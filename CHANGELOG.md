@@ -1,6 +1,6 @@
 # Changelog
 
-Notable changes to **The Lost Shrine**, listed newest first.
+Listed newest first.
 
 ## [Dev1]
 
