@@ -4,6 +4,8 @@
 
 # <p align="center">[PLAY HERE](https://ronno7.github.io/TheLostShrine/)</p>
 
+## <p align="center">[Changelog](CHANGELOG.md)</p>
+
 <img width="2172" height="724" alt="52006c6e-3fe1-4df9-aad1-6ad3dac39af2" src="https://github.com/user-attachments/assets/cc3010d2-3a8c-4801-8a68-76673a667024" />
 
 <br>
