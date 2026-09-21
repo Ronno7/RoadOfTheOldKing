@@ -4,8 +4,21 @@ Listed newest first.
 
 ## [Unreleased]
 
+### Added
+
+- Added a reusable placeholder hatchet prefab and a walk-over pickup near the Tutorial spawn.
+- Added mouse aiming, a buffered three-hit light combo on left click, and a charged spinning cleave on right-click hold/release.
+- Added E to throw the hatchet, sticking at obstacles or maximum range, with walk-up retrieval.
+- Added a separate Recall unlock at the northern Tutorial altar. Once unlocked, E recalls the hatchet through targets to the moving player.
+- Added charge and swing effects, a flight trail, and a Tutorial controls/status overlay.
+- Added practice dummies with health, knockback, stagger, and automatic reset; shielded dummies and cracked stones require a full cleave to break their protection. Bushes can also be chopped.
+- Separated combat input, weapon state, hit detection, damage responses, and visuals, with a shared hatchet settings asset for tuning.
+- Documented prototype controls, tuning, puzzle integration, and repeatable Play Mode checks in `Docs/HatchetPrototype.md`.
+- Added `Docs/SystemsOverview.md`, an overview of the implemented systems, their design, and their common settings.
+
 ### Changed
 
+- Replaced the README artwork with the new top and bottom banners stored in the repository.
 - Expanded WASD/arrow-key movement from four to eight directions, with equal diagonal speed.
 - Kept four-direction visual facing while preserving the last full movement direction when idle.
 - Simplified movement input to keyboard controls; mouse-wheel camera zoom remains available.

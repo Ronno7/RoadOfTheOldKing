@@ -8,12 +8,14 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - {component: {fileID: 1002}}
-  - {component: {fileID: 1003}}
-  - {component: {fileID: 1004}}
-  - {component: {fileID: 1005}}
-  - {component: {fileID: 1006}}
-  - {component: {fileID: 1013}}
+  - component: {fileID: 1002}
+  - component: {fileID: 1003}
+  - component: {fileID: 1004}
+  - component: {fileID: 1005}
+  - component: {fileID: 1006}
+  - component: {fileID: 1013}
+  - component: {fileID: 9215421230755382488}
+  - component: {fileID: 3612271848531798894}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -40,12 +42,12 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!50 &1003
 Rigidbody2D:
+  serializedVersion: 5
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1001}
-  serializedVersion: 5
   m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
@@ -55,8 +57,12 @@ Rigidbody2D:
   m_AngularDamping: 0.05
   m_GravityScale: 0
   m_Material: {fileID: 0}
-  m_IncludeLayers: {serializedVersion: 2, m_Bits: 0}
-  m_ExcludeLayers: {serializedVersion: 2, m_Bits: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
   m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 1
@@ -72,18 +78,38 @@ BoxCollider2D:
   serializedVersion: 3
   m_Density: 1
   m_Material: {fileID: 6200000, guid: 80cce0d426195974b416da7c3be85572, type: 2}
-  m_IncludeLayers: {serializedVersion: 2, m_Bits: 0}
-  m_ExcludeLayers: {serializedVersion: 2, m_Bits: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
   m_LayerOverridePriority: 0
-  m_ForceSendLayers: {serializedVersion: 2, m_Bits: 4294967295}
-  m_ForceReceiveLayers: {serializedVersion: 2, m_Bits: 4294967295}
-  m_ContactCaptureLayers: {serializedVersion: 2, m_Bits: 4294967295}
-  m_CallbackLayers: {serializedVersion: 2, m_Bits: 4294967295}
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
   m_AutoTiling: 0
   m_Size: {x: 0.75, y: 0.75}
   m_EdgeRadius: 0
@@ -113,6 +139,48 @@ MonoBehaviour:
   m_EditorClassIdentifier: ''
   moveSpeed: 4.5
   inputSource: {fileID: 1005}
+--- !u!114 &1013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bfe9b1e9869509cad65da8b0d5987d9, type: 3}
+  m_Name: ''
+  m_EditorClassIdentifier: ''
+  marker: {fileID: 1011}
+  markerDistance: 0.24
+--- !u!114 &9215421230755382488
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b451e47c64e54741ae1b9809145b43d, type: 3}
+  m_Name: ''
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Input.PlayerCombatInput
+--- !u!114 &3612271848531798894
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 511025610d771e048af5bfdc734b16fe, type: 3}
+  m_Name: ''
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerCombatController
+  inputSource: {fileID: 9215421230755382488}
+  aimCamera: {fileID: 0}
+  recallUnlocked: 0
+  lightInputBuffer: 0.16
 --- !u!1 &1007
 GameObject:
   m_ObjectHideFlags: 0
@@ -121,8 +189,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - {component: {fileID: 1008}}
-  - {component: {fileID: 1009}}
+  - component: {fileID: 1008}
+  - component: {fileID: 1009}
   m_Layer: 6
   m_Name: Body
   m_TagString: Untagged
@@ -147,6 +215,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &1009
 SpriteRenderer:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -171,7 +240,9 @@ SpriteRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
-  m_StaticBatchInfo: {firstSubMesh: 0, subMeshCount: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
   m_StaticBatchRoot: {fileID: 0}
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
@@ -186,9 +257,11 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 300
   m_SortingLayer: 3
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: ab6058c4ddee5c148cd9d34a78a0a92e, type: 3}
   m_Color: {r: 0.866667, g: 0.729412, b: 0.423529, a: 1}
   m_FlipX: 0
@@ -198,7 +271,6 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &1010
 GameObject:
@@ -208,8 +280,8 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - {component: {fileID: 1011}}
-  - {component: {fileID: 1012}}
+  - component: {fileID: 1011}
+  - component: {fileID: 1012}
   m_Layer: 6
   m_Name: FacingMarker
   m_TagString: Untagged
@@ -234,6 +306,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &1012
 SpriteRenderer:
+  serializedVersion: 2
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -258,7 +331,9 @@ SpriteRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
-  m_StaticBatchInfo: {firstSubMesh: 0, subMeshCount: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
   m_StaticBatchRoot: {fileID: 0}
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
@@ -273,11 +348,13 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 300
   m_SortingLayer: 3
   m_SortingOrder: 1
+  m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: ab6058c4ddee5c148cd9d34a78a0a92e, type: 3}
-  m_Color: {r: 1.0, g: 0.968627, b: 0.862745, a: 1}
+  m_Color: {r: 1, g: 0.968627, b: 0.862745, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -285,19 +362,4 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &1013
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1001}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5bfe9b1e9869509cad65da8b0d5987d9, type: 3}
-  m_Name: ''
-  m_EditorClassIdentifier: ''
-  marker: {fileID: 1011}
-  markerDistance: 0.24
