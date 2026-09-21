@@ -19,7 +19,7 @@ namespace TheLostShrine.Player
 
         private void Reset()
         {
-            inputSource = GetComponent<KeyboardMovementInput>();
+            inputSource = GetComponent<IMovementInput>() as MonoBehaviour;
         }
 
         private void Awake()
@@ -50,7 +50,7 @@ namespace TheLostShrine.Player
                 : Vector2.zero;
 
             if (direction.sqrMagnitude > 0f)
-                FacingDirection = direction;
+                FacingDirection = direction.normalized;
 
             // Velocity is units per second. Unity applies the physics time step.
             // Moving the Rigidbody, instead of the Transform, preserves collisions.
