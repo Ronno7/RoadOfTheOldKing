@@ -8,10 +8,11 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - {component: {fileID: 1002}}
-  - {component: {fileID: 1003}}
-  - {component: {fileID: 1004}}
-  - {component: {fileID: 1005}}
+  - component: {fileID: 1002}
+  - component: {fileID: 1003}
+  - component: {fileID: 1004}
+  - component: {fileID: 1005}
+  - component: {fileID: 4280390714884492857}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -59,14 +60,21 @@ Camera:
   m_Anamorphism: 0
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
-  m_NormalizedViewPortRect: {serializedVersion: 2, x: 0, y: 0, width: 1, height: 1}
+  m_NormalizedViewPortRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
   near clip plane: 0.3
   far clip plane: 100
   field of view: 60
   orthographic: 1
   orthographic size: 5.5
   m_Depth: -1
-  m_CullingMask: {serializedVersion: 2, m_Bits: 4294967295}
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -101,3 +109,19 @@ MonoBehaviour:
   target: {fileID: 0}
   offset: {x: 0, y: 0, z: -10}
   smoothTime: 0.1
+--- !u!114 &4280390714884492857
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1269eb361ec7223438201fa82a9a5563, type: 3}
+  m_Name: ''
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Cameras.CameraZoom2D
+  minSize: 3
+  maxSize: 8
+  scrollSensitivity: 0.5
+  smoothTime: 0.08
