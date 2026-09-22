@@ -2,7 +2,7 @@
 
 Listed newest first.
 
-## [Unreleased]
+## 21SEP2026 - PRD 02
 
 ### Added
 
@@ -41,7 +41,7 @@ Listed newest first.
 - Kept four-direction visual facing while preserving the last full movement direction when idle.
 - Simplified movement input to keyboard controls; mouse-wheel camera zoom remains available.
 
-## 2026-09-20
+## 20SEP2026
 
 ### Added
 
@@ -57,7 +57,7 @@ Listed newest first.
 - Set `Tutorial` as the enabled build scene in place of `MovementPlayground`.
 - Updated the browser build with the tutorial area and camera zoom.
 
-## [Dev1]
+## 14SEP2026 - DEV 01
 
 ### Added
 
