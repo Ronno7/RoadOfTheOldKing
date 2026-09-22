@@ -7,5 +7,8 @@ namespace TheLostShrine.Input
     {
         // World-space intent: a unit direction when moving, or zero when idle.
         Vector2 MoveDirection { get; }
+        bool SprintHeld { get; }
+        bool IsActive { get; }
+        bool ConsumeDashPress();
     }
 }

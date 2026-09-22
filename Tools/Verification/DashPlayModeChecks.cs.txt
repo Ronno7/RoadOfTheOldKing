@@ -1,0 +1,134 @@
+// Run in fresh PrototypeLoop Play Mode with an empty TheLostShrine.Verification.*
+// checkpoint saveKey. Exercises real input, physics, damage and bonfire components.
+// Stop Play Mode afterward; the final assertion defeats the player.
+var results=new System.Collections.Generic.List<string>();
+System.Action<bool,string> check=(ok,name)=>results.Add((ok?"PASS ":"FAIL ")+name);
+System.Func<float,float,bool> near=(a,b)=>Mathf.Abs(a-b)<.03f;
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var session=TheLostShrine.Progression.CheckpointSession.Instance;
+if(!((string)session.GetType().GetField("saveKey",flags).GetValue(session)).StartsWith("TheLostShrine.Verification."))throw new System.Exception("Use an isolated save slot.");
+var player=GameObject.Find("Player").GetComponent<TheLostShrine.Player.PlayerCombatController>();
+var movement=player.GetComponent<TheLostShrine.Player.PlayerMovement>();
+var dash=player.GetComponent<TheLostShrine.Player.PlayerDash>();
+var stamina=player.GetComponent<TheLostShrine.Player.PlayerStamina>();
+var life=player.GetComponent<TheLostShrine.Player.PlayerHealth>();
+var reaction=player.GetComponent<TheLostShrine.Combat.HitReaction>();
+var body=player.GetComponent<Rigidbody2D>();
+var input=player.GetComponent<TheLostShrine.Input.PlayerMovementInput>();
+var weapon=UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Weapons.HatchetWeapon>();
+var source=UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Combat.SimpleMeleeEnemy>().gameObject;
+var inputUpdate=input.GetType().GetMethod("Update",flags);
+var moveUpdate=movement.GetType().GetMethod("FixedUpdate",flags);
+var weaponSim=weapon.GetType().GetMethod("Simulate",flags);
+var oldRouting=UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode;
+UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=UnityEngine.InputSystem.InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+var keyboard=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
+var actions=(UnityEngine.InputSystem.InputActionMap)input.GetType().GetField("actions",flags).GetValue(input);
+var oldDevices=actions.devices;actions.devices=new UnityEngine.InputSystem.InputDevice[]{keyboard};
+var oldFocus=(bool)input.GetType().GetField("hasFocus",flags).GetValue(input);
+var oldPaused=(bool)input.GetType().GetField("paused",flags).GetValue(input);
+var oldSimulation=Physics2D.simulationMode;var originalPosition=body.position;
+var origin=new Vector2(100,100);GameObject wall=null;
+System.Action<UnityEngine.InputSystem.Key[]> keys=held=>{
+    UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState(held));
+    UnityEngine.InputSystem.InputSystem.Update();input.GetType().GetField("hasFocus",flags).SetValue(input,true);inputUpdate.Invoke(input,null);
+};
+System.Action step=()=>{moveUpdate.Invoke(movement,null);Physics2D.Simulate(Time.fixedDeltaTime);};
+System.Action<float> advance=seconds=>{for(int i=0;i<Mathf.CeilToInt(seconds/Time.fixedDeltaTime);i++)step();};
+System.Action<Vector2> move=p=>{body.position=p;player.transform.position=p;body.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();};
+System.Action reset=()=>{weapon.CancelAction();life.HealAtRest();keys(new UnityEngine.InputSystem.Key[0]);move(origin);moveUpdate.Invoke(movement,null);};
+System.Func<bool> hit=()=>life.Health.ReceiveHit(new TheLostShrine.Combat.CombatHit(source,TheLostShrine.Combat.AttackKind.EnemyMelee,20,Vector2.left,2,.2f));
+try {
+    Physics2D.simulationMode=SimulationMode2D.Script;input.GetType().GetField("hasFocus",flags).SetValue(input,true);
+    input.GetType().GetField("paused",flags).SetValue(input,false);move(origin);
+    check(dash!=null && !dash.IsDashing && !dash.HasDodgeProtection,"Dash exists on the player prefab and starts inactive");
+    check(dash.TryStart(Vector2.right) && near(stamina.Current,75),"Dash works before weapon pickup and costs 25 stamina");
+    reset();player.TryEquip(weapon);
+    keys(new[]{UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.Space});step();
+    check(dash.IsDashing && near(body.linearVelocity.magnitude,2.2f/.18f),"Space starts the short dash through the real movement motor");
+    check(near(stamina.Current,75) && !movement.IsSprinting,"Dash pays once and does not also spend sprint stamina");
+    check(dash.HasDodgeProtection && !hit() && life.Health.Health==100,"Opening dodge window rejects incoming damage");
+    check(!weapon.TryLightChop(Vector2.right) && !weapon.TryBeginCharge() && !weapon.TryThrow(Vector2.right) && near(stamina.Current,75),"Dashing blocks new attacks without charging their costs");
+    check(!dash.TryStart(Vector2.up) && dash.Direction==Vector2.right && near(stamina.Current,75),"A second dash cannot restart, steer or double-charge an active dash");
+    keys(new[]{UnityEngine.InputSystem.Key.Space});advance(.2f);
+    check(!dash.IsDashing && near(Vector2.Distance(body.position,origin),2.2f),"Unobstructed dash travels 2.2 units and ends promptly");
+    check(!dash.HasDodgeProtection && !life.IsInvulnerable,"Dodge protection ends without granting post-hit invulnerability");
+    check(body.linearVelocity==Vector2.zero,"Releasing movement during dash stops cleanly at its end");
+    for(int i=0;i<40;i++){keys(new[]{UnityEngine.InputSystem.Key.Space});step();}
+    check(!dash.IsDashing && near(stamina.Current,75),"Holding Space never repeats the dash after cooldown");
+
+    reset();keys(new[]{UnityEngine.InputSystem.Key.W,UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.Space});step();
+    keys(new UnityEngine.InputSystem.Key[0]);advance(.2f);
+    Vector2 diagonal=body.position-origin;
+    check(near(diagonal.magnitude,2.2f) && near(diagonal.x,diagonal.y),"Diagonal dash is normalized to the same distance");
+    reset();keys(new[]{UnityEngine.InputSystem.Key.A});moveUpdate.Invoke(movement,null);
+    keys(new[]{UnityEngine.InputSystem.Key.Space});moveUpdate.Invoke(movement,null);
+    check(dash.Direction==Vector2.left,"Stationary dash follows the last movement-facing direction");
+    reset();keys(new[]{UnityEngine.InputSystem.Key.Space});keys(new UnityEngine.InputSystem.Key[0]);step();
+    check(dash.IsDashing,"A quick Space tap between physics steps is not lost");
+    keys(new UnityEngine.InputSystem.Key[0]);advance(.2f);
+    keys(new[]{UnityEngine.InputSystem.Key.Space});step();
+    check(!dash.IsDashing && near(stamina.Current,75),"Cooldown rejects early repeat presses without spending stamina");
+    keys(new UnityEngine.InputSystem.Key[0]);advance(.4f);
+    check(!dash.IsDashing && near(stamina.Current,75),"A rejected cooldown press does not launch a delayed dash");
+    keys(new[]{UnityEngine.InputSystem.Key.Space});step();
+    check(dash.IsDashing && near(stamina.Current,50),"A fresh press after cooldown can dash again");
+
+    reset();stamina.TrySpend(100);keys(new[]{UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.Space});step();
+    check(!dash.IsDashing && stamina.Current==0 && stamina.WasSpendRejected,"Exhaustion rejects dash and exposes stamina feedback");
+    check(near(body.linearVelocity.magnitude,movement.MoveSpeed),"Failed dash leaves ordinary walking available");
+    reset();stamina.TrySpend(75);keys(new[]{UnityEngine.InputSystem.Key.Space});step();
+    check(dash.IsDashing && stamina.Current==0,"Exactly 25 stamina can fund one dash without going negative");
+    reset();keys(new[]{UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.LeftShift});moveUpdate.Invoke(movement,null);
+    check(movement.IsSprinting,"Sprint is active before a sprint-to-dash transition");
+    float before=stamina.Current;keys(new[]{UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.LeftShift,UnityEngine.InputSystem.Key.Space});step();
+    check(dash.IsDashing && !movement.IsSprinting && near(stamina.Current,before-25),"Dash cleanly replaces sprint without an extra sprint charge");
+    keys(new[]{UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.LeftShift});advance(.22f);
+    check(!dash.IsDashing && movement.IsSprinting && near(body.linearVelocity.magnitude,movement.SprintSpeed),"Held Shift resumes sprint after dash ends");
+
+    reset();weapon.TryLightChop(Vector2.right);before=stamina.Current;
+    check(!dash.TryStart(Vector2.up) && near(stamina.Current,before),"Dash cannot cancel a light attack for free");
+    weapon.CancelAction();stamina.Restore();weapon.TryBeginCharge();before=stamina.Current;
+    check(!dash.TryStart(Vector2.up) && near(stamina.Current,before),"Dash cannot cancel charging");
+    weaponSim.Invoke(weapon,new object[]{.9f});weapon.TryReleaseCharge(Vector2.right);
+    check(!dash.TryStart(Vector2.up),"Dash cannot cancel the cleave animation");
+    reset();weapon.TryThrow(Vector2.right);weaponSim.Invoke(weapon,new object[]{.7f});player.UnlockRecall();
+    check(dash.TryStart(Vector2.left) && weapon.TryRecall(),"Dash remains available while the hatchet is away and permits Recall");
+
+    reset();dash.TryStart(Vector2.right);dash.Tick(.12f);
+    check(dash.IsDashing && !dash.HasDodgeProtection,"Protection covers only the opening 0.1 seconds of the dash");
+    check(hit() && life.Health.Health==80,"The unprotected dash ending can be punished");
+    Vector2 impulse=body.linearVelocity;moveUpdate.Invoke(movement,null);
+    check(!dash.IsDashing && body.linearVelocity==impulse,"A stagger interrupts dash and preserves knockback");
+    before=stamina.Current;check(!dash.TryStart(Vector2.up) && near(stamina.Current,before),"Stagger prevents starting a new dash");
+
+    reset();wall=new GameObject("Dash Verification Wall");wall.transform.position=origin+Vector2.right;
+    wall.AddComponent<BoxCollider2D>().size=new Vector2(.15f,4f);Physics2D.SyncTransforms();
+    keys(new[]{UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.Space});step();bool startedWallDash=dash.IsDashing;
+    keys(new UnityEngine.InputSystem.Key[0]);advance(.22f);
+    check(startedWallDash && body.position.x<origin.x+.65f && body.position.x>=origin.x,"Dash collides with a thin wall instead of teleporting through it");
+    check(player.GetComponent<Collider2D>().enabled && body.simulated,"Dodge never disables collision or physics");
+    UnityEngine.Object.DestroyImmediate(wall);wall=null;
+    reset();dash.TryStart(Vector2.right);input.GetType().GetMethod("OnApplicationFocus",flags).Invoke(input,new object[]{false});moveUpdate.Invoke(movement,null);
+    check(!dash.IsDashing && body.linearVelocity==Vector2.zero && !dash.HasDodgeProtection,"Focus loss cancels dash movement and protection");
+    input.GetType().GetMethod("OnApplicationFocus",flags).Invoke(input,new object[]{true});
+    reset();dash.TryStart(Vector2.right);input.enabled=false;moveUpdate.Invoke(movement,null);
+    check(!dash.IsDashing && !dash.HasDodgeProtection,"Disabling controls cancels dash");input.enabled=true;
+    reset();var camp=session.Fires[0];move(camp.SpawnPosition);dash.TryStart(Vector2.up);
+    var interaction=player.GetComponent<TheLostShrine.Player.PlayerBonfireInteraction>();
+    check(interaction.Open(camp) && !dash.IsDashing && dash.CooldownRemaining==0 && stamina.Current==100,"Bonfire rest cancels dash, resets cooldown and restores stamina");
+    keys(new[]{UnityEngine.InputSystem.Key.Space});moveUpdate.Invoke(movement,null);
+    check(!dash.IsDashing && stamina.Current==100,"Space cannot dash while the bonfire menu locks input");interaction.Close();
+    reset();dash.TryStart(Vector2.right);dash.Tick(.12f);
+    life.Health.ReceiveHit(new TheLostShrine.Combat.CombatHit(source,TheLostShrine.Combat.AttackKind.EnemyMelee,1000,Vector2.down,0,0));
+    check(!life.IsAlive && !movement.enabled && !dash.IsDashing && !dash.HasDodgeProtection,"Defeat immediately ends dash and dodge protection");
+    check(!dash.TryStart(Vector2.right),"A defeated player cannot start another dash");
+} finally {
+    if(wall!=null)UnityEngine.Object.DestroyImmediate(wall);
+    actions.devices=oldDevices;UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard);
+    UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=oldRouting;
+    input.GetType().GetField("hasFocus",flags).SetValue(input,oldFocus);
+    input.GetType().GetField("paused",flags).SetValue(input,oldPaused);
+    move(originalPosition);Physics2D.simulationMode=oldSimulation;
+}
+return string.Join("\n",results.ToArray());

@@ -1,0 +1,75 @@
+// Run in a fresh PrototypeLoop Play Mode session using an empty
+// TheLostShrine.Verification.* checkpoint saveKey. Stop Play Mode afterward.
+var results=new System.Collections.Generic.List<string>();
+System.Action<bool,string> check=(ok,name)=>results.Add((ok?"PASS ":"FAIL ")+name);
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var session=TheLostShrine.Progression.CheckpointSession.Instance;
+if(!((string)session.GetType().GetField("saveKey",flags).GetValue(session)).StartsWith("TheLostShrine.Verification."))
+    throw new System.Exception("Use an isolated verification save slot.");
+var player=GameObject.Find("Player").GetComponent<TheLostShrine.Player.PlayerCombatController>();
+var stamina=player.GetComponent<TheLostShrine.Player.PlayerStamina>();
+var body=player.GetComponent<Rigidbody2D>();
+var weapon=UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Weapons.HatchetWeapon>();
+var sim=weapon.GetType().GetMethod("Simulate",flags);
+var settings=weapon.Settings;
+var origin=new Vector2(100,100);
+var initial=body.position;
+var oldSimulation=Physics2D.simulationMode;
+var created=new System.Collections.Generic.List<GameObject>();
+System.Action<float> tick=seconds=>{for(int i=0;i<Mathf.CeilToInt(seconds/.02f);i++)sim.Invoke(weapon,new object[]{.02f});};
+System.Action<Vector2> move=p=>{body.position=p;body.linearVelocity=Vector2.zero;player.transform.position=p;Physics2D.SyncTransforms();};
+System.Action prepare=()=>{weapon.CancelAction();stamina.Restore();move(origin);weapon.TryThrow(Vector2.right);tick(.7f);};
+System.Func<float,TheLostShrine.Combat.Damageable> target=x=>{
+    var go=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Combat/PracticeDummy.prefab"));
+    go.name="Auto Recall Verification Target";go.transform.position=origin+Vector2.right*x;
+    go.GetComponent<Rigidbody2D>().position=go.transform.position;created.Add(go);Physics2D.SyncTransforms();
+    return go.GetComponent<TheLostShrine.Combat.Damageable>();
+};
+try {
+    Physics2D.simulationMode=SimulationMode2D.Script;
+    check(settings.autoRecallDistance==10f && settings.autoRecallDistance>settings.throwRange,"Auto Recall threshold is 10, beyond the normal throw range");
+    check(GameObject.Find("Sign - BACK TO DUMMIES").GetComponentInChildren<TextMesh>().text.Contains("Hold Shift to sprint"),"Return trail teaches Shift sprint");
+    move(origin);tick(.02f);
+    check(weapon.State==TheLostShrine.Weapons.HatchetState.OnGround && player.Weapon==null,"Unowned pickup is never recalled");
+    player.TryEquip(weapon);prepare();
+    check(!player.CanRecall && weapon.State==TheLostShrine.Weapons.HatchetState.Stuck,"Throw still stops normally before Recall unlock");
+    move(origin+Vector2.left*15);tick(.1f);
+    check(weapon.State==TheLostShrine.Weapons.HatchetState.Stuck,"Walking far away cannot bypass the Recall unlock");
+    player.UnlockRecall();tick(.02f);
+    check(weapon.State==TheLostShrine.Weapons.HatchetState.Returning,"Unlocking Recall enables automatic retrieval of a distant hatchet");tick(2f);
+    check(weapon.State==TheLostShrine.Weapons.HatchetState.Held,"Automatic return reaches its owner");
+    prepare();tick(2f);
+    check(weapon.State==TheLostShrine.Weapons.HatchetState.Stuck,"A normal stationary throw stays out for deliberate Recall");
+    Vector2 landed=weapon.transform.position;
+    move(landed+Vector2.left*settings.autoRecallDistance);tick(.02f);
+    check(weapon.State==TheLostShrine.Weapons.HatchetState.Stuck,"Exact distance limit does not recall early");
+    move(landed+Vector2.left*(settings.autoRecallDistance-.1f));tick(.02f);
+    check(weapon.State==TheLostShrine.Weapons.HatchetState.Stuck,"Repositioning inside the limit leaves the hatchet planted");
+    stamina.TrySpend(stamina.Current);
+    move(landed+Vector2.left*(settings.autoRecallDistance+.1f));tick(.02f);
+    check(weapon.State==TheLostShrine.Weapons.HatchetState.Returning,"Crossing the distance limit starts Recall");
+    check(stamina.Current==0,"Automatic Recall works at zero stamina without a second cost");tick(1f);
+    check(weapon.State==TheLostShrine.Weapons.HatchetState.Held,"Free automatic retrieval cannot strand an exhausted player");
+
+    weapon.CancelAction();stamina.Restore();move(origin);weapon.TryThrow(Vector2.right);
+    move(origin+Vector2.left*(settings.autoRecallDistance+1f));tick(.02f);
+    check(weapon.State==TheLostShrine.Weapons.HatchetState.Returning,"Walking away during outbound flight can also trigger automatic Recall");tick(1f);
+    prepare();var a=target(2f);var b=target(4f);int countA=0;int countB=0;
+    a.HitReceived+=hit=>{if(hit.Kind==TheLostShrine.Combat.AttackKind.Recall)countA++;};
+    b.HitReceived+=hit=>{if(hit.Kind==TheLostShrine.Combat.AttackKind.Recall)countB++;};
+    move(origin+Vector2.left*5f);tick(.02f);
+    check(weapon.State==TheLostShrine.Weapons.HatchetState.Returning,"Moving away from a planted throw starts a real return attack");tick(1f);
+    check(a.Health==a.MaxHealth-settings.recallDamage && b.Health==b.MaxHealth-settings.recallDamage,"Automatic Recall deals normal damage to every target it crosses");
+    check(countA==1 && countB==1,"Distance checks cannot restart a return or repeatedly damage the same target");
+    foreach(var go in created)go.SetActive(false);
+    prepare();check(weapon.TryRecall(),"Manual E Recall remains available inside the automatic limit");tick(1f);
+    prepare();move(weapon.transform.position);tick(.02f);
+    check(weapon.State==TheLostShrine.Weapons.HatchetState.Held,"On-foot retrieval is unchanged");
+    // The marked puzzle move is deliberately inside the automatic threshold.
+    check(Vector2.Distance(new Vector2(10.5f,12.5f),new Vector2(6.5f,8.5f))<settings.autoRecallDistance,"Puzzle repositioning stays inside the automatic limit");
+} finally {
+    weapon.CancelAction();stamina.Restore();
+    foreach(var go in created)if(go!=null)UnityEngine.Object.DestroyImmediate(go);
+    move(initial);Physics2D.simulationMode=oldSimulation;
+}
+return string.Join("\n",results.ToArray());

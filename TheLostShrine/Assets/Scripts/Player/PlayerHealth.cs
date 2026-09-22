@@ -11,12 +11,17 @@ namespace TheLostShrine.Player
         [SerializeField, Min(0f)] private float invulnerabilityDuration = 0.8f;
         private Damageable health;
         private float invulnerableUntil;
+        private PlayerDash dash;
 
         public Damageable Health => health;
         public bool IsAlive => health != null && health.IsAlive;
-        public bool IsInvulnerable => Time.time < invulnerableUntil;
+        public bool IsInvulnerable => Time.time < invulnerableUntil || (dash != null && dash.HasDodgeProtection);
 
-        private void Awake() => health = GetComponent<Damageable>();
+        private void Awake()
+        {
+            health = GetComponent<Damageable>();
+            dash = GetComponent<PlayerDash>();
+        }
         private void OnEnable()
         {
             health.HitReceived += OnHit;
@@ -39,6 +44,9 @@ namespace TheLostShrine.Player
             health.RestoreHealth();
             invulnerableUntil = 0f;
             GetComponent<HitReaction>().Clear();
+            GetComponent<PlayerStamina>()?.Restore();
+            if (dash != null)
+                dash.ResetAtRest();
         }
 
         private void OnDefeated()

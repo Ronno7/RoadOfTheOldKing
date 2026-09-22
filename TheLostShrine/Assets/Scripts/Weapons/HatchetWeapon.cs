@@ -32,6 +32,7 @@ namespace TheLostShrine.Weapons
         public float ComboTimeRemaining => comboRemaining;
         public float LightReach => settings.lightRadius + (ComboIndex == 2 ? 0.15f : 0f);
         public bool IsAway => State == HatchetState.Flying || State == HatchetState.Stuck || State == HatchetState.Returning;
+        public bool IsAttacking => State == HatchetState.LightChop || State == HatchetState.Charging || State == HatchetState.Cleaving;
         public float Charge01 => State == HatchetState.Charging
             ? Mathf.Clamp01(elapsed / settings.fullCharge) : State == HatchetState.Cleaving ? cleaveStrength : 0f;
         public float AttackProgress => Mathf.Clamp01(elapsed / (State == HatchetState.Cleaving
@@ -70,11 +71,14 @@ namespace TheLostShrine.Weapons
 
         public bool TryLightChop(Vector2 direction)
         {
-            if (!isActiveAndEnabled || State != HatchetState.Held)
+            if (!isActiveAndEnabled || State != HatchetState.Held || !owner.CanStartAttack)
+                return false;
+            int nextComboIndex = comboRemaining > 0f ? (ComboIndex + 1) % 3 : 0;
+            if (!owner.Stamina.TrySpend(nextComboIndex == 2 ? settings.finisherStaminaCost : settings.lightStaminaCost))
                 return false;
             SetAim(direction);
             attackDirection = AimDirection;
-            ComboIndex = comboRemaining > 0f ? (ComboIndex + 1) % 3 : 0;
+            ComboIndex = nextComboIndex;
             hits.BeginAttack();
             SetState(HatchetState.LightChop);
             return true;
@@ -82,7 +86,10 @@ namespace TheLostShrine.Weapons
 
         public bool TryBeginCharge()
         {
-            if (!isActiveAndEnabled || State != HatchetState.Held)
+            if (!isActiveAndEnabled || State != HatchetState.Held || !owner.CanStartAttack)
+                return false;
+            // Pay once on commitment. Holding or cancelling cannot generate a free cleave.
+            if (!owner.Stamina.TrySpend(settings.cleaveStaminaCost))
                 return false;
             comboRemaining = 0f;
             SetState(HatchetState.Charging);
@@ -125,7 +132,9 @@ namespace TheLostShrine.Weapons
 
         public bool TryThrow(Vector2 direction)
         {
-            if (!isActiveAndEnabled || State != HatchetState.Held)
+            if (!isActiveAndEnabled || State != HatchetState.Held || !owner.CanStartAttack)
+                return false;
+            if (!owner.Stamina.TrySpend(settings.throwStaminaCost))
                 return false;
             SetAim(direction);
             attackDirection = AimDirection;
@@ -165,6 +174,8 @@ namespace TheLostShrine.Weapons
             }
 
             float previousElapsed = elapsed;
+            if (IsAttacking)
+                owner.Stamina.DelayRecovery();
             elapsed += deltaTime;
             switch (State)
             {
@@ -217,6 +228,12 @@ namespace TheLostShrine.Weapons
                     FlyBack(deltaTime);
                     break;
             }
+
+            // Share manual Recall's unlock, damage and return behavior; never restart a return.
+            if (owner.CanRecall && (State == HatchetState.Flying || State == HatchetState.Stuck) &&
+                ((Vector2)(transform.position - owner.transform.position)).sqrMagnitude >
+                settings.autoRecallDistance * settings.autoRecallDistance)
+                TryRecall();
         }
 
         private void FlyOut(float deltaTime)

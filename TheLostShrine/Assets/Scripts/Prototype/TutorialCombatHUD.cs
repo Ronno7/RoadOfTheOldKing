@@ -17,11 +17,15 @@ namespace TheLostShrine.Prototype
         private bool restarting;
         private bool confirmNewRun;
         private PlayerBonfireInteraction bonfireInteraction;
+        private PlayerStamina stamina;
 
         private void Start()
         {
             if (player != null)
+            {
                 bonfireInteraction = player.GetComponent<PlayerBonfireInteraction>();
+                stamina = player.GetComponent<PlayerStamina>();
+            }
         }
 
         private void Update()
@@ -62,35 +66,47 @@ namespace TheLostShrine.Prototype
             float width = Mathf.Min(440f, screenWidth - 24f);
             Color previousColor = GUI.color;
 
-            GUI.Box(new Rect(12f, 12f, width, 156f), GUIContent.none);
+            GUI.Box(new Rect(12f, 12f, width, 186f), GUIContent.none);
             GUI.Label(new Rect(24f, 18f, width - 24f, 24f), "PROTOTYPE LOOP", title);
             if (playerHealth != null && playerHealth.Health != null)
             {
                 var health = playerHealth.Health;
-                GUI.Label(new Rect(24f, 46f, 110f, 24f), "HP  " + health.Health + " / " + health.MaxHealth, title);
+                GUI.Label(new Rect(24f, 46f, 140f, 24f), "HP  " + health.Health + " / " + health.MaxHealth, title);
                 GUI.color = new Color(0.2f, 0.2f, 0.2f);
-                GUI.DrawTexture(new Rect(134f, 50f, width - 146f, 14f), Texture2D.whiteTexture);
+                GUI.DrawTexture(new Rect(174f, 50f, width - 186f, 14f), Texture2D.whiteTexture);
                 GUI.color = playerHealth.IsInvulnerable ? Color.white : new Color(0.9f, 0.3f, 0.3f);
-                GUI.DrawTexture(new Rect(134f, 50f, (width - 146f) * health.Health / health.MaxHealth, 14f), Texture2D.whiteTexture);
+                GUI.DrawTexture(new Rect(174f, 50f, (width - 186f) * health.Health / health.MaxHealth, 14f), Texture2D.whiteTexture);
                 GUI.color = previousColor;
             }
+            if (stamina != null)
+            {
+                GUI.Label(new Rect(24f, 76f, 140f, 24f), "STA  " + Mathf.FloorToInt(stamina.Current) + " / " + Mathf.RoundToInt(stamina.Maximum), text);
+                GUI.color = new Color(0.2f, 0.2f, 0.2f);
+                GUI.DrawTexture(new Rect(174f, 80f, width - 186f, 14f), Texture2D.whiteTexture);
+                GUI.color = stamina.WasSpendRejected ? new Color(1f, 0.3f, 0.2f) :
+                    stamina.Normalized < 0.25f ? new Color(1f, 0.7f, 0.2f) : new Color(0.3f, 0.85f, 0.55f);
+                GUI.DrawTexture(new Rect(174f, 80f, (width - 186f) * stamina.Normalized, 14f), Texture2D.whiteTexture);
+                GUI.color = previousColor;
+                if (stamina.WasSpendRejected)
+                    GUI.Label(new Rect(24f, 207f, width - 24f, 24f), "Not enough stamina - walk to recover.", text);
+            }
             string instruction = guide != null ? guide.Instruction : "Pick up the hatchet and practice.";
-            GUI.Label(new Rect(24f, 77f, width - 24f, 82f), instruction, text);
+            GUI.Label(new Rect(24f, 107f, width - 24f, 82f), instruction, text);
 
-            string controls = "WASD / arrows: move   |   Mouse: aim   |   Scroll: zoom\n" +
+            string controls = "WASD / arrows: move   |   Shift: sprint   |   Mouse: aim   |   Scroll: zoom\n" +
                 "LMB: slash   |   Hold / release RMB: cleave   |   E: throw" +
-                (player.CanRecall ? " / recall" : " (retrieve on foot)") + "\nF: rest / travel near a fire   |   Esc: leave fire menu";
+                (player.CanRecall ? " / recall" : " (retrieve on foot)") + "\nSpace: dash / dodge   |   F: rest / travel   |   Esc: leave fire menu";
             GUI.Box(new Rect(12f, screenHeight - 86f, Mathf.Min(660f, screenWidth - 24f), 74f), GUIContent.none);
             GUI.Label(new Rect(24f, screenHeight - 80f, Mathf.Min(638f, screenWidth - 48f), 70f), controls, text);
 
             if (bonfireInteraction != null && !bonfireInteraction.IsOpen && bonfireInteraction.Nearby != null)
-                GUI.Label(new Rect(24f, 182f, width - 24f, 28f), "F - Rest at " + bonfireInteraction.Nearby.DisplayName, title);
+                GUI.Label(new Rect(24f, 235f, width - 24f, 28f), "F - Rest at " + bonfireInteraction.Nearby.DisplayName, title);
 
             var weapon = player.Weapon;
             if (weapon != null && weapon.State == HatchetState.Charging)
             {
                 GUI.color = weapon.Charge01 >= 1f ? new Color(1f, 0.8f, 0.2f) : new Color(0.5f, 0.8f, 1f);
-                GUI.DrawTexture(new Rect(12f, 176f, width * weapon.Charge01, 10f), Texture2D.whiteTexture);
+                GUI.DrawTexture(new Rect(12f, 206f, width * weapon.Charge01, 10f), Texture2D.whiteTexture);
                 GUI.color = previousColor;
             }
 
@@ -136,7 +152,7 @@ namespace TheLostShrine.Prototype
                     confirmNewRun = false;
                 return;
             }
-            if (GUI.Button(new Rect(x, y, 384f, 32f), "Rest again (heal / reset enemies / save)"))
+            if (GUI.Button(new Rect(x, y, 384f, 32f), "Rest again (restore HP / stamina / save)"))
                 session.Rest(fire);
             y += 42f;
             bool travelAvailable = false;

@@ -1,11 +1,12 @@
 using System;
+using TheLostShrine.Combat;
 using TheLostShrine.Input;
 using TheLostShrine.Weapons;
 using UnityEngine;
 
 namespace TheLostShrine.Player
 {
-    [DisallowMultipleComponent]
+    [DisallowMultipleComponent, RequireComponent(typeof(PlayerStamina))]
     public sealed class PlayerCombatController : MonoBehaviour
     {
         [SerializeField] private MonoBehaviour inputSource;
@@ -14,15 +15,21 @@ namespace TheLostShrine.Player
         [SerializeField, Min(0f)] private float lightInputBuffer = 0.25f;
         private ICombatInput input;
         private float queuedLightUntil = -1f;
+        private PlayerDash dash;
 
         public HatchetWeapon Weapon { get; private set; }
         public Vector2 AimDirection { get; private set; } = Vector2.down;
         public bool CanRecall => recallUnlocked;
+        public IStamina Stamina { get; private set; }
+        public bool IsAttacking => Weapon != null && Weapon.IsAttacking;
+        public bool CanStartAttack => dash == null || !dash.IsDashing;
         public event Action WeaponEquipped;
         public event Action RecallUnlocked;
 
         private void Awake()
         {
+            Stamina = GetComponent<IStamina>();
+            dash = GetComponent<PlayerDash>();
             if (inputSource == null)
                 inputSource = GetComponent<ICombatInput>() as MonoBehaviour;
             input = inputSource as ICombatInput;
@@ -49,6 +56,14 @@ namespace TheLostShrine.Player
             if (Weapon == null)
                 return;
             Weapon.SetAim(AimDirection);
+
+            if (!CanStartAttack)
+            {
+                queuedLightUntil = -1f;
+                if (frame.ThrowPressed && Weapon.IsAway && CanRecall)
+                    Weapon.TryRecall();
+                return;
+            }
 
             if (frame.ThrowPressed)
             {

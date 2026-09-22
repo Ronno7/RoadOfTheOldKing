@@ -6,9 +6,14 @@ namespace TheLostShrine.Player
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D))]
+    [RequireComponent(typeof(PlayerStamina), typeof(PlayerDash))]
     public sealed class PlayerMovement : MonoBehaviour
     {
         [SerializeField, Min(0.1f)] private float moveSpeed = 4.5f;
+        [SerializeField, Min(1f)] private float sprintMultiplier = 1.6f;
+        [SerializeField, Min(0.1f)] private float sprintCostPerSecond = 20f;
+        [Tooltip("Minimum stamina needed to start sprinting, preventing stuttering at empty.")]
+        [SerializeField, Min(0f)] private float minimumSprintStamina = 20f;
         [SerializeField] private Vector2 initialFacing = Vector2.down;
         [Tooltip("A component on this player that implements IMovementInput.")]
         [SerializeField] private MonoBehaviour inputSource;
@@ -16,8 +21,13 @@ namespace TheLostShrine.Player
         private Rigidbody2D body;
         private IMovementInput movementInput;
         private HitReaction hitReaction;
+        private PlayerStamina stamina;
+        private PlayerCombatController combat;
+        private PlayerDash dash;
 
         public float MoveSpeed => moveSpeed;
+        public float SprintSpeed => moveSpeed * sprintMultiplier;
+        public bool IsSprinting { get; private set; }
         public Vector2 FacingDirection { get; private set; } = Vector2.down;
 
         private void Reset()
@@ -29,6 +39,9 @@ namespace TheLostShrine.Player
         {
             body = GetComponent<Rigidbody2D>();
             hitReaction = GetComponent<HitReaction>();
+            stamina = GetComponent<PlayerStamina>();
+            combat = GetComponent<PlayerCombatController>();
+            dash = GetComponent<PlayerDash>();
             FacingDirection = initialFacing.sqrMagnitude > 0f ? initialFacing.normalized : Vector2.down;
             body.bodyType = RigidbodyType2D.Dynamic;
             body.gravityScale = 0f;
@@ -50,24 +63,56 @@ namespace TheLostShrine.Player
 
         private void FixedUpdate()
         {
+            dash.Tick(Time.fixedDeltaTime);
+            bool dashRequested = movementInput.ConsumeDashPress();
             // Let the reaction's impulse move the body during stagger.
             if (hitReaction != null && hitReaction.IsStaggered)
+            {
+                IsSprinting = false;
+                dash.Cancel();
                 return;
+            }
 
-            Vector2 direction = inputSource != null && inputSource.isActiveAndEnabled
-                ? Vector2.ClampMagnitude(movementInput.MoveDirection, 1f)
-                : Vector2.zero;
+            if (inputSource == null || !inputSource.isActiveAndEnabled || !movementInput.IsActive)
+            {
+                IsSprinting = false;
+                dash.Cancel();
+                body.linearVelocity = Vector2.zero;
+                return;
+            }
+
+            Vector2 direction = Vector2.ClampMagnitude(movementInput.MoveDirection, 1f);
+
+            if (dashRequested)
+                dash.TryStart(direction.sqrMagnitude > 0f ? direction : FacingDirection);
+            if (dash.IsDashing)
+            {
+                IsSprinting = false;
+                FacingDirection = dash.Direction;
+                stamina.DelayRecovery();
+                body.linearVelocity = dash.GetVelocity(Time.fixedDeltaTime);
+                return;
+            }
 
             if (direction.sqrMagnitude > 0f)
                 FacingDirection = direction.normalized;
 
+            bool wantsSprint = direction.sqrMagnitude > 0f && movementInput.SprintHeld &&
+                (combat == null || !combat.IsAttacking);
+            IsSprinting = wantsSprint && stamina != null &&
+                (IsSprinting || stamina.Current >= minimumSprintStamina) &&
+                stamina.TrySpend(sprintCostPerSecond * Time.fixedDeltaTime);
+
             // Velocity is units per second. Unity applies the physics time step.
             // Moving the Rigidbody, instead of the Transform, preserves collisions.
-            body.linearVelocity = direction * moveSpeed;
+            body.linearVelocity = direction * (IsSprinting ? SprintSpeed : moveSpeed);
         }
 
         private void OnDisable()
         {
+            IsSprinting = false;
+            if (dash != null)
+                dash.Cancel();
             if (body != null)
                 body.linearVelocity = Vector2.zero;
         }

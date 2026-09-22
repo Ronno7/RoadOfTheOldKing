@@ -25,22 +25,22 @@ try{
 Physics2D.simulationMode=SimulationMode2D.Script;
 check(session.Fires.Length==2&&camp!=null&&exit!=null,"Both uniquely identified bonfires are registered");
 check(!session.HasCheckpoint&&!camp.IsDiscovered&&!exit.IsDiscovered,"A fresh save has no checkpoint or travel destinations");
-check(!session.Rest(camp)&&health.Health.Health==5,"A distant fire cannot be used to heal or save");
+check(!session.Rest(camp)&&health.Health.Health==100,"A distant fire cannot be used to heal or save");
 check(!session.Travel(exit,camp),"Travel to an undiscovered fire is rejected");
 // Establish the already-verified first section's end state.
 player.TryEquip(weapon);player.UnlockRecall();
-var hit=new TheLostShrine.Combat.CombatHit(player.gameObject,TheLostShrine.Combat.AttackKind.ChargedCleave,20,Vector2.up,0,0,true);
+var hit=new TheLostShrine.Combat.CombatHit(player.gameObject,TheLostShrine.Combat.AttackKind.ChargedCleave,1000,Vector2.up,0,0,true);
 foreach(var prop in UnityEngine.Object.FindObjectsByType<TheLostShrine.Combat.Breakable>(FindObjectsSortMode.None))prop.ReceiveHit(hit);
 enemy.GetComponent<TheLostShrine.Combat.Damageable>().ReceiveHit(hit);
 guide.GetType().GetField("<Step>k__BackingField",flags).SetValue(guide,TheLostShrine.Prototype.PrototypeStep.Enemy);update();
 check(guide.Step==TheLostShrine.Prototype.PrototypeStep.Bonfire,"Enemy defeat opens the new campfire section");
-health.Health.ReceiveHit(new TheLostShrine.Combat.CombatHit(enemy.gameObject,TheLostShrine.Combat.AttackKind.EnemyMelee,2,Vector2.down,1,.2f));
-check(health.Health.Health==3,"Player can arrive at camp with damage");
+health.Health.ReceiveHit(new TheLostShrine.Combat.CombatHit(enemy.gameObject,TheLostShrine.Combat.AttackKind.EnemyMelee,40,Vector2.down,1,.2f));
+check(health.Health.Health==60,"Player can arrive at camp with damage");
 move(camp.SpawnPosition);weapon.TryThrow(Vector2.right);tick(.04f);
 check(interaction.Open(camp),"Opening the nearby fire performs a rest");update();
-check(health.Health.Health==5&&!health.GetComponent<TheLostShrine.Combat.HitReaction>().IsStaggered,"Rest fully heals and clears stagger");
+check(health.Health.Health==100&&!health.GetComponent<TheLostShrine.Combat.HitReaction>().IsStaggered,"Rest fully heals and clears stagger");
 check(weapon.State==TheLostShrine.Weapons.HatchetState.Held,"Rest safely retrieves a thrown hatchet");
-check(enemy.GetComponent<TheLostShrine.Combat.Damageable>().Health==6&&enemy.State==TheLostShrine.Combat.MeleeEnemyState.Idle&&enemy.GetComponent<Collider2D>().enabled,"Rest revives the defeated enemy at full health");
+check(enemy.GetComponent<TheLostShrine.Combat.Damageable>().Health==100&&enemy.State==TheLostShrine.Combat.MeleeEnemyState.Idle&&enemy.GetComponent<Collider2D>().enabled,"Rest revives the defeated enemy at full health");
 check(Vector2.Distance(enemy.transform.position,new Vector2(-15.5f,11.5f))<.01f,"Rest restores enemy home position");
 check(camp.IsDiscovered&&session.Progress.checkpointId==camp.Id&&guide.Step==TheLostShrine.Prototype.PrototypeStep.Puzzle,"First fire becomes the checkpoint and opens puzzle access");
 check(interaction.IsOpen&&!player.GetComponent<TheLostShrine.Input.PlayerMovementInput>().enabled&&!player.GetComponent<TheLostShrine.Input.PlayerCombatInput>().enabled,"Fire menu disables movement and combat input");
@@ -68,7 +68,7 @@ check(puzzle.IsSolved&&puzzle.Door.IsOpen&&guide.Step>=TheLostShrine.Prototype.P
 move(exit.SpawnPosition);check(interaction.Open(exit),"Far fire can be discovered after the door opens");update();
 check(session.Progress.discoveredFires.Count==2&&session.Progress.checkpointId==exit.Id&&guide.Step==TheLostShrine.Prototype.PrototypeStep.Complete,"Second fire completes the route and becomes the respawn point");
 check(session.Travel(camp,exit),"Travel between two discovered fires succeeds");interaction.Close();
-check(Vector2.Distance(body.position,camp.SpawnPosition)<.01f&&session.Progress.checkpointId==camp.Id&&health.Health.Health==5,"Travel moves to a safe spawn, heals, and updates checkpoint");
+check(Vector2.Distance(body.position,camp.SpawnPosition)<.01f&&session.Progress.checkpointId==camp.Id&&health.Health.Health==100,"Travel moves to a safe spawn, heals, and updates checkpoint");
 check(puzzle.Door.IsOpen&&player.CanRecall,"Travel preserves the solved door and Recall");
 check(!session.Travel(exit,exit),"Travel cannot be initiated remotely from another fire");
 check(session.Travel(exit,camp),"Return travel to the far fire succeeds");

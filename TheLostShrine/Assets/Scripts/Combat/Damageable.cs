@@ -6,7 +6,7 @@ namespace TheLostShrine.Combat
     [DisallowMultipleComponent]
     public sealed class Damageable : MonoBehaviour, IHitReceiver
     {
-        [SerializeField, Min(1)] private int maxHealth = 8;
+        [SerializeField, Min(1)] private int maxHealth = 100;
         [SerializeField] private MonoBehaviour protectionSource;
         private IHitProtection protection;
 

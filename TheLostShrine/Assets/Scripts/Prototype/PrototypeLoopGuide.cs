@@ -34,14 +34,14 @@ namespace TheLostShrine.Prototype
                 switch (Step)
                 {
                     case PrototypeStep.Pickup: return "Walk over the hatchet in front of you.";
-                    case PrototypeStep.Chop: return "Follow the path. Aim at a plain dummy and left-click to slash.";
+                    case PrototypeStep.Chop: return "Aim at a plain dummy and left-click to slash. Attacks use stamina; walk to recover.";
                     case PrototypeStep.Throw: return "Step back, aim at a plain dummy, and press E to throw.";
                     case PrototypeStep.Retrieve: return "Walk over to retrieve your hatchet. Recall comes later.";
                     case PrototypeStep.Bushes: return "The east gate is open. Chop both bushes along the path.";
                     case PrototypeStep.Stone: return "Hold right-click until gold, then release beside the cracked stone.";
                     case PrototypeStep.UnlockRecall: return "Continue east to the Recall altar.";
                     case PrototypeStep.RecallPractice: return "Follow the upper path back to the dummies. Throw past them, move, then E to recall through one.";
-                    case PrototypeStep.Enemy: return "Take the northwest path. Approach the sentinel, step out of its marked strike, then counterattack.";
+                    case PrototypeStep.Enemy: return "Take the northwest path. Space: short dash / dodge. Avoid the marked strike, then counterattack. Watch your stamina.";
                     case PrototypeStep.Bonfire: return "Follow the east path to the fire. Press F nearby to heal, save, and set your checkpoint.";
                     case PrototypeStep.Puzzle: return puzzle != null && puzzle.IsArmed
                         ? "Move down to the blue floor mark. Press E to recall through the blue target and open the door."

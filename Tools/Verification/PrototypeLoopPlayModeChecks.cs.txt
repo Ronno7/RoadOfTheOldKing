@@ -1,10 +1,12 @@
 // Run through Unity MCP execute_code in a fresh PrototypeLoop session with an empty,
 // isolated CheckpointSession saveKey, so automatic save loading cannot skip the route.
+// Resource exhaustion is covered in StaminaPlayModeChecks; these route checks refill between actions.
 // Stop Play Mode afterward; these checks intentionally consume the route and defeat the player.
 var results=new System.Collections.Generic.List<string>();
 System.Action<bool,string> check=(ok,name)=>results.Add((ok?"PASS ":"FAIL ")+name);
 var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
 var player=GameObject.Find("Player").GetComponent<TheLostShrine.Player.PlayerCombatController>();
+var stamina=player.GetComponent<TheLostShrine.Player.PlayerStamina>();
 var life=player.GetComponent<TheLostShrine.Player.PlayerHealth>();
 var body=player.GetComponent<Rigidbody2D>();
 var weapon=GameObject.Find("Hatchet Pickup").GetComponent<TheLostShrine.Weapons.HatchetWeapon>();
@@ -16,7 +18,7 @@ var ground=GameObject.Find("Ground").GetComponent<UnityEngine.Tilemaps.Tilemap>(
 var weaponSim=weapon.GetType().GetMethod("Simulate",flags);
 var guideUpdate=guide.GetType().GetMethod("Update",flags);
 var enemyTick=enemy.GetType().GetMethod("Tick",flags);
-System.Action<float> tickWeapon=duration=>{for(int i=0;i<Mathf.CeilToInt(duration/.02f);i++)weaponSim.Invoke(weapon,new object[]{.02f});};
+System.Action<float> tickWeapon=duration=>{for(int i=0;i<Mathf.CeilToInt(duration/.02f);i++)weaponSim.Invoke(weapon,new object[]{.02f});stamina.Restore();};
 System.Action tickGuide=()=>guideUpdate.Invoke(guide,null);
 System.Action<float> tickEnemy=duration=>enemyTick.Invoke(enemy,new object[]{duration});
 System.Action<Vector2> move=position=>{body.position=position;body.linearVelocity=Vector2.zero;player.transform.position=position;Physics2D.SyncTransforms();};
@@ -41,7 +43,7 @@ var oldSimulation=Physics2D.simulationMode;
 GameObject wall=null;
 try{
 Physics2D.simulationMode=SimulationMode2D.Script;
-check(life.Health.Health==5&&life.Health.MaxHealth==5&&life.IsAlive,"Player starts with five health");
+check(life.Health.Health==100&&life.Health.MaxHealth==100&&life.IsAlive,"Player starts with 100 health");
 check(Vector2.Dot(player.GetComponent<TheLostShrine.Player.PlayerMovement>().FacingDirection,((Vector2)weapon.transform.position-body.position).normalized)>.99f,"Player faces the hatchet placed ahead at spawn");
 check(player.Weapon==null&&!player.CanRecall&&guide.Step==TheLostShrine.Prototype.PrototypeStep.Pickup,"Starts unarmed, Recall locked, pickup instruction active");
 check(closed("Practice Exit Gate")&&closed("Recall Return Gate")&&closed("Enemy Approach Gate"),"All progression gates start closed");
@@ -52,9 +54,9 @@ check(player.Weapon==weapon&&guide.Step==TheLostShrine.Prototype.PrototypeStep.C
 check(!player.CanRecall,"Picking up the hatchet still does not grant Recall");
 var dummy=GameObject.Find("Practice Dummy 1").GetComponent<TheLostShrine.Combat.Damageable>();
 move((Vector2)dummy.transform.position+Vector2.down*1.2f);weapon.TryLightChop(Vector2.up);tickWeapon(.3f);tickGuide();
-check(dummy.Health==7&&guide.Step==TheLostShrine.Prototype.PrototypeStep.Throw,"Real slash damage advances to throw lesson");
+check(dummy.Health==90&&guide.Step==TheLostShrine.Prototype.PrototypeStep.Throw,"Real slash damage advances to throw lesson");
 move((Vector2)dummy.transform.position+Vector2.down*3f);weapon.TryThrow(Vector2.up);tickWeapon(.4f);tickGuide();
-check(dummy.Health==5&&weapon.State==TheLostShrine.Weapons.HatchetState.Stuck&&guide.Step==TheLostShrine.Prototype.PrototypeStep.Retrieve,"Actual throw hits dummy and teaches manual retrieval");
+check(dummy.Health==75&&weapon.State==TheLostShrine.Weapons.HatchetState.Stuck&&guide.Step==TheLostShrine.Prototype.PrototypeStep.Retrieve,"Actual throw hits dummy and teaches manual retrieval");
 check(!weapon.TryRecall()&&closed("Practice Exit Gate"),"Recall and route stay locked until manual retrieval");
 move(weapon.transform.position);tickWeapon(.02f);tickGuide();
 check(guide.Step==TheLostShrine.Prototype.PrototypeStep.Bushes&&!closed("Practice Exit Gate"),"Retrieving opens the east practice exit");
@@ -74,9 +76,9 @@ check(!reachable(body.position,new Vector2(-17.5f,9.5f)),"Enemy corner stays blo
 dummy.GetComponent<TheLostShrine.Prototype.PracticeTarget>().ResetTarget();
 Vector2 dummyPosition=dummy.transform.position;
 move(dummyPosition+new Vector2(1f,-2f));weapon.TryThrow(Vector2.up);tickWeapon(.7f);
-check(weapon.State==TheLostShrine.Weapons.HatchetState.Stuck&&dummy.Health==8,"Throw beside dummy sets up a return shot");
+check(weapon.State==TheLostShrine.Weapons.HatchetState.Stuck&&dummy.Health==100,"Throw beside dummy sets up a return shot");
 move(dummyPosition+Vector2.down*2f);weapon.TryRecall();tickWeapon(.8f);tickGuide();
-check(dummy.Health==6&&guide.Step==TheLostShrine.Prototype.PrototypeStep.Enemy&&!closed("Enemy Approach Gate"),"Real repositioned Recall damages original dummy and unlocks enemy route");
+check(dummy.Health==90&&guide.Step==TheLostShrine.Prototype.PrototypeStep.Enemy&&!closed("Enemy Approach Gate"),"Real repositioned Recall damages original dummy and unlocks enemy route");
 check(reachable(body.position,new Vector2(-17.5f,9.5f)),"Final enemy corner is now reachable");
 
 // A real enemy checks the player's current position at the strike, not at wind-up.
@@ -85,38 +87,38 @@ move(home+Vector2.down*3.5f);tickEnemy(.02f);
 check(enemy.State==TheLostShrine.Combat.MeleeEnemyState.Pursuing&&enemyBody.linearVelocity.y<0,"Enemy notices nearby player and approaches");
 move(home+Vector2.down*1.2f);tickEnemy(.02f);
 check(enemy.State==TheLostShrine.Combat.MeleeEnemyState.Windup&&enemyBody.linearVelocity==Vector2.zero,"Enemy stops and telegraphs before attacking");
-tickEnemy(.3f);check(life.Health.Health==5,"Wind-up itself deals no damage");
+tickEnemy(.3f);check(life.Health.Health==100,"Wind-up itself deals no damage");
 Vector2 lockedFacing=enemy.FacingDirection;move(home+Vector2.right*1.2f);tickEnemy(.36f);tickEnemy(.02f);
-check(enemy.FacingDirection==lockedFacing&&life.Health.Health==5,"Sidestepping the locked attack direction avoids damage");
+check(enemy.FacingDirection==lockedFacing&&life.Health.Health==100,"Sidestepping the locked attack direction avoids damage");
 tickEnemy(.15f);check(enemy.State==TheLostShrine.Combat.MeleeEnemyState.Recovering&&enemyBody.linearVelocity==Vector2.zero,"A missed strike leaves a stationary recovery opening");
 tickEnemy(.4f);check(enemy.State==TheLostShrine.Combat.MeleeEnemyState.Recovering,"Recovery is long enough to counterattack");
 move(home+Vector2.down*1.2f);tickEnemy(.6f);tickEnemy(.66f);tickEnemy(.02f);
-check(life.Health.Health==4&&life.IsInvulnerable,"Staying in the next strike loses one health and grants brief immunity");
+check(life.Health.Health==80&&life.IsInvulnerable,"Staying in the next strike loses 20 health and grants brief immunity");
 check(body.linearVelocity.y<0,"Accepted enemy strike knocks player away");
 Vector2 impulse=body.linearVelocity;player.GetComponent<TheLostShrine.Player.PlayerMovement>().GetType().GetMethod("FixedUpdate",flags).Invoke(player.GetComponent<TheLostShrine.Player.PlayerMovement>(),null);
 check(body.linearVelocity==impulse,"Player movement preserves knockback during stagger");
-tickEnemy(.02f);check(life.Health.Health==4,"One swing cannot repeatedly damage the player");
-var enemyHit=new TheLostShrine.Combat.CombatHit(enemy.gameObject,TheLostShrine.Combat.AttackKind.EnemyMelee,1,Vector2.down,0,0);
-check(!life.Health.ReceiveHit(enemyHit)&&life.Health.Health==4,"Immediate follow-up hit is rejected during invulnerability");
-expireProtection();check(life.Health.ReceiveHit(enemyHit)&&life.Health.Health==3,"Damage works again after protection expires");
+tickEnemy(.02f);check(life.Health.Health==80,"One swing cannot repeatedly damage the player");
+var enemyHit=new TheLostShrine.Combat.CombatHit(enemy.gameObject,TheLostShrine.Combat.AttackKind.EnemyMelee,20,Vector2.down,0,0);
+check(!life.Health.ReceiveHit(enemyHit)&&life.Health.Health==80,"Immediate follow-up hit is rejected during invulnerability");
+expireProtection();check(life.Health.ReceiveHit(enemyHit)&&life.Health.Health==60,"Damage works again after protection expires");
 expireProtection();expireStagger(player.gameObject);
 tickEnemy(.2f);tickEnemy(1f); // Finish recovery and begin another wind-up.
 wall=new GameObject("Verification occluder");wall.transform.position=home+Vector2.down*.6f;wall.AddComponent<BoxCollider2D>().size=new Vector2(2,.1f);Physics2D.SyncTransforms();
-tickEnemy(.7f);tickEnemy(.02f);check(life.Health.Health==3,"Strike cannot damage through a solid wall");
+tickEnemy(.7f);tickEnemy(.02f);check(life.Health.Health==60,"Strike cannot damage through a solid wall");
 tickEnemy(.2f); // Leave the occluder up for the whole active strike window.
 UnityEngine.Object.DestroyImmediate(wall);wall=null;
 tickEnemy(1f);
 check(enemy.State==TheLostShrine.Combat.MeleeEnemyState.Windup,"Enemy can prepare another attack after recovery");
 enemyHealth.ReceiveHit(new TheLostShrine.Combat.CombatHit(player.gameObject,TheLostShrine.Combat.AttackKind.LightChop,1,Vector2.up,1,.4f));tickEnemy(.8f);
-check(enemy.State==TheLostShrine.Combat.MeleeEnemyState.Recovering&&life.Health.Health==3&&enemyBody.linearVelocity.y>0,"Player hit interrupts wind-up and enemy AI respects stagger/knockback");
+check(enemy.State==TheLostShrine.Combat.MeleeEnemyState.Recovering&&life.Health.Health==60&&enemyBody.linearVelocity.y>0,"Player hit interrupts wind-up and enemy AI respects stagger/knockback");
 expireStagger(enemy.gameObject);move(home+Vector2.down*9);tickEnemy(1f);tickEnemy(.02f);
 check(enemy.State==TheLostShrine.Combat.MeleeEnemyState.Idle||enemy.State==TheLostShrine.Combat.MeleeEnemyState.Returning,"Enemy abandons a player beyond its home leash");
-enemyHealth.ReceiveHit(new TheLostShrine.Combat.CombatHit(player.gameObject,TheLostShrine.Combat.AttackKind.ChargedCleave,20,Vector2.up,0,0,true));tickGuide();tickEnemy(30f);
+enemyHealth.ReceiveHit(new TheLostShrine.Combat.CombatHit(player.gameObject,TheLostShrine.Combat.AttackKind.ChargedCleave,1000,Vector2.up,0,0,true));tickGuide();tickEnemy(30f);
 check(!enemyHealth.IsAlive&&!enemy.GetComponent<Collider2D>().enabled&&enemy.State==TheLostShrine.Combat.MeleeEnemyState.Defeated,"Defeated enemy stops attacking and stays defeated");
 check(guide.Step==TheLostShrine.Prototype.PrototypeStep.Bonfire,"Defeating enemy opens the bonfire section");
 int deaths=0;life.Health.Defeated+=()=>deaths++;
 move(new Vector2(-14.5f,-6.5f));weapon.CancelAction();weapon.TryThrow(Vector2.right);
-expireProtection();life.Health.ReceiveHit(new TheLostShrine.Combat.CombatHit(enemy.gameObject,TheLostShrine.Combat.AttackKind.EnemyMelee,20,Vector2.down,0,0));
+expireProtection();life.Health.ReceiveHit(new TheLostShrine.Combat.CombatHit(enemy.gameObject,TheLostShrine.Combat.AttackKind.EnemyMelee,1000,Vector2.down,0,0));
 check(life.Health.Health==0&&!life.IsAlive&&deaths==1,"Lethal damage clamps health to zero and emits one defeat");
 check(!player.enabled&&!player.GetComponent<TheLostShrine.Player.PlayerMovement>().enabled&&!body.simulated,"Death stops movement, combat input and physics");
 check(weapon.State==TheLostShrine.Weapons.HatchetState.Held,"Death cancels an in-flight hatchet without further damage");

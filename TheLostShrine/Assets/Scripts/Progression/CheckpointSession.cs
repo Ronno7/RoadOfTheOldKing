@@ -106,7 +106,7 @@ namespace TheLostShrine.Progression
             Progress.scenePath = SceneManager.GetActiveScene().path;
             Capture();
             RestoreCombatArea();
-            Save("Rested at " + fire.DisplayName + ". Health restored; progress saved.");
+            Save("Rested at " + fire.DisplayName + ". HP and stamina restored; enemies reset; progress saved.");
             return true;
         }
 

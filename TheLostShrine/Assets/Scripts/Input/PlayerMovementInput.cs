@@ -8,10 +8,15 @@ namespace TheLostShrine.Input
     {
         private InputActionMap actions;
         private InputAction move;
+        private InputAction sprint;
+        private InputAction dash;
+        private float dashQueuedUntil = -1f;
         private bool hasFocus = true;
         private bool paused;
 
         public Vector2 MoveDirection { get; private set; }
+        public bool SprintHeld { get; private set; }
+        public bool IsActive => isActiveAndEnabled && hasFocus && !paused && Time.timeScale > 0f;
 
         private void Awake()
         {
@@ -29,16 +34,35 @@ namespace TheLostShrine.Input
                 .With("Left", "<Keyboard>/leftArrow")
                 .With("Right", "<Keyboard>/d")
                 .With("Right", "<Keyboard>/rightArrow");
+
+            sprint = actions.AddAction("Sprint", InputActionType.Button);
+            sprint.AddBinding("<Keyboard>/leftShift");
+            sprint.AddBinding("<Keyboard>/rightShift");
+            dash = actions.AddAction("Dash", InputActionType.Button, "<Keyboard>/space");
         }
 
         private void OnEnable() => actions.Enable();
 
         private void Update()
         {
-            if (!hasFocus || paused)
+            if (!IsActive)
+            {
+                ClearInput();
                 return;
+            }
 
             MoveDirection = move.ReadValue<Vector2>();
+            SprintHeld = sprint.IsPressed();
+            if (dash.WasPressedThisFrame())
+                dashQueuedUntil = Time.time + 0.12f;
+        }
+
+        // Update may run between physics steps; consume a short press exactly once.
+        public bool ConsumeDashPress()
+        {
+            bool requested = IsActive && dashQueuedUntil >= Time.time;
+            dashQueuedUntil = -1f;
+            return requested;
         }
 
         private void OnDisable()
@@ -64,6 +88,8 @@ namespace TheLostShrine.Input
         private void ClearInput()
         {
             MoveDirection = Vector2.zero;
+            SprintHeld = false;
+            dashQueuedUntil = -1f;
         }
     }
 }

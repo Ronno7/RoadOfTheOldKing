@@ -10206,7 +10206,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 4.2, y: 0.9, z: 1}
+  m_LocalScale: {x: 4.8, y: 1.15, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 941080129}
@@ -11989,7 +11989,9 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 675965934}
-  m_Text: BACK TO DUMMIES
+  m_Text: 'BACK TO DUMMIES
+
+    <size=36>Hold Shift to sprint</size>'
   m_OffsetZ: 0
   m_CharacterSize: 0.065
   m_LineSpacing: 1
@@ -54513,7 +54515,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 4.2, y: 0.9, z: 1}
+  m_LocalScale: {x: 4.2, y: 1.15, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 147882692}
@@ -56685,7 +56687,9 @@ TextMesh:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1526128003}
-  m_Text: 6  DODGE / COUNTER
+  m_Text: '6  DODGE / COUNTER
+
+    <size=34>Space: short dash / dodge</size>'
   m_OffsetZ: 0
   m_CharacterSize: 0.065
   m_LineSpacing: 1

@@ -2,6 +2,26 @@
 
 Listed newest first.
 
+## 22SEP2026 - Combat balance
+
+### Added
+
+- Added a Spacebar dash: 2.2 units over 0.18 seconds, costing 25 stamina, with a 0.1-second opening dodge window and 0.35-second recovery before another dash. Direction follows movement or last facing when idle.
+- Added a Space / short dash / dodge hint in the sentinel arena and updated the HUD and lesson text. Dash respects collisions, cannot cancel attacks, does not repeat on held Space, and resets at bonfires or respawn.
+- Added 39 dash checks covering input, physics, protection, stamina, attack/sprint transitions, interruptions, and bonfires.
+- Added a short Shift-to-sprint hint beneath the Back to Dummies trail sign.
+- Added automatic hatchet Recall beyond 10 units of player separation once Recall is unlocked; it uses normal return damage, remains free, and leaves room for the marked puzzle repositioning.
+- Added Shift sprint with equal diagonal speed, a 100-point stamina pool, delayed recovery, and a placeholder stamina bar with low-stamina/rejected-action feedback.
+- Added stamina costs to the light combo (18/18/24), charged cleave (35), and throw (25). Recall remains free. Charging pays once up front, cannot regenerate while held, and does not refund cancelled charges.
+- Added 50 repeatable stamina checks for keyboard bindings, exhaustion, action gating, recovery, charge cancellation, free Recall, bonfires, and death; all 271 current gameplay assertions pass, including 20 automatic Recall and 39 dash checks.
+
+### Changed
+
+- Sprint moves at 7.2 units/second, spends 20 stamina/second, and needs 20 stamina to start; walking remains free at 4.5. Recovery restores 25 stamina/second after 0.8 seconds without spending or performing melee.
+- Player, sentinel, and practice dummy health now use 100-point pools. Light combo damage is 10/10/15, full cleave 30, throw 15, Recall 10, and sentinel strikes 20.
+- Melee/charging, stagger, lost focus, disabled controls, fire menus, and death stop sprinting. Exhaustion falls back to walking.
+- Bonfire rest, travel, and respawn refill stamina. Expanded the systems overview and updated existing combat/route/puzzle checks for the new damage scale.
+
 ## 21SEP2026 - PRD 02
 
 ### Added

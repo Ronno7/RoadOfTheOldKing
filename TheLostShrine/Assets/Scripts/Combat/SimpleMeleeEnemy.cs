@@ -20,7 +20,7 @@ namespace TheLostShrine.Combat
         [SerializeField, Min(0.05f)] private float windupDuration = 0.65f;
         [SerializeField, Min(0.02f)] private float strikeDuration = 0.12f;
         [SerializeField, Min(0.05f)] private float recoveryDuration = 0.9f;
-        [SerializeField, Min(1)] private int damage = 1;
+        [SerializeField, Min(1)] private int damage = 20;
         private readonly ContactFilter2D solidFilter = new ContactFilter2D { useTriggers = false };
         private readonly List<RaycastHit2D> sight = new List<RaycastHit2D>(12);
         private Damageable health;
