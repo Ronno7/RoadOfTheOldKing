@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="300" viewBox="0 0 1000 300" role="img" aria-labelledby="title description">
+  <title id="title">Game loop</title>
+  <desc id="description">Explore, fight or solve, progress, then explore again. After Recall is unlocked, the hatchet loop is throw, reposition, recall. Planned progression: Tutorial, three trials, dungeon, boss.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M1 1L9 5L1 9" fill="none" stroke="black" stroke-width="1.5"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="300" fill="white"/>
+  <g fill="black" font-family="Arial, sans-serif" text-anchor="middle">
+    <text x="500" y="34" font-size="24" font-weight="bold">Game loop</text>
+    <g fill="none" stroke="black" stroke-width="1.5">
+      <rect x="110" y="65" width="220" height="60"/>
+      <rect x="390" y="65" width="220" height="60"/>
+      <rect x="670" y="65" width="220" height="60"/>
+      <g marker-end="url(#arrow)">
+        <path d="M330 95H382"/>
+        <path d="M610 95H662"/>
+        <path d="M780 125V165H220V133"/>
+      </g>
+    </g>
+    <g font-size="22">
+      <text x="220" y="103">Explore</text>
+      <text x="500" y="103">Fight / solve</text>
+      <text x="780" y="103">Progress</text>
+    </g>
+    <g font-size="20">
+      <text x="500" y="225">Hatchet: Throw &#8594; Reposition &#8594; Recall</text>
+      <text x="500" y="272">Planned: Tutorial &#8594; 3 trials &#8594; Dungeon &#8594; Boss</text>
+    </g>
+  </g>
+</svg>

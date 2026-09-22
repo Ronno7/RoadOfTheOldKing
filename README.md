@@ -8,5 +8,9 @@
 
 <p align="center"><a href="Docs/SystemsOverview.md">System's overview</a></p>
 
+<p align="center">
+  <img width="100%" alt="Game loop: explore, fight or solve, progress, and repeat. Hatchet: throw, reposition, recall. Planned progression: Tutorial, three trials, dungeon, boss." src="Docs/Diagrams/GameLoop.svg" />
+</p>
+
 <img width="100%" alt="The Lost Shrine bottom banner" src="TLS_Banner_Bottom.png" />
 

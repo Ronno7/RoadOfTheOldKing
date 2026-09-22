@@ -6,6 +6,7 @@ Listed newest first.
 
 ### Added
 
+- Added a minimal black-and-white game-loop SVG to the README, showing the core loop, hatchet loop, and planned progression.
 - Added a reusable placeholder hatchet prefab and a walk-over pickup near the Tutorial spawn.
 - Added mouse aiming, a buffered three-hit light combo on left click, and a charged spinning cleave on right-click hold/release.
 - Added E to throw the hatchet, sticking at obstacles or maximum range, with walk-up retrieval.
