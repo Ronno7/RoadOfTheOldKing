@@ -12,7 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69d20bcd943624b409855b7f8ded6904, type: 3}
   m_Name: HatchetSettings
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Weapons.HatchetSettings
-  lightDuration: 0.25
+  lightDuration: 0.2
+  finisherDurationMultiplier: 1.15
+  lightWindupFraction: 0.12
+  lightSwingEndFraction: 0.5
   lightRadius: 1.35
   lightArc: 110
   comboWindow: 0.55

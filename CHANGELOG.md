@@ -18,6 +18,10 @@ Listed newest first.
 
 ### Changed
 
+- Made light attacks faster, with a brief wind-up, a quick slash, and a short recovery. Damage is limited to the slash phase, and queued combo clicks are more forgiving.
+- Fixed the backhand slash effect to follow the blade's direction, added a tapered crescent that fades quickly, and added three small combo pips above the player.
+- Returning hatchets now damage shielded targets from behind without breaking their shields. Front and side Recall hits remain blocked; full cleaves still break guards.
+- Added a facing arrow to the shield practice dummy and a controls hint for rear Recall hits. Special rear-hit knockdown/stun remains planned for later.
 - Replaced the README artwork with the new top and bottom banners stored in the repository.
 - Expanded WASD/arrow-key movement from four to eight directions, with equal diagonal speed.
 - Kept four-direction visual facing while preserving the last full movement direction when idle.

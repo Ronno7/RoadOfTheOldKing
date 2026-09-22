@@ -12,6 +12,10 @@ namespace TheLostShrine.Weapons
         private HatchetWeapon weapon;
         private Color originalBlade;
         private bool wasFlying;
+        private readonly AnimationCurve ringWidth = AnimationCurve.Linear(0f, 1f, 1f, 1f);
+        private readonly AnimationCurve slashWidth = new AnimationCurve(
+            new Keyframe(0f, 0f), new Keyframe(0.3f, 0.85f),
+            new Keyframe(0.65f, 1f), new Keyframe(1f, 0f));
 
         private void Awake()
         {
@@ -53,12 +57,7 @@ namespace TheLostShrine.Weapons
                     DrawArc(transform.position, 0.55f, 0f, 360f, new Color(1f, 0.8f, 0.3f, 0.55f));
                     break;
                 case HatchetState.LightChop:
-                    float direction = weapon.ComboIndex == 1 ? -1f : 1f;
-                    float aimAngle = Mathf.Atan2(weapon.AttackDirection.y, weapon.AttackDirection.x) * Mathf.Rad2Deg;
-                    angle = aimAngle + Mathf.Lerp(-weapon.Settings.lightArc * 0.5f, weapon.Settings.lightArc * 0.5f, weapon.AttackProgress) * direction;
-                    model.localPosition = new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad)) * 0.65f;
-                    DrawArc(transform.position, weapon.Settings.lightRadius, aimAngle - weapon.Settings.lightArc * 0.5f,
-                        weapon.Settings.lightArc * weapon.AttackProgress, new Color(1f, 0.9f, 0.55f, 0.8f));
+                    angle = DrawLightSlash();
                     break;
                 case HatchetState.Charging:
                     angle += Mathf.Sin(Time.time * 35f) * weapon.Charge01 * 8f;
@@ -82,11 +81,64 @@ namespace TheLostShrine.Weapons
             model.localRotation = Quaternion.Euler(0f, 0f, angle);
         }
 
+        private float DrawLightSlash()
+        {
+            var settings = weapon.Settings;
+            float progress = weapon.AttackProgress;
+            float direction = weapon.ComboIndex == 1 ? -1f : 1f;
+            float aimAngle = Mathf.Atan2(weapon.AttackDirection.y, weapon.AttackDirection.x) * Mathf.Rad2Deg;
+            float halfArc = settings.lightArc * 0.5f;
+            float slashTime = Mathf.InverseLerp(settings.lightWindupFraction, settings.lightSwingEndFraction, progress);
+            float sweepProgress = 1f - Mathf.Pow(1f - slashTime, 3f);
+            float sweepAngle = aimAngle + Mathf.Lerp(-halfArc, halfArc, sweepProgress) * direction;
+            float poseAngle = sweepAngle;
+            float reach = Mathf.Max(0.25f, weapon.LightReach - 0.45f);
+            float poseRadius;
+
+            if (progress < settings.lightWindupFraction)
+            {
+                float windup = Mathf.InverseLerp(0f, settings.lightWindupFraction, progress);
+                poseAngle = aimAngle - Mathf.Lerp(halfArc * 0.65f, halfArc, windup) * direction;
+                poseRadius = Mathf.Lerp(0.5f, 0.6f, windup);
+            }
+            else if (progress <= settings.lightSwingEndFraction)
+                poseRadius = Mathf.Lerp(0.6f, reach, sweepProgress);
+            else
+            {
+                float recovery = Mathf.SmoothStep(0f, 1f,
+                    Mathf.InverseLerp(settings.lightSwingEndFraction, 1f, progress));
+                poseAngle = Mathf.Lerp(sweepAngle, aimAngle, recovery);
+                poseRadius = Mathf.Lerp(reach, 0.5f, recovery);
+            }
+            model.localPosition = new Vector3(Mathf.Cos(poseAngle * Mathf.Deg2Rad), Mathf.Sin(poseAngle * Mathf.Deg2Rad)) * poseRadius;
+
+            float fadeEnd = Mathf.Min(1f, settings.lightSwingEndFraction + 0.28f);
+            float fade = 1f - Mathf.InverseLerp(settings.lightSwingEndFraction, fadeEnd, progress);
+            if (sweepProgress > 0f && fade > 0f)
+            {
+                // Both the blade and crescent use the same signed sweep, including the backhand.
+                float trailSweep = Mathf.Min(settings.lightArc * sweepProgress, 85f);
+                Color color = weapon.ComboIndex == 2 ? new Color(1f, 0.8f, 0.3f, fade)
+                    : new Color(1f, 0.96f, 0.78f, fade);
+                DrawArc(transform.position, weapon.LightReach, sweepAngle - direction * trailSweep,
+                    direction * trailSweep, color);
+                if (arc != null)
+                {
+                    arc.widthCurve = slashWidth;
+                    arc.widthMultiplier = weapon.ComboIndex == 2 ? 0.23f : 0.17f;
+                    arc.startColor = new Color(color.r, color.g, color.b, fade * 0.3f);
+                }
+            }
+            return poseAngle;
+        }
+
         private void DrawArc(Vector3 center, float radius, float startAngle, float sweep, Color color)
         {
             if (arc == null)
                 return;
             arc.enabled = true;
+            arc.widthCurve = ringWidth;
+            arc.widthMultiplier = 0.045f;
             arc.positionCount = 33;
             arc.startColor = color;
             arc.endColor = color;

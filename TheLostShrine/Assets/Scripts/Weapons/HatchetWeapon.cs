@@ -27,12 +27,16 @@ namespace TheLostShrine.Weapons
         public Vector2 AimDirection { get; private set; } = Vector2.right;
         public Vector2 AttackDirection => attackDirection;
         public int ComboIndex { get; private set; }
+        public int ComboStep => State == HatchetState.LightChop ||
+            (State == HatchetState.Held && comboRemaining > 0f) ? ComboIndex + 1 : 0;
+        public float ComboTimeRemaining => comboRemaining;
+        public float LightReach => settings.lightRadius + (ComboIndex == 2 ? 0.15f : 0f);
         public bool IsAway => State == HatchetState.Flying || State == HatchetState.Stuck || State == HatchetState.Returning;
         public float Charge01 => State == HatchetState.Charging
             ? Mathf.Clamp01(elapsed / settings.fullCharge) : State == HatchetState.Cleaving ? cleaveStrength : 0f;
         public float AttackProgress => Mathf.Clamp01(elapsed / (State == HatchetState.Cleaving
             ? settings.cleaveDuration : LightDuration));
-        private float LightDuration => settings.lightDuration * (ComboIndex == 2 ? 1.25f : 1f);
+        public float LightDuration => settings.lightDuration * (ComboIndex == 2 ? settings.finisherDurationMultiplier : 1f);
 
         private void Awake()
         {
@@ -162,9 +166,10 @@ namespace TheLostShrine.Weapons
                     break;
                 case HatchetState.LightChop:
                     transform.position = owner.transform.position;
-                    if (elapsed >= LightDuration * 0.2f && previousElapsed <= LightDuration * 0.75f)
+                    if (elapsed >= LightDuration * settings.lightWindupFraction &&
+                        previousElapsed < LightDuration * settings.lightSwingEndFraction)
                         hits.Melee(owner.transform.position, attackDirection,
-                            settings.lightRadius + (ComboIndex == 2 ? 0.15f : 0f), settings.lightArc,
+                            LightReach, settings.lightArc,
                             new CombatHit(owner.gameObject, AttackKind.LightChop,
                                 ComboIndex == 2 ? settings.finisherDamage : settings.lightDamage,
                                 attackDirection, ComboIndex == 2 ? 2f : 0.6f, 0.12f));

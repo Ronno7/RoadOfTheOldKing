@@ -11,7 +11,7 @@ namespace TheLostShrine.Player
         [SerializeField] private MonoBehaviour inputSource;
         [SerializeField] private Camera aimCamera;
         [SerializeField] private bool recallUnlocked;
-        [SerializeField, Min(0f)] private float lightInputBuffer = 0.16f;
+        [SerializeField, Min(0f)] private float lightInputBuffer = 0.25f;
         private ICombatInput input;
         private float queuedLightUntil = -1f;
 

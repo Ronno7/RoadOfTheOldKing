@@ -1,7 +1,5 @@
 # System's overview
 
-The Lost Shrine currently has a playable exploration and hatchet-combat prototype. Open `TheLostShrine/` in Unity, load `Assets/Scenes/Tutorial.unity`, and press **Play**. Systems use focused components so controls, game rules, and presentation can change independently.
-
 1. **World layout and collision.** Tutorial is painted with 64 imported 16-by-16-pixel tiles using Unity's Tilemap and Tile Palette tools. A sample-map prefab supports tile experiments; `MovementPlayground` preserves the earlier movement test area. Tutorial is the scene enabled for builds.
 
    Visible tiles and physical boundaries are separate. Box colliders block the pond and island edges, making barriers explicit and editable. Painting another water tile does not automatically add collision.
@@ -18,17 +16,19 @@ The Lost Shrine currently has a playable exploration and hatchet-combat prototyp
 
 5. **Weapon actions and hit detection.** `HatchetWeapon` uses a state machine: ground, held, chop, charge, cleave, flying, stuck, and returning states determine which actions are allowed. This prevents overlapping actions and disables melee while the weapon is away.
 
-   `HatchetHitDetector` handles physics separately. Melee checks reach, angle, and terrain obstruction. Flight checks the full distance traveled each physics step to catch obstacles between positions. Each target takes at most one hit per swing or flight leg. Outward throws stop on impact or at maximum range; returning throws can hit multiple targets.
+   Light attacks have a brief wind-up, a fast slash, and a short recovery. Only the slash phase can deal damage. `HatchetHitDetector` handles physics separately. Melee checks reach, angle, and terrain obstruction. Flight checks the full distance traveled each physics step to catch obstacles between positions. Each target takes at most one hit per swing or flight leg. Outward throws stop on impact or at maximum range; returning throws can hit multiple targets.
 
-6. **Health, protection, and reactions.** `CombatHit` carries damage, direction, knockback, stagger, and guard-breaking information to an `IHitReceiver`. `Damageable` manages health; `ShieldProtection` supplies protection through `IHitProtection`; `HitReaction` responds to accepted hits with knockback and stagger timing.
+6. **Health, protection, and reactions.** `CombatHit` carries damage, direction, impact position, knockback, stagger, and guard-breaking information to an `IHitReceiver`. `Damageable` manages health; `ShieldProtection` supplies protection through `IHitProtection`; `HitReaction` responds to accepted hits with knockback and stagger timing.
 
    `Breakable` handles destructible props. Bushes accept ordinary hits, while shields and cracked stones require a full cleave to break. Separate target components let the same weapon interact with different objects without owning their internal rules.
+
+   Returning hatchets can also bypass an intact shield by hitting the target's rear half. The shield compares the actual impact position with its facing direction, shown by the dummy's blue arrow. Front and exact-side Recall hits remain guarded. Rear hits deal ordinary Recall damage without breaking the shield; a special knockdown/stun is planned for later.
 
 7. **Recall progression.** Picking up the hatchet leaves Recall locked. Players initially retrieve stopped throws on foot. The northern altar's `RecallUnlockPickup` calls `PlayerCombatController.UnlockRecall()`; a future puzzle can call the same method.
 
    Once unlocked, E recalls the weapon toward the moving player, ignoring terrain so it can reach its owner. Repeated unlock calls are harmless. Progress lasts for the play session; persistent saves are not implemented.
 
-8. **Feedback, practice targets, and tuning.** `HatchetView` reads weapon state to draw swings, charge indicators, spins, and trails independently of damage calculations. `TutorialCombatHUD` displays controls, charge progress, and Recall status. `PracticeTarget` adds health labels, hit flashes, and a four-second reset after defeat, restoring health, position, and shields. These are training targets; enemy AI is not implemented.
+8. **Feedback, practice targets, and tuning.** `HatchetView` reads weapon state to draw tapered slashes, charge indicators, spins, and trails independently of damage calculations. Slash effects share the weapon's timing and follow its swing direction. `HatchetComboIndicator` shows the current combo hit with three small pips above the player. `TutorialCombatHUD` displays controls, charge progress, and Recall status. `PracticeTarget` adds health labels, hit flashes, and a four-second reset after defeat, restoring health, position, and shields. These are training targets; enemy AI is not implemented.
 
    Prefabs store reusable object setups. `HatchetSettings.asset` is a ScriptableObject: an asset holding attack timing, damage, range, and flight speeds separately from behavior. Combat can therefore be tuned in the Inspector without changing code.
 

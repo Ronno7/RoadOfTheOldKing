@@ -6,7 +6,12 @@ namespace TheLostShrine.Weapons
     public sealed class HatchetSettings : ScriptableObject
     {
         [Header("Light combo")]
-        [Min(0.1f)] public float lightDuration = 0.25f;
+        [Min(0.1f)] public float lightDuration = 0.2f;
+        [Min(1f)] public float finisherDurationMultiplier = 1.15f;
+        [Tooltip("Fraction of the swing spent drawing back before the slash can hit.")]
+        [Range(0f, 0.4f)] public float lightWindupFraction = 0.12f;
+        [Tooltip("The slash and damage window end here; the remaining time is recovery.")]
+        [Range(0.2f, 0.85f)] public float lightSwingEndFraction = 0.5f;
         [Min(0.1f)] public float lightRadius = 1.35f;
         [Range(20f, 180f)] public float lightArc = 110f;
         [Min(0f)] public float comboWindow = 0.55f;
@@ -29,6 +34,10 @@ namespace TheLostShrine.Weapons
         [Min(1)] public int recallDamage = 2;
         [Min(0.1f)] public float retrieveDistance = 0.9f;
 
-        private void OnValidate() => fullCharge = Mathf.Max(minimumCharge, fullCharge);
+        private void OnValidate()
+        {
+            fullCharge = Mathf.Max(minimumCharge, fullCharge);
+            lightSwingEndFraction = Mathf.Max(lightWindupFraction + 0.05f, lightSwingEndFraction);
+        }
     }
 }

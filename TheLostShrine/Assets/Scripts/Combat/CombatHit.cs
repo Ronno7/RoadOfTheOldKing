@@ -13,9 +13,10 @@ namespace TheLostShrine.Combat
         public readonly float Knockback;
         public readonly float StaggerDuration;
         public readonly bool BreaksGuard;
+        public readonly Vector2? ImpactPoint;
 
         public CombatHit(GameObject source, AttackKind kind, int damage, Vector2 direction,
-            float knockback, float staggerDuration, bool breaksGuard = false)
+            float knockback, float staggerDuration, bool breaksGuard = false, Vector2? impactPoint = null)
         {
             Source = source;
             Kind = kind;
@@ -24,6 +25,7 @@ namespace TheLostShrine.Combat
             Knockback = knockback;
             StaggerDuration = staggerDuration;
             BreaksGuard = breaksGuard;
+            ImpactPoint = impactPoint;
         }
     }
 

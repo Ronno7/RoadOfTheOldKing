@@ -26,11 +26,12 @@ namespace TheLostShrine.Weapons
         private bool IsCandidate(Collider2D collider) => collider != null &&
             !collider.transform.IsChildOf(owner) && !collider.transform.IsChildOf(weapon);
 
-        private void Apply(Collider2D collider, CombatHit hit)
+        private void Apply(Collider2D collider, CombatHit hit, Vector2 impactPoint)
         {
             var receiver = collider.GetComponentInParent<IHitReceiver>();
             if (receiver != null && hitTargets.Add(receiver))
-                receiver.ReceiveHit(hit);
+                receiver.ReceiveHit(new CombatHit(hit.Source, hit.Kind, hit.Damage, hit.Direction,
+                    hit.Knockback, hit.StaggerDuration, hit.BreaksGuard, impactPoint));
         }
 
         public void Melee(Vector2 center, Vector2 aim, float radius, float arc, CombatHit hit)
@@ -57,7 +58,7 @@ namespace TheLostShrine.Weapons
                 if (!obstructed)
                     Apply(collider, new CombatHit(hit.Source, hit.Kind, hit.Damage,
                         direction.sqrMagnitude > 0.001f ? direction : aim,
-                        hit.Knockback, hit.StaggerDuration, hit.BreaksGuard));
+                        hit.Knockback, hit.StaggerDuration, hit.BreaksGuard), point);
             }
         }
 
@@ -72,7 +73,7 @@ namespace TheLostShrine.Weapons
             {
                 if (!IsCandidate(cast.collider))
                     continue;
-                Apply(cast.collider, hit);
+                Apply(cast.collider, hit, cast.point);
                 if (stopAtImpact)
                 {
                     impact = cast;
