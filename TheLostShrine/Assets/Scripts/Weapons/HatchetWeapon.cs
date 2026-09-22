@@ -112,6 +112,17 @@ namespace TheLostShrine.Weapons
                 SetState(HatchetState.Held);
         }
 
+        // Death cancels damage in progress, including a thrown or returning hatchet.
+        public void CancelAction()
+        {
+            if (owner == null)
+                return;
+            stuckTarget = null;
+            comboRemaining = 0f;
+            transform.position = owner.transform.position;
+            SetState(HatchetState.Held);
+        }
+
         public bool TryThrow(Vector2 direction)
         {
             if (!isActiveAndEnabled || State != HatchetState.Held)

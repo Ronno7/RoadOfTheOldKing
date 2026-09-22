@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace TheLostShrine.Combat
 {
-    public enum AttackKind { LightChop, ChargedCleave, Throw, Recall }
+    public enum AttackKind { LightChop, ChargedCleave, Throw, Recall, EnemyMelee }
 
     public readonly struct CombatHit
     {

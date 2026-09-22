@@ -1,3 +1,5 @@
+// Run in a fresh PrototypeLoop session with an empty, isolated CheckpointSession saveKey.
+// Fixtures use empty space outside the map; never run against a player's saved route.
 var results=new System.Collections.Generic.List<string>();
 System.Action<bool,string> check=(ok,name)=>results.Add((ok?"PASS ":"FAIL ")+name);
 var player=GameObject.Find("Player").GetComponent<TheLostShrine.Player.PlayerCombatController>();
@@ -28,7 +30,7 @@ move(weapon.transform.position);Physics2D.Simulate(.02f);
 check(player.Weapon==weapon && weapon.State==TheLostShrine.Weapons.HatchetState.Held && !weapon.GetComponent<Collider2D>().enabled,"Real trigger picks up the existing hatchet");
 check(!player.CanRecall,"Pickup leaves Recall locked");
 check(!player.TryEquip(weapon),"Duplicate equip rejected");
-Vector2 origin=new Vector2(-4,-6);move(origin);
+Vector2 origin=new Vector2(100,100);move(origin);
 var dummy=spawn(dummyPath,origin+Vector2.right);
 var health=dummy.GetComponent<TheLostShrine.Combat.Damageable>();
 var extra=new GameObject("Extra hit collider");extra.transform.SetParent(dummy.transform,false);extra.AddComponent<CircleCollider2D>().radius=.25f;
@@ -84,7 +86,7 @@ check(!weapon.TryLightChop(Vector2.right) && !weapon.TryBeginCharge(),"Melee una
 check(weapon.State==TheLostShrine.Weapons.HatchetState.Stuck && Mathf.Abs(Vector2.Distance(origin,weapon.transform.position)-6)<.05f,"Throw stops at configured range");
 check(!weapon.TryRecall(),"Locked Recall rejects stuck recall");
 move(weapon.transform.position);tick(.02f);check(weapon.State==TheLostShrine.Weapons.HatchetState.Held,"Walk-up retrieval works before Recall unlock");
-move(new Vector2(-1,7));Physics2D.Simulate(.02f);check(player.CanRecall,"Separate altar trigger unlocks Recall");
+move(UnityEngine.Object.FindFirstObjectByType<TheLostShrine.World.RecallUnlockPickup>().transform.position);Physics2D.Simulate(.02f);check(player.CanRecall,"Separate altar trigger unlocks Recall");
 move(origin);
 var obstacle=new GameObject("Verification wall");obstacle.transform.position=origin+Vector2.right*2;obstacle.AddComponent<BoxCollider2D>().size=new Vector2(.2f,2);created.Add(obstacle);Physics2D.SyncTransforms();
 weapon.TryThrow(Vector2.right);tick(.3f);check(weapon.State==TheLostShrine.Weapons.HatchetState.Stuck && weapon.transform.position.x<origin.x+1.8f,"Swept throw stops at solid obstacle");
@@ -111,7 +113,7 @@ weapon.TryThrow(Vector2.right);tick(.22f);UnityEngine.Object.DestroyImmediate(do
 check(weapon!=null && weapon.State==TheLostShrine.Weapons.HatchetState.Stuck,"Destroying struck target preserves the hatchet");
 weapon.TryRecall();tick(.5f);
 // Recall bypass depends on the contact side, while leaving the shield intact.
-Vector2 guardPosition=new Vector2(-8,-6);
+Vector2 guardPosition=origin+Vector2.left*4;
 var rearTarget=spawn("Assets/Prefabs/Combat/ShieldPracticeDummy.prefab",guardPosition);
 var rearHealth=rearTarget.GetComponent<TheLostShrine.Combat.Damageable>();
 var rearShield=rearTarget.GetComponent<TheLostShrine.Combat.ShieldProtection>();

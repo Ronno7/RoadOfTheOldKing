@@ -19,6 +19,13 @@ namespace TheLostShrine.Combat
         private void OnEnable() => health.HitReceived += React;
         private void OnDisable() => health.HitReceived -= React;
 
+        public void Clear()
+        {
+            staggerUntil = 0f;
+            if (body != null)
+                body.linearVelocity = Vector2.zero;
+        }
+
         private void React(CombatHit hit)
         {
             staggerUntil = Mathf.Max(staggerUntil, Time.time + hit.StaggerDuration);

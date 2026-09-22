@@ -8,6 +8,12 @@ namespace TheLostShrine.Combat
         [SerializeField] private bool requiresFullCleave;
         public bool IsBroken { get; private set; }
 
+        public void RestoreBrokenState()
+        {
+            IsBroken = true;
+            gameObject.SetActive(false);
+        }
+
         public bool ReceiveHit(CombatHit hit)
         {
             if (IsBroken || (requiresFullCleave && !hit.BreaksGuard))

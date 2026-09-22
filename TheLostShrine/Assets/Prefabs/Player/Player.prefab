@@ -16,6 +16,10 @@ GameObject:
   - component: {fileID: 1013}
   - component: {fileID: 9215421230755382488}
   - component: {fileID: 3612271848531798894}
+  - component: {fileID: 4217139744019354931}
+  - component: {fileID: 4535813709327544358}
+  - component: {fileID: 7425349288622817033}
+  - component: {fileID: 405733286098808294}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -123,8 +127,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e5d4da9ce03b5880a37a447244f0a788, type: 3}
-  m_Name: ''
-  m_EditorClassIdentifier: ''
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1006
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -135,9 +139,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 606e228678bc5124861a6f2d9d70c10e, type: 3}
-  m_Name: ''
-  m_EditorClassIdentifier: ''
+  m_Name: 
+  m_EditorClassIdentifier: 
   moveSpeed: 4.5
+  initialFacing: {x: 0, y: -1}
   inputSource: {fileID: 1005}
 --- !u!114 &1013
 MonoBehaviour:
@@ -149,8 +154,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5bfe9b1e9869509cad65da8b0d5987d9, type: 3}
-  m_Name: ''
-  m_EditorClassIdentifier: ''
+  m_Name: 
+  m_EditorClassIdentifier: 
   marker: {fileID: 1011}
   markerDistance: 0.24
 --- !u!114 &9215421230755382488
@@ -163,7 +168,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6b451e47c64e54741ae1b9809145b43d, type: 3}
-  m_Name: ''
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Input.PlayerCombatInput
 --- !u!114 &3612271848531798894
 MonoBehaviour:
@@ -175,12 +180,63 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 511025610d771e048af5bfdc734b16fe, type: 3}
-  m_Name: ''
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerCombatController
   inputSource: {fileID: 9215421230755382488}
   aimCamera: {fileID: 0}
   recallUnlocked: 0
   lightInputBuffer: 0.25
+--- !u!114 &4217139744019354931
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Damageable
+  maxHealth: 5
+  protectionSource: {fileID: 7425349288622817033}
+--- !u!114 &4535813709327544358
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a3d61830c75a1945a2ae1374af9f9a1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.HitReaction
+--- !u!114 &7425349288622817033
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77ed5e44f82138e47a2ffd319bf6a318, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerHealth
+  invulnerabilityDuration: 0.8
+--- !u!114 &405733286098808294
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d592fa17525fa6d448b81267a9c0bdc8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerBonfireInteraction
 --- !u!1 &1007
 GameObject:
   m_ObjectHideFlags: 0

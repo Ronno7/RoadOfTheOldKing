@@ -1,11 +1,12 @@
 using TheLostShrine.Combat;
+using TheLostShrine.Progression;
 using UnityEngine;
 
 namespace TheLostShrine.Prototype
 {
     // Tutorial-only feedback and reset behavior; enemy logic can use Damageable independently.
     [DisallowMultipleComponent, RequireComponent(typeof(Damageable))]
-    public sealed class PracticeTarget : MonoBehaviour
+    public sealed class PracticeTarget : MonoBehaviour, IResetOnRest
     {
         [SerializeField] private SpriteRenderer bodyVisual;
         [SerializeField] private Transform healthFill;
@@ -80,6 +81,8 @@ namespace TheLostShrine.Prototype
         {
             resetAt = -1f;
             health.RestoreHealth();
+            if (reaction != null)
+                reaction.Clear();
             if (shield != null)
                 shield.Restore();
             if (body != null)
@@ -91,5 +94,7 @@ namespace TheLostShrine.Prototype
             if (bodyCollider != null)
                 bodyCollider.enabled = true;
         }
+
+        public void ResetOnRest() => ResetTarget();
     }
 }
