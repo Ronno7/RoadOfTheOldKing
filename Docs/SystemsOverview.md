@@ -65,6 +65,20 @@
 
     `PlayerDash` owns timing, direction, and cost. `PlayerMovement` remains the only component that applies player movement velocity, so sprint, dash, knockback, and wall collision cannot fight over the Rigidbody. Input remembers a short Space tap until the next physics step and consumes it once; holding Space does not repeat dashes. Attacks and dashes cannot start over one another, but Recall remains available while dodging. Stagger, disabled controls, focus loss, and defeat cancel the dash. Rest and travel reset its cooldown and refill stamina; respawning creates a fresh dash state.
 
+17. **Sun Shards and hatchet upgrades.** PrototypeLoop contains three one-time rewards: a pickup dropped when the sentinel falls, an immediate award for solving the throw/Recall puzzle, and a pickup on the optional north trail beyond the puzzle door. Walk over gold shards to collect them. The HUD shows unspent shards. At the second bonfire, press **F**, open **Hatchet upgrades**, review three choices, then confirm one for **3 Sun Shards**. The other two choices disappear for that run.
+
+    | First-tier choice | Effect | Unchanged |
+    | --- | --- | --- |
+    | Quick Hands | 20% faster light slashes and recovery; first two swings take about 0.167 seconds | Damage, stamina per swing, reach |
+    | Sweeping Edge | Light slash arc grows from 110 to 150 degrees | Forward reach, damage, timing, stamina |
+    | Wide Cleave | Charged cleave radius grows from 2.1 to 2.6 units | Damage, charge time, stamina |
+
+    These values are a starting point for balance testing. `SunShardReward` listens to enemy defeat or puzzle completion, independently of their combat logic. A reusable prefab supplies the pickup trigger and gold placeholder. Stable reward IDs record both availability and collection; an uncollected sentinel drop survives a reload, and killing a revived sentinel never produces another reward. Collected shards, spending, and upgrades survive rest, death, travel, and game reload. Rewards save even before the first bonfire; a death there returns the player to the start while keeping saved progress. New run clears progression.
+
+    `HatchetUpgrade` assets describe each choice; `HatchetUpgradeTier` groups choices and sets the price. `WeaponUpgradeProgression` owns sequential tier selection, affordability, and permanent exclusions without depending on menus or storage. `CheckpointSession` validates the open bonfire and player before saving the purchase. `BonfireUpgradeMenu` only presents the options. The weapon rebuilds its effective stats from saved selections, and its visuals use those same stats. Shared base settings are never modified, so reloading cannot accidentally stack a bonus twice or change other weapons.
+
+    Add future tiers by creating choice/tier assets and appending them to the session's ordered **Upgrade Tiers** array. Existing stat effects combine across tiers. New behaviors such as curved flight will require their own focused implementation; the purchase and persistence flow can stay the same. Old version-one saves load with zero shards and no upgrades; already solved puzzles grant their reward on restoration, and the sentinel can be defeated again to earn its new reward.
+
 The design follows SOLID principles through focused responsibilities, small interfaces, and events. Interfaces define what a component provides or accepts. Events let health notify reaction and feedback components when damage occurs. For example, adding another object that implements `IHitReceiver` does not require changing player controls.
 
 ```mermaid
@@ -87,6 +101,9 @@ Common settings are located here, relative to `TheLostShrine/`:
 | Camera smoothing and zoom limits | `Assets/Prefabs/Cameras/FollowCamera.prefab` |
 | Attack costs, timing, damage, reach, flight speed, and automatic Recall distance | `Assets/Settings/Weapons/HatchetSettings.asset` |
 | Weapon appearance | `Model` child of `Assets/Prefabs/Weapons/Hatchet.prefab` |
+| Upgrade descriptions, effects, and first-tier cost | `Assets/Settings/Weapons/Upgrades/` |
+| Tier order | **Upgrade Tiers** on `Checkpoint Session` |
+| Shard IDs and reward sources | `Sun Shards and Upgrades` in PrototypeLoop; `Assets/Prefabs/World/SunShard.prefab` |
 | Terrain and barriers | PrototypeLoop's Tilemaps and `World/Boundaries` |
 | Dummy health | `Damageable` on prefabs in `Assets/Prefabs/Combat/` |
 | Player health and damage immunity | `Damageable` and `PlayerHealth` on `Assets/Prefabs/Player/Player.prefab` |
@@ -99,4 +116,6 @@ Common settings are located here, relative to `TheLostShrine/`:
 
 Verification scripts live in `Tools/Verification/` and run through Unity MCP in Play Mode. Always use an empty `TheLostShrine.Verification.*` checkpoint save key and restore the normal scene key afterward. `StaminaPlayModeChecks.cs.txt` exercises real keyboard bindings, exhaustion, spending, recovery, cancellation, free Recall, rest/travel, and death. The older hatchet and route checks refill stamina between simulated actions to isolate their geometry/progression assertions. The bonfire/puzzle checks run with the normal stamina rules. `AutoRecallPlayModeChecks.cs.txt` covers the unlock, distance boundary, in-flight recall, free retrieval, return damage, and manual retrieval. `DashPlayModeChecks.cs.txt` covers Space input, distance, wall collision, dodge protection, action exclusivity, stamina, interruption, and rest/death. The browser build has not been rebuilt for these changes.
 
-Latest verification: 39 dash, 20 automatic Recall, 50 stamina, 78 hatchet, 46 route/health/enemy, and 38 bonfire/puzzle assertions passed (271 total). Checkpoint respawn was also verified to restore 100 HP and stamina.
+`SunShardPlayModeChecks.cs.txt` checks unique rewards, the actual throw/Recall puzzle reward, safe detour access, purchase validation, permanent choices, all three effects against actual combat targets, future-tier composition, and old-save compatibility. `SetupSunShardPrototype.cs.txt` records the Edit Mode asset/scene setup; it is not a runtime dependency.
+
+Latest verification: 39 shard/upgrade, 39 dash, 20 automatic Recall, 50 stamina, 78 hatchet, 46 route/health/enemy, and 38 bonfire/puzzle assertions passed (310 total). Purchased upgrades and collected shards were also verified across death/respawn and a fresh Play Mode load.

@@ -2,6 +2,16 @@
 
 Listed newest first.
 
+## 22SEP2026 - Sun Shards and first weapon upgrade
+
+### Added
+
+- Three one-time Sun Shards in PrototypeLoop: a sentinel drop, an automatic throw/Recall puzzle reward, and an exploration pickup on a short optional north trail beyond the puzzle door.
+- A reusable gold shard pickup prefab, persistent reward IDs, and an unspent-shard HUD counter. Rewards save immediately, including before the first bonfire, and remain collected through rest, death, travel, and reload. Unclaimed sentinel drops remain available; respawned enemies cannot be farmed for shards.
+- A first upgrade tier at the second bonfire costing 3 shards: Quick Hands (20% faster light attacks), Sweeping Edge (150-degree light arc), or Wide Cleave (2.6-unit radius). Damage and stamina costs stay unchanged. Players review and confirm one permanent choice, discarding the other two for that run.
+- Data assets for upgrade choices and ordered tiers, purchase rules independent of UI/storage, and runtime stat composition shared by damage detection and visuals without changing the base weapon settings.
+- Backward-compatible save fields for shard balance and selected upgrades, plus 39 repeatable shard/upgrade checks. Updated the systems overview; WebGL has not been rebuilt.
+
 ## 22SEP2026 - Combat balance
 
 ### Added

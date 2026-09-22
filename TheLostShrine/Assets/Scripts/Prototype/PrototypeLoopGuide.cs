@@ -42,12 +42,14 @@ namespace TheLostShrine.Prototype
                     case PrototypeStep.UnlockRecall: return "Continue east to the Recall altar.";
                     case PrototypeStep.RecallPractice: return "Follow the upper path back to the dummies. Throw past them, move, then E to recall through one.";
                     case PrototypeStep.Enemy: return "Take the northwest path. Space: short dash / dodge. Avoid the marked strike, then counterattack. Watch your stamina.";
-                    case PrototypeStep.Bonfire: return "Follow the east path to the fire. Press F nearby to heal, save, and set your checkpoint.";
+                    case PrototypeStep.Bonfire: return "Collect the sentinel's Sun Shard, then follow the east path. F at the fire heals and saves.";
                     case PrototypeStep.Puzzle: return puzzle != null && puzzle.IsArmed
                         ? "Move down to the blue floor mark. Press E to recall through the blue target and open the door."
                         : "Stand on the gold floor mark. Aim at the gold target to the right and press E to throw.";
-                    case PrototypeStep.ExitBonfire: return "The door is open. Follow the path east and press F at the second fire.";
-                    default: return "Loop complete. Use the fires to rest and travel, or start a new run from their menu.";
+                    case PrototypeStep.ExitBonfire: return "Puzzle solved: one Sun Shard earned. Explore the side path beyond the door, then F at the second fire to upgrade.";
+                    default: return CheckpointSession.Instance != null && CheckpointSession.Instance.Upgrades.NextTier != null
+                        ? "Find all 3 Sun Shards: sentinel, puzzle, and the side path beyond the door. Spend them at the second fire for one hatchet upgrade."
+                        : "Upgrade chosen. Travel back to try it on the dummies or sentinel. Resting never replenishes Sun Shards.";
                 }
             }
         }

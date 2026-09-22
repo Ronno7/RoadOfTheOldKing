@@ -14,17 +14,20 @@ namespace TheLostShrine.Progression
     public sealed class CheckpointSession : MonoBehaviour
     {
         [SerializeField] private string saveKey = "TheLostShrine.PrototypeLoop.Save.v1";
+        [SerializeField] private HatchetUpgradeTier[] upgradeTiers = Array.Empty<HatchetUpgradeTier>();
         private IProgressStore store;
         private PlayerHealth player;
         private PlayerCombatController combat;
         private bool loading;
         private bool loadFailed;
+        private WeaponUpgradeProgression upgrades;
 
         public static CheckpointSession Instance { get; private set; }
         public ProgressState Progress { get; private set; } = new ProgressState();
         public bool HasCheckpoint => !string.IsNullOrEmpty(Progress.checkpointId);
         public string Status { get; private set; } = "";
         public Bonfire[] Fires { get; private set; } = Array.Empty<Bonfire>();
+        public WeaponUpgradeProgression Upgrades => upgrades ?? (upgrades = new WeaponUpgradeProgression(Progress, upgradeTiers));
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatic() => Instance = null;
@@ -79,6 +82,7 @@ namespace TheLostShrine.Progression
                 combat.UnlockRecall();
             foreach (var participant in Participants<IProgressParticipant>())
                 participant.RestoreProgress(Progress);
+            ApplyUpgrades();
         }
 
         private static T[] Participants<T>() => FindObjectsByType<MonoBehaviour>(
@@ -154,8 +158,35 @@ namespace TheLostShrine.Progression
         public void SaveProgress()
         {
             Capture();
-            if (HasCheckpoint)
-                Save("Puzzle complete. Progress saved.");
+            Save("Progress saved.");
+        }
+
+        public bool TryCollectShard(string rewardId)
+        {
+            if (loading || string.IsNullOrEmpty(rewardId) || Progress.Has("shard/collected/" + rewardId))
+                return false;
+            Progress.Complete("shard/collected/" + rewardId);
+            Progress.sunShards++;
+            Capture();
+            Save("Sun Shard collected. " + Progress.sunShards + " available.");
+            return true;
+        }
+
+        public bool TryPurchaseUpgrade(Bonfire fire, HatchetUpgrade choice)
+        {
+            if (loading || player == null || !player.IsAlive || combat.Weapon == null || fire == null ||
+                !fire.AllowsUpgrades || !Fires.Contains(fire) || !fire.CanUse(player.transform) ||
+                player.GetComponent<PlayerBonfireInteraction>().ActiveFire != fire || !Upgrades.TryPurchase(choice))
+                return false;
+            ApplyUpgrades();
+            Capture();
+            Save(choice.displayName + " chosen. The other choices in this tier are gone.");
+            return true;
+        }
+
+        private void ApplyUpgrades()
+        {
+            if (combat != null && combat.Weapon != null) combat.Weapon.ApplyUpgrades(Upgrades.Selected);
         }
 
         private void Save(string successMessage)
@@ -173,13 +204,9 @@ namespace TheLostShrine.Progression
         {
             if (loading || player == null || player.IsAlive)
                 return;
-            if (HasCheckpoint)
-            {
-                Capture();
-                Save("Returned to the last bonfire.");
-            }
-            else
-                Progress = new ProgressState();
+            // Permanent rewards also survive a death before the first rest.
+            Capture();
+            Save(HasCheckpoint ? "Returned to the last bonfire." : "Returned to the start.");
             loading = true;
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
@@ -192,6 +219,7 @@ namespace TheLostShrine.Progression
             catch (Exception) { Status = "Could not clear the save."; return; }
             loadFailed = false;
             Progress = new ProgressState();
+            upgrades = null;
             Status = "";
             loading = true;
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);

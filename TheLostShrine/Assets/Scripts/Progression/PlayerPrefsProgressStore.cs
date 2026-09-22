@@ -16,6 +16,11 @@ namespace TheLostShrine.Progression
             var state = JsonUtility.FromJson<ProgressState>(PlayerPrefs.GetString(key));
             if (state == null || state.version != 1 || state.discoveredFires == null || state.completedIds == null)
                 throw new InvalidOperationException("Unrecognized prototype save.");
+            // Existing version-one saves predate upgrades and start with an empty choice list.
+            if (state.upgrades == null) state.upgrades = new System.Collections.Generic.List<UpgradeSelection>();
+            if (state.sunShards < 0 || state.upgrades.Exists(s => s == null ||
+                string.IsNullOrEmpty(s.tierId) || string.IsNullOrEmpty(s.upgradeId)))
+                throw new InvalidOperationException("Invalid weapon progression.");
             return state;
         }
 

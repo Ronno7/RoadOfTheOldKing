@@ -20,6 +20,9 @@ namespace TheLostShrine.Weapons
         private float comboRemaining;
         private float cleaveStrength;
         private Vector2 attackDirection = Vector2.right;
+        private float lightSpeedMultiplier = 1f;
+        private float addedLightArc;
+        private float addedCleaveRadius;
 
         public HatchetSettings Settings => settings;
         public HatchetState State { get; private set; } = HatchetState.OnGround;
@@ -31,13 +34,28 @@ namespace TheLostShrine.Weapons
             (State == HatchetState.Held && comboRemaining > 0f) ? ComboIndex + 1 : 0;
         public float ComboTimeRemaining => comboRemaining;
         public float LightReach => settings.lightRadius + (ComboIndex == 2 ? 0.15f : 0f);
+        public float LightArc => Mathf.Clamp(settings.lightArc + addedLightArc, 20f, 180f);
+        public float CleaveRadius => settings.cleaveRadius + addedCleaveRadius;
         public bool IsAway => State == HatchetState.Flying || State == HatchetState.Stuck || State == HatchetState.Returning;
         public bool IsAttacking => State == HatchetState.LightChop || State == HatchetState.Charging || State == HatchetState.Cleaving;
         public float Charge01 => State == HatchetState.Charging
             ? Mathf.Clamp01(elapsed / settings.fullCharge) : State == HatchetState.Cleaving ? cleaveStrength : 0f;
         public float AttackProgress => Mathf.Clamp01(elapsed / (State == HatchetState.Cleaving
             ? settings.cleaveDuration : LightDuration));
-        public float LightDuration => settings.lightDuration * (ComboIndex == 2 ? settings.finisherDurationMultiplier : 1f);
+        public float LightDuration => settings.lightDuration * (ComboIndex == 2 ? settings.finisherDurationMultiplier : 1f) / lightSpeedMultiplier;
+
+        // Rebuild from saved selections, never mutate the shared base settings asset.
+        public void ApplyUpgrades(System.Collections.Generic.IEnumerable<HatchetUpgrade> upgrades)
+        {
+            lightSpeedMultiplier = 1f;
+            addedLightArc = addedCleaveRadius = 0f;
+            foreach (var upgrade in upgrades)
+            {
+                lightSpeedMultiplier *= Mathf.Max(1f, upgrade.lightSpeedMultiplier);
+                addedLightArc += Mathf.Max(0f, upgrade.addedLightArc);
+                addedCleaveRadius += Mathf.Max(0f, upgrade.addedCleaveRadius);
+            }
+        }
 
         private void Awake()
         {
@@ -191,7 +209,7 @@ namespace TheLostShrine.Weapons
                     if (elapsed >= LightDuration * settings.lightWindupFraction &&
                         previousElapsed < LightDuration * settings.lightSwingEndFraction)
                         hits.Melee(owner.transform.position, attackDirection,
-                            LightReach, settings.lightArc,
+                            LightReach, LightArc,
                             new CombatHit(owner.gameObject, AttackKind.LightChop,
                                 ComboIndex == 2 ? settings.finisherDamage : settings.lightDamage,
                                 attackDirection, ComboIndex == 2 ? 2f : 0.6f, 0.12f));
@@ -204,7 +222,7 @@ namespace TheLostShrine.Weapons
                 case HatchetState.Cleaving:
                     transform.position = owner.transform.position;
                     if (elapsed >= settings.cleaveDuration * 0.15f && previousElapsed <= settings.cleaveDuration * 0.8f)
-                        hits.Melee(owner.transform.position, attackDirection, settings.cleaveRadius, 360f,
+                        hits.Melee(owner.transform.position, attackDirection, CleaveRadius, 360f,
                             new CombatHit(owner.gameObject, AttackKind.ChargedCleave,
                                 Mathf.Max(1, Mathf.RoundToInt(settings.cleaveDamage * Mathf.Lerp(0.5f, 1f, cleaveStrength))),
                                 attackDirection, settings.cleaveKnockback * cleaveStrength,

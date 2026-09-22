@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9eaf14fc9f6cd5a438abbb2f01aaa64b, type: 3}
+  m_Name: TierOne
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Weapons.HatchetUpgradeTier
+  id: hatchet/tier-1
+  shardCost: 3
+  choices:
+  - {fileID: 11400000, guid: 48b1ae4734d480847b0936b0efab4268, type: 2}
+  - {fileID: 11400000, guid: 8987fd055c7d8354bb5930cb1826d350, type: 2}
+  - {fileID: 11400000, guid: 53cedd22d4145514a8b7b1a620863ce4, type: 2}

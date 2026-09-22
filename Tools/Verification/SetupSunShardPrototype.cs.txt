@@ -1,0 +1,69 @@
+// Run once in Edit Mode after scripts compile; safe to repeat.
+if(EditorApplication.isPlaying)throw new System.Exception("Edit Mode required.");
+System.Action<UnityEngine.Object,string,UnityEngine.Object> reference=(target,name,value)=>{var s=new SerializedObject(target);s.FindProperty(name).objectReferenceValue=value;s.ApplyModifiedPropertiesWithoutUndo();};
+System.Action<UnityEngine.Object,string,string> text=(target,name,value)=>{var s=new SerializedObject(target);s.FindProperty(name).stringValue=value;s.ApplyModifiedPropertiesWithoutUndo();};
+string folder="Assets/Settings/Weapons/Upgrades";
+if(!AssetDatabase.IsValidFolder(folder))AssetDatabase.CreateFolder("Assets/Settings/Weapons","Upgrades");
+string[] ids={"quick-hands","sweeping-edge","wide-cleave"};
+string[] names={"Quick Hands","Sweeping Edge","Wide Cleave"};
+string[] descriptions={"20% faster light slashes and recovery. Same stamina per swing.","Light slash arc: 110 to 150 degrees. Same forward reach and damage.","Charged cleave radius: 2.1 to 2.6 units. Same damage and stamina."};
+var choices=new TheLostShrine.Weapons.HatchetUpgrade[3];
+for(int i=0;i<3;i++){
+string path=folder+"/"+names[i].Replace(" ","")+".asset";
+choices[i]=AssetDatabase.LoadAssetAtPath<TheLostShrine.Weapons.HatchetUpgrade>(path);
+if(choices[i]==null){choices[i]=ScriptableObject.CreateInstance<TheLostShrine.Weapons.HatchetUpgrade>();AssetDatabase.CreateAsset(choices[i],path);}
+choices[i].id="hatchet/"+ids[i];choices[i].displayName=names[i];choices[i].description=descriptions[i];
+choices[i].lightSpeedMultiplier=i==0?1.2f:1f;choices[i].addedLightArc=i==1?40f:0f;choices[i].addedCleaveRadius=i==2?.5f:0f;EditorUtility.SetDirty(choices[i]);
+}
+string tierPath=folder+"/TierOne.asset";
+var tier=AssetDatabase.LoadAssetAtPath<TheLostShrine.Weapons.HatchetUpgradeTier>(tierPath);
+if(tier==null){tier=ScriptableObject.CreateInstance<TheLostShrine.Weapons.HatchetUpgradeTier>();AssetDatabase.CreateAsset(tier,tierPath);}
+tier.id="hatchet/tier-1";tier.shardCost=3;tier.choices=choices;EditorUtility.SetDirty(tier);
+var session=UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Progression.CheckpointSession>();
+var sessionData=new SerializedObject(session);var tiers=sessionData.FindProperty("upgradeTiers");tiers.arraySize=1;tiers.GetArrayElementAtIndex(0).objectReferenceValue=tier;sessionData.ApplyModifiedPropertiesWithoutUndo();
+var exit=GameObject.Find("Beyond the Gate Bonfire").GetComponent<TheLostShrine.World.Bonfire>();
+var fireData=new SerializedObject(exit);fireData.FindProperty("allowsUpgrades").boolValue=true;fireData.ApplyModifiedPropertiesWithoutUndo();
+var square=AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Sprites/WhiteSquare.png");
+string prefabPath="Assets/Prefabs/World/SunShard.prefab";
+var prefab=AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+if(prefab==null){
+var go=new GameObject("Sun Shard");var trigger=go.AddComponent<CircleCollider2D>();trigger.isTrigger=true;trigger.radius=.65f;
+var reward=go.AddComponent<TheLostShrine.World.SunShardReward>();
+var visual=new GameObject("Shard");visual.transform.SetParent(go.transform,false);visual.transform.localScale=new Vector3(.33f,.52f,1);visual.transform.localRotation=Quaternion.Euler(0,0,30);
+var sr=visual.AddComponent<SpriteRenderer>();sr.sprite=square;sr.color=new Color(1f,.76f,.16f);sr.sortingLayerName="Player";sr.sortingOrder=25;
+reference(reward,"pickupVisual",visual);
+prefab=PrefabUtility.SaveAsPrefabAsset(go,prefabPath);UnityEngine.Object.DestroyImmediate(go);
+}
+var root=GameObject.Find("Sun Shards and Upgrades")??new GameObject("Sun Shards and Upgrades");
+string[] rewardNames={"Sun Shard - Sentinel","Sun Shard - Puzzle","Sun Shard - Exploration"};
+string[] rewardIds={"prototype/sentinel","prototype/recall-puzzle","prototype/detour"};
+Vector3[] positions={new Vector3(-15.5f,11.5f,0),new Vector3(8.5f,10.5f,0),new Vector3(18.5f,20.5f,0)};
+for(int i=0;i<3;i++){
+var go=GameObject.Find(rewardNames[i]);if(go==null){go=(GameObject)PrefabUtility.InstantiatePrefab(prefab);go.name=rewardNames[i];go.transform.SetParent(root.transform);}
+go.transform.position=positions[i];var reward=go.GetComponent<TheLostShrine.World.SunShardReward>();text(reward,"rewardId",rewardIds[i]);
+reference(reward,"defeatSource",i==0?UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Combat.SimpleMeleeEnemy>().GetComponent<TheLostShrine.Combat.Damageable>():null);
+reference(reward,"puzzleSource",i==1?UnityEngine.Object.FindFirstObjectByType<TheLostShrine.World.ThrowRecallPuzzle>():null);
+var data=new SerializedObject(reward);data.FindProperty("awardImmediately").boolValue=i==1;data.ApplyModifiedPropertiesWithoutUndo();
+go.transform.GetChild(0).gameObject.SetActive(i==2);PrefabUtility.RecordPrefabInstancePropertyModifications(reward);
+}
+var ground=GameObject.Find("Ground").GetComponent<UnityEngine.Tilemaps.Tilemap>();
+var water=GameObject.Find("Obstacles - Water").GetComponent<UnityEngine.Tilemaps.Tilemap>();
+var grass=AssetDatabase.LoadAssetAtPath<UnityEngine.Tilemaps.TileBase>("Assets/Art/Tiles/Ground16/Tiles/Grass_Plain.asset");
+var pathTile=ground.GetTile(new Vector3Int(0,5,0))??grass;
+for(int y=16;y<=20;y++)for(int x=(y<19?20:18);x<=21;x++){ground.SetTile(new Vector3Int(x,y,0),grass);water.SetTile(new Vector3Int(x,y,0),null);}
+for(int y=14;y<=19;y++)ground.SetTile(new Vector3Int(20,y,0),pathTile);
+for(int x=18;x<=20;x++)ground.SetTile(new Vector3Int(x,19,0),pathTile);
+// Split the existing water strips around the new two-tile trail.
+foreach(var collider in UnityEngine.Object.FindObjectsByType<BoxCollider2D>(FindObjectsSortMode.None)){
+if(collider.name!="Water Boundary"||collider.bounds.size.x<40||collider.transform.position.y<16||collider.transform.position.y>19)continue;
+collider.transform.position=new Vector3(-2,collider.transform.position.y,0);collider.size=new Vector2(44,1);
+}
+System.Action<string,Vector3,Vector2> wall=(name,position,size)=>{var go=GameObject.Find(name)??new GameObject(name);go.transform.SetParent(root.transform);go.transform.position=position;var c=go.GetComponent<BoxCollider2D>();if(c==null)c=go.AddComponent<BoxCollider2D>();c.size=size;};
+wall("Detour Water - East",new Vector3(23.5f,18.5f,0),new Vector2(3,5));
+wall("Detour Water - West",new Vector3(17.5f,20,0),new Vector2(1,2));
+wall("Detour Water - North",new Vector3(20,21.5f,0),new Vector2(6,1));
+var sign=GameObject.Find("Sign - 9  REST / TRAVEL");sign.GetComponentInChildren<TextMesh>().text="9  REST / UPGRADE\n<size=34>3 Sun Shards - choose one</size>";sign.transform.Find("Backing").localScale=new Vector3(5,1.15f,1);
+if(GameObject.Find("Sign - SUN SHARD DETOUR")==null){var hint=UnityEngine.Object.Instantiate(GameObject.Find("Sign - BACK TO DUMMIES"),root.transform);hint.name="Sign - SUN SHARD DETOUR";hint.transform.position=new Vector3(20.7f,16,0);hint.GetComponentInChildren<TextMesh>().text="SIDE PATH\n<size=34>Sun Shard</size>";hint.transform.Find("Backing").localScale=new Vector3(2.7f,1.05f,1);}
+AssetDatabase.SaveAssets();UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+UnityEditor.SceneManagement.EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+return "Created tier assets, reusable shard prefab, three reward sources, upgrade fire and north detour.";

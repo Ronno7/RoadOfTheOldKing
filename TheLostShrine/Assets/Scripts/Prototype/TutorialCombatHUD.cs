@@ -18,6 +18,8 @@ namespace TheLostShrine.Prototype
         private bool confirmNewRun;
         private PlayerBonfireInteraction bonfireInteraction;
         private PlayerStamina stamina;
+        private bool showUpgrades;
+        private readonly BonfireUpgradeMenu upgradeMenu = new BonfireUpgradeMenu();
 
         private void Start()
         {
@@ -34,7 +36,11 @@ namespace TheLostShrine.Prototype
             if (canRestart && Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame)
                 Restart();
             if (bonfireInteraction == null || !bonfireInteraction.IsOpen)
+            {
                 confirmNewRun = false;
+                showUpgrades = false;
+                upgradeMenu.Reset();
+            }
         }
 
         private void Restart()
@@ -92,6 +98,12 @@ namespace TheLostShrine.Prototype
             }
             string instruction = guide != null ? guide.Instruction : "Pick up the hatchet and practice.";
             GUI.Label(new Rect(24f, 107f, width - 24f, 82f), instruction, text);
+            var progress = CheckpointSession.Instance;
+            if (progress != null)
+            {
+                GUI.Box(new Rect(screenWidth - 218f, 12f, 206f, 38f), GUIContent.none);
+                GUI.Label(new Rect(screenWidth - 206f, 18f, 190f, 26f), "SUN SHARDS  " + progress.Progress.sunShards, title);
+            }
 
             string controls = "WASD / arrows: move   |   Shift: sprint   |   Mouse: aim   |   Scroll: zoom\n" +
                 "LMB: slash   |   Hold / release RMB: cleave   |   E: throw" +
@@ -132,12 +144,24 @@ namespace TheLostShrine.Prototype
             if (session == null)
                 return;
             var fire = bonfireInteraction.ActiveFire;
-            var box = new Rect((screenWidth - 420f) * 0.5f, (screenHeight - 330f) * 0.5f, 420f, 330f);
+            float menuWidth = showUpgrades ? 520f : 420f;
+            float menuHeight = showUpgrades ? 426f : 372f;
+            var box = new Rect((screenWidth - menuWidth) * 0.5f, (screenHeight - menuHeight) * 0.5f, menuWidth, menuHeight);
             Color menuColor = GUI.color;
             GUI.color = new Color(0.06f, 0.08f, 0.08f, 0.97f);
             GUI.DrawTexture(box, Texture2D.whiteTexture);
             GUI.color = menuColor;
             GUI.Box(box, GUIContent.none);
+            if (showUpgrades)
+            {
+                upgradeMenu.Draw(box, session, fire, title, text);
+                if (GUI.Button(new Rect(box.x + 18f, box.yMax - 46f, box.width - 36f, 30f), "Back to bonfire"))
+                {
+                    showUpgrades = false;
+                    upgradeMenu.Reset();
+                }
+                return;
+            }
             float x = box.x + 18f;
             float y = box.y + 16f;
             GUI.Label(new Rect(x, y, 384f, 28f), fire.DisplayName.ToUpperInvariant(), title);
@@ -155,6 +179,12 @@ namespace TheLostShrine.Prototype
             if (GUI.Button(new Rect(x, y, 384f, 32f), "Rest again (restore HP / stamina / save)"))
                 session.Rest(fire);
             y += 42f;
+            if (fire.AllowsUpgrades)
+            {
+                if (GUI.Button(new Rect(x, y, 384f, 32f), "Hatchet upgrades (Sun Shards: " + session.Progress.sunShards + ")"))
+                    showUpgrades = true;
+                y += 38f;
+            }
             bool travelAvailable = false;
             foreach (var destination in session.Fires)
             {

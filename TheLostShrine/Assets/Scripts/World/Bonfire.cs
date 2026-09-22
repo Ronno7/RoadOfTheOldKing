@@ -9,6 +9,8 @@ namespace TheLostShrine.World
         [SerializeField] private string id;
         [SerializeField] private string displayName = "Bonfire";
         [SerializeField] private int displayOrder;
+        [SerializeField] private bool allowsUpgrades;
+        public bool AllowsUpgrades => allowsUpgrades;
         [SerializeField] private Transform spawnPoint;
         [SerializeField, Min(0.1f)] private float interactionRadius = 1.7f;
         public string Id => id;

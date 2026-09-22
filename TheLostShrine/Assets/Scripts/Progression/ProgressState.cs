@@ -13,6 +13,8 @@ namespace TheLostShrine.Progression
         public string scenePath = "";
         public List<string> discoveredFires = new List<string>();
         public List<string> completedIds = new List<string>();
+        public int sunShards;
+        public List<UpgradeSelection> upgrades = new List<UpgradeSelection>();
 
         public bool Has(string id) => !string.IsNullOrEmpty(id) && completedIds.Contains(id);
         public void Complete(string id)

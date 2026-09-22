@@ -67,7 +67,7 @@ namespace TheLostShrine.Weapons
                 case HatchetState.Cleaving:
                     angle += 360f * weapon.AttackProgress;
                     model.localPosition = new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad)) * 1.1f;
-                    DrawArc(transform.position, weapon.Settings.cleaveRadius, angle - 300f, 300f,
+                    DrawArc(transform.position, weapon.CleaveRadius, angle - 300f, 300f,
                         new Color(1f, 0.75f, 0.2f, 0.85f));
                     break;
                 case HatchetState.Flying:
@@ -87,7 +87,7 @@ namespace TheLostShrine.Weapons
             float progress = weapon.AttackProgress;
             float direction = weapon.ComboIndex == 1 ? -1f : 1f;
             float aimAngle = Mathf.Atan2(weapon.AttackDirection.y, weapon.AttackDirection.x) * Mathf.Rad2Deg;
-            float halfArc = settings.lightArc * 0.5f;
+            float halfArc = weapon.LightArc * 0.5f;
             float slashTime = Mathf.InverseLerp(settings.lightWindupFraction, settings.lightSwingEndFraction, progress);
             float sweepProgress = 1f - Mathf.Pow(1f - slashTime, 3f);
             float sweepAngle = aimAngle + Mathf.Lerp(-halfArc, halfArc, sweepProgress) * direction;
@@ -117,7 +117,7 @@ namespace TheLostShrine.Weapons
             if (sweepProgress > 0f && fade > 0f)
             {
                 // Both the blade and crescent use the same signed sweep, including the backhand.
-                float trailSweep = Mathf.Min(settings.lightArc * sweepProgress, 85f);
+                float trailSweep = Mathf.Min(weapon.LightArc * sweepProgress, 85f);
                 Color color = weapon.ComboIndex == 2 ? new Color(1f, 0.8f, 0.3f, fade)
                     : new Color(1f, 0.96f, 0.78f, fade);
                 DrawArc(transform.position, weapon.LightReach, sweepAngle - direction * trailSweep,

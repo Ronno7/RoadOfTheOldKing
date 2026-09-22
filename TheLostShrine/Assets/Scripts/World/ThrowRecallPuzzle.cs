@@ -12,6 +12,8 @@ namespace TheLostShrine.World
         public bool IsArmed { get; private set; }
         public bool IsSolved { get; private set; }
         public PuzzleDoor Door => door;
+        public string ProgressId => progressId;
+        public event System.Action Solved;
 
         public bool ReceiveTargetHit(bool anchor, CombatHit hit)
         {
@@ -28,6 +30,7 @@ namespace TheLostShrine.World
                 IsSolved = true;
                 if (door != null)
                     door.SetOpen(true);
+                Solved?.Invoke();
                 CheckpointSession.Instance?.SaveProgress();
                 return true;
             }

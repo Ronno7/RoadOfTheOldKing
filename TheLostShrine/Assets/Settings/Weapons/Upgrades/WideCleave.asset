@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec0f44e5a65ea8f4e8b0391b5593061f, type: 3}
+  m_Name: WideCleave
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Weapons.HatchetUpgrade
+  id: hatchet/wide-cleave
+  displayName: Wide Cleave
+  description: 'Charged cleave radius: 2.1 to 2.6 units. Same damage and stamina.'
+  lightSpeedMultiplier: 1
+  addedLightArc: 0
+  addedCleaveRadius: 0.5
