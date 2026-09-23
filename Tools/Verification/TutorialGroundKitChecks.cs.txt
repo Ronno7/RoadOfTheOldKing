@@ -1,0 +1,46 @@
+// Edit Mode asset/rule checks. Operates in a temporary preview scene; no save data or gameplay state.
+if(EditorApplication.isPlaying)throw new System.Exception("Edit Mode required.");
+string root="Assets/Art/Tiles/Tutorial/Ground";
+var results=new System.Collections.Generic.List<string>();int assertions=0;
+System.Action<bool,string> check=(ok,name)=>{assertions++;if(!ok)results.Add("FAIL "+name);};
+var sprites=AssetDatabase.LoadAllAssetsAtPath(root+"/TutorialGround16.png").OfType<Sprite>().ToArray();
+check(sprites.Length==308,"308 sliced sprites");
+foreach(var sprite in sprites){check(sprite.rect.width==16&&sprite.rect.height==16&&sprite.pixelsPerUnit==16,"Native cell and world scale "+sprite.name);check(sprite.bounds.size.x==1&&sprite.bounds.size.y==1,"Full-rectangle mesh "+sprite.name);}
+var importer=(TextureImporter)AssetImporter.GetAtPath(root+"/TutorialGround16.png");
+check(importer.filterMode==FilterMode.Point&&!importer.mipmapEnabled&&importer.textureCompression==TextureImporterCompression.Uncompressed&&importer.npotScale==TextureImporterNPOTScale.None,"Point filter, no mipmaps/compression/rescale");
+var tileIds=AssetDatabase.FindAssets("t:Tile",new[]{root+"/Tiles"});
+check(tileIds.Length==308,"308 visual tiles; collision brush lives in its own layer");
+foreach(var guid in tileIds){var tile=AssetDatabase.LoadAssetAtPath<UnityEngine.Tilemaps.Tile>(AssetDatabase.GUIDToAssetPath(guid));check(tile.sprite!=null,"Tile sprite "+tile.name);check(tile.colliderType==(tile.name=="Collision_Block"?UnityEngine.Tilemaps.Tile.ColliderType.Grid:UnityEngine.Tilemaps.Tile.ColliderType.None),"Collider separation "+tile.name);}
+foreach(string palette in new[]{"TutorialGround_Paint","TutorialGround_IndividualPieces"})check(AssetDatabase.LoadAllAssetsAtPath(root+"/Palettes/"+palette+".prefab").OfType<UnityEditor.GridPalette>().Any(),"Registered palette "+palette);
+var prefab=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Art/Tiles/Tutorial/Templates/TutorialZoneTemplate.prefab");
+check(prefab!=null&&prefab.GetComponent<Grid>()!=null,"Reusable one-unit Grid template");
+foreach(string layer in new[]{"Ground","Terrain","Paths","Environment","Detail Decoration","Collision","Above Player","Interactive Objects"})check(prefab.transform.Find(layer)!=null,"Layer "+layer);
+check(prefab.transform.Find("Ground").GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>().Length==7,"Seven material maps inside Ground");
+check(prefab.transform.Find("Interactive Objects").GetComponent<UnityEngine.Tilemaps.Tilemap>()==null,"Interactive objects remain GameObjects");
+check(prefab.transform.Find("Collision").GetComponent<UnityEngine.Tilemaps.TilemapCollider2D>()!=null&&!prefab.transform.Find("Collision").GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().enabled,"Dedicated hidden collision tilemap");
+var scene=UnityEditor.SceneManagement.EditorSceneManager.NewPreviewScene();
+try{
+var grid=new GameObject("Rule verification",typeof(Grid));UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(grid,scene);
+var go=new GameObject("Tiles",typeof(UnityEngine.Tilemaps.Tilemap),typeof(UnityEngine.Tilemaps.TilemapRenderer));go.transform.SetParent(grid.transform,false);
+var map=go.GetComponent<UnityEngine.Tilemaps.Tilemap>();
+Vector3Int[] offsets={new Vector3Int(0,1,0),new Vector3Int(1,0,0),new Vector3Int(0,-1,0),new Vector3Int(-1,0,0),new Vector3Int(1,1,0),new Vector3Int(1,-1,0),new Vector3Int(-1,-1,0),new Vector3Int(-1,1,0)};
+foreach(string material in new[]{"DryGrass","Earth","DampEarth","WornStone","Cobbles","TilledSoil"}){
+var rule=AssetDatabase.LoadAssetAtPath<RuleTile>(root+"/Rules/Paint_"+material+".asset");
+check(rule!=null&&rule.m_TilingRules.Count==47,"Complete 47-shape rule set "+material);
+check(rule.m_DefaultColliderType==UnityEngine.Tilemaps.Tile.ColliderType.None&&rule.m_TilingRules.All(r=>r.m_ColliderType==UnityEngine.Tilemaps.Tile.ColliderType.None),"No rule-generated collision "+material);
+for(int raw=0;raw<256;raw++){
+map.ClearAllTiles();map.SetTile(Vector3Int.zero,rule);
+for(int b=0;b<8;b++)if((raw&(1<<b))!=0)map.SetTile(offsets[b],rule);
+int normalized=raw;
+for(int b=4;b<8;b++){int a=b-4;int c=(a+1)%4;if((raw&(1<<a))==0||(raw&(1<<c))==0)normalized&=~(1<<b);}
+map.RefreshAllTiles();var selected=map.GetSprite(Vector3Int.zero);
+check(selected!=null&&(normalized==255?selected.name.StartsWith(material+"_Center"):selected.name.EndsWith("_"+normalized.ToString("D3"))),material+" raw neighbors "+raw+" -> "+normalized);
+}
+// Erasing a neighbor must refresh the neighboring sprite rather than leave a stale connection.
+map.ClearAllTiles();map.SetTile(Vector3Int.zero,rule);map.SetTile(Vector3Int.right,rule);var joined=map.GetSprite(Vector3Int.zero);map.SetTile(Vector3Int.right,null);var isolated=map.GetSprite(Vector3Int.zero);
+check(joined!=isolated&&isolated.name.EndsWith("_000"),"Erase refresh "+material);
+}
+var grass=AssetDatabase.LoadAssetAtPath<RuleTile>(root+"/Rules/Paint_Grass.asset");map.ClearAllTiles();map.SetTile(Vector3Int.zero,grass);check(map.GetSprite(Vector3Int.zero)!=null&&grass.m_DefaultColliderType==UnityEngine.Tilemaps.Tile.ColliderType.None,"Automatic grass fill");
+}finally{UnityEditor.SceneManagement.EditorSceneManager.ClosePreviewScene(scene);}
+results.Insert(0,(results.Count==0?"PASS ":"FAILED ")+assertions+" ground kit assertions; 1536 neighbor arrangements exercised.");
+return string.Join("\n",results.ToArray());

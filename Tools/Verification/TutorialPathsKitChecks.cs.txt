@@ -1,0 +1,36 @@
+if(EditorApplication.isPlaying)throw new System.Exception("Edit Mode required");
+string root="Assets/Art/Tiles/Tutorial/Paths";int count=0;var failures=new System.Collections.Generic.List<string>();
+System.Action<bool,string> check=(ok,label)=>{count++;if(!ok)failures.Add(label);};
+var sprites=AssetDatabase.LoadAllAssetsAtPath(root+"/TutorialPaths16.png").OfType<Sprite>().ToArray();
+check(sprites.Length==100,"100 native sprites");
+// Unity gives sprites a small Z thickness; only X/Y determine the grid footprint.
+foreach(var s in sprites)check(s.rect.width==16&&s.rect.height==16&&s.pixelsPerUnit==16&&s.bounds.size.x==1&&s.bounds.size.y==1&&s.vertices.Length==4,"Native cell "+s.name);
+var importer=(TextureImporter)AssetImporter.GetAtPath(root+"/TutorialPaths16.png");
+check(importer.filterMode==FilterMode.Point&&!importer.mipmapEnabled&&importer.textureCompression==TextureImporterCompression.Uncompressed,"Crisp pixel import");
+var ids=AssetDatabase.FindAssets("t:Tile",new[]{root+"/Tiles"});check(ids.Length==100,"100 visual tiles");
+foreach(var id in ids){var tile=AssetDatabase.LoadAssetAtPath<UnityEngine.Tilemaps.Tile>(AssetDatabase.GUIDToAssetPath(id));check(tile.sprite!=null&&tile.colliderType==UnityEngine.Tilemaps.Tile.ColliderType.None,"Non-colliding sprite "+tile.name);}
+string palettePath=root+"/Palettes/TutorialPaths.prefab";
+check(AssetDatabase.LoadAllAssetsAtPath(palettePath).OfType<GridPalette>().Any(),"Single registered palette");
+var palette=AssetDatabase.LoadAssetAtPath<GameObject>(palettePath).GetComponentInChildren<UnityEngine.Tilemaps.Tilemap>();
+check(palette.GetTile(new Vector3Int(4,0,0))==AssetDatabase.LoadAssetAtPath<RuleTile>("Assets/Art/Tiles/Tutorial/Ground/Rules/Paint_Cobbles.asset"),"Existing cobbles reused directly");
+var template=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Art/Tiles/Tutorial/Templates/TutorialZoneTemplate.prefab");
+foreach(var name in new[]{"DirtLane","Footpath","Paving"})check(template.transform.Find("Paths/"+name)!=null,"Path layer "+name);
+check(AssetDatabase.FindAssets("t:Prefab",new[]{"Assets/Art/Tiles/Tutorial/Templates"}).Length==1,"Only one useful template");
+check(AssetDatabase.FindAssets("t:Scene",new[]{root}).Length==0,"No per-layer preview scene");
+var scene=UnityEditor.SceneManagement.EditorSceneManager.NewPreviewScene();
+try{
+var grid=new GameObject("Path verification",typeof(Grid));UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(grid,scene);
+var go=new GameObject("Map",typeof(UnityEngine.Tilemaps.Tilemap),typeof(UnityEngine.Tilemaps.TilemapRenderer));go.transform.SetParent(grid.transform,false);var map=go.GetComponent<UnityEngine.Tilemaps.Tilemap>();
+Vector3Int[] offsets={new Vector3Int(0,1,0),new Vector3Int(1,0,0),new Vector3Int(0,-1,0),new Vector3Int(-1,0,0),new Vector3Int(1,1,0),new Vector3Int(1,-1,0),new Vector3Int(-1,-1,0),new Vector3Int(-1,1,0)};
+foreach(var material in new[]{"DirtLane","Footpath"}){
+var rule=AssetDatabase.LoadAssetAtPath<RuleTile>(root+"/Rules/Paint_"+material+".asset");check(rule.m_TilingRules.Count==47,"Full shape coverage "+material);
+check(rule.m_TilingRules.All(r=>r.m_ColliderType==UnityEngine.Tilemaps.Tile.ColliderType.None),"No rule collision "+material);
+for(int raw=0;raw<256;raw++){
+map.ClearAllTiles();map.SetTile(Vector3Int.zero,rule);for(int b=0;b<8;b++)if((raw&(1<<b))!=0)map.SetTile(offsets[b],rule);
+int mask=raw;for(int b=4;b<8;b++)if((raw&(1<<(b-4)))==0||(raw&(1<<((b-3)%4)))==0)mask&=~(1<<b);
+map.RefreshAllTiles();var sprite=map.GetSprite(Vector3Int.zero);check(sprite!=null&&(mask==255?sprite.name.StartsWith(material+"_Center"):sprite.name.EndsWith("_"+mask.ToString("D3"))),material+" neighbors "+raw);
+}
+map.ClearAllTiles();map.SetTile(Vector3Int.zero,rule);map.SetTile(Vector3Int.right,rule);var joined=map.GetSprite(Vector3Int.zero);map.SetTile(Vector3Int.right,null);check(map.GetSprite(Vector3Int.zero)!=joined&&map.GetSprite(Vector3Int.zero).name.EndsWith("_000"),"Erase refresh "+material);
+}
+}finally{UnityEditor.SceneManagement.EditorSceneManager.ClosePreviewScene(scene);}
+return (failures.Count==0?"PASS ":"FAILED ")+count+" Paths assertions; 512 neighbor arrangements\n"+string.Join("\n",failures.ToArray());

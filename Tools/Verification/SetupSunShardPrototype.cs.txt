@@ -48,7 +48,7 @@ go.transform.GetChild(0).gameObject.SetActive(i==2);PrefabUtility.RecordPrefabIn
 }
 var ground=GameObject.Find("Ground").GetComponent<UnityEngine.Tilemaps.Tilemap>();
 var water=GameObject.Find("Obstacles - Water").GetComponent<UnityEngine.Tilemaps.Tilemap>();
-var grass=AssetDatabase.LoadAssetAtPath<UnityEngine.Tilemaps.TileBase>("Assets/Art/Tiles/Ground16/Tiles/Grass_Plain.asset");
+var grass=AssetDatabase.LoadAssetAtPath<UnityEngine.Tilemaps.TileBase>("Assets/Art/Tiles/Prototype/Ground/Tiles/Grass_Plain.asset");
 var pathTile=ground.GetTile(new Vector3Int(0,5,0))??grass;
 for(int y=16;y<=20;y++)for(int x=(y<19?20:18);x<=21;x++){ground.SetTile(new Vector3Int(x,y,0),grass);water.SetTile(new Vector3Int(x,y,0),null);}
 for(int y=14;y<=19;y++)ground.SetTile(new Vector3Int(20,y,0),pathTile);

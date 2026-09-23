@@ -1,12 +1,13 @@
 using TheLostShrine.Combat;
 using TheLostShrine.Input;
+using TheLostShrine.Progression;
 using UnityEngine;
 
 namespace TheLostShrine.Player
 {
     // Player-specific damage protection and death response reuse the shared health model.
     [DisallowMultipleComponent, RequireComponent(typeof(Damageable), typeof(HitReaction))]
-    public sealed class PlayerHealth : MonoBehaviour, IHitProtection
+    public sealed class PlayerHealth : MonoBehaviour, IHitProtection, IProgressParticipant
     {
         [SerializeField, Min(0f)] private float invulnerabilityDuration = 0.8f;
         private Damageable health;
@@ -35,6 +36,8 @@ namespace TheLostShrine.Player
         }
 
         public bool Blocks(CombatHit hit) => IsInvulnerable;
+        public void CaptureProgress(ProgressState state) { }
+        public void RestoreProgress(ProgressState state) => health.SetMaxHealthBonus(HeartFragmentProgression.BonusHealth(state));
         private void OnHit(CombatHit hit) => invulnerableUntil = Time.time + invulnerabilityDuration;
 
         public void HealAtRest()

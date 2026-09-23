@@ -1,0 +1,30 @@
+// Run in Edit Mode. Creates the reusable placeholder and the three optional scene pickups.
+if(EditorApplication.isPlaying)throw new System.Exception("Edit Mode required.");
+string path="Assets/Prefabs/World/HeartFragment.prefab";
+var prefab=AssetDatabase.LoadAssetAtPath<GameObject>(path);
+if(prefab==null){
+var go=new GameObject("Heart Fragment");var trigger=go.AddComponent<CircleCollider2D>();trigger.isTrigger=true;trigger.radius=.55f;
+var pickup=go.AddComponent<TheLostShrine.World.HeartFragmentPickup>();
+var visual=new GameObject("Heart");visual.transform.SetParent(go.transform,false);
+var square=AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Sprites/WhiteSquare.png");
+float[] widths={2,2,7,7,5,3,1,1,1,1};float[] xs={-1.5f,1.5f,0,0,0,0,0,0,-1,0};float[] ys={2.5f,2.5f,1.5f,.5f,-.5f,-1.5f,-2.5f,1.5f,.5f,-.5f};
+for(int i=0;i<widths.Length;i++){
+var pixel=new GameObject(i<7?"Heart row":"Fragment crack");pixel.transform.SetParent(visual.transform,false);pixel.transform.localPosition=new Vector3(xs[i]*.105f,ys[i]*.105f,0);pixel.transform.localScale=new Vector3(widths[i]*.105f,.105f,1);
+var sr=pixel.AddComponent<SpriteRenderer>();sr.sprite=square;sr.sortingLayerName="Player";sr.sortingOrder=i<7?25:26;sr.color=i<7?new Color(.96f,.23f,.34f):new Color(1,.78f,.75f);
+}
+var s=new SerializedObject(pickup);s.FindProperty("visual").objectReferenceValue=visual;s.ApplyModifiedPropertiesWithoutUndo();
+prefab=PrefabUtility.SaveAsPrefabAsset(go,path);UnityEngine.Object.DestroyImmediate(go);
+}
+var root=GameObject.Find("Heart Fragments");if(root==null)root=new GameObject("Heart Fragments");
+string[] names={"Heart Fragment - Practice Nook","Heart Fragment - Recall Clearing","Heart Fragment - Beyond the Gate"};
+string[] ids={"prototype/practice-nook","prototype/recall-clearing","prototype/beyond-gate"};
+Vector3[] positions={new Vector3(-18.5f,-3.5f,0),new Vector3(18.5f,-1.5f,0),new Vector3(20.5f,10.5f,0)};
+for(int i=0;i<3;i++){
+var go=GameObject.Find(names[i]);if(go==null){go=(GameObject)PrefabUtility.InstantiatePrefab(prefab);go.name=names[i];go.transform.SetParent(root.transform);}
+go.transform.position=positions[i];var pickup=go.GetComponent<TheLostShrine.World.HeartFragmentPickup>();var s=new SerializedObject(pickup);s.FindProperty("rewardId").stringValue=ids[i];s.ApplyModifiedPropertiesWithoutUndo();PrefabUtility.RecordPrefabInstancePropertyModifications(pickup);
+}
+if(GameObject.Find("Sign - HEART FRAGMENTS")==null){
+var hint=UnityEngine.Object.Instantiate(GameObject.Find("Sign - BACK TO DUMMIES"),root.transform);hint.name="Sign - HEART FRAGMENTS";hint.transform.position=new Vector3(-18.5f,-2.2f,0);hint.GetComponentInChildren<TextMesh>().text="HEART FRAGMENTS\n<size=30>3 fragments = +20 max HP</size>";hint.transform.Find("Backing").localScale=new Vector3(4,1.1f,1);
+}
+AssetDatabase.SaveAssets();UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());UnityEditor.SceneManagement.EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+return "Heart prefab, three optional pickups, and teaching sign saved.";

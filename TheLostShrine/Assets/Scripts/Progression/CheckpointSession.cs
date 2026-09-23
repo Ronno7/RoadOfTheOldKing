@@ -184,6 +184,19 @@ namespace TheLostShrine.Progression
             return true;
         }
 
+        public bool TryCollectHeartFragment(string rewardId)
+        {
+            if (loading || player == null || !player.IsAlive || !HeartFragmentProgression.TryCollect(Progress, rewardId))
+                return false;
+            player.RestoreProgress(Progress);
+            Capture();
+            int count = HeartFragmentProgression.Count(Progress);
+            Save(count % HeartFragmentProgression.FragmentsPerHeart == 0
+                ? "Heart complete! Maximum HP +20."
+                : "Heart fragment collected: " + count % HeartFragmentProgression.FragmentsPerHeart + " / 3.");
+            return true;
+        }
+
         private void ApplyUpgrades()
         {
             if (combat != null && combat.Weapon != null) combat.Weapon.ApplyUpgrades(Upgrades.Selected);

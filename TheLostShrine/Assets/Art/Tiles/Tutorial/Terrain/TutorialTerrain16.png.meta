@@ -1,0 +1,7378 @@
+fileFormatVersion: 2
+guid: 0c8ce66f5d13841438cbe9a1304bc3c5
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 7765315056487092444
+    second: TutorialTerrain16_0
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 16
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 0
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: MeadowWater_Island_000
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 382
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eb49b28ab244a0749bcce4d1b5185357
+      internalID: 489334155
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_End_N_001
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 382
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a446ebdd2f7ef7b48bafbfc56ce4e368
+      internalID: 598594030
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_End_E_002
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 382
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 82555ca434de55646aaa07ee2f809913
+      internalID: 845796775
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_003
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 382
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 97bad3c04a9b3b545b01331e20ac2562
+      internalID: -1186458406
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_End_S_004
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 382
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a4b2677a657008c4891808019e52c516
+      internalID: -121933691
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Straight_NS_005
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 382
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e65e3c24804f3cd44b934e7409518a09
+      internalID: -2016353126
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_006
+      rect:
+        serializedVersion: 2
+        x: 122
+        y: 382
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 563a0241a785ca846bbd4de18dfe4e73
+      internalID: -1588339891
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_007
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 382
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fdedf2ca9cd16f849bf7ac7b6fbf60c6
+      internalID: -344621415
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_End_W_008
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 382
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 99e4669740f882d429e1c68c94bb15ed
+      internalID: 1753858586
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_009
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 382
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 71d2523cf3895dc4dbe04644633e164a
+      internalID: -1204416429
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Straight_EW_010
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 382
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9f422b26217b4ef43a22e42c30cb0066
+      internalID: -4916277
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_011
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 382
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d29949ad3cfc8b94290d4df1b7319d26
+      internalID: 2136263595
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_012
+      rect:
+        serializedVersion: 2
+        x: 242
+        y: 382
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c8bf67bb9bd837d4486e4c163b50f87c
+      internalID: -1589240046
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_013
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 382
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5e18811869e7525468abafe5027df730
+      internalID: 185184585
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_014
+      rect:
+        serializedVersion: 2
+        x: 282
+        y: 382
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2ef70a436fee46c4f8188a73012d13f7
+      internalID: -788832537
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_015
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 382
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a7bd6ecbf359f664180bbc7467a4020a
+      internalID: -311696386
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Bend_NE_019
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 362
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c26299b523d0c564ea311ff990e125d3
+      internalID: -1798448591
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_023
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 362
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 057b914a90fe90544aa4005ea7a970ee
+      internalID: -1028018153
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_027
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 362
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 92aac79bbec3e324ab3a1738983b08ac
+      internalID: -29844571
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_031
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 362
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 42c9d1722a7dfbb43869a597da4ec0c8
+      internalID: -1225377420
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Bend_SE_038
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 362
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 377b888776f76294e9d98538d7518c30
+      internalID: 23888747
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_039
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 362
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 41e5d0d18d58c334db7597df5fc9fb8b
+      internalID: 338576936
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_046
+      rect:
+        serializedVersion: 2
+        x: 122
+        y: 362
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 560912e2c6e032249a27c15e248255fa
+      internalID: 312658946
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_047
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 362
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b77fcba8d499b974d9cb7bba2cf1aedc
+      internalID: 207934377
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Edge_W_055
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 362
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 954b277d4e7e9584bbe595331a9436d6
+      internalID: 1650180607
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_063
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 362
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ff2c1c2660931f44fb44349001a9b54e
+      internalID: 784284262
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Bend_SW_076
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 362
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d9774872e88d6a445a0f93ba06096660
+      internalID: -1248815434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_077
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 362
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 63d9bbb1adc39e54385c3008a3fbceae
+      internalID: 1707745041
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_078
+      rect:
+        serializedVersion: 2
+        x: 242
+        y: 362
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8c5f9b9037cd540449c43c32556d0dfd
+      internalID: -1258389030
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_079
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 362
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ae5a9e99175af6242a43476b98d0c8ab
+      internalID: -84647592
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_095
+      rect:
+        serializedVersion: 2
+        x: 282
+        y: 362
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6546f7571bb1d5a46bd3172856ae4290
+      internalID: -645400588
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Edge_N_110
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 362
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2c3f63a54dd1172429cf3851f1354a9c
+      internalID: -1084513845
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_111
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 342
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fdcebda54e96a4b44bdba70af3ce16e9
+      internalID: -706454708
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Inner_NW_127
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 342
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: de22b398af64ca742b88c603093efb6d
+      internalID: -248152143
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Bend_NW_137
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 342
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7a85065c869da3b468ac07ecea685182
+      internalID: 1016859027
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_139
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 342
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4a664ec440da752449871c0831d6dfbe
+      internalID: 43181223
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_141
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 342
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 302fbfafad2f78e4e8e6ebbd01f7b726
+      internalID: 615691003
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_143
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 342
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7506327f48791564c9259715b54eb413
+      internalID: 2109817704
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Edge_S_155
+      rect:
+        serializedVersion: 2
+        x: 122
+        y: 342
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bcda1435e1c3b784d87ec5078dc75dd1
+      internalID: -784903288
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_159
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 342
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 700e6368aa5e53346b04533e57327865
+      internalID: 28721914
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_175
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 342
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a81a37daaa2acf24eaf08e4de799690e
+      internalID: -169346672
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Inner_SW_191
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 342
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ec20cd22c0c370b40bc2bd2dca90c86a
+      internalID: -2008769994
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Edge_E_205
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 342
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bb84c5c01884c224d90f83b12e7fa1d5
+      internalID: 573166301
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Junction_207
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 342
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4e6474f36d36f5640ab1c6e361ff6c5f
+      internalID: 2083534756
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Inner_SE_223
+      rect:
+        serializedVersion: 2
+        x: 242
+        y: 342
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 90dc38e53fc32fc4c974331489e81200
+      internalID: -142184654
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Inner_NE_239
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 342
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d8857dbc3f90d4f4cb6ab75fe7f3a079
+      internalID: -1039279064
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Center_255
+      rect:
+        serializedVersion: 2
+        x: 282
+        y: 342
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1d10a1efd4d75bf45ae76a17c304d246
+      internalID: -719395187
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Center_Variant_01
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 342
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d1f0c336dcb6eac45a6320f3b56fd896
+      internalID: 802225622
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Center_Variant_02
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 322
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 434a9e35ea081f54a9c7da8fa870553c
+      internalID: -1569210446
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: MeadowWater_Center_Variant_03
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 322
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8a211d743d401eb4db54b303cd42825b
+      internalID: 697448934
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Island_000
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 322
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2b1379958d37d3e4ea67a0b4e949f148
+      internalID: 316583850
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_End_N_001
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 322
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9b2da1ec79d1405498fa25e9dd62cae8
+      internalID: 1912806202
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_End_E_002
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 322
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4ea121ebf76bb3e47a44a326aae1366a
+      internalID: -1120922238
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_003
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 322
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e7323faf5e7688a4abb3088b150d19f7
+      internalID: -1091615192
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_End_S_004
+      rect:
+        serializedVersion: 2
+        x: 122
+        y: 322
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8fd3ef77956c35d4d9688c9a6584948b
+      internalID: 525013702
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Straight_NS_005
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 322
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5e49de6cf99437348a3455e04fe14b59
+      internalID: -1933617598
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_006
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 322
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d7f1372f20badb54381b9845adf4bd67
+      internalID: 1252489654
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_007
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 322
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 74a5f11e40e89604bbe3a1bfce68898d
+      internalID: -414057884
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_End_W_008
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 322
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eba7037ee1b29ac4383d8d3b99fac9cf
+      internalID: -1149312762
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_009
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 322
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 55642a05f83886e4f9534ade85f420fc
+      internalID: 101666653
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Straight_EW_010
+      rect:
+        serializedVersion: 2
+        x: 242
+        y: 322
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 46ee76cacfb626c41a6c88ee46f8477b
+      internalID: 637622961
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_011
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 322
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 88e24731855b2d24d8930a2117742411
+      internalID: 906098344
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_012
+      rect:
+        serializedVersion: 2
+        x: 282
+        y: 322
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 62b0dd34183b05145a2b130abec64837
+      internalID: -22173915
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_013
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 322
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7767d5ebd2d840a47ae3d33639513b84
+      internalID: 573818918
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_014
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 302
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 29a8efc1d8aec8d4d95f1bf4640c369b
+      internalID: 441161256
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_015
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 302
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a1c9f2565e73c9a40be7e647366708ab
+      internalID: -1631167268
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Bend_NE_019
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 302
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c1a1b330f71f9b646a16aabff68277aa
+      internalID: 1577948274
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_023
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 302
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dca4be66973ec0544b64d7479fe94733
+      internalID: -490990483
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_027
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 302
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f14fc85a455f64f4caab292fbd3432a9
+      internalID: 1922616080
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_031
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 302
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1d7b56ee86b3323458b38534596e850c
+      internalID: 56333041
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Bend_SE_038
+      rect:
+        serializedVersion: 2
+        x: 122
+        y: 302
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1f4b81c0a920f7948a467b279edad0ac
+      internalID: -189982754
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_039
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 302
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: be51d36ec68a1c041a2c89578607a82c
+      internalID: -1430272986
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_046
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 302
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ce0e34f7a7355da45b1432769cbdf93a
+      internalID: 1380555126
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_047
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 302
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dbde2dcc1f6c0944fbbc827145d730de
+      internalID: -894127649
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Edge_W_055
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 302
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4973b9abdf4d78f4192b51478aa78ecc
+      internalID: -968502516
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_063
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 302
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6bea11028663f32478cfe27f18617203
+      internalID: -308976380
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Bend_SW_076
+      rect:
+        serializedVersion: 2
+        x: 242
+        y: 302
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cf85b62f318281948af08970ed9db831
+      internalID: 1988317025
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_077
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 302
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 02ba0bef827a68349a8e1adfbc8a47a9
+      internalID: 439815430
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_078
+      rect:
+        serializedVersion: 2
+        x: 282
+        y: 302
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fedac3a8c666bfc4c89084d6da285a78
+      internalID: -350538130
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_079
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 302
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b656c386d5ebb2d46954f491aff420f3
+      internalID: -1163130602
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_095
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 282
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 32bbd4f67eba39a408a9471080b5f739
+      internalID: 2011060008
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Edge_N_110
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 282
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b3889df6547a20b458e5499448d579a5
+      internalID: -1002040817
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_111
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 282
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 201c2c206c261c541a3118be3a6fad86
+      internalID: 1367261194
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Inner_NW_127
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 282
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 74c669d7d8cbb90468dfe30891b000a9
+      internalID: -663998687
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Bend_NW_137
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 282
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d63edcb023c9f664e81124e4355804cb
+      internalID: -1950234898
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_139
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 282
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7873c9673957c5c4a9b702999272679e
+      internalID: 591848227
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_141
+      rect:
+        serializedVersion: 2
+        x: 122
+        y: 282
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4a76ccc1f4958ff41b003f7aa68ed677
+      internalID: -1790117892
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_143
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 282
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 255d5938a3c7d6c4b88b4789066ea447
+      internalID: -1619071105
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Edge_S_155
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 282
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ccf4013d2f9d9f04a8621cd7d1f4997d
+      internalID: 837601457
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_159
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 282
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f8b3633624ea269448b1918db16fa815
+      internalID: 2080980846
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_175
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 282
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5e2efb2dfdd4d644c9c370e0300e0cd4
+      internalID: 627523121
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Inner_SW_191
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 282
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1ac9450f4b412d044aee5f6037785b6b
+      internalID: 609564702
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Edge_E_205
+      rect:
+        serializedVersion: 2
+        x: 242
+        y: 282
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c7a703146d714d744975e9f3faa9f20a
+      internalID: -652444127
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Junction_207
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 282
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6a4ca4ad1e69b0841a718e6522148bd3
+      internalID: 489009112
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Inner_SE_223
+      rect:
+        serializedVersion: 2
+        x: 282
+        y: 282
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3cc4164e99a14ef429cca876537b6aab
+      internalID: 1418818513
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Inner_NE_239
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 282
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 95866dccb6a80264284e251e32d39b59
+      internalID: 282071079
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Center_255
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 262
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9d9bd605c9d9e4f4984be7e00b625026
+      internalID: -596582036
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Center_Variant_01
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 262
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6a6f4aa6f856ed147aefdb33880fbfd9
+      internalID: 1517253194
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Center_Variant_02
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 262
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4ef34245426f101489fe67d9184c55d7
+      internalID: -2133227831
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWater_Center_Variant_03
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 262
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9bbff650853470049b900f7006d25912
+      internalID: 578297664
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Island_000
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 262
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 95036ec61e4b1df4c98a374ab264d141
+      internalID: -2000012989
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_End_N_001
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 262
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2ad5035ce8cd6b44eb892062274f2652
+      internalID: -1240531552
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_End_E_002
+      rect:
+        serializedVersion: 2
+        x: 122
+        y: 262
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 45be0ed0e95ecf340bf6571bebfa6160
+      internalID: -1100165244
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_003
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 262
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9bfb484a3430b604cbcb75582bfc7a57
+      internalID: -236470504
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_End_S_004
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 262
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0dfb67d7ff7bffe42b8f386a8b8d96e1
+      internalID: 1566285413
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Straight_NS_005
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 262
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c6a5b904e058f234db81cbe699316647
+      internalID: -655712494
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_006
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 262
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 93f6c9798d133ed41ab6c06ddfbdcbc3
+      internalID: 448586405
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_007
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 262
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1f4ad5bcabf7a27408d2b21ded79063e
+      internalID: -1646216767
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_End_W_008
+      rect:
+        serializedVersion: 2
+        x: 242
+        y: 262
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 36a6029b6a1ba874daa68fd8ae99c513
+      internalID: -1029980054
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_009
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 262
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: de0a8cc1acd00b744b64f7b94c90a14e
+      internalID: -2122542477
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Straight_EW_010
+      rect:
+        serializedVersion: 2
+        x: 282
+        y: 262
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7b2a259652c639745a512a319877fbec
+      internalID: 453511966
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_011
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 262
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b6eab3dbaa159cf4e9eafcb27bd78c1b
+      internalID: -593412060
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_012
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 242
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ef0d7ff899bb3e44aa73c5ca4ab5bb80
+      internalID: 656172193
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_013
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 242
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cdfcf246246dae2498db9073ee73798a
+      internalID: -1225171203
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_014
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 242
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d1d6f3f4a00e54b4784fc99f80bea709
+      internalID: 604110360
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_015
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 242
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2065bddbc7cc1644f8922b68de02a4c0
+      internalID: -2009510080
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Bend_NE_019
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 242
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3ca6e4e1a4aace34f9d3a7fea13b693b
+      internalID: -1774865340
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_023
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 242
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9856ece673de71049bbcb9537506f9ce
+      internalID: -1613377200
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_027
+      rect:
+        serializedVersion: 2
+        x: 122
+        y: 242
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 564fd59bcbc940d41b541278648c6702
+      internalID: -108961554
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_031
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 242
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: af82ea37407266f4bb34aa5c4df9e56a
+      internalID: -1588510571
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Bend_SE_038
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 242
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dc54e1ea3f9e73b4e9aff01b2d439310
+      internalID: 1590175118
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_039
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 242
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 00a3cb69193f96441afea4a3a2861dbb
+      internalID: -1730203034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_046
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 242
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c8670a6a2b7176e468c302ba83a80c08
+      internalID: 1487450920
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_047
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 242
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 422abfc9b051ec14888e5afbf3833717
+      internalID: -1193478624
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Edge_W_055
+      rect:
+        serializedVersion: 2
+        x: 242
+        y: 242
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ec8a3929d5e0ad54cb3cbcdf0cc83cca
+      internalID: 61164983
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_063
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 242
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c527815715ca44840a359c0a7aca3580
+      internalID: -469689982
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Bend_SW_076
+      rect:
+        serializedVersion: 2
+        x: 282
+        y: 242
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8713e58cf703e334ca1cc00dc1a5a164
+      internalID: 905115831
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_077
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 242
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f07fd4038f08fd744b39085c1171e930
+      internalID: -2108716194
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_078
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 222
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 88ee66e9ab162204581cb0af4ce21d7d
+      internalID: 651194023
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_079
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 222
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 907514e37e90a904a869ae742e7c9ad4
+      internalID: -527414014
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_095
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 222
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cb0cdec02ac1b4a4d991c5e563de9751
+      internalID: -1366758151
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Edge_N_110
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 222
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 775e436282583f44bb1e2ab1ccd7a5c6
+      internalID: 1129613440
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_111
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 222
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c8803528d37ed8f4dae0df6111c689d9
+      internalID: -1857600111
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Inner_NW_127
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 222
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4aca2637026161c4f9aba5a354b9d717
+      internalID: -784427782
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Bend_NW_137
+      rect:
+        serializedVersion: 2
+        x: 122
+        y: 222
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 29e335d8c056cf44f90a559b6597dbd6
+      internalID: 65967147
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_139
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 222
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0f6e19462e53e7849b872167ababab56
+      internalID: -1081294899
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_141
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 222
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6d664300d731d614484379f2ff702a4d
+      internalID: 1417858584
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_143
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 222
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b1e7a1afa45c0dd4ba744b6270f287fe
+      internalID: 1456085365
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Edge_S_155
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 222
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3fd1a5c41038a2b45ba560190e318e32
+      internalID: -687490289
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_159
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 222
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0788e194a11f4c84e927efcffea92d7f
+      internalID: 1052813539
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_175
+      rect:
+        serializedVersion: 2
+        x: 242
+        y: 222
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c16909325ac6f6248ad6a9d4227b146e
+      internalID: -1091425573
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Inner_SW_191
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 222
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f9d9446291934524db704d5242b7f874
+      internalID: 693191703
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Edge_E_205
+      rect:
+        serializedVersion: 2
+        x: 282
+        y: 222
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9ffc8ef2b36a64748a05f5756ca880f9
+      internalID: -1096146288
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Junction_207
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 222
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: acfa50ae0ba18904ebfa01cb7961a256
+      internalID: -828355853
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Inner_SE_223
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 202
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5d3d7ce91ffa28f47ba8b23d587f5aca
+      internalID: -1483527762
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Inner_NE_239
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 202
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4f7b7c86cb2305146b026715930260df
+      internalID: 478920143
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Center_255
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 202
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c409dc056da8bc241812d0ccf7db2938
+      internalID: -842848552
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Center_Variant_01
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 202
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8a84440de5e5f6e4486ad8b62b8e08c2
+      internalID: -170833376
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Center_Variant_02
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 202
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 39b5626ddcf391840a87ac287e0ca324
+      internalID: 272449997
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DeepWater_Center_Variant_03
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 202
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 09564f3eafae5df40956be145d2c44ea
+      internalID: -1897387169
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Island_000
+      rect:
+        serializedVersion: 2
+        x: 122
+        y: 202
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 476326d9af30d0e4ba99cc112cb7e01e
+      internalID: -826554101
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_End_N_001
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 202
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eb8061076bf715641940453b5b7fc0de
+      internalID: -635996552
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_End_E_002
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 202
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ffbafe292aa0a924e808308e6f85abed
+      internalID: -1050386687
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_003
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 202
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8ad6d3ef932666b498d478f35c268244
+      internalID: -1676087135
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_End_S_004
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 202
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a0f609355fe885e409e71f237320c69a
+      internalID: -56419864
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Straight_NS_005
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 202
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3756666a0889eb349bbd3c0da6308cb7
+      internalID: 2063852480
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_006
+      rect:
+        serializedVersion: 2
+        x: 242
+        y: 202
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6dea3ba646e50194395a7c0794497f6f
+      internalID: -2123034972
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_007
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 202
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 50062280d37249c499918ab16c9cc4be
+      internalID: 1038622487
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_End_W_008
+      rect:
+        serializedVersion: 2
+        x: 282
+        y: 202
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8fddce1a935b0b441b657332435de949
+      internalID: 1005832024
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_009
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 202
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b74b334e1414bc047bf477fcbf272f23
+      internalID: 512418406
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Straight_EW_010
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 182
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1d6d28c391cc6004da8b1d992c885ad4
+      internalID: 845662599
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_011
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 182
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b223a089e5373a34aa6795fdaad075c5
+      internalID: -210541567
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_012
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 182
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5bbe9b50f28c1e34ab8e25e8d099eceb
+      internalID: 351201921
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_013
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 182
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f9133c57845c0d648871688e1d3477b6
+      internalID: 1659646586
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_014
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 182
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 63a90262241ef774d9d60cb0e736244b
+      internalID: -862762013
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_015
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 182
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0d2ab46a68a4cc849a1c71338b293144
+      internalID: 1913313907
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Bend_NE_019
+      rect:
+        serializedVersion: 2
+        x: 122
+        y: 182
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 38311faedbf0e4246b7babfeb9d62634
+      internalID: 940611215
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_023
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 182
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9311ca03f726a944396a3632517b3976
+      internalID: 2122771288
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_027
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 182
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d47f54a682c94ff4a8e1fa0e9c736f83
+      internalID: 1801840082
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_031
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 182
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3d60716ad97407949b96906c53d39aec
+      internalID: -227795734
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Bend_SE_038
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 182
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3f5ece75ea4ac84479deba8afcafb33e
+      internalID: -1032533947
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_039
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 182
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 447134f322159c34db50b09f9ea2216a
+      internalID: -2083475986
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_046
+      rect:
+        serializedVersion: 2
+        x: 242
+        y: 182
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 35fdd464aa5c95d45b80fb45fd4b7a19
+      internalID: -79037693
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_047
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 182
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f7137f9eef0b5e042a09125a1395c9af
+      internalID: 2138602942
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Edge_W_055
+      rect:
+        serializedVersion: 2
+        x: 282
+        y: 182
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2fa54c2d8d2303241b48c9f5abc2c57c
+      internalID: -1170647003
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_063
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 182
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3172dd87cc1e7004ba96ce2a034d7a13
+      internalID: -698994316
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Bend_SW_076
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 162
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 218f431c2a20bd74688ce092d3956f4e
+      internalID: -1003404693
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_077
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 162
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4939f5fc834fd4b48967400e8987bdb1
+      internalID: -1327882084
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_078
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 162
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 111f45f843ac5f941b339cb05c762dbf
+      internalID: -820558639
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_079
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 162
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6d138166ac606694c9302de2ce78f9e9
+      internalID: -170750380
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_095
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 162
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4fd52ea47a216cb4a8552a87afb0f5f8
+      internalID: -755650957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Edge_N_110
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 162
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9764b11af16ac1b48af2b246bf69a06c
+      internalID: -386017047
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_111
+      rect:
+        serializedVersion: 2
+        x: 122
+        y: 162
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4f57b50052a2c2f478808ff03a9691eb
+      internalID: -1849803167
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Inner_NW_127
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 162
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2c9b411cd2303364887446efb4a2906c
+      internalID: -2129851540
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Bend_NW_137
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 162
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e7f33a3e68d0bf046866bd85c33bf5f5
+      internalID: -765394030
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_139
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 162
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0ae1a1b49e2315842959b139a559f894
+      internalID: -2068603103
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_141
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 162
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6ed5a13ba957daf4396df34eab6a1219
+      internalID: 479030769
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_143
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 162
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6113bc85b6d6a8a4194e0688d8c824a9
+      internalID: 843396845
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Edge_S_155
+      rect:
+        serializedVersion: 2
+        x: 242
+        y: 162
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fd9b8560bed5ef1428703df3e5071e92
+      internalID: -289935924
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_159
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 162
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a26f568e289dc7546bee2a6bcd7c3677
+      internalID: 1188419394
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_175
+      rect:
+        serializedVersion: 2
+        x: 282
+        y: 162
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4a3ab74a58834f0448980246af2877a2
+      internalID: -603229249
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Inner_SW_191
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 162
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 78e2169c7218c404984e14b06f4a555b
+      internalID: 1363007351
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Edge_E_205
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 142
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 99475e1d23720d148b17872e905dfddc
+      internalID: 1599520542
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Junction_207
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 142
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3f64ba54ee87aef4b9c447fc31d6c3b7
+      internalID: -1219051787
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Inner_SE_223
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 142
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9911ce6ec2ea73840977ec7559b1d258
+      internalID: 1508647828
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Inner_NE_239
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 142
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e097368c0627b7249a5ab928c52e9ae4
+      internalID: 1703834839
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Center_255
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 142
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8361f6431b1c2b74293294d1fd38b0d8
+      internalID: -356737596
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Center_Variant_01
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 142
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2941e880e56df3e4bb0aa24eae86be6c
+      internalID: 1820883193
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Center_Variant_02
+      rect:
+        serializedVersion: 2
+        x: 122
+        y: 142
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 31837120575160248b1973354473717a
+      internalID: -1257082242
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrassLedge_Center_Variant_03
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 142
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 594e38501939ef14089164df6e697d0c
+      internalID: 558677478
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Island_000
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 142
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 46e6c01e7fb271e4abbe73f2c37551c6
+      internalID: 592739621
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_End_N_001
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 142
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1ae1cbc4d9a7ed043973f48d02f4edac
+      internalID: -623762649
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_End_E_002
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 142
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b16539682eedf4647bf502b7f64d002f
+      internalID: 40535865
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_003
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 142
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d82c5484c086564478055c49f07361f1
+      internalID: -309761503
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_End_S_004
+      rect:
+        serializedVersion: 2
+        x: 242
+        y: 142
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4db4f806d77f70d4c9f8e88ed048b8b8
+      internalID: -617186136
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Straight_NS_005
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 142
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e0149073314dccd47be7f48f22ef77eb
+      internalID: 120001148
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_006
+      rect:
+        serializedVersion: 2
+        x: 282
+        y: 142
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 34d9ad4a4d052f640a192b8207b6cb3f
+      internalID: -61302085
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_007
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 142
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 209904c8c1a65ec4198a04617ac8bdbe
+      internalID: 197706868
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_End_W_008
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 122
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0d5dd470d87090843a89cc8f92226cc3
+      internalID: 621719995
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_009
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 122
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e3e2b3f8ace5c5742b248ba0e9ee1e63
+      internalID: 134344040
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Straight_EW_010
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 122
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7e72b582df9469f47b8f237693697a61
+      internalID: 1920832476
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_011
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 122
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 550c4e8ee4631a24cbb83e45211747e2
+      internalID: 1357133297
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_012
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 122
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7a2d3dd0701e64d4090b2d554989b31b
+      internalID: 1926199608
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_013
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 122
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: af0e857ef53e6724a8adc8345c4739f5
+      internalID: 1097908578
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_014
+      rect:
+        serializedVersion: 2
+        x: 122
+        y: 122
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6a67d36388883854294dbf5b8d213bad
+      internalID: 1239011028
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_015
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 122
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 395861eff19e593479a416e277ed6d41
+      internalID: 858798884
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Bend_NE_019
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 122
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9338c254f05eb7148a40f9a84d9c8324
+      internalID: 1597950614
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_023
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 122
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 948cb63ef1f05c442afbdb94eb93333a
+      internalID: -1531601090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_027
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 122
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1a891e20805ca5741bcb6345b91f2fb1
+      internalID: -1997652341
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_031
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 122
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ae22ec43840b0444bb843b0c32515c9d
+      internalID: 1242470630
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Bend_SE_038
+      rect:
+        serializedVersion: 2
+        x: 242
+        y: 122
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e359c60678c1a8442b1483e75d9fc3ce
+      internalID: -666898746
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_039
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 122
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dddabbc5ea25e664ca7d5ddd66085663
+      internalID: -1850136131
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_046
+      rect:
+        serializedVersion: 2
+        x: 282
+        y: 122
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: df333ed5dd60fc04180fea2d2dfe6394
+      internalID: -1644965661
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_047
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 122
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ae9891ea7046d184abd42926167a0302
+      internalID: 2071295038
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Edge_W_055
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 102
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: da802187eedb2604da20498e2c0709b8
+      internalID: 1229080220
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_063
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 102
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 85f65dcb00476a14486349041eb15c5d
+      internalID: 1081010957
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Bend_SW_076
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 102
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 36375351c0c5a054b943c5844abca1cf
+      internalID: 1377161632
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_077
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 102
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 398489fe1ebf9b04b8978914451e14f1
+      internalID: -491391163
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_078
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 102
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1fc15c073ea141541bfb3fd378a04331
+      internalID: 835047692
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_079
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 102
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c3008d0550d791541948e2c730dc1da0
+      internalID: -2141061865
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_095
+      rect:
+        serializedVersion: 2
+        x: 122
+        y: 102
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9bca71cc419058d4a9e630093ff9f64e
+      internalID: 1085704584
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Edge_N_110
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 102
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eb2815e497b18104b995b576c9e5a475
+      internalID: 36454964
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_111
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 102
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 978c33917c6e7c344ae37ab9d17fa512
+      internalID: 1321027803
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Inner_NW_127
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 102
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2124a865a5817f04baa96139ab878f7c
+      internalID: 746769573
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Bend_NW_137
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 102
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8973f94110432e149a439635ee4a927e
+      internalID: 1131197746
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_139
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 102
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d3bf0c92a54e01749a9d1d9203ac0371
+      internalID: 462162758
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_141
+      rect:
+        serializedVersion: 2
+        x: 242
+        y: 102
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8647bc4e7fd01544bbd07d195ab83634
+      internalID: 958480461
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_143
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 102
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 170692e24f4f0fb419db5854b12ecd5b
+      internalID: -849058609
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Edge_S_155
+      rect:
+        serializedVersion: 2
+        x: 282
+        y: 102
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2bcbc5b4d692c6c4d99ef85d62ea05c5
+      internalID: -842121784
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_159
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 102
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 12039d8a2b707194ab18d9e2a951521f
+      internalID: 1320688399
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_175
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 82
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8a9c33ca50c17aa43ad8ba70d317b922
+      internalID: 1950465215
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Inner_SW_191
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 82
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 380c2b8ecdbd5084182fcc3bfee6e2e4
+      internalID: 2129694537
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Edge_E_205
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 82
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0e5a5e6f5676bda428dd290e12e73395
+      internalID: 1276565702
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Junction_207
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 82
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b4ddfd8b7fa8369468c758f1c166eb44
+      internalID: -409597350
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Inner_SE_223
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 82
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 76cc00d3f989ee940bbd2256c42b318d
+      internalID: 387550808
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Inner_NE_239
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 82
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7ca4f011903e47a41a846ff3cb0a1488
+      internalID: -1782310541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Center_255
+      rect:
+        serializedVersion: 2
+        x: 122
+        y: 82
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f4d842d8379afbd478f924b65988e4be
+      internalID: -507119522
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Center_Variant_01
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 82
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b7d2080fb2b72f44da0d70eac53777aa
+      internalID: 614850505
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Center_Variant_02
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 82
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6cdf64097b4d37c4293976dca95f7560
+      internalID: -1913811951
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneLedge_Center_Variant_03
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 82
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ffeaa14447a801048af970c0a84056fe
+      internalID: 1600021725
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWall_Post_000
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 82
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2a2a77b0eb2556d4a9bd92a4393d18cd
+      internalID: -316399419
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWall_End_N_001
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 82
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f3c84d0b9800512488dc5cad4b097f2a
+      internalID: -145186682
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWall_End_E_002
+      rect:
+        serializedVersion: 2
+        x: 242
+        y: 82
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a3f73d6e98d258149b62f288c00278d9
+      internalID: -133426622
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWall_Corner_NE_003
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 82
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b156bf6b4d793eb44ab2c38b91fdd682
+      internalID: -172578506
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWall_End_S_004
+      rect:
+        serializedVersion: 2
+        x: 282
+        y: 82
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bd199d7fe1204fc48a33ac2bb0fca206
+      internalID: 1282450410
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWall_Straight_NS_005
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 82
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: dc9473153c170044ab8510e4ad87d8e7
+      internalID: -1947163806
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWall_Corner_SE_006
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 62
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5366a28f03ab21f4cbb8641a3880e72d
+      internalID: -1094358146
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWall_T_NES_007
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 62
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 17140dd0855a3e64a8a8b704ef887ade
+      internalID: 833288529
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWall_End_W_008
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 62
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4b73fb87d155429498ca56229eb8a0a3
+      internalID: -161662187
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWall_Corner_NW_009
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 62
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 59794b67d18af0345885519a30f32415
+      internalID: 1136946630
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWall_Straight_EW_010
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 62
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: de6026d5479fc9e4e99944a7bd599f95
+      internalID: 103956544
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWall_T_NEW_011
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 62
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2e7e30de0f02fd3438cdedb0f2d65a47
+      internalID: 1975512610
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWall_Corner_SW_012
+      rect:
+        serializedVersion: 2
+        x: 122
+        y: 62
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a5c129e7d73b1b848b73c7b1d2a584b5
+      internalID: -170517262
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWall_T_NSW_013
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 62
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 318fb00fd1ce3ca4ba5eb09202fd22ff
+      internalID: 1268960405
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWall_T_ESW_014
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 62
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6262862ec3e9a8042996684b7989fbc3
+      internalID: -2135515057
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneWall_Cross_015
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 62
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7ae0ec699f310ff48a2d72849b3e0bb1
+      internalID: 580294579
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EarthCliff_Top_Left
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 62
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f1e8538ac30bbe645b830c551ab9f9c4
+      internalID: -1514237697
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EarthCliff_Top_Center
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 62
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a30cac13da71ada489ea2cfe4af17ae3
+      internalID: 1755474539
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EarthCliff_Top_Right
+      rect:
+        serializedVersion: 2
+        x: 242
+        y: 62
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 87cd9cd8f39b3de48b188fd8dce58d29
+      internalID: 1236187818
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EarthCliff_Middle_Left
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 62
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a98a556f195f7104ea20b8c9ce7d9ff6
+      internalID: 1495882457
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EarthCliff_Middle_Center
+      rect:
+        serializedVersion: 2
+        x: 282
+        y: 62
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 08e028f411bef54408dd32cba6c21e48
+      internalID: 1282687571
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EarthCliff_Middle_Right
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 62
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e3a87d952753ff54db2c17bea7fe1c93
+      internalID: 1551698527
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EarthCliff_Foot_Left
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 42
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 28046a17754c10042be4e251cab0b0e5
+      internalID: -703406413
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EarthCliff_Foot_Center
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 42
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5e371383346a49545b9b7e6cc67e2ee9
+      internalID: 1891175407
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EarthCliff_Foot_Right
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 42
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5bff42c7053684940aa66e8012a8b266
+      internalID: -2020612280
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneCliff_Top_Left
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 42
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8f56149bb6bdb354c8c9ee57e990d038
+      internalID: -204160383
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneCliff_Top_Center
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 42
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6440a9751aeff7449af8955d59ed8634
+      internalID: 501522775
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneCliff_Top_Right
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 42
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c5deff7d87a951649916ea9272431619
+      internalID: -1198795746
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneCliff_Middle_Left
+      rect:
+        serializedVersion: 2
+        x: 122
+        y: 42
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a19c1aabacd4be24cba738554ac6ce05
+      internalID: 661176208
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneCliff_Middle_Center
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 42
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e8f801cdfcf9f504dbc827c5c98b37a3
+      internalID: -1543431900
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneCliff_Middle_Right
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 42
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e92304f2825fdd0448e9c694f6e40f9c
+      internalID: -439615803
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneCliff_Foot_Left
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 42
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 64b96980331b38a4884ebdca71789e27
+      internalID: -1010044726
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneCliff_Foot_Center
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 42
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 95300134c76b1994cb96d0cfd74b048c
+      internalID: 1901374904
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneCliff_Foot_Right
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 42
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9a116da9a4b4ae446ba9e387f7b43b4b
+      internalID: -584926370
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneStairs_Top_Left
+      rect:
+        serializedVersion: 2
+        x: 242
+        y: 42
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1af20930cf2a67b479cfefdfebe8739e
+      internalID: 1910484028
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneStairs_Top_Center
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 42
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1ff1f4775335add44b4c0ef0b885954d
+      internalID: 1757570855
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneStairs_Top_Right
+      rect:
+        serializedVersion: 2
+        x: 282
+        y: 42
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 06be54700979a964387f0f0976fa2803
+      internalID: -383258000
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneStairs_Middle_Left
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 42
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6ce726cb46b481740b6ad8d4839c4743
+      internalID: 2042283154
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneStairs_Middle_Center
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 22
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7195a3ce05454184ea139e917ad7c2be
+      internalID: -1299169926
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneStairs_Middle_Right
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 22
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b6a4402aa82c26749a869df0695a7704
+      internalID: -487638786
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneStairs_Foot_Left
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 22
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3010fa55ac268684985139b4ba21600f
+      internalID: -877411029
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneStairs_Foot_Center
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 22
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4e60302ab2322a1449d12569caa47efd
+      internalID: -1076540073
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StoneStairs_Foot_Right
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 22
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c4b68deb3ef9edc418f3276a31f69727
+      internalID: -843542631
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EarthRamp_Top_Left
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 22
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d7ee9127168bea340806729434cd9ba6
+      internalID: 1815425723
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EarthRamp_Top_Center
+      rect:
+        serializedVersion: 2
+        x: 122
+        y: 22
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e70726808f36868439e091b6d77727c2
+      internalID: -1333149332
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EarthRamp_Top_Right
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 22
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b77f680b248d5aa429dffa732102f03d
+      internalID: 269308637
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EarthRamp_Middle_Left
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 22
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 15971546f63b3544189a4293736baff6
+      internalID: -1607260680
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EarthRamp_Middle_Center
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 22
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c1233ce21d23ff54296ad65aaf2aeda4
+      internalID: 2076796789
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EarthRamp_Middle_Right
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 22
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 21e8d62a18cd9884bb4c591c568448cd
+      internalID: -1758147551
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EarthRamp_Foot_Left
+      rect:
+        serializedVersion: 2
+        x: 222
+        y: 22
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5fefe93dcc63ab8498955c4adeece5d5
+      internalID: -441375171
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EarthRamp_Foot_Center
+      rect:
+        serializedVersion: 2
+        x: 242
+        y: 22
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d29ec001034262b4eb009affaed802f0
+      internalID: -613648971
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EarthRamp_Foot_Right
+      rect:
+        serializedVersion: 2
+        x: 262
+        y: 22
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 198eb5f95032ccb4495a438f61e9c295
+      internalID: 1478304106
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ripple_00
+      rect:
+        serializedVersion: 2
+        x: 282
+        y: 22
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c0e9c21f239acce44bbfb09c89cd37d4
+      internalID: 286853218
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ripple_01
+      rect:
+        serializedVersion: 2
+        x: 302
+        y: 22
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d1fae541209aa0245ae4940c626579bc
+      internalID: 2038092276
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ripple_02
+      rect:
+        serializedVersion: 2
+        x: 2
+        y: 2
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: da264b1b38bbbab48b997d64e353965e
+      internalID: 811231116
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Ripple_03
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 2
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b4cf80eca75ec8a45aba705326a85de9
+      internalID: 1740183526
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FallLip_00
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 2
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 022e29878f012af4d8af58088bca86d3
+      internalID: 171505737
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FallBody_00
+      rect:
+        serializedVersion: 2
+        x: 62
+        y: 2
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bf3f309ecd6b88844a7749e9c973dfc3
+      internalID: -1139205541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FallBody_01
+      rect:
+        serializedVersion: 2
+        x: 82
+        y: 2
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eca3fd2d47f081b469466b457f04aaa5
+      internalID: 1990853355
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FallBody_02
+      rect:
+        serializedVersion: 2
+        x: 102
+        y: 2
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fc8ae3166f0532d4eb9a20f2a262906c
+      internalID: -1477547607
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FallBody_03
+      rect:
+        serializedVersion: 2
+        x: 122
+        y: 2
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0fa2e9b360b0df44d8911748cf4477b2
+      internalID: 1609360619
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FallFoam_00
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 2
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 11a8ffd8f7675d449aba4bc8da0ac7e4
+      internalID: -1320282406
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FallFoam_01
+      rect:
+        serializedVersion: 2
+        x: 162
+        y: 2
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0d090ad1f2f860b4480c592b77996090
+      internalID: 531993020
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FallFoam_02
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 2
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8bb82e8555be86a48b61574baa1dd152
+      internalID: -17329033
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: FallFoam_03
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 2
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: caa73d4e858ddb14f97779bd0d0bbc41
+      internalID: -1198973985
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: a0d8532fbe0e92d409b7dd7b9b964a70
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      DeepWater_Bend_NE_019: -1774865340
+      DeepWater_Bend_NW_137: 65967147
+      DeepWater_Bend_SE_038: 1590175118
+      DeepWater_Bend_SW_076: 905115831
+      DeepWater_Center_255: -842848552
+      DeepWater_Center_Variant_01: -170833376
+      DeepWater_Center_Variant_02: 272449997
+      DeepWater_Center_Variant_03: -1897387169
+      DeepWater_Edge_E_205: -1096146288
+      DeepWater_Edge_N_110: 1129613440
+      DeepWater_Edge_S_155: -687490289
+      DeepWater_Edge_W_055: 61164983
+      DeepWater_End_E_002: -1100165244
+      DeepWater_End_N_001: -1240531552
+      DeepWater_End_S_004: 1566285413
+      DeepWater_End_W_008: -1029980054
+      DeepWater_Inner_NE_239: 478920143
+      DeepWater_Inner_NW_127: -784427782
+      DeepWater_Inner_SE_223: -1483527762
+      DeepWater_Inner_SW_191: 693191703
+      DeepWater_Island_000: -2000012989
+      DeepWater_Junction_003: -236470504
+      DeepWater_Junction_006: 448586405
+      DeepWater_Junction_007: -1646216767
+      DeepWater_Junction_009: -2122542477
+      DeepWater_Junction_011: -593412060
+      DeepWater_Junction_012: 656172193
+      DeepWater_Junction_013: -1225171203
+      DeepWater_Junction_014: 604110360
+      DeepWater_Junction_015: -2009510080
+      DeepWater_Junction_023: -1613377200
+      DeepWater_Junction_027: -108961554
+      DeepWater_Junction_031: -1588510571
+      DeepWater_Junction_039: -1730203034
+      DeepWater_Junction_046: 1487450920
+      DeepWater_Junction_047: -1193478624
+      DeepWater_Junction_063: -469689982
+      DeepWater_Junction_077: -2108716194
+      DeepWater_Junction_078: 651194023
+      DeepWater_Junction_079: -527414014
+      DeepWater_Junction_095: -1366758151
+      DeepWater_Junction_111: -1857600111
+      DeepWater_Junction_139: -1081294899
+      DeepWater_Junction_141: 1417858584
+      DeepWater_Junction_143: 1456085365
+      DeepWater_Junction_159: 1052813539
+      DeepWater_Junction_175: -1091425573
+      DeepWater_Junction_207: -828355853
+      DeepWater_Straight_EW_010: 453511966
+      DeepWater_Straight_NS_005: -655712494
+      EarthCliff_Foot_Center: 1891175407
+      EarthCliff_Foot_Left: -703406413
+      EarthCliff_Foot_Right: -2020612280
+      EarthCliff_Middle_Center: 1282687571
+      EarthCliff_Middle_Left: 1495882457
+      EarthCliff_Middle_Right: 1551698527
+      EarthCliff_Top_Center: 1755474539
+      EarthCliff_Top_Left: -1514237697
+      EarthCliff_Top_Right: 1236187818
+      EarthRamp_Foot_Center: -613648971
+      EarthRamp_Foot_Left: -441375171
+      EarthRamp_Foot_Right: 1478304106
+      EarthRamp_Middle_Center: 2076796789
+      EarthRamp_Middle_Left: -1607260680
+      EarthRamp_Middle_Right: -1758147551
+      EarthRamp_Top_Center: -1333149332
+      EarthRamp_Top_Left: 1815425723
+      EarthRamp_Top_Right: 269308637
+      FallBody_00: -1139205541
+      FallBody_01: 1990853355
+      FallBody_02: -1477547607
+      FallBody_03: 1609360619
+      FallFoam_00: -1320282406
+      FallFoam_01: 531993020
+      FallFoam_02: -17329033
+      FallFoam_03: -1198973985
+      FallLip_00: 171505737
+      GrassLedge_Bend_NE_019: 940611215
+      GrassLedge_Bend_NW_137: -765394030
+      GrassLedge_Bend_SE_038: -1032533947
+      GrassLedge_Bend_SW_076: -1003404693
+      GrassLedge_Center_255: -356737596
+      GrassLedge_Center_Variant_01: 1820883193
+      GrassLedge_Center_Variant_02: -1257082242
+      GrassLedge_Center_Variant_03: 558677478
+      GrassLedge_Edge_E_205: 1599520542
+      GrassLedge_Edge_N_110: -386017047
+      GrassLedge_Edge_S_155: -289935924
+      GrassLedge_Edge_W_055: -1170647003
+      GrassLedge_End_E_002: -1050386687
+      GrassLedge_End_N_001: -635996552
+      GrassLedge_End_S_004: -56419864
+      GrassLedge_End_W_008: 1005832024
+      GrassLedge_Inner_NE_239: 1703834839
+      GrassLedge_Inner_NW_127: -2129851540
+      GrassLedge_Inner_SE_223: 1508647828
+      GrassLedge_Inner_SW_191: 1363007351
+      GrassLedge_Island_000: -826554101
+      GrassLedge_Junction_003: -1676087135
+      GrassLedge_Junction_006: -2123034972
+      GrassLedge_Junction_007: 1038622487
+      GrassLedge_Junction_009: 512418406
+      GrassLedge_Junction_011: -210541567
+      GrassLedge_Junction_012: 351201921
+      GrassLedge_Junction_013: 1659646586
+      GrassLedge_Junction_014: -862762013
+      GrassLedge_Junction_015: 1913313907
+      GrassLedge_Junction_023: 2122771288
+      GrassLedge_Junction_027: 1801840082
+      GrassLedge_Junction_031: -227795734
+      GrassLedge_Junction_039: -2083475986
+      GrassLedge_Junction_046: -79037693
+      GrassLedge_Junction_047: 2138602942
+      GrassLedge_Junction_063: -698994316
+      GrassLedge_Junction_077: -1327882084
+      GrassLedge_Junction_078: -820558639
+      GrassLedge_Junction_079: -170750380
+      GrassLedge_Junction_095: -755650957
+      GrassLedge_Junction_111: -1849803167
+      GrassLedge_Junction_139: -2068603103
+      GrassLedge_Junction_141: 479030769
+      GrassLedge_Junction_143: 843396845
+      GrassLedge_Junction_159: 1188419394
+      GrassLedge_Junction_175: -603229249
+      GrassLedge_Junction_207: -1219051787
+      GrassLedge_Straight_EW_010: 845662599
+      GrassLedge_Straight_NS_005: 2063852480
+      MeadowWater_Bend_NE_019: -1798448591
+      MeadowWater_Bend_NW_137: 1016859027
+      MeadowWater_Bend_SE_038: 23888747
+      MeadowWater_Bend_SW_076: -1248815434
+      MeadowWater_Center_255: -719395187
+      MeadowWater_Center_Variant_01: 802225622
+      MeadowWater_Center_Variant_02: -1569210446
+      MeadowWater_Center_Variant_03: 697448934
+      MeadowWater_Edge_E_205: 573166301
+      MeadowWater_Edge_N_110: -1084513845
+      MeadowWater_Edge_S_155: -784903288
+      MeadowWater_Edge_W_055: 1650180607
+      MeadowWater_End_E_002: 845796775
+      MeadowWater_End_N_001: 598594030
+      MeadowWater_End_S_004: -121933691
+      MeadowWater_End_W_008: 1753858586
+      MeadowWater_Inner_NE_239: -1039279064
+      MeadowWater_Inner_NW_127: -248152143
+      MeadowWater_Inner_SE_223: -142184654
+      MeadowWater_Inner_SW_191: -2008769994
+      MeadowWater_Island_000: 489334155
+      MeadowWater_Junction_003: -1186458406
+      MeadowWater_Junction_006: -1588339891
+      MeadowWater_Junction_007: -344621415
+      MeadowWater_Junction_009: -1204416429
+      MeadowWater_Junction_011: 2136263595
+      MeadowWater_Junction_012: -1589240046
+      MeadowWater_Junction_013: 185184585
+      MeadowWater_Junction_014: -788832537
+      MeadowWater_Junction_015: -311696386
+      MeadowWater_Junction_023: -1028018153
+      MeadowWater_Junction_027: -29844571
+      MeadowWater_Junction_031: -1225377420
+      MeadowWater_Junction_039: 338576936
+      MeadowWater_Junction_046: 312658946
+      MeadowWater_Junction_047: 207934377
+      MeadowWater_Junction_063: 784284262
+      MeadowWater_Junction_077: 1707745041
+      MeadowWater_Junction_078: -1258389030
+      MeadowWater_Junction_079: -84647592
+      MeadowWater_Junction_095: -645400588
+      MeadowWater_Junction_111: -706454708
+      MeadowWater_Junction_139: 43181223
+      MeadowWater_Junction_141: 615691003
+      MeadowWater_Junction_143: 2109817704
+      MeadowWater_Junction_159: 28721914
+      MeadowWater_Junction_175: -169346672
+      MeadowWater_Junction_207: 2083534756
+      MeadowWater_Straight_EW_010: -4916277
+      MeadowWater_Straight_NS_005: -2016353126
+      Ripple_00: 286853218
+      Ripple_01: 2038092276
+      Ripple_02: 811231116
+      Ripple_03: 1740183526
+      StoneCliff_Foot_Center: 1901374904
+      StoneCliff_Foot_Left: -1010044726
+      StoneCliff_Foot_Right: -584926370
+      StoneCliff_Middle_Center: -1543431900
+      StoneCliff_Middle_Left: 661176208
+      StoneCliff_Middle_Right: -439615803
+      StoneCliff_Top_Center: 501522775
+      StoneCliff_Top_Left: -204160383
+      StoneCliff_Top_Right: -1198795746
+      StoneLedge_Bend_NE_019: 1597950614
+      StoneLedge_Bend_NW_137: 1131197746
+      StoneLedge_Bend_SE_038: -666898746
+      StoneLedge_Bend_SW_076: 1377161632
+      StoneLedge_Center_255: -507119522
+      StoneLedge_Center_Variant_01: 614850505
+      StoneLedge_Center_Variant_02: -1913811951
+      StoneLedge_Center_Variant_03: 1600021725
+      StoneLedge_Edge_E_205: 1276565702
+      StoneLedge_Edge_N_110: 36454964
+      StoneLedge_Edge_S_155: -842121784
+      StoneLedge_Edge_W_055: 1229080220
+      StoneLedge_End_E_002: 40535865
+      StoneLedge_End_N_001: -623762649
+      StoneLedge_End_S_004: -617186136
+      StoneLedge_End_W_008: 621719995
+      StoneLedge_Inner_NE_239: -1782310541
+      StoneLedge_Inner_NW_127: 746769573
+      StoneLedge_Inner_SE_223: 387550808
+      StoneLedge_Inner_SW_191: 2129694537
+      StoneLedge_Island_000: 592739621
+      StoneLedge_Junction_003: -309761503
+      StoneLedge_Junction_006: -61302085
+      StoneLedge_Junction_007: 197706868
+      StoneLedge_Junction_009: 134344040
+      StoneLedge_Junction_011: 1357133297
+      StoneLedge_Junction_012: 1926199608
+      StoneLedge_Junction_013: 1097908578
+      StoneLedge_Junction_014: 1239011028
+      StoneLedge_Junction_015: 858798884
+      StoneLedge_Junction_023: -1531601090
+      StoneLedge_Junction_027: -1997652341
+      StoneLedge_Junction_031: 1242470630
+      StoneLedge_Junction_039: -1850136131
+      StoneLedge_Junction_046: -1644965661
+      StoneLedge_Junction_047: 2071295038
+      StoneLedge_Junction_063: 1081010957
+      StoneLedge_Junction_077: -491391163
+      StoneLedge_Junction_078: 835047692
+      StoneLedge_Junction_079: -2141061865
+      StoneLedge_Junction_095: 1085704584
+      StoneLedge_Junction_111: 1321027803
+      StoneLedge_Junction_139: 462162758
+      StoneLedge_Junction_141: 958480461
+      StoneLedge_Junction_143: -849058609
+      StoneLedge_Junction_159: 1320688399
+      StoneLedge_Junction_175: 1950465215
+      StoneLedge_Junction_207: -409597350
+      StoneLedge_Straight_EW_010: 1920832476
+      StoneLedge_Straight_NS_005: 120001148
+      StoneStairs_Foot_Center: -1076540073
+      StoneStairs_Foot_Left: -877411029
+      StoneStairs_Foot_Right: -843542631
+      StoneStairs_Middle_Center: -1299169926
+      StoneStairs_Middle_Left: 2042283154
+      StoneStairs_Middle_Right: -487638786
+      StoneStairs_Top_Center: 1757570855
+      StoneStairs_Top_Left: 1910484028
+      StoneStairs_Top_Right: -383258000
+      StoneWall_Corner_NE_003: -172578506
+      StoneWall_Corner_NW_009: 1136946630
+      StoneWall_Corner_SE_006: -1094358146
+      StoneWall_Corner_SW_012: -170517262
+      StoneWall_Cross_015: 580294579
+      StoneWall_End_E_002: -133426622
+      StoneWall_End_N_001: -145186682
+      StoneWall_End_S_004: 1282450410
+      StoneWall_End_W_008: -161662187
+      StoneWall_Post_000: -316399419
+      StoneWall_Straight_EW_010: 103956544
+      StoneWall_Straight_NS_005: -1947163806
+      StoneWall_T_ESW_014: -2135515057
+      StoneWall_T_NES_007: 833288529
+      StoneWall_T_NEW_011: 1975512610
+      StoneWall_T_NSW_013: 1268960405
+      StoneWater_Bend_NE_019: 1577948274
+      StoneWater_Bend_NW_137: -1950234898
+      StoneWater_Bend_SE_038: -189982754
+      StoneWater_Bend_SW_076: 1988317025
+      StoneWater_Center_255: -596582036
+      StoneWater_Center_Variant_01: 1517253194
+      StoneWater_Center_Variant_02: -2133227831
+      StoneWater_Center_Variant_03: 578297664
+      StoneWater_Edge_E_205: -652444127
+      StoneWater_Edge_N_110: -1002040817
+      StoneWater_Edge_S_155: 837601457
+      StoneWater_Edge_W_055: -968502516
+      StoneWater_End_E_002: -1120922238
+      StoneWater_End_N_001: 1912806202
+      StoneWater_End_S_004: 525013702
+      StoneWater_End_W_008: -1149312762
+      StoneWater_Inner_NE_239: 282071079
+      StoneWater_Inner_NW_127: -663998687
+      StoneWater_Inner_SE_223: 1418818513
+      StoneWater_Inner_SW_191: 609564702
+      StoneWater_Island_000: 316583850
+      StoneWater_Junction_003: -1091615192
+      StoneWater_Junction_006: 1252489654
+      StoneWater_Junction_007: -414057884
+      StoneWater_Junction_009: 101666653
+      StoneWater_Junction_011: 906098344
+      StoneWater_Junction_012: -22173915
+      StoneWater_Junction_013: 573818918
+      StoneWater_Junction_014: 441161256
+      StoneWater_Junction_015: -1631167268
+      StoneWater_Junction_023: -490990483
+      StoneWater_Junction_027: 1922616080
+      StoneWater_Junction_031: 56333041
+      StoneWater_Junction_039: -1430272986
+      StoneWater_Junction_046: 1380555126
+      StoneWater_Junction_047: -894127649
+      StoneWater_Junction_063: -308976380
+      StoneWater_Junction_077: 439815430
+      StoneWater_Junction_078: -350538130
+      StoneWater_Junction_079: -1163130602
+      StoneWater_Junction_095: 2011060008
+      StoneWater_Junction_111: 1367261194
+      StoneWater_Junction_139: 591848227
+      StoneWater_Junction_141: -1790117892
+      StoneWater_Junction_143: -1619071105
+      StoneWater_Junction_159: 2080980846
+      StoneWater_Junction_175: 627523121
+      StoneWater_Junction_207: 489009112
+      StoneWater_Straight_EW_010: 637622961
+      StoneWater_Straight_NS_005: -1933617598
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

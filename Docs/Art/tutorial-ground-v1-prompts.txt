@@ -1,0 +1,30 @@
+INITIAL GENERATION
+
+Use case: stylized-concept.
+Asset type: tutorial Ground layer texture atlas for a top-down 2D pixel-art adventure, The Lost Shrine.
+Create an entirely new SQUARE 4-by-4 ground texture atlas, 16 equal square cells, from the reference's LEFT tutorial palette. The supplied image is a COLOR / MOOD REFERENCE ONLY: do not reproduce its presentation, scene, labels, buildings or swatches.
+
+The entire output must be occupied by the texture atlas. Exactly four equal columns and four equal rows. No outer padding, gutters, visible grid lines, tile frames, titles, labels, numbers, hex codes, transparency, shadows between cells, perspective, isometric diamonds, sample scene, or UI.
+Each row represents ONE MATERIAL, its four cells four restrained texture variants. Material should extend flush to each cell edge. Within a row all cells use the SAME dominant base color and compatible opposite edges, so painting different variants together does not make a checkerboard or repeated rectangular outlines. This is a ground fill sheet, not a transition/autotile sheet.
+
+TOP ROW: four soft meadow grass variants. Predominantly flat #8B9B5E. Small low-contrast clusters in #60724D and #BECA82, rare #384B3C. Grass as a close-cropped ground surface, not individual tall blades or tufts. First tile especially plain.
+SECOND ROW: four warm bare-earth variants. Predominantly #B58C61 with sparse #826047 and #DFC291 clusters. Bare dirt fills the entire tile. No path edges, pebbles, objects, footprints or islands.
+THIRD ROW: four simple flat worn stone floor variants. Predominantly #B2AE91 with subtle #77766A wear and restrained #DFC291 warm flecks. Broad quiet surfaces. No outlined paving grid, cobblestones, bricks, individual standing rocks, beveling, ancient road pattern or deep cracks.
+BOTTOM ROW: four darker damp-earth variants. Predominantly #826047 with sparse #543F36 and #B58C61 mottling. Dry-to-damp brown soil texture only, no water pools, reflections, debris or footprints.
+
+PIXEL STYLE: coarse readable deliberate square pixel clusters, visually consistent with tiny classic 16x16 ground tiles enlarged with nearest-neighbor scaling. Sparse texture, about 80 percent calm base color per tile. Strict flat colors, no gradients, noise, microtexture, anti-aliased brush strokes, photorealism, lighting hotspots or vignette. Slight variation in cluster arrangement among the four cells, not light/dark alternate squares. No flowers, leaves, grass tufts, fences, buildings, water, cliffs, objects or decorations: those belong to other layers. Comfortably warm green countryside; no sepia filter, neon green, or autumn cast.
+
+Important: tile boundaries align exactly at 25%, 50%, 75% of the image dimensions. All tiles are square and equally sized. Make this a clean practical atlas image, not a pretty presentation board.
+
+REFINEMENT
+
+Edit this ground atlas into a much cleaner second version for actual small pixel-art ground tiles. Preserve the square 4 by 4 arrangement, material row order (green grass / warm tan earth / light gray-green stone / dark brown damp earth), and the material hue families. Keep the four tiles within each row nearly identical in base color.
+
+CRITICAL CHANGES:
+1. Remove ALL fine vertical dividing lines at the column boundaries. No grid, borders or gutters anywhere.
+2. Remove ALL gradients, haze and lighting variations. Each material's background must be one perfectly uniform flat color.
+3. Vastly simplify: each individual tile has only 4 to 7 little asymmetrical clusters total and at least 85 percent flat base color. No dense stippling.
+4. Make the logical pixel grid REALLY COARSE: each tile must look like a 16 by 16 pixel tile enlarged by exact nearest neighbor. Thus the entire sheet looks like a 64 by 64 pixel image enlarged. Every colored block has the same size, on the same global grid. NO finer pixels, semi-transparent pixels, softened edges or anti-aliasing. Pixel clusters are 1 to 3 logical pixels.
+5. Keep the outer TWO logical pixels of EVERY TILE the row's uniform base color, with all tiny texture clusters inside those bounds. The outer strip must be exactly the same color as the main field, not an outline. This allows all four variants in a material row to meet without visible seams.
+6. Limit to exact specified flat colors only: grass base #8B9B5E, shade #60724D, light #BECA82; dirt base #B58C61, shade #826047, light #DFC291; stone base #B2AE91, shade #77766A, light #DFC291; mud base #826047, shade #543F36, light #B58C61. Do not use other colors.
+No text, objects, grass tufts, flowers, stones, cracks, rendered scene, paths or edge transitions. Same practical full-bleed square atlas arrangement. This is deliberately quiet, minimal ground with a few chunky flat pixel marks, not a richly textured illustration.

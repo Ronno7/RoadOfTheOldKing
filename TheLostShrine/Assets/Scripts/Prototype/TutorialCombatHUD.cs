@@ -101,8 +101,14 @@ namespace TheLostShrine.Prototype
             var progress = CheckpointSession.Instance;
             if (progress != null)
             {
-                GUI.Box(new Rect(screenWidth - 218f, 12f, 206f, 38f), GUIContent.none);
+                GUI.Box(new Rect(screenWidth - 218f, 12f, 206f, 102f), GUIContent.none);
                 GUI.Label(new Rect(screenWidth - 206f, 18f, 190f, 26f), "SUN SHARDS  " + progress.Progress.sunShards, title);
+                int fragments = HeartFragmentProgression.Count(progress.Progress);
+                int bonus = HeartFragmentProgression.BonusHealth(progress.Progress);
+                GUI.Label(new Rect(screenWidth - 206f, 46f, 190f, 26f),
+                    "FRAGMENTS  " + fragments % HeartFragmentProgression.FragmentsPerHeart + " / 3", text);
+                GUI.Label(new Rect(screenWidth - 206f, 72f, 190f, 34f),
+                    bonus > 0 ? "Permanent HP: +" + bonus : "3 fragments = +20 max HP", text);
             }
 
             string controls = "WASD / arrows: move   |   Shift: sprint   |   Mouse: aim   |   Scroll: zoom\n" +

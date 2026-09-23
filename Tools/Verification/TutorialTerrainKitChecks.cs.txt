@@ -1,0 +1,55 @@
+// Edit Mode only; all temporary objects live in a preview scene. Does not touch saves or gameplay.
+if(EditorApplication.isPlaying)throw new System.Exception("Edit Mode required.");
+string root="Assets/Art/Tiles/Tutorial/Terrain";
+var results=new System.Collections.Generic.List<string>();int assertions=0;
+System.Action<bool,string> check=(ok,name)=>{assertions++;if(!ok)results.Add("FAIL "+name);};
+var sprites=AssetDatabase.LoadAllAssetsAtPath(root+"/TutorialTerrain16.png").OfType<Sprite>().ToArray();
+check(sprites.Length==315,"315 native sprites");
+foreach(var s in sprites){check(s.rect.width==16&&s.rect.height==16&&s.pixelsPerUnit==16,"Native resolution "+s.name);check(s.bounds.size.x==1&&s.bounds.size.y==1,"Full-rect sprite "+s.name);}
+var importer=(TextureImporter)AssetImporter.GetAtPath(root+"/TutorialTerrain16.png");
+check(importer.filterMode==FilterMode.Point&&!importer.mipmapEnabled&&importer.textureCompression==TextureImporterCompression.Uncompressed&&importer.npotScale==TextureImporterNPOTScale.None,"Pixel import settings");
+var tileIds=AssetDatabase.FindAssets("t:Tile",new[]{root+"/Tiles"});
+check(tileIds.Length==315,"315 visual Tile assets");
+foreach(var id in tileIds){var t=AssetDatabase.LoadAssetAtPath<UnityEngine.Tilemaps.Tile>(AssetDatabase.GUIDToAssetPath(id));check(t.sprite!=null&&t.colliderType==UnityEngine.Tilemaps.Tile.ColliderType.None,"Non-colliding art "+t.name);}
+foreach(string name in new[]{"TutorialTerrain_Paint","TutorialTerrain_Structures","TutorialTerrain_IndividualPieces"})check(AssetDatabase.LoadAllAssetsAtPath(root+"/Palettes/"+name+".prefab").OfType<GridPalette>().Any(),"Registered palette "+name);
+var template=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Art/Tiles/Tutorial/Templates/TutorialZoneTemplate.prefab");
+check(template!=null&&template.GetComponent<Grid>()!=null,"Combined ground and terrain template");
+foreach(string category in new[]{"Ground","Terrain","Paths","Environment","Detail Decoration","Collision","Above Player","Interactive Objects"})check(template.transform.Find(category)!=null,"Category "+category);
+check(template.transform.Find("Ground").GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>().Length==7,"Existing seven ground maps");
+check(template.transform.Find("Terrain").GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>().Length==9,"Nine independent terrain maps");
+check(template.transform.Find("Interactive Objects").GetComponent<UnityEngine.Tilemaps.Tilemap>()==null,"Interactive objects container");
+check(template.GetComponentsInChildren<UnityEngine.Tilemaps.TilemapCollider2D>().Length==1&&!template.transform.Find("Collision").GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().enabled,"Single hidden collision map");
+var terrain=template.transform.Find("Terrain");
+check(terrain.Find("MeadowWater").GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().sortingOrder>terrain.Find("GrassLedge").GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().sortingOrder,"Water can render on plateaus");
+check(terrain.Find("WaterDetails").GetComponent<UnityEngine.Tilemaps.Tilemap>().animationFrameRate==4,"Gentle 4fps water animation");
+foreach(string kind in new[]{"Ripple","FallBody","FallFoam"}){
+var tile=AssetDatabase.LoadAssetAtPath<UnityEngine.Tilemaps.AnimatedTile>(root+"/Animations/Animated_"+kind+".asset");
+check(tile!=null&&tile.m_AnimatedSprites.Length==4&&tile.m_AnimatedSprites.All(s=>s!=null),"Animation frames "+kind);
+check(tile.m_TileColliderType==UnityEngine.Tilemaps.Tile.ColliderType.None,"No animated collision "+kind);
+}
+var scene=UnityEditor.SceneManagement.EditorSceneManager.NewPreviewScene();
+try{
+var grid=new GameObject("Terrain verification",typeof(Grid));UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(grid,scene);
+var go=new GameObject("Tiles",typeof(UnityEngine.Tilemaps.Tilemap),typeof(UnityEngine.Tilemaps.TilemapRenderer));go.transform.SetParent(grid.transform,false);
+var map=go.GetComponent<UnityEngine.Tilemaps.Tilemap>();
+Vector3Int[] offsets={new Vector3Int(0,1,0),new Vector3Int(1,0,0),new Vector3Int(0,-1,0),new Vector3Int(-1,0,0),new Vector3Int(1,1,0),new Vector3Int(1,-1,0),new Vector3Int(-1,-1,0),new Vector3Int(-1,1,0)};
+foreach(string material in new[]{"MeadowWater","StoneWater","DeepWater","GrassLedge","StoneLedge","StoneWall"}){
+var rule=AssetDatabase.LoadAssetAtPath<RuleTile>(root+"/Rules/Paint_"+material+".asset");
+check(rule!=null&&rule.m_TilingRules.Count==(material=="StoneWall"?16:47),"Complete rule coverage "+material);
+check(rule.m_TilingRules.Select(r=>r.m_Id).Distinct().Count()==rule.m_TilingRules.Count,"Unique rule IDs "+material);
+check(rule.m_DefaultColliderType==UnityEngine.Tilemaps.Tile.ColliderType.None&&rule.m_TilingRules.All(r=>r.m_ColliderType==UnityEngine.Tilemaps.Tile.ColliderType.None),"Non-colliding brush "+material);
+for(int raw=0;raw<256;raw++){
+map.ClearAllTiles();map.SetTile(Vector3Int.zero,rule);
+for(int bit=0;bit<8;bit++)if((raw&(1<<bit))!=0)map.SetTile(offsets[bit],rule);
+int normalized=raw;
+if(material=="StoneWall")normalized&=15;
+else for(int bit=4;bit<8;bit++)if((raw&(1<<(bit-4)))==0||(raw&(1<<((bit-3)%4)))==0)normalized&=~(1<<bit);
+map.RefreshAllTiles();var sprite=map.GetSprite(Vector3Int.zero);
+check(sprite!=null&&(normalized==255?sprite.name.StartsWith(material+"_Center"):sprite.name.EndsWith("_"+normalized.ToString("D3"))),material+" neighbors "+raw);
+}
+map.ClearAllTiles();map.SetTile(Vector3Int.zero,rule);map.SetTile(Vector3Int.right,rule);var joined=map.GetSprite(Vector3Int.zero);map.SetTile(Vector3Int.right,null);var single=map.GetSprite(Vector3Int.zero);
+check(single!=joined&&single.name.EndsWith("_000"),"Neighbor erase refresh "+material);
+}
+}finally{UnityEditor.SceneManagement.EditorSceneManager.ClosePreviewScene(scene);}
+results.Insert(0,(results.Count==0?"PASS ":"FAILED ")+assertions+" terrain kit assertions; 1536 neighbor arrangements exercised.");
+return string.Join("\n",results.ToArray());

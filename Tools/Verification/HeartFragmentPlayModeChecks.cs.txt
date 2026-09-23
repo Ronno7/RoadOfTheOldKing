@@ -1,0 +1,54 @@
+// Fresh PrototypeLoop Play Mode session; never run against the normal save key.
+var results=new System.Collections.Generic.List<string>();System.Action<bool,string> check=(ok,name)=>results.Add((ok?"PASS ":"FAIL ")+name);
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var session=TheLostShrine.Progression.CheckpointSession.Instance;string key=(string)session.GetType().GetField("saveKey",flags).GetValue(session);
+if(!key.StartsWith("TheLostShrine.Verification."))throw new System.Exception("Isolated save required.");
+var player=GameObject.Find("Player").GetComponent<TheLostShrine.Player.PlayerHealth>();var body=player.GetComponent<Rigidbody2D>();var health=player.Health;
+var pickups=UnityEngine.Object.FindObjectsByType<TheLostShrine.World.HeartFragmentPickup>(FindObjectsSortMode.None);System.Array.Sort(pickups,(a,b)=>string.CompareOrdinal(a.RewardId,b.RewardId));
+var store=new TheLostShrine.Progression.PlayerPrefsProgressStore(key);var simulation=Physics2D.simulationMode;GameObject dummy=null;
+System.Action<Vector2> move=p=>{body.position=p;body.linearVelocity=Vector2.zero;player.transform.position=p;Physics2D.SyncTransforms();};
+try{
+Physics2D.simulationMode=SimulationMode2D.Script;
+check(pickups.Length==3,"Exactly three heart fragments exist in PrototypeLoop");
+check(health.Health==100&&health.MaxHealth==100&&TheLostShrine.Progression.HeartFragmentProgression.Count(session.Progress)==0,"Fresh player starts with 100 HP and zero fragments");
+check(System.Array.TrueForAll(pickups,p=>!p.IsCollected&&p.GetComponent<Collider2D>().isTrigger&&p.GetComponent<Collider2D>().enabled),"All fresh fragments have active pickup triggers");
+check(!pickups[0].TryCollect(player)&&!pickups[0].TryCollect(null),"Distant or non-player collection is rejected");
+check(!session.TryCollectHeartFragment("")&&!session.TryCollectHeartFragment(" "),"Empty reward IDs are rejected");
+var ground=GameObject.Find("Ground").GetComponent<UnityEngine.Tilemaps.Tilemap>();var water=GameObject.Find("Obstacles - Water").GetComponent<UnityEngine.Tilemaps.Tilemap>();
+var filter=new ContactFilter2D{useTriggers=false};var overlaps=new System.Collections.Generic.List<Collider2D>();var casts=new System.Collections.Generic.List<RaycastHit2D>();
+foreach(var pickup in pickups){
+var position=(Vector2)pickup.transform.position;Physics2D.OverlapCircle(position,.35f,filter,overlaps);
+check(ground.HasTile(ground.WorldToCell(position))&&!water.HasTile(water.WorldToCell(position))&&overlaps.Count==0,"Clear ground around "+pickup.RewardId);
+Vector2 start=pickup.RewardId.Contains("practice")?new Vector2(-17.5f,-5.5f):pickup.RewardId.Contains("recall")?new Vector2(16.5f,-1.5f):new Vector2(18.5f,10.5f);
+var delta=position-start;Physics2D.CircleCast(start,.3f,delta.normalized,filter,casts,delta.magnitude);check(casts.Count==0,"Player-sized route reaches "+pickup.RewardId);
+var renderers=pickup.GetComponentsInChildren<SpriteRenderer>();check(renderers.Length>0&&System.Array.TrueForAll(renderers,r=>r.sprite!=null&&r.sortingLayerName=="Player"),"Heart placeholder renders above ground: "+pickup.RewardId);
+}
+health.ReceiveHit(new TheLostShrine.Combat.CombatHit(null,TheLostShrine.Combat.AttackKind.EnemyMelee,30,Vector2.right,0,0));
+move(pickups[0].transform.position);Physics2D.Simulate(.02f);
+check(pickups[0].IsCollected&&TheLostShrine.Progression.HeartFragmentProgression.Count(session.Progress)==1,"Real physics trigger collects the first fragment");
+check(health.Health==70&&health.MaxHealth==100,"Partial set neither increases capacity nor heals damage");
+check(!pickups[0].GetComponent<Collider2D>().enabled&&!pickups[0].transform.GetChild(0).gameObject.activeSelf,"Collected fragment hides its visual and disables its trigger");
+check(!pickups[0].TryCollect(player)&&!session.TryCollectHeartFragment(pickups[0].RewardId),"Duplicate pickup and reward ID cannot award twice");
+var saved=store.Load();check(!session.HasCheckpoint&&TheLostShrine.Progression.HeartFragmentProgression.Count(saved)==1,"Partial collection saves immediately before any bonfire");
+move(pickups[1].transform.position);check(pickups[1].TryCollect(player),"Second distinct fragment can be collected");
+check(health.MaxHealth==100&&health.Health==70&&TheLostShrine.Progression.HeartFragmentProgression.Count(session.Progress)==2,"Two fragments remain a partial set");
+move(pickups[2].transform.position);check(pickups[2].TryCollect(player),"Third distinct fragment can be collected");
+check(health.MaxHealth==120&&health.Health==90,"Complete set adds exactly 20 to maximum and current HP");
+saved=store.Load();check(TheLostShrine.Progression.HeartFragmentProgression.Count(saved)==3&&TheLostShrine.Progression.HeartFragmentProgression.BonusHealth(saved)==20,"Saved IDs reconstruct the permanent health bonus");
+player.RestoreProgress(saved);player.RestoreProgress(saved);foreach(var pickup in pickups)pickup.RestoreProgress(saved);
+check(health.MaxHealth==120&&health.Health==90&&System.Array.TrueForAll(pickups,p=>p.IsCollected),"Repeated restoration neither stacks HP nor heals again nor respawns pickups");
+check(session.Progress.sunShards==0&&session.Progress.upgrades.Count==0,"Heart collection does not change Sun Shards or weapon choices");
+var camp=session.Fires[0];move(camp.SpawnPosition);check(session.Rest(camp)&&health.Health==120,"Bonfire rest heals to the increased maximum");
+check(TheLostShrine.Progression.HeartFragmentProgression.Count(session.Progress)==3&&System.Array.TrueForAll(pickups,p=>p.IsCollected),"Rest leaves fragments permanently collected");
+var exit=session.Fires[1];move(exit.SpawnPosition);session.Rest(exit);check(session.Travel(camp,exit)&&health.Health==120&&health.MaxHealth==120,"Bonfire travel retains maximum health and refills it");
+// The pure rule supports further sets without changing pickup or saving code.
+var future=new TheLostShrine.Progression.ProgressState();future.Complete("shard/collected/unrelated");
+for(int i=0;i<6;i++)TheLostShrine.Progression.HeartFragmentProgression.TryCollect(future,"future/"+i);
+check(TheLostShrine.Progression.HeartFragmentProgression.Count(future)==6&&TheLostShrine.Progression.HeartFragmentProgression.BonusHealth(future)==40,"Future sets compound and unrelated reward types are ignored");
+var legacy=JsonUtility.FromJson<TheLostShrine.Progression.ProgressState>("{\"version\":1,\"completedIds\":[],\"discoveredFires\":[]}");
+check(TheLostShrine.Progression.HeartFragmentProgression.BonusHealth(legacy)==0,"Existing saves need no migration and start without a health bonus");
+dummy=new GameObject("Heart bonus edge-case target");var damageable=dummy.AddComponent<TheLostShrine.Combat.Damageable>();damageable.SetMaxHealthBonus(20);damageable.ReceiveHit(new TheLostShrine.Combat.CombatHit(null,TheLostShrine.Combat.AttackKind.LightChop,1000,Vector2.right,0,0));damageable.SetMaxHealthBonus(40);
+check(!damageable.IsAlive&&damageable.Health==0,"Applying a health bonus cannot resurrect a dead target");
+damageable.RestoreHealth();check(damageable.Health==140,"Explicit restore fills the adjusted health capacity");damageable.SetMaxHealthBonus(0);check(damageable.Health==100&&damageable.MaxHealth==100,"Removing a bonus restores base capacity without mutating the configured value");
+}finally{if(dummy!=null)UnityEngine.Object.DestroyImmediate(dummy);Physics2D.simulationMode=simulation;}
+return string.Join("\n",results.ToArray());

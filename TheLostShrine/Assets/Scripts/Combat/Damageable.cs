@@ -9,9 +9,10 @@ namespace TheLostShrine.Combat
         [SerializeField, Min(1)] private int maxHealth = 100;
         [SerializeField] private MonoBehaviour protectionSource;
         private IHitProtection protection;
+        private int maxHealthBonus;
 
         public int Health { get; private set; }
-        public int MaxHealth => maxHealth;
+        public int MaxHealth => maxHealth + maxHealthBonus;
         public bool IsAlive => Health > 0;
         public event Action<CombatHit> HitReceived;
         public event Action Defeated;
@@ -34,6 +35,15 @@ namespace TheLostShrine.Combat
             return true;
         }
 
-        public void RestoreHealth() => Health = maxHealth;
+        // Absolute bonus makes restoration idempotent. Increasing capacity also fills the new HP.
+        public void SetMaxHealthBonus(int bonus)
+        {
+            int previousMaximum = MaxHealth;
+            maxHealthBonus = Mathf.Max(0, bonus);
+            if (IsAlive)
+                Health = Mathf.Clamp(Health + MaxHealth - previousMaximum, 1, MaxHealth);
+        }
+
+        public void RestoreHealth() => Health = MaxHealth;
     }
 }

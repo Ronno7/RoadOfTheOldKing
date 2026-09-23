@@ -2,6 +2,23 @@
 
 Listed newest first.
 
+## 22SEP2026 - Tutorial art and presentation
+
+- Added cohesive ground, terrain and village path tiles with automatic connections, painting palettes and animated water.
+- Created DemoTutorial as one world-only presentation scene showcasing the art.
+- Organized tiles by zone and layer, kept one shared starter template, and removed redundant previews and templates.
+- Updated painting guides and verified tile connections, asset references and clear paths through the demo.
+
+## 22SEP2026 - Heart fragments
+
+### Added
+
+- Three optional heart fragments around the practice area, Recall clearing, and second bonfire, with a reusable red heart placeholder prefab and a short teaching sign.
+- Every three unique fragments grant +20 permanent maximum HP. Completing a set also adds 20 current HP; partial sets do not heal. Added HUD progress toward the next set and the permanent HP bonus.
+- Fragment collection saves immediately and survives rest, death, travel, and reload. Bonfires and respawning refill the increased health capacity. New run clears fragments and returns the player to 100 maximum HP; existing saves remain compatible.
+- Separated pickup handling, fragment rules, and health capacity. Derived progression from existing unique reward IDs and applied an absolute runtime bonus without changing base prefab health or stacking on reload.
+- Added 34 heart-fragment checks and updated the systems overview. WebGL has not been rebuilt.
+
 ## 22SEP2026 - Sun Shards and first weapon upgrade
 
 ### Added

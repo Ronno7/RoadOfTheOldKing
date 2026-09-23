@@ -1,0 +1,33 @@
+// Inspect the presentation without changing gameplay, saves or build settings.
+if(EditorApplication.isPlaying)throw new System.Exception("Edit Mode required.");
+string path="Assets/Scenes/DemoTutorial.unity";
+var scene=UnityEngine.SceneManagement.SceneManager.GetSceneByPath(path);
+bool opened=!scene.IsValid()||!scene.isLoaded;
+if(opened)scene=UnityEditor.SceneManagement.EditorSceneManager.OpenScene(path,UnityEditor.SceneManagement.OpenSceneMode.Additive);
+var failures=new System.Collections.Generic.List<string>();int count=0;
+System.Action<bool,string> check=(ok,label)=>{count++;if(!ok)failures.Add(label);};
+try{
+var roots=scene.GetRootGameObjects();var objects=roots.SelectMany(g=>g.GetComponentsInChildren<Transform>(true)).Select(t=>t.gameObject).ToArray();
+check(roots.Length==3,"Only world, presentation camera and light roots");
+check(objects.All(g=>!PrefabUtility.IsPartOfPrefabInstance(g)),"Presentation has no prefab instances");
+check(objects.All(g=>GameObjectUtility.GetMonoBehavioursWithMissingScriptCount(g)==0),"No missing scripts");
+check(objects.All(g=>g.GetComponents<MonoBehaviour>().Length==0),"No gameplay MonoBehaviours");
+check(objects.Sum(g=>g.GetComponents<Camera>().Length)==1,"One presentation camera");
+check(objects.Sum(g=>g.GetComponents<Light>().Length)==1,"World light");
+var maps=roots.SelectMany(g=>g.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>()).ToDictionary(m=>m.name);
+foreach(string name in new[]{"Grass","DryGrass","Earth","DampEarth","WornStone","Paving","TilledSoil","MeadowWater","StoneWater","DeepWater","GrassLedge","StoneLedge","StoneWall","CliffFaces","Stairs and Ramps","WaterDetails","DirtLane","Footpath"})check(maps[name].GetUsedTilesCount()>0,"Visible material "+name);
+var seen=new System.Collections.Generic.HashSet<string>();
+foreach(var map in maps.Values){var used=new UnityEngine.Tilemaps.TileBase[map.GetUsedTilesCount()];map.GetUsedTilesNonAlloc(used);foreach(var tile in used){check(tile!=null,"Valid tile on "+map.name);if(tile!=null)seen.Add(tile.name);}foreach(var p in map.cellBounds.allPositionsWithin)if(map.HasTile(p))check(map.GetSprite(p)!=null,"Resolved sprite "+map.name+" "+p);}
+foreach(string animation in new[]{"Animated_Ripple","Animated_FallBody","Animated_FallFoam"})check(seen.Contains(animation),"Animation placed "+animation);
+var collision=maps["Collision"];
+check(!collision.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().enabled&&collision.GetComponent<UnityEngine.Tilemaps.TilemapCollider2D>()!=null,"Separate invisible collision");
+foreach(string name in new[]{"DirtLane","Footpath","Paving","Stairs and Ramps"})foreach(var p in maps[name].cellBounds.allPositionsWithin)if(maps[name].HasTile(p))check(!collision.HasTile(p),"Open route "+name+" "+p);
+var visited=new System.Collections.Generic.HashSet<Vector3Int>();var queue=new System.Collections.Generic.Queue<Vector3Int>();queue.Enqueue(new Vector3Int(13,10,0));
+var steps=new[]{Vector3Int.left,Vector3Int.right,Vector3Int.up,Vector3Int.down};
+while(queue.Count>0){var p=queue.Dequeue();if(p.x<0||p.x>=64||p.y<0||p.y>=40||collision.HasTile(p)||!visited.Add(p))continue;foreach(var step in steps)queue.Enqueue(p+step);}
+foreach(var p in new[]{new Vector3Int(13,32,0),new Vector3Int(53,33,0),new Vector3Int(54,22,0),new Vector3Int(13,3,0)})check(visited.Contains(p),"Connected landscape "+p);
+check(AssetDatabase.FindAssets("t:Scene",new[]{"Assets/Art/Tiles"}).Length==0,"No per-layer scenes in art folders");
+check(EditorBuildSettings.scenes.All(s=>s.path!=path),"Presentation excluded from gameplay build");
+check(AssetDatabase.LoadAssetAtPath<UnityEngine.Tilemaps.Tile>("Assets/Art/Tiles/Tutorial/Collision/Collision_Block.asset")!=null,"Collision asset in correct layer");
+}finally{if(opened)UnityEditor.SceneManagement.EditorSceneManager.CloseScene(scene,true);}
+return (failures.Count==0?"PASS ":"FAILED ")+count+" demo assertions\n"+string.Join("\n",failures.ToArray());
