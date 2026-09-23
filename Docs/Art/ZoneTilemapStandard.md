@@ -1,8 +1,8 @@
 # Zone tilemap standard
 
-Use this structure for every zone. Build the tutorial art first using [Hearth & Meadow](OpeningZonePalettes-v1.md).
+Use this structure for every zone. Build the tutorial art first using [Hearth & Meadow](Palettes/OpeningZonePalettes-v1.md).
 
-The [tutorial village plan](TutorialVillagePlan.md) records the intended route and upcoming environment assets.
+The [tutorial village plan](Tutorial/Plan.md) records the intended route and upcoming environment assets.
 
 | Layer | Content | Notes |
 | --- | --- | --- |
@@ -12,30 +12,34 @@ The [tutorial village plan](TutorialVillagePlan.md) records the intended route a
 | Environment | Trees, rocks, fences, ruins, pillars, buildings | Place static visual structures here. Large structures may span multiple tiles. |
 | Detail / Decoration | Flowers, grass tufts, leaves, bones, pottery, bronze fragments, carved stones | Keep movable or breakable versions as interactive GameObjects. |
 | Collision | Terrain boundaries and solid objects | Separate invisible Tilemap/Collider layer; no baked collision in ordinary Ground tiles. |
-| Above Player | Canopies, arches, roof edges, banners, tall ruins | Only the parts that should cover the player. |
+| Above Player | Canopies, arches, roof edges, banners, tall ruins | Existing tutorial overhead parts reuse Environment art, with separate collision. [Authoring guide](../../TheLostShrine/Assets/Art/Tiles/Tutorial/AbovePlayer/README.md). |
 | Interactive Objects | Breakables, switches, targets, chests, puzzle pieces, bonfires, Recall objects | A GameObject parent/container, not a baked Tilemap. Use reusable prefabs. |
 
 This is an authoring convention. Draw order and object sorting must also accommodate the player's feet and tall-object bases; the list alone does not establish every object's sorting behavior.
 
 ## Folder layout
 
-Store art under `Assets/Art/Tiles/<Zone>/<Layer>/`. The current tutorial has **Ground**, **Terrain**, **Paths**, **Collision**, and reserved **Environment**, **DetailDecoration**, and **AbovePlayer** folders. Ground/Terrain/Paths own their atlases, tiles, brushes and palettes. Terrain owns its water animations. Interactive objects stay under `Assets/Prefabs/`.
+Store art under `Assets/Art/Tiles/<Zone>/<Layer>/`. The current tutorial has **Ground**, **Terrain**, **Paths**, **Environment**, **Collision**, **DetailDecoration**, and an **AbovePlayer** authoring guide. Each production kit owns its atlas, tiles and palettes. Terrain owns its water animations. The Environment atlas supplies both base and overhead portions of its objects. Interactive objects stay under `Assets/Prefabs/`.
 
 One reusable blank template, `Tutorial/Templates/TutorialZoneTemplate.prefab`, combines Ground, Terrain and Paths. The original prototype kit is in `Prototype/Ground/`, with its asset references preserved.
 
 ## One presentation scene
 
-Open **Assets/Scenes/DemoTutorial.unity** for the combined world-only art presentation. It shows the available materials, garden plots, a village square, river/island pond, cliff waterfall, stairs and a stone terrace. Play Mode animates the water. It contains only world tiles, a camera and light; author the actual tutorial separately.
+Open **Assets/Scenes/DemoTutorial.unity** for the full world-only art presentation: homes, work areas, a garden, orchard, practice enclosure, bridge and modest ruins. Static Environment objects are reusable prefab instances with independent visual/overhead/collision maps. Practice props remain visual-only GameObjects. There are no gameplay scripts or inactive sample worlds in this scene.
 
 Layer builders update assets and palettes without generating scenes. The explicit **Rebuild Demo Tutorial Presentation** menu command recreates this demonstration only. The scene is excluded from gameplay build settings.
 
-[Presentation image](demo-tutorial.png)
+[Full presentation](Tutorial/Previews/demo-tutorial.png) · [Village close-up](Tutorial/Previews/tutorial-environment-detail.png). The [village plan](Tutorial/Plan.md) tracks the current art direction, next layer and deferred atmosphere/camera work.
 
 ## Production kits
 
-- **Ground:** 308 native 16x16 visual tiles, seven automatic RuleTile brushes and two palettes. [Painting guide](../../TheLostShrine/Assets/Art/Tiles/Tutorial/Ground/README.md) · [Contact sheet](tutorial-ground-production-atlas.png).
-- **Terrain:** 315 native tiles, six automatic brushes, three animated water tiles and three palettes. Five full 47-shape sets cover banks and ledges; walls have 16 cardinal shapes. [Painting guide](../../TheLostShrine/Assets/Art/Tiles/Tutorial/Terrain/README.md) · [Contact sheet](tutorial-terrain-production-atlas.png).
+- **Ground:** 308 native 16x16 visual tiles, seven automatic RuleTile brushes and two palettes. [Painting guide](../../TheLostShrine/Assets/Art/Tiles/Tutorial/Ground/README.md) · [Contact sheet](Tutorial/Previews/tutorial-ground-production-atlas.png).
+- **Terrain:** 315 native tiles, six automatic brushes, three animated water tiles and three palettes. Five full 47-shape sets cover banks and ledges; walls have 16 cardinal shapes. [Painting guide](../../TheLostShrine/Assets/Art/Tiles/Tutorial/Terrain/README.md) · [Contact sheet](Tutorial/Previews/tutorial-terrain-production-atlas.png).
 
 - **Paths:** 100 native dirt-lane/footpath tiles, two automatic brushes and one palette that also reuses Ground cobbles for paving. [Painting guide](../../TheLostShrine/Assets/Art/Tiles/Tutorial/Paths/README.md).
 
-All production atlases use exact native pixels and the approved [opening-zone palette](OpeningZonePalettes-v1.md). The older [generated ground draft](tutorial-ground-v1.png) remains a visual study, not the production atlas.
+- **Environment:** 31 objects, 229 tile pieces, one palette, 28 static prefabs and three visual-only practice props. Separate trunk/base collision and overhead art; 14 exact Tutorial colors and binary transparency. [Painting guide](../../TheLostShrine/Assets/Art/Tiles/Tutorial/Environment/README.md).
+
+All five production layers use exact colors from the approved [opening-zone palette](Palettes/OpeningZonePalettes-v1.md). The previous high-detail Environment kit and temporary sample tooling have been removed. The [approved sample reference](Tutorial/Sources/Environment/Sample-preview.png) remains in the art docs; its four native sprites are reused unchanged. The older [generated ground draft](Tutorial/Sources/Ground/tutorial-ground-v1.png) is a visual study, not a production atlas.
+
+**Detail / Decoration:** 12 designs, eight ground stamps made from 12 collision-free tiles, one palette and four visual-only props. Ground details use Ground sorting order 30; the unlit fire ring uses order 31. [Painting guide](../../TheLostShrine/Assets/Art/Tiles/Tutorial/DetailDecoration/README.md) · [Village detail](Tutorial/Previews/tutorial-decoration-village.png) · [Practice/rest detail](Tutorial/Previews/tutorial-decoration-practice.png). The six approved sample designs are preserved exactly. Atmospheric work remains deferred.

@@ -67,6 +67,7 @@ def verify():
 
 def main():
     OUT.mkdir(parents=True,exist_ok=True)
+    (ROOT/'Docs/Art/Tutorial/Previews').mkdir(parents=True,exist_ok=True)
     entries=[];images=[]
     for material in MATERIALS:
         for mask,v in [(m,0) for m in ground.MASKS]+[(255,v) for v in range(1,4)]:
@@ -82,7 +83,7 @@ def main():
         sample=Image.new('RGBA',(16,16),ground.P['grass']);sample.alpha_composite(im)
         sheet.paste(sample.resize((64,64),Image.Resampling.NEAREST),(i%cols*64,i//cols*64))
     atlas.save(OUT/'TutorialPaths16.png')
-    sheet.save(ROOT/'Docs/Art/tutorial-paths-production-atlas.png')
+    sheet.save(ROOT/'Docs/Art/Tutorial/Previews/tutorial-paths-production-atlas.png')
     (OUT/'TileManifest.json').write_text(json.dumps(dict(tileSize=16,columns=cols,padding=2,entries=entries),indent=2)+'\n')
     with (OUT/'TileIndex.csv').open('w',newline='') as f:
         w=csv.DictWriter(f,fieldnames=entries[0].keys());w.writeheader();w.writerows(entries)

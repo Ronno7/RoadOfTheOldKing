@@ -13,7 +13,7 @@ import build_tutorial_ground as ground
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'TheLostShrine/Assets/Art/Tiles/Tutorial/Terrain'
-DOC = ROOT / 'Docs/Art'
+DOC = ROOT / 'Docs/Art/Tutorial/Previews'
 P = dict(ground.P)
 P.update({k: tuple(bytes.fromhex(v)) + (255,) for k, v in {
     'water': '6E9F9A', 'waterdeep': '395F66', 'watershade': '638C8E',

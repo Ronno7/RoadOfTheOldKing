@@ -1,0 +1,73 @@
+// Run in Edit Mode through Unity MCP execute_code. Does not modify gameplay or saves.
+if(EditorApplication.isPlaying)throw new System.Exception("Edit Mode required.");
+string root=TheLostShrine.EditorTools.TutorialEnvironmentKitBuilder.Root;
+var props=TheLostShrine.EditorTools.TutorialEnvironmentKitBuilder.ReadCatalog();
+var failures=new System.Collections.Generic.List<string>();int count=0;
+System.Action<bool,string> check=(ok,label)=>{count++;if(!ok)failures.Add(label);};
+var sprites=AssetDatabase.LoadAllAssetsAtPath(root+"/TutorialEnvironment16.png").OfType<Sprite>().ToDictionary(s=>s.name);
+var importer=(TextureImporter)AssetImporter.GetAtPath(root+"/TutorialEnvironment16.png");
+check(importer.filterMode==FilterMode.Point&&!importer.mipmapEnabled&&importer.textureCompression==TextureImporterCompression.Uncompressed&&importer.spritePixelsPerUnit==16,"Native crisp import");
+check(props.Length==31&&props.Select(p=>p.name).Distinct().Count()==31,"31 unique objects");
+int expectedTiles=props.Where(p=>!p.interactiveArt).Sum(p=>p.width/16*(p.height/16));
+check(AssetDatabase.FindAssets("t:Tile",new[]{root+"/Tiles"}).Length==expectedTiles,"No missing or obsolete tile pieces");
+var colors=System.IO.File.ReadAllLines("../Docs/Art/Palettes/tutorial-hearth-and-meadow-v1.gpl").Select(l=>l.Split((char[])null,System.StringSplitOptions.RemoveEmptyEntries)).Where(p=>p.Length>=3&&char.IsDigit(p[0][0])).Select(p=>new Color32(byte.Parse(p[0]),byte.Parse(p[1]),byte.Parse(p[2]),255)).ToArray();
+var atlas=new Texture2D(2,2);atlas.LoadImage(System.IO.File.ReadAllBytes(root+"/TutorialEnvironment16.png"));
+check(atlas.GetPixels32().All(p=>p.a==0||(p.a==255&&colors.Contains(p))),"Exact Tutorial palette and binary alpha");
+var approved=new Texture2D(2,2);approved.LoadImage(System.IO.File.ReadAllBytes("../Docs/Art/Tutorial/Sources/Environment/ApprovedSample16.png"));
+foreach(var prop in props.Where(p=>p.native))
+{
+    var r=sprites[prop.name].rect;var a=prop.sourceRect;
+    check(atlas.GetPixels((int)r.x,(int)r.y,prop.width,prop.height).SequenceEqual(approved.GetPixels(a.x,approved.height-a.y-a.height,a.width,a.height)),"Approved pixels preserved "+prop.name);
+}
+var gateRect=sprites["Gate_Open"].rect;
+check(atlas.GetPixels((int)gateRect.x+18,(int)gateRect.y,12,32).All(p=>p.a==0),"Gate art leaves a player-wide visible opening");
+UnityEngine.Object.DestroyImmediate(atlas);UnityEngine.Object.DestroyImmediate(approved);
+foreach(var prop in props)
+{
+    check(sprites.ContainsKey(prop.name)&&sprites[prop.name].rect.width==prop.width&&sprites[prop.name].rect.height==prop.height,"Whole sprite "+prop.name);
+    string path=(prop.interactiveArt?TheLostShrine.EditorTools.TutorialEnvironmentKitBuilder.VisualRoot:TheLostShrine.EditorTools.TutorialEnvironmentKitBuilder.PrefabRoot)+"/"+prop.name+(prop.interactiveArt?"_Visual":"")+".prefab";
+    var prefab=AssetDatabase.LoadAssetAtPath<GameObject>(path);
+    check(prefab!=null,"Prefab "+prop.name);if(!prefab)continue;
+    check(prefab.GetComponentsInChildren<MonoBehaviour>(true).Length==0,"Art-only prefab "+prop.name);
+    check(prefab.GetComponentsInChildren<Transform>(true).All(t=>GameObjectUtility.GetMonoBehavioursWithMissingScriptCount(t.gameObject)==0),"Valid components "+prop.name);
+    if(prop.interactiveArt)
+    {
+        check(prefab.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>().Length==0&&prefab.GetComponentsInChildren<Collider2D>().Length==0,"Practice art ready for gameplay wiring, not baked "+prop.name);
+        check(prefab.GetComponentInChildren<SpriteRenderer>().sprite==sprites[prop.name],"Practice sprite assigned "+prop.name);continue;
+    }
+    var maps=prefab.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>().ToDictionary(m=>m.name);
+    var bases=maps["Environment"];var upper=maps["Above Player"];var block=maps["Collision"];
+    check(!block.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().enabled&&block.GetComponent<UnityEngine.Tilemaps.TilemapCollider2D>()!=null,"Separate collision "+prop.name);
+    check(bases.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().sortingLayerName=="World"&&upper.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().sortingOrder==100,"Player occlusion layers "+prop.name);
+    for(int y=0;y<prop.height/16;y++)for(int x=0;x<prop.width/16;x++)
+    {
+        var p=new Vector3Int(x,y,0);
+        check(bases.HasTile(p)!=upper.HasTile(p),"One visible cell, no duplicate "+prop.name+" "+p);
+        var tile=(UnityEngine.Tilemaps.Tile)(bases.GetTile(p)??upper.GetTile(p));
+        check(tile!=null&&tile.sprite!=null&&tile.sprite.rect.width==16&&tile.sprite.rect.height==16&&tile.colliderType==UnityEngine.Tilemaps.Tile.ColliderType.None,"Correct cell sprite "+prop.name+" "+p);
+        bool expected=prop.collision.Any(a=>x>=a.x&&x<a.x+a.width&&y>=a.y&&y<a.y+a.height);
+        check(block.HasTile(p)==expected,"Collision footprint "+prop.name+" "+p);
+    }
+    if(prop.name=="Stone_Bridge")for(int x=0;x<10;x++)foreach(int y in new[]{1,2})check(!block.HasTile(new Vector3Int(x,y,0)),"Traversable bridge deck");
+    if(prop.name=="Gate_Open"||prop.name=="Old_Arch")check(!block.HasTile(new Vector3Int(1,0,0)),"Open passage "+prop.name);
+    if(prop.name=="Gate_Closed")check(block.HasTile(new Vector3Int(1,0,0)),"Closed gate footprint");
+    if(prop.kind=="tree")
+    {
+        check(prop.collision.Length==1&&prop.collision[0].width==1&&prop.collision[0].height==1,"Trunk-only footprint "+prop.name);
+        check(upper.HasTile(new Vector3Int(1,2,0))&&!block.HasTile(new Vector3Int(1,2,0)),"Walkable overhead canopy "+prop.name);
+    }
+}
+string palette=root+"/Palettes/TutorialEnvironment.prefab";
+check(AssetDatabase.LoadAllAssetsAtPath(palette).OfType<GridPalette>().Any(),"Registered painting palette");
+check(AssetDatabase.FindAssets("t:Prefab",new[]{"Assets/Art/Tiles/Tutorial/Templates"}).Length==1,"One shared template");
+check(AssetDatabase.FindAssets("t:Scene",new[]{root}).Length==0,"No extra demonstration scenes");
+var scene=UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+check(scene.path=="Assets/Scenes/DemoTutorial.unity","Presentation open");
+foreach(var collider in scene.GetRootGameObjects().SelectMany(g=>g.GetComponentsInChildren<UnityEngine.Tilemaps.TilemapCollider2D>()))collider.ProcessTilemapChanges();Physics2D.SyncTransforms();
+foreach(var p in new[]{new Vector2(8f,29.5f),new Vector2(16f,32.5f),new Vector2(4f,17.5f),new Vector2(7.5f,18.5f),new Vector2(52.5f,8.5f),new Vector2(52.5f,17f),new Vector2(53.5f,32.5f),new Vector2(33.5f,20.5f),new Vector2(42.5f,21.5f),new Vector2(29.5f,33.5f)})
+    check(Physics2D.OverlapBox(p,Vector2.one*.75f,0)==null,"Player-sized clearance "+p);
+check(Physics2D.OverlapBox(new Vector2(29.5f,31.5f),Vector2.one*.75f,0)!=null,"Oak trunk blocks the player");
+var player=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Player/Player.prefab").GetComponentsInChildren<SpriteRenderer>().First(r=>r.name=="Body");
+var oak=AssetDatabase.LoadAssetAtPath<GameObject>(TheLostShrine.EditorTools.TutorialEnvironmentKitBuilder.PrefabRoot+"/Oak.prefab").transform.Find("Above Player").GetComponent<UnityEngine.Tilemaps.TilemapRenderer>();
+check(oak.sortingLayerID==player.sortingLayerID&&oak.sortingOrder>player.sortingOrder,"Canopy draws over actual player renderer");
+return (failures.Count==0?"PASS ":"FAILED ")+count+" Environment assertions; "+props.Length+" objects, "+expectedTiles+" tile pieces\n"+string.Join("\n",failures.ToArray());

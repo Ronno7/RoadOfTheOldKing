@@ -12,7 +12,7 @@ import random
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'TheLostShrine/Assets/Art/Tiles/Tutorial/Ground'
-DOC = ROOT / 'Docs/Art'
+DOC = ROOT / 'Docs/Art/Tutorial/Previews'
 SIZE, PAD, COLS = 16, 2, 16
 P = {k: tuple(bytes.fromhex(v)) + (255,) for k, v in {
     'grass': '8B9B5E', 'leafshade': '60724D', 'leaflight': 'BECA82',

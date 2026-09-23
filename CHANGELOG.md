@@ -2,6 +2,12 @@
 
 Listed newest first.
 
+## 23SEP2026 - Tutorial art completion
+
+- Completed the cohesive Environment kit (31 objects) and compact Decoration kit (12 designs), preserving the approved style and palette.
+- Dressed DemoTutorial with village/work areas, practice yard, bridge, ruins and sparse details; verified routes, separate collision, and canopy/roof sorting.
+- Consolidated sample assets into production and organized art plans, palettes, previews and rebuild sources. Interactive objects are next; atmosphere/camera work remains deferred.
+
 ## 22SEP2026 - Tutorial art and presentation
 
 - Added cohesive ground, terrain and village path tiles with automatic connections, painting palettes and animated water.

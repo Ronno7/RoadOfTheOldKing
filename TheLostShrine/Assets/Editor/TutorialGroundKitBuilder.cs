@@ -122,7 +122,7 @@ namespace TheLostShrine.EditorTools
             AddMap(paths.transform,"Footpath",20);
             AddMap(paths.transform,"DirtLane",21);
             AddMap(paths.transform,"Paving",22);
-            var environment = AddMap(root.transform,"Environment",0,"Player");
+            var environment = AddMap(root.transform,"Environment",0,"World");
             environment.GetComponent<TilemapRenderer>().mode = TilemapRenderer.Mode.Individual;
             AddMap(root.transform,"Detail Decoration",30);
             var collision = AddMap(root.transform,"Collision",0);

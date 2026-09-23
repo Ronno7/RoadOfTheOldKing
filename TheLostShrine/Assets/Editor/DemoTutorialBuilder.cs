@@ -159,6 +159,8 @@ namespace TheLostShrine.EditorTools
                 foreach(var p in maps[name].cellBounds.allPositionsWithin)
                     if(maps[name].HasTile(p)&&new[]{Vector3Int.left,Vector3Int.right,Vector3Int.up,Vector3Int.down}.Any(n=>!maps[name].HasTile(p+n)))maps["Collision"].SetTile(p,block);
             foreach(var p in maps["Stairs and Ramps"].cellBounds.allPositionsWithin)if(maps["Stairs and Ramps"].HasTile(p))maps["Collision"].SetTile(p,null);
+            TutorialEnvironmentDemo.Dress(world);
+            TutorialDecorationKitBuilder.Dress(world);
         }
     }
 }
