@@ -2,6 +2,8 @@
 
 Start with the [tutorial plan](Tutorial/Plan.md) for current scope and deferred work. The next layer is Interactive Objects.
 
+To build a scene with the existing kits, follow the [tutorial scene quick start](Tutorial/QuickStart.md).
+
 | Location | What belongs here |
 | --- | --- |
 | [Palettes](Palettes/OpeningZonePalettes-v1.md) | Shared color decisions, swatch images and exact GPL palettes |
