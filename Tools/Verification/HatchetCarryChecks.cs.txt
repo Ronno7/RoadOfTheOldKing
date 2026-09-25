@@ -1,0 +1,85 @@
+// Run in fresh Tutorial Play Mode. Uses the real stump pickup and movement motor.
+// Stop Play Mode afterward to reset ownership; no checkpoint/save system is used.
+if(!Application.isPlaying)throw new Exception("Enter Tutorial Play Mode first.");
+var player=GameObject.Find("Player");var body=player.GetComponent<Rigidbody2D>();
+var input=player.GetComponent<TheLostShrine.Input.PlayerMovementInput>();
+var movement=player.GetComponent<TheLostShrine.Player.PlayerMovement>();
+var animation=player.GetComponent<TheLostShrine.Player.PlayerLocomotionAnimation>();
+var combat=player.GetComponent<TheLostShrine.Player.PlayerCombatController>();
+var weapon=GameObject.Find("Hatchet Pickup").GetComponent<TheLostShrine.Weapons.HatchetWeapon>();
+if(weapon.State!=TheLostShrine.Weapons.HatchetState.OnGround)throw new Exception("Use a fresh scene with the weapon still in its stump.");
+var view=weapon.GetComponent<TheLostShrine.Weapons.HatchetView>();
+var model=weapon.transform.Find("Model");var blade=model.Find("Sprite").GetComponent<SpriteRenderer>();
+var sprite=player.transform.Find("Body").GetComponent<SpriteRenderer>();
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var inputUpdate=input.GetType().GetMethod("Update",flags);var motor=movement.GetType().GetMethod("FixedUpdate",flags);
+var animate=animation.GetType().GetMethod("LateUpdate",flags);var render=view.GetType().GetMethod("LateUpdate",flags);
+var simulate=weapon.GetType().GetMethod("Simulate",flags);
+var actions=(UnityEngine.InputSystem.InputActionMap)input.GetType().GetField("actions",flags).GetValue(input);
+var oldDevices=actions.devices;var oldRouting=UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode;
+var oldFocus=input.GetType().GetField("hasFocus",flags).GetValue(input);var oldPause=input.GetType().GetField("paused",flags).GetValue(input);
+var oldSimulation=Physics2D.simulationMode;var oldInterpolation=body.interpolation;var oldPosition=body.position;
+var keyboard=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
+var results=new System.Collections.Generic.List<string>();System.Action<bool,string> check=(ok,label)=>results.Add((ok?"PASS ":"FAIL ")+label);
+int equips=0;System.Action equipped=()=>equips++;combat.WeaponEquipped+=equipped;
+System.Action<UnityEngine.InputSystem.Key[]> keys=held=>{
+ UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState(held));
+ UnityEngine.InputSystem.InputSystem.Update();input.GetType().GetField("hasFocus",flags).SetValue(input,true);inputUpdate.Invoke(input,null);
+};
+System.Action step=()=>{motor.Invoke(movement,null);Physics2D.Simulate(Time.fixedDeltaTime);simulate.Invoke(weapon,new object[]{Time.fixedDeltaTime});animate.Invoke(animation,null);render.Invoke(view,null);};
+System.Action<Vector2> move=p=>{body.position=p;player.transform.position=p;body.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();animation.GetType().GetMethod("OnEnable",flags).Invoke(animation,null);};
+var expected=new System.Collections.Generic.Dictionary<string,Vector2>();
+string[] dirs={"South","East","West","North"};
+var points=new[]{new Vector2(-.426f,.547f),new Vector2(-.445f,.555f),new Vector2(-.383f,.629f),new Vector2(-.414f,.566f),new Vector2(.246f,.5f),new Vector2(.215f,.539f),new Vector2(.258f,.551f),new Vector2(.27f,.543f),new Vector2(-.367f,.512f),new Vector2(-.289f,.59f),new Vector2(-.332f,.535f),new Vector2(-.309f,.535f),new Vector2(.352f,.523f),new Vector2(.398f,.578f),new Vector2(.43f,.551f),new Vector2(.422f,.551f)};
+for(int i=0;i<16;i++)expected[dirs[i/4]+"_"+(i%4).ToString("00")]=points[i];
+System.Func<bool> attached=()=>Vector3.Distance(model.position,sprite.transform.TransformPoint(expected[sprite.sprite.name]))<.001f && blade.sortingOrder==sprite.sortingOrder-1 && blade.sortingLayerID==sprite.sortingLayerID;
+try {
+ UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=UnityEngine.InputSystem.InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+ actions.devices=new UnityEngine.InputSystem.InputDevice[]{keyboard};input.GetType().GetField("paused",flags).SetValue(input,false);
+ Physics2D.simulationMode=SimulationMode2D.Script;body.interpolation=RigidbodyInterpolation2D.None;
+ check(blade.sprite.texture.width==43 && blade.sprite.texture.height==64 && blade.sprite.texture.filterMode==FilterMode.Point,"Hatchet uses the reduced point-filtered runtime texture");
+ check(Mathf.Abs(blade.sprite.pixelsPerUnit-37.33333f)<.01f && Mathf.Abs(model.lossyScale.x-1)<.001f,"Reduced pixel density preserves physical size");
+ render.Invoke(view,null);var groundPosition=model.position;render.Invoke(view,null);
+ check(model.position==groundPosition && !weapon.GetComponentInChildren<LineRenderer>().enabled,"Embedded pickup is still, without prototype ring/bob");
+ move(new Vector2(42.27f,21.3f));keys(new[]{UnityEngine.InputSystem.Key.W});
+ for(int n=0;n<40 && weapon.State==TheLostShrine.Weapons.HatchetState.OnGround;n++)step();
+ check(weapon.Owner==combat && combat.Weapon==weapon && equips==1,"Walking up to the solid stump equips the real hatchet once");
+ check(!weapon.GetComponent<Collider2D>().enabled && weapon.State==TheLostShrine.Weapons.HatchetState.Held,"Pickup collider is disabled after collecting");
+ var directionKeys=new[]{UnityEngine.InputSystem.Key.S,UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.A,UnityEngine.InputSystem.Key.W};
+ for(int d=0;d<4;d++){
+  move(new Vector2(200,200));keys(new[]{directionKeys[d]});bool gripOK=true;var seen=new System.Collections.Generic.HashSet<string>();
+  for(int n=0;n<30;n++){step();seen.Add(sprite.sprite.name);gripOK&=attached() && blade.flipX==(d==1||d==3);}
+  check(seen.Count==4 && gripOK,dirs[d]+" four walk frames keep the grip in the drawn hand with correct facing/sorting");
+  keys(new UnityEngine.InputSystem.Key[0]);step();var held=model.position;
+  weapon.SetAim(Vector2.left);render.Invoke(view,null);weapon.SetAim(Vector2.right);render.Invoke(view,null);
+  check(attached() && Vector3.Distance(held,model.position)<.001f,dirs[d]+" idle stays attached and ignores mouse aim");
+ }
+ move(new Vector2(200,200));keys(new[]{UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.LeftShift});bool sprintOK=true;
+ for(int n=0;n<25;n++){step();sprintOK&=attached();}
+ check(movement.IsSprinting && sprintOK,"Sprint cadence and hand grip stay synchronized");
+ keys(new[]{UnityEngine.InputSystem.Key.W,UnityEngine.InputSystem.Key.D});step();check(attached()&&sprite.sprite.name.StartsWith("East_"),"Diagonal turn has no one-frame grip lag");
+ player.GetComponent<TheLostShrine.Player.PlayerHealth>().HealAtRest();keys(new[]{UnityEngine.InputSystem.Key.A,UnityEngine.InputSystem.Key.Space});step();
+ check(player.GetComponent<TheLostShrine.Player.PlayerDash>().IsDashing && attached(),"Dash carries the hatchet on its held stride pose");
+ keys(new UnityEngine.InputSystem.Key[0]);for(int n=0;n<12;n++)step();check(attached(),"Dash release settles to the standing hand");
+ player.GetComponent<TheLostShrine.Player.PlayerHealth>().HealAtRest();
+ check(weapon.TryThrow(Vector2.right),"Existing throw can leave the carry presentation");render.Invoke(view,null);
+ check(blade.sortingOrder==10 && !blade.flipX,"Away state releases hand sorting and horizontal flip");
+ simulate.Invoke(weapon,new object[]{.1f});render.Invoke(view,null);check(Vector2.Distance(model.position,player.transform.position)>.8f,"Flying weapon is no longer attached to the hand");
+ weapon.CancelAction();render.Invoke(view,null);check(attached(),"Returning to Held reconnects immediately");
+ check(weapon.TryLightChop(Vector2.right),"Existing combat state can take visual ownership");render.Invoke(view,null);
+ weapon.CancelAction();render.Invoke(view,null);check(attached(),"Action cancellation restores the current grip");
+ var viewScript=MonoScript.FromMonoBehaviour(view);var animationScript=MonoScript.FromMonoBehaviour(animation);
+ int viewOrder=MonoImporter.GetExecutionOrder(viewScript), animationOrder=MonoImporter.GetExecutionOrder(animationScript);
+ if(viewOrder==0)viewOrder=((DefaultExecutionOrder)Attribute.GetCustomAttribute(view.GetType(),typeof(DefaultExecutionOrder))).order;
+ if(animationOrder==0)animationOrder=((DefaultExecutionOrder)Attribute.GetCustomAttribute(animation.GetType(),typeof(DefaultExecutionOrder))).order;
+ check(viewOrder>animationOrder,"Weapon view runs after player frame selection");
+ check(equips==1,"Movement/actions do not duplicate pickup events");
+} finally {
+ weapon.CancelAction();combat.WeaponEquipped-=equipped;player.GetComponent<TheLostShrine.Player.PlayerHealth>().HealAtRest();
+ keys(new UnityEngine.InputSystem.Key[0]);actions.devices=oldDevices;
+ input.GetType().GetField("hasFocus",flags).SetValue(input,oldFocus);input.GetType().GetField("paused",flags).SetValue(input,oldPause);
+ move(oldPosition);body.interpolation=oldInterpolation;Physics2D.simulationMode=oldSimulation;animate.Invoke(animation,null);render.Invoke(view,null);
+ UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard);UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=oldRouting;
+ Camera.main.GetComponent<TheLostShrine.Cameras.CameraFollow2D>().SnapToTarget();
+}
+return new{passed=results.Count(s=>s.StartsWith("PASS")),failed=results.Count(s=>s.StartsWith("FAIL")),results};

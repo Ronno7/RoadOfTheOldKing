@@ -23,13 +23,16 @@ BLOBS = ['MeadowWater', 'StoneWater', 'DeepWater', 'GrassLedge', 'StoneLedge']
 
 
 @lru_cache(None)
-def extended(mask):
+def extended(mask, flush=False):
     occupied = {(0, 0)} | {offset for b, offset in enumerate(ground.OFFSETS) if mask & (1 << b)}
     result = Image.new('L', (48, 48))
     for tx, ty in occupied:
         local = ground.normalize(sum(1 << b for b, (dx, dy) in enumerate(ground.OFFSETS)
                                      if (tx + dx, ty + dy) in occupied))
-        result.paste(ground.coverage(local), ((tx + 1) * 16, (ty + 1) * 16))
+        # Structural ledges meet full-cell cliff faces. The ground-overlay inset
+        # is suitable for water banks, but creates a three-pixel gap on cliffs.
+        shape = Image.new('L', (16, 16), 255) if flush else ground.coverage(local)
+        result.paste(shape, ((tx + 1) * 16, (ty + 1) * 16))
     return result
 
 
@@ -44,7 +47,7 @@ def distance(field, x, y, limit):
 
 def blob(material, mask, variant=0):
     image = Image.new('RGBA', (16, 16))
-    field = extended(mask)
+    field = extended(mask, material in ('GrassLedge', 'StoneLedge'))
     for y in range(16):
         for x in range(16):
             if not field.getpixel((x + 16, y + 16)): continue
@@ -66,11 +69,12 @@ def blob(material, mask, variant=0):
                 if south <= 7:
                     if south == 7: color = 'sand' if stone else 'leaflight'
                     elif south == 6: color = 'stone' if stone else 'leafshade'
-                    elif south == 1: color = 'deepsoil'
-                    elif south == 2: color = 'stoneshade' if stone else 'soil'
-                    else:
-                        color = 'stoneshade' if stone else 'earth'
-                        if (x + (4 if y % 8 >= 4 else 0)) % 8 == 0: color = 'deepsoil' if stone else 'soil'
+                    else: color = 'stoneshade' if stone else 'earth'
+                    # The ledge is the beginning of the face, not a separate
+                    # bordered panel. Continue its side outline at one pixel.
+                    side = ((x == 0 and not mask & 8) or
+                            (x == 15 and not mask & 2))
+                    if side and south < 6: color = 'stoneshade' if stone else 'soil'
                 elif d == 1: color = ('sand' if stone else 'leaflight') if north else ('stoneshade' if stone else 'leafshade')
             image.putpixel((x, y), P[color])
     if variant:
@@ -111,15 +115,12 @@ def face(material, row, column, variant=0):
     stone = material == 'StoneCliff'
     im = Image.new('RGBA', (16,16), P['stoneshade' if stone else 'earth'])
     d = ImageDraw.Draw(im)
-    # Irregular vertical fissures and broken strata, not a masonry grid.
-    fissure = [2,2,3,3,3,2,2,1,1,1,2,2,2,2,2,2]
-    for y in range(16):
-        for offset in (0,8):
-            x = (fissure[(y + (5 if offset else 0)) % 16] + offset) % 16
-            im.putpixel((x,y),P['deepsoil' if stone else 'soil'])
-            if y % 7 < 4:im.putpixel(((x+1)%16,y),P['stone' if stone else 'sand'])
-    d.line((4,7,7,6,9,6),fill=P['soil'])
-    d.line((11,12,13,12,15,11),fill=P['soil'])
+    # Keep shared edges quiet and continuous; short interior fissures avoid
+    # the previous two bright vertical columns repeated in every cell.
+    phase = 2 if row == 'Middle' else 0
+    d.line((5+phase,4,5+phase,6,4+phase,7,4+phase,9),
+           fill=P['deepsoil' if stone else 'soil'])
+    d.line((10,11,12,11),fill=P['stone' if stone else 'sand'])
     if row == 'Top':
         d.rectangle((0,0,15,2),fill=P['stone' if stone else 'grass'])
         d.line((0,3,15,3),fill=P['sand' if stone else 'leaflight'])
@@ -128,9 +129,14 @@ def face(material, row, column, variant=0):
         d.rectangle((0,13,15,15),fill=P['deepsoil'])
         d.line((0,12,15,12),fill=P['soil'])
         for x in (2,8,13): d.line((x,14,x+1,14),fill=P['stoneshade' if stone else 'soil'])
-    if column == 'Left':
-        d.line((0,0,0,15),fill=P['deepsoil']);d.line((1,0,1,15),fill=P['stone' if stone else 'sand'])
-    if column == 'Right': d.rectangle((14,0,15,15),fill=P['deepsoil'])
+    if column in ('Left', 'Right'):
+        x = 0 if column == 'Left' else 15
+        # A manual Top includes meadow above its lip. Never pull the brown
+        # face border up through that meadow or over the horizontal rim.
+        if row == 'Top':
+            d.line((x,0,x,2),fill=P['stoneshade' if stone else 'leafshade'])
+        d.line((x,5 if row == 'Top' else 0,x,12 if row == 'Foot' else 15),
+               fill=P['stoneshade' if stone else 'soil'])
     if variant: d.line((6,7,9,7),fill=P['deepsoil'])
     return im
 
@@ -163,14 +169,27 @@ def water_detail(kind, frame):
         d.rectangle((2,0,13,15),fill=P['water'])
         for x in (3,7,11):
             for y in range(16):
-                if (y+frame*4+x)%16<9:im.putpixel((x,y),P['waterlight'])
+                # Image Y increases downward: subtract phase to move the
+                # highlights toward the pool as frame indices advance.
+                if (y-frame*4+x)%16<9:im.putpixel((x,y),P['waterlight'])
         d.line((2,0,2,15),fill=P['watershade']);d.line((13,0,13,15),fill=P['watershade'])
     else:
         d.rectangle((2,0,13,5),fill=P['water'])
         d.line((3,0,3,4),fill=P['waterlight']);d.line((11,0,11,4),fill=P['waterlight'])
-        d.line((2,6+frame%2,13,6+frame%2),fill=P['cream'])
-        d.line((1+frame%2,8,14-frame%2,8),fill=P['waterlight'])
-        d.line((4,11,10,11),fill=P['waterlight'])
+        # Broad foamy impact, spreading rings and a short outward spray.
+        radius = (5,6,7,6)[frame]
+        d.ellipse((7-radius,5,8+radius,11),fill=P['watershade'])
+        d.polygon(((2,5),(5,5),(5,4),(10,4),(10,5),(13,5),
+                   (13,7),(15,7),(15,9),(12,9),(12,10),(3,10),
+                   (3,9),(0,9),(0,7),(2,7)),fill=P['waterlight'])
+        crest = 5 + frame%2
+        d.line((3,crest,6,crest),fill=P['cream'])
+        d.line((9,crest+1,12,crest+1),fill=P['cream'])
+        d.line((2,11+frame,5,11+frame),fill=P['waterlight'])
+        d.line((10,11+frame,13,11+frame),fill=P['waterlight'])
+        left,right = (((3,3),(12,4)),((1,2),(14,2)),((0,4),(15,4)),((1,6),(14,6)))[frame]
+        for x,y in (left,right):
+            d.line((x,y,x,y+1),fill=P['waterlight'])
     return im
 
 
@@ -189,8 +208,37 @@ def verify(images, entries):
                 assert a[3]==b[3],(material,mask,n)
                 if 'Water' in material:assert a==b,(material,mask,n,a,b)
                 color_checks+=1
+    # Regression: a south ledge and its face must cover every pixel across
+    # the shared cell boundary, including the two outside ends.
+    for ledge, cliff in (('GrassLedge', 'EarthCliff'), ('StoneLedge', 'StoneCliff')):
+        for mask in (155, 19, 137):
+            cap = byname[f'{ledge}_{ground.shape_name(mask)}']
+            for column in ('Left', 'Center', 'Right'):
+                face_tile = byname[f'{cliff}_Middle_{column}']
+                for x in range(16):
+                    assert cap.getpixel((x,15))[3] == 255, (ledge,mask,x,'ledge gap')
+                    assert face_tile.getpixel((x,0))[3] == 255, (cliff,column,x,'face gap')
+                    color_checks += 1
+        # Check color as well as coverage: no dark separator at the vertical
+        # join, and matching one-pixel outlines at both outside corners.
+        for mask, column in ((155, 'Center'), (19, 'Left'), (137, 'Right')):
+            cap = byname[f'{ledge}_{ground.shape_name(mask)}']
+            continuation = byname[f'{cliff}_Middle_{column}']
+            for x in range(16):
+                assert cap.getpixel((x,15)) == continuation.getpixel((x,0)), (ledge,mask,x,'color seam')
+                color_checks += 1
+        for column, x in (('Left', 0), ('Right', 15)):
+            top = byname[f'{cliff}_Top_{column}']
+            for y in range(3):
+                assert top.getpixel((x,y)) == P['stoneshade' if cliff == 'StoneCliff' else 'leafshade']
     palette=set(P.values())|{(0,0,0,0)}
     for im in images:assert set(im.get_flattened_data())<=palette
+    for frame in range(4):
+        a,b=(byname[f'FallBody_{i:02}'] for i in (frame,(frame+1)%4))
+        for x in (3,7,11):
+            for y in range(16):
+                assert a.getpixel((x,y)) == b.getpixel((x,(y+4)%16)), 'water must travel down'
+    assert len({byname[f'FallFoam_{i:02}'].tobytes() for i in range(4)}) == 4
     return checks,color_checks
 
 

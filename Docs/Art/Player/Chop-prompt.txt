@@ -1,0 +1,9 @@
+25 September 2026 — first combat pose sample
+Reference: Assets/Art/Sprites/Player/PlayerSheet.png, the approved character identity and style.
+Output: Assets/Art/Sprites/Player/ChopEast.png. Transparent, four evenly spaced full-body sprites facing right.
+
+Preserve the blue embroidered cap, brown hair, cream fur/tunic, satchel, boots, proportions, restrained palette and soft charcoal outline. Match the reference's pixel clusters. No weapon, text, shadow or slash baked into the character.
+
+Pose sequence: bent-knee anticipation with fist behind the head; raised backswing with planted feet; leading-leg weight shift and fist extended at chest height; lowered arm and rear heel lifting through the follow-through. The hatchet is attached separately to each fist in Unity.
+
+Import and integration decisions are recorded in README.md. The source is preserved; Unity supplies slicing, scale and foot pivots. WoodChop.wav is a short synthesized placeholder, not a recorded or final production sound.

@@ -1,0 +1,272 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &6701922493289244817
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1001, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      propertyPath: m_Name
+      value: TutorialPlayer
+      objectReference: {fileID: 0}
+    - target: {fileID: 1002, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1002, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1002, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1002, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1002, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1002, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1002, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1002, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1002, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1002, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1008, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1008, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1008, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 1009, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 2131032035, guid: f4041311381ad8449b3366c16288195f, type: 3}
+    - target: {fileID: 1009, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1009, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      propertyPath: m_Color.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1009, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1009, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      propertyPath: m_SpriteSortPoint
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1010, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1013, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      propertyPath: marker
+      value: 
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1001, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3442763725406863558}
+    - targetCorrespondingSourceObject: {fileID: 1001, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8051658232381421123}
+    - targetCorrespondingSourceObject: {fileID: 1001, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5681167356592790295}
+    - targetCorrespondingSourceObject: {fileID: 1007, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2914356251290594518}
+  m_SourcePrefab: {fileID: 100100000, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+--- !u!212 &6701922493289245536 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 1009, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+  m_PrefabInstance: {fileID: 6701922493289244817}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &6701922493289245560 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1001, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+  m_PrefabInstance: {fileID: 6701922493289244817}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3442763725406863558
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6701922493289245560}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 342195b4b3fde5f418e7cd4775efd74c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerLocomotionAnimation
+  animator: {fileID: 2914356251290594518}
+  strideLength: 2.25
+  idleBreathAmount: 0.012
+  idleBreathPeriod: 3.2
+  idleSettleTime: 0.35
+--- !u!114 &8051658232381421123
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6701922493289245560}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36dac95313f2eca4b964f6106036ed79, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerWeaponGrip
+  body: {fileID: 6701922493289245536}
+  frames:
+  - sprite: {fileID: 2131032035, guid: f4041311381ad8449b3366c16288195f, type: 3}
+    position: {x: -0.426, y: 0.547}
+    angle: 14
+    flipX: 0
+  - sprite: {fileID: 82819816, guid: f4041311381ad8449b3366c16288195f, type: 3}
+    position: {x: -0.445, y: 0.555}
+    angle: 12
+    flipX: 0
+  - sprite: {fileID: -1432532458, guid: f4041311381ad8449b3366c16288195f, type: 3}
+    position: {x: -0.383, y: 0.629}
+    angle: 16
+    flipX: 0
+  - sprite: {fileID: 29575243, guid: f4041311381ad8449b3366c16288195f, type: 3}
+    position: {x: -0.414, y: 0.566}
+    angle: 12
+    flipX: 0
+  - sprite: {fileID: 660914831, guid: f4041311381ad8449b3366c16288195f, type: 3}
+    position: {x: 0.246, y: 0.5}
+    angle: -28
+    flipX: 1
+  - sprite: {fileID: -711932826, guid: f4041311381ad8449b3366c16288195f, type: 3}
+    position: {x: 0.215, y: 0.539}
+    angle: -25
+    flipX: 1
+  - sprite: {fileID: 43188130, guid: f4041311381ad8449b3366c16288195f, type: 3}
+    position: {x: 0.258, y: 0.551}
+    angle: -31
+    flipX: 1
+  - sprite: {fileID: 1759020035, guid: f4041311381ad8449b3366c16288195f, type: 3}
+    position: {x: 0.27, y: 0.543}
+    angle: -25
+    flipX: 1
+  - sprite: {fileID: 1363804303, guid: f4041311381ad8449b3366c16288195f, type: 3}
+    position: {x: -0.367, y: 0.512}
+    angle: 28
+    flipX: 0
+  - sprite: {fileID: -49006107, guid: f4041311381ad8449b3366c16288195f, type: 3}
+    position: {x: -0.289, y: 0.59}
+    angle: 25
+    flipX: 0
+  - sprite: {fileID: 973409709, guid: f4041311381ad8449b3366c16288195f, type: 3}
+    position: {x: -0.332, y: 0.535}
+    angle: 31
+    flipX: 0
+  - sprite: {fileID: 711320756, guid: f4041311381ad8449b3366c16288195f, type: 3}
+    position: {x: -0.309, y: 0.535}
+    angle: 25
+    flipX: 0
+  - sprite: {fileID: -1016550650, guid: f4041311381ad8449b3366c16288195f, type: 3}
+    position: {x: 0.352, y: 0.523}
+    angle: -18
+    flipX: 1
+  - sprite: {fileID: -948535507, guid: f4041311381ad8449b3366c16288195f, type: 3}
+    position: {x: 0.398, y: 0.578}
+    angle: -15
+    flipX: 1
+  - sprite: {fileID: -1787170307, guid: f4041311381ad8449b3366c16288195f, type: 3}
+    position: {x: 0.43, y: 0.551}
+    angle: -21
+    flipX: 1
+  - sprite: {fileID: -1521687406, guid: f4041311381ad8449b3366c16288195f, type: 3}
+    position: {x: 0.422, y: 0.551}
+    angle: -15
+    flipX: 1
+--- !u!114 &5681167356592790295
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6701922493289245560}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b082398a00905bc4892fb2dc8be4071c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerChopAnimation
+  body: {fileID: 6701922493289245536}
+  poses:
+  - sprite: {fileID: 917630724, guid: 9c091fdb001001d4fa5239ba4c01da04, type: 3}
+    grip: {x: -0.53515625, y: 1.2382812}
+    angle: 35
+  - sprite: {fileID: -1643943539, guid: 9c091fdb001001d4fa5239ba4c01da04, type: 3}
+    grip: {x: -0.421875, y: 1.4804688}
+    angle: 15
+  - sprite: {fileID: 1760224869, guid: 9c091fdb001001d4fa5239ba4c01da04, type: 3}
+    grip: {x: 0.80859375, y: 0.79296875}
+    angle: -85
+  - sprite: {fileID: -130655961, guid: 9c091fdb001001d4fa5239ba4c01da04, type: 3}
+    grip: {x: 0.640625, y: 0.48828125}
+    angle: -115
+  recoverySprite: {fileID: 660914831, guid: f4041311381ad8449b3366c16288195f, type: 3}
+  recoveryGrip: {x: 0.246, y: 0.5}
+  hitPause: 0.045
+--- !u!1 &6701922493289245566 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1007, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+  m_PrefabInstance: {fileID: 6701922493289244817}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &2914356251290594518
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6701922493289245566}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: f2f4cf5f4631f5343b9ce4ce11765ab2, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

@@ -3,15 +3,24 @@ using UnityEngine;
 namespace TheLostShrine.Weapons
 {
     [DisallowMultipleComponent, RequireComponent(typeof(HatchetWeapon))]
+    [DefaultExecutionOrder(200)]
     public sealed class HatchetView : MonoBehaviour
     {
         [SerializeField] private Transform model;
         [SerializeField] private SpriteRenderer blade;
         [SerializeField] private LineRenderer arc;
         [SerializeField] private TrailRenderer trail;
+        [Tooltip("Use the animated player's per-frame hand grips while carrying.")]
+        [SerializeField] private bool useAnimatedGrip;
+        [SerializeField] private float spriteAngleOffset;
+        [SerializeField] private Vector3 groundVisualOffset;
+        [SerializeField] private float groundAngle = 35f;
+        [SerializeField] private bool bobOnGround = true;
         private HatchetWeapon weapon;
         private Color originalBlade;
         private bool wasFlying;
+        private int originalSortingLayer;
+        private int originalSortingOrder;
         private readonly AnimationCurve ringWidth = AnimationCurve.Linear(0f, 1f, 1f, 1f);
         private readonly AnimationCurve slashWidth = new AnimationCurve(
             new Keyframe(0f, 0f), new Keyframe(0.3f, 0.85f),
@@ -21,7 +30,11 @@ namespace TheLostShrine.Weapons
         {
             weapon = GetComponent<HatchetWeapon>();
             if (blade != null)
+            {
                 originalBlade = blade.color;
+                originalSortingLayer = blade.sortingLayerID;
+                originalSortingOrder = blade.sortingOrder;
+            }
         }
 
         private void LateUpdate()
@@ -39,7 +52,31 @@ namespace TheLostShrine.Weapons
             if (arc != null)
                 arc.enabled = false;
             if (blade != null)
+            {
                 blade.color = Color.Lerp(originalBlade, new Color(1f, 0.85f, 0.25f), weapon.Charge01);
+                blade.flipX = false;
+                blade.sortingLayerID = originalSortingLayer;
+                blade.sortingOrder = originalSortingOrder;
+            }
+
+            if (useAnimatedGrip && weapon.State == HatchetState.LightChop && weapon.Owner != null)
+            {
+                transform.position = weapon.Owner.transform.position;
+                var chop = weapon.Owner.GetComponent<TheLostShrine.Player.PlayerChopAnimation>();
+                if (chop != null && chop.TryApplyWeapon(model, blade))
+                {
+                    DrawChopAccent();
+                    return;
+                }
+            }
+
+            if (useAnimatedGrip && weapon.State == HatchetState.Held && weapon.Owner != null)
+            {
+                transform.position = weapon.Owner.transform.position;
+                var grip = weapon.Owner.GetComponent<TheLostShrine.Player.PlayerWeaponGrip>();
+                if (grip != null && grip.TryApply(model, blade))
+                    return;
+            }
 
             float angle = Mathf.Atan2(weapon.AimDirection.y, weapon.AimDirection.x) * Mathf.Rad2Deg;
             model.localPosition = Vector3.zero;
@@ -52,9 +89,13 @@ namespace TheLostShrine.Weapons
             switch (weapon.State)
             {
                 case HatchetState.OnGround:
-                    angle = 35f;
-                    model.localPosition = Vector3.up * (0.06f + Mathf.Sin(Time.time * 3f) * 0.04f);
-                    DrawArc(transform.position, 0.55f, 0f, 360f, new Color(1f, 0.8f, 0.3f, 0.55f));
+                    angle = groundAngle;
+                    model.localPosition = groundVisualOffset;
+                    if (bobOnGround)
+                    {
+                        model.localPosition += Vector3.up * (0.06f + Mathf.Sin(Time.time * 3f) * 0.04f);
+                        DrawArc(transform.position, 0.55f, 0f, 360f, new Color(1f, 0.8f, 0.3f, 0.55f));
+                    }
                     break;
                 case HatchetState.LightChop:
                     angle = DrawLightSlash();
@@ -78,7 +119,7 @@ namespace TheLostShrine.Weapons
                     angle = Mathf.Atan2(weapon.AttackDirection.y, weapon.AttackDirection.x) * Mathf.Rad2Deg - 25f;
                     break;
             }
-            model.localRotation = Quaternion.Euler(0f, 0f, angle);
+            model.localRotation = Quaternion.Euler(0f, 0f, angle + spriteAngleOffset);
         }
 
         private float DrawLightSlash()
@@ -130,6 +171,23 @@ namespace TheLostShrine.Weapons
                 }
             }
             return poseAngle;
+        }
+
+        private void DrawChopAccent()
+        {
+            float t = weapon.AttackProgress;
+            float start = weapon.Settings.lightWindupFraction;
+            float end = weapon.Settings.lightSwingEndFraction;
+            if (t < start || t > end + 0.12f) return;
+            float cut = Mathf.InverseLerp(start, end, t);
+            float fade = 1f - Mathf.InverseLerp(end, end + 0.12f, t);
+            DrawArc(model.position, 1.08f, 50f - 85f * cut, -50f,
+                new Color(1f, 0.93f, 0.74f, fade * 0.7f));
+            if (arc != null)
+            {
+                arc.widthCurve = slashWidth;
+                arc.widthMultiplier = 0.10f;
+            }
         }
 
         private void DrawArc(Vector3 center, float radius, float startAngle, float sweep, Color color)

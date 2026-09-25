@@ -14,11 +14,13 @@ namespace TheLostShrine.Weapons
         private readonly List<RaycastHit2D> casts = new List<RaycastHit2D>(16);
         private readonly List<RaycastHit2D> sight = new List<RaycastHit2D>(8);
         private readonly HashSet<IHitReceiver> hitTargets = new HashSet<IHitReceiver>();
+        private readonly System.Action<CombatHit> confirmedHit;
 
-        public HatchetHitDetector(Transform owner, Transform weapon)
+        public HatchetHitDetector(Transform owner, Transform weapon, System.Action<CombatHit> confirmedHit = null)
         {
             this.owner = owner;
             this.weapon = weapon;
+            this.confirmedHit = confirmedHit;
         }
 
         public void BeginAttack() => hitTargets.Clear();
@@ -30,8 +32,11 @@ namespace TheLostShrine.Weapons
         {
             var receiver = collider.GetComponentInParent<IHitReceiver>();
             if (receiver != null && hitTargets.Add(receiver))
-                receiver.ReceiveHit(new CombatHit(hit.Source, hit.Kind, hit.Damage, hit.Direction,
-                    hit.Knockback, hit.StaggerDuration, hit.BreaksGuard, impactPoint));
+            {
+                var resolved = new CombatHit(hit.Source, hit.Kind, hit.Damage, hit.Direction,
+                    hit.Knockback, hit.StaggerDuration, hit.BreaksGuard, impactPoint);
+                if (receiver.ReceiveHit(resolved)) confirmedHit?.Invoke(resolved);
+            }
         }
 
         public void Melee(Vector2 center, Vector2 aim, float radius, float arc, CombatHit hit)

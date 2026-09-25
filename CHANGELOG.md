@@ -1,126 +1,63 @@
 # Changelog
 
-Listed newest first.
+## 25SEP2026 - Player and hatchet integration
 
-## 23SEP2026 - Tutorial art completion
+- Added the animated player to Tutorial with four-direction locomotion, sprint cadence, idle breathing and the follow/zoom camera.
+- Added the hatchet pickup at the stump and frame-specific hand grips for carrying, turning, sprinting and dodging.
+- Increased the hatchet's visual size by 30% and reduced its pixel density to match the character.
+- Added a right-facing light-chop sample with four action poses, planted movement, hand-anchored weapon motion, synchronized damage and impact-only hit pause.
+- Added practice-target artwork, recoil, wood chips and temporary impact audio; retained a short in-game combat milestone capture.
+- Added player, pickup, carry and idle verification checks; verified access to all 13 tutorial route stops.
+- Consolidated development and art documentation, removed obsolete previews, and simplified the changelog.
 
-- Completed the cohesive Environment kit (31 objects) and compact Decoration kit (12 designs), preserving the approved style and palette.
-- Dressed DemoTutorial with village/work areas, practice yard, bridge, ruins and sparse details; verified routes, separate collision, and canopy/roof sorting.
-- Consolidated sample assets into production and organized art plans, palettes, previews and rebuild sources. Interactive objects are next; atmosphere/camera work remains deferred.
+## 24SEP2026 - Player art and tutorial world
 
-## 22SEP2026 - Tutorial art and presentation
+- Added the 16-frame weapon-free character sheet with simplified shading and softer outlines.
+- Rebuilt the houses as a 6x5 workshop and an 8x6 thatched longhouse.
+- Built Tutorial terrain, paths, village dressing, forest boundaries, practice terrace and separate collision.
+- Fixed cliff and ledge seams, ramp returns and waterfall direction; increased waterfall speed and landing splash.
+- Moved the bridge south and added the winding forest road, Recall ruins, stone placeholder and safe practice clearing.
+- Extended surrounding woodland for camera coverage and checked route clearance.
 
-- Added cohesive ground, terrain and village path tiles with automatic connections, painting palettes and animated water.
-- Created DemoTutorial as one world-only presentation scene showcasing the art.
-- Organized tiles by zone and layer, kept one shared starter template, and removed redundant previews and templates.
-- Updated painting guides and verified tile connections, asset references and clear paths through the demo.
+## 23SEP2026 - Environment and decoration
 
-## 22SEP2026 - Heart fragments
+- Added 31 environment objects and 12 decoration designs using the tutorial palette.
+- Dressed DemoTutorial with village work areas, a practice yard, bridge and ruins.
+- Added separate collision footprints and overhead sorting for trees, roofs and ruins.
+- Consolidated production assets, painting palettes and rebuild sources.
 
-### Added
+## 22SEP2026 - Art kits and progression
 
-- Three optional heart fragments around the practice area, Recall clearing, and second bonfire, with a reusable red heart placeholder prefab and a short teaching sign.
-- Every three unique fragments grant +20 permanent maximum HP. Completing a set also adds 20 current HP; partial sets do not heal. Added HUD progress toward the next set and the permanent HP bonus.
-- Fragment collection saves immediately and survives rest, death, travel, and reload. Bonfires and respawning refill the increased health capacity. New run clears fragments and returns the player to 100 maximum HP; existing saves remain compatible.
-- Separated pickup handling, fragment rules, and health capacity. Derived progression from existing unique reward IDs and applied an absolute runtime bonus without changing base prefab health or stacking on reload.
-- Added 34 heart-fragment checks and updated the systems overview. WebGL has not been rebuilt.
+- Added ground, terrain and path kits with automatic connections, painting palettes and animated water.
+- Added DemoTutorial as the art reference scene and consolidated the blank zone template.
+- Added sprinting, stamina costs and recovery, plus a short directional dash with an opening dodge window.
+- Rebalanced player, enemy and dummy health to 100-point pools and updated attack damage.
+- Added automatic Recall beyond 10 units after unlocking the ability.
+- Added three unique Sun Shards, persistent rewards and a three-shard weapon upgrade choice in PrototypeLoop.
+- Added heart fragments: every three grant 20 permanent maximum HP, with persistent collection and HUD feedback.
+- Added verification for stamina, dodge, Recall, rewards, upgrades and heart fragments.
 
-## 22SEP2026 - Sun Shards and first weapon upgrade
+## 21SEP2026 - Combat and prototype loop
 
-### Added
+- Added hatchet pickup, mouse aiming, a buffered three-hit combo, charged cleave, throwing, retrieval and Recall.
+- Added practice targets, shields, breakable bushes and cracked stone, plus a telegraphed melee enemy.
+- Added player health, damage immunity, knockback, defeat and restart handling.
+- Built the guided prototype route, Recall puzzle, bonfires, checkpoint saves and travel between discovered fires.
+- Added persistent lesson and puzzle progress, checkpoint respawning and a new-run option.
+- Renamed the original Tutorial scene to PrototypeLoop and set it as the build scene.
+- Added attack effects and combo indicators; fixed backhand slash direction and rear Recall hits on shields.
+- Changed movement to eight directions with normalized diagonal speed and four-direction visual facing.
+- Added gameplay verification, the systems overview and the game-loop diagram.
 
-- Three one-time Sun Shards in PrototypeLoop: a sentinel drop, an automatic throw/Recall puzzle reward, and an exploration pickup on a short optional north trail beyond the puzzle door.
-- A reusable gold shard pickup prefab, persistent reward IDs, and an unspent-shard HUD counter. Rewards save immediately, including before the first bonfire, and remain collected through rest, death, travel, and reload. Unclaimed sentinel drops remain available; respawned enemies cannot be farmed for shards.
-- A first upgrade tier at the second bonfire costing 3 shards: Quick Hands (20% faster light attacks), Sweeping Edge (150-degree light arc), or Wide Cleave (2.6-unit radius). Damage and stamina costs stay unchanged. Players review and confirm one permanent choice, discarding the other two for that run.
-- Data assets for upgrade choices and ordered tiers, purchase rules independent of UI/storage, and runtime stat composition shared by damage detection and visuals without changing the base weapon settings.
-- Backward-compatible save fields for shard balance and selected upgrades, plus 39 repeatable shard/upgrade checks. Updated the systems overview; WebGL has not been rebuilt.
+## 20SEP2026 - Initial tutorial prototype
 
-## 22SEP2026 - Combat balance
-
-### Added
-
-- Added a Spacebar dash: 2.2 units over 0.18 seconds, costing 25 stamina, with a 0.1-second opening dodge window and 0.35-second recovery before another dash. Direction follows movement or last facing when idle.
-- Added a Space / short dash / dodge hint in the sentinel arena and updated the HUD and lesson text. Dash respects collisions, cannot cancel attacks, does not repeat on held Space, and resets at bonfires or respawn.
-- Added 39 dash checks covering input, physics, protection, stamina, attack/sprint transitions, interruptions, and bonfires.
-- Added a short Shift-to-sprint hint beneath the Back to Dummies trail sign.
-- Added automatic hatchet Recall beyond 10 units of player separation once Recall is unlocked; it uses normal return damage, remains free, and leaves room for the marked puzzle repositioning.
-- Added Shift sprint with equal diagonal speed, a 100-point stamina pool, delayed recovery, and a placeholder stamina bar with low-stamina/rejected-action feedback.
-- Added stamina costs to the light combo (18/18/24), charged cleave (35), and throw (25). Recall remains free. Charging pays once up front, cannot regenerate while held, and does not refund cancelled charges.
-- Added 50 repeatable stamina checks for keyboard bindings, exhaustion, action gating, recovery, charge cancellation, free Recall, bonfires, and death; all 271 current gameplay assertions pass, including 20 automatic Recall and 39 dash checks.
-
-### Changed
-
-- Sprint moves at 7.2 units/second, spends 20 stamina/second, and needs 20 stamina to start; walking remains free at 4.5. Recovery restores 25 stamina/second after 0.8 seconds without spending or performing melee.
-- Player, sentinel, and practice dummy health now use 100-point pools. Light combo damage is 10/10/15, full cleave 30, throw 15, Recall 10, and sentinel strikes 20.
-- Melee/charging, stagger, lost focus, disabled controls, fire menus, and death stop sprinting. Exhaustion falls back to walking.
-- Bonfire rest, travel, and respawn refill stamina. Expanded the systems overview and updated existing combat/route/puzzle checks for the new damage scale.
-
-## 21SEP2026 - PRD 02
-
-### Added
-
-- Added two bonfires after the sentinel and beyond the new puzzle door. F opens a rest menu that heals, saves, sets the checkpoint, resets combat targets, and allows travel to discovered fires.
-- Added a short throw/Recall puzzle: hit the gold target with an outbound throw, reposition to the blue floor mark, then recall through the blue target to open the next door.
-- Added local checkpoint saves for the hatchet, Recall, discovered fires, cleared route obstacles, lesson milestones, and completed puzzles, with a confirmed New run option.
-- Added 38 repeatable bonfire/puzzle checks; verified checkpoint respawn, save loading across Play Mode sessions, travel, menu input, and physical door access.
-- Added a linear prototype teaching route with step-by-step instructions and gates: hatchet pickup, slash/throw/retrieval, bushes, cracked stone, Recall unlock, return to the same dummies, then a separate enemy arena.
-- Added a reusable six-health melee sentinel with approach behavior, a visible locked-direction wind-up, a dodgeable strike, recovery, stagger interruption, and a home-area leash.
-- Added five-health player damage, short post-hit immunity, knockback, a placeholder HP display, and a defeat/restart prompt.
-- Added repeatable checks for route progression, enemy behavior, player health, and defeat.
-- Added a minimal black-and-white game-loop SVG to the README, showing the core loop, hatchet loop, and planned progression.
-- Added a reusable placeholder hatchet prefab and a walk-over pickup near the Tutorial spawn.
-- Added mouse aiming, a buffered three-hit light combo on left click, and a charged spinning cleave on right-click hold/release.
-- Added E to throw the hatchet, sticking at obstacles or maximum range, with walk-up retrieval.
-- Added a separate Recall unlock at the northern Tutorial altar. Once unlocked, E recalls the hatchet through targets to the moving player.
-- Added charge and swing effects, a flight trail, and a Tutorial controls/status overlay.
-- Added practice dummies with health, knockback, stagger, and automatic reset; shielded dummies and cracked stones require a full cleave to break their protection. Bushes can also be chopped.
-- Separated combat input, weapon state, hit detection, damage responses, and visuals, with a shared hatchet settings asset for tuning.
-- Documented prototype controls, tuning, puzzle integration, and repeatable Play Mode checks in `Docs/SystemsOverview.md`.
-- Added `Docs/SystemsOverview.md`, an overview of the implemented systems, their design, and their common settings.
-
-### Changed
-
-- Expanded the prototype route beyond the enemy arena with a campfire, a marked Recall puzzle, and an exit fire. Completed routes and puzzle doors stay open when resting resets enemies.
-- Defeat now offers R / Return to bonfire after discovering a checkpoint; before the first fire it restarts at the original spawn. Saved progress loads automatically on a new session.
-- Renamed `Tutorial` to `PrototypeLoop`, preserving its scene GUID and updating the enabled build scene. Expanded the tile layout into a guided loop with water boundaries and a northwest enemy corner.
-- Player movement now respects hit stagger, and player defeat cancels active hatchet damage and disables controls.
-- Updated systems/weapon documentation and moved the existing hatchet verification fixtures outside the map so they remain independent of the new layout.
-- Made light attacks faster, with a brief wind-up, a quick slash, and a short recovery. Damage is limited to the slash phase, and queued combo clicks are more forgiving.
-- Fixed the backhand slash effect to follow the blade's direction, added a tapered crescent that fades quickly, and added three small combo pips above the player.
-- Returning hatchets now damage shielded targets from behind without breaking their shields. Front and side Recall hits remain blocked; full cleaves still break guards.
-- Added a facing arrow to the shield practice dummy and a controls hint for rear Recall hits. Special rear-hit knockdown/stun remains planned for later.
-- Replaced the README artwork with the new top and bottom banners stored in the repository.
-- Expanded WASD/arrow-key movement from four to eight directions, with equal diagonal speed.
-- Kept four-direction visual facing while preserving the last full movement direction when idle.
-- Simplified movement input to keyboard controls; mouse-wheel camera zoom remains available.
-
-## 20SEP2026
-
-### Added
-
-- Imported 64 pixel-art tiles at 16x16 pixels, including grass, dirt, stone, flowers, rocks, water, and terrain transitions.
-- Added a ground Tile Palette and sample-map prefab for painting and testing levels.
-- Created the `Tutorial` scene with a grassy clearing, dirt loop, flowers, and a small pond using the imported tiles.
-- Added solid pond and shoreline boundaries, plus the existing player and follow camera, to make Tutorial ready to explore.
-- Added smooth mouse-wheel camera zoom: scroll up to zoom in and down to zoom out, limited to orthographic sizes 3-8 with a starting size of 5.5.
-- Exposed zoom limits, sensitivity, and smoothing in the camera Inspector.
-
-### Changed
-
-- Set `Tutorial` as the enabled build scene in place of `MovementPlayground`.
+- Added 64 pixel-art tiles, a painting palette and a sample-map prefab.
+- Built the initial tutorial clearing with paths, flowers, a pond and solid boundaries.
+- Added mouse-wheel camera zoom with a starting size of 5.5 and limits of 3-8.
 - Updated the browser build with the tutorial area and camera zoom.
 
-## 14SEP2026 - DEV 01
+## 14SEP2026 - Movement foundation
 
-### Added
-
-- Continuous four-direction player movement using WASD or arrow keys.
-- Direction priority based on the most recently pressed held direction.
-- Physics-based collision with obstacles and boundary walls.
-- Smooth camera follow with adjustable smoothing.
-- Basic test area with a reference grid and solid obstacles.
-- Placeholder player sprite with a facing-direction marker.
-- Reusable player, obstacle, and camera prefabs.
-- Organized folders for future gameplay, art, animation, audio, and UI work.
-- Separate input, movement, and camera components, with an interchangeable input interface.
-- Pixel-art title and decorative banner artwork for the README.
+- Added keyboard movement, physics collision, smooth camera follow and a movement test scene.
+- Added reusable player, obstacle and camera prefabs with separate input and movement components.
+- Organized project folders and added title and banner artwork.

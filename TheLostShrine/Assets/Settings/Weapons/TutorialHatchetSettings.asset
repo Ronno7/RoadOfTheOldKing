@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69d20bcd943624b409855b7f8ded6904, type: 3}
+  m_Name: TutorialHatchetSettings
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Weapons.HatchetSettings
+  lightDuration: 0.3
+  finisherDurationMultiplier: 1.15
+  lightWindupFraction: 0.32
+  lightSwingEndFraction: 0.53
+  lightRadius: 1.8
+  lightArc: 110
+  comboWindow: 0.55
+  lightDamage: 10
+  finisherDamage: 15
+  lightStaminaCost: 18
+  finisherStaminaCost: 24
+  minimumCharge: 0.2
+  fullCharge: 0.8
+  cleaveDuration: 0.45
+  cleaveRadius: 2.1
+  cleaveDamage: 30
+  cleaveStaminaCost: 35
+  cleaveKnockback: 6
+  cleaveStagger: 0.7
+  throwSpeed: 10
+  recallSpeed: 16
+  throwRange: 6
+  autoRecallDistance: 10
+  flightRadius: 0.18
+  throwDamage: 15
+  recallDamage: 10
+  throwStaminaCost: 25
+  retrieveDistance: 0.9

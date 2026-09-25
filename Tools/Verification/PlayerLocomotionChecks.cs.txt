@@ -1,0 +1,97 @@
+// Run via Unity MCP execute_code in Tutorial Play Mode. No saves are read or written.
+// Uses a virtual keyboard, the real motor and Physics2D, restoring all state in finally.
+if (!Application.isPlaying) throw new Exception("Enter Tutorial Play Mode first.");
+var player=GameObject.Find("Player");
+var movement=player.GetComponent<TheLostShrine.Player.PlayerMovement>();
+var animation=player.GetComponent<TheLostShrine.Player.PlayerLocomotionAnimation>();
+if(animation==null)throw new Exception("Use the animated Tutorial player.");
+var body=player.GetComponent<Rigidbody2D>();
+var dash=player.GetComponent<TheLostShrine.Player.PlayerDash>();
+var health=player.GetComponent<TheLostShrine.Player.PlayerHealth>();
+var input=player.GetComponent<TheLostShrine.Input.PlayerMovementInput>();
+var renderer=player.transform.Find("Body").GetComponent<SpriteRenderer>();
+var animator=renderer.GetComponent<Animator>();
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var inputUpdate=input.GetType().GetMethod("Update",flags);
+var motorUpdate=movement.GetType().GetMethod("FixedUpdate",flags);
+var visualUpdate=animation.GetType().GetMethod("LateUpdate",flags);
+var resetVisual=animation.GetType().GetMethod("OnEnable",flags);
+var phase=animation.GetType().GetField("cycle",flags);
+var actions=(UnityEngine.InputSystem.InputActionMap)input.GetType().GetField("actions",flags).GetValue(input);
+var oldDevices=actions.devices;
+var oldRouting=UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode;
+var oldSimulation=Physics2D.simulationMode;
+var oldInterpolation=body.interpolation;
+var oldFocus=(bool)input.GetType().GetField("hasFocus",flags).GetValue(input);
+var oldPause=(bool)input.GetType().GetField("paused",flags).GetValue(input);
+var oldFacing=movement.GetType().GetProperty("FacingDirection").GetValue(movement,null);
+var start=body.position;
+var results=new System.Collections.Generic.List<string>();
+System.Action<bool,string> check=(ok,label)=>results.Add((ok?"PASS ":"FAIL ")+label);
+var keyboard=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
+GameObject wall=null;
+System.Action<UnityEngine.InputSystem.Key[]> keys=held=>{
+    UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState(held));
+    UnityEngine.InputSystem.InputSystem.Update();
+    input.GetType().GetField("hasFocus",flags).SetValue(input,true);
+    inputUpdate.Invoke(input,null);
+};
+System.Action step=()=>{motorUpdate.Invoke(movement,null);Physics2D.Simulate(Time.fixedDeltaTime);visualUpdate.Invoke(animation,null);};
+System.Action<Vector2> move=p=>{body.position=p;player.transform.position=p;body.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();};
+System.Action reset=()=>{health.HealAtRest();movement.enabled=true;input.enabled=true;keys(new UnityEngine.InputSystem.Key[0]);move(new Vector2(200,200));resetVisual.Invoke(animation,null);step();};
+try {
+    UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=UnityEngine.InputSystem.InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+    actions.devices=new UnityEngine.InputSystem.InputDevice[]{keyboard};
+    input.GetType().GetField("paused",flags).SetValue(input,false);
+    Physics2D.simulationMode=SimulationMode2D.Script;body.interpolation=RigidbodyInterpolation2D.None;
+    var directions=new[]{UnityEngine.InputSystem.Key.S,UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.A,UnityEngine.InputSystem.Key.W};
+    string[] names={"South","East","West","North"};
+    for(int d=0;d<4;d++) {
+        reset();keys(new[]{directions[d]});var seen=new System.Collections.Generic.HashSet<string>();var origin=body.position;
+        for(int n=0;n<30;n++){step();seen.Add(renderer.sprite.name);}
+        check(seen.Count==4 && seen.All(s=>s.StartsWith(names[d]+"_")),names[d]+" plays all four approved frames");
+        check(Mathf.Abs(Vector2.Distance(origin,body.position)-movement.MoveSpeed*Time.fixedDeltaTime*30)<.03f,names[d]+" motor travels at walk speed");
+        keys(new UnityEngine.InputSystem.Key[0]);step();
+        check(renderer.sprite.name==names[d]+"_00" && body.linearVelocity==Vector2.zero,names[d]+" stops immediately, retaining facing");
+    }
+    reset();keys(new[]{UnityEngine.InputSystem.Key.D});for(int n=0;n<6;n++)step();float before=(float)phase.GetValue(animation);
+    keys(new[]{UnityEngine.InputSystem.Key.W});step();float after=(float)phase.GetValue(animation);
+    check(Mathf.Abs(after-Mathf.Repeat(before+movement.MoveSpeed*Time.fixedDeltaTime/2.25f,1))<.002f && renderer.sprite.name.StartsWith("North_"),"Turning preserves stride phase");
+    reset();keys(new[]{UnityEngine.InputSystem.Key.W,UnityEngine.InputSystem.Key.D});step();
+    check(Mathf.Abs(body.linearVelocity.magnitude-movement.MoveSpeed)<.01f && renderer.sprite.name.StartsWith("East_"),"Diagonal speed normalized and facing stable");
+    reset();keys(new[]{UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.LeftShift});for(int n=0;n<6;n++)step();
+    check(movement.IsSprinting && Mathf.Abs(body.linearVelocity.magnitude-movement.SprintSpeed)<.01f,"Shift drives existing sprint motor");
+    check(Mathf.Abs((float)phase.GetValue(animation)-Mathf.Repeat(.25f+movement.SprintSpeed*Time.fixedDeltaTime*6/2.25f,1))<.002f,"Sprint cadence matches distance (1.6x walk)");
+    reset();wall=new GameObject("Locomotion verification wall");wall.layer=LayerMask.NameToLayer("Environment");wall.transform.position=new Vector3(201.5f,200,0);wall.AddComponent<BoxCollider2D>().size=new Vector2(1,8);Physics2D.SyncTransforms();
+    keys(new[]{UnityEngine.InputSystem.Key.D});for(int n=0;n<45;n++)step();
+    check(body.position.x<200.64f && renderer.sprite.name=="East_00","Blocked wall stops player and walk cycle");
+    UnityEngine.Object.DestroyImmediate(wall);wall=null;
+    reset();keys(new[]{UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.Space});step();
+    check(dash.IsDashing && renderer.sprite.name=="East_02","Dash holds a directional stride pose");
+    keys(new UnityEngine.InputSystem.Key[0]);for(int n=0;n<12;n++)step();
+    check(!dash.IsDashing && renderer.sprite.name=="East_00","Dash settles to idle after release");
+    reset();keys(new[]{UnityEngine.InputSystem.Key.D});step();movement.enabled=false;visualUpdate.Invoke(animation,null);
+    check(renderer.sprite.name=="East_00","Disabling movement stops animation");
+    reset();keys(new[]{UnityEngine.InputSystem.Key.D});step();move(new Vector2(210,210));visualUpdate.Invoke(animation,null);
+    check(renderer.sprite.name=="East_00" && (float)phase.GetValue(animation)==0,"Teleport resets gait without fast forwarding");
+    reset();keys(new[]{UnityEngine.InputSystem.Key.A});step();input.GetType().GetMethod("OnApplicationFocus",flags).Invoke(input,new object[]{false});step();
+    check(body.linearVelocity==Vector2.zero && renderer.sprite.name=="West_00","Focus loss stops movement and animation");
+    reset();keys(new[]{UnityEngine.InputSystem.Key.W});step();animation.enabled=false;animation.enabled=true;keys(new UnityEngine.InputSystem.Key[0]);step();
+    check(renderer.sprite.name=="North_00","Re-enabling animation restores a valid idle");
+    check(renderer.transform.localScale==Vector3.one && renderer.transform.localPosition==new Vector3(0,-.25f,0) && !renderer.flipX,"No squash, mirroring, scale or foot-offset drift");
+    check(animator.runtimeAnimatorController.animationClips.Length==8 && !animator.applyRootMotion,"Eight native clips with no root motion");
+    var camera=Camera.main;var follow=camera.GetComponent<TheLostShrine.Cameras.CameraFollow2D>();follow.SnapToTarget();
+    check(Vector2.Distance(camera.transform.position,player.transform.position)<.001f && Camera.allCamerasCount==1,"Existing follow camera targets the only player/camera");
+} finally {
+    if(wall!=null)UnityEngine.Object.DestroyImmediate(wall);
+    movement.enabled=true;input.enabled=true;animation.enabled=true;health.HealAtRest();
+    keys(new UnityEngine.InputSystem.Key[0]);actions.devices=oldDevices;
+    input.GetType().GetField("hasFocus",flags).SetValue(input,oldFocus);input.GetType().GetField("paused",flags).SetValue(input,oldPause);
+    movement.GetType().GetProperty("FacingDirection").SetValue(movement,oldFacing,null);
+    move(start);body.interpolation=oldInterpolation;resetVisual.Invoke(animation,null);visualUpdate.Invoke(animation,null);
+    Physics2D.simulationMode=oldSimulation;
+    UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard);
+    UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=oldRouting;
+    Camera.main.GetComponent<TheLostShrine.Cameras.CameraFollow2D>().SnapToTarget();
+}
+return new {passed=results.Count(s=>s.StartsWith("PASS")),failed=results.Count(s=>s.StartsWith("FAIL")),results};

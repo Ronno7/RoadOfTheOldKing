@@ -1,6 +1,6 @@
-# Opening-zone color palettes — proposal v1
+# Opening-zone color palettes
 
-Palette exploration for The Lost Shrine. These are proposed art colors, not changes to the existing Unity tiles or scene. The hex values below are the source of truth; generated concept imagery may approximate them.
+Hearth and Meadow is the production tutorial environment palette. Field and Old Road is the planned Green Lowlands palette. The hex values below are the source of truth; generated reference imagery may approximate them.
 
 The tutorial is a sheltered settlement within Green Lowlands. Keep both places green and sunlit, with warmth coming from earth, timber, cream plaster and clay roofs rather than an orange filter. Shared earth colors make the transition feel continuous.
 

@@ -24,6 +24,7 @@ namespace TheLostShrine.Player
         private PlayerStamina stamina;
         private PlayerCombatController combat;
         private PlayerDash dash;
+        private PlayerChopAnimation chop;
 
         public float MoveSpeed => moveSpeed;
         public float SprintSpeed => moveSpeed * sprintMultiplier;
@@ -42,6 +43,7 @@ namespace TheLostShrine.Player
             stamina = GetComponent<PlayerStamina>();
             combat = GetComponent<PlayerCombatController>();
             dash = GetComponent<PlayerDash>();
+            chop = GetComponent<PlayerChopAnimation>();
             FacingDirection = initialFacing.sqrMagnitude > 0f ? initialFacing.normalized : Vector2.down;
             body.bodyType = RigidbodyType2D.Dynamic;
             body.gravityScale = 0f;
@@ -91,6 +93,14 @@ namespace TheLostShrine.Player
                 FacingDirection = dash.Direction;
                 stamina.DelayRecovery();
                 body.linearVelocity = dash.GetVelocity(Time.fixedDeltaTime);
+                return;
+            }
+
+            if (chop != null && chop.IsPlaying)
+            {
+                IsSprinting = false;
+                FacingDirection = combat.Weapon.AttackDirection;
+                body.linearVelocity = direction * moveSpeed * chop.MovementScale;
                 return;
             }
 

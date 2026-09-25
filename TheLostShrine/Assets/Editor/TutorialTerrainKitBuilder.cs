@@ -101,7 +101,7 @@ namespace TheLostShrine.EditorTools
             {
                 var tile = GetOrCreate<AnimatedTile>(Root + "/Animations/Animated_" + material + ".asset");
                 tile.m_AnimatedSprites = entries.Where(e => e.material == material).OrderBy(e => e.variant).Select(e => sprites[e.name]).ToArray();
-                tile.m_MinSpeed = tile.m_MaxSpeed = 1;
+                tile.m_MinSpeed = tile.m_MaxSpeed = material == "Ripple" ? 1f : 1.25f;
                 tile.m_AnimationStartTime = 0; tile.m_AnimationStartFrame = 0;
                 tile.m_TileColliderType = Tile.ColliderType.None;
                 EditorUtility.SetDirty(tile); result.Add(material, tile);

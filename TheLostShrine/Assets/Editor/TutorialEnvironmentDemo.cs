@@ -35,20 +35,20 @@ namespace TheLostShrine.EditorTools
             string lane=TutorialPathsKitBuilder.Root+"/Rules/Paint_DirtLane.asset";
             string earth=TutorialGroundKitBuilder.Root+"/Rules/Paint_Earth.asset";
 
-            // Two-cell approaches center on the doors of even-width cottages.
+            // Two-cell approaches follow the offset workshop and longhouse entrances.
             foreach(var p in maps["Footpath"].cellBounds.allPositionsWithin)
                 if(p.y>=27)maps["Footpath"].SetTile(p,null);
-            place("Cottage_Clay",6,30);place("Cottage_Thatch",14,33);
-            paint("Footpath",foot,7,28,2,3);
-            paint("Footpath",foot,8,28,6,1);
+            place("Cottage_Clay",5.375f,29);place("Cottage_Thatch",12.25f,32);
+            paint("Footpath",foot,6,27,2,3);
+            paint("Footpath",foot,7,27,7,2);
             paint("Footpath",foot,12,27,3,3);
             paint("Footpath",foot,13,29,4,2);
-            paint("Footpath",foot,15,30,2,4);
+            paint("Footpath",foot,16,29,2,4);
             // A third home opens onto the square, next to the shared well.
-            place("Cottage_Clay",2,18);
+            place("Cottage_Clay",2.375f,18);
             paint("Footpath",foot,3,16,2,3);
             paint("Footpath",foot,4,17,7,1);
-            place("Village_Well",6,19);paint("Footpath",foot,6,18,4,1);
+            place("Village_Well",9,19);paint("Footpath",foot,9,18,4,1);
             place("Woodshed",0,10);
             paint("Footpath",foot,0,7,2,4);paint("Footpath",foot,1,7,4,1);
             place("Firewood_Rack",0,14);place("Hatchet_Stump",2,5);place("Fallen_Log",0,2);
@@ -88,13 +88,13 @@ namespace TheLostShrine.EditorTools
             place("Old_Arch",52,32);place("Broken_Pillar",48,32);place("Ruined_Wall",56,34);
             paint("Footpath",foot,53,29,1,4);
 
-            foreach(var p in new[]{new Vector2Int(0,31),new Vector2Int(3,35),new Vector2Int(28,31),new Vector2Int(28,36),new Vector2Int(0,23),new Vector2Int(60,31),new Vector2Int(59,0),new Vector2Int(56,2),new Vector2Int(28,0),new Vector2Int(19,0)})
+            foreach(var p in new[]{new Vector2Int(0,31),new Vector2Int(9,36),new Vector2Int(28,31),new Vector2Int(28,36),new Vector2Int(0,26),new Vector2Int(60,31),new Vector2Int(59,0),new Vector2Int(56,2),new Vector2Int(28,0),new Vector2Int(19,0)})
                 place("Oak",p.x,p.y);
             foreach(var p in new[]{new Vector2Int(26,25),new Vector2Int(44,31),new Vector2Int(61,23),new Vector2Int(43,2)})
                 place("Birch",p.x,p.y);
-            foreach(var p in new[]{new Vector2Int(6,0),new Vector2Int(15,0),new Vector2Int(23,7),new Vector2Int(2,27)})
+            foreach(var p in new[]{new Vector2Int(6,0),new Vector2Int(15,0),new Vector2Int(23,7),new Vector2Int(22,12)})
                 place("Apple_Tree",p.x,p.y);
-            place("Hedgerow",0,27);place("Hedgerow",25,37);place("Hedgerow",47,1);
+            place("Hedgerow",0,36);place("Hedgerow",25,37);place("Hedgerow",47,1);
             place("Boulder_Cluster",29,26);place("Boulder",44,25);place("Boulder",24,3);
             place("Small_Stones",22,2);place("Small_Stones",56,25);place("Fallen_Log",44,2);
         }

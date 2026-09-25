@@ -1,13 +1,13 @@
 # Environment art sources
 
-The simplified sample was approved for full production on 23 September 2026. The previous high-detail Village/Construction sources and their kit assets were replaced.
+These source sheets and native references are required by the production Environment builder.
 
 | File | Role |
 | --- | --- |
 | `Sample.png`, `Sample-prompt.txt` | Approved generated style reference and exact prompt |
-| `ApprovedSample16.png` | Exact native cottage, oak, boulder and horizontal fence pixels reused by production |
-| `Sample-preview.png` | Historical approved sample shown on the first three tile layers |
-| `Structures.png` | Thatched cottage, woodshed, well, arch, pillar and ruined wall |
+| `ApprovedSample16.png` | Exact native oak, boulder and horizontal fence pixels reused by production; original cottage retained only in this shared reference |
+| `Structures.png` | Woodshed, well, arch, pillar and ruined wall; the cottage in this sheet is unused |
+| `Cottages.png`, `Cottages-prompt.txt` | Current 6x5 workshop (96x80) and 8x6 thatched longhouse (128x96) |
 | `Nature.png` | Birch, apple tree, hedge, boulder cluster, fallen log, notched stump, firewood and small stones |
 | `Fences.png` | Vertical segment, corners, closed gate, repaired section and post; its open-gate draft is unused |
 | `OpenGate.png` | Replacement open gate with a clear player-width passage |

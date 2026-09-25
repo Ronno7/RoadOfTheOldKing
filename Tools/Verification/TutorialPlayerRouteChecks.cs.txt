@@ -1,0 +1,66 @@
+// Tutorial Play Mode: pathfind with the player's clearance, then traverse every
+// route anchor with the actual motor/physics. Restores the player and camera.
+if(!Application.isPlaying)throw new Exception("Enter Tutorial Play Mode first.");
+var player=GameObject.Find("Player");
+var body=player.GetComponent<Rigidbody2D>();
+var movement=player.GetComponent<TheLostShrine.Player.PlayerMovement>();
+var input=player.GetComponent<TheLostShrine.Input.PlayerMovementInput>();
+var animation=player.GetComponent<TheLostShrine.Player.PlayerLocomotionAnimation>();
+var follow=Camera.main.GetComponent<TheLostShrine.Cameras.CameraFollow2D>();
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var motorStep=movement.GetType().GetMethod("FixedUpdate",flags);
+var visualStep=animation.GetType().GetMethod("LateUpdate",flags);
+var moveInput=input.GetType().GetProperty("MoveDirection");
+var sprintInput=input.GetType().GetProperty("SprintHeld");
+var oldPosition=body.position;var oldMode=Physics2D.simulationMode;var oldInterpolation=body.interpolation;
+var oldFocus=input.GetType().GetField("hasFocus",flags).GetValue(input);
+var oldPaused=input.GetType().GetField("paused",flags).GetValue(input);
+var oldFacing=movement.GetType().GetProperty("FacingDirection").GetValue(movement,null);
+var world=GameObject.Find("Tutorial Zone");
+var collision=world.transform.Find("Collision").GetComponent<UnityEngine.Tilemaps.Tilemap>();
+var anchors=world.transform.Find("Layout Anchors (editor only)").Cast<Transform>().ToArray();
+var visited=new System.Collections.Generic.Dictionary<Vector2Int,Vector2Int>();
+var queue=new System.Collections.Generic.Queue<Vector2Int>();
+var origin=new Vector2Int(15,13);visited[origin]=origin;queue.Enqueue(origin);
+var directions=new[]{Vector2Int.up,Vector2Int.right,Vector2Int.down,Vector2Int.left};
+var results=new System.Collections.Generic.List<string>();int steps=0;
+Physics2D.SyncTransforms();
+while(queue.Count>0){
+    var p=queue.Dequeue();foreach(var d in directions){
+        var q=p+d;if(q.x<0||q.y<0||q.x>=100||q.y>=100||visited.ContainsKey(q))continue;
+        if(collision.HasTile(new Vector3Int(q.x,q.y,0)))continue;
+        if(Physics2D.OverlapBoxAll((Vector2)q+Vector2.one*.5f,Vector2.one*.8f,0,~(1<<player.layer)).Any(c=>!c.isTrigger))continue;
+        visited[q]=p;queue.Enqueue(q);
+    }
+}
+try {
+    Physics2D.simulationMode=SimulationMode2D.Script;body.interpolation=RigidbodyInterpolation2D.None;
+    input.GetType().GetField("hasFocus",flags).SetValue(input,true);input.GetType().GetField("paused",flags).SetValue(input,false);
+    sprintInput.SetValue(input,false,null);
+    foreach(var anchor in anchors){
+        var goal=Vector2Int.FloorToInt(anchor.position);
+        if(!visited.ContainsKey(goal)){results.Add("FAIL unreachable: "+anchor.name);continue;}
+        var path=new System.Collections.Generic.List<Vector2Int>();var cell=goal;
+        while(cell!=origin){path.Add(cell);cell=visited[cell];}path.Add(origin);path.Reverse();
+        body.position=(Vector2)origin+Vector2.one*.5f;player.transform.position=body.position;Physics2D.SyncTransforms();
+        bool blocked=false;
+        foreach(var waypoint in path){
+            var target=(Vector2)waypoint+Vector2.one*.5f;int attempts=0;
+            while(Vector2.Distance(body.position,target)>.015f && attempts++<20){
+                var delta=target-body.position;
+                moveInput.SetValue(input,Vector2.ClampMagnitude(delta/(movement.MoveSpeed*Time.fixedDeltaTime),1),null);
+                motorStep.Invoke(movement,null);Physics2D.Simulate(Time.fixedDeltaTime);visualStep.Invoke(animation,null);steps++;
+            }
+            if(Vector2.Distance(body.position,target)>.015f){blocked=true;results.Add("FAIL motor blocked: "+anchor.name+" at "+body.position);break;}
+        }
+        if(!blocked){follow.SnapToTarget();results.Add("PASS actual motor reaches "+anchor.name);}
+    }
+} finally {
+    moveInput.SetValue(input,Vector2.zero,null);body.linearVelocity=Vector2.zero;
+    body.position=oldPosition;player.transform.position=oldPosition;Physics2D.SyncTransforms();
+    body.interpolation=oldInterpolation;Physics2D.simulationMode=oldMode;
+    input.GetType().GetField("hasFocus",flags).SetValue(input,oldFocus);input.GetType().GetField("paused",flags).SetValue(input,oldPaused);
+    movement.GetType().GetProperty("FacingDirection").SetValue(movement,oldFacing,null);
+    animation.GetType().GetMethod("OnEnable",flags).Invoke(animation,null);visualStep.Invoke(animation,null);follow.SnapToTarget();
+}
+return new{passed=results.Count(s=>s.StartsWith("PASS")),failed=results.Count(s=>s.StartsWith("FAIL")),steps,reachableCells=visited.Count,results};

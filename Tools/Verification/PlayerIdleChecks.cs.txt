@@ -1,0 +1,45 @@
+// Tutorial Play Mode, with the hatchet equipped. No save data is used.
+if(!Application.isPlaying)throw new Exception("Enter Tutorial Play Mode first.");
+var p=GameObject.Find("Player");var motion=p.GetComponent<TheLostShrine.Player.PlayerLocomotionAnimation>();
+var movement=p.GetComponent<TheLostShrine.Player.PlayerMovement>();var combat=p.GetComponent<TheLostShrine.Player.PlayerCombatController>();
+var weapon=combat.Weapon;if(weapon==null)throw new Exception("Equip the Tutorial hatchet first.");
+var view=weapon.GetComponent<TheLostShrine.Weapons.HatchetView>();var model=weapon.transform.Find("Model");
+var visual=p.transform.Find("Body");var sprite=visual.GetComponent<SpriteRenderer>();var body=p.GetComponent<Rigidbody2D>();
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var update=motion.GetType().GetMethod("LateUpdate",flags);var breathe=motion.GetType().GetMethod("UpdateIdleMotion",flags);
+var reset=motion.GetType().GetMethod("ResetIdleMotion",flags);var draw=view.GetType().GetMethod("LateUpdate",flags);
+var facing=movement.GetType().GetProperty("FacingDirection");var oldFacing=facing.GetValue(movement,null);
+var oldVelocity=body.linearVelocity;var position=p.transform.position;var feet=visual.position;var collider=p.GetComponent<BoxCollider2D>().bounds;
+var so=new SerializedObject(p.GetComponent<TheLostShrine.Player.PlayerWeaponGrip>());var poses=so.FindProperty("frames");
+var grips=new System.Collections.Generic.Dictionary<Sprite,Vector2>();
+for(int i=0;i<poses.arraySize;i++){var e=poses.GetArrayElementAtIndex(i);grips[(Sprite)e.FindPropertyRelative("sprite").objectReferenceValue]=e.FindPropertyRelative("position").vector2Value;}
+var results=new System.Collections.Generic.List<string>();System.Action<bool,string> check=(ok,name)=>results.Add((ok?"PASS ":"FAIL ")+name);
+try{
+ body.linearVelocity=Vector2.zero;
+ var dirs=new[]{Vector2.down,Vector2.right,Vector2.left,Vector2.up};string[] names={"South","East","West","North"};
+ for(int d=0;d<4;d++){
+  reset.Invoke(motion,null);facing.SetValue(movement,dirs[d],null);update.Invoke(motion,null);
+  float min=2,max=0,maxGripError=0;
+  for(int i=0;i<340;i++){
+   breathe.Invoke(motion,new object[]{true,.02f});draw.Invoke(view,null);
+   min=Mathf.Min(min,visual.localScale.y);max=Mathf.Max(max,visual.localScale.y);
+   maxGripError=Mathf.Max(maxGripError,Vector3.Distance(model.position,visual.TransformPoint(grips[sprite.sprite])));
+  }
+  check(sprite.sprite.name==names[d]+"_00" && max>1.011f && max<=1.0121f && min>=1f,names[d]+" breathes subtly without changing its standing frame");
+  check(maxGripError<.001f,names[d]+" hatchet stays in the breathing hand");
+ }
+ check(p.transform.position==position && visual.position==feet && p.GetComponent<BoxCollider2D>().bounds==collider,"Idle keeps the foot pivot, root and collision fixed");
+ var scale=visual.localScale;breathe.Invoke(motion,new object[]{true,0f});check(visual.localScale==scale,"Zero elapsed time freezes breathing");
+ breathe.Invoke(motion,new object[]{false,.02f});check(visual.localScale==Vector3.one,"Movement/dash path resets idle deformation immediately");
+ reset.Invoke(motion,null);breathe.Invoke(motion,new object[]{true,.2f});check(visual.localScale==Vector3.one,"Brief stops wait before starting a breath");
+ p.GetComponent<TheLostShrine.Player.PlayerHealth>().HealAtRest();weapon.TryBeginCharge();update.Invoke(motion,null);
+ check(visual.localScale==Vector3.one,"Attack state suppresses relaxed breathing");weapon.CancelAction();
+ breathe.Invoke(motion,new object[]{true,2f});motion.enabled=false;check(visual.localScale==Vector3.one,"Disabling animation restores neutral scale");motion.enabled=true;
+ var baseScale=visual.localScale;for(int i=0;i<2000;i++)breathe.Invoke(motion,new object[]{true,.02f});
+ check(visual.localScale.x==baseScale.x && visual.localScale.z==baseScale.z && visual.localScale.y<=1.0121f,"Long idle does not accumulate scale drift");
+ check(Vector3.Distance(model.Find("Sprite").localScale,Vector3.one*1.3f)<.0001f && model.localScale==Vector3.one,"Hatchet is 30 percent larger around its unchanged grip pivot");
+}finally{
+ weapon.CancelAction();p.GetComponent<TheLostShrine.Player.PlayerHealth>().HealAtRest();motion.enabled=true;
+ reset.Invoke(motion,null);facing.SetValue(movement,oldFacing,null);body.linearVelocity=oldVelocity;update.Invoke(motion,null);draw.Invoke(view,null);
+}
+return new{passed=results.Count(s=>s.StartsWith("PASS")),failed=results.Count(s=>s.StartsWith("FAIL")),results};

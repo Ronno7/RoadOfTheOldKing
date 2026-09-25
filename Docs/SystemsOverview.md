@@ -1,4 +1,8 @@
-# System's overview
+# Systems overview
+
+**Current development status:** [Vertical-slice plan](VerticalSlice.md). The systems below describe the working PrototypeLoop mechanics unless stated otherwise. `Tutorial.unity` now has the approved animated player, follow/zoom camera, world layout, practice dummy and real stump hatchet pickup/carrying. Remaining tutorial interactions, Recall awakening, enemy and checkpoint integration are still pending. Only PrototypeLoop is enabled for builds.
+
+**Tutorial presentation:** `TutorialPlayer` and `TutorialHatchet` inherit the existing gameplay prefabs. Locomotion samples directional clips by distance; idle breathing keeps the foot pivot fixed. The weapon follows frame-specific hand grips after animation, with separate ownership during attacks and flight. Current art settings and the combat animation plan are in [Player and hatchet](Art/Player/README.md).
 
 1. **World layout and collision.** `PrototypeLoop` (formerly `Tutorial`) uses the imported 16-by-16-pixel tiles for a linear practice route: pickup, dummies, bushes, cracked stone, Recall, return to the dummies, an enemy arena, a bonfire, a Recall puzzle, and a second fire beyond its door. A sample-map prefab supports tile experiments; `MovementPlayground` preserves the earlier movement test area. `PrototypeLoop` is the scene enabled for builds.
 
@@ -11,6 +15,8 @@
 3. **Camera follow and zoom.** `CameraFollow2D` smoothly follows a target after movement updates. It needs only the target's position, so it can follow objects other than the player. `CameraZoom2D` separately handles smooth scroll-wheel zoom, starting at size 5.5 and staying within 3-8. Smaller orthographic sizes show a closer view. Both components live on the reusable camera prefab.
 
 4. **Weapon pickup and controls.** `HatchetPickup` detects overlap and equips the weapon through `PlayerCombatController`. One prefab instance serves as the ground pickup, held weapon, and projectile.
+
+   Tutorial uses `TutorialHatchet`, a weapon prefab variant with the approved sprite imported at 43x64 to match the player's pixel density. Its grounded pose sits still in the stump. `PlayerWeaponGrip` maps each of the 16 player sprites to its hand position and carry angle; HatchetView runs afterward (execution order 200 versus player animation 100), keeping the grip under the drawn hand through locomotion. Carrying follows the visible sprite rather than mouse aim. Existing action states release that grip and restore it on return to Held; dedicated attack/throw art remains pending. See verification below for carry checks.
 
    `PlayerCombatInput` supplies actions through `ICombatInput`. The controller converts the cursor into a world-space aim direction, briefly remembers combo clicks, and commands `HatchetWeapon`. Left click chains three chops; holding and releasing right click performs a charged spin; E throws or recalls. Focus loss and pausing cancel charging.
 
@@ -38,7 +44,7 @@
 
 11. **Prototype teaching route.** `PrototypeLoopGuide` listens for actual dummy hits and checks pickup, retrieval, broken props, Recall, enemy defeat, bonfire discovery, and puzzle completion. It supplies one current instruction and opens route gates as lessons are completed. The first fire follows the enemy arena; the second sits beyond the puzzle door. Saved milestones keep completed lessons open when enemies reset. This sequence belongs to the prototype scene rather than the weapon or enemy systems.
 
-12. **Bonfires and travel.** Approach a fire and press **F** to light/rest at it: restore health and stamina fully, retrieve the hatchet, clear stagger, reset enemies/dummies, save, and set the respawn location. `PlayerBonfireInteraction` handles the nearby interaction and locks movement/attacks while the menu is open; F or Escape leaves it. After discovering both fires, their menus offer travel between them. `Bonfire` holds each fire's stable ID and safe spawn point, while `BonfireView` draws its placeholder flame and label. Hatchet upgrades will join this menu when Sun Shards are implemented.
+12. **Bonfires and travel.** Approach a fire and press **F** to light/rest at it: restore health and stamina fully, retrieve the hatchet, clear stagger, reset enemies/dummies, save, and set the respawn location. `PlayerBonfireInteraction` handles the nearby interaction and locks movement/attacks while the menu is open; F or Escape leaves it. After discovering both fires, their menus offer travel between them. `Bonfire` holds each fire's stable ID and safe spawn point, while `BonfireView` draws its placeholder flame and label. The prototype's second fire also offers the implemented three-shard hatchet upgrade menu described below.
 
 13. **Throw/Recall puzzle.** Stand on the gold floor mark and throw at the gold target to arm the mechanism. Move to the blue floor mark and recall through the blue target to open the door. `HatchetPuzzleTarget` receives the existing `CombatHit` data through `IHitReceiver`; `ThrowRecallPuzzle` enforces the throw-then-return sequence and tells `PuzzleDoor` to open. Melee, an outbound hit on the blue target, or Recall before arming cannot solve it. Rest resets an unfinished attempt, while a completed door remains open.
 
@@ -116,6 +122,7 @@ Common settings are located here, relative to `TheLostShrine/`:
 | Dash distance, duration, cost, cooldown, and dodge window | `PlayerDash` on `Assets/Prefabs/Player/Player.prefab` |
 | Camera smoothing and zoom limits | `Assets/Prefabs/Cameras/FollowCamera.prefab` |
 | Attack costs, timing, damage, reach, flight speed, and automatic Recall distance | `Assets/Settings/Weapons/HatchetSettings.asset` |
+| Tutorial chop timing and reach | `Assets/Settings/Weapons/TutorialHatchetSettings.asset`; action cels and fist anchors on TutorialPlayer's `PlayerChopAnimation` |
 | Weapon appearance | `Model` child of `Assets/Prefabs/Weapons/Hatchet.prefab` |
 | Upgrade descriptions, effects, and first-tier cost | `Assets/Settings/Weapons/Upgrades/` |
 | Tier order | **Upgrade Tiers** on `Checkpoint Session` |
@@ -132,18 +139,17 @@ Common settings are located here, relative to `TheLostShrine/`:
 | Puzzle targets, floor marks, and door | `Assets/Prefabs/World/ThrowRecallPuzzle.prefab` |
 | Local save slot | `Checkpoint Session` in the scene; default key `TheLostShrine.PrototypeLoop.Save.v1` |
 
-Verification scripts live in `Tools/Verification/` and run through Unity MCP in Play Mode. Always use an empty `TheLostShrine.Verification.*` checkpoint save key and restore the normal scene key afterward. `StaminaPlayModeChecks.cs.txt` exercises real keyboard bindings, exhaustion, spending, recovery, cancellation, free Recall, rest/travel, and death. The older hatchet and route checks refill stamina between simulated actions to isolate their geometry/progression assertions. The bonfire/puzzle checks run with the normal stamina rules. `AutoRecallPlayModeChecks.cs.txt` covers the unlock, distance boundary, in-flight recall, free retrieval, return damage, and manual retrieval. `DashPlayModeChecks.cs.txt` covers Space input, distance, wall collision, dodge protection, action exclusivity, stamina, interruption, and rest/death. The browser build has not been rebuilt for these changes.
+## Verification
 
-`SunShardPlayModeChecks.cs.txt` checks unique rewards, the actual throw/Recall puzzle reward, safe detour access, purchase validation, permanent choices, all three effects against actual combat targets, future-tier composition, and old-save compatibility. `SetupSunShardPrototype.cs.txt` records the Edit Mode asset/scene setup; it is not a runtime dependency.
+Scripts live in `Tools/Verification/`. Run each in its indicated scene and mode; read its setup/cleanup instructions first. Prototype progression tests require an empty `TheLostShrine.Verification.*` checkpoint slot and restoration of the normal slot afterward. Tutorial presentation tests do not use saves.
 
-`HeartFragmentPlayModeChecks.cs.txt` covers real pickup triggers, clear routes to each fragment, partial sets, duplicate prevention, immediate saving, health restoration, bonfires, and additional sets. `SetupHeartFragments.cs.txt` records the Edit Mode prefab and scene setup.
+| Area | Recorded checks | Scripts |
+| --- | --- | --- |
+| Tutorial locomotion | 26 assertions; real motor traversal to all 13 route anchors | PlayerLocomotionChecks.cs.txt, TutorialPlayerRouteChecks.cs.txt |
+| Hatchet pickup/carry | 25 assertions, rerun with the enlarged sprite | HatchetCarryChecks.cs.txt |
+| Idle breathing | 16 assertions plus an unarmed instance check | PlayerIdleChecks.cs.txt |
+| First combat pose sample | 25 assertions: pose/contact timing, planted movement, local hit pause, deduplication, combo damage, cancellation, guarded/occluded hits and target recoil. Carry (25) and idle (16) rerun successfully alongside this pass. | PlayerChopChecks.cs.txt |
+| Prototype combat/progression | 344 assertions across hatchet, route/health/enemy, bonfire/puzzle, stamina, automatic Recall, dash, shards/upgrades and heart fragments; save/load and respawn also checked | Corresponding *PlayModeChecks.cs.txt files |
+| Art kits and demo | Latest consolidation pass: 2,804 Ground, 2,532 Terrain and 5,244 DemoTutorial assertions | TutorialGroundKitChecks.cs.txt, TutorialTerrainKitChecks.cs.txt, DemoTutorialChecks.cs.txt |
 
-Latest verification: 34 heart fragment, 39 shard/upgrade, 39 dash, 20 automatic Recall, 50 stamina, 78 hatchet, 46 route/health/enemy, and 38 bonfire/puzzle assertions passed (344 total). Permanent progression was also verified across death/respawn and a fresh Play Mode load.
-
-Ground art verification is separate: `TutorialGroundKitChecks.cs.txt` passed 2,806 Edit Mode asset/rule assertions, including 1,536 neighbor configurations. The generator checked 2,048 adjacent-cell geometry arrangements. Gameplay tests were not repeated for this asset-only addition.
-
-Terrain art verification: `TutorialTerrainKitChecks.cs.txt` passed 3,065 Edit Mode assertions, including 1,536 neighbor configurations, erase refresh, sample collision and connected routes, animation frame assets and import settings. The generator checked 2,048 geometry neighborhoods and 480 edge samples. Rebuilding preserved all 315 sprite IDs; the shared-helper refactor also passed the existing 2,806 Ground checks. Both previews were rendered and visually inspected in Unity.
-
-Tile art is now organized by zone and layer: `Assets/Art/Tiles/Tutorial/Ground`, `Tutorial/Terrain`, `Tutorial/Collision`, and reserved visual-layer folders. Original prototype art lives under `Prototype/Ground`. `Assets/Scenes/DemoTutorial.unity` is the single world-only presentation for all tutorial layers; the per-layer preview scenes and showcase prefabs were removed. Kit builders update assets, while the separate `DemoTutorialBuilder` is only used to explicitly rebuild that presentation. One combined blank template remains in `Tutorial/Templates`; the redundant ground-only template was removed.
-
-After consolidating the presentation and moving art folders, verification passed 2,804 Ground, 2,532 Terrain and 5,244 DemoTutorial assertions. The separate demo checks cover world-only content, every material family, animation placement, tile references, collision openings and connected routes. All 707 pre-move tile/texture GUIDs still resolve.
+These are recorded results for their respective changes, not a claim that every suite has been rerun against the current Tutorial. SetupSunShardPrototype and SetupHeartFragments record authoring setup and are not runtime dependencies. The browser build predates the current Tutorial integration.

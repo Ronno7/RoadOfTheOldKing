@@ -33,6 +33,8 @@ Water includes its bank inside the painted area. A single cell is a tiny puddle;
 
 **Tall cliffs:** extend the south edge with Middle face tiles, then a Foot row. Use Left and Right pieces at the ends and repeat Center pieces for width. Repeat Middle rows for height. The Top face row supplies its own cap for fully manual construction; omit it beneath an automatic ledge to avoid a doubled cap. These extensions are authored manually, not added by the RuleTile.
 
+Ledges now meet cliff faces at the cell boundary without the three-pixel ground-overlay inset. Keep both maps on the same grid with no positional offsets. Choose face end pieces from exposed neighbors on each row, including stepped sections; complete the short face returns beside ramp openings. Water banks retain their inset.
+
 **Stairs and ramps:** combine the matching 3x3 pieces; repeat Center columns and Middle rows to widen or lengthen them. The art is oriented for walking north/south. Place it over the drop and remove collision beneath the entire opening. The showcase demonstrates a broad staircase and a short earth ramp.
 
 **Low walls:** draw connected lines with Paint_StoneWall and leave cells empty for gates. These low borders render below the player; use the Above Player category for future tall wall/arch artwork that needs occlusion.
@@ -46,6 +48,7 @@ The Paint palette's second row contains **Animated_Ripple**, **Animated_FallBody
 - Use ripples sparingly inside water.
 - Stack FallLip at the plateau edge, repeat FallBody down the face, then put FallFoam in the receiving pool.
 - The three animations have four frames each and use stock Unity AnimatedTile assets. No custom runtime animation script.
+- Waterfall highlights move downward. Body and foam use a 1.25 speed multiplier (5 fps on the template's 4 fps map); ordinary ripples stay at 4 fps. The landing adds a broader foam burst, outward spray and spreading ripples. [Motion preview](../../../../../../Docs/Art/Tutorial/Previews/waterfall-motion.gif).
 
 The Structures palette also includes a ready-stacked waterfall column. Its width is one cell; leave water beneath the transparent margins. These are decorative water effects.
 

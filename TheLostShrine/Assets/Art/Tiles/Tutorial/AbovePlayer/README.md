@@ -5,7 +5,7 @@ The current tutorial's overhead art is complete within the Environment kit. This
 | Object | Overhead portion |
 | --- | --- |
 | Oak, birch, apple tree | Upper trunk and canopy, starting one tile above the base |
-| Clay and thatched cottages | Upper two rows, including roofs |
+| Clay and thatched cottages | Upper four rows of the 8×8 sprites, including roofs |
 | Woodshed and well | Upper structure/roof, starting one tile above the base |
 | Old arch | Upper pillars and arch, above the separate base supports |
 | Broken pillar and ruined wall | Upper masonry above the base footprint |

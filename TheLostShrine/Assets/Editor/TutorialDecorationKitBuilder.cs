@@ -182,18 +182,18 @@ namespace TheLostShrine.EditorTools
                 var go=(GameObject)PrefabUtility.InstantiatePrefab(prefab,root.transform);
                 go.transform.localPosition=new Vector3(x,y,0);
             };
-            // Approved corner: preserve its density and placements.
-            place("MeadowFlowers",0,18);place("MeadowFlowers",5,22);place("MeadowFlowers",4,23);
-            place("GrassTuft",2,16);place("GrassTuft",5,23);place("GrassTuft",0,20);place("GrassTuft",3,23);
-            place("FallenLeaves",0,22);place("FallenLeaves",2,24);place("CarvedStone",7,22);
+            // Retain the sparse accents around the enlarged cottage and relocated well.
+            place("MeadowFlowers",0,17);place("MeadowFlowers",8,21);place("MeadowFlowers",8,22);
+            place("GrassTuft",2,16);place("GrassTuft",8,17);place("GrassTuft",8,20);place("GrassTuft",9,22);
+            place("FallenLeaves",0,15);place("FallenLeaves",3,15);place("CarvedStone",9,21);
             place("WoodChips",1,13);place("WoodChips",3,14);
-            prop("ClayJar",1.75f,18.125f);prop("WoodenBucket",8.25f,19.125f);
+            prop("ClayJar",8.375f,18.125f);prop("WoodenBucket",11.25f,19.125f);
             prop("GrainSack",3.5f,10.125f);place("SplitLogs",3,12);
             // Two small home accents, orchard and chopping area.
-            place("MeadowFlowers",5,30);place("MeadowFlowers",18,33);
-            place("GrassTuft",10,32);place("LooseGrass",19,35);
-            prop("ClayJar",10.5f,30.125f);prop("GrainSack",13.5f,33.125f);
-            place("FallenLeaves",5,35);place("FallenLeaves",16,1);
+            place("MeadowFlowers",2,29);place("MeadowFlowers",20,36);
+            place("GrassTuft",11,29);place("LooseGrass",21,36);
+            prop("ClayJar",2.5f,29.125f);prop("GrainSack",20.5f,35.125f);
+            place("FallenLeaves",2,35);place("FallenLeaves",16,1);
             place("GrassTuft",10,1);place("LooseGrass",22,5);
             place("WoodChips",4,5);place("SplitLogs",1,4);
             // Scuffs belong only at the three practice positions.

@@ -23,6 +23,16 @@ namespace TheLostShrine.Weapons
         private float lightSpeedMultiplier = 1f;
         private float addedLightArc;
         private float addedCleaveRadius;
+        private float impactPauseRemaining;
+        public event System.Action<CombatHit> HitConfirmed;
+        public bool IsImpactPaused => impactPauseRemaining > 0f;
+
+        // Pause only this action clock. Enemies, camera, UI and world time keep running.
+        public void PauseOnImpact(float seconds)
+        {
+            if (State == HatchetState.LightChop)
+                impactPauseRemaining = Mathf.Max(impactPauseRemaining, Mathf.Clamp(seconds, 0f, 0.1f));
+        }
 
         public HatchetSettings Settings => settings;
         public HatchetState State { get; private set; } = HatchetState.OnGround;
@@ -73,7 +83,7 @@ namespace TheLostShrine.Weapons
             if (!isActiveAndEnabled || State != HatchetState.OnGround || newOwner == null)
                 return false;
             owner = newOwner;
-            hits = new HatchetHitDetector(owner.transform, transform);
+            hits = new HatchetHitDetector(owner.transform, transform, hit => HitConfirmed?.Invoke(hit));
             if (pickupCollider != null)
                 pickupCollider.enabled = false;
             transform.position = owner.transform.position;
@@ -191,6 +201,14 @@ namespace TheLostShrine.Weapons
                 return;
             }
 
+            if (impactPauseRemaining > 0f)
+            {
+                float paused = Mathf.Min(deltaTime, impactPauseRemaining);
+                impactPauseRemaining -= paused;
+                deltaTime -= paused;
+                owner.Stamina.DelayRecovery();
+                if (deltaTime <= 0f) return;
+            }
             float previousElapsed = elapsed;
             if (IsAttacking)
                 owner.Stamina.DelayRecovery();
@@ -296,6 +314,7 @@ namespace TheLostShrine.Weapons
         {
             State = state;
             elapsed = 0f;
+            impactPauseRemaining = 0f;
         }
 
         private void OnDisable() => CancelCharge();

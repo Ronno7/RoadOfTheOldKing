@@ -1,8 +1,8 @@
 # Zone tilemap standard
 
-Use this structure for every zone. Build the tutorial art first using [Hearth & Meadow](Palettes/OpeningZonePalettes-v1.md).
+Use this structure for every zone. The tutorial environment uses [Hearth & Meadow](Palettes/OpeningZonePalettes-v1.md).
 
-The [tutorial village plan](Tutorial/Plan.md) records the intended route and upcoming environment assets.
+The [tutorial village plan](Tutorial/Plan.md) records the route, placed environment and remaining interactions.
 
 | Layer | Content | Notes |
 | --- | --- | --- |
@@ -29,7 +29,7 @@ Open **Assets/Scenes/DemoTutorial.unity** for the full world-only art presentati
 
 Layer builders update assets and palettes without generating scenes. The explicit **Rebuild Demo Tutorial Presentation** menu command recreates this demonstration only. The scene is excluded from gameplay build settings.
 
-[Full presentation](Tutorial/Previews/demo-tutorial.png) · [Village close-up](Tutorial/Previews/tutorial-environment-detail.png). The [village plan](Tutorial/Plan.md) tracks the current art direction, next layer and deferred atmosphere/camera work.
+[Full presentation](Tutorial/Previews/demo-tutorial.png) · [Village close-up](Tutorial/Previews/tutorial-environment-detail.png). The [village plan](Tutorial/Plan.md) tracks art direction, world layout and deferred atmosphere/occlusion work.
 
 ## Production kits
 
@@ -38,8 +38,8 @@ Layer builders update assets and palettes without generating scenes. The explici
 
 - **Paths:** 100 native dirt-lane/footpath tiles, two automatic brushes and one palette that also reuses Ground cobbles for paving. [Painting guide](../../TheLostShrine/Assets/Art/Tiles/Tutorial/Paths/README.md).
 
-- **Environment:** 31 objects, 229 tile pieces, one palette, 28 static prefabs and three visual-only practice props. Separate trunk/base collision and overhead art; 14 exact Tutorial colors and binary transparency. [Painting guide](../../TheLostShrine/Assets/Art/Tiles/Tutorial/Environment/README.md).
+- **Environment:** 31 objects, 275 tile pieces, one palette, 28 static prefabs and three visual-only practice props. Separate trunk/base collision and overhead art; 14 exact Tutorial colors and binary transparency. [Painting guide](../../TheLostShrine/Assets/Art/Tiles/Tutorial/Environment/README.md).
 
-All five production layers use exact colors from the approved [opening-zone palette](Palettes/OpeningZonePalettes-v1.md). The previous high-detail Environment kit and temporary sample tooling have been removed. The [approved sample reference](Tutorial/Sources/Environment/Sample-preview.png) remains in the art docs; its four native sprites are reused unchanged. The older [generated ground draft](Tutorial/Sources/Ground/tutorial-ground-v1.png) is a visual study, not a production atlas.
+The environment kits use exact colors from the [opening-zone palette](Palettes/OpeningZonePalettes-v1.md). Native oak, boulder and fence pixels in `Tutorial/Sources/Environment/ApprovedSample16.png` remain production inputs; the cottages use the larger workshop and longhouse designs.
 
 **Detail / Decoration:** 12 designs, eight ground stamps made from 12 collision-free tiles, one palette and four visual-only props. Ground details use Ground sorting order 30; the unlit fire ring uses order 31. [Painting guide](../../TheLostShrine/Assets/Art/Tiles/Tutorial/DetailDecoration/README.md) · [Village detail](Tutorial/Previews/tutorial-decoration-village.png) · [Practice/rest detail](Tutorial/Previews/tutorial-decoration-practice.png). The six approved sample designs are preserved exactly. Atmospheric work remains deferred.

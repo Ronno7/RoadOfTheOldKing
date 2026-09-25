@@ -37,6 +37,11 @@ foreach(var prop in props)
     }
     var maps=prefab.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>().ToDictionary(m=>m.name);
     var bases=maps["Environment"];var upper=maps["Above Player"];var block=maps["Collision"];
+    if(prop.name.StartsWith("Cottage_"))
+    {
+        check(prop.width==(prop.name=="Cottage_Clay"?96:128)&&prop.height==(prop.name=="Cottage_Clay"?80:96)&&prefab.transform.localScale==Vector3.one,"Native 6x5 workshop / 8x6 longhouse "+prop.name);
+        check(!upper.GetComponent<Collider2D>()&&prop.overheadRow==2,"Overhead structure separated from solid base "+prop.name);
+    }
     check(!block.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().enabled&&block.GetComponent<UnityEngine.Tilemaps.TilemapCollider2D>()!=null,"Separate collision "+prop.name);
     check(bases.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().sortingLayerName=="World"&&upper.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().sortingOrder==100,"Player occlusion layers "+prop.name);
     for(int y=0;y<prop.height/16;y++)for(int x=0;x<prop.width/16;x++)
@@ -64,7 +69,7 @@ check(AssetDatabase.FindAssets("t:Scene",new[]{root}).Length==0,"No extra demons
 var scene=UnityEngine.SceneManagement.SceneManager.GetActiveScene();
 check(scene.path=="Assets/Scenes/DemoTutorial.unity","Presentation open");
 foreach(var collider in scene.GetRootGameObjects().SelectMany(g=>g.GetComponentsInChildren<UnityEngine.Tilemaps.TilemapCollider2D>()))collider.ProcessTilemapChanges();Physics2D.SyncTransforms();
-foreach(var p in new[]{new Vector2(8f,29.5f),new Vector2(16f,32.5f),new Vector2(4f,17.5f),new Vector2(7.5f,18.5f),new Vector2(52.5f,8.5f),new Vector2(52.5f,17f),new Vector2(53.5f,32.5f),new Vector2(33.5f,20.5f),new Vector2(42.5f,21.5f),new Vector2(29.5f,33.5f)})
+foreach(var p in new[]{new Vector2(7f,28.5f),new Vector2(16f,31.5f),new Vector2(4f,17.5f),new Vector2(10f,18.5f),new Vector2(52.5f,8.5f),new Vector2(52.5f,17f),new Vector2(53.5f,32.5f),new Vector2(33.5f,20.5f),new Vector2(42.5f,21.5f),new Vector2(29.5f,33.5f)})
     check(Physics2D.OverlapBox(p,Vector2.one*.75f,0)==null,"Player-sized clearance "+p);
 check(Physics2D.OverlapBox(new Vector2(29.5f,31.5f),Vector2.one*.75f,0)!=null,"Oak trunk blocks the player");
 var player=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Player/Player.prefab").GetComponentsInChildren<SpriteRenderer>().First(r=>r.name=="Body");

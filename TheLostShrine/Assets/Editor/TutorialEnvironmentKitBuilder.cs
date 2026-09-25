@@ -26,7 +26,7 @@ namespace TheLostShrine.EditorTools
             public int width,height,overheadRow;
             public int[] swatches;
             public Area[] collision;
-            public bool interactiveArt,native,stretch;
+            public bool interactiveArt,native,stretch,hueAware;
         }
         [Serializable] public class Catalog { public Prop[] entries; }
         public static Prop[] ReadCatalog() => JsonUtility.FromJson<Catalog>(File.ReadAllText(Root+"/EnvironmentManifest.json")).entries;
@@ -58,7 +58,7 @@ namespace TheLostShrine.EditorTools
                     if(!texture.LoadImage(File.ReadAllBytes("../Docs/Art/Tutorial/Sources/Environment/"+source+".png")))throw new InvalidDataException(source);
                     sources.Add(source,texture);
                 }
-                // Preserve the approved four sprites exactly; constrain new sources to the same palette.
+                // Preserve native reference sprites; constrain generated sources to the same palette.
                 atlas=new Texture2D(512,512,TextureFormat.RGBA32,false);
                 atlas.SetPixels32(new Color32[512*512]);
                 var entries=new List<Entry>();int ax=2,ay=2,shelfHeight=0;
@@ -110,7 +110,7 @@ namespace TheLostShrine.EditorTools
                     Stamp(prop,baseMap,overhead,collision,Vector3Int.zero);
                     PrefabUtility.SaveAsPrefabAsset(prefab,PrefabRoot+"/"+prop.name+".prefab");Object.DestroyImmediate(prefab);
                     for(int y=0;y<prop.height/16;y++)for(int x=0;x<prop.width/16;x++)
-                        paletteMap.SetTile(new Vector3Int(i%4*12+x,-i/4*8+y,0),AssetDatabase.LoadAssetAtPath<Tile>(TilePath(prop.name,x,y)));
+                        paletteMap.SetTile(new Vector3Int(i%4*12+x,-i/4*10+y,0),AssetDatabase.LoadAssetAtPath<Tile>(TilePath(prop.name,x,y)));
                 }
                 SavePalette(paletteObject,Root+"/Palettes/TutorialEnvironment.prefab");
                 var template=TutorialTerrainKitBuilder.CreateTemplate();
@@ -156,11 +156,19 @@ namespace TheLostShrine.EditorTools
                 int sy=maxY-Math.Min(sh-1,(int)((y+.5f)*sh/height));
                 var pixel=input[(source.height-1-sy)*source.width+sx];
                 if(pixel.a<128)continue;
-                int best=0,distance=int.MaxValue;
+                int best=0;float distance=float.MaxValue;
                 foreach(int c in prop.swatches)
                 {
                     int dr=pixel.r-palette[c].r,dg=pixel.g-palette[c].g,db=pixel.b-palette[c].b;
-                    int d=dr*dr+dg*dg+db*db;
+                    float d=dr*dr+dg*dg+db*db;
+                    // Keep nearby wood/clay/straw values in their material hue ramp.
+                    if(prop.hueAware)
+                    {
+                        Color.RGBToHSV(pixel,out float h,out float s,out _);
+                        Color.RGBToHSV(palette[c],out float ph,out _,out _);
+                        float dh=Mathf.Abs(h-ph);dh=Mathf.Min(dh,1-dh);
+                        d+=Mathf.Pow(dh*1800,2)*Mathf.Clamp01(s*4);
+                    }
                     if(d<distance){distance=d;best=c;}
                 }
                 result[(oy+y)*prop.width+ox+x]=palette[best];

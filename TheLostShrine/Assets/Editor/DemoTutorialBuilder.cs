@@ -96,11 +96,12 @@ namespace TheLostShrine.EditorTools
             oval("StoneLedge",terrain["StoneLedge"],48,4,2,1);
 
             // Main high meadow: stepped silhouette, stone stairs and a spring feeding a fall.
-            rect("GrassLedge",terrain["GrassLedge"],6,26,21,9);
+            // Broaden the village shelf for the approved eight-unit cottages.
+            rect("GrassLedge",terrain["GrassLedge"],2,26,25,9);
             rect("GrassLedge",terrain["GrassLedge"],9,35,15,3);
             rect("GrassLedge",terrain["GrassLedge"],4,29,2,4);
-            for(int x=6;x<=26;x++)for(int y=23;y<=25;y++)
-                maps["CliffFaces"].SetTile(new Vector3Int(x,y,0),piece("EarthCliff_"+(y==23?"Foot":"Middle")+"_"+(x==6?"Left":x==26?"Right":"Center")));
+            for(int x=2;x<=26;x++)for(int y=23;y<=25;y++)
+                maps["CliffFaces"].SetTile(new Vector3Int(x,y,0),piece("EarthCliff_"+(y==23?"Foot":"Middle")+"_"+(x==2?"Left":x==26?"Right":"Center")));
             for(int x=12;x<=14;x++)for(int y=23;y<=26;y++)
                 maps["Stairs and Ramps"].SetTile(new Vector3Int(x,y,0),piece("StoneStairs_"+(y==26?"Top":y==23?"Foot":"Middle")+"_"+(x==12?"Left":x==14?"Right":"Center")));
             oval("MeadowWater",terrain["MeadowWater"],23,31,3,3);
@@ -161,6 +162,13 @@ namespace TheLostShrine.EditorTools
             foreach(var p in maps["Stairs and Ramps"].cellBounds.allPositionsWithin)if(maps["Stairs and Ramps"].HasTile(p))maps["Collision"].SetTile(p,null);
             TutorialEnvironmentDemo.Dress(world);
             TutorialDecorationKitBuilder.Dress(world);
+            var playerArt = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/WorldArt/Player/PlayerSheetPreview.prefab");
+            if (playerArt)
+            {
+                var preview = (GameObject)PrefabUtility.InstantiatePrefab(playerArt, world.transform);
+                preview.name = "Player Art";
+                preview.transform.localPosition = new Vector3(4, 16.25f, 0);
+            }
         }
     }
 }
