@@ -11,7 +11,7 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 ROOT = Path(__file__).resolve().parents[3]
 CONFIG = Path(__file__).with_name("player_throw_layers.json")
-OUTPUT = ROOT / "TheLostShrine/Assets/Art/Sprites/Player/Actions/Throw"
+OUTPUT = ROOT / "RoadOfTheOldKing/Assets/Art/Sprites/Player/Actions/Throw"
 REVIEW = ROOT / "ArtSource/Player/Registered/Combat"
 
 

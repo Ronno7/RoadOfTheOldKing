@@ -2,7 +2,7 @@
 
 # <p align="center">ROAD OF THE OLD KING</p>
 
-# <p align="center">[PLAY HERE](https://ronno7.github.io/TheLostShrine/)</p>
+# <p align="center">[PLAY HERE](https://ronno7.github.io/RoadOfTheOldKing/)</p>
 
 A top-down 2D action RPG built in Unity 6.3. Combat centers on a throwable hatchet: strike at close range, reposition after throwing, and Recall the weapon through enemies and puzzle targets.
 

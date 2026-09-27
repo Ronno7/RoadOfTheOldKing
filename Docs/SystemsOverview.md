@@ -117,12 +117,12 @@ flowchart LR
 
 | Responsibility | Source |
 | --- | --- |
-| Movement, sprint and velocity ownership | [PlayerMovement](../TheLostShrine/Assets/Scripts/Player/PlayerMovement.cs) |
-| Weapon action state and ownership | [HatchetWeapon](../TheLostShrine/Assets/Scripts/Weapons/HatchetWeapon.cs) |
-| Aim, release and throw timing | [ThrowActionClock](../TheLostShrine/Assets/Scripts/Weapons/ThrowActionClock.cs) |
-| Synchronized animation presentation | [RegisteredPlayerAnimation](../TheLostShrine/Assets/Scripts/Player/RegisteredPlayerAnimation.cs) |
-| Checkpoints and persistent progress | [CheckpointSession](../TheLostShrine/Assets/Scripts/Progression/CheckpointSession.cs) |
-| Upgrade selection and exclusions | [WeaponUpgradeProgression](../TheLostShrine/Assets/Scripts/Progression/WeaponUpgradeProgression.cs) |
+| Movement, sprint and velocity ownership | [PlayerMovement](../RoadOfTheOldKing/Assets/Scripts/Player/PlayerMovement.cs) |
+| Weapon action state and ownership | [HatchetWeapon](../RoadOfTheOldKing/Assets/Scripts/Weapons/HatchetWeapon.cs) |
+| Aim, release and throw timing | [ThrowActionClock](../RoadOfTheOldKing/Assets/Scripts/Weapons/ThrowActionClock.cs) |
+| Synchronized animation presentation | [RegisteredPlayerAnimation](../RoadOfTheOldKing/Assets/Scripts/Player/RegisteredPlayerAnimation.cs) |
+| Checkpoints and persistent progress | [CheckpointSession](../RoadOfTheOldKing/Assets/Scripts/Progression/CheckpointSession.cs) |
+| Upgrade selection and exclusions | [WeaponUpgradeProgression](../RoadOfTheOldKing/Assets/Scripts/Progression/WeaponUpgradeProgression.cs) |
 
 ## Verification
 

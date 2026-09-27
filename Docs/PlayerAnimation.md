@@ -4,7 +4,7 @@
 
 The player uses authored whole-body sprite poses with synchronized body and hatchet layers. Planted feet, torso rotation and arm movement give actions weight, while unequal frame durations keep anticipation, impact and recovery readable.
 
-The original [character sheet](../TheLostShrine/Assets/Art/Sprites/Player/PlayerSheet.png) establishes the compact proportions, muted colors, patterned cap trim, simple hands and hatchet scale.
+The original [character sheet](../RoadOfTheOldKing/Assets/Art/Sprites/Player/PlayerSheet.png) establishes the compact proportions, muted colors, patterned cap trim, simple hands and hatchet scale.
 
 ## Gameplay preview
 
@@ -27,7 +27,7 @@ Registered frames use a 640 x 640 canvas, 128 pixels per unit and a common foot 
 
 ## Playback and timing
 
-[RegisteredPlayerAnimation](../TheLostShrine/Assets/Scripts/Player/RegisteredPlayerAnimation.cs) selects matching frames from [RegisteredActionSprites](../TheLostShrine/Assets/Scripts/Player/RegisteredActionSprites.cs). Gameplay owns the clock, possession and hit windows; presentation samples that state without applying damage or spending stamina.
+[RegisteredPlayerAnimation](../RoadOfTheOldKing/Assets/Scripts/Player/RegisteredPlayerAnimation.cs) selects matching frames from [RegisteredActionSprites](../RoadOfTheOldKing/Assets/Scripts/Player/RegisteredActionSprites.cs). Gameplay owns the clock, possession and hit windows; presentation samples that state without applying damage or spending stamina.
 
 | Action | Frames per cardinal view | Playback |
 | --- | ---: | --- |

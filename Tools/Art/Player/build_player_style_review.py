@@ -5,7 +5,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[3]
 OUT = ROOT / "Docs/Art/Player/Previews"
-ORIGINAL = ROOT / "TheLostShrine/Assets/Art/Sprites/Player/PlayerSheet.png"
+ORIGINAL = ROOT / "RoadOfTheOldKing/Assets/Art/Sprites/Player/PlayerSheet.png"
 FONT = ImageFont.truetype("C:/Windows/Fonts/consola.ttf", 18)
 SMALL = ImageFont.truetype("C:/Windows/Fonts/consola.ttf", 15)
 BG = (49, 59, 55)

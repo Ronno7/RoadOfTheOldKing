@@ -12,7 +12,7 @@ from player_contours import normalize_layers, normalize_prop
 
 ROOT = Path(__file__).resolve().parents[3]
 REVIEW = ROOT / "ArtSource/Player/Registered/Sprint"
-OUTPUT = ROOT / "TheLostShrine/Assets/Art/Sprites/Player/Actions/Sprint"
+OUTPUT = ROOT / "RoadOfTheOldKing/Assets/Art/Sprites/Player/Actions/Sprint"
 
 
 def build_mirrored_view(name, view, config):
