@@ -12,8 +12,8 @@ from build_player_throw_layers import polygon_mask, isolate, body_support
 ROOT = Path(__file__).resolve().parents[3]
 CONFIG = Path(__file__).with_name("player_return_layers.json")
 REVIEW = ROOT / "ArtSource/Player/Registered/Return"
-OUTPUT = ROOT / "TheLostShrine/Assets/Art/Sprites/Player/Actions/Catch"
-SPIN = ROOT / "TheLostShrine/Assets/Art/Sprites/Weapons/Spin"
+OUTPUT = ROOT / "RoadOfTheOldKing/Assets/Art/Sprites/Player/Actions/Catch"
+SPIN = ROOT / "RoadOfTheOldKing/Assets/Art/Sprites/Weapons/Spin"
 
 
 def register(image, size, scale, anchor, origin):

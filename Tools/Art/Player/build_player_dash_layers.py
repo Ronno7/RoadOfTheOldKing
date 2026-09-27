@@ -12,7 +12,7 @@ from player_contours import normalize_layers
 
 ROOT = Path(__file__).resolve().parents[3]
 REVIEW = ROOT / "ArtSource/Player/Registered/Dash"
-OUTPUT = ROOT / "TheLostShrine/Assets/Art/Sprites/Player/Actions/Dash"
+OUTPUT = ROOT / "RoadOfTheOldKing/Assets/Art/Sprites/Player/Actions/Dash"
 
 
 def main():

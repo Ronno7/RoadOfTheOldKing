@@ -8,7 +8,7 @@ import random
 import build_tutorial_ground as ground
 
 ROOT = Path(__file__).resolve().parents[3]
-OUT = ROOT / 'TheLostShrine/Assets/Art/Tiles/Tutorial/Paths'
+OUT = ROOT / 'RoadOfTheOldKing/Assets/Art/Tiles/Tutorial/Paths'
 MATERIALS = {'DirtLane': 2, 'Footpath': 5}
 
 

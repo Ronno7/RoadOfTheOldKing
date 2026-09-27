@@ -11,7 +11,7 @@ import json
 import random
 
 ROOT = Path(__file__).resolve().parents[3]
-OUT = ROOT / 'TheLostShrine/Assets/Art/Tiles/Tutorial/Ground'
+OUT = ROOT / 'RoadOfTheOldKing/Assets/Art/Tiles/Tutorial/Ground'
 DOC = ROOT / 'Docs/Art/Tutorial/Previews'
 SIZE, PAD, COLS = 16, 2, 16
 P = {k: tuple(bytes.fromhex(v)) + (255,) for k, v in {

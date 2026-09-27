@@ -12,7 +12,7 @@ import json
 import build_tutorial_ground as ground
 
 ROOT = Path(__file__).resolve().parents[3]
-OUT = ROOT / 'TheLostShrine/Assets/Art/Tiles/Tutorial/Terrain'
+OUT = ROOT / 'RoadOfTheOldKing/Assets/Art/Tiles/Tutorial/Terrain'
 DOC = ROOT / 'Docs/Art/Tutorial/Previews'
 P = dict(ground.P)
 P.update({k: tuple(bytes.fromhex(v)) + (255,) for k, v in {

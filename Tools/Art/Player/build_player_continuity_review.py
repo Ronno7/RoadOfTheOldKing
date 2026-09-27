@@ -7,7 +7,7 @@ from PIL import Image, ImageDraw, ImageFont
 from build_player_style_review import originals
 
 ROOT = Path(__file__).resolve().parents[3]
-ART = ROOT / 'TheLostShrine/Assets/Art/Sprites/Player/Actions'
+ART = ROOT / 'RoadOfTheOldKing/Assets/Art/Sprites/Player/Actions'
 OUT = ROOT / 'Docs/Art/Player/Previews/Current-Continuity.png'
 FONT = ImageFont.truetype('C:/Windows/Fonts/consola.ttf',18)
 

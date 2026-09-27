@@ -14,7 +14,7 @@ def main():
     source = isolate(source, body_support(source))
     sprite = register(source, 256, 176 / 872, (698, 908), (140, 201))
     sprite = normalize_prop(sprite)
-    sprite.save(ROOT / "TheLostShrine/Assets/Art/Sprites/Weapons/Hatchet.png")
+    sprite.save(ROOT / "RoadOfTheOldKing/Assets/Art/Sprites/Weapons/Hatchet.png")
     print("carry: 256 square, 128 PPU, grip pivot (140,55), unit renderer scale")
 
     source = Image.open(ROOT / "ArtSource/Player/Weapon/Hatchet-Turns.png").convert("RGBA")
@@ -26,7 +26,7 @@ def main():
         cel = isolate(cel, body_support(cel))
         cel = register(cel, 256, 176/768, grip, (140, 201))
         turns.paste(normalize_prop(cel), (index*256, 0))
-    turns.save(ROOT / "TheLostShrine/Assets/Art/Sprites/Weapons/HatchetTurns.png")
+    turns.save(ROOT / "RoadOfTheOldKing/Assets/Art/Sprites/Weapons/HatchetTurns.png")
     print("turns: oblique/edge-on, matched native length and grip, no background haze")
 
 

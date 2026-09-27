@@ -7,7 +7,7 @@ from build_player_throw_layers import polygon_mask, isolate, body_support
 
 ROOT = Path(__file__).resolve().parents[3]
 CONFIG = Path(__file__).with_name("player_forehand_layers.json")
-OUTPUT = ROOT / "TheLostShrine/Assets/Art/Sprites/Player/Actions/Forehand"
+OUTPUT = ROOT / "RoadOfTheOldKing/Assets/Art/Sprites/Player/Actions/Forehand"
 REVIEW = ROOT / "ArtSource/Player/Registered/Combat"
 
 
