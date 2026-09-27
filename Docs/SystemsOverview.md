@@ -2,7 +2,7 @@
 
 [Player animation and previews](PlayerAnimation.md) · [World and tilemaps](World.md)
 
-The Lost Shrine separates input, gameplay state, presentation and persistence into focused components. The systems below describe the working PrototypeLoop mechanics unless stated otherwise.
+Road of the Old King separates input, gameplay state, presentation and persistence into focused components. The systems below describe the working PrototypeLoop mechanics unless stated otherwise.
 
 **Current scope:** PrototypeLoop is the enabled build scene. The newer Tutorial world includes the animated player, camera, hatchet pickup and practice dummy; its complete teaching, enemy and checkpoint progression are still in development. The published browser build predates the newer Tutorial presentation.
 

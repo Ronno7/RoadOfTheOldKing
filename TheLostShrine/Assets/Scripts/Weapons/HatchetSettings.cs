@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace TheLostShrine.Weapons
 {
-    [CreateAssetMenu(menuName = "The Lost Shrine/Hatchet Settings")]
+    [CreateAssetMenu(menuName = "Road of the Old King/Hatchet Settings")]
     public sealed class HatchetSettings : ScriptableObject
     {
         [Header("Light combo")]

@@ -1,6 +1,6 @@
-<img width="100%" alt="The Lost Shrine top banner" src="Docs/Branding/TLS_Banner_Top.png" />
+<img width="100%" alt="Road of the Old King top banner" src="Docs/Branding/Banner-Top.png" />
 
-# <p align="center">THE LOST SHRINE</p>
+# <p align="center">ROAD OF THE OLD KING</p>
 
 # <p align="center">[PLAY HERE](https://ronno7.github.io/TheLostShrine/)</p>
 
@@ -14,4 +14,4 @@ A top-down 2D action RPG built in Unity 6.3. Combat centers on a throwable hatch
 
 The browser release is an earlier mechanics prototype. The documentation and previews also cover the newer Tutorial world and player animation; Tutorial's progression sequence is still in development.
 
-<img width="100%" alt="The Lost Shrine bottom banner" src="Docs/Branding/TLS_Banner_Bottom.png" />
+<img width="100%" alt="Road of the Old King bottom banner" src="Docs/Branding/Banner-Bottom.png" />

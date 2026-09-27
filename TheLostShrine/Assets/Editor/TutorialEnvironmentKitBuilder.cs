@@ -34,7 +34,7 @@ namespace TheLostShrine.EditorTools
         private static string PieceName(string name,int x,int y) => name+"_"+x+"_"+y;
         private static bool IsOverhead(Prop prop,int y) => prop.kind=="bridge" ? y==0||y==prop.height/16-1 : y>=prop.overheadRow;
 
-        [MenuItem("Tools/The Lost Shrine/Build Tutorial Environment Kit")]
+        [MenuItem("Tools/Road of the Old King/Build Tutorial Environment Kit")]
         public static void Build()
         {
             if(EditorApplication.isPlaying)throw new InvalidOperationException("Use Edit Mode.");

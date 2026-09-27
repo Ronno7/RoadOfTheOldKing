@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace TheLostShrine.Player
 {
-    [CreateAssetMenu(menuName = "The Lost Shrine/Registered Aim Gaits")]
+    [CreateAssetMenu(menuName = "Road of the Old King/Registered Aim Gaits")]
     public sealed class RegisteredAimSprites : ScriptableObject
     {
         [Min(.1f), Tooltip("Actual ground distance for one complete left/right stride. Shared phase across gaits.")]

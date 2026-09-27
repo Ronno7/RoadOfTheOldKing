@@ -36,10 +36,10 @@ namespace TheLostShrine.Editor
             public int canvas, pixelsPerUnit, columns, celCount;
             public float rotationsPerSecond;
         }
-        [MenuItem("The Lost Shrine/Animation/Import Registered Animations")]
+        [MenuItem("Road of the Old King/Animation/Import Registered Animations")]
         public static void BuildAll() { BuildThrow(); BuildForehand(); BuildCatch(); BuildSpin(); BuildCarry(); BuildDash(); BuildSprint(); }
 
-        [MenuItem("The Lost Shrine/Animation/Import Registered Dash")]
+        [MenuItem("Road of the Old King/Animation/Import Registered Dash")]
         public static void BuildDash()
         {
             if (EditorApplication.isPlaying) throw new InvalidOperationException("Import in Edit Mode.");
@@ -67,7 +67,7 @@ namespace TheLostShrine.Editor
                 weapon = ImportSheet(DashFolder+"/Dash-"+name+"-Weapon.png", name+"_DashWeapon", 5, 3, 640, 128, RegisteredActionSprites.GroundPivot) };
         }
 
-        [MenuItem("The Lost Shrine/Animation/Import Registered Sprint")]
+        [MenuItem("Road of the Old King/Animation/Import Registered Sprint")]
         public static void BuildSprint()
         {
             if (EditorApplication.isPlaying) throw new InvalidOperationException("Import in Edit Mode.");
@@ -134,10 +134,10 @@ namespace TheLostShrine.Editor
             importer.SaveAndReimport();
         }
 
-        [MenuItem("The Lost Shrine/Animation/Import Registered Throw")]
+        [MenuItem("Road of the Old King/Animation/Import Registered Throw")]
         public static void BuildThrow() => Build("Throw", ThrowAssetPath, 8, 4, Array.Empty<float>(), -1, -1);
 
-        [MenuItem("The Lost Shrine/Animation/Import Registered Forehand")]
+        [MenuItem("Road of the Old King/Animation/Import Registered Forehand")]
         public static void BuildForehand()
         {
             string manifestPath = Path.GetFullPath(Path.Combine(Application.dataPath,

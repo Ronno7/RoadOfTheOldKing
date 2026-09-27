@@ -20,7 +20,7 @@ namespace TheLostShrine.EditorTools
         private static readonly string[] Materials = { "MeadowWater", "StoneWater", "DeepWater", "GrassLedge", "StoneLedge", "StoneWall" };
         private static readonly string[] MapNames = { "GrassLedge", "StoneLedge", "CliffFaces", "MeadowWater", "StoneWater", "DeepWater", "StoneWall", "Stairs and Ramps", "WaterDetails" };
 
-        [MenuItem("Tools/The Lost Shrine/Build Tutorial Terrain Kit")]
+        [MenuItem("Tools/Road of the Old King/Build Tutorial Terrain Kit")]
         public static void Build()
         {
             if (EditorApplication.isPlaying) throw new InvalidOperationException("Use Edit Mode.");

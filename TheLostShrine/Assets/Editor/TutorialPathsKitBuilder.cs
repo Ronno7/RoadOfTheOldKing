@@ -15,7 +15,7 @@ namespace TheLostShrine.EditorTools
     {
         public const string Root = "Assets/Art/Tiles/Tutorial/Paths";
 
-        [MenuItem("Tools/The Lost Shrine/Build Tutorial Paths Kit")]
+        [MenuItem("Tools/Road of the Old King/Build Tutorial Paths Kit")]
         public static void Build()
         {
             if(EditorApplication.isPlaying)throw new InvalidOperationException("Use Edit Mode.");

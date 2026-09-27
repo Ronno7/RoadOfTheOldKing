@@ -13,6 +13,7 @@ namespace TheLostShrine.Progression
     [DefaultExecutionOrder(-100), DisallowMultipleComponent]
     public sealed class CheckpointSession : MonoBehaviour
     {
+        // Stable storage key across title changes; do not rename with display branding.
         [SerializeField] private string saveKey = "TheLostShrine.PrototypeLoop.Save.v1";
         [SerializeField] private HatchetUpgradeTier[] upgradeTiers = Array.Empty<HatchetUpgradeTier>();
         private IProgressStore store;
