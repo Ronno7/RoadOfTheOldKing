@@ -88,5 +88,5 @@ def build_carry_view(name, view, config, output, review):
             sheets[key].paste(cel,(i%4*size,i//4*size))
     output.mkdir(parents=True,exist_ok=True)
     for key,sheet in sheets.items():
-        sheet.save((review if key=='Master' else output)/f'Sprint-{name}-{key}.png')
+        sheet.save((review if key in ("Master", "Reveal") else output)/f'Sprint-{name}-{key}.png')
     print(f'{name}:8 local carry drawings; unchanged head/cap/legs; fixed walking axe scale; exact layer reconstruction.')

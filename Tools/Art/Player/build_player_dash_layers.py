@@ -55,7 +55,7 @@ def main():
             raise AssertionError("Registered layers do not reconstruct the drawing")
         OUTPUT.mkdir(parents=True, exist_ok=True)
         for key, sheet in sheets.items():
-            sheet.save((REVIEW if key == "Master" else OUTPUT) / f"Dash-{name}-{key}.png")
+            sheet.save((REVIEW if key in ("Master", "Reveal") else OUTPUT) / f"Dash-{name}-{key}.png")
     (REVIEW / "dash.json").write_text(json.dumps({key:config[key] for key in
         ("canvas", "pixelsPerUnit", "origin", "columns", "exposures")}, indent=2)+"\n")
     print("Dash: five whole poses per view, matched body/weapon, exact RGBA reconstruction, no clipping.")

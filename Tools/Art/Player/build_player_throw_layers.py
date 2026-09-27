@@ -135,7 +135,7 @@ def main():
         normalize_layers(sheets)
         paths = {}
         for key, sheet in sheets.items():
-            path = (REVIEW if key == "Master" else OUTPUT) / f"Throw-{name.title()}-{key}.png"
+            path = (REVIEW if key in ("Master", "Reveal") else OUTPUT) / f"Throw-{name.title()}-{key}.png"
             sheet.save(path)
             paths[key.lower()] = path.relative_to(ROOT).as_posix()
         # Validate the exported, normalized layers too (RGBA, not only RGB or bounds).

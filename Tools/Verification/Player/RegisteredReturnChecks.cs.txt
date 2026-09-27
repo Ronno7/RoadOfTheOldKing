@@ -7,7 +7,7 @@ var throwing=AssetDatabase.LoadAssetAtPath<TheLostShrine.Player.RegisteredAction
 var spin=AssetDatabase.LoadAssetAtPath<TheLostShrine.Weapons.AxeSpinSprites>(TheLostShrine.Editor.RegisteredSpriteProofBuilder.SpinAssetPath);
 check(catching!=null && catching.IsRegistered(out error) && catching.celCount==4 && catching.possessionCel==1,"Four catch cels per view; possession starts at grip");
 check(spin!=null && spin.IsRegistered(out error) && spin.rotationsPerSecond==4,"Eight centered spin cels at four rotations/second");
-foreach(var view in catching.views) foreach(var layer in new[]{view.body,view.weapon,view.reveal}) {
+foreach(var view in catching.views) foreach(var layer in new[]{view.body,view.weapon}) {
     var importer=(TextureImporter)AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(layer[0]));
     var config=new TextureImporterSettings(); importer.ReadTextureSettings(config);
     check(layer[0].texture.width==1280 && layer[0].texture.height==1280 &&

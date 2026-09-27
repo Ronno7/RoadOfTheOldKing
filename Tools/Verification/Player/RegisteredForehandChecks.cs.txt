@@ -3,10 +3,10 @@ var results = new System.Collections.Generic.List<string>();
 System.Action<bool,string> check = (ok,name) => results.Add((ok ? "PASS " : "FAIL ") + name);
 var asset=AssetDatabase.LoadAssetAtPath<TheLostShrine.Player.RegisteredActionSprites>(TheLostShrine.Editor.RegisteredSpriteProofBuilder.ForehandAssetPath);
 string error;
-check(asset!=null && asset.IsRegistered(out error),"All 72 forehand sprites share the registered canvas/scale/pivot");
+check(asset!=null && asset.IsRegistered(out error),"All 48 runtime forehand sprites share the registered canvas/scale/pivot");
 check(asset.celCount==6 && asset.views.Length==4,"Six authored forehand cels in every cardinal view");
 foreach(var view in asset.views)
-    foreach(var layer in new[]{view.body,view.weapon,view.reveal}) {
+    foreach(var layer in new[]{view.body,view.weapon}) {
         var texture=layer[0].texture;
         var importer=(TextureImporter)AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(texture));
         var config=new TextureImporterSettings(); importer.ReadTextureSettings(config);

@@ -1,3 +1,4 @@
+using System.IO;
 using TheLostShrine.Player;
 using TheLostShrine.Weapons;
 using UnityEditor;
@@ -14,6 +15,8 @@ namespace TheLostShrine.Editor
         private RegisteredActionSprites forehand, throwing;
         private HatchetSettings settings;
         private readonly System.Collections.Generic.Dictionary<string, Sprite> references = new System.Collections.Generic.Dictionary<string, Sprite>();
+        // Source-only patches are loaded on demand; runtime assets never reference them.
+        private readonly System.Collections.Generic.Dictionary<string, Texture2D> revealSheets = new System.Collections.Generic.Dictionary<string, Texture2D>();
         private readonly ThrowActionClock clock = new ThrowActionClock();
         private double previous;
         private int selectedCel, launches;
@@ -41,7 +44,18 @@ namespace TheLostShrine.Editor
             previous = EditorApplication.timeSinceStartup;
             EditorApplication.update += Tick;
         }
-        private void OnDisable() => EditorApplication.update -= Tick;
+        private void OnDisable()
+        {
+            EditorApplication.update -= Tick;
+            ClearRevealSheets();
+        }
+
+        private void ClearRevealSheets()
+        {
+            foreach (var texture in revealSheets.Values)
+                if (texture != null) DestroyImmediate(texture);
+            revealSheets.Clear();
+        }
         private void OnLostFocus() { if (holding) ResetPreview(); }
 
         private void Begin(bool hold)
@@ -55,6 +69,7 @@ namespace TheLostShrine.Editor
         }
         private void ResetPreview()
         {
+            ClearRevealSheets();
             clock.Cancel(); manual = true; selectedCel = 0; launched = holding = false; flightTime = meleeTime = 0f; launches = 0;
             Repaint();
         }
@@ -97,7 +112,9 @@ namespace TheLostShrine.Editor
             if (GUILayout.Button("Reset")) ResetPreview();
             EditorGUILayout.EndHorizontal();
             speed = EditorGUILayout.Slider("Playback speed", speed, .1f, 1f);
+            EditorGUI.BeginChangeCheck();
             layerView = (LayerView)EditorGUILayout.EnumPopup("Layer view", layerView);
+            if (EditorGUI.EndChangeCheck()) ClearRevealSheets();
             showReference = EditorGUILayout.Toggle("Show original character at same PPU", showReference);
             if (action == ActionView.Throw) flight = EditorGUILayout.Toggle("Independent flight after release", flight);
             else
@@ -150,7 +167,7 @@ namespace TheLostShrine.Editor
             Rect canvas = new Rect(origin.x-320*scale,origin.y-544*scale,640*scale,640*scale);
             if (layerView != LayerView.WeaponOnly)
             {
-                if (layerView == LayerView.BodyOnly) DrawCel(canvas,view.reveal[cel]);
+                if (layerView == LayerView.BodyOnly) DrawReveal(canvas, view, cel);
                 DrawCel(canvas,view.body[cel]);
             }
             if (layerView != LayerView.BodyOnly)
@@ -165,6 +182,41 @@ namespace TheLostShrine.Editor
                 else DrawCel(canvas,view.weapon[cel]);
             }
             GUI.EndGroup();
+        }
+
+        private void DrawReveal(Rect destination, RegisteredActionSprites.View view, int cel)
+        {
+            var texture = GetRevealSheet(view, cel);
+            if (texture == null) return;
+            var rect = view.body[cel].rect;
+            GUI.DrawTextureWithTexCoords(destination, texture, new Rect(rect.x / texture.width,
+                rect.y / texture.height, rect.width / texture.width, rect.height / texture.height), true);
+        }
+
+        private Texture2D GetRevealSheet(RegisteredActionSprites.View view, int cel)
+        {
+            string path = Path.GetFullPath(Path.Combine(Application.dataPath,
+                "../../ArtSource/Player/Registered/Combat/" + action + "-" + view.name + "-Reveal.png"));
+            if (!revealSheets.TryGetValue(path, out var texture))
+            {
+                texture = null;
+                if (File.Exists(path))
+                {
+                    var loaded = new Texture2D(2, 2, TextureFormat.RGBA32, false)
+                    { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp, hideFlags = HideFlags.HideAndDontSave };
+                    if (loaded.LoadImage(File.ReadAllBytes(path), true) &&
+                        loaded.width == view.body[cel].texture.width && loaded.height == view.body[cel].texture.height)
+                        texture = loaded;
+                    else
+                    {
+                        DestroyImmediate(loaded);
+                        Debug.LogWarning("Invalid review-only reveal sheet: " + path);
+                    }
+                }
+                // Missing source art is allowed when reviewing a runtime-only checkout.
+                revealSheets[path] = texture;
+            }
+            return texture;
         }
 
         private static void DrawCel(Rect destination, Sprite sprite)

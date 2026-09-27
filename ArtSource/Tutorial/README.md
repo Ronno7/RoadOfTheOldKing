@@ -1,7 +1,7 @@
 # Tutorial environment sources
 
-These approved images are the inputs used by Unity's Environment and Decoration builders. The EnvironmentManifest in the Unity asset folder selects the required source sheets; Decoration uses Expansion and ApprovedSample16. Native approved pixels and palette constraints remain unchanged.
+Environment and decoration sheets feed the editor asset builders. Their manifests define source rectangles, output sizes and palette constraints; native reference samples preserve the original pixels.
 
-The earlier broad sample images are superseded by the retained ApprovedSample16 inputs. [Provenance.json](Provenance.json) preserves original briefs as historical records.
+[Provenance.json](Provenance.json) records the original generation/edit briefs. Runtime tilemaps and prefabs use the generated Unity assets.
 
-See the [Tutorial art plan](../../Docs/Art/Tutorial/Plan.md), [painting quick start](../../Docs/Art/Tutorial/QuickStart.md) and [art tool guide](../../Tools/Art/README.md). Normal level painting uses existing Unity palettes and does not require rebuilding sources.
+See [world and tilemaps](../../Docs/World.md) for the resulting environment, RuleTiles and animated water.

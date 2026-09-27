@@ -3,11 +3,11 @@ var results = new System.Collections.Generic.List<string>();
 System.Action<bool,string> check = (ok,name) => results.Add((ok ? "PASS " : "FAIL ") + name);
 var asset = AssetDatabase.LoadAssetAtPath<TheLostShrine.Player.RegisteredActionSprites>(TheLostShrine.Editor.RegisteredSpriteProofBuilder.ThrowAssetPath);
 string error;
-check(asset != null && asset.IsRegistered(out error), "All 96 sprites have full 640px cells, 128 PPU and the common foot pivot");
+check(asset != null && asset.IsRegistered(out error), "All 64 runtime sprites have full 640px cells, 128 PPU and the common foot pivot");
 check(asset.views.Length == 4 && asset.views[0].direction == Vector2.right && asset.views[1].direction == Vector2.up && asset.views[2].direction == Vector2.down && asset.views[3].direction == Vector2.left,
     "All four cardinal views have explicit flight directions");
 foreach (var view in asset.views)
-    foreach (var layer in new[] { view.body, view.weapon, view.reveal }) {
+    foreach (var layer in new[] { view.body, view.weapon }) {
         var path = AssetDatabase.GetAssetPath(layer[0]);
         var importer = AssetImporter.GetAtPath(path) as TextureImporter;
         var texture = layer[0].texture;

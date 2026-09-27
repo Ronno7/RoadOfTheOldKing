@@ -1,6 +1,6 @@
 # Animation assets
 
-Organize playback definitions by character and action, regardless of playback method.
+Playback definitions are grouped by character and action, independently of playback method.
 
 | Folder | Contents |
 | --- | --- |
@@ -10,4 +10,4 @@ Organize playback definitions by character and action, regardless of playback me
 
 `.anim` files use Unity's Animator. The custom `.asset` sequences are sampled by gameplay-driven presentation code so body and weapon frames stay synchronized. Both belong here; sprite-sheet textures stay under `Assets/Art/Sprites`.
 
-Future player interactions can get an `Interactions` folder when those assets exist. Keep gameplay tuning under `Assets/Settings`, reusable object setups under `Assets/Prefabs`, and external rebuild inputs in the workspace's `ArtSource` folder.
+See [player animation](../../../Docs/PlayerAnimation.md) for timing, layering and previews.

@@ -64,8 +64,7 @@ namespace TheLostShrine.Editor
         {
             return new RegisteredActionSprites.View { name = name, direction = direction,
                 body = ImportSheet(DashFolder+"/Dash-"+name+"-Body.png", name+"_DashBody", 5, 3, 640, 128, RegisteredActionSprites.GroundPivot),
-                weapon = ImportSheet(DashFolder+"/Dash-"+name+"-Weapon.png", name+"_DashWeapon", 5, 3, 640, 128, RegisteredActionSprites.GroundPivot),
-                reveal = ImportSheet(DashFolder+"/Dash-"+name+"-Reveal.png", name+"_DashReveal", 5, 3, 640, 128, RegisteredActionSprites.GroundPivot) };
+                weapon = ImportSheet(DashFolder+"/Dash-"+name+"-Weapon.png", name+"_DashWeapon", 5, 3, 640, 128, RegisteredActionSprites.GroundPivot) };
         }
 
         [MenuItem("The Lost Shrine/Animation/Import Registered Sprint")]
@@ -80,8 +79,7 @@ namespace TheLostShrine.Editor
                 name = name, direction = directions[index],
                 body = ImportSheet(SprintFolder+"/Sprint-"+name+"-Body.png", name+"_SprintBody", 8, 4, 640, 128, RegisteredActionSprites.GroundPivot),
                 unarmedBody = name == "East" || name == "West" || name == "South" ? ImportSheet(SprintFolder+"/Sprint-"+name+"-Unarmed.png", name+"_SprintUnarmed", 8, 4, 640, 128, RegisteredActionSprites.GroundPivot) : Array.Empty<Sprite>(),
-                weapon = ImportSheet(SprintFolder+"/Sprint-"+name+"-Weapon.png", name+"_SprintWeapon", 8, 4, 640, 128, RegisteredActionSprites.GroundPivot),
-                reveal = ImportSheet(SprintFolder+"/Sprint-"+name+"-Reveal.png", name+"_SprintReveal", 8, 4, 640, 128, RegisteredActionSprites.GroundPivot)
+                weapon = ImportSheet(SprintFolder+"/Sprint-"+name+"-Weapon.png", name+"_SprintWeapon", 8, 4, 640, 128, RegisteredActionSprites.GroundPivot)
             }).ToArray();
             asset.celCount = 8; asset.exposures = Array.Empty<float>();
             asset.contactCel = asset.recoveryCel = asset.possessionCel = -1;
@@ -199,7 +197,7 @@ namespace TheLostShrine.Editor
             if (!asset.IsRegistered(out var error)) throw new InvalidOperationException(error);
             EditorUtility.SetDirty(asset);
             AssetDatabase.SaveAssetIfDirty(asset);
-            Debug.Log(family + " proof: " + count*views.Count + " cels, matched body/weapon/reveal layers at 128 PPU.");
+            Debug.Log(family + " proof: " + count*views.Count + " cels, matched body/weapon layers at 128 PPU.");
         }
 
         private static RegisteredActionSprites.View MakeView(string family, string name, Vector2 direction, int count, int columns)
@@ -221,8 +219,7 @@ namespace TheLostShrine.Editor
                 spinStartCel = name == "North" ? 0 : 1,
                 spinFlipX = name == "South" || name == "West",
                 body = Import(family, name, "Body", count, columns),
-                weapon = Import(family, name, "Weapon", count, columns),
-                reveal = Import(family, name, "Reveal", count, columns) };
+                weapon = Import(family, name, "Weapon", count, columns) };
         }
 
         private static Sprite[] Import(string family, string direction, string layer, int count, int columns)
