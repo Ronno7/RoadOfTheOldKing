@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace TheLostShrine.Weapons
 {
-    [CreateAssetMenu(menuName = "The Lost Shrine/Axe Spin Sprites")]
+    [CreateAssetMenu(menuName = "Road of the Old King/Axe Spin Sprites")]
     public sealed class AxeSpinSprites : ScriptableObject
     {
         public Sprite[] cels = Array.Empty<Sprite>();

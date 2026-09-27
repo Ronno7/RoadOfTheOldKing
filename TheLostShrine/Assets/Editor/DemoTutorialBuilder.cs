@@ -14,7 +14,7 @@ namespace TheLostShrine.EditorTools
     {
         public const string ScenePath = "Assets/Scenes/DemoTutorial.unity";
 
-        [MenuItem("Tools/The Lost Shrine/Rebuild Demo Tutorial Presentation")]
+        [MenuItem("Tools/Road of the Old King/Rebuild Demo Tutorial Presentation")]
         public static void Build()
         {
             if (EditorApplication.isPlaying) throw new InvalidOperationException("Use Edit Mode.");

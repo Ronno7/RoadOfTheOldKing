@@ -6,7 +6,7 @@ namespace TheLostShrine.Player
 {
     // Full-canvas authored layers. All sprites share scale and foot origin; no grip tweening.
     [MovedFrom(true, "TheLostShrine.Player", "Assembly-CSharp", "RegisteredThrowSprites")]
-    [CreateAssetMenu(menuName = "The Lost Shrine/Registered Action Sprites")]
+    [CreateAssetMenu(menuName = "Road of the Old King/Registered Action Sprites")]
     public sealed class RegisteredActionSprites : ScriptableObject
     {
         [Serializable]

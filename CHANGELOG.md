@@ -2,6 +2,7 @@
 
 ## 27SEP2026 - Animation milestone and workspace cleanup
 
+- Renamed the game to **Road of the Old King**, including Unity product settings, web presentation and editor menus.
 - Completed four-direction catch coverage, finishing the current player animation set. Accepted the artwork for now and moved future animation work into a ranked backlog so development can focus on Tutorial gameplay.
 - Organized animation definitions, sprite sheets, source art, previews and tools by purpose. Removed obsolete studies and temporary files while preserving working assets and useful development references.
 - Separated review-only reveal sheets from runtime animation assets, preserving editor inspection and source rebuilds without changing gameplay artwork or timing.

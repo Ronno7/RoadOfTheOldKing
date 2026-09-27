@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace TheLostShrine.Weapons
 {
-    [CreateAssetMenu(menuName = "The Lost Shrine/Hatchet Upgrade Tier")]
+    [CreateAssetMenu(menuName = "Road of the Old King/Hatchet Upgrade Tier")]
     public sealed class HatchetUpgradeTier : ScriptableObject
     {
         public string id;

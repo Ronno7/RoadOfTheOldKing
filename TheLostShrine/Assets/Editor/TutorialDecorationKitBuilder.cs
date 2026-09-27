@@ -44,7 +44,7 @@ namespace TheLostShrine.EditorTools
             };
         }
 
-        [MenuItem("Tools/The Lost Shrine/Build Tutorial Decoration Kit")]
+        [MenuItem("Tools/Road of the Old King/Build Tutorial Decoration Kit")]
         public static void Build()
         {
             Directory.CreateDirectory(Root+"/Tiles");
@@ -208,7 +208,7 @@ namespace TheLostShrine.EditorTools
             place("CarvedStone",57,32);place("LooseGrass",58,33);
         }
 
-        [MenuItem("Tools/The Lost Shrine/Dress Demo with Tutorial Decorations")]
+        [MenuItem("Tools/Road of the Old King/Dress Demo with Tutorial Decorations")]
         public static void PlaceInDemo()
         {
             var scene=SceneManager.GetActiveScene();

@@ -20,7 +20,7 @@ namespace TheLostShrine.EditorTools
         public const string Root = "Assets/Art/Tiles/Tutorial/Ground";
         public const string CollisionPath = "Assets/Art/Tiles/Tutorial/Collision/Collision_Block.asset";
         private static readonly string[] Materials = { "Grass", "DryGrass", "Earth", "DampEarth", "WornStone", "Cobbles", "TilledSoil" };
-        [MenuItem("Tools/The Lost Shrine/Build Tutorial Ground Kit")]
+        [MenuItem("Tools/Road of the Old King/Build Tutorial Ground Kit")]
         public static void Build()
         {
             if (EditorApplication.isPlaying) throw new InvalidOperationException("Use Edit Mode.");

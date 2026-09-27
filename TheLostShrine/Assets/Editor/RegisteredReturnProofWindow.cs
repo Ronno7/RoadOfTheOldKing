@@ -89,7 +89,7 @@ namespace TheLostShrine.Editor
         private int selectedCel;
         private double previous;
 
-        [MenuItem("The Lost Shrine/Animation/Return and Spin Review")]
+        [MenuItem("Road of the Old King/Animation/Return and Spin Review")]
         public static void Open() => GetWindow<RegisteredReturnProofWindow>("Return and spin");
         private void OnEnable()
         {

@@ -24,9 +24,9 @@ namespace TheLostShrine.Editor
         private float flightTime, meleeTime, speed = 1f;
         private RegisteredActionSprites Sprites => action == ActionView.Throw ? throwing : forehand;
 
-        [MenuItem("The Lost Shrine/Animation/Registered Action Review")]
+        [MenuItem("Road of the Old King/Animation/Registered Action Review")]
         public static void Open() => GetWindow<RegisteredSpriteProofWindow>("Action layers");
-        [MenuItem("The Lost Shrine/Animation/Registered Throw Review")]
+        [MenuItem("Road of the Old King/Animation/Registered Throw Review")]
         public static void OpenThrow()
         {
             var window = GetWindow<RegisteredSpriteProofWindow>("Action layers");
@@ -101,7 +101,7 @@ namespace TheLostShrine.Editor
             action = (ActionView)EditorGUILayout.EnumPopup("Action", action);
             if (EditorGUI.EndChangeCheck()) ResetPreview();
             if (Sprites == null || settings == null)
-            { EditorGUILayout.HelpBox("Import Registered Animations from The Lost Shrine > Animation, then reopen this review.", MessageType.Info); return; }
+            { EditorGUILayout.HelpBox("Import Registered Animations from Road of the Old King > Animation, then reopen this review.", MessageType.Info); return; }
             EditorGUILayout.LabelField("Registered layers - " + string.Join(" / ", System.Array.ConvertAll(Sprites.views, view => view.name)), EditorStyles.boldLabel);
             EditorGUILayout.LabelField("640 px canvas / 128 PPU / shared ground pivot / full-body drawings");
             EditorGUILayout.BeginHorizontal();
