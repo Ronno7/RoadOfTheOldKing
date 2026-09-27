@@ -1,0 +1,180 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20ff5ab44eca0024d9c9d38fde782bd6, type: 3}
+  m_Name: Sprint
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.RegisteredActionSprites
+  views:
+  - name: East
+    direction: {x: 1, y: 0}
+    freePropOffset: {x: 0, y: 0}
+    freePropScale: 1
+    spinStartCel: 0
+    spinFlipX: 0
+    body:
+    - {fileID: 6472701396537107722, guid: fba3e4b3a1f8e434f978e05655d4635b, type: 3}
+    - {fileID: 8011015380498501803, guid: fba3e4b3a1f8e434f978e05655d4635b, type: 3}
+    - {fileID: 5785675036256664551, guid: fba3e4b3a1f8e434f978e05655d4635b, type: 3}
+    - {fileID: 2233480954415922840, guid: fba3e4b3a1f8e434f978e05655d4635b, type: 3}
+    - {fileID: -2658872523690986309, guid: fba3e4b3a1f8e434f978e05655d4635b, type: 3}
+    - {fileID: -670462423283710550, guid: fba3e4b3a1f8e434f978e05655d4635b, type: 3}
+    - {fileID: -2663117303281067134, guid: fba3e4b3a1f8e434f978e05655d4635b, type: 3}
+    - {fileID: 1769474924927962540, guid: fba3e4b3a1f8e434f978e05655d4635b, type: 3}
+    unarmedBody:
+    - {fileID: -7794388461477220934, guid: 0567b76cd7552334f800ca6509a73ca9, type: 3}
+    - {fileID: 3089000839996302109, guid: 0567b76cd7552334f800ca6509a73ca9, type: 3}
+    - {fileID: -3812349470945371892, guid: 0567b76cd7552334f800ca6509a73ca9, type: 3}
+    - {fileID: 5879515835159377211, guid: 0567b76cd7552334f800ca6509a73ca9, type: 3}
+    - {fileID: 5519231338879445351, guid: 0567b76cd7552334f800ca6509a73ca9, type: 3}
+    - {fileID: 1638280221332331866, guid: 0567b76cd7552334f800ca6509a73ca9, type: 3}
+    - {fileID: -6142431317548858067, guid: 0567b76cd7552334f800ca6509a73ca9, type: 3}
+    - {fileID: -8408286463111517464, guid: 0567b76cd7552334f800ca6509a73ca9, type: 3}
+    weapon:
+    - {fileID: 8880123910133673147, guid: d7512ed6e80198d4380fbeb6866b304e, type: 3}
+    - {fileID: -4010024799784110184, guid: d7512ed6e80198d4380fbeb6866b304e, type: 3}
+    - {fileID: 4535591796146309219, guid: d7512ed6e80198d4380fbeb6866b304e, type: 3}
+    - {fileID: 625076520627680242, guid: d7512ed6e80198d4380fbeb6866b304e, type: 3}
+    - {fileID: -1839842872117192590, guid: d7512ed6e80198d4380fbeb6866b304e, type: 3}
+    - {fileID: 2844084051605706638, guid: d7512ed6e80198d4380fbeb6866b304e, type: 3}
+    - {fileID: 5565863083235260470, guid: d7512ed6e80198d4380fbeb6866b304e, type: 3}
+    - {fileID: 7284447191529698615, guid: d7512ed6e80198d4380fbeb6866b304e, type: 3}
+    reveal:
+    - {fileID: 5366608440318403323, guid: 1b80cf5119aba3f45a3e26b13f871083, type: 3}
+    - {fileID: 8824486502655136100, guid: 1b80cf5119aba3f45a3e26b13f871083, type: 3}
+    - {fileID: -1164965780318301058, guid: 1b80cf5119aba3f45a3e26b13f871083, type: 3}
+    - {fileID: -7435727950211916145, guid: 1b80cf5119aba3f45a3e26b13f871083, type: 3}
+    - {fileID: -1669700243191921661, guid: 1b80cf5119aba3f45a3e26b13f871083, type: 3}
+    - {fileID: 8382623643891040511, guid: 1b80cf5119aba3f45a3e26b13f871083, type: 3}
+    - {fileID: -8011175167068217612, guid: 1b80cf5119aba3f45a3e26b13f871083, type: 3}
+    - {fileID: -6218562261516203705, guid: 1b80cf5119aba3f45a3e26b13f871083, type: 3}
+  - name: North
+    direction: {x: 0, y: 1}
+    freePropOffset: {x: 0, y: 0}
+    freePropScale: 1
+    spinStartCel: 0
+    spinFlipX: 0
+    body:
+    - {fileID: -7243696773977073729, guid: 8902eee3160b8bb43acf391bc6e7fad7, type: 3}
+    - {fileID: -8038766443462016922, guid: 8902eee3160b8bb43acf391bc6e7fad7, type: 3}
+    - {fileID: 1542428870365444734, guid: 8902eee3160b8bb43acf391bc6e7fad7, type: 3}
+    - {fileID: 6081066569164392971, guid: 8902eee3160b8bb43acf391bc6e7fad7, type: 3}
+    - {fileID: 5207079803441229086, guid: 8902eee3160b8bb43acf391bc6e7fad7, type: 3}
+    - {fileID: -3757351023578519473, guid: 8902eee3160b8bb43acf391bc6e7fad7, type: 3}
+    - {fileID: -5384180352571265819, guid: 8902eee3160b8bb43acf391bc6e7fad7, type: 3}
+    - {fileID: 3319644393411559135, guid: 8902eee3160b8bb43acf391bc6e7fad7, type: 3}
+    unarmedBody: []
+    weapon:
+    - {fileID: -754285379057577296, guid: 09154291680231542a41cf34fa3a3d89, type: 3}
+    - {fileID: 1973387467895130448, guid: 09154291680231542a41cf34fa3a3d89, type: 3}
+    - {fileID: -5150339592171187524, guid: 09154291680231542a41cf34fa3a3d89, type: 3}
+    - {fileID: 2615561878493008463, guid: 09154291680231542a41cf34fa3a3d89, type: 3}
+    - {fileID: 5047925061089246617, guid: 09154291680231542a41cf34fa3a3d89, type: 3}
+    - {fileID: -6642895306586396775, guid: 09154291680231542a41cf34fa3a3d89, type: 3}
+    - {fileID: 2561964074710424017, guid: 09154291680231542a41cf34fa3a3d89, type: 3}
+    - {fileID: -6800557745881733949, guid: 09154291680231542a41cf34fa3a3d89, type: 3}
+    reveal:
+    - {fileID: 5496380831569736277, guid: 505e6ffd80e46504684a6f3dca85298d, type: 3}
+    - {fileID: 1790101241871115957, guid: 505e6ffd80e46504684a6f3dca85298d, type: 3}
+    - {fileID: -3685646975269970163, guid: 505e6ffd80e46504684a6f3dca85298d, type: 3}
+    - {fileID: -8456816724787103277, guid: 505e6ffd80e46504684a6f3dca85298d, type: 3}
+    - {fileID: -4772227325519070021, guid: 505e6ffd80e46504684a6f3dca85298d, type: 3}
+    - {fileID: -1615739048390322632, guid: 505e6ffd80e46504684a6f3dca85298d, type: 3}
+    - {fileID: 5617894151875330217, guid: 505e6ffd80e46504684a6f3dca85298d, type: 3}
+    - {fileID: -2933345188327848580, guid: 505e6ffd80e46504684a6f3dca85298d, type: 3}
+  - name: South
+    direction: {x: 0, y: -1}
+    freePropOffset: {x: 0, y: 0}
+    freePropScale: 1
+    spinStartCel: 0
+    spinFlipX: 0
+    body:
+    - {fileID: -239279995720911435, guid: 1ce42d86d2140e1488b0a6673898bdae, type: 3}
+    - {fileID: 8235377266729406377, guid: 1ce42d86d2140e1488b0a6673898bdae, type: 3}
+    - {fileID: 4190369102591858482, guid: 1ce42d86d2140e1488b0a6673898bdae, type: 3}
+    - {fileID: 5557065742265016489, guid: 1ce42d86d2140e1488b0a6673898bdae, type: 3}
+    - {fileID: -6640644244355836961, guid: 1ce42d86d2140e1488b0a6673898bdae, type: 3}
+    - {fileID: -7233473657209576237, guid: 1ce42d86d2140e1488b0a6673898bdae, type: 3}
+    - {fileID: 1370737818702841413, guid: 1ce42d86d2140e1488b0a6673898bdae, type: 3}
+    - {fileID: 868995928362216356, guid: 1ce42d86d2140e1488b0a6673898bdae, type: 3}
+    unarmedBody:
+    - {fileID: -2796703548095549767, guid: 6fabc9c842de37949ae236f3716fcc05, type: 3}
+    - {fileID: 2848648639792288934, guid: 6fabc9c842de37949ae236f3716fcc05, type: 3}
+    - {fileID: 1368761249232648689, guid: 6fabc9c842de37949ae236f3716fcc05, type: 3}
+    - {fileID: 7918274447556618912, guid: 6fabc9c842de37949ae236f3716fcc05, type: 3}
+    - {fileID: 1350532942303794971, guid: 6fabc9c842de37949ae236f3716fcc05, type: 3}
+    - {fileID: -8724399048139551662, guid: 6fabc9c842de37949ae236f3716fcc05, type: 3}
+    - {fileID: 8638181944982250691, guid: 6fabc9c842de37949ae236f3716fcc05, type: 3}
+    - {fileID: 6640018573041784532, guid: 6fabc9c842de37949ae236f3716fcc05, type: 3}
+    weapon:
+    - {fileID: 7485545479855665742, guid: b772b780eba8782408122caeedc7166a, type: 3}
+    - {fileID: 3340362011234073839, guid: b772b780eba8782408122caeedc7166a, type: 3}
+    - {fileID: 3217019542175851986, guid: b772b780eba8782408122caeedc7166a, type: 3}
+    - {fileID: 938715833231794507, guid: b772b780eba8782408122caeedc7166a, type: 3}
+    - {fileID: -5560650301692100105, guid: b772b780eba8782408122caeedc7166a, type: 3}
+    - {fileID: -8122157979570458921, guid: b772b780eba8782408122caeedc7166a, type: 3}
+    - {fileID: 7159280993217354504, guid: b772b780eba8782408122caeedc7166a, type: 3}
+    - {fileID: 7013715621216688957, guid: b772b780eba8782408122caeedc7166a, type: 3}
+    reveal:
+    - {fileID: 2147448507516112649, guid: 51844f65e57bc7745ab66021dcd69bdd, type: 3}
+    - {fileID: 5288850126062213684, guid: 51844f65e57bc7745ab66021dcd69bdd, type: 3}
+    - {fileID: 2932510137730022537, guid: 51844f65e57bc7745ab66021dcd69bdd, type: 3}
+    - {fileID: -2009724779884292267, guid: 51844f65e57bc7745ab66021dcd69bdd, type: 3}
+    - {fileID: 3905288871011509865, guid: 51844f65e57bc7745ab66021dcd69bdd, type: 3}
+    - {fileID: 4404055425099435656, guid: 51844f65e57bc7745ab66021dcd69bdd, type: 3}
+    - {fileID: -423645279214199189, guid: 51844f65e57bc7745ab66021dcd69bdd, type: 3}
+    - {fileID: 6373394658758676737, guid: 51844f65e57bc7745ab66021dcd69bdd, type: 3}
+  - name: West
+    direction: {x: -1, y: 0}
+    freePropOffset: {x: 0, y: 0}
+    freePropScale: 1
+    spinStartCel: 0
+    spinFlipX: 0
+    body:
+    - {fileID: -6704467906549025366, guid: 38f4ebbd4f334a34cb4d3a00f1976cfd, type: 3}
+    - {fileID: -1740691835819740587, guid: 38f4ebbd4f334a34cb4d3a00f1976cfd, type: 3}
+    - {fileID: -417013163072565463, guid: 38f4ebbd4f334a34cb4d3a00f1976cfd, type: 3}
+    - {fileID: -3302697781109402445, guid: 38f4ebbd4f334a34cb4d3a00f1976cfd, type: 3}
+    - {fileID: 1723603490040195729, guid: 38f4ebbd4f334a34cb4d3a00f1976cfd, type: 3}
+    - {fileID: -7799270514909423521, guid: 38f4ebbd4f334a34cb4d3a00f1976cfd, type: 3}
+    - {fileID: -607972539680976609, guid: 38f4ebbd4f334a34cb4d3a00f1976cfd, type: 3}
+    - {fileID: -8112881624208863458, guid: 38f4ebbd4f334a34cb4d3a00f1976cfd, type: 3}
+    unarmedBody:
+    - {fileID: -7124884751907188120, guid: 3801c3742da88874f8dcd11dec330a75, type: 3}
+    - {fileID: 7448151753981616890, guid: 3801c3742da88874f8dcd11dec330a75, type: 3}
+    - {fileID: 2078407197734595237, guid: 3801c3742da88874f8dcd11dec330a75, type: 3}
+    - {fileID: -7453728560803139565, guid: 3801c3742da88874f8dcd11dec330a75, type: 3}
+    - {fileID: 6394086547801998331, guid: 3801c3742da88874f8dcd11dec330a75, type: 3}
+    - {fileID: -4484854865841973489, guid: 3801c3742da88874f8dcd11dec330a75, type: 3}
+    - {fileID: -8834007828279829958, guid: 3801c3742da88874f8dcd11dec330a75, type: 3}
+    - {fileID: 606982818259214007, guid: 3801c3742da88874f8dcd11dec330a75, type: 3}
+    weapon:
+    - {fileID: -4676064493759738684, guid: ec936d53c0b1b1944897d1846f6df8d8, type: 3}
+    - {fileID: 8801730865686560640, guid: ec936d53c0b1b1944897d1846f6df8d8, type: 3}
+    - {fileID: -4079108149221062145, guid: ec936d53c0b1b1944897d1846f6df8d8, type: 3}
+    - {fileID: -6242606155376705461, guid: ec936d53c0b1b1944897d1846f6df8d8, type: 3}
+    - {fileID: 5228949430232360750, guid: ec936d53c0b1b1944897d1846f6df8d8, type: 3}
+    - {fileID: 2204725714333780505, guid: ec936d53c0b1b1944897d1846f6df8d8, type: 3}
+    - {fileID: -2281966910184862291, guid: ec936d53c0b1b1944897d1846f6df8d8, type: 3}
+    - {fileID: 3771708009964700569, guid: ec936d53c0b1b1944897d1846f6df8d8, type: 3}
+    reveal:
+    - {fileID: -8848907885811795248, guid: b82696e66ca808141866ae557e336778, type: 3}
+    - {fileID: 7444509170626262425, guid: b82696e66ca808141866ae557e336778, type: 3}
+    - {fileID: -6328717229842401154, guid: b82696e66ca808141866ae557e336778, type: 3}
+    - {fileID: -7144568544327122557, guid: b82696e66ca808141866ae557e336778, type: 3}
+    - {fileID: 4898754846960057874, guid: b82696e66ca808141866ae557e336778, type: 3}
+    - {fileID: -8506804073574044735, guid: b82696e66ca808141866ae557e336778, type: 3}
+    - {fileID: -7248284311473631880, guid: b82696e66ca808141866ae557e336778, type: 3}
+    - {fileID: 8344813160749361710, guid: b82696e66ca808141866ae557e336778, type: 3}
+  celCount: 8
+  exposures: []
+  contactCel: -1
+  recoveryCel: -1
+  possessionCel: -1

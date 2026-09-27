@@ -16,7 +16,7 @@ namespace TheLostShrine.EditorTools
     {
         internal const string Root = "Assets/Art/Tiles/Tutorial/DetailDecoration";
         internal const string VisualRoot = "Assets/Prefabs/WorldArt/Tutorial";
-        const string Sources = "../Docs/Art/Tutorial/Sources/Decoration/";
+        const string Sources = "../ArtSource/Tutorial/Decoration/";
         [Serializable] sealed class Item
         {
             public string name;

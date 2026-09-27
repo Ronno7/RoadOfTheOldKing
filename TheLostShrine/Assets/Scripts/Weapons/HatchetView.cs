@@ -18,6 +18,8 @@ namespace TheLostShrine.Weapons
         [SerializeField] private bool bobOnGround = true;
         private HatchetWeapon weapon;
         private Color originalBlade;
+        private Sprite originalSprite;
+        private Vector3 originalBladeScale;
         private bool wasFlying;
         private int originalSortingLayer;
         private int originalSortingOrder;
@@ -32,6 +34,8 @@ namespace TheLostShrine.Weapons
             if (blade != null)
             {
                 originalBlade = blade.color;
+                originalSprite = blade.sprite;
+                originalBladeScale = blade.transform.localScale;
                 originalSortingLayer = blade.sortingLayerID;
                 originalSortingOrder = blade.sortingOrder;
             }
@@ -42,22 +46,33 @@ namespace TheLostShrine.Weapons
             if (model == null || weapon.Settings == null)
                 return;
             bool flying = weapon.State == HatchetState.Flying || weapon.State == HatchetState.Returning;
+            var registered = useAnimatedGrip && weapon.Owner != null
+                ? weapon.Owner.GetComponent<TheLostShrine.Player.RegisteredPlayerAnimation>() : null;
             if (trail != null)
             {
                 if (flying != wasFlying)
                     trail.Clear();
-                trail.emitting = flying;
+                trail.emitting = flying && (registered == null || !registered.HasSpin);
             }
             wasFlying = flying;
             if (arc != null)
                 arc.enabled = false;
+            if (weapon.ThrowPhase == ThrowPhase.Aim && weapon.Owner != null)
+                DrawThrowAim();
             if (blade != null)
             {
                 blade.color = Color.Lerp(originalBlade, new Color(1f, 0.85f, 0.25f), weapon.Charge01);
+                // Combat can supply perspective cels; all other states use the equipped sprite.
+                blade.sprite = originalSprite;
+                blade.enabled = true;
+                blade.transform.localScale = originalBladeScale;
                 blade.flipX = false;
                 blade.sortingLayerID = originalSortingLayer;
                 blade.sortingOrder = originalSortingOrder;
             }
+
+            if (registered != null && registered.TryApplyWeapon(model, blade))
+                return;
 
             if (useAnimatedGrip && weapon.State == HatchetState.LightChop && weapon.Owner != null)
             {
@@ -65,7 +80,7 @@ namespace TheLostShrine.Weapons
                 var chop = weapon.Owner.GetComponent<TheLostShrine.Player.PlayerChopAnimation>();
                 if (chop != null && chop.TryApplyWeapon(model, blade))
                 {
-                    DrawChopAccent();
+                    DrawChopAccent(chop);
                     return;
                 }
             }
@@ -173,20 +188,31 @@ namespace TheLostShrine.Weapons
             return poseAngle;
         }
 
-        private void DrawChopAccent()
+        private void DrawThrowAim()
         {
-            float t = weapon.AttackProgress;
-            float start = weapon.Settings.lightWindupFraction;
-            float end = weapon.Settings.lightSwingEndFraction;
-            if (t < start || t > end + 0.12f) return;
-            float cut = Mathf.InverseLerp(start, end, t);
-            float fade = 1f - Mathf.InverseLerp(end, end + 0.12f, t);
-            DrawArc(model.position, 1.08f, 50f - 85f * cut, -50f,
-                new Color(1f, 0.93f, 0.74f, fade * 0.7f));
+            if (arc == null) return;
+            Vector3 origin = weapon.Owner.transform.position;
+            Vector3 direction = weapon.AimDirection;
+            float distance = weapon.AimDistance;
+            if (distance < 0.01f) return;
+            arc.enabled = true;
+            arc.widthCurve = ringWidth;
+            arc.widthMultiplier = 0.025f;
+            arc.startColor = new Color(1f, 0.94f, 0.74f, 0.1f);
+            arc.endColor = new Color(1f, 0.94f, 0.74f, 0.5f);
+            arc.positionCount = 2;
+            arc.SetPosition(0, origin);
+            arc.SetPosition(1, origin + direction * distance);
+        }
+
+        private void DrawChopAccent(TheLostShrine.Player.PlayerChopAnimation chop)
+        {
+            if (!chop.TryGetSlash(out var origin, out var start, out var sweep, out var fade)) return;
+            DrawArc(origin, 1.08f, start, sweep, new Color(1f, 0.93f, 0.74f, fade * 0.7f));
             if (arc != null)
             {
                 arc.widthCurve = slashWidth;
-                arc.widthMultiplier = 0.10f;
+                arc.widthMultiplier = weapon.ComboIndex == 2 ? 0.14f : 0.10f;
             }
         }
 

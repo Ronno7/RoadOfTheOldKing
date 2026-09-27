@@ -1,0 +1,43 @@
+// Edit or Play Mode. Pure action timing: no scene, input, assets or saves are mutated.
+var results = new System.Collections.Generic.List<string>();
+System.Action<bool,string> check = (ok,name) => results.Add((ok ? "PASS " : "FAIL ") + name);
+var timing = new TheLostShrine.Weapons.ThrowActionTiming();
+var clock = new TheLostShrine.Weapons.ThrowActionClock();
+float flight;
+check(clock.Begin(timing) && clock.Commit(), "Quick tap commits during preparation");
+check(!clock.Advance(.119f, out flight) && clock.CelIndex == 4, "No physical axe before 120 ms");
+check(clock.Advance(.001f, out flight) && clock.CelIndex == 5 && flight < .00001f, "Launch at 120 ms, on cel 6");
+check(!clock.Advance(.5f, out flight) && !clock.IsActive && clock.HasLaunched, "Release marker fires once through recovery");
+clock.Begin(timing); clock.Advance(.08f, out flight);
+check(clock.Phase == TheLostShrine.Weapons.ThrowPhase.Aim && clock.CelIndex == 2, "80 ms preparation enters two-cel aim loop");
+check(!clock.Advance(600f, out flight) && clock.CanCancelAim && !clock.HasLaunched, "Held aim never launches itself");
+clock.Commit();
+check(!clock.Advance(.039f, out flight) && clock.Advance(.001f, out flight), "Held throw launches 40 ms after key-up");
+clock.Cancel();
+check(!clock.Commit() && !clock.Advance(1f, out flight), "Cancelled action ignores stale release and time");
+clock.Begin(timing); clock.Commit();
+check(!clock.Begin(timing) && !clock.Commit(), "Repeated press/commit cannot restart or duplicate launch");
+check(clock.Advance(.5f, out flight) && Mathf.Abs(flight - .38f) < .00001f && !clock.IsActive,
+    "Long step simulates only 380 ms of flight after 120 ms wind-up");
+clock.Begin(timing); clock.Commit();
+int launches = 0; float flightTotal = 0f;
+for (int i = 0; i < 15; i++) { if (clock.Advance(.02f, out flight)) launches++; flightTotal += flight; }
+check(launches == 1 && Mathf.Abs(flightTotal - .18f) < .00001f && clock.IsActive,
+    "Fifteen physics steps preserve launch timing and flight duration");
+clock.Cancel(); clock.Begin(timing);
+check(clock.MovementScale == .55f, "Uncommitted preparation permits slow aim movement");
+clock.Commit();
+check(clock.MovementScale == 0f, "Committed wind-up plants the body");
+clock.Advance(.231f, out flight);
+check(clock.MovementScale > 0f && clock.MovementScale < 1f, "Late recovery progressively restores movement");
+clock.Cancel(); clock.Begin(timing);
+check(!clock.Advance(float.NaN, out flight) && !clock.Advance(float.PositiveInfinity, out flight) &&
+    !clock.Advance(-1f, out flight) && clock.CelIndex == 0, "Invalid time cannot corrupt the action");
+clock.Cancel();
+check(!clock.Begin(new TheLostShrine.Weapons.ThrowActionTiming { preparation = new float[0] }) &&
+    !clock.Begin(new TheLostShrine.Weapons.ThrowActionTiming { launchCel = 4 }), "Invalid exposure/marker data rejected");
+foreach (string path in new[]{"Assets/Settings/Weapons/HatchetSettings.asset", "Assets/Settings/Weapons/TutorialHatchetSettings.asset"}) {
+    var settings = AssetDatabase.LoadAssetAtPath<TheLostShrine.Weapons.HatchetSettings>(path);
+    check(clock.Begin(settings.throwAction), "Serialized timing loads: " + settings.name); clock.Cancel();
+}
+return string.Join("\n", results.ToArray());

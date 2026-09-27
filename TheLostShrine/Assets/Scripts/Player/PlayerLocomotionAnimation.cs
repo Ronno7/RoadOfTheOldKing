@@ -11,6 +11,8 @@ namespace TheLostShrine.Player
         [SerializeField] private Animator animator;
         [Tooltip("World units covered by one complete four-frame walk cycle.")]
         [SerializeField, Min(0.1f)] private float strideLength = 2.25f;
+        [Tooltip("Ground distance for a complete authored eight-cel sprint. Missing views retain the walk cadence.")]
+        [SerializeField, Min(0.1f)] private float sprintStrideLength = 3.2f;
         [Tooltip("Subtle visual breathing, anchored at the sprite's feet. No physics motion.")]
         [SerializeField, Range(0f, 0.03f)] private float idleBreathAmount = 0.012f;
         [SerializeField, Min(1f)] private float idleBreathPeriod = 3.2f;
@@ -31,6 +33,7 @@ namespace TheLostShrine.Player
         private Rigidbody2D body;
         private PlayerCombatController combat;
         private PlayerChopAnimation chop;
+        private RegisteredPlayerAnimation registered;
         private Vector3 restingScale;
         private float idleElapsed;
         private Vector2 previousPosition;
@@ -47,6 +50,7 @@ namespace TheLostShrine.Player
             body = GetComponent<Rigidbody2D>();
             combat = GetComponent<PlayerCombatController>();
             chop = GetComponent<PlayerChopAnimation>();
+            registered = GetComponent<RegisteredPlayerAnimation>();
             if (animator == null || animator.runtimeAnimatorController == null)
             {
                 Debug.LogError("Player locomotion needs the player sprite Animator and controller.", this);
@@ -69,13 +73,31 @@ namespace TheLostShrine.Player
             ResetIdleMotion();
         }
 
-        private void LateUpdate()
+        private void LateUpdate() => Present(Time.deltaTime);
+
+        private void Present(float deltaTime)
         {
             Vector2 position = transform.position;
-            float distance = Vector2.Distance(position, previousPosition);
+            Vector2 displacement = position - previousPosition;
+            float distance = displacement.magnitude;
             previousPosition = position;
-            if (Time.deltaTime <= 0f)
+            if (deltaTime <= 0f)
                 return;
+            bool teleported = distance > Mathf.Max(1f, movement.SprintSpeed * deltaTime * 2f);
+
+            if (registered != null)
+            {
+                registered.PrepareTravelFrame(deltaTime, displacement, teleported);
+                if (registered.IsPresentingBody)
+                {
+                    if (chop != null) chop.HideHandLayer();
+                    ResetIdleMotion();
+                    wasWalking = false;
+                    displayedFrame = -1;
+                    registered.TryApplyBody();
+                    return;
+                }
+            }
 
             if (chop != null && chop.IsPlaying)
             {
@@ -88,13 +110,12 @@ namespace TheLostShrine.Player
 
             Vector2 facing = movement.FacingDirection;
             if (combat != null && combat.IsAttacking)
-                facing = combat.Weapon.AttackDirection;
+                facing = combat.ActionFacing;
             int direction = Mathf.Abs(facing.x) >= Mathf.Abs(facing.y)
                 ? (facing.x > 0f ? 1 : 2) : (facing.y > 0f ? 3 : 0);
             bool canMove = movement.isActiveAndEnabled && body.simulated &&
                 (reaction == null || !reaction.IsStaggered);
             // A respawn/teleport must not fast-forward the feet through many strides.
-            bool teleported = distance > Mathf.Max(1f, movement.SprintSpeed * Time.deltaTime * 2f);
 
             if (canMove && dash != null && dash.IsDashing && !teleported)
             {
@@ -109,9 +130,19 @@ namespace TheLostShrine.Player
             if (walking)
             {
                 // Start on the first step; retain cycle phase when changing direction.
+                bool drawnSprint = movement.IsSprinting && registered != null && registered.HasSprintView(facing);
                 if (!wasWalking)
-                    cycle = 0.25f;
-                cycle = Mathf.Repeat(cycle + distance / strideLength, 1f);
+                    cycle = drawnSprint ? 0f : 0.25f;
+                cycle = Mathf.Repeat(cycle + distance / (drawnSprint ? sprintStrideLength : strideLength), 1f);
+                if (drawnSprint && registered.TryPresentSprint(facing, cycle))
+                {
+                    ResetIdleMotion();
+                    wasWalking = true;
+                    displayedFrame = -1; // Ensure the original Animator writes again when sprint yields.
+                    if (chop != null) chop.HideHandLayer();
+                    registered.TryApplyBody();
+                    return;
+                }
                 SetPose(WalkStates[direction], Mathf.FloorToInt(cycle * 4f));
             }
             else
@@ -121,7 +152,7 @@ namespace TheLostShrine.Player
             }
             wasWalking = walking;
             UpdateIdleMotion(canMove && !walking && !teleported &&
-                (combat == null || !combat.IsAttacking), Time.deltaTime);
+                (combat == null || !combat.IsAttacking), deltaTime);
         }
 
         private void UpdateIdleMotion(bool resting, float deltaTime)

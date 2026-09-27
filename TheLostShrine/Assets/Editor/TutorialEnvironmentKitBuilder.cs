@@ -55,7 +55,7 @@ namespace TheLostShrine.EditorTools
                 foreach(var source in props.Select(p=>p.source).Distinct())
                 {
                     var texture=new Texture2D(2,2,TextureFormat.RGBA32,false);
-                    if(!texture.LoadImage(File.ReadAllBytes("../Docs/Art/Tutorial/Sources/Environment/"+source+".png")))throw new InvalidDataException(source);
+                    if(!texture.LoadImage(File.ReadAllBytes("../ArtSource/Tutorial/Environment/"+source+".png")))throw new InvalidDataException(source);
                     sources.Add(source,texture);
                 }
                 // Preserve native reference sprites; constrain generated sources to the same palette.

@@ -1,0 +1,39 @@
+// Fresh Tutorial Play Mode; stop afterward to discard the temporary pickup.
+if(!Application.isPlaying)throw new Exception("Use Tutorial Play Mode.");
+var results=new System.Collections.Generic.List<string>();
+System.Action<bool,string> check=(ok,label)=>results.Add((ok?"PASS ":"FAIL ")+label);
+var props=AssetDatabase.LoadAllAssetsAtPath("Assets/Art/Sprites/Weapons/HatchetTurns.png").OfType<Sprite>().ToArray();
+check(props.Length==2,"Both north preparation perspectives remain imported");
+foreach(var sprite in props)check(sprite.rect.size==new Vector2(256,256) && sprite.pixelsPerUnit==128 &&
+    sprite.pivot==new Vector2(140,55) && sprite.texture.filterMode==FilterMode.Point,"Native density and matching grip: "+sprite.name);
+var player=GameObject.Find("Player");
+var combat=player.GetComponent<TheLostShrine.Player.PlayerCombatController>();
+var weapon=GameObject.Find("Hatchet Pickup").GetComponent<TheLostShrine.Weapons.HatchetWeapon>();
+var animation=player.GetComponent<TheLostShrine.Player.PlayerLocomotionAnimation>();
+var view=weapon.GetComponent<TheLostShrine.Weapons.HatchetView>();
+var blade=weapon.transform.Find("Model/Sprite").GetComponent<SpriteRenderer>();
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var oldControls=combat.GetType().GetField("controlsActive",flags).GetValue(combat);
+System.Action<float> step=dt=>{
+    weapon.GetType().GetMethod("Simulate",flags).Invoke(weapon,new object[]{dt});
+    animation.GetType().GetMethod("Present",flags).Invoke(animation,new object[]{dt});
+    view.GetType().GetMethod("LateUpdate",flags).Invoke(view,null);
+};
+try {
+    if(combat.Weapon==null)combat.TryEquip(weapon);
+    combat.GetType().GetMethod("ProcessInput",flags).Invoke(combat,new object[]{new TheLostShrine.Input.CombatInputFrame{Active=true}});
+    weapon.CancelAction();player.GetComponent<TheLostShrine.Player.PlayerStamina>().Restore();
+    check(weapon.TryLightChop(Vector2.up),"North action starts with the revised held prop");
+    weapon.GetType().GetProperty("ComboIndex").SetValue(weapon,1,null);
+    step(.015f);
+    check(blade.sprite!=null && blade.sprite.name=="HatchetOblique","Existing north preparation reference selects the new oblique art");
+    step(.05f);
+    check(blade.sprite!=null && blade.sprite.name=="HatchetEdge","Next preparation exposure selects the new edge-on art");
+    check(blade.transform.localScale==Vector3.one,"Perspective transition retains native scale");
+    weapon.PauseOnImpact(.045f);var paused=blade.sprite;step(.02f);
+    check(blade.sprite==paused,"Hit pause holds the selected perspective");
+    weapon.CancelAction();step(.02f);
+    check(blade.sprite==AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Sprites/Weapons/Hatchet.png") && blade.transform.localScale==Vector3.one,
+        "Cancellation restores the matched carry drawing at unit scale");
+} finally {weapon.CancelAction();player.GetComponent<TheLostShrine.Player.PlayerStamina>().Restore();step(.02f);combat.GetType().GetField("controlsActive",flags).SetValue(combat,oldControls);}
+return string.Join("\n",results.ToArray());

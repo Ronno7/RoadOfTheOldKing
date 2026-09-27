@@ -1,0 +1,112 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20ff5ab44eca0024d9c9d38fde782bd6, type: 3}
+  m_Name: Catch
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.RegisteredActionSprites
+  views:
+  - name: East
+    direction: {x: 1, y: 0}
+    freePropOffset: {x: 1.3595506, y: 1.247191}
+    freePropScale: 0.94
+    spinStartCel: 1
+    spinFlipX: 0
+    body:
+    - {fileID: -336448465354026151, guid: 1f3c3e75eadb5114ab619cc58612f656, type: 3}
+    - {fileID: -8916441043937334196, guid: 1f3c3e75eadb5114ab619cc58612f656, type: 3}
+    - {fileID: -4562066385751167209, guid: 1f3c3e75eadb5114ab619cc58612f656, type: 3}
+    - {fileID: 5665563532292129697, guid: 1f3c3e75eadb5114ab619cc58612f656, type: 3}
+    unarmedBody: []
+    weapon:
+    - {fileID: -6533851310541386314, guid: c8ae2f400af020e4aa8055e1370637ec, type: 3}
+    - {fileID: -4976459677261328004, guid: c8ae2f400af020e4aa8055e1370637ec, type: 3}
+    - {fileID: -3832594960169967685, guid: c8ae2f400af020e4aa8055e1370637ec, type: 3}
+    - {fileID: 1238898443709566166, guid: c8ae2f400af020e4aa8055e1370637ec, type: 3}
+    reveal:
+    - {fileID: 5960942145155655659, guid: 6d41cb784e1c7bc41a6718ac83cf41ec, type: 3}
+    - {fileID: -1154231858799995138, guid: 6d41cb784e1c7bc41a6718ac83cf41ec, type: 3}
+    - {fileID: -3784587287131841446, guid: 6d41cb784e1c7bc41a6718ac83cf41ec, type: 3}
+    - {fileID: -7277830011284850192, guid: 6d41cb784e1c7bc41a6718ac83cf41ec, type: 3}
+  - name: North
+    direction: {x: 0, y: 1}
+    freePropOffset: {x: 0.64772725, y: 1.8011364}
+    freePropScale: 0.75
+    spinStartCel: 0
+    spinFlipX: 0
+    body:
+    - {fileID: 437761130950914343, guid: fadb3cb2af339d346985c36f5073f615, type: 3}
+    - {fileID: -8925242490492771489, guid: fadb3cb2af339d346985c36f5073f615, type: 3}
+    - {fileID: 7503525534683555930, guid: fadb3cb2af339d346985c36f5073f615, type: 3}
+    - {fileID: 4586826549495463754, guid: fadb3cb2af339d346985c36f5073f615, type: 3}
+    unarmedBody: []
+    weapon:
+    - {fileID: 9161062229085888617, guid: e6383eef69f45b54a96e718a2a44369b, type: 3}
+    - {fileID: -522130100663366540, guid: e6383eef69f45b54a96e718a2a44369b, type: 3}
+    - {fileID: -1359934631259869881, guid: e6383eef69f45b54a96e718a2a44369b, type: 3}
+    - {fileID: 2146877595584884064, guid: e6383eef69f45b54a96e718a2a44369b, type: 3}
+    reveal:
+    - {fileID: -7920632738329245677, guid: db0557c4499cc0d45af3269a6714c245, type: 3}
+    - {fileID: 914314466662334587, guid: db0557c4499cc0d45af3269a6714c245, type: 3}
+    - {fileID: -1262613736244914972, guid: db0557c4499cc0d45af3269a6714c245, type: 3}
+    - {fileID: 2715870415961264369, guid: db0557c4499cc0d45af3269a6714c245, type: 3}
+  - name: South
+    direction: {x: 0, y: -1}
+    freePropOffset: {x: -0.8532609, y: 1.0271739}
+    freePropScale: 1.05
+    spinStartCel: 1
+    spinFlipX: 1
+    body:
+    - {fileID: -2329270222254833885, guid: ad91988ec0345c149ba96c38ecabe0ac, type: 3}
+    - {fileID: -432939907777744652, guid: ad91988ec0345c149ba96c38ecabe0ac, type: 3}
+    - {fileID: 5614020349874397173, guid: ad91988ec0345c149ba96c38ecabe0ac, type: 3}
+    - {fileID: 3991491090660284886, guid: ad91988ec0345c149ba96c38ecabe0ac, type: 3}
+    unarmedBody: []
+    weapon:
+    - {fileID: -2017017953841153089, guid: 43a3b04894f83e84291e0fb983b86e57, type: 3}
+    - {fileID: 1954686744494563822, guid: 43a3b04894f83e84291e0fb983b86e57, type: 3}
+    - {fileID: 2190277189852306211, guid: 43a3b04894f83e84291e0fb983b86e57, type: 3}
+    - {fileID: 2115054373724945152, guid: 43a3b04894f83e84291e0fb983b86e57, type: 3}
+    reveal:
+    - {fileID: -6290582515876681299, guid: 126df71ae7e66fe4e85db03028b4e186, type: 3}
+    - {fileID: -5437767235570625865, guid: 126df71ae7e66fe4e85db03028b4e186, type: 3}
+    - {fileID: 8952069729309126147, guid: 126df71ae7e66fe4e85db03028b4e186, type: 3}
+    - {fileID: -4186584414943042153, guid: 126df71ae7e66fe4e85db03028b4e186, type: 3}
+  - name: West
+    direction: {x: -1, y: 0}
+    freePropOffset: {x: -0.8828125, y: 1.140625}
+    freePropScale: 0.8
+    spinStartCel: 1
+    spinFlipX: 1
+    body:
+    - {fileID: 6563964472276280409, guid: 5a5b1c5819275c24ca36d3541f2b6b1a, type: 3}
+    - {fileID: 5606165230834154014, guid: 5a5b1c5819275c24ca36d3541f2b6b1a, type: 3}
+    - {fileID: -8714909878126171207, guid: 5a5b1c5819275c24ca36d3541f2b6b1a, type: 3}
+    - {fileID: 1797048485625605268, guid: 5a5b1c5819275c24ca36d3541f2b6b1a, type: 3}
+    unarmedBody: []
+    weapon:
+    - {fileID: -8154490338235682536, guid: 63c64b42fc1b6ca40809c76823d95a6e, type: 3}
+    - {fileID: -7284079637368692103, guid: 63c64b42fc1b6ca40809c76823d95a6e, type: 3}
+    - {fileID: 8278140531972152321, guid: 63c64b42fc1b6ca40809c76823d95a6e, type: 3}
+    - {fileID: 9068488793678182177, guid: 63c64b42fc1b6ca40809c76823d95a6e, type: 3}
+    reveal:
+    - {fileID: -6892515857077997594, guid: c37d39453294d8a42946bac8bd69feae, type: 3}
+    - {fileID: 3482255633928877045, guid: c37d39453294d8a42946bac8bd69feae, type: 3}
+    - {fileID: 9160256530342810062, guid: c37d39453294d8a42946bac8bd69feae, type: 3}
+    - {fileID: -5001860115194875316, guid: c37d39453294d8a42946bac8bd69feae, type: 3}
+  celCount: 4
+  exposures:
+  - 0.06
+  - 0.05
+  - 0.08
+  - 0.1
+  contactCel: -1
+  recoveryCel: -1
+  possessionCel: 1

@@ -41,6 +41,8 @@ namespace TheLostShrine.Input
                 ChargeHeld = charge.IsPressed(),
                 ChargeReleased = charge.WasReleasedThisFrame(),
                 ThrowPressed = throwWeapon.WasPressedThisFrame(),
+                ThrowHeld = throwWeapon.IsPressed(),
+                ThrowReleased = throwWeapon.WasReleasedThisFrame(),
                 PointerPosition = mouse.position.ReadValue()
             };
         }

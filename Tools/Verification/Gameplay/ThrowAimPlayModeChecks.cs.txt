@@ -1,0 +1,166 @@
+// Run in Play Mode in an empty, unsaved scene. Uses real Tutorial prefabs, no save session.
+// All fixtures and synthetic input devices are removed in finally. Stop Play Mode afterward.
+if (!Application.isPlaying || UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Progression.CheckpointSession>() != null)
+    throw new Exception("Use an empty Play Mode scene without a checkpoint session.");
+var results = new System.Collections.Generic.List<string>();
+System.Action<bool,string> check = (ok,name) => results.Add((ok ? "PASS " : "FAIL ") + name);
+System.Func<float,float,bool> near = (a,b) => Mathf.Abs(a-b) < .001f;
+var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+var created = new System.Collections.Generic.List<GameObject>();
+System.Func<string,GameObject> spawn = path => {
+    var go = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(path)); created.Add(go); return go;
+};
+var goPlayer = spawn("Assets/Prefabs/Player/TutorialPlayer.prefab");
+var player = goPlayer.GetComponent<TheLostShrine.Player.PlayerCombatController>();
+var weapon = spawn("Assets/Prefabs/Weapons/TutorialHatchet.prefab").GetComponent<TheLostShrine.Weapons.HatchetWeapon>();
+var stamina = player.GetComponent<TheLostShrine.Player.PlayerStamina>();
+var dash = player.GetComponent<TheLostShrine.Player.PlayerDash>();
+var reaction = player.GetComponent<TheLostShrine.Combat.HitReaction>();
+var body = player.GetComponent<Rigidbody2D>();
+var combatInput = player.GetComponent<TheLostShrine.Input.PlayerCombatInput>();
+var moveInput = player.GetComponent<TheLostShrine.Input.PlayerMovementInput>();
+var movement = player.GetComponent<TheLostShrine.Player.PlayerMovement>();
+var sim = weapon.GetType().GetMethod("Simulate",flags);
+var process = player.GetType().GetMethod("ProcessInput",flags);
+var moveTick = movement.GetType().GetMethod("FixedUpdate",flags);
+var moveRead = moveInput.GetType().GetMethod("Update",flags);
+var view = weapon.GetComponent<TheLostShrine.Weapons.HatchetView>();
+var viewTick = view.GetType().GetMethod("LateUpdate",flags);
+var recover = stamina.GetType().GetMethod("Tick",flags);
+var combatMap = (UnityEngine.InputSystem.InputActionMap)combatInput.GetType().GetField("actions",flags).GetValue(combatInput);
+var moveMap = (UnityEngine.InputSystem.InputActionMap)moveInput.GetType().GetField("actions",flags).GetValue(moveInput);
+var keyboard = UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
+var mouse = UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Mouse>();
+var oldRouting = UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode;
+var oldSimulation = Physics2D.simulationMode;
+System.Action<float> tick = seconds => sim.Invoke(weapon,new object[]{seconds});
+System.Action<TheLostShrine.Input.CombatInputFrame> send = frame => process.Invoke(player,new object[]{frame});
+System.Action neutral = () => send(new TheLostShrine.Input.CombatInputFrame { Active = true });
+System.Action press = () => send(new TheLostShrine.Input.CombatInputFrame { Active = true, ThrowPressed = true, ThrowHeld = true });
+System.Action release = () => send(new TheLostShrine.Input.CombatInputFrame { Active = true, ThrowReleased = true });
+System.Action<Vector2> move = position => { body.position = position; player.transform.position = position; body.linearVelocity = Vector2.zero; Physics2D.SyncTransforms(); };
+System.Action reset = () => {
+    weapon.CancelAction(); stamina.Restore(); dash.ResetAtRest(); reaction.Clear(); neutral();
+    player.GetType().GetField("<AimDirection>k__BackingField",flags).SetValue(player,Vector2.right);
+    player.GetType().GetField("recallUnlocked",flags).SetValue(player,false);
+    move(new Vector2(100,100));
+};
+try {
+    Physics2D.simulationMode = SimulationMode2D.Script;
+    UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode = UnityEngine.InputSystem.InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+    combatMap.devices = new UnityEngine.InputSystem.InputDevice[]{ keyboard, mouse };
+    moveMap.devices = new UnityEngine.InputSystem.InputDevice[]{ keyboard };
+    combatInput.GetType().GetField("focused",flags).SetValue(combatInput,true);
+    moveInput.GetType().GetField("hasFocus",flags).SetValue(moveInput,true);
+    check(player.TryEquip(weapon), "Tutorial prefabs equip without scene dependencies"); reset();
+    press(); tick(10f);
+    check(weapon.CanCancelThrowAim && !weapon.IsAway && near(stamina.Current,100), "Ten-second held aim is free and does not launch");
+    stamina.TrySpend(60); recover.Invoke(stamina,new object[]{1f});
+    check(stamina.Current > 40f, "Aiming permits stamina recovery");
+    check(!weapon.TryLightChop(Vector2.right) && !weapon.TryBeginCharge(), "Aim excludes melee and cleave");
+    release(); float paid = stamina.Current;
+    check(near(paid,20f) && weapon.ThrowCelIndex == 4, "Key-up spends throw cost once and starts release cels");
+    release(); tick(.039f);
+    check(!weapon.IsAway && near(stamina.Current,paid), "Duplicate key-up cannot spend again or launch early");
+    tick(.001f);
+    check(weapon.State == TheLostShrine.Weapons.HatchetState.Flying && weapon.ThrowCelIndex == 5, "Physical launch shares cel-6 marker");
+
+    reset(); send(new TheLostShrine.Input.CombatInputFrame { Active=true, ThrowPressed=true, ThrowReleased=true });
+    tick(.119f); check(!weapon.IsAway && near(stamina.Current,75), "Same-sample down/up preserves quick tap wind-up");
+    tick(.001f); check(weapon.IsAway, "Same-sample tap launches at 120 ms");
+    reset(); weapon.TryThrow(Vector2.right); tick(.5f);
+    check(near(weapon.transform.position.x,103.8f), "Large step advances only post-marker flight distance");
+    reset(); weapon.TryThrow(Vector2.right); for(int i=0;i<25;i++) tick(.02f);
+    check(near(weapon.transform.position.x,103.8f), "Partitioned physics steps match large-step flight");
+
+    reset(); press(); tick(.08f); release(); move(new Vector2(101,100)); weapon.SetAim(Vector2.up); tick(.14f);
+    check(weapon.AttackDirection == Vector2.right && near(weapon.transform.position.x,102) && near(weapon.transform.position.y,100),
+        "Aim locks at key-up; launch origin follows player until marker");
+    reset(); stamina.TrySpend(90); press(); tick(.08f); release(); tick(.5f);
+    check(!weapon.IsThrowing && !weapon.IsAway && near(stamina.Current,10), "Unaffordable release returns to ready without launch");
+
+    reset(); press(); tick(.08f);
+    send(new TheLostShrine.Input.CombatInputFrame { Active=true, ThrowHeld=true, ChargePressed=true, ChargeHeld=true });
+    send(new TheLostShrine.Input.CombatInputFrame { Active=true, ThrowReleased=true, ChargeReleased=true }); tick(.5f);
+    check(!weapon.IsThrowing && weapon.State == TheLostShrine.Weapons.HatchetState.Held && near(stamina.Current,100),
+        "RMB cancels aim and consumes both stale release edges without cleave cost");
+    reset(); press(); stamina.TrySpend(80);
+    check(!dash.TryStart(Vector2.left) && weapon.CanCancelThrowAim, "Unaffordable dash leaves aim intact");
+    stamina.Restore(); check(dash.TryStart(Vector2.left) && !weapon.IsThrowing && near(stamina.Current,75), "Accepted dash cancels aim and pays only dash cost");
+    dash.ResetAtRest(); release(); tick(.5f);
+    check(!weapon.IsAway && near(stamina.Current,75), "Key-up after dash cannot throw");
+    reset(); press(); release(); check(!dash.TryStart(Vector2.left), "Committed release cannot be dash-cancelled");
+
+    reset(); weapon.TryLightChop(Vector2.right); press(); tick(1f); release(); tick(.5f);
+    check(!weapon.IsAway && !weapon.IsThrowing && near(stamina.Current,82), "Rejected E during swing cannot become a queued throw");
+    reset(); weapon.TryBeginCharge(); tick(.3f);
+    send(new TheLostShrine.Input.CombatInputFrame { Active=true, ThrowPressed=true, ThrowHeld=true, ChargeReleased=true });
+    check(weapon.State == TheLostShrine.Weapons.HatchetState.Cleaving, "Rejected E does not swallow ongoing cleave release");
+
+    reset(); press(); tick(.08f); send(default(TheLostShrine.Input.CombatInputFrame)); release(); tick(.5f);
+    check(!weapon.IsAway && !weapon.IsThrowing && near(stamina.Current,100), "Control loss cancels held aim and ignores stale release");
+    reset(); press(); release(); send(default(TheLostShrine.Input.CombatInputFrame)); tick(.5f);
+    check(!weapon.IsAway && near(stamina.Current,75), "Interrupted committed throw retains cost but never spawns");
+    reset(); press(); release(); reaction.GetType().GetField("staggerUntil",flags).SetValue(reaction,Time.time+1f); tick(.5f);
+    check(!weapon.IsAway && !weapon.IsThrowing && near(stamina.Current,75), "Stagger before marker prevents launch even without an Update");
+    reset(); press(); combatInput.enabled=false; tick(.5f); combatInput.enabled=true; neutral(); release();
+    check(!weapon.IsThrowing && !weapon.IsAway, "Disabled input cancels aim before the physics marker");
+    reset(); press(); release(); player.enabled=false; tick(.5f); player.enabled=true; neutral();
+    check(!weapon.IsAway && !weapon.IsThrowing, "Disabled combat controller cannot launch a pending throw");
+    reset(); press(); player.GetType().GetMethod("OnApplicationFocus",flags).Invoke(player,new object[]{false}); tick(.5f); neutral(); release();
+    check(!weapon.IsAway && !weapon.IsThrowing, "Focus loss consumes the outstanding E cycle");
+    reset(); press(); Time.timeScale=0f; tick(.5f); Time.timeScale=1f; neutral(); release();
+    check(!weapon.IsAway && !weapon.IsThrowing, "Pause cannot launch a pending throw");
+
+    reset(); player.UnlockRecall(); weapon.TryThrow(Vector2.right); tick(.22f); press(); tick(.2f);
+    check(weapon.State == TheLostShrine.Weapons.HatchetState.Held, "E press recalls an away weapon during throw recovery");
+    release(); tick(.5f);
+    check(!weapon.IsThrowing && !weapon.IsAway && near(stamina.Current,75), "Holding Recall through catch then key-up never rethrows");
+
+    reset();
+    UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState());
+    UnityEngine.InputSystem.InputSystem.Update(); neutral();
+    UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.E));
+    UnityEngine.InputSystem.InputSystem.Update(); var down=combatInput.Read(); send(down);
+    check(down.ThrowPressed && down.ThrowHeld && !down.ThrowReleased && weapon.CanCancelThrowAim, "Actual E binding reports press and held state");
+    UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.E,UnityEngine.InputSystem.Key.W,UnityEngine.InputSystem.Key.D,UnityEngine.InputSystem.Key.LeftShift));
+    UnityEngine.InputSystem.InputSystem.Update(); moveRead.Invoke(moveInput,null); moveTick.Invoke(movement,null);
+    check(near(body.linearVelocity.magnitude,4.5f*.55f) && body.linearVelocity.x>0 && body.linearVelocity.y>0 && !movement.IsSprinting && near(stamina.Current,100),
+        "Actual WASD moves diagonally at 55% walk while aiming; Shift spends nothing");
+    check(Vector2.Dot(movement.FacingDirection,Vector2.right)>.999f, "Aim facing stays independent of world-relative travel");
+    UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState());
+    UnityEngine.InputSystem.InputSystem.Update(); var up=combatInput.Read(); send(up);
+    check(up.ThrowReleased && !up.ThrowHeld && near(stamina.Current,75), "Actual E key-up commits once");
+
+    reset(); var wall=new GameObject("Throw verification wall"); created.Add(wall); wall.transform.position=new Vector3(100.6f,100,0);
+    wall.AddComponent<BoxCollider2D>().size=new Vector2(.1f,1f); Physics2D.SyncTransforms(); press(); tick(.08f); viewTick.Invoke(view,null);
+    var arc=(LineRenderer)view.GetType().GetField("arc",flags).GetValue(view);
+    // Box2D's contact tolerance can shift the cast by a few millimetres.
+    check(weapon.AimDistance>.35f && weapon.AimDistance<.40f && arc.enabled && arc.positionCount==2 &&
+        near(Vector3.Distance(arc.GetPosition(0),arc.GetPosition(1)),weapon.AimDistance), "Aim guide uses flight radius and stops before nearby wall");
+    release(); tick(.5f);
+    check(weapon.State==TheLostShrine.Weapons.HatchetState.Stuck && weapon.transform.position.x<100.6f, "Delayed launch cannot skip a wall next to the player");
+    wall.SetActive(false); reset();
+    var target=spawn("Assets/Prefabs/Combat/PracticeDummy.prefab"); target.transform.position=new Vector3(103,100,0); target.GetComponent<Rigidbody2D>().position=target.transform.position;
+    var extra=new GameObject("Duplicate collider"); extra.transform.SetParent(target.transform,false); extra.AddComponent<CircleCollider2D>().radius=.2f;
+    var targetHealth=target.GetComponent<TheLostShrine.Combat.Damageable>(); Physics2D.SyncTransforms(); int before=targetHealth.Health;
+    press(); tick(.5f); viewTick.Invoke(view,null);
+    check(targetHealth.Health==before, "Aim preview never damages a target");
+    release(); tick(.5f); tick(.2f);
+    check(targetHealth.Health==before-weapon.Settings.throwDamage && weapon.State==TheLostShrine.Weapons.HatchetState.Stuck,
+        "Throw still hits once with multiple colliders and sticks to its target");
+    move(weapon.transform.position); tick(.02f);
+    check(weapon.State==TheLostShrine.Weapons.HatchetState.Held, "On-foot retrieval still works before Recall unlock");
+    target.SetActive(false); reset(); player.UnlockRecall(); weapon.TryThrow(Vector2.right); tick(.8f); move(new Vector2(90,100)); tick(.02f);
+    check(weapon.State==TheLostShrine.Weapons.HatchetState.Returning, "Distance-based automatic Recall still starts");
+    tick(2f); check(weapon.State==TheLostShrine.Weapons.HatchetState.Held, "Automatic Recall still reaches its owner");
+    reset(); press(); release();
+    player.GetComponent<TheLostShrine.Combat.Damageable>().ReceiveHit(new TheLostShrine.Combat.CombatHit(target,TheLostShrine.Combat.AttackKind.EnemyMelee,1000,Vector2.right,0f,.1f)); tick(.5f);
+    check(!player.enabled && !weapon.IsThrowing && weapon.State==TheLostShrine.Weapons.HatchetState.Held, "Defeat cancels pending launch and restores safe weapon state");
+} finally {
+    Time.timeScale=1f; Physics2D.simulationMode=oldSimulation;
+    foreach(var go in created) if(go!=null) UnityEngine.Object.DestroyImmediate(go);
+    UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard); UnityEngine.InputSystem.InputSystem.RemoveDevice(mouse);
+    UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=oldRouting;
+}
+return string.Join("\n",results.ToArray());
