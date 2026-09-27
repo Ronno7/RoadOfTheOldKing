@@ -1,8 +1,12 @@
 # Systems overview
 
-**Current development status:** [Vertical-slice plan and deferred-work register](VerticalSlice.md). The systems below describe the working PrototypeLoop mechanics unless stated otherwise. `Tutorial.unity` has the approved animated player, follow/zoom camera, world layout, practice dummy and real stump hatchet pickup/carrying. Remaining tutorial interactions, stone awakening, enemy and checkpoint integration are still pending. An active legacy `RecallAltar` overlap-unlock component remains in Tutorial and must be reconciled with the planned awakening. Only PrototypeLoop is enabled for builds.
+[Player animation and previews](PlayerAnimation.md) · [World and tilemaps](World.md)
 
-**Tutorial presentation:** `TutorialPlayer` and `TutorialHatchet` inherit the working gameplay prefabs. Original walking/carrying and idle breathing remain active. Tap/hold E and moving aim are integrated. `RegisteredPlayerAnimation` presents four-direction sprint, dash, opening forehand, stationary throw/aim and catch: 148 registered body cel slots including empty-hand variants/reuse, plus eight shared axe-spin cels. Actual travel drives sprint phase; gameplay owns attack/release/arrival timing. Existing poses cover diagonals, later combo/cleave and moving aim/catch. See the [animation plan](AnimationPlan.md), [milestone gallery](Art/Player/README.md) and [proof timing/ownership contracts](../ArtSource/Player/README.md#timing-and-ownership).
+The Lost Shrine separates input, gameplay state, presentation and persistence into focused components. The systems below describe the working PrototypeLoop mechanics unless stated otherwise.
+
+**Current scope:** PrototypeLoop is the enabled build scene. The newer Tutorial world includes the animated player, camera, hatchet pickup and practice dummy; its complete teaching, enemy and checkpoint progression are still in development. The published browser build predates the newer Tutorial presentation.
+
+**Tutorial animation:** original walking/carrying and idle breathing combine with four-direction sprint, dash, opening forehand, stationary aim/throw and catch. Gameplay controls attack, release and arrival timing; the presenter selects synchronized body/weapon frames. See [player animation](PlayerAnimation.md) for the layer design, frame counts and examples.
 
 1. **World layout and collision.** `PrototypeLoop` (formerly `Tutorial`) uses the imported 16-by-16-pixel tiles for a linear practice route: pickup, dummies, bushes, cracked stone, Recall, return to the dummies, an enemy arena, a bonfire, a Recall puzzle, and a second fire beyond its door. A sample-map prefab supports tile experiments; `MovementPlayground` preserves the earlier movement test area. `PrototypeLoop` is the scene enabled for builds.
 
@@ -16,7 +20,7 @@
 
 4. **Weapon pickup and controls.** `HatchetPickup` detects overlap and equips the weapon through `PlayerCombatController`. One prefab instance serves as the ground pickup, held weapon, and projectile.
 
-   Tutorial uses `TutorialHatchet`, a weapon prefab variant preserving the approved sprite at its source resolution. Its grounded pose sits still in the stump. `PlayerWeaponGrip` maps each of the 16 player sprites to its hand position and carry angle; HatchetView runs afterward (execution order 200 versus player animation 100), keeping the grip under the drawn hand through locomotion. Carrying follows the visible sprite rather than mouse aim. Registered cardinal actions replace the carry grip with matched layers, and flight uses the complete drawn prop. Unfinished actions retain existing presentation. See verification below for carry checks.
+   Tutorial uses `TutorialHatchet`, a weapon prefab variant preserving the approved sprite at its source resolution. Its grounded pose sits still in the stump. `PlayerWeaponGrip` maps each of the 16 player sprites to its hand position and carry angle; HatchetView runs afterward (execution order 200 versus player animation 100), keeping the grip under the drawn hand through locomotion. Carrying follows the visible sprite rather than mouse aim. Registered cardinal actions replace the carry grip with matched layers, and flight uses the complete drawn prop. Unfinished actions retain existing presentation.
 
    `PlayerCombatInput` supplies actions through `ICombatInput`, including E press/held/release edges. The controller converts the cursor into a world-space aim direction, briefly remembers combo clicks, and commands `HatchetWeapon`. Left click chains three chops; holding and releasing right click performs a charged spin. Tap E for a quick throw; hold E to aim and release to throw. While aiming, RMB or an accepted dash cancels. E pressed while the weapon is away recalls it when unlocked; key-up after catching cannot throw it again. Focus/control loss, pause, stagger and death cancel a pending throw. The rejected E/RMB cycles cannot become delayed actions.
 
@@ -24,7 +28,7 @@
 
    Light attacks have a brief wind-up, a fast slash, and a short recovery. Only the slash phase can deal damage. `HatchetHitDetector` handles physics separately. Melee checks reach, angle, and terrain obstruction. Flight checks the full distance traveled each physics step to catch obstacles between positions. Each target takes at most one hit per swing or flight leg. Outward throws stop on impact or at maximum range; returning throws can hit multiple targets.
 
-   `ThrowActionClock` owns preparation, optional aim hold and release/recovery, separate from physical weapon ownership. The existing weapon physics step advances it once. `HatchetSettings.throwAction` contains cel exposures and the launch-cel index; `ThrowCelIndex` is ready for the new sprite presenter. Quick throws launch 120 ms after starting; prepared held throws launch 40 ms after key-up. Direction and the 25 stamina cost commit on valid key-up; the ground-plane origin is read at launch. Interrupted commitments retain the cost without spawning. The first flight step consumes only time after the marker, so a long frame cannot launch twice or skip anticipation.
+   `ThrowActionClock` owns preparation, optional aim hold and release/recovery, separate from physical weapon ownership. The existing weapon physics step advances it once. `HatchetSettings.throwAction` contains cel exposures and the launch-cel index; `ThrowCelIndex` supplies the current frame to the sprite presenter. Quick throws launch 120 ms after starting; prepared held throws launch 40 ms after key-up. Direction and the 25 stamina cost commit on valid key-up; the ground-plane origin is read at launch. Interrupted commitments retain the cost without spawning. The first flight step consumes only time after the marker, so a long frame cannot launch twice or skip anticipation.
 
    Aim permits world-relative movement at 55% walking speed, independently faces the cursor, suppresses sprint without spending sprint stamina and allows stamina recovery. Committed release briefly plants the player, then restores movement through recovery. `PlayerMovement` reads gameplay movement limits for throws and light swings, instead of consulting `PlayerChopAnimation`. The aim guide uses the flight sweep radius and stops at the nearest solid hit without damaging it. All four cardinal stationary throws use matched layers and the real release marker. Existing carry/walk art remains temporary for moving aim; dedicated directional gaits are deferred.
 
@@ -87,7 +91,7 @@
 
     `HatchetUpgrade` assets describe each choice; `HatchetUpgradeTier` groups choices and sets the price. `WeaponUpgradeProgression` owns sequential tier selection, affordability, and permanent exclusions without depending on menus or storage. `CheckpointSession` validates the open bonfire and player before saving the purchase. `BonfireUpgradeMenu` only presents the options. The weapon rebuilds its effective stats from saved selections, and its visuals use those same stats. Shared base settings are never modified, so reloading cannot accidentally stack a bonus twice or change other weapons.
 
-    Add future tiers by creating choice/tier assets and appending them to the session's ordered **Upgrade Tiers** array. Existing stat effects combine across tiers. New behaviors such as curved flight will require their own focused implementation; the purchase and persistence flow can stay the same. Old version-one saves load with zero shards and no upgrades; already solved puzzles grant their reward on restoration, and the sentinel can be defeated again to earn its new reward.
+    Upgrade tiers are data assets, and existing stat effects combine across tiers. New flight behaviors would require additional gameplay code; purchase and persistence are independent of those behaviors. Old version-one saves load with zero shards and no upgrades; already solved puzzles grant their reward on restoration, and the sentinel can be defeated again to earn its new reward.
 
 18. **Heart fragments.** Three optional red heart pickups sit beside the practice area, in the Recall clearing, and near the second bonfire beyond the puzzle door. Walk over them to collect them. Every **3 fragments permanently add 20 maximum HP**, taking the prototype player from 100 to 120. Completing a set also fills the newly added 20 HP; partial sets do not heal. The HUD shows fragments toward the next set and the permanent HP bonus. The first pickup has a short teaching sign.
 
@@ -95,15 +99,7 @@
 
     Pickups stay collected through rest, travel, death, and reload. Rest and respawn fill the increased capacity. New run resets fragments and maximum HP to the original 100. Existing saves need no migration. More sets can use the same prefab and rules with new stable reward IDs; each additional complete set adds another 20 HP.
 
-19. **Tutorial ground art kit.** `Assets/Art/Tiles/Tutorial/Ground` contains 308 native 16x16 visual tiles across seven materials. Stock Unity `RuleTile` assets inspect neighboring cells and choose the correct edge, corner, connector or junction; you paint a material instead of selecting each corner manually. Transparent edge pixels reveal the material on a lower Tilemap. Ground has separate material submaps so overlays remain independent. All visual tiles are non-colliding; a dedicated collision brush and map handle solid boundaries.
-
-    The kit includes automatic and individual-piece palettes, a blank template following the eight-category zone standard, and the shared DemoTutorial presentation. The Python generator owns exact pixel geometry and palette colors. `TutorialGroundKitBuilder` is Editor-only and assembles sliced sprites, Tile/RuleTile assets, palettes and the shared blank template; the game uses ordinary Unity assets with no generation code at runtime. See [the painting guide](../TheLostShrine/Assets/Art/Tiles/Tutorial/Ground/README.md). The original PrototypeLoop art remains in place.
-
-20. **Tutorial terrain art kit.** `Assets/Art/Tiles/Tutorial/Terrain` adds 315 native tiles for riverbanks, water, cliffs, elevation boundaries, low stone walls, stairs and ramps. Six stock `RuleTile` brushes select connected shapes; three stock `AnimatedTile` assets animate ripples and waterfalls. Five materials have all 47 valid corner/edge combinations, and walls cover all 16 cardinal connections. Taller cliff faces and steps use repeatable manual pieces.
-
-    The combined Ground/Terrain template preserves the eight categories, with separate maps for different terrain brushes. Visual tiles never generate collision. The hidden Collision map blocks water, walls and drops while stairways and gates stay clear. Height is visual; this kit does not add jumping or swimming mechanics. DemoTutorial demonstrates those arrangements without changing PrototypeLoop. Shared `TileKitAssets` helpers handle import and palette registration for both Editor builders, while the production generator owns pixel geometry and approved palette colors. See [the terrain painting guide](../TheLostShrine/Assets/Art/Tiles/Tutorial/Terrain/README.md).
-
-21. **Tutorial paths.** `Assets/Art/Tiles/Tutorial/Paths` adds broad dirt lanes and narrow footpaths, each with all 47 connection shapes plus three center variations. One palette exposes these brushes and the existing Ground cobbles for paving. The shared zone template separates Footpath, DirtLane and Paving maps, allowing clean overlaps at trail junctions and stone thresholds. Paths are non-colliding visual tiles; the existing Collision map controls access. DemoTutorial shows all three route styles. No extra scenes, duplicate paving assets, runtime scripts or layer-specific templates are added. See [the Paths guide](../TheLostShrine/Assets/Art/Tiles/Tutorial/Paths/README.md).
+19. **Tilemap world.** Tutorial uses native 16 x 16 tiles with separate visual and collision layers. Unity RuleTiles choose edges and corners from neighboring cells; AnimatedTiles handle four-frame ripples and waterfalls. Static object prefabs separate ground-level art, overhead portions and solid footprints. Python generators and Unity Editor builders produce ordinary Unity assets, with no generation code in the running game. See [world and tilemaps](World.md) for connection shapes, rendering layers and previews.
 
 The design follows SOLID principles through focused responsibilities, small interfaces, and events. Interfaces define what a component provides or accepts. Events let health notify reaction and feedback components when damage occurs. For example, adding another object that implements `IHitReceiver` does not require changing player controls.
 
@@ -117,36 +113,19 @@ flowchart LR
     D --> G[Weapon visuals]
 ```
 
-Common settings are located here, relative to `TheLostShrine/`:
+## Key implementation files
 
-| Setting | Location |
+| Responsibility | Source |
 | --- | --- |
-| Walking/sprint speeds and sprint cost | `PlayerMovement` on `Assets/Prefabs/Player/Player.prefab` |
-| Stamina maximum, regeneration, and delay | `PlayerStamina` on `Assets/Prefabs/Player/Player.prefab` |
-| Dash distance, duration, cost, cooldown, and dodge window | `PlayerDash` on `Assets/Prefabs/Player/Player.prefab` |
-| Camera smoothing and zoom limits | `Assets/Prefabs/Cameras/FollowCamera.prefab` |
-| Attack costs, timing, damage, reach, flight speed, and automatic Recall distance | `Assets/Settings/Weapons/HatchetSettings.asset` |
-| Tutorial chop timing and reach | `Assets/Settings/Weapons/TutorialHatchetSettings.asset`; action cels and fist anchors on TutorialPlayer's `PlayerChopAnimation` |
-| Weapon appearance | `Model` child of `Assets/Prefabs/Weapons/Hatchet.prefab` |
-| Upgrade descriptions, effects, and first-tier cost | `Assets/Settings/Weapons/Upgrades/` |
-| Tier order | **Upgrade Tiers** on `Checkpoint Session` |
-| Shard IDs and reward sources | `Sun Shards and Upgrades` in PrototypeLoop; `Assets/Prefabs/World/SunShard.prefab` |
-| Heart pickup locations and IDs | `Heart Fragments` in PrototypeLoop; `Assets/Prefabs/World/HeartFragment.prefab` |
-| Fragments per set and health per set | `HeartFragmentProgression.FragmentsPerHeart` and `HealthPerHeart` |
-| Terrain and barriers | PrototypeLoop's Tilemaps and `World/Boundaries` |
-| Dummy health | `Damageable` on prefabs in `Assets/Prefabs/Combat/` |
-| Player health and damage immunity | `Damageable` and `PlayerHealth` on `Assets/Prefabs/Player/Player.prefab` |
-| Enemy health, detection, and attack timing | `Assets/Prefabs/Combat/MeleeSentinel.prefab` |
-| Teaching sequence and gates | `Prototype Loop HUD` and `Prototype Route` in the scene |
-| Fire appearance and interaction radius | `Assets/Prefabs/World/Bonfire.prefab` |
-| Fire IDs and respawn positions | Each Bonfire instance under `Bonfires and Recall Puzzle` |
-| Puzzle targets, floor marks, and door | `Assets/Prefabs/World/ThrowRecallPuzzle.prefab` |
-| Local save slot | `Checkpoint Session` in the scene; default key `TheLostShrine.PrototypeLoop.Save.v1` |
+| Movement, sprint and velocity ownership | [PlayerMovement](../TheLostShrine/Assets/Scripts/Player/PlayerMovement.cs) |
+| Weapon action state and ownership | [HatchetWeapon](../TheLostShrine/Assets/Scripts/Weapons/HatchetWeapon.cs) |
+| Aim, release and throw timing | [ThrowActionClock](../TheLostShrine/Assets/Scripts/Weapons/ThrowActionClock.cs) |
+| Synchronized animation presentation | [RegisteredPlayerAnimation](../TheLostShrine/Assets/Scripts/Player/RegisteredPlayerAnimation.cs) |
+| Checkpoints and persistent progress | [CheckpointSession](../TheLostShrine/Assets/Scripts/Progression/CheckpointSession.cs) |
+| Upgrade selection and exclusions | [WeaponUpgradeProgression](../TheLostShrine/Assets/Scripts/Progression/WeaponUpgradeProgression.cs) |
 
 ## Verification
 
-Current snippets are grouped by Gameplay, Player and World in the [verification index](../Tools/Verification/README.md); native recordings are separate in [Tools/Capture](../Tools/Capture/README.md). Read each header for scene/mode and save-isolation requirements, then run only the suites affected by a change.
+Focused checks cover combat, stamina and dodge; throw input and release timing; Recall and catch ownership; sprite registration; progression and save restoration; and tile connections, collision separation and route clearance.
 
-Existing coverage includes combat/stamina/dodge, throw input and timing, Recall ownership, registered imports and presentation, original locomotion/carrying, progression/save/rewards, tile kits and route clearance. Earlier obsolete first-chop/early-combo presentation assertions and one-shot setup scripts were removed; the changelog retains their historical milestones.
-
-The latest west catch integration recorded 189 passing checks. Earlier kit/prototype counts describe their original runs, not a current full-suite result. The browser build predates the production Tutorial; only PrototypeLoop is currently enabled for builds.
+The [verification source](../Tools/Verification) contains Unity Editor-executed C# snippets grouped by Gameplay, Player and World. These are focused integration fixtures rather than an automatically discovered continuous-integration suite. Preview recordings demonstrate presentation; they do not establish completion of Tutorial progression.

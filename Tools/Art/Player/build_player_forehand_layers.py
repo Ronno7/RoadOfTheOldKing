@@ -72,7 +72,7 @@ def main():
         normalize_layers(sheets)
         paths = {}
         for key, sheet in sheets.items():
-            path = (REVIEW if key == "Master" else OUTPUT) / f"Forehand-{name.title()}-{key}.png"
+            path = (REVIEW if key in ("Master", "Reveal") else OUTPUT) / f"Forehand-{name.title()}-{key}.png"
             sheet.save(path)
             paths[key.lower()] = path.relative_to(ROOT).as_posix()
         if ImageChops.difference(Image.alpha_composite(sheets["Body"], sheets["Weapon"]), sheets["Master"]).getbbox(alpha_only=False):

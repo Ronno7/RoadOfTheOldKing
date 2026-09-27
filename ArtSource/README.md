@@ -1,8 +1,8 @@
 # Art source files
 
-Editable/rebuild inputs live here, outside Unity's imported runtime assets.
+Source artwork and reconstruction inputs are kept outside Unity's imported runtime assets.
 
-- [Player](Player/README.md): accepted drawings, masks, registration outputs and source provenance.
-- [Tutorial](Tutorial/README.md): environment/decoration sheets consumed by Unity builders.
+- [Player](Player/README.md): character drawings, weapon masks, hidden-body patches and registered masters.
+- [Tutorial](Tutorial/README.md): environment and decoration source sheets.
 
-Runtime assets remain in `TheLostShrine/Assets/Art`. Current visual references and milestone GIFs live under `Docs/Art`; exporters and capture tools live under `Tools`. Remove superseded studies once active recipes no longer depend on them.
+Runtime sprites and tile assets live under `TheLostShrine/Assets/Art`. [Player animation](../Docs/PlayerAnimation.md) and [world presentation](../Docs/World.md) explain how the assets are used.

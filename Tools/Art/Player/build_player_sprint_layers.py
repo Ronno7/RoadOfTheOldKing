@@ -25,7 +25,7 @@ def build_mirrored_view(name, view, config):
         raise ValueError('Exact cell reflection requires a centered horizontal foot pivot')
     sheets = {}
     for key in ('Body','Weapon','Reveal','Master','Unarmed'):
-        folder = REVIEW if key == 'Master' else OUTPUT
+        folder = REVIEW if key in ("Master", "Reveal") else OUTPUT
         source = Image.open(folder/f'Sprint-{source_name}-{key}.png').convert('RGBA')
         if source.size != (size*4,size*2):
             raise ValueError('Expected eight registered sprint cels')
@@ -44,7 +44,7 @@ def build_mirrored_view(name, view, config):
     if ImageChops.difference(Image.alpha_composite(sheets['Body'],sheets['Weapon']),sheets['Master']).getbbox(alpha_only=False):
         raise AssertionError('Mirrored body/weapon layers do not reconstruct the drawing')
     for key,sheet in sheets.items():
-        sheet.save((REVIEW if key == 'Master' else OUTPUT)/f'Sprint-{name}-{key}.png')
+        sheet.save((REVIEW if key in ("Master", "Reveal") else OUTPUT)/f'Sprint-{name}-{key}.png')
     print(f'{name}: eight exact mirrored {source_name} cels per track; no resampling, color changes or phase reordering.')
 
 
@@ -144,7 +144,7 @@ def build_view(name, view, config):
         raise AssertionError("Registered sprint layers do not reconstruct the drawing")
     OUTPUT.mkdir(parents=True,exist_ok=True)
     for key,sheet in sheets.items():
-        sheet.save((REVIEW if key=="Master" else OUTPUT)/f"Sprint-{name}-{key}.png")
+        sheet.save((REVIEW if key in ("Master", "Reveal") else OUTPUT)/f"Sprint-{name}-{key}.png")
     if "unarmedRecipe" in view:
         from build_player_unarmed_layers import build_unarmed_view
         build_unarmed_view(name, sheets['Body'], view['unarmedRecipe'], config, OUTPUT)

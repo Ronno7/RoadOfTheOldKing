@@ -1,9 +1,12 @@
-# Development tools
+# Development tooling
 
-| Folder | Purpose |
+These tools support asset generation, gameplay captures and focused verification. They are not required by the running game.
+
+| Directory | Responsibility |
 | --- | --- |
-| [Art](Art/README.md) | Rebuild accepted player art and world tile kits |
-| [Capture](Capture/README.md) | Record current Unity gameplay and package milestone GIFs |
-| [Verification](Verification/README.md) | Focused checks for gameplay, player presentation and world assets |
+| [Art/Player](Art/Player) | Sprite registration, complementary body/weapon layers and comparison images |
+| [Art/World](Art/World) | Native tile geometry, atlas generation and manifests |
+| [Capture](Capture) | Unity capture fixtures and animation-preview packaging |
+| [Verification](Verification) | Gameplay, animation, progression and world-asset checks |
 
-Run only the tools relevant to a change. Existing assets are ready to use; opening or playing the project requires none of these scripts. Disposable outputs belong in ignored `tmp/` or Unity `Captures/`, never alongside accepted sources.
+The implementation is described in the [systems overview](../Docs/SystemsOverview.md), [player animation](../Docs/PlayerAnimation.md) and [world documentation](../Docs/World.md).

@@ -23,8 +23,6 @@ namespace TheLostShrine.Player
             [Tooltip("Optional whole-body poses when no weapon is held; shares the same cel phase and pivot.")]
             public Sprite[] unarmedBody = Array.Empty<Sprite>();
             public Sprite[] weapon = Array.Empty<Sprite>();
-            [Tooltip("Hidden-body patches, shown only in the body-only inspection pass.")]
-            public Sprite[] reveal = Array.Empty<Sprite>();
         }
 
         public View[] views = Array.Empty<View>();
@@ -95,12 +93,12 @@ namespace TheLostShrine.Player
             { error = "Invalid contact/recovery cel markers."; return false; }
             foreach (var view in views)
             {
-                if (view == null || view.body == null || view.weapon == null || view.reveal == null ||
-                    view.body.Length != celCount || view.weapon.Length != celCount || view.reveal.Length != celCount)
+                if (view == null || view.body == null || view.weapon == null ||
+                    view.body.Length != celCount || view.weapon.Length != celCount)
                 { error = "Each view needs synchronized cels on every layer."; return false; }
                 if (view.unarmedBody != null && view.unarmedBody.Length != 0 && view.unarmedBody.Length != celCount)
                 { error = "An unarmed variant must cover the complete cel track."; return false; }
-                foreach (var layer in new[] { view.body, view.weapon, view.reveal, view.unarmedBody ?? Array.Empty<Sprite>() })
+                foreach (var layer in new[] { view.body, view.weapon, view.unarmedBody ?? Array.Empty<Sprite>() })
                     foreach (var sprite in layer)
                         if (sprite == null || sprite.rect.size != Vector2.one * CanvasSize ||
                             sprite.pixelsPerUnit != PixelsPerUnit ||
