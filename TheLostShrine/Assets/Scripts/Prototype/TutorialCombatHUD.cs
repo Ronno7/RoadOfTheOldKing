@@ -112,10 +112,12 @@ namespace TheLostShrine.Prototype
             }
 
             string controls = "WASD / arrows: move   |   Shift: sprint   |   Mouse: aim   |   Scroll: zoom\n" +
-                "LMB: slash   |   Hold / release RMB: cleave   |   E: throw" +
-                (player.CanRecall ? " / recall" : " (retrieve on foot)") + "\nSpace: dash / dodge   |   F: rest / travel   |   Esc: leave fire menu";
-            GUI.Box(new Rect(12f, screenHeight - 86f, Mathf.Min(660f, screenWidth - 24f), 74f), GUIContent.none);
-            GUI.Label(new Rect(24f, screenHeight - 80f, Mathf.Min(638f, screenWidth - 48f), 70f), controls, text);
+                "LMB: slash   |   Hold / release RMB: cleave   |   Space: dash / dodge\n" +
+                "Tap E: throw   |   Hold E: aim; release: throw; RMB: cancel" +
+                (player.CanRecall ? "   |   E while away: recall" : "\nRetrieve thrown axe on foot") +
+                "\nF: rest / travel   |   Esc: leave fire menu";
+            GUI.Box(new Rect(12f, screenHeight - 128f, Mathf.Min(760f, screenWidth - 24f), 116f), GUIContent.none);
+            GUI.Label(new Rect(24f, screenHeight - 122f, Mathf.Min(738f, screenWidth - 48f), 110f), controls, text);
 
             if (bonfireInteraction != null && !bonfireInteraction.IsOpen && bonfireInteraction.Nearby != null)
                 GUI.Label(new Rect(24f, 235f, width - 24f, 28f), "F - Rest at " + bonfireInteraction.Nearby.DisplayName, title);

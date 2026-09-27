@@ -24,7 +24,14 @@ namespace TheLostShrine.Weapons
         private float addedLightArc;
         private float addedCleaveRadius;
         private float impactPauseRemaining;
+        private readonly ThrowActionClock throwAction = new ThrowActionClock();
         public event System.Action<CombatHit> HitConfirmed;
+        // Successful Recall arrival only; cancellation, equip and ground pickup do not catch.
+        public event System.Action ReturnedToHand;
+        // Presentation samples actual transit time, including steps that cross release.
+        public float FlightSeconds { get; private set; }
+        public uint FlightSequence { get; private set; }
+        public Vector2 ReturnApproachDirection { get; private set; }
         public bool IsImpactPaused => impactPauseRemaining > 0f;
 
         // Pause only this action clock. Enemies, camera, UI and world time keep running.
@@ -47,7 +54,18 @@ namespace TheLostShrine.Weapons
         public float LightArc => Mathf.Clamp(settings.lightArc + addedLightArc, 20f, 180f);
         public float CleaveRadius => settings.cleaveRadius + addedCleaveRadius;
         public bool IsAway => State == HatchetState.Flying || State == HatchetState.Stuck || State == HatchetState.Returning;
-        public bool IsAttacking => State == HatchetState.LightChop || State == HatchetState.Charging || State == HatchetState.Cleaving;
+        public bool IsAttacking => throwAction.IsActive || State == HatchetState.LightChop || State == HatchetState.Charging || State == HatchetState.Cleaving;
+        public ThrowPhase ThrowPhase => throwAction.Phase;
+        public int ThrowCelIndex => throwAction.CelIndex;
+        public bool IsThrowing => throwAction.IsActive;
+        public bool CanCancelThrowAim => throwAction.CanCancelAim;
+        public bool ControlsMovement => IsThrowing || State == HatchetState.LightChop;
+        public Vector2 ActionFacing => CanCancelThrowAim ? AimDirection : attackDirection;
+        public float AimDistance => hits == null || owner == null ? 0f : hits.PreviewFlightDistance(
+            owner.transform.position, AimDirection, settings.throwRange, settings.flightRadius);
+        public float ActionMovementScale => IsThrowing ? throwAction.MovementScale
+            : State == HatchetState.LightChop ? Mathf.SmoothStep(0f, 1f,
+                Mathf.InverseLerp(ComboIndex == 2 ? 0.84f : 0.78f, 1f, AttackProgress)) : 1f;
         public float Charge01 => State == HatchetState.Charging
             ? Mathf.Clamp01(elapsed / settings.fullCharge) : State == HatchetState.Cleaving ? cleaveStrength : 0f;
         public float AttackProgress => Mathf.Clamp01(elapsed / (State == HatchetState.Cleaving
@@ -99,7 +117,7 @@ namespace TheLostShrine.Weapons
 
         public bool TryLightChop(Vector2 direction)
         {
-            if (!isActiveAndEnabled || State != HatchetState.Held || !owner.CanStartAttack)
+            if (!isActiveAndEnabled || State != HatchetState.Held || IsThrowing || !owner.CanStartAttack)
                 return false;
             int nextComboIndex = comboRemaining > 0f ? (ComboIndex + 1) % 3 : 0;
             if (!owner.Stamina.TrySpend(nextComboIndex == 2 ? settings.finisherStaminaCost : settings.lightStaminaCost))
@@ -114,7 +132,7 @@ namespace TheLostShrine.Weapons
 
         public bool TryBeginCharge()
         {
-            if (!isActiveAndEnabled || State != HatchetState.Held || !owner.CanStartAttack)
+            if (!isActiveAndEnabled || State != HatchetState.Held || IsThrowing || !owner.CanStartAttack)
                 return false;
             // Pay once on commitment. Holding or cancelling cannot generate a free cleave.
             if (!owner.Stamina.TrySpend(settings.cleaveStaminaCost))
@@ -150,6 +168,7 @@ namespace TheLostShrine.Weapons
         // Death cancels damage in progress, including a thrown or returning hatchet.
         public void CancelAction()
         {
+            throwAction.Cancel();
             if (owner == null)
                 return;
             stuckTarget = null;
@@ -160,19 +179,46 @@ namespace TheLostShrine.Weapons
 
         public bool TryThrow(Vector2 direction)
         {
-            if (!isActiveAndEnabled || State != HatchetState.Held || !owner.CanStartAttack)
-                return false;
-            if (!owner.Stamina.TrySpend(settings.throwStaminaCost))
+            return TryBeginThrow(direction) && TryReleaseThrow(direction);
+        }
+
+        public bool TryBeginThrow(Vector2 direction)
+        {
+            if (!isActiveAndEnabled || State != HatchetState.Held || owner == null || !owner.CanStartAttack ||
+                !throwAction.Begin(settings.throwAction))
                 return false;
             SetAim(direction);
+            comboRemaining = 0f;
+            return true;
+        }
+
+        public bool TryReleaseThrow(Vector2 direction)
+        {
+            if (!isActiveAndEnabled || !CanCancelThrowAim || !owner.CanStartAttack) return false;
+            if (!owner.Stamina.TrySpend(settings.throwStaminaCost))
+            {
+                CancelThrow();
+                return false;
+            }
+            SetAim(direction);
             attackDirection = AimDirection;
+            return throwAction.Commit();
+        }
+
+        // Cancelling after launch ends recovery but does not teleport the flying weapon home.
+        public void CancelThrow() => throwAction.Cancel();
+
+        private void LaunchThrow()
+        {
             // Start at the player center so a nearby wall cannot be skipped.
+            // Future hand sprites supply a visual offset, never an unchecked physics origin.
             transform.position = owner.transform.position;
             travelled = 0f;
+            FlightSeconds = 0f;
+            FlightSequence++;
             comboRemaining = 0f;
             hits.BeginAttack();
             SetState(HatchetState.Flying);
-            return true;
         }
 
         public bool TryRecall()
@@ -182,6 +228,7 @@ namespace TheLostShrine.Weapons
                 return false;
             stuckTarget = null;
             hits.BeginAttack(); // A target can be hit once outbound and once on return.
+            ReturnApproachDirection = ((Vector2)(transform.position - owner.transform.position)).normalized;
             SetState(HatchetState.Returning);
             return true;
         }
@@ -191,15 +238,21 @@ namespace TheLostShrine.Weapons
         // One state machine controls action exclusivity and flight lifecycle.
         private void Simulate(float deltaTime)
         {
-            if (deltaTime <= 0f || State == HatchetState.OnGround)
+            if (deltaTime <= 0f || float.IsNaN(deltaTime) || float.IsInfinity(deltaTime) || State == HatchetState.OnGround)
                 return;
             if (owner == null)
             {
+                throwAction.Cancel();
                 SetState(HatchetState.OnGround);
                 if (pickupCollider != null)
                     pickupCollider.enabled = true;
                 return;
             }
+
+            if (IsThrowing && !owner.CanContinueAction) CancelThrow();
+            bool wasThrowing = IsThrowing;
+            bool committedThrow = wasThrowing && !CanCancelThrowAim;
+            if (throwAction.Advance(deltaTime, out float flightSeconds)) LaunchThrow();
 
             if (impactPauseRemaining > 0f)
             {
@@ -210,7 +263,7 @@ namespace TheLostShrine.Weapons
                 if (deltaTime <= 0f) return;
             }
             float previousElapsed = elapsed;
-            if (IsAttacking)
+            if (committedThrow || State == HatchetState.LightChop || State == HatchetState.Charging || State == HatchetState.Cleaving)
                 owner.Stamina.DelayRecovery();
             elapsed += deltaTime;
             switch (State)
@@ -249,7 +302,8 @@ namespace TheLostShrine.Weapons
                         SetState(HatchetState.Held);
                     break;
                 case HatchetState.Flying:
-                    FlyOut(deltaTime);
+                    if (!wasThrowing || flightSeconds > 0f)
+                        FlyOut(wasThrowing ? flightSeconds : deltaTime);
                     break;
                 case HatchetState.Stuck:
                     if (stuckTarget != null && stuckTarget.gameObject.activeInHierarchy)
@@ -280,6 +334,7 @@ namespace TheLostShrine.Weapons
             var hit = new CombatHit(owner.gameObject, AttackKind.Throw, settings.throwDamage, attackDirection, 1f, 0.15f);
             if (hits.Flight(origin, destination, settings.flightRadius, hit, true, out RaycastHit2D impact))
             {
+                FlightSeconds += impact.distance / settings.throwSpeed;
                 transform.position = origin + attackDirection * impact.distance;
                 stuckTarget = impact.collider != null && impact.collider.gameObject.activeInHierarchy
                     ? impact.collider.transform : null;
@@ -289,6 +344,7 @@ namespace TheLostShrine.Weapons
                 return;
             }
             transform.position = destination;
+            FlightSeconds += distance / settings.throwSpeed;
             travelled += distance;
             if (travelled >= settings.throwRange - 0.001f)
             {
@@ -301,13 +357,19 @@ namespace TheLostShrine.Weapons
         {
             Vector2 origin = transform.position;
             Vector2 destination = Vector2.MoveTowards(origin, owner.transform.position, settings.recallSpeed * deltaTime);
+            if (Vector2.Distance(origin, owner.transform.position) > 0.001f)
+                ReturnApproachDirection = (origin - (Vector2)owner.transform.position).normalized;
+            FlightSeconds += Vector2.Distance(origin, destination) / settings.recallSpeed;
             Vector2 direction = (destination - origin).normalized;
             hits.Flight(origin, destination, settings.flightRadius,
                 new CombatHit(owner.gameObject, AttackKind.Recall, settings.recallDamage, direction, 1.5f, 0.2f), false, out _);
             transform.position = destination;
             // Return ignores solid terrain so the owned hatchet cannot get stranded.
             if (Vector2.Distance(destination, owner.transform.position) <= 0.1f)
+            {
                 SetState(HatchetState.Held);
+                ReturnedToHand?.Invoke();
+            }
         }
 
         private void SetState(HatchetState state)
@@ -317,6 +379,10 @@ namespace TheLostShrine.Weapons
             impactPauseRemaining = 0f;
         }
 
-        private void OnDisable() => CancelCharge();
+        private void OnDisable()
+        {
+            CancelCharge();
+            CancelThrow();
+        }
     }
 }

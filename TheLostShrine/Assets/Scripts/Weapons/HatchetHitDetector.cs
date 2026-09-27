@@ -25,6 +25,15 @@ namespace TheLostShrine.Weapons
 
         public void BeginAttack() => hitTargets.Clear();
 
+        // The aim guide uses the same swept radius and exclusions as flight, without hits.
+        public float PreviewFlightDistance(Vector2 origin, Vector2 direction, float distance, float radius)
+        {
+            Physics2D.CircleCast(origin, radius, direction, filter, casts, distance);
+            foreach (var cast in casts)
+                if (IsCandidate(cast.collider)) distance = Mathf.Min(distance, cast.distance);
+            return distance;
+        }
+
         private bool IsCandidate(Collider2D collider) => collider != null &&
             !collider.transform.IsChildOf(owner) && !collider.transform.IsChildOf(weapon);
 

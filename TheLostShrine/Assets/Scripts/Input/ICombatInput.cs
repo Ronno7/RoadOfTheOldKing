@@ -10,6 +10,8 @@ namespace TheLostShrine.Input
         public bool ChargeHeld;
         public bool ChargeReleased;
         public bool ThrowPressed;
+        public bool ThrowHeld;
+        public bool ThrowReleased;
         public Vector2 PointerPosition;
     }
 

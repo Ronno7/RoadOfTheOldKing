@@ -1,27 +1,14 @@
 # Art build tools
 
-Keep these three scripts: they are the source generators for the current Ground, Terrain and Paths kits. The Unity project already contains their generated assets, so opening, painting or playing the game does not require running Python.
+Python exporters require Python 3 with Pillow and run from the repository root. Normal playing/painting uses the generated Unity assets and does not run these tools.
 
-| Script | Produces |
+| Folder | What it maintains |
 | --- | --- |
-| [build_tutorial_ground.py](build_tutorial_ground.py) | Ground textures and connected material shapes |
-| [build_tutorial_terrain.py](build_tutorial_terrain.py) | Water/banks, ledges, walls, stairs and water-animation pixels |
-| [build_tutorial_paths.py](build_tutorial_paths.py) | Connected dirt lanes and footpaths |
+| [Player](Player) | Accepted drawing registration, synchronized body/axe/reveal layers, sprint variants, prop views and current comparison boards |
+| [World](World) | Native Ground, Terrain and Paths pixel geometry, manifests and atlas previews |
 
-Each writes a native PNG atlas, tile manifest/index and generation report into its existing Unity art folder, plus a contact sheet in [Docs/Art/Tutorial/Previews](../../Docs/Art/Tutorial/Previews/tutorial-ground-production-atlas.png). Terrain and Paths import shared palette/connection helpers from the Ground script.
+Player recipes and shared helper modules stay together. Follow the [player rebuild guide](../../ArtSource/Player/README.md#rebuild-and-verification); rebuild only the affected family, then its Unity importer.
 
-## When to use them
+World generators are `build_tutorial_ground.py`, `build_tutorial_terrain.py` and `build_tutorial_paths.py`. Example: `python Tools/Art/World/build_tutorial_terrain.py`. For a complete rebuild use Ground → Terrain → Paths, followed by the corresponding **Tools → The Lost Shrine → Build Tutorial … Kit** menus. Builders import/slice/register assets; they do not repaint scenes.
 
-Run a generator when changing or reconstructing the pixel geometry for its kit. It overwrites that kit's generated art and metadata, so review the resulting diff before accepting changes. Ordinary level painting uses the existing Unity palettes.
-
-From the repository root, using Python 3 with Pillow installed:
-
-```powershell
-python Tools/Art/build_tutorial_ground.py
-python Tools/Art/build_tutorial_terrain.py
-python Tools/Art/build_tutorial_paths.py
-```
-
-Run only the affected generator, then its matching **Tools > The Lost Shrine > Build Tutorial Ground/Terrain/Paths Kit** command in Unity. For a complete rebuild, use Ground first, then Terrain, then Paths. The Unity builders import/slice the output and update tiles, RuleTiles, palettes and the shared blank template. They do not repaint scenes.
-
-Environment and Decoration follow a different source path: their Unity Editor builders read the approved/generated images in [Docs/Art/Tutorial/Sources](../../Docs/Art/README.md), then prepare the native atlases. All of these are authoring tools, excluded from runtime gameplay.
+Environment/Decoration use the Unity Editor builders directly with [ArtSource/Tutorial](../../ArtSource/Tutorial/README.md). Accepted palette guides remain in [Docs/Art/Palettes](../../Docs/Art/Palettes/OpeningZonePalettes-v1.md). Exporters overwrite generated files, so inspect the resulting diff and run affected checks before accepting changes.

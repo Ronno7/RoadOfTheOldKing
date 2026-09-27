@@ -1,0 +1,36 @@
+// Edit Mode: inspect imported art, settings and the actual release clock. No scene mutations.
+var results = new System.Collections.Generic.List<string>();
+System.Action<bool,string> check = (ok,name) => results.Add((ok ? "PASS " : "FAIL ") + name);
+var asset = AssetDatabase.LoadAssetAtPath<TheLostShrine.Player.RegisteredActionSprites>(TheLostShrine.Editor.RegisteredSpriteProofBuilder.ThrowAssetPath);
+string error;
+check(asset != null && asset.IsRegistered(out error), "All 96 sprites have full 640px cells, 128 PPU and the common foot pivot");
+check(asset.views.Length == 4 && asset.views[0].direction == Vector2.right && asset.views[1].direction == Vector2.up && asset.views[2].direction == Vector2.down && asset.views[3].direction == Vector2.left,
+    "All four cardinal views have explicit flight directions");
+foreach (var view in asset.views)
+    foreach (var layer in new[] { view.body, view.weapon, view.reveal }) {
+        var path = AssetDatabase.GetAssetPath(layer[0]);
+        var importer = AssetImporter.GetAtPath(path) as TextureImporter;
+        var texture = layer[0].texture;
+        check(texture.width == 2560 && texture.height == 1280 && importer.spriteImportMode == SpriteImportMode.Multiple &&
+            importer.filterMode == FilterMode.Point && !importer.mipmapEnabled &&
+            importer.textureCompression == TextureImporterCompression.Uncompressed && importer.npotScale == TextureImporterNPOTScale.None,
+            "Atlas resolution, slices and pixel filtering: " + texture.name);
+        check(layer[0].rect.position == new Vector2(0,640) && layer[4].rect.position == Vector2.zero &&
+            layer[7].rect.position == new Vector2(1920,0), "Top row first, no vertical flip: " + texture.name);
+    }
+var settings = AssetDatabase.LoadAssetAtPath<TheLostShrine.Weapons.HatchetSettings>("Assets/Settings/Weapons/TutorialHatchetSettings.asset");
+var timing = settings.throwAction;
+int launchCel = timing.preparation.Length + timing.aim.Length + timing.launchCel;
+check(timing.preparation.Length == 2 && timing.aim.Length == 2 && timing.release.Length == 4 && launchCel == 5,
+    "Live timing matches eight-cel artwork; cel 6 contains the detached axe");
+var clock = new TheLostShrine.Weapons.ThrowActionClock(); float flight;
+clock.Begin(timing); clock.Commit();
+check(!clock.Advance(.119f, out flight) && clock.CelIndex == 4, "Last held drive remains visible before release");
+check(clock.Advance(.001f, out flight) && clock.CelIndex == launchCel && flight < .00001f,
+    "At the marker, the complete release axe starts at its authored position without a forward jump");
+check(!clock.Advance(.01f, out flight) && Mathf.Abs(flight - .01f) < .00001f, "Detached motion advances only after release");
+clock.Cancel(); clock.Begin(timing); clock.Advance(1f, out flight);
+check(clock.CanCancelAim && !clock.HasLaunched && clock.CelIndex >= 2 && clock.CelIndex <= 3, "Aim loops in its two registered cels");
+clock.Commit();
+check(clock.Advance(.04f, out flight) && clock.CelIndex == launchCel, "Held release uses the same handoff drawing");
+return string.Join("\n", results.ToArray());

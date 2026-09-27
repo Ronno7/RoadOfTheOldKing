@@ -4,7 +4,7 @@ Direction: the boy's home village feels quaint, cozy and lived in, with a Shire-
 
 ## Current state
 
-Tutorial includes the [animated player and separate hatchet](../Player/README.md), idle breathing, follow/zoom camera and working stump pickup. Combat presentation and the remaining lesson interactions are next.
+Tutorial includes the [animated player and separate hatchet](../Player/README.md), idle breathing, follow/zoom camera and working stump pickup. Cardinal sprint, dash, opening strike, stationary throw/aim and catch are integrated. Current player art is accepted; future animation is incremental. Lesson interactions follow the [development plan](../../VerticalSlice.md); it also records the legacy overlap Recall altar that must be reconciled with the stone awakening.
 
 Ground, Terrain and Paths establish the simple, restrained visual style for Environment and Decoration.
 

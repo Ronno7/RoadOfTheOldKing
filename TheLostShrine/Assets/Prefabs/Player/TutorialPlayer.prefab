@@ -105,6 +105,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1001, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5681167356592790295}
+    - targetCorrespondingSourceObject: {fileID: 1001, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5525331860928623697}
     - targetCorrespondingSourceObject: {fileID: 1007, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2914356251290594518}
@@ -129,10 +132,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 342195b4b3fde5f418e7cd4775efd74c, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerLocomotionAnimation
   animator: {fileID: 2914356251290594518}
   strideLength: 2.25
+  sprintStrideLength: 3.2
   idleBreathAmount: 0.012
   idleBreathPeriod: 3.2
   idleSettleTime: 0.35
@@ -146,7 +150,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 36dac95313f2eca4b964f6106036ed79, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerWeaponGrip
   body: {fileID: 6701922493289245536}
   frames:
@@ -224,25 +228,297 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b082398a00905bc4892fb2dc8be4071c, type: 3}
-  m_Name: 
+  m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerChopAnimation
   body: {fileID: 6701922493289245536}
-  poses:
-  - sprite: {fileID: 917630724, guid: 9c091fdb001001d4fa5239ba4c01da04, type: 3}
-    grip: {x: -0.53515625, y: 1.2382812}
-    angle: 35
-  - sprite: {fileID: -1643943539, guid: 9c091fdb001001d4fa5239ba4c01da04, type: 3}
-    grip: {x: -0.421875, y: 1.4804688}
-    angle: 15
-  - sprite: {fileID: 1760224869, guid: 9c091fdb001001d4fa5239ba4c01da04, type: 3}
-    grip: {x: 0.80859375, y: 0.79296875}
-    angle: -85
-  - sprite: {fileID: -130655961, guid: 9c091fdb001001d4fa5239ba4c01da04, type: 3}
-    grip: {x: 0.640625, y: 0.48828125}
-    angle: -115
-  recoverySprite: {fileID: 660914831, guid: f4041311381ad8449b3366c16288195f, type: 3}
-  recoveryGrip: {x: 0.246, y: 0.5}
+  directions:
+  - name: South
+    opening:
+    - sprite: {fileID: -552787012, guid: 939a4b480452a474abb40d2df02765d7, type: 3}
+      grip: {x: -0.61625, y: 1.130625}
+      angle: 35
+      endAngle: 35
+      flipX: 0
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+    - sprite: {fileID: -962940914, guid: 939a4b480452a474abb40d2df02765d7, type: 3}
+      grip: {x: -0.446875, y: 1.515625}
+      angle: 15
+      endAngle: 15
+      flipX: 0
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+    - sprite: {fileID: 2110347717, guid: 939a4b480452a474abb40d2df02765d7, type: 3}
+      grip: {x: -0.180625, y: 0.556875}
+      angle: -145
+      endAngle: -195
+      flipX: 0
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+    - sprite: {fileID: 2049313858, guid: 939a4b480452a474abb40d2df02765d7, type: 3}
+      grip: {x: -0.170625, y: 0.338125}
+      angle: -185
+      endAngle: -185
+      flipX: 0
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+    backhandPreparation: []
+    backhand:
+      sprite: {fileID: -748814861, guid: 5e48b3280da7a9a498bb5fa3e71bc13b, type: 3}
+      grip: {x: 0.40163043, y: 0.90815216}
+      angle: 145
+      endAngle: 205
+      flipX: 0
+      handOverlay: {fileID: 2014554619, guid: 5e48b3280da7a9a498bb5fa3e71bc13b, type: 3}
+      weaponSprite: {fileID: 0}
+    backhandFollowThrough:
+      sprite: {fileID: 0}
+      grip: {x: 0, y: 0}
+      angle: 0
+      endAngle: 0
+      flipX: 0
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+    finisher:
+      sprite: {fileID: 1074178706, guid: 5e48b3280da7a9a498bb5fa3e71bc13b, type: 3}
+      grip: {x: 0.06195652, y: 0.20217392}
+      angle: -155
+      endAngle: -195
+      flipX: 0
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+    recovery:
+      sprite: {fileID: 2131032035, guid: f4041311381ad8449b3366c16288195f, type: 3}
+      grip: {x: -0.426, y: 0.547}
+      angle: 14
+      endAngle: 14
+      flipX: 0
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+  - name: East
+    opening:
+    - sprite: {fileID: 917630724, guid: 9c091fdb001001d4fa5239ba4c01da04, type: 3}
+      grip: {x: -0.53515625, y: 1.2382812}
+      angle: 35
+      endAngle: 35
+      flipX: 1
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+    - sprite: {fileID: -1643943539, guid: 9c091fdb001001d4fa5239ba4c01da04, type: 3}
+      grip: {x: -0.421875, y: 1.4804688}
+      angle: 15
+      endAngle: 15
+      flipX: 1
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+    - sprite: {fileID: 1760224869, guid: 9c091fdb001001d4fa5239ba4c01da04, type: 3}
+      grip: {x: 0.80859375, y: 0.79296875}
+      angle: -85
+      endAngle: -112
+      flipX: 1
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+    - sprite: {fileID: -130655961, guid: 9c091fdb001001d4fa5239ba4c01da04, type: 3}
+      grip: {x: 0.640625, y: 0.48828125}
+      angle: -115
+      endAngle: -115
+      flipX: 1
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+    backhandPreparation: []
+    backhand:
+      sprite: {fileID: 24152673, guid: 5e48b3280da7a9a498bb5fa3e71bc13b, type: 3}
+      grip: {x: 0.6255435, y: 1.0065217}
+      angle: -100
+      endAngle: -50
+      flipX: 1
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+    backhandFollowThrough:
+      sprite: {fileID: 0}
+      grip: {x: 0, y: 0}
+      angle: 0
+      endAngle: 0
+      flipX: 0
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+    finisher:
+      sprite: {fileID: 925135893, guid: 5e48b3280da7a9a498bb5fa3e71bc13b, type: 3}
+      grip: {x: 0.50923914, y: 0.26467392}
+      angle: -82
+      endAngle: -115
+      flipX: 1
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+    recovery:
+      sprite: {fileID: 660914831, guid: f4041311381ad8449b3366c16288195f, type: 3}
+      grip: {x: 0.246, y: 0.5}
+      angle: -28
+      endAngle: -28
+      flipX: 1
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+  - name: West
+    opening:
+    - sprite: {fileID: 1128779342, guid: 939a4b480452a474abb40d2df02765d7, type: 3}
+      grip: {x: 0.45625, y: 1.25}
+      angle: -35
+      endAngle: -35
+      flipX: 0
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+    - sprite: {fileID: 1257510373, guid: 939a4b480452a474abb40d2df02765d7, type: 3}
+      grip: {x: 0.306875, y: 1.4725}
+      angle: -15
+      endAngle: -15
+      flipX: 0
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+    - sprite: {fileID: -2126757829, guid: 939a4b480452a474abb40d2df02765d7, type: 3}
+      grip: {x: -0.888125, y: 0.900625}
+      angle: 85
+      endAngle: 112
+      flipX: 0
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+    - sprite: {fileID: 1017004338, guid: 939a4b480452a474abb40d2df02765d7, type: 3}
+      grip: {x: -0.706875, y: 0.545625}
+      angle: 115
+      endAngle: 115
+      flipX: 0
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+    backhandPreparation: []
+    backhand:
+      sprite: {fileID: -1614958390, guid: 5e48b3280da7a9a498bb5fa3e71bc13b, type: 3}
+      grip: {x: -0.65434784, y: 1.0070652}
+      angle: 100
+      endAngle: 50
+      flipX: 0
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+    backhandFollowThrough:
+      sprite: {fileID: 0}
+      grip: {x: 0, y: 0}
+      angle: 0
+      endAngle: 0
+      flipX: 0
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+    finisher:
+      sprite: {fileID: -1188999776, guid: 5e48b3280da7a9a498bb5fa3e71bc13b, type: 3}
+      grip: {x: -0.5320652, y: 0.26358697}
+      angle: 82
+      endAngle: 115
+      flipX: 0
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+    recovery:
+      sprite: {fileID: 1363804303, guid: f4041311381ad8449b3366c16288195f, type: 3}
+      grip: {x: -0.367, y: 0.512}
+      angle: 28
+      endAngle: 28
+      flipX: 0
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+  - name: North
+    opening:
+    - sprite: {fileID: -10410014, guid: 939a4b480452a474abb40d2df02765d7, type: 3}
+      grip: {x: 0.6125, y: 1.140625}
+      angle: -25
+      endAngle: 15
+      flipX: 1
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+    - sprite: {fileID: -1524242379, guid: 939a4b480452a474abb40d2df02765d7, type: 3}
+      grip: {x: 0.536875, y: 1.58875}
+      angle: 15
+      endAngle: 55
+      flipX: 1
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 913484402, guid: e60d844246f670a4daef87e0e90694d8, type: 3}
+    - sprite: {fileID: -1757998287, guid: 939a4b480452a474abb40d2df02765d7, type: 3}
+      grip: {x: 0.66, y: 1.595625}
+      angle: 55
+      endAngle: 25
+      flipX: 1
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+    - sprite: {fileID: -33237383, guid: 939a4b480452a474abb40d2df02765d7, type: 3}
+      grip: {x: 0.57125, y: 0.525}
+      angle: 25
+      endAngle: -18
+      flipX: 1
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 913484402, guid: e60d844246f670a4daef87e0e90694d8, type: 3}
+    backhandPreparation:
+    - sprite: {fileID: 1252603771, guid: 8ec626545e70e95489261e863b335ff0, type: 3}
+      grip: {x: 0.6391304, y: 0.6}
+      angle: -18
+      endAngle: -55
+      flipX: 1
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 913484402, guid: e60d844246f670a4daef87e0e90694d8, type: 3}
+    - sprite: {fileID: 1954515480, guid: 8ec626545e70e95489261e863b335ff0, type: 3}
+      grip: {x: 0.65652174, y: 1.2869565}
+      angle: -55
+      endAngle: -35
+      flipX: 0
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 1127681328, guid: e60d844246f670a4daef87e0e90694d8, type: 3}
+    backhand:
+      sprite: {fileID: -710991743, guid: 8ec626545e70e95489261e863b335ff0, type: 3}
+      grip: {x: 0.79565215, y: 1.2391304}
+      angle: -35
+      endAngle: 15
+      flipX: 0
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+    backhandFollowThrough:
+      sprite: {fileID: 1530653510, guid: 8ec626545e70e95489261e863b335ff0, type: 3}
+      grip: {x: 0.90869564, y: 1.0043478}
+      angle: 15
+      endAngle: -18
+      flipX: 0
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 1127681328, guid: e60d844246f670a4daef87e0e90694d8, type: 3}
+    finisher:
+      sprite: {fileID: 1278503501, guid: 5e48b3280da7a9a498bb5fa3e71bc13b, type: 3}
+      grip: {x: 0.71847826, y: 1.3815217}
+      angle: 60
+      endAngle: 30
+      flipX: 1
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
+    recovery:
+      sprite: {fileID: -1016550650, guid: f4041311381ad8449b3366c16288195f, type: 3}
+      grip: {x: 0.352, y: 0.523}
+      angle: -18
+      endAngle: -18
+      flipX: 1
+      handOverlay: {fileID: 0}
+      weaponSprite: {fileID: 0}
   hitPause: 0.045
+--- !u!114 &5525331860928623697
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6701922493289245560}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 41b630eb0130395438bb1d248e04c164, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.RegisteredPlayerAnimation
+  body: {fileID: 6701922493289245536}
+  forehand: {fileID: 11400000, guid: d5e17603ecbf53b499f24312deac6034, type: 2}
+  throwing: {fileID: 11400000, guid: 49c63d74d86dff343af1a060f8577a57, type: 2}
+  catching: {fileID: 11400000, guid: 25c576910d69bff44a67f1de534a5f63, type: 2}
+  spin: {fileID: 11400000, guid: d7b4ad5244094894093efde82fd84e28, type: 2}
+  aimGaits: {fileID: 0}
+  dashSprites: {fileID: 11400000, guid: d7ddf025b82a4714fb911e87619e07c3, type: 2}
+  sprintSprites: {fileID: 11400000, guid: 0ab92c810d6aadc4aa8387cff68433d9, type: 2}
 --- !u!1 &6701922493289245566 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1007, guid: e010a24f9d755d869541b88e5f988af7, type: 3}

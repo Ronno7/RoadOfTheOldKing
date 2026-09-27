@@ -1,0 +1,66 @@
+// Fresh Tutorial Play Mode, no save session. Real E-input path and 50 Hz weapon/presentation clock.
+// Stop Play Mode afterward to discard temporary equipment.
+int direction = 2; // 2 south, 3 west
+Vector2 aim=new[]{Vector2.right,Vector2.up,Vector2.down,Vector2.left}[direction];
+string facing=new[]{"East","North","South","West"}[direction];
+if(!Application.isPlaying || UnityEngine.SceneManagement.SceneManager.GetActiveScene().name!="Tutorial" ||
+    UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Progression.CheckpointSession>()!=null)
+    throw new Exception("Capture in fresh Tutorial Play Mode without a save session.");
+var player=GameObject.Find("Player").GetComponent<TheLostShrine.Player.PlayerCombatController>();
+var weapon=GameObject.Find("Hatchet Pickup").GetComponent<TheLostShrine.Weapons.HatchetWeapon>();
+var animator=player.GetComponent<TheLostShrine.Player.PlayerLocomotionAnimation>();
+var movement=player.GetComponent<TheLostShrine.Player.PlayerMovement>();
+var motor=player.GetComponent<Rigidbody2D>();
+var view=weapon.GetComponent<TheLostShrine.Weapons.HatchetView>();
+var presenter=player.GetComponent<TheLostShrine.Player.RegisteredPlayerAnimation>();
+var cam=Camera.main;
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var oldSimulation=Physics2D.simulationMode;var oldTarget=cam.targetTexture;var oldActive=RenderTexture.active;
+var oldPosition=motor.position;var oldCamera=cam.transform.position;var oldVelocity=motor.linearVelocity;
+var oldFacing=movement.FacingDirection;var oldAim=player.AimDirection;var oldInterpolation=motor.interpolation;
+var target=new RenderTexture(1920,1080,24,RenderTextureFormat.ARGB32);
+var pixels=new Texture2D(1920,1080,TextureFormat.RGB24,false);
+var folder=System.IO.Path.GetFullPath(System.IO.Path.Combine(Application.dataPath,"../../tmp/throw-proof/native-"+facing.ToLowerInvariant()));
+System.IO.Directory.CreateDirectory(folder);
+var frames=new System.Collections.Generic.List<string>();
+System.Action<TheLostShrine.Input.CombatInputFrame> send=frame=>{
+    frame.PointerPosition=cam.WorldToScreenPoint(player.transform.position+(Vector3)aim*3f);
+    player.GetType().GetMethod("ProcessInput",flags).Invoke(player,new object[]{frame});
+};
+try {
+    Physics2D.simulationMode=SimulationMode2D.Script;motor.interpolation=RigidbodyInterpolation2D.None;
+    send(new TheLostShrine.Input.CombatInputFrame{Active=true});
+    if(weapon.State==TheLostShrine.Weapons.HatchetState.OnGround)player.TryEquip(weapon);
+    weapon.CancelAction();player.GetComponent<TheLostShrine.Player.PlayerStamina>().Restore();
+    player.transform.position=new Vector3(45,54,0);motor.position=player.transform.position;motor.linearVelocity=Vector2.zero;
+    movement.GetType().GetProperty("FacingDirection").SetValue(movement,aim,null);
+    player.GetType().GetField("<AimDirection>k__BackingField",flags).SetValue(player,aim);
+    Physics2D.SyncTransforms();
+    cam.transform.position=player.transform.position+new Vector3(1.6f,1.5f,-10);cam.targetTexture=target;
+    send(new TheLostShrine.Input.CombatInputFrame{Active=true});
+    for(int i=0;i<160;i++) {
+        if(i==10)send(new TheLostShrine.Input.CombatInputFrame{Active=true,ThrowPressed=true,ThrowReleased=true});
+        if(i==80) {
+            weapon.CancelAction();player.GetComponent<TheLostShrine.Player.PlayerStamina>().Restore();
+            send(new TheLostShrine.Input.CombatInputFrame{Active=true});
+            send(new TheLostShrine.Input.CombatInputFrame{Active=true,ThrowPressed=true,ThrowHeld=true});
+        }
+        if(i==120)send(new TheLostShrine.Input.CombatInputFrame{Active=true,ThrowReleased=true});
+        animator.GetType().GetMethod("Present",flags).Invoke(animator,new object[]{.02f});
+        view.GetType().GetMethod("LateUpdate",flags).Invoke(view,null);
+        cam.Render();RenderTexture.active=target;pixels.ReadPixels(new Rect(0,0,1920,1080),0,0);pixels.Apply();
+        System.IO.File.WriteAllBytes(System.IO.Path.Combine(folder,i.ToString("D3")+".png"),pixels.EncodeToPNG());
+        frames.Add(i+","+(i<80?"Tap":"Hold")+","+weapon.State+","+presenter.DisplayedAction+","+presenter.DisplayedCel+","+weapon.FlightSeconds.ToString("F4",System.Globalization.CultureInfo.InvariantCulture));
+        weapon.GetType().GetMethod("Simulate",flags).Invoke(weapon,new object[]{.02f});
+    }
+    System.IO.File.WriteAllLines(System.IO.Path.Combine(folder,"timeline.csv"),frames.ToArray());
+    return "160 native Tutorial frames: real quick-tap E, held aim and key-up release; Recall remains locked.";
+}
+finally {
+    weapon.CancelAction();cam.targetTexture=oldTarget;RenderTexture.active=oldActive;cam.transform.position=oldCamera;
+    motor.position=oldPosition;player.transform.position=oldPosition;motor.linearVelocity=oldVelocity;motor.interpolation=oldInterpolation;
+    movement.GetType().GetProperty("FacingDirection").SetValue(movement,oldFacing,null);
+    player.GetType().GetField("<AimDirection>k__BackingField",flags).SetValue(player,oldAim);
+    Physics2D.simulationMode=oldSimulation;
+    target.Release();UnityEngine.Object.DestroyImmediate(target);UnityEngine.Object.DestroyImmediate(pixels);
+}

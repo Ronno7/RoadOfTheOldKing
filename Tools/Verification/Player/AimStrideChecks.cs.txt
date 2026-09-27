@@ -1,0 +1,45 @@
+// Edit Mode: independently specified direction boundaries and travelled-distance invariants.
+var results=new System.Collections.Generic.List<string>();
+System.Action<bool,string> check=(ok,label)=>results.Add((ok?"PASS ":"FAIL ")+label);
+System.Func<float,Vector2> angle=d=>new Vector2(Mathf.Cos(d*Mathf.Deg2Rad),Mathf.Sin(d*Mathf.Deg2Rad));
+var clock=new TheLostShrine.Player.AimStrideClock();
+clock.Advance(Vector2.right,Vector2.right*.25f,1.5f);
+check(clock.Facing==Vector2.right && clock.Gait==TheLostShrine.Player.AimGait.Forward && clock.SampleCel(6)==1,"Quarter-unit travel selects the second cel of a 1.5-unit six-cel stride");
+float phase=clock.Phase;
+for(int i=0;i<1000;i++)clock.Advance(Vector2.right,Vector2.zero,1.5f);
+check(clock.Phase==phase,"Standing still cannot advance feet regardless of sample count");
+clock.Advance(Vector2.up,Vector2.zero,1.5f);
+check(clock.Facing==Vector2.up && clock.Phase==phase,"Stationary aiming changes facing without advancing the stride");
+clock.Advance(Vector2.up,Vector2.right*.125f,1.5f);
+check(clock.Gait==TheLostShrine.Player.AimGait.Right && Mathf.Abs(clock.Phase-.25f)<.00001f,"North aim plus east travel selects right strafe and preserves phase");
+clock.Advance(Vector2.up,Vector2.left*.125f,1.5f);
+check(clock.Gait==TheLostShrine.Player.AimGait.Left,"North aim plus west travel selects left strafe");
+clock.Advance(Vector2.up,Vector2.down*.125f,1.5f);
+check(clock.Gait==TheLostShrine.Player.AimGait.Backward,"Opposite movement selects backward gait");
+phase=clock.Phase;clock.Advance(Vector2.left,new Vector2(100,100),1.5f,true);
+check(clock.Phase==phase && clock.Facing==Vector2.left,"Teleport updates facing without fast-forwarding feet");
+clock.Reset();clock.Advance(angle(44),Vector2.zero,1.5f);
+clock.Advance(angle(46),Vector2.zero,1.5f);
+check(clock.Facing==Vector2.right,"Facing retains east across small diagonal jitter");
+clock.Advance(angle(51),Vector2.zero,1.5f);
+check(clock.Facing==Vector2.up,"Facing switches after crossing the retention band");
+clock.Advance(angle(44),Vector2.zero,1.5f);
+check(clock.Facing==Vector2.up,"Facing hysteresis also works on the return side");
+clock.Advance(angle(39),Vector2.zero,1.5f);
+check(clock.Facing==Vector2.right,"Facing returns to east after crossing the opposite band");
+clock.Reset();clock.Advance(Vector2.right,angle(44)*.01f,1.5f);clock.Advance(Vector2.right,angle(46)*.01f,1.5f);
+check(clock.Gait==TheLostShrine.Player.AimGait.Forward,"Relative gait retains forward across diagonal jitter");
+clock.Advance(Vector2.right,angle(51)*.01f,1.5f);
+check(clock.Gait==TheLostShrine.Player.AimGait.Left,"Relative gait changes beyond its retention band");
+var split=new TheLostShrine.Player.AimStrideClock();var whole=new TheLostShrine.Player.AimStrideClock();
+for(int i=0;i<10;i++)split.Advance(Vector2.right,new Vector2(.025f,0),1.5f);
+whole.Advance(Vector2.right,new Vector2(.25f,0),1.5f);
+check(Mathf.Abs(split.Phase-whole.Phase)<.000001f && split.SampleCel(6)==whole.SampleCel(6),"Distance partition leaves the same phase and cel");
+whole.Advance(Vector2.right,new Vector2(1.25f,0),1.5f);
+check(whole.SampleCel(6)==0 && whole.Phase<.00001f,"One full stride wraps cleanly to contact");
+bool rejected=false;try{clock.Advance(Vector2.right,Vector2.one,0);}catch(ArgumentException){rejected=true;}
+check(rejected,"Zero stride cannot corrupt phase");
+rejected=false;try{clock.Advance(new Vector2(float.NaN,0),Vector2.one,1.5f);}catch(ArgumentException){rejected=true;}
+check(rejected,"Nonfinite input cannot poison direction selection");
+clock.Reset();check(clock.Phase==0 && clock.Gait==TheLostShrine.Player.AimGait.Forward,"Reset clears the previous action's stride and gait");
+return string.Join("\n",results.ToArray());

@@ -43,10 +43,10 @@ Open **Assets/Scenes/DemoTutorial.unity** for the one full art presentation. It 
 
 ## Sources and verification
 
-[Sources and exact prompts](../../../../../../Docs/Art/Tutorial/Sources/Environment/README.md) are in the art docs. New artwork was generated with the built-in image tool using the approved sample as its style reference. The importer crops/resamples new sources, restricts each object to its approved material swatches and makes alpha binary. The three unchanged native sample sprites are copied directly from their reference.
+[Sources and exact prompts](../../../../../../ArtSource/Tutorial/Environment/README.md) are in the art docs. New artwork was generated with the built-in image tool using the approved sample as its style reference. The importer crops/resamples new sources, restricts each object to its approved material swatches and makes alpha binary. The three unchanged native sample sprites are copied directly from their reference.
 
 `EnvironmentManifest.json` records crop regions, dimensions, swatches, overhead splits and collision rectangles. The atlas uses point filtering, no mipmaps and no compression. Surviving sprite names/identifiers and asset GUIDs are preserved on rebuild.
 
-`Tools/Verification/TutorialEnvironmentKitChecks.cs.txt` checks exact palette/alpha, unchanged approved pixels, tile/prefab references, trunk footprints, canopy sorting against the real player renderer, and player-sized openings. `DemoTutorialChecks.cs.txt` also checks connected routes against all scene colliders.
+`Tools/Verification/World/TutorialEnvironmentKitChecks.cs.txt` checks exact palette/alpha, unchanged approved pixels, tile/prefab references, trunk footprints, canopy sorting against the real player renderer, and player-sized openings. `DemoTutorialChecks.cs.txt` also checks connected routes against all scene colliders.
 
 [Current art plan](../../../../../../Docs/Art/Tutorial/Plan.md) · [Full demo](../../../../../../Docs/Art/Tutorial/Previews/demo-tutorial.png) · [Village close-up](../../../../../../Docs/Art/Tutorial/Previews/tutorial-environment-detail.png)

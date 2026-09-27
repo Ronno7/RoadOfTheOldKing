@@ -1,0 +1,38 @@
+// Edit Mode. Imported sprite contract and sampling boundaries; no scene mutations.
+var results = new System.Collections.Generic.List<string>();
+System.Action<bool,string> check = (ok,name) => results.Add((ok ? "PASS " : "FAIL ") + name);
+var asset=AssetDatabase.LoadAssetAtPath<TheLostShrine.Player.RegisteredActionSprites>(TheLostShrine.Editor.RegisteredSpriteProofBuilder.ForehandAssetPath);
+string error;
+check(asset!=null && asset.IsRegistered(out error),"All 72 forehand sprites share the registered canvas/scale/pivot");
+check(asset.celCount==6 && asset.views.Length==4,"Six authored forehand cels in every cardinal view");
+foreach(var view in asset.views)
+    foreach(var layer in new[]{view.body,view.weapon,view.reveal}) {
+        var texture=layer[0].texture;
+        var importer=(TextureImporter)AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(texture));
+        var config=new TextureImporterSettings(); importer.ReadTextureSettings(config);
+        check(texture.width==1920 && texture.height==1280 && importer.filterMode==FilterMode.Point &&
+            !importer.mipmapEnabled && importer.textureCompression==TextureImporterCompression.Uncompressed &&
+            config.spriteMeshType==SpriteMeshType.FullRect,"Full atlas and mesh, pixel filtering: "+texture.name);
+        check(layer[0].rect.position==new Vector2(0,640) && layer[3].rect.position==Vector2.zero &&
+            layer[5].rect.position==new Vector2(1280,0),"Forehand slices are top row first: "+texture.name);
+    }
+check(Mathf.Abs(asset.Duration-.32f)<.00001f && asset.SampleAtSeconds(.129f)==2 &&
+    asset.SampleAtSeconds(.13f)==3 && asset.SampleAtSeconds(.17f)==4,"Authored exposures keep 130-170 ms contact");
+var settings=AssetDatabase.LoadAssetAtPath<TheLostShrine.Weapons.HatchetSettings>("Assets/Settings/Weapons/TutorialHatchetSettings.asset");
+float start=settings.lightWindupFraction, end=settings.lightSwingEndFraction;
+check(asset.SampleMeleeCel(start-.001f,start,end)==2 && asset.SampleMeleeCel(start,start,end)==3,"Drive ends exactly at gameplay contact start");
+check(asset.SampleMeleeCel(end-.001f,start,end)==3 && asset.SampleMeleeCel(end,start,end)==4,"Recovery begins exactly at gameplay contact end");
+check(asset.SampleMeleeCel(1,start,end)==5 && asset.SampleMeleeCel(-1,start,end)==0,"Sampling clamps action endpoints");
+check(asset.SampleMeleeCel(.8f,start,end,true)==3,"Late-frame hit pause holds contact instead of a recovery cel");
+check(asset.SampleMeleeCel(.8f,start,end)==5,"Leaving hit pause resumes sampling the authoritative action progress");
+check(asset.SampleAtSeconds(float.NaN)==0 && asset.SampleMeleeCel(float.NaN,start,end)==0,"Invalid elapsed samples do not index outside the sheet");
+var invalid=ScriptableObject.CreateInstance<TheLostShrine.Player.RegisteredActionSprites>();
+try {
+    invalid.views=asset.views; invalid.celCount=6; invalid.exposures=new[]{.1f};
+    check(!invalid.IsRegistered(out error),"Mismatched exposure count is rejected");
+    invalid.exposures=(float[])asset.exposures.Clone(); invalid.exposures[0]=float.NaN;
+    check(!invalid.IsRegistered(out error),"Nonfinite exposure is rejected");
+    invalid.exposures=(float[])asset.exposures.Clone(); invalid.contactCel=4; invalid.recoveryCel=3;
+    check(!invalid.IsRegistered(out error),"Reversed contact/recovery markers are rejected");
+} finally { UnityEngine.Object.DestroyImmediate(invalid); }
+return string.Join("\n",results.ToArray());

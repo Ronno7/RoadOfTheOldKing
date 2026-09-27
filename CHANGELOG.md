@@ -1,14 +1,24 @@
 # Changelog
 
+## 27SEP2026 - Animation milestone and workspace cleanup
+
+- Completed four-direction catch coverage, finishing the current player animation set. Accepted the artwork for now and moved future animation work into a ranked backlog so development can focus on Tutorial gameplay.
+- Organized animation definitions, sprite sheets, source art, previews and tools by purpose. Removed obsolete studies and temporary files while preserving working assets and useful development references.
+
+## 26SEP2026 - Directional movement and combat
+
+- Completed four-direction sprint, dash, opening swings and stationary throws, with armed/empty-hand presentation and movement-driven foot timing.
+- Established consistent character proportions, muted colors, patterned cap trim, simple hands and hatchet geometry to preserve the original sprite's old-school feel.
+- Kept moving aim functional with existing walking art; dedicated aim-walk and moving-catch artwork remain future work.
+
 ## 25SEP2026 - Player and hatchet integration
 
-- Added the animated player to Tutorial with four-direction locomotion, sprint cadence, idle breathing and the follow/zoom camera.
-- Added the hatchet pickup at the stump and frame-specific hand grips for carrying, turning, sprinting and dodging.
-- Increased the hatchet's visual size by 30% and reduced its pixel density to match the character.
-- Added a right-facing light-chop sample with four action poses, planted movement, hand-anchored weapon motion, synchronized damage and impact-only hit pause.
-- Added practice-target artwork, recoil, wood chips and temporary impact audio; retained a short in-game combat milestone capture.
-- Added player, pickup, carry and idle verification checks; verified access to all 13 tutorial route stops.
-- Consolidated development and art documentation, removed obsolete previews, and simplified the changelog.
+- Integrated the animated Tutorial player, directional locomotion, idle breathing, follow/zoom camera and stump hatchet pickup/carrying; refined weapon scale and clarity.
+- Added the initial combo presentation and practice-target recoil, wood chips and impact audio. Retired the rejected articulated rig and selected authored full-body sprites for the replacement.
+- Implemented tap E to quick throw, hold E to aim and release, moving aim, a collision-aware guide and shared release timing. Gameplay now owns movement limits, once-per-throw stamina cost and interruption/Recall handling.
+- Completed the east/north sprite proof: 36 matched forehand/throw/catch body cels and eight fast axe-spin cels. Matched pickup/carry and north combo axe views to the drawn weapon, corrected catch scale and perspective, softened heavy outer borders and redrew simple blob hands with continuous wrists.
+- Connected the east/north opening swing, stationary throw/catch and fast spinning axe to live Tutorial gameplay, with synchronized release/Recall handoffs, movement fallbacks and a native-scale milestone GIF. Gameplay and import checks cover the integration.
+- Consolidated animation documentation and rebuild instructions, preserved milestone GIFs and source art, and removed the superseded browser review and disposable captures.
 
 ## 24SEP2026 - Player art and tutorial world
 

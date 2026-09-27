@@ -35,6 +35,6 @@ Open `Assets/Scenes/DemoTutorial.unity` for the combined world-only presentation
 
 The production atlas remains `TutorialGround16.png`: 320x400 pixels, with native 16px cells and 2px extrusion on each side. Use the imported sprite rectangles, not plain 16px grid slicing.
 
-Run `Tools/Art/build_tutorial_ground.py` with Python and Pillow, then choose **Tools > The Lost Shrine > Build Tutorial Ground Kit**. This updates generated art, Tiles, RuleTiles and palettes, preserving sprite IDs. It does not create or repaint scenes. The builder and shared `TileKitAssets` helpers are Editor-only.
+Run `Tools/Art/World/build_tutorial_ground.py` with Python and Pillow, then choose **Tools > The Lost Shrine > Build Tutorial Ground Kit**. This updates generated art, Tiles, RuleTiles and palettes, preserving sprite IDs. It does not create or repaint scenes. The builder and shared `TileKitAssets` helpers are Editor-only.
 
-The native production pixels use exact palette colors and tested connection geometry. Connection checks live in `Tools/Verification/TutorialGroundKitChecks.cs.txt`; presentation checks live in `DemoTutorialChecks.cs.txt`.
+The native production pixels use exact palette colors and tested connection geometry. Connection checks live in `Tools/Verification/World/TutorialGroundKitChecks.cs.txt`; presentation checks live in `DemoTutorialChecks.cs.txt`.

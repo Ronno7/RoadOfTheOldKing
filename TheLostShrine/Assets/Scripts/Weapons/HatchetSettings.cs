@@ -29,6 +29,8 @@ namespace TheLostShrine.Weapons
         [Min(0f)] public float cleaveStaminaCost = 35f;
         [Min(0f)] public float cleaveKnockback = 6f;
         [Min(0f)] public float cleaveStagger = 0.7f;
+        [Header("Throw action (seconds per drawn cel)")]
+        public ThrowActionTiming throwAction = new ThrowActionTiming();
         [Header("Flight")]
         [Min(0.1f)] public float throwSpeed = 10f;
         [Min(0.1f)] public float recallSpeed = 16f;

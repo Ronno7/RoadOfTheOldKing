@@ -18,6 +18,7 @@ namespace TheLostShrine.Combat
         private Quaternion restRotation;
         private float age = 1f;
         private float direction;
+        private Vector2 recoilDirection;
         private float strength;
 
         private void Awake()
@@ -63,7 +64,9 @@ namespace TheLostShrine.Combat
         private void OnHit(CombatHit hit)
         {
             age = 0f;
-            direction = hit.Direction.x >= 0f ? 1f : -1f;
+            recoilDirection = hit.Direction;
+            direction = Mathf.Abs(hit.Direction.x) > 0.25f
+                ? Mathf.Sign(hit.Direction.x) : -Mathf.Sign(hit.Direction.y);
             strength = hit.Damage > 10 ? 1.3f : 1f;
             if (impactSound != null)
             {
@@ -75,7 +78,8 @@ namespace TheLostShrine.Combat
             {
                 chips[i].enabled = true;
                 chips[i].transform.position = impact;
-                velocities[i] = new Vector3(direction * (0.45f + i * 0.23f), 0.8f + (i % 3) * 0.45f, 0f);
+                velocities[i] = (Vector3)hit.Direction * (0.45f + i * 0.23f)
+                    + Vector3.up * (0.8f + (i % 3) * 0.45f);
             }
         }
 
@@ -89,7 +93,7 @@ namespace TheLostShrine.Combat
             float t = Mathf.Max(0f, age - 0.045f);
             float recoil = age < 0.045f ? 1f : Mathf.Cos(t * 25f) * Mathf.Exp(-t * 18f);
             if (age > 0.32f) recoil = 0f;
-            visual.localPosition = restPosition + Vector3.right * (direction * 0.065f * strength * recoil);
+            visual.localPosition = restPosition + (Vector3)recoilDirection * (0.065f * strength * recoil);
             visual.localRotation = restRotation * Quaternion.Euler(0f, 0f, -direction * 5f * strength * recoil);
             for (int i = 0; i < chips.Length; i++)
             {

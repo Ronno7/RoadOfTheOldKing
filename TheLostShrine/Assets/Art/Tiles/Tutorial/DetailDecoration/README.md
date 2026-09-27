@@ -28,7 +28,7 @@ The native atlas uses **13 exact Hearth & Meadow colors**, **16 pixels per unit*
 
 ## Source and preparation
 
-[Sources and exact prompts](../../../../../../Docs/Art/Tutorial/Sources/Decoration/README.md) are saved in the art docs. New artwork uses the built-in image tool with the approved sample as reference. The importer copies approved pixels directly, crops/resamples the expansion, restricts its colors and makes alpha binary. Practice wear maps the source's pale dirt into earth/timber shades for lower contrast.
+[Sources and exact prompts](../../../../../../ArtSource/Tutorial/Decoration/README.md) are saved in the art docs. New artwork uses the built-in image tool with the approved sample as reference. The importer copies approved pixels directly, crops/resamples the expansion, restricts its colors and makes alpha binary. Practice wear maps the source's pale dirt into earth/timber shades for lower contrast.
 
 `DecorationManifest.json` records source rectangles, native placement/sizes and swatches. Source crop coordinates are top-left; atlas coordinates are bottom-left. Native entries come from ApprovedSample16.png; others come from Expansion.png. Existing tile/prefab GUIDs and sprite identifiers are retained.
 

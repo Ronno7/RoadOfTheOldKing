@@ -1,0 +1,55 @@
+// Edit Mode: imported return art, ownership boundaries and deterministic playback.
+var results = new System.Collections.Generic.List<string>();
+System.Action<bool,string> check = (ok,label) => results.Add((ok ? "PASS " : "FAIL ")+label);
+string error;
+var catching=AssetDatabase.LoadAssetAtPath<TheLostShrine.Player.RegisteredActionSprites>(TheLostShrine.Editor.RegisteredSpriteProofBuilder.CatchAssetPath);
+var throwing=AssetDatabase.LoadAssetAtPath<TheLostShrine.Player.RegisteredActionSprites>(TheLostShrine.Editor.RegisteredSpriteProofBuilder.ThrowAssetPath);
+var spin=AssetDatabase.LoadAssetAtPath<TheLostShrine.Weapons.AxeSpinSprites>(TheLostShrine.Editor.RegisteredSpriteProofBuilder.SpinAssetPath);
+check(catching!=null && catching.IsRegistered(out error) && catching.celCount==4 && catching.possessionCel==1,"Four catch cels per view; possession starts at grip");
+check(spin!=null && spin.IsRegistered(out error) && spin.rotationsPerSecond==4,"Eight centered spin cels at four rotations/second");
+foreach(var view in catching.views) foreach(var layer in new[]{view.body,view.weapon,view.reveal}) {
+    var importer=(TextureImporter)AssetImporter.GetAtPath(AssetDatabase.GetAssetPath(layer[0]));
+    var config=new TextureImporterSettings(); importer.ReadTextureSettings(config);
+    check(layer[0].texture.width==1280 && layer[0].texture.height==1280 &&
+        importer.filterMode==FilterMode.Point && !importer.mipmapEnabled &&
+        importer.textureCompression==TextureImporterCompression.Uncompressed && config.spriteMeshType==SpriteMeshType.FullRect,
+        "Catch atlas pixel import: "+layer[0].texture.name);
+    check(layer[0].rect.position==new Vector2(0,640) && layer[2].rect.position==Vector2.zero,"Top-to-bottom slices: "+layer[0].texture.name);
+}
+var clock=new TheLostShrine.Player.CatchPresentationClock();
+check(!clock.ConfirmCatch(),"Inactive catch ignores stale arrival");
+clock.BeginReach(catching); clock.Advance(100);
+check(clock.IsActive && !clock.HasCaught && clock.CelIndex==0,"Arbitrarily long approach holds reach without inventing ownership");
+check(clock.ConfirmCatch() && clock.CelIndex==1 && clock.HasCaught,"Confirmed arrival enters grip immediately");
+clock.Advance(.049f); check(clock.CelIndex==1,"Grip holds its authored 50 ms");
+check(!clock.ConfirmCatch(),"Duplicate arrival does not restart recovery");
+clock.Advance(.001f); check(clock.CelIndex==2,"Absorb follows grip at 50 ms");
+clock.Advance(.08f); check(clock.CelIndex==3,"Settle follows 80 ms absorption");
+clock.Advance(.1f); check(!clock.IsActive,"Catch ends 230 ms after arrival");
+clock.BeginReach(catching); clock.Cancel();
+check(!clock.ConfirmCatch() && clock.CelIndex==-1 && !clock.HasCaught,"Cancelled reach cannot catch on a late notification");
+clock.BeginReach(catching); clock.ConfirmCatch(); clock.Advance(10);
+check(!clock.IsActive,"Long frame finishes catch without hanging");
+var a=new TheLostShrine.Player.CatchPresentationClock(); var b=new TheLostShrine.Player.CatchPresentationClock();
+a.BeginReach(catching);b.BeginReach(catching);a.ConfirmCatch();b.ConfirmCatch();
+a.Advance(.16f);for(int i=0;i<16;i++)b.Advance(.01f);
+check(a.CelIndex==b.CelIndex && a.IsActive==b.IsActive,"Catch is independent of frame partition");
+bool rejected=false; try { clock.Advance(float.NaN); } catch(ArgumentOutOfRangeException) { rejected=true; }
+check(rejected,"Invalid delta cannot poison the catch clock");
+bool ordered=true;for(int i=0;i<8;i++)ordered &= spin.Sample(i/32.0)==i;
+check(ordered && spin.Sample(.25)==0 && spin.Sample(1)==0,"Eight drawn exposures form four complete rotations in one second");
+check(spin.Sample(.125,1)==5 && spin.Sample(0,-1)==7,"Spin can start at an authored release phase");
+var settings=AssetDatabase.LoadAssetAtPath<TheLostShrine.Weapons.HatchetSettings>("Assets/Settings/Weapons/TutorialHatchetSettings.asset");
+for(int v=0;v<catching.views.Length;v++) {
+    var held=TheLostShrine.Editor.RegisteredReturnStudy.Sample(.119f,v,throwing,catching,spin,settings.throwAction);
+    var released=TheLostShrine.Editor.RegisteredReturnStudy.Sample(.12f,v,throwing,catching,spin,settings.throwAction);
+    var approach=TheLostShrine.Editor.RegisteredReturnStudy.Sample(1.399f,v,throwing,catching,spin,settings.throwAction);
+    var caught=TheLostShrine.Editor.RegisteredReturnStudy.Sample(1.4f,v,throwing,catching,spin,settings.throwAction);
+    check(held.held!=null && held.prop==null && released.held==null && released.prop!=null,"One axe across release: view "+v);
+    check(approach.held==null && approach.prop!=null && caught.prop==null && caught.held==catching.views[v].weapon[1],"One axe across confirmed catch: view "+v);
+    check(approach.prop==spin.cels[catching.views[v].spinStartCel] && approach.propFlipX==catching.views[v].spinFlipX,"Terminal prop matches the receiving blade orientation: view "+v);
+}
+var invalid=ScriptableObject.Instantiate(catching);
+try { invalid.possessionCel=0; check(!invalid.IsRegistered(out error),"Catch cannot claim possession in the reach cel"); }
+finally { UnityEngine.Object.DestroyImmediate(invalid); }
+return string.Join("\n",results.ToArray());
