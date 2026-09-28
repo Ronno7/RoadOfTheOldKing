@@ -8,8 +8,8 @@ if(!Application.isPlaying || UnityEngine.Object.FindFirstObjectByType<TheLostShr
 var results=new System.Collections.Generic.List<string>();
 System.Action<bool,string> check=(ok,name)=>results.Add((ok?"PASS ":"FAIL ")+name);
 var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
-var root=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Player/TutorialPlayer.prefab"));
-var prop=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Weapons/TutorialHatchet.prefab"));
+var root=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Player/Player.prefab"));
+var prop=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Weapons/Hatchet.prefab"));
 var combat=root.GetComponent<TheLostShrine.Player.PlayerCombatController>();
 var weapon=prop.GetComponent<TheLostShrine.Weapons.HatchetWeapon>();
 var movement=root.GetComponent<TheLostShrine.Player.PlayerMovement>();

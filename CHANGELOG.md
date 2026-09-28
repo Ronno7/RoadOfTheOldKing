@@ -1,5 +1,12 @@
 # Changelog
 
+## 27SEP2026 - Combat readability and inspection tools
+
+- Added a cursor-following aim marker and restrained light-melee windup, active damage footprint and slash feedback. Attack reach, width, timing and terrain clipping follow the weapon's gameplay rules, including combos, upgrades and hit pause.
+- Consolidated the finished character into one standard Player prefab shared by Tutorial and test scenes.
+- Promoted the finished weapon to an independent `Hatchet.prefab` for gameplay and combat previews; retained the old weapon as `PrototypeHatchet.prefab` for PrototypeLoop, preserving existing scene references and tuning.
+- Added the Combat Effects Preview editor window.
+
 ## 27SEP2026 - Animation milestone, cleanup and Tutorial integration
 
 - Added explicit F interactions for initial equipment and item pickups, with contextual prompts and one-item-per-press selection shared with bonfire controls; thrown hatchets retain automatic walk-over retrieval for combat.
@@ -21,8 +28,8 @@
 - Integrated the animated Tutorial player, directional locomotion, idle breathing, follow/zoom camera and stump hatchet pickup/carrying; refined weapon scale and clarity.
 - Added the initial combo presentation and practice-target recoil, wood chips and impact audio. Retired the rejected articulated rig and selected authored full-body sprites for the replacement.
 - Implemented tap E to quick throw, hold E to aim and release, moving aim, a collision-aware guide and shared release timing. Gameplay now owns movement limits, once-per-throw stamina cost and interruption/Recall handling.
-- Completed the east/north sprite proof: 36 matched forehand/throw/catch body cels and eight fast axe-spin cels. Matched pickup/carry and north combo axe views to the drawn weapon, corrected catch scale and perspective, softened heavy outer borders and redrew simple blob hands with continuous wrists.
-- Connected the east/north opening swing, stationary throw/catch and fast spinning axe to live Tutorial gameplay, with synchronized release/Recall handoffs, movement fallbacks and a native-scale milestone GIF. Gameplay and import checks cover the integration.
+- Completed the east/north sprite proof: 36 matched forehand/throw/catch body cels and eight fast axe-spin cels. Matched pickup/carry and north combo axe views to the drawn weapon, corrected catch scale and perspective.
+- Connected the east/north opening swing, stationary throw/catch and fast spinning axe to live Tutorial gameplay, with synchronized release/Recall handoffs, movement fallbacks.
 - Consolidated animation documentation and rebuild instructions, preserved milestone GIFs and source art, and removed the superseded browser review and disposable captures.
 
 ## 24SEP2026 - Player art and tutorial world

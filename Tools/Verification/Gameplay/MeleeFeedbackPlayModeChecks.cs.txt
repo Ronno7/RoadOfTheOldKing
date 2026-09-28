@@ -1,0 +1,101 @@
+// Empty unsaved Play Mode scene, no CheckpointSession. Uses real player/weapon assets.
+// Checks full-sector feedback independently of terrain-blocked actual damage.
+if (!Application.isPlaying || UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Progression.CheckpointSession>() != null)
+    throw new Exception("Use an empty Play Mode scene without a checkpoint session.");
+var results = new System.Collections.Generic.List<string>();
+System.Action<bool,string> check = (ok,label) => results.Add((ok ? "PASS " : "FAIL ") + label);
+var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+var created = new System.Collections.Generic.List<GameObject>();
+System.Func<string,GameObject> spawn = path => { var go = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(path)); created.Add(go); return go; };
+var previousSimulation = Physics2D.simulationMode;
+var upgrade = ScriptableObject.CreateInstance<TheLostShrine.Weapons.HatchetUpgrade>();
+try {
+    Physics2D.simulationMode = SimulationMode2D.Script;
+    var root = spawn("Assets/Prefabs/Player/Player.prefab");
+    var player = root.GetComponent<TheLostShrine.Player.PlayerCombatController>();
+    var weapon = spawn("Assets/Prefabs/Weapons/Hatchet.prefab").GetComponent<TheLostShrine.Weapons.HatchetWeapon>();
+    var feedback = weapon.GetComponent<TheLostShrine.Weapons.HatchetMeleeFeedback>();
+    var surface = (MeshRenderer)feedback.GetType().GetField("surface",flags).GetValue(feedback);
+    var mesh = (Mesh)feedback.GetType().GetField("mesh",flags).GetValue(feedback);
+    var stamina = root.GetComponent<TheLostShrine.Player.PlayerStamina>();
+    // Isolate window/geometry tests from the separate hit-pause subscriber.
+    root.GetComponent<TheLostShrine.Player.PlayerChopAnimation>().enabled = false;
+    System.Action<float> tick = dt => weapon.GetType().GetMethod("Simulate",flags).Invoke(weapon,new object[]{dt});
+    System.Action render = () => feedback.GetType().GetMethod("LateUpdate",flags).Invoke(feedback,null);
+    System.Action reset = () => { weapon.CancelAction(); stamina.Restore(); };
+    var target = new GameObject("Melee target"); created.Add(target);
+    target.AddComponent<CircleCollider2D>().radius = .025f;
+    var health = target.AddComponent<TheLostShrine.Combat.Damageable>();
+    System.Action<Vector2> place = position => { target.transform.position = position; health.RestoreHealth(); Physics2D.SyncTransforms(); };
+    check(player.TryEquip(weapon),"Standard player equips feedback-enabled weapon");
+    render(); check(!surface.enabled,"Idle has no attack footprint");
+    float start = weapon.LightDuration * weapon.Settings.lightWindupFraction;
+    float end = weapon.LightDuration * weapon.Settings.lightSwingEndFraction;
+    place(Vector2.right); weapon.TryLightChop(Vector2.right); tick(start * .5f); render();
+    check(weapon.LightPhase == TheLostShrine.Weapons.MeleePhase.Windup && surface.enabled && health.Health == 100,"Windup outlines intent without damage");
+    tick(start * .5f + .001f); render();
+    check(weapon.LightPhase == TheLostShrine.Weapons.MeleePhase.Active && surface.enabled && health.Health == 90,"Active footprint starts with actual damage");
+    tick(.001f); check(health.Health == 90,"Footprint does not cause repeat hits");
+    weapon.PauseOnImpact(.04f); float progress = weapon.LightSwingProgress;
+    tick(.02f); render(); check(weapon.LightSwingProgress == progress && surface.enabled,"Hit pause holds the active swish clock");
+    tick(.2f); render(); check(!surface.enabled,"No damaging-looking tail after the window");
+    health.RestoreHealth(); tick(.005f); check(health.Health == 100,"Recovery cannot hit a fresh target");
+
+    for (int d = 0; d < 8; d++) {
+        float angle = d * Mathf.PI / 4f; Vector2 aim = new Vector2(Mathf.Cos(angle),Mathf.Sin(angle));
+        for (int sample = 0; sample < 4; sample++) {
+            reset(); float reach = weapon.Settings.lightRadius;
+            float offset = sample < 2 ? 0 : (weapon.LightArc * .5f + (sample == 2 ? -6f : 6f)) * Mathf.Deg2Rad;
+            float distance = sample == 0 ? reach - .15f : sample == 1 ? reach + .15f : reach * .7f;
+            place(new Vector2(Mathf.Cos(angle + offset),Mathf.Sin(angle + offset)) * distance);
+            weapon.TryLightChop(aim); tick(start + .002f); render();
+            check((health.Health < 100) == (sample == 0 || sample == 2),"Direction " + d + " actual hit agrees with range/angle sample " + sample);
+        }
+        bool inside = true;
+        foreach(var v in mesh.vertices) if(v.magnitude > weapon.LightReach + .001f || (v.sqrMagnitude > .001f && Vector2.Angle(aim,v) > weapon.LightArc*.5f+.01f)) inside = false;
+        check(inside,"Direction " + d + " all visual vertices stay inside damage sector");
+        weapon.SetAim(-aim); render();
+        check(weapon.AttackDirection == aim,"Direction " + d + " committed sector ignores later cursor movement");
+    }
+
+    reset(); place(new Vector2(1.4f,0));
+    var wall = new GameObject("Melee wall"); created.Add(wall); wall.transform.position = new Vector3(.7f,0,0);
+    var wallCollider = wall.AddComponent<BoxCollider2D>(); wallCollider.size = new Vector2(.1f,6); Physics2D.SyncTransforms();
+    weapon.TryLightChop(Vector2.right); tick(start+.002f); render();
+    check(health.Health==100,"Solid wall still blocks actual damage");
+    var unobstructedVertices=mesh.vertices;
+    check(surface.enabled && mesh.vertices.Max(v=>v.x)>weapon.LightReach-.002f,"Footprint retains full reach through a wall");
+    wall.transform.position=Vector3.zero;Physics2D.SyncTransforms();render();
+    check(surface.enabled && mesh.vertices.SequenceEqual(unobstructedVertices),"Collider overlapping the origin cannot collapse the effect");
+    wall.transform.position=new Vector3(.7f,0,0);
+    wallCollider.isTrigger=true; reset(); Physics2D.SyncTransforms(); weapon.TryLightChop(Vector2.right); tick(start+.002f); render();
+    check(health.Health<100,"Triggers do not block melee");
+    wallCollider.isTrigger=false; wall.AddComponent<TheLostShrine.Combat.Damageable>(); reset();health.RestoreHealth();Physics2D.SyncTransforms();weapon.TryLightChop(Vector2.right);tick(start+.002f);
+    check(health.Health<100,"Damage receivers do not occlude targets behind them");
+    wall.SetActive(false);target.SetActive(false);
+
+    reset(); upgrade.addedLightArc=40f; upgrade.lightSpeedMultiplier=1.2f; weapon.ApplyUpgrades(new[]{upgrade});
+    weapon.TryLightChop(Vector2.right); tick(weapon.LightDuration*weapon.Settings.lightWindupFraction+.001f); render();
+    check(Mathf.Abs(weapon.LightArc-150f)<.001f && Mathf.Abs(weapon.LightDuration-.25f)<.001f && weapon.LightPhase==TheLostShrine.Weapons.MeleePhase.Active,"Wider/faster upgrade changes shared geometry and timing");
+    check(Vector2.Angle(Vector2.right,mesh.vertices[1])>70f,"Mesh expands to the upgraded arc");
+    tick(.3f); stamina.Restore();weapon.TryLightChop(Vector2.right);tick(.1f);render();
+    check(weapon.ComboIndex==1 && surface.enabled,"Backhand uses the same active footprint");
+    tick(.3f);stamina.Restore();weapon.TryLightChop(Vector2.right);render();
+    check(weapon.ComboIndex==2 && Mathf.Abs(weapon.LightReach-(weapon.Settings.lightRadius+.15f))<.001f,"Finisher expands reach from gameplay stats");
+    tick(weapon.LightDuration*.42f);render();
+    float farthest=0;foreach(var v in mesh.vertices) farthest=Mathf.Max(farthest,v.magnitude);
+    check(Mathf.Abs(farthest-weapon.LightReach)<.001f,"Finisher contour reaches its actual hit boundary");
+    Time.timeScale=0;render();check(!surface.enabled,"Pause hides the footprint");Time.timeScale=1;render();check(surface.enabled,"Resume restores current action phase");
+    feedback.enabled=false;check(!surface.enabled,"Disabling feedback clears its renderer");feedback.enabled=true;render();
+    weapon.CancelAction();render();check(!surface.enabled,"Cancellation clears footprint immediately on presentation update");
+    stamina.TrySpend(stamina.Current);check(!weapon.TryLightChop(Vector2.right),"Exhausted click cannot start a swing");render();check(!surface.enabled,"Rejected click has no swipe");
+    stamina.Restore();weapon.TryLightChop(Vector2.right);tick(.6f);render();check(!surface.enabled,"Long physics step cannot leave stale active feedback");
+    reset();weapon.TryLightChop(Vector2.right);tick(.1f);
+    root.GetComponent<TheLostShrine.Combat.Damageable>().ReceiveHit(new TheLostShrine.Combat.CombatHit(target,TheLostShrine.Combat.AttackKind.EnemyMelee,1000,Vector2.right,0f,0f));
+    render();check(!surface.enabled && weapon.LightPhase==TheLostShrine.Weapons.MeleePhase.None,"Defeat cancels damage and its feedback");
+} finally {
+    Time.timeScale=1f;Physics2D.simulationMode=previousSimulation;
+    foreach(var go in created) if(go!=null) UnityEngine.Object.DestroyImmediate(go);
+    UnityEngine.Object.DestroyImmediate(upgrade);
+}
+return string.Join("\n",results.ToArray());

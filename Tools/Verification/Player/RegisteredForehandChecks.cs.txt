@@ -18,7 +18,7 @@ foreach(var view in asset.views)
     }
 check(Mathf.Abs(asset.Duration-.32f)<.00001f && asset.SampleAtSeconds(.129f)==2 &&
     asset.SampleAtSeconds(.13f)==3 && asset.SampleAtSeconds(.17f)==4,"Authored exposures keep 130-170 ms contact");
-var settings=AssetDatabase.LoadAssetAtPath<TheLostShrine.Weapons.HatchetSettings>("Assets/Settings/Weapons/TutorialHatchetSettings.asset");
+var settings=AssetDatabase.LoadAssetAtPath<TheLostShrine.Weapons.HatchetSettings>("Assets/Settings/Weapons/HatchetSettings.asset");
 float start=settings.lightWindupFraction, end=settings.lightSwingEndFraction;
 check(asset.SampleMeleeCel(start-.001f,start,end)==2 && asset.SampleMeleeCel(start,start,end)==3,"Drive ends exactly at gameplay contact start");
 check(asset.SampleMeleeCel(end-.001f,start,end)==3 && asset.SampleMeleeCel(end,start,end)==4,"Recovery begins exactly at gameplay contact end");

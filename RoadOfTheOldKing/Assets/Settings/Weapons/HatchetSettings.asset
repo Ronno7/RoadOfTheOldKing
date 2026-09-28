@@ -14,15 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Weapons.HatchetSettings
   lightDuration: 0.3
   finisherDurationMultiplier: 1.15
-  lightWindupFraction: 0.12
-  lightSwingEndFraction: 0.5
-  lightRadius: 1.35
+  lightWindupFraction: 0.32
+  lightSwingEndFraction: 0.53
+  lightRadius: 2.4
   lightArc: 110
   comboWindow: 0.55
   lightDamage: 10
   finisherDamage: 15
-  lightStaminaCost: 18
-  finisherStaminaCost: 24
+  lightStaminaCost: 15
+  finisherStaminaCost: 20
   minimumCharge: 0.2
   fullCharge: 0.8
   cleaveDuration: 0.45
@@ -32,14 +32,22 @@ MonoBehaviour:
   cleaveKnockback: 6
   cleaveStagger: 0.7
   throwAction:
-    preparation: [0.04, 0.04]
-    aim: [0.2, 0.2]
-    release: [0.04, 0.04, 0.07, 0.08]
+    preparation:
+    - 0.04
+    - 0.04
+    aim:
+    - 0.2
+    - 0.2
+    release:
+    - 0.04
+    - 0.04
+    - 0.07
+    - 0.08
     launchCel: 1
     aimMovementScale: 0.55
-  throwSpeed: 10
+  throwSpeed: 12
   recallSpeed: 16
-  throwRange: 6
+  throwRange: 7
   autoRecallDistance: 10
   flightRadius: 0.18
   throwDamage: 15

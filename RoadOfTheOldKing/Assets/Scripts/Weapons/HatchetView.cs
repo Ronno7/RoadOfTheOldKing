@@ -28,9 +28,6 @@ namespace TheLostShrine.Weapons
         private int originalSortingLayer;
         private int originalSortingOrder;
         private readonly AnimationCurve ringWidth = AnimationCurve.Linear(0f, 1f, 1f, 1f);
-        private readonly AnimationCurve slashWidth = new AnimationCurve(
-            new Keyframe(0f, 0f), new Keyframe(0.3f, 0.85f),
-            new Keyframe(0.65f, 1f), new Keyframe(1f, 0f));
 
         private void Awake()
         {
@@ -91,10 +88,7 @@ namespace TheLostShrine.Weapons
                 transform.position = weapon.Owner.transform.position;
                 var chop = weapon.Owner.GetComponent<TheLostShrine.Player.PlayerChopAnimation>();
                 if (chop != null && chop.TryApplyWeapon(model, blade))
-                {
-                    DrawChopAccent(chop);
                     return;
-                }
             }
 
             if (useAnimatedGrip && weapon.State == HatchetState.Held && weapon.Owner != null)
@@ -196,23 +190,6 @@ namespace TheLostShrine.Weapons
             }
             model.localPosition = new Vector3(Mathf.Cos(poseAngle * Mathf.Deg2Rad), Mathf.Sin(poseAngle * Mathf.Deg2Rad)) * poseRadius;
 
-            float fadeEnd = Mathf.Min(1f, settings.lightSwingEndFraction + 0.28f);
-            float fade = 1f - Mathf.InverseLerp(settings.lightSwingEndFraction, fadeEnd, progress);
-            if (sweepProgress > 0f && fade > 0f)
-            {
-                // Both the blade and crescent use the same signed sweep, including the backhand.
-                float trailSweep = Mathf.Min(weapon.LightArc * sweepProgress, 85f);
-                Color color = weapon.ComboIndex == 2 ? new Color(1f, 0.8f, 0.3f, fade)
-                    : new Color(1f, 0.96f, 0.78f, fade);
-                DrawArc(transform.position, weapon.LightReach, sweepAngle - direction * trailSweep,
-                    direction * trailSweep, color);
-                if (arc != null)
-                {
-                    arc.widthCurve = slashWidth;
-                    arc.widthMultiplier = weapon.ComboIndex == 2 ? 0.23f : 0.17f;
-                    arc.startColor = new Color(color.r, color.g, color.b, fade * 0.3f);
-                }
-            }
             return poseAngle;
         }
 
@@ -231,17 +208,6 @@ namespace TheLostShrine.Weapons
             arc.positionCount = 2;
             arc.SetPosition(0, origin);
             arc.SetPosition(1, origin + direction * distance);
-        }
-
-        private void DrawChopAccent(TheLostShrine.Player.PlayerChopAnimation chop)
-        {
-            if (!chop.TryGetSlash(out var origin, out var start, out var sweep, out var fade)) return;
-            DrawArc(origin, 1.08f, start, sweep, new Color(1f, 0.93f, 0.74f, fade * 0.7f));
-            if (arc != null)
-            {
-                arc.widthCurve = slashWidth;
-                arc.widthMultiplier = weapon.ComboIndex == 2 ? 0.14f : 0.10f;
-            }
         }
 
         private void DrawArc(Vector3 center, float radius, float startAngle, float sweep, Color color)

@@ -1,4 +1,4 @@
-// Run in Play Mode in an empty, unsaved scene. Uses real Tutorial prefabs, no save session.
+// Run in Play Mode in an empty, unsaved scene. Uses the standard Player and Tutorial weapon prefabs, no save session.
 // All fixtures and synthetic input devices are removed in finally. Stop Play Mode afterward.
 if (!Application.isPlaying || UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Progression.CheckpointSession>() != null)
     throw new Exception("Use an empty Play Mode scene without a checkpoint session.");
@@ -10,9 +10,9 @@ var created = new System.Collections.Generic.List<GameObject>();
 System.Func<string,GameObject> spawn = path => {
     var go = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(path)); created.Add(go); return go;
 };
-var goPlayer = spawn("Assets/Prefabs/Player/TutorialPlayer.prefab");
+var goPlayer = spawn("Assets/Prefabs/Player/Player.prefab");
 var player = goPlayer.GetComponent<TheLostShrine.Player.PlayerCombatController>();
-var weapon = spawn("Assets/Prefabs/Weapons/TutorialHatchet.prefab").GetComponent<TheLostShrine.Weapons.HatchetWeapon>();
+var weapon = spawn("Assets/Prefabs/Weapons/Hatchet.prefab").GetComponent<TheLostShrine.Weapons.HatchetWeapon>();
 var stamina = player.GetComponent<TheLostShrine.Player.PlayerStamina>();
 var dash = player.GetComponent<TheLostShrine.Player.PlayerDash>();
 var reaction = player.GetComponent<TheLostShrine.Combat.HitReaction>();
@@ -69,12 +69,12 @@ try {
     tick(.119f); check(!weapon.IsAway && near(stamina.Current,75), "Same-sample down/up preserves quick tap wind-up");
     tick(.001f); check(weapon.IsAway, "Same-sample tap launches at 120 ms");
     reset(); weapon.TryThrow(Vector2.right); tick(.5f);
-    check(near(weapon.transform.position.x,103.8f), "Large step advances only post-marker flight distance");
+    check(near(weapon.transform.position.x,104.56f), "Large step advances only post-marker flight distance");
     reset(); weapon.TryThrow(Vector2.right); for(int i=0;i<25;i++) tick(.02f);
-    check(near(weapon.transform.position.x,103.8f), "Partitioned physics steps match large-step flight");
+    check(near(weapon.transform.position.x,104.56f), "Partitioned physics steps match large-step flight");
 
     reset(); press(); tick(.08f); release(); move(new Vector2(101,100)); weapon.SetAim(Vector2.up); tick(.14f);
-    check(weapon.AttackDirection == Vector2.right && near(weapon.transform.position.x,102) && near(weapon.transform.position.y,100),
+    check(weapon.AttackDirection == Vector2.right && near(weapon.transform.position.x,102.2f) && near(weapon.transform.position.y,100),
         "Aim locks at key-up; launch origin follows player until marker");
     reset(); stamina.TrySpend(90); press(); tick(.08f); release(); tick(.5f);
     check(!weapon.IsThrowing && !weapon.IsAway && near(stamina.Current,10), "Unaffordable release returns to ready without launch");

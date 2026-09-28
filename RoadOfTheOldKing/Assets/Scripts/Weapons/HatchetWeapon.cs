@@ -5,6 +5,7 @@ using UnityEngine;
 namespace TheLostShrine.Weapons
 {
     public enum HatchetState { OnGround, Held, LightChop, Charging, Cleaving, Flying, Stuck, Returning }
+    public enum MeleePhase { None, Windup, Active, Recovery }
 
     [DisallowMultipleComponent]
     public sealed class HatchetWeapon : MonoBehaviour
@@ -71,6 +72,13 @@ namespace TheLostShrine.Weapons
         public float AttackProgress => Mathf.Clamp01(elapsed / (State == HatchetState.Cleaving
             ? settings.cleaveDuration : LightDuration));
         public float LightDuration => settings.lightDuration * (ComboIndex == 2 ? settings.finisherDurationMultiplier : 1f) / lightSpeedMultiplier;
+        private float LightDamageStart => LightDuration * settings.lightWindupFraction;
+        private float LightDamageEnd => LightDuration * settings.lightSwingEndFraction;
+        // Presentation reads the same action clock/window as the physics interval below.
+        public MeleePhase LightPhase => State != HatchetState.LightChop ? MeleePhase.None
+            : elapsed < LightDamageStart ? MeleePhase.Windup
+            : elapsed < LightDamageEnd ? MeleePhase.Active : MeleePhase.Recovery;
+        public float LightSwingProgress => Mathf.InverseLerp(LightDamageStart, LightDamageEnd, elapsed);
 
         // Rebuild from saved selections, never mutate the shared base settings asset.
         public void ApplyUpgrades(System.Collections.Generic.IEnumerable<HatchetUpgrade> upgrades)
@@ -277,8 +285,7 @@ namespace TheLostShrine.Weapons
                     break;
                 case HatchetState.LightChop:
                     transform.position = owner.transform.position;
-                    if (elapsed >= LightDuration * settings.lightWindupFraction &&
-                        previousElapsed < LightDuration * settings.lightSwingEndFraction)
+                    if (elapsed >= LightDamageStart && previousElapsed < LightDamageEnd)
                         hits.Melee(owner.transform.position, attackDirection,
                             LightReach, LightArc,
                             new CombatHit(owner.gameObject, AttackKind.LightChop,

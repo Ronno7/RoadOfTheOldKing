@@ -18,7 +18,7 @@ foreach (var view in asset.views)
         check(layer[0].rect.position == new Vector2(0,640) && layer[4].rect.position == Vector2.zero &&
             layer[7].rect.position == new Vector2(1920,0), "Top row first, no vertical flip: " + texture.name);
     }
-var settings = AssetDatabase.LoadAssetAtPath<TheLostShrine.Weapons.HatchetSettings>("Assets/Settings/Weapons/TutorialHatchetSettings.asset");
+var settings = AssetDatabase.LoadAssetAtPath<TheLostShrine.Weapons.HatchetSettings>("Assets/Settings/Weapons/HatchetSettings.asset");
 var timing = settings.throwAction;
 int launchCel = timing.preparation.Length + timing.aim.Length + timing.launchCel;
 check(timing.preparation.Length == 2 && timing.aim.Length == 2 && timing.release.Length == 4 && launchCel == 5,
