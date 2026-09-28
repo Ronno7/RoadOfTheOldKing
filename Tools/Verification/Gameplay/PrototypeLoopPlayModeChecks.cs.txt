@@ -49,7 +49,7 @@ check(player.Weapon==null&&!player.CanRecall&&guide.Step==TheLostShrine.Prototyp
 check(closed("Practice Exit Gate")&&closed("Recall Return Gate")&&closed("Enemy Approach Gate"),"All progression gates start closed");
 check(!reachable(body.position,new Vector2(16.5f,-3.5f))&&!reachable(body.position,new Vector2(-17.5f,9.5f)),"Geometry prevents skipping directly to Recall or enemy");
 check(enemy.State==TheLostShrine.Combat.MeleeEnemyState.Idle,"Distant enemy stays idle");
-move(weapon.transform.position);Physics2D.Simulate(.02f);tickGuide();
+move(weapon.transform.position);Physics2D.Simulate(.02f);check(player.Weapon==null,"Starting pickup waits for F");player.GetComponent<TheLostShrine.Player.PlayerBonfireInteraction>().TryInteract();tickGuide();
 check(player.Weapon==weapon&&guide.Step==TheLostShrine.Prototype.PrototypeStep.Chop,"Actual pickup advances to melee lesson");
 check(!player.CanRecall,"Picking up the hatchet still does not grant Recall");
 var dummy=GameObject.Find("Practice Dummy 1").GetComponent<TheLostShrine.Combat.Damageable>();
@@ -69,8 +69,8 @@ weapon.TryBeginCharge();tickWeapon(.9f);weapon.TryReleaseCharge(Vector2.right);t
 check(guide.Step==TheLostShrine.Prototype.PrototypeStep.UnlockRecall,"Full charged cleave opens the path to Recall");
 check(reachable(new Vector2(-3.5f,-4.5f),new Vector2(16.5f,-3.5f)),"Cleared bush and stone pinch points fit the player collider");
 check(closed("Recall Return Gate")&&closed("Enemy Approach Gate"),"Return shortcut and enemy remain locked before Recall");
-move(GameObject.Find("Recall Altar").transform.position);Physics2D.Simulate(.02f);tickGuide();
-check(player.CanRecall&&guide.Step==TheLostShrine.Prototype.PrototypeStep.RecallPractice&&!closed("Recall Return Gate"),"Real altar trigger grants Recall and opens the upper return route");
+move(GameObject.Find("Recall Altar").transform.position);Physics2D.Simulate(.02f);player.GetComponent<TheLostShrine.Player.PlayerBonfireInteraction>().TryInteract();tickGuide();
+check(player.CanRecall&&guide.Step==TheLostShrine.Prototype.PrototypeStep.RecallPractice&&!closed("Recall Return Gate"),"Explicit altar interaction grants Recall and opens the upper return route");
 check(reachable(body.position,new Vector2(-12.5f,-.5f)),"Return path connects altar back to original dummy room");
 check(!reachable(body.position,new Vector2(-17.5f,9.5f)),"Enemy corner stays blocked until Recall practice");
 dummy.GetComponent<TheLostShrine.Prototype.PracticeTarget>().ResetTarget();

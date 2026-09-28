@@ -12,7 +12,7 @@ The original [character sheet](../RoadOfTheOldKing/Assets/Art/Sprites/Player/Pla
 
 [South action loop](Art/Player/Previews/Live-Action-Loop-South.gif) · [West action loop](Art/Player/Previews/Live-Action-Loop-West.gif) · [Character comparison](Art/Player/Previews/Current-Continuity.png) · [Hatchet handoffs](Art/Player/Previews/Axe-Continuity.png)
 
-These captures show the animation and weapon systems in Tutorial with Recall enabled. They do not represent a completed Tutorial progression sequence.
+These captures show the animation and weapon systems in Tutorial with Recall enabled; the older captures retain the previous perspective-based flight art. They do not represent a completed Tutorial progression sequence.
 
 ## Layers and weapon ownership
 
@@ -36,11 +36,13 @@ Registered frames use a 640 x 640 canvas, 128 pixels per unit and a common foot 
 | Catch | 4 | Reach holds until confirmed arrival, followed by grip and recovery |
 | Dash | 5 | Travel and recovery follow the gameplay dash |
 | Sprint | 8 | Actual distance traveled drives gait phase |
-| Detached hatchet spin | 8 shared frames | Four complete rotations per second |
+| Detached hatchet | One shared sprite | Seven rotations per second; fixed direction-based landing |
 
 The registered body tracks contain 148 frame slots, including reuse and 24 separate unarmed sprint frames. The original 16-frame locomotion sheet remains separate. Idle/walk use Unity animation clips; gameplay-driven action sequences use custom assets under `Assets/Animations`.
 
 Tap **E** quick-throws; holding **E** enters aim and releasing throws. Quick throws release at 120 ms, or 40 ms after releasing a prepared hold. The frame transition shares the physical launch marker, including when a simulation step crosses that marker. Catch presentation follows confirmed arrival so the player cannot appear to own the axe early.
+
+The detached axe reuses the pickup sprite at 1.15x scale, centered on its collision position during flight and after landing. A short trail supplies motion feedback; the held drawings and pickup pivot remain separate from this presentation.
 
 Sprint advances one cycle per 3.2 units traveled; pushing against a wall stops the gait. Melee contact and hit pause follow gameplay timing, and dash frames do not extend the dodge immunity window.
 

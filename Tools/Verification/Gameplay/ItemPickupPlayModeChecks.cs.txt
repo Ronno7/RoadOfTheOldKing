@@ -1,0 +1,90 @@
+// Run in fresh Tutorial Play Mode with a TheLostShrine.Verification.Pickups.* save key.
+// Before play, capture the original key/save into PickupCheck.OriginalKey, RealSaveExists and RealSave
+// in Editor SessionState. Restore the scene key and remove the isolated test save afterward.
+if (!EditorApplication.isPlaying) throw new Exception("Play Mode required.");
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var session=TheLostShrine.Progression.CheckpointSession.Instance;
+string key=session==null?"":(string)session.GetType().GetField("saveKey",flags).GetValue(session);
+if (!key.StartsWith("TheLostShrine.Verification.Pickups.")) throw new Exception("Fresh isolated pickup save required.");
+var results=new System.Collections.Generic.List<string>();
+Action<bool,string> check=(ok,name)=>{if(!ok)throw new Exception("FAIL: "+name);results.Add("PASS: "+name);};
+var player=UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Player.PlayerHealth>();
+var combat=player.GetComponent<TheLostShrine.Player.PlayerCombatController>();
+var body=player.GetComponent<Rigidbody2D>();
+var interaction=player.GetComponent<TheLostShrine.Player.PlayerBonfireInteraction>();
+var stamina=player.GetComponent<TheLostShrine.Player.PlayerStamina>();
+var weapon=UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Weapons.HatchetWeapon>();
+var enemy=UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Combat.SimpleMeleeEnemy>();
+var reward=UnityEngine.Object.FindFirstObjectByType<TheLostShrine.World.SunShardReward>();
+var fire=session.Fires.Single();
+var store=new TheLostShrine.Progression.PlayerPrefsProgressStore(key);
+var oldSimulation=Physics2D.simulationMode;
+GameObject extra=null,heart=null;
+Action refresh=()=>interaction.GetType().GetMethod("RefreshNearby",flags).Invoke(interaction,null);
+Action<float> tick=dt=>weapon.GetType().GetMethod("Simulate",flags).Invoke(weapon,new object[]{dt});
+Action<Vector2> move=p=>{body.position=p;body.linearVelocity=Vector2.zero;player.transform.position=p;Physics2D.SyncTransforms();};
+try {
+    Physics2D.simulationMode=SimulationMode2D.Script;
+    combat.GetType().GetMethod("ProcessInput",flags).Invoke(combat,new object[]{new TheLostShrine.Input.CombatInputFrame{Active=true}});
+    check(combat.Weapon==null,"Fresh player starts without the hatchet");
+    move(weapon.transform.position);Physics2D.Simulate(.02f);tick(.02f);refresh();
+    check(combat.Weapon==null && weapon.State==TheLostShrine.Weapons.HatchetState.OnGround,"Standing over starting hatchet never equips it");
+    check(interaction.Prompt=="F - Pick up hatchet","Starting pickup shows F prompt");
+    check(interaction.TryInteract() && combat.Weapon==weapon && store.Load().hasHatchet,"F action equips and saves starting hatchet");
+    check(!interaction.TryInteract(),"Repeated pickup cannot equip a second hatchet");
+    move(new Vector2(1000,1000));stamina.Restore();weapon.TryThrow(Vector2.right);tick(1);
+    check(weapon.State==TheLostShrine.Weapons.HatchetState.Stuck,"Throw lands normally");
+    move(weapon.transform.position);tick(.1f);refresh();
+    check(weapon.State==TheLostShrine.Weapons.HatchetState.Held,"Walking onto thrown hatchet retrieves it automatically");
+    check(!interaction.TryInteract() && interaction.Prompt=="","Owned hatchet does not offer a redundant F interaction");
+    stamina.Restore();combat.UnlockRecall();weapon.TryThrow(Vector2.right);tick(1);
+    check(weapon.TryRecall(),"Recall remains available");
+    tick(1);
+    check(weapon.State==TheLostShrine.Weapons.HatchetState.Held,"Recall catches automatically without F");
+
+    enemy.GetComponent<TheLostShrine.Combat.Damageable>().ReceiveHit(new TheLostShrine.Combat.CombatHit(
+        player.gameObject,TheLostShrine.Combat.AttackKind.ChargedCleave,1000,Vector2.up,0,0,true));
+    move(fire.SpawnPosition);reward.transform.position=player.transform.position;
+    extra=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/World/SunShard.prefab"));
+    extra.transform.position=player.transform.position+Vector3.right*.4f;
+    var other=extra.GetComponent<TheLostShrine.World.SunShardReward>();
+    other.GetType().GetField("rewardId",flags).SetValue(other,"verification/second-pickup");
+    other.RestoreProgress(session.Progress);
+    Physics2D.SyncTransforms();Physics2D.Simulate(.02f);refresh();
+    check(session.Progress.sunShards==0 && reward.IsAvailable,"Standing on available shards does not collect them");
+    check(interaction.NearbyPickup==reward && interaction.Prompt=="F - Pick up Sun Shard","Nearest pickup gets the prompt before bonfire");
+    check(interaction.TryInteract() && session.Progress.sunShards==1 && !other.IsCollected && !interaction.IsOpen,"One F action collects one item without opening fire");
+    refresh();check(session.Progress.sunShards==1,"Discovery alone never repeats collection");
+    check(interaction.TryInteract() && session.Progress.sunShards==2,"A second action collects the next item");
+    check(interaction.TryInteract() && interaction.IsOpen && session.HasCheckpoint,"Next F action opens nearby bonfire");
+    check(interaction.TryInteract() && !interaction.IsOpen,"F closes bonfire without an extra interaction");
+
+    heart=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/World/HeartFragment.prefab"));
+    heart.transform.position=player.transform.position+Vector3.up*.2f;
+    var fragment=heart.GetComponent<TheLostShrine.World.HeartFragmentPickup>();
+    fragment.GetType().GetField("rewardId",flags).SetValue(fragment,"verification/fragment");
+    fragment.RestoreProgress(session.Progress);
+    Physics2D.SyncTransforms();Physics2D.Simulate(.02f);refresh();
+    check(!fragment.IsCollected && interaction.NearbyPickup==fragment,"Heart fragments wait for F");
+    Time.timeScale=0;check(!interaction.TryInteract() && !fragment.IsCollected,"Paused interaction rejected");Time.timeScale=1;
+    combat.enabled=false;check(!interaction.TryInteract() && !fragment.IsCollected,"Disabled control cannot collect");
+    combat.enabled=true;
+    combat.GetType().GetMethod("ProcessInput",flags).Invoke(combat,new object[]{new TheLostShrine.Input.CombatInputFrame{Active=true}});
+    check(interaction.TryInteract() && fragment.IsCollected,"F collects heart fragment");
+    check(!fragment.TryCollect(player),"Collected heart cannot duplicate");
+    var altar=UnityEngine.Object.FindFirstObjectByType<TheLostShrine.World.RecallUnlockPickup>();
+    if(altar!=null) {
+        combat.GetType().GetField("recallUnlocked",flags).SetValue(combat,false);
+        move(altar.transform.position);Physics2D.Simulate(.02f);refresh();
+        check(!combat.CanRecall,"Legacy altar no longer unlocks through overlap");
+        check(interaction.TryInteract() && combat.CanRecall && store.Load().recallUnlocked,"Legacy altar requires explicit F and saves unlock");
+    }
+    string realKey=SessionState.GetString("PickupCheck.OriginalKey","");
+    check(PlayerPrefs.HasKey(realKey)==SessionState.GetBool("PickupCheck.RealSaveExists",false) &&
+        PlayerPrefs.GetString(realKey,"")==SessionState.GetString("PickupCheck.RealSave",""),"Normal Tutorial save untouched");
+    return string.Join("\n",results);
+} finally {
+    Time.timeScale=1;Physics2D.simulationMode=oldSimulation;
+    if(extra!=null)UnityEngine.Object.DestroyImmediate(extra);
+    if(heart!=null)UnityEngine.Object.DestroyImmediate(heart);
+}

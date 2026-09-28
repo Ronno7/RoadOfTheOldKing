@@ -8,7 +8,7 @@ Tutorial moves from a sheltered village and practice terrace through woodland, a
 
 [Village and work yard](Art/Tutorial/Previews/tutorial-populated-home.png) · [Practice terrace](Art/Tutorial/Previews/tutorial-populated-practice.png) · [Forest road](Art/Tutorial/Previews/tutorial-forest-road.png) · [Ruined courtyard](Art/Tutorial/Previews/tutorial-recall-courtyard.png)
 
-The environment and player systems are integrated in Tutorial. Its teaching sequence, Recall awakening, enemy and checkpoint progression remain in development. Static practice and ruin artwork alone does not imply those interactions are implemented.
+The environment and player systems are integrated in Tutorial. The first enemy, shard reward and bonfire setup reuse the gameplay prefabs. Its teaching sequence, Recall awakening and overworld transition remain in development. Static practice and ruin artwork alone does not imply those interactions are implemented.
 
 ## Tilemap composition
 

@@ -277379,11 +277379,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1009299101363915887, guid: 249a612a659afa440a7621e6cb21722b, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 38.31733
+      value: 81.03
       objectReference: {fileID: 0}
     - target: {fileID: 1009299101363915887, guid: 249a612a659afa440a7621e6cb21722b, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 26.712934
+      value: 28.86
       objectReference: {fileID: 0}
     - target: {fileID: 1009299101363915887, guid: 249a612a659afa440a7621e6cb21722b, type: 3}
       propertyPath: m_LocalPosition.z
@@ -363410,6 +363410,348 @@ Tilemap:
     e31: 0
     e32: 0
     e33: 1
+--- !u!114 &9001000001 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8008346698316579839, guid: d7c55d4254c5ea14aac253e4b271919f, type: 3}
+  m_PrefabInstance: {fileID: 1607463906426744502}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 511025610d771e048af5bfdc734b16fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerCombatController
+--- !u!114 &9001000002 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4183317567831234456, guid: d7c55d4254c5ea14aac253e4b271919f, type: 3}
+  m_PrefabInstance: {fileID: 1607463906426744502}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77ed5e44f82138e47a2ffd319bf6a318, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerHealth
+--- !u!1 &9001000003
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9001000004}
+  m_Layer: 0
+  m_Name: Tutorial Gameplay
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9001000004
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9001000003}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 9001000006}
+  - {fileID: 9001000009}
+  - {fileID: 9001000011}
+  - {fileID: 9001000014}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &9001000005
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 9001000004}
+    m_Modifications:
+    - target: {fileID: 2201329399722417042, guid: c1fa4c848d1d17a43b5934c24a272e5e, type: 3}
+      propertyPath: maxHealth
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 7719948658464183918, guid: c1fa4c848d1d17a43b5934c24a272e5e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 86
+      objectReference: {fileID: 0}
+    - target: {fileID: 7719948658464183918, guid: c1fa4c848d1d17a43b5934c24a272e5e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 7719948658464183918, guid: c1fa4c848d1d17a43b5934c24a272e5e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7719948658464183918, guid: c1fa4c848d1d17a43b5934c24a272e5e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9009435604842691915, guid: c1fa4c848d1d17a43b5934c24a272e5e, type: 3}
+      propertyPath: damage
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 9009435604842691915, guid: c1fa4c848d1d17a43b5934c24a272e5e, type: 3}
+      propertyPath: target
+      value: 
+      objectReference: {fileID: 9001000002}
+    - target: {fileID: 9009435604842691915, guid: c1fa4c848d1d17a43b5934c24a272e5e, type: 3}
+      propertyPath: moveSpeed
+      value: 1.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 9009435604842691915, guid: c1fa4c848d1d17a43b5934c24a272e5e, type: 3}
+      propertyPath: leashRadius
+      value: 5.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 9009435604842691915, guid: c1fa4c848d1d17a43b5934c24a272e5e, type: 3}
+      propertyPath: noticeRadius
+      value: 4.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 9009435604842691915, guid: c1fa4c848d1d17a43b5934c24a272e5e, type: 3}
+      propertyPath: windupDuration
+      value: 0.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 9009435604842691915, guid: c1fa4c848d1d17a43b5934c24a272e5e, type: 3}
+      propertyPath: recoveryDuration
+      value: 1.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9055788630328572994, guid: c1fa4c848d1d17a43b5934c24a272e5e, type: 3}
+      propertyPath: m_Name
+      value: First Enemy
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: c1fa4c848d1d17a43b5934c24a272e5e, type: 3}
+--- !u!4 &9001000006 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7719948658464183918, guid: c1fa4c848d1d17a43b5934c24a272e5e, type: 3}
+  m_PrefabInstance: {fileID: 9001000005}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &9001000007 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2201329399722417042, guid: c1fa4c848d1d17a43b5934c24a272e5e, type: 3}
+  m_PrefabInstance: {fileID: 9001000005}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Damageable
+--- !u!1001 &9001000008
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 9001000004}
+    m_Modifications:
+    - target: {fileID: 5654612537884550831, guid: 82f144a445197664aa1a134666757137, type: 3}
+      propertyPath: m_Name
+      value: First Enemy Sun Shard
+      objectReference: {fileID: 0}
+    - target: {fileID: 6908157066474429611, guid: 82f144a445197664aa1a134666757137, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 86
+      objectReference: {fileID: 0}
+    - target: {fileID: 6908157066474429611, guid: 82f144a445197664aa1a134666757137, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 6908157066474429611, guid: 82f144a445197664aa1a134666757137, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6908157066474429611, guid: 82f144a445197664aa1a134666757137, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9004386297107476432, guid: 82f144a445197664aa1a134666757137, type: 3}
+      propertyPath: rewardId
+      value: tutorial/first-enemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 9004386297107476432, guid: 82f144a445197664aa1a134666757137, type: 3}
+      propertyPath: defeatSource
+      value: 
+      objectReference: {fileID: 9001000007}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 82f144a445197664aa1a134666757137, type: 3}
+--- !u!4 &9001000009 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6908157066474429611, guid: 82f144a445197664aa1a134666757137, type: 3}
+  m_PrefabInstance: {fileID: 9001000008}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &9001000010
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 9001000004}
+    m_Modifications:
+    - target: {fileID: 217401835310237027, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 552519079130167117, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: id
+      value: tutorial/roadside-fire
+      objectReference: {fileID: 0}
+    - target: {fileID: 552519079130167117, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: displayName
+      value: Roadside Bonfire
+      objectReference: {fileID: 0}
+    - target: {fileID: 552519079130167117, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: allowsUpgrades
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1881476792191968801, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 87
+      objectReference: {fileID: 0}
+    - target: {fileID: 1881476792191968801, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 83
+      objectReference: {fileID: 0}
+    - target: {fileID: 1881476792191968801, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1881476792191968801, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2369363320632364989, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7300992784925826037, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8209990534844468561, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: m_Name
+      value: Roadside Bonfire
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+--- !u!4 &9001000011 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1881476792191968801, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+  m_PrefabInstance: {fileID: 9001000010}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &9001000012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9001000013}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 906b59732e7d04c4f9cdba70a9557718, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 9001000001}
+  playerHealth: {fileID: 9001000002}
+  guide: {fileID: 0}
+  heading: ROAD OF THE OLD KING
+  compact: 1
+--- !u!1 &9001000013
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9001000014}
+  - component: {fileID: 9001000012}
+  m_Layer: 0
+  m_Name: Tutorial HUD
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9001000014
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9001000013}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 9001000004}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &9001000015
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9001000016}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1e2e35f10ff2084b82dc32b822bdeaa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  saveKey: RoadOfTheOldKing.Tutorial.Save.v1
+  upgradeTiers:
+  - {fileID: 11400000, guid: 4ff5f7aa093c4394d826b17ca248bd36, type: 2}
+--- !u!1 &9001000016
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9001000017}
+  - component: {fileID: 9001000015}
+  m_Layer: 0
+  m_Name: Tutorial Session
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9001000017
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9001000016}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1839735485 &140403919657787182
 Tilemap:
   m_ObjectHideFlags: 0
@@ -659961,3 +660303,5 @@ SceneRoots:
   - {fileID: 1607463906426744502}
   - {fileID: 4023814267581280584}
   - {fileID: 1610212160}
+  - {fileID: 9001000004}
+  - {fileID: 9001000017}

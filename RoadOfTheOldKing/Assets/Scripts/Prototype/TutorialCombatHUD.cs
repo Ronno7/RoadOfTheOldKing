@@ -12,6 +12,8 @@ namespace TheLostShrine.Prototype
         [SerializeField] private PlayerCombatController player;
         [SerializeField] private PlayerHealth playerHealth;
         [SerializeField] private PrototypeLoopGuide guide;
+        [SerializeField] private string heading = "PROTOTYPE LOOP";
+        [SerializeField] private bool compact;
         private GUIStyle title;
         private GUIStyle text;
         private bool restarting;
@@ -72,8 +74,8 @@ namespace TheLostShrine.Prototype
             float width = Mathf.Min(440f, screenWidth - 24f);
             Color previousColor = GUI.color;
 
-            GUI.Box(new Rect(12f, 12f, width, 186f), GUIContent.none);
-            GUI.Label(new Rect(24f, 18f, width - 24f, 24f), "PROTOTYPE LOOP", title);
+            GUI.Box(new Rect(12f, 12f, width, compact ? 94f : 186f), GUIContent.none);
+            GUI.Label(new Rect(24f, 18f, width - 24f, 24f), heading, title);
             if (playerHealth != null && playerHealth.Health != null)
             {
                 var health = playerHealth.Health;
@@ -96,31 +98,38 @@ namespace TheLostShrine.Prototype
                 if (stamina.WasSpendRejected)
                     GUI.Label(new Rect(24f, 207f, width - 24f, 24f), "Not enough stamina - walk to recover.", text);
             }
-            string instruction = guide != null ? guide.Instruction : "Pick up the hatchet and practice.";
-            GUI.Label(new Rect(24f, 107f, width - 24f, 82f), instruction, text);
+            string instruction = guide != null ? guide.Instruction : "Press F near the hatchet to pick it up and practice.";
+            if (!compact)
+                GUI.Label(new Rect(24f, 107f, width - 24f, 82f), instruction, text);
             var progress = CheckpointSession.Instance;
             if (progress != null)
             {
-                GUI.Box(new Rect(screenWidth - 218f, 12f, 206f, 102f), GUIContent.none);
+                GUI.Box(new Rect(screenWidth - 218f, 12f, 206f, compact ? 42f : 102f), GUIContent.none);
                 GUI.Label(new Rect(screenWidth - 206f, 18f, 190f, 26f), "SUN SHARDS  " + progress.Progress.sunShards, title);
-                int fragments = HeartFragmentProgression.Count(progress.Progress);
-                int bonus = HeartFragmentProgression.BonusHealth(progress.Progress);
-                GUI.Label(new Rect(screenWidth - 206f, 46f, 190f, 26f),
-                    "FRAGMENTS  " + fragments % HeartFragmentProgression.FragmentsPerHeart + " / 3", text);
-                GUI.Label(new Rect(screenWidth - 206f, 72f, 190f, 34f),
-                    bonus > 0 ? "Permanent HP: +" + bonus : "3 fragments = +20 max HP", text);
+                if (!compact)
+                {
+                    int fragments = HeartFragmentProgression.Count(progress.Progress);
+                    int bonus = HeartFragmentProgression.BonusHealth(progress.Progress);
+                    GUI.Label(new Rect(screenWidth - 206f, 46f, 190f, 26f),
+                        "FRAGMENTS  " + fragments % HeartFragmentProgression.FragmentsPerHeart + " / 3", text);
+                    GUI.Label(new Rect(screenWidth - 206f, 72f, 190f, 34f),
+                        bonus > 0 ? "Permanent HP: +" + bonus : "3 fragments = +20 max HP", text);
+                }
             }
 
             string controls = "WASD / arrows: move   |   Shift: sprint   |   Mouse: aim   |   Scroll: zoom\n" +
                 "LMB: slash   |   Hold / release RMB: cleave   |   Space: dash / dodge\n" +
                 "Tap E: throw   |   Hold E: aim; release: throw; RMB: cancel" +
-                (player.CanRecall ? "   |   E while away: recall" : "\nRetrieve thrown axe on foot") +
-                "\nF: rest / travel   |   Esc: leave fire menu";
-            GUI.Box(new Rect(12f, screenHeight - 128f, Mathf.Min(760f, screenWidth - 24f), 116f), GUIContent.none);
-            GUI.Label(new Rect(24f, screenHeight - 122f, Mathf.Min(738f, screenWidth - 48f), 110f), controls, text);
+                (player.CanRecall ? "   |   E while away: recall" : "\nWalk over your thrown axe to retrieve it") +
+                "\nF: pick up / rest   |   Esc: leave fire menu";
+            if (!compact)
+            {
+                GUI.Box(new Rect(12f, screenHeight - 128f, Mathf.Min(760f, screenWidth - 24f), 116f), GUIContent.none);
+                GUI.Label(new Rect(24f, screenHeight - 122f, Mathf.Min(738f, screenWidth - 48f), 110f), controls, text);
+            }
 
-            if (bonfireInteraction != null && !bonfireInteraction.IsOpen && bonfireInteraction.Nearby != null)
-                GUI.Label(new Rect(24f, 235f, width - 24f, 28f), "F - Rest at " + bonfireInteraction.Nearby.DisplayName, title);
+            if (bonfireInteraction != null && !string.IsNullOrEmpty(bonfireInteraction.Prompt))
+                GUI.Label(new Rect(24f, compact ? 116f : 235f, width - 24f, 28f), bonfireInteraction.Prompt, title);
 
             var weapon = player.Weapon;
             if (weapon != null && weapon.State == HatchetState.Charging)
@@ -177,7 +186,7 @@ namespace TheLostShrine.Prototype
             y += 90f;
             if (confirmNewRun)
             {
-                GUI.Label(new Rect(x, y, 384f, 44f), "Start over? This clears this prototype's saved progress.", text);
+                GUI.Label(new Rect(x, y, 384f, 44f), "Start over? This clears this journey's saved progress.", text);
                 if (GUI.Button(new Rect(x, y + 54f, 188f, 34f), "Start new run"))
                     session.StartNewRun();
                 if (GUI.Button(new Rect(x + 196f, y + 54f, 188f, 34f), "Keep playing"))

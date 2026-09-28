@@ -5,21 +5,24 @@ using UnityEngine;
 namespace TheLostShrine.World
 {
     [DisallowMultipleComponent, RequireComponent(typeof(Collider2D))]
-    public sealed class RecallUnlockPickup : MonoBehaviour, IProgressParticipant
+    public sealed class RecallUnlockPickup : WorldPickup, IProgressParticipant
     {
         [SerializeField] private SpriteRenderer crystal;
         [SerializeField] private TextMesh label;
         private bool activated;
 
-        private void OnTriggerEnter2D(Collider2D other)
+        public override string Prompt => "Awaken Recall";
+        public override bool CanCollect(PlayerHealth player) => base.CanCollect(player) &&
+            !activated && player.GetComponent<PlayerCombatController>() != null &&
+            !player.GetComponent<PlayerCombatController>().CanRecall;
+
+        public override bool TryCollect(PlayerHealth player)
         {
-            if (activated)
-                return;
-            var player = other.GetComponentInParent<PlayerCombatController>();
-            if (player == null)
-                return;
-            player.UnlockRecall();
+            if (!CanCollect(player)) return false;
+            player.GetComponent<PlayerCombatController>().UnlockRecall();
             ShowActivated();
+            CheckpointSession.Instance?.SaveProgress();
+            return true;
         }
 
         private void ShowActivated()

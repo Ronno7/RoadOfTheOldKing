@@ -308,9 +308,12 @@ namespace TheLostShrine.Weapons
                 case HatchetState.Stuck:
                     if (stuckTarget != null && stuckTarget.gameObject.activeInHierarchy)
                         transform.position = stuckTarget.TransformPoint(stuckOffset);
+                    // An owned throw is a combat tool: retrieve it by walking close.
+                    // The initial, unowned OnGround pickup still requires F.
                     if (Vector2.Distance(transform.position, owner.transform.position) <= settings.retrieveDistance)
                     {
                         stuckTarget = null;
+                        transform.position = owner.transform.position;
                         SetState(HatchetState.Held);
                     }
                     break;

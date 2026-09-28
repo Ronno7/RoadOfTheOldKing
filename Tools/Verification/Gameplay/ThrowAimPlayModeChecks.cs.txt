@@ -150,7 +150,7 @@ try {
     check(targetHealth.Health==before-weapon.Settings.throwDamage && weapon.State==TheLostShrine.Weapons.HatchetState.Stuck,
         "Throw still hits once with multiple colliders and sticks to its target");
     move(weapon.transform.position); tick(.02f);
-    check(weapon.State==TheLostShrine.Weapons.HatchetState.Held, "On-foot retrieval still works before Recall unlock");
+    check(weapon.State==TheLostShrine.Weapons.HatchetState.Held, "Walk-over retrieval works before Recall unlock");
     target.SetActive(false); reset(); player.UnlockRecall(); weapon.TryThrow(Vector2.right); tick(.8f); move(new Vector2(90,100)); tick(.02f);
     check(weapon.State==TheLostShrine.Weapons.HatchetState.Returning, "Distance-based automatic Recall still starts");
     tick(2f); check(weapon.State==TheLostShrine.Weapons.HatchetState.Held, "Automatic Recall still reaches its owner");

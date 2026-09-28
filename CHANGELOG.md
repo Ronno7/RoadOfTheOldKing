@@ -1,7 +1,10 @@
 # Changelog
 
-## 27SEP2026 - Animation milestone and workspace cleanup
+## 27SEP2026 - Animation milestone, cleanup and Tutorial integration
 
+- Added explicit F interactions for initial equipment and item pickups, with contextual prompts and one-item-per-press selection shared with bonfire controls; thrown hatchets retain automatic walk-over retrieval for combat.
+- Simplified detached hatchet presentation to one larger sprite with faster spin, a short trail and consistent grounded placement; modestly increased Tutorial throw speed and reach.
+- Established the Tutorial enemy, unique Sun Shard reward and bonfire/checkpoint setup using existing prefabs, with separate Tutorial saves and a compact HUD.
 - Renamed the game to **Road of the Old King**, including Unity product settings, web presentation, editor menus and project folder paths.
 - Completed four-direction catch coverage, finishing the current player animation set. Accepted the artwork for now and moved future animation work into a ranked backlog so development can focus on Tutorial gameplay.
 - Organized animation definitions, sprite sheets, source art, previews and tools by purpose. Removed obsolete studies and temporary files while preserving working assets and useful development references.
