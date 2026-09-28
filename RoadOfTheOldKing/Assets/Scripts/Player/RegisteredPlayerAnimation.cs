@@ -10,7 +10,6 @@ namespace TheLostShrine.Player
     {
         [SerializeField] private SpriteRenderer body;
         [SerializeField] private RegisteredActionSprites forehand, throwing, catching;
-        [SerializeField] private AxeSpinSprites spin;
         [SerializeField] private RegisteredAimSprites aimGaits;
         [SerializeField] private RegisteredActionSprites dashSprites;
         [SerializeField] private RegisteredActionSprites sprintSprites;
@@ -26,15 +25,9 @@ namespace TheLostShrine.Player
         private readonly AimStrideClock aimStride = new AimStrideClock();
         private RegisteredActionSprites.View currentView, catchView, aimView;
         private Sprite currentBody, currentWeapon;
-        private uint flightSequence;
-        private Vector3 releaseOffset;
-        private float flightScale = 1f;
-        private int flightStartCel;
-        private bool flightFlipX;
         private bool justCaught, moved, caughtDuringThrow;
 
         public bool IsPresentingBody { get; private set; }
-        public bool HasSpin => isActiveAndEnabled && spin != null;
         public int DisplayedCel { get; private set; } = -1;
         public string DisplayedAction { get; private set; } = "Locomotion";
         public AimGait SelectedAimGait => aimStride.Gait;
@@ -46,11 +39,11 @@ namespace TheLostShrine.Player
             dash = GetComponent<PlayerDash>();
             motor = GetComponent<Rigidbody2D>();
             movement = GetComponent<PlayerMovement>();
-            if (body == null || forehand == null || throwing == null || catching == null || spin == null ||
+            if (body == null || forehand == null || throwing == null || catching == null ||
                 !forehand.IsRegistered(out _) || !throwing.IsRegistered(out _) ||
-                !catching.IsRegistered(out _) || !spin.IsRegistered(out _))
+                !catching.IsRegistered(out _))
             {
-                Debug.LogError("Registered player animation needs a body and four valid action assets.", this);
+                Debug.LogError("Registered player animation needs a body and three valid action assets.", this);
                 enabled = false;
                 return;
             }
@@ -93,7 +86,6 @@ namespace TheLostShrine.Player
             caughtDuringThrow = false;
             if (weapon == null) return;
             weapon.ReturnedToHand += OnReturned;
-            flightSequence = 0;
         }
 
         // Only use a supplied cardinal view in its own sector. Missing views never mirror anatomy.
@@ -162,15 +154,6 @@ namespace TheLostShrine.Player
             if (canAim && weapon.CanCancelThrowAim)
                 aimStride.Advance(weapon.ActionFacing, displacement, aimGaits == null ? 1.5f : aimGaits.strideLength, teleported);
             else aimStride.Reset();
-            if (weapon.FlightSequence != flightSequence)
-            {
-                flightSequence = weapon.FlightSequence;
-                var view = FindView(throwing, weapon.AttackDirection);
-                releaseOffset = view == null ? Vector3.up : body.transform.TransformPoint(view.freePropOffset) - transform.position;
-                flightScale = view == null ? 1f : view.freePropScale;
-                flightStartCel = view == null ? 0 : view.spinStartCel;
-                flightFlipX = view != null && view.spinFlipX;
-            }
             if (!weapon.IsThrowing || weapon.CanCancelThrowAim) caughtDuringThrow = false;
             bool throwingNow = weapon.IsThrowing && !caughtDuringThrow;
             if (!CanShowCatch || (weapon.State != HatchetState.Held && weapon.State != HatchetState.Returning) || throwingNow ||
@@ -280,41 +263,8 @@ namespace TheLostShrine.Player
                 blade.enabled = false;
                 return true;
             }
-            int cel = spin.Sample(weapon.FlightSeconds, flightStartCel);
-            Vector3 offset = Vector3.Lerp(releaseOffset, Vector3.up,
-                Mathf.SmoothStep(0f, 1f, weapon.FlightSeconds / .3f));
-            float scale = flightScale;
-            bool flipX = flightFlipX;
-            if (weapon.State == HatchetState.Stuck)
-                offset = Vector3.zero; // Impact/ground retrieval stays at the collision landmark.
-            if (weapon.State == HatchetState.Returning)
-            {
-                float distance = Vector2.Distance(weapon.transform.position, transform.position);
-                float approach = 1f - Mathf.Clamp01(distance / 2f);
-                var view = IsPresentingBody && DisplayedAction == "Catch" ? currentView : null;
-                Vector3 targetOffset = view == null ? Vector3.up : body.transform.TransformPoint(view.freePropOffset) - transform.position;
-                offset = Vector3.Lerp(Vector3.up, targetOffset, approach);
-                if (view != null)
-                {
-                    scale = Mathf.Lerp(flightScale, view.freePropScale, approach);
-                    float timeToArrival = Mathf.Max(0, distance - .1f) / weapon.Settings.recallSpeed;
-                    if (timeToArrival <= .0625f)
-                    {
-                        cel = timeToArrival > .03125f ? (view.spinStartCel + 7) % 8 : view.spinStartCel;
-                        flipX = view.spinFlipX;
-                    }
-                }
-            }
-            model.SetPositionAndRotation(weapon.transform.position + offset, Quaternion.identity);
-            blade.sprite = spin.cels[cel];
-            // Match the visible blade side of the authored release; body and physics never mirror.
-            blade.flipX = flipX;
-            var parentScale = blade.transform.parent.lossyScale;
-            var size = body.transform.lossyScale * scale;
-            blade.transform.localScale = new Vector3(size.x / parentScale.x, size.y / parentScale.y, size.z / parentScale.z);
-            blade.sortingLayerID = body.sortingLayerID;
-            blade.sortingOrder = body.sortingOrder + 1;
-            return true;
+            // Detached flight and landing belong to HatchetView, using one world sprite.
+            return false;
         }
 
         private void OnDisable()

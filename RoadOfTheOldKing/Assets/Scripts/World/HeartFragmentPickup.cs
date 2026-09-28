@@ -5,21 +5,20 @@ using UnityEngine;
 namespace TheLostShrine.World
 {
     [DisallowMultipleComponent, RequireComponent(typeof(Collider2D))]
-    public sealed class HeartFragmentPickup : MonoBehaviour, IProgressParticipant
+    public sealed class HeartFragmentPickup : WorldPickup, IProgressParticipant
     {
         [SerializeField] private string rewardId;
         [SerializeField] private GameObject visual;
         public string RewardId => rewardId;
         public bool IsCollected { get; private set; }
 
-        private void OnTriggerEnter2D(Collider2D other) => TryCollect(other.GetComponentInParent<PlayerHealth>());
-        private void OnTriggerStay2D(Collider2D other) => TryCollect(other.GetComponentInParent<PlayerHealth>());
+        public override string Prompt => "Pick up heart fragment";
+        public override bool CanCollect(PlayerHealth player) => base.CanCollect(player) &&
+            !IsCollected && !string.IsNullOrEmpty(rewardId) && CheckpointSession.Instance != null;
 
-        public bool TryCollect(PlayerHealth player)
+        public override bool TryCollect(PlayerHealth player)
         {
-            if (!isActiveAndEnabled || IsCollected || player == null || !player.IsAlive ||
-                Vector2.Distance(player.transform.position, transform.position) > 1f ||
-                CheckpointSession.Instance == null || !CheckpointSession.Instance.TryCollectHeartFragment(rewardId))
+            if (!CanCollect(player) || !CheckpointSession.Instance.TryCollectHeartFragment(rewardId))
                 return false;
             IsCollected = true;
             Refresh();

@@ -64,7 +64,7 @@ try {
     foreach(var go in created)go.SetActive(false);
     prepare();check(weapon.TryRecall(),"Manual E Recall remains available inside the automatic limit");tick(1f);
     prepare();move(weapon.transform.position);tick(.02f);
-    check(weapon.State==TheLostShrine.Weapons.HatchetState.Held,"On-foot retrieval is unchanged");
+    check(weapon.State==TheLostShrine.Weapons.HatchetState.Held,"Walking over retrieves an owned grounded axe");
     // The marked puzzle move is deliberately inside the automatic threshold.
     check(Vector2.Distance(new Vector2(10.5f,12.5f),new Vector2(6.5f,8.5f))<settings.autoRecallDistance,"Puzzle repositioning stays inside the automatic limit");
 } finally {

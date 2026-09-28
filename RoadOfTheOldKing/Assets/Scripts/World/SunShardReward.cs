@@ -7,7 +7,7 @@ namespace TheLostShrine.World
 {
     // Optional event sources unlock a reward. Without a source it is an exploration pickup.
     [DisallowMultipleComponent]
-    public sealed class SunShardReward : MonoBehaviour, IProgressParticipant
+    public sealed class SunShardReward : WorldPickup, IProgressParticipant
     {
         [SerializeField] private string rewardId;
         [SerializeField] private Damageable defeatSource;
@@ -19,14 +19,16 @@ namespace TheLostShrine.World
         public bool IsCollected => CheckpointSession.Instance != null &&
             CheckpointSession.Instance.Progress.Has("shard/collected/" + rewardId);
 
-        private void OnEnable()
+        protected override void OnEnable()
         {
+            base.OnEnable();
             if (defeatSource != null) defeatSource.Defeated += Unlock;
             if (puzzleSource != null) puzzleSource.Solved += Unlock;
         }
 
-        private void OnDisable()
+        protected override void OnDisable()
         {
+            base.OnDisable();
             if (defeatSource != null) defeatSource.Defeated -= Unlock;
             if (puzzleSource != null) puzzleSource.Solved -= Unlock;
         }
@@ -41,11 +43,11 @@ namespace TheLostShrine.World
             else CheckpointSession.Instance?.SaveProgress();
         }
 
-        private void OnTriggerEnter2D(Collider2D other) => TryCollect(other.GetComponentInParent<PlayerHealth>());
-        private void OnTriggerStay2D(Collider2D other) => TryCollect(other.GetComponentInParent<PlayerHealth>());
-
-        public bool TryCollect(PlayerHealth player) => player != null && player.IsAlive &&
-            Vector2.Distance(player.transform.position, transform.position) <= 1f && Collect();
+        public override string Prompt => "Pick up Sun Shard";
+        public override bool CanCollect(PlayerHealth player) => base.CanCollect(player) &&
+            IsAvailable && !IsCollected && !awardImmediately && !string.IsNullOrEmpty(rewardId) &&
+            CheckpointSession.Instance != null;
+        public override bool TryCollect(PlayerHealth player) => CanCollect(player) && Collect();
 
         private bool Collect()
         {

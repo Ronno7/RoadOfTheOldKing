@@ -20,7 +20,6 @@ try {
     var model=(Transform)view.GetType().GetField("model",flags).GetValue(view);
     var body=player.GetComponentInChildren<Animator>().GetComponent<SpriteRenderer>();
     var held=body.transform.Find("Drawn held axe").GetComponent<SpriteRenderer>();
-    var spin=AssetDatabase.LoadAssetAtPath<TheLostShrine.Weapons.AxeSpinSprites>(TheLostShrine.Editor.RegisteredSpriteProofBuilder.SpinAssetPath);
     var forehand=AssetDatabase.LoadAssetAtPath<TheLostShrine.Player.RegisteredActionSprites>(TheLostShrine.Editor.RegisteredSpriteProofBuilder.ForehandAssetPath);
     var throwArt=AssetDatabase.LoadAssetAtPath<TheLostShrine.Player.RegisteredActionSprites>(TheLostShrine.Editor.RegisteredSpriteProofBuilder.ThrowAssetPath);
     var catchArt=AssetDatabase.LoadAssetAtPath<TheLostShrine.Player.RegisteredActionSprites>(TheLostShrine.Editor.RegisteredSpriteProofBuilder.CatchAssetPath);
@@ -62,10 +61,10 @@ try {
         weapon.TryReleaseThrow(aim);tick(.039f);render(.02f,0);
         check(!weapon.IsAway && held.enabled && !blade.enabled,label+"axe remains attached before the actual marker");
         tick(.0011f);var physicsOrigin=weapon.transform.position;render(.02f,0);
-        check(weapon.IsAway && !held.enabled && blade.enabled && System.Array.IndexOf(spin.cels,blade.sprite)>=0,label+"release hands off to exactly one complete spin sprite");
-        check(weapon.transform.position==physicsOrigin && model.rotation==Quaternion.identity,label+"visual release offset cannot move collision or tween the prop angle");
-        check(Mathf.Abs(blade.transform.lossyScale.x-throwArt.views[direction].freePropScale)<.0001f,label+"spin projection has no inherited 1.3x carry scaling");
-        check(blade.flipX==throwArt.views[direction].spinFlipX && !body.flipX,label+"release preserves its authored blade side without mirroring the body");
+        check(weapon.IsAway && !held.enabled && blade.enabled && blade.sprite==original,label+"release hands off to the same single hatchet sprite");
+        check(weapon.transform.position==physicsOrigin && Vector3.Distance(blade.bounds.center,physicsOrigin)<.0001f,label+"detached sprite spins at the actual collision center");
+        check(Mathf.Abs(blade.transform.localScale.x-1.15f)<.0001f,label+"detached size is consistent in every direction");
+        check(!blade.flipX && !body.flipX,label+"flight never swaps blade perspective or mirrors the body");
         tick(.2f);render(.02f,0);
         float phase=weapon.FlightSeconds;weapon.TryRecall();
         check(Mathf.Abs(weapon.FlightSeconds-phase)<.00001f,label+"Recall does not restart spin time");
@@ -88,8 +87,54 @@ try {
         weapon.TryThrow(aim);tick(.1201f);render(.02f,0);
         float previous=Vector2.Dot(model.position,aim);bool forward=true;
         for(int i=0;i<16;i++) {tick(.02f);render(.02f,0);float next=Vector2.Dot(model.position,aim);forward &= next>=previous-.0001f;previous=next;}
-        check(forward,new[]{"East","North","South","West"}[direction]+" release-offset transition never pulls an outbound axe backwards");
+        check(forward,new[]{"East","North","South","West"}[direction]+" centered outbound flight never pulls the axe backwards");
     }
+    // The same endpoint and pose must survive different simulation step sizes,
+    // diagonals, impact distances, waiting on the ground, and a subsequent Recall.
+    check(weapon.Settings.throwSpeed==12 && weapon.Settings.throwRange==7,"Tutorial baseline is 12 units/sec over 7 units");
+    for(int direction=0;direction<8;direction++) {
+        float a=direction*Mathf.PI/4;Vector2 aim=new Vector2(Mathf.Cos(a),Mathf.Sin(a));
+        Vector3 endpoint=Vector3.zero;Quaternion landing=Quaternion.identity;
+        foreach(float step in new[]{.01f,.037f}) {
+            reset();Vector3 start=player.transform.position;
+            weapon.TryThrow(aim);
+            for(int i=0;i<Mathf.CeilToInt(1.2f/step);i++) {tick(step);render(step,0);}
+            check(weapon.State==TheLostShrine.Weapons.HatchetState.Stuck &&
+                Vector3.Distance(weapon.transform.position,start+(Vector3)aim*7)<.002f,
+                "Direction "+direction+" lands at the exact range with step "+step);
+            check(blade.sprite==original && !blade.flipX &&
+                Vector3.Distance(blade.bounds.center,weapon.transform.position)<.0001f,
+                "Direction "+direction+" ground sprite retains flight art and collision center");
+            if(step==.01f) {endpoint=model.position;landing=model.rotation;}
+            else check(Vector3.Distance(model.position,endpoint)<.002f && Quaternion.Angle(model.rotation,landing)<.01f,
+                "Direction "+direction+" landing pose is independent of final spin phase");
+            tick(.25f);render(.25f,0);
+            check(Quaternion.Angle(model.rotation,landing)<.01f,"Grounded axe stays planted");
+        }
+    }
+    reset();weapon.TryThrow(Vector2.right);tick(.22f);render(.02f,0);
+    float spinAngle=model.eulerAngles.z;
+    tick(.02f);render(.02f,0);
+    check(Mathf.Abs(Mathf.DeltaAngle(spinAngle,model.eulerAngles.z)+50.4f)<.01f,"Single-sprite spin runs at seven rotations/sec");
+    var trail=(TrailRenderer)view.GetType().GetField("trail",flags).GetValue(view);
+    check(trail!=null && trail.emitting,"Detached motion uses the existing trail");
+    reset();
+    var flightWall=new GameObject("Flight stop fixture");created.Add(flightWall);
+    var flightWallCollider=flightWall.AddComponent<BoxCollider2D>();flightWallCollider.size=new Vector2(.2f,4);
+    Quaternion flightWallLanding=Quaternion.identity;
+    foreach(float flightWallDistance in new[]{2f,3.3f}) {
+        reset();flightWall.transform.position=player.transform.position+Vector3.right*flightWallDistance;Physics2D.SyncTransforms();
+        weapon.TryThrow(Vector2.right);tick(1);render(.02f,0);
+        float stopped=weapon.transform.position.x-player.transform.position.x;
+        check(weapon.State==TheLostShrine.Weapons.HatchetState.Stuck &&
+            Mathf.Abs(stopped-(flightWallDistance-.1f-weapon.Settings.flightRadius))<.01f,
+            "Wall stop uses swept contact, not overshoot or bounce");
+        check(Vector3.Distance(blade.bounds.center,weapon.transform.position)<.0001f && !trail.emitting,
+            "Impact has no height snap and stops the trail");
+        if(flightWallDistance==2f)flightWallLanding=model.rotation;
+        else check(Quaternion.Angle(model.rotation,flightWallLanding)<.01f,"Impact distance does not change planted orientation");
+    }
+    flightWall.SetActive(false);reset();
     // Both newer directions expose all eight cels with exclusive weapon ownership.
     foreach(int direction in new[]{2,3}) {
         Vector2 aim=direction==2?Vector2.down:Vector2.left;string label=direction==2?"South":"West";

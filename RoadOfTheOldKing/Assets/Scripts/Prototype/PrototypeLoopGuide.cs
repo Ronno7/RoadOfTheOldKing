@@ -33,16 +33,16 @@ namespace TheLostShrine.Prototype
             {
                 switch (Step)
                 {
-                    case PrototypeStep.Pickup: return "Walk over the hatchet in front of you.";
+                    case PrototypeStep.Pickup: return "Approach the hatchet and press F to pick it up.";
                     case PrototypeStep.Chop: return "Aim at a plain dummy and left-click to slash. Attacks use stamina; walk to recover.";
                     case PrototypeStep.Throw: return "Tap E to quick throw, or hold E to aim and release. Move while aiming; RMB cancels.";
-                    case PrototypeStep.Retrieve: return "Walk over to retrieve your hatchet. Recall comes later.";
+                    case PrototypeStep.Retrieve: return "Walk over to retrieve your thrown hatchet. Recall comes later.";
                     case PrototypeStep.Bushes: return "The east gate is open. Chop both bushes along the path.";
                     case PrototypeStep.Stone: return "Hold right-click until gold, then release beside the cracked stone.";
-                    case PrototypeStep.UnlockRecall: return "Continue east to the Recall altar.";
+                    case PrototypeStep.UnlockRecall: return "Continue east to the Recall altar and press F.";
                     case PrototypeStep.RecallPractice: return "Follow the upper path back to the dummies. Throw past them, move, then E to recall through one.";
                     case PrototypeStep.Enemy: return "Take the northwest path. Space: short dash / dodge. Avoid the marked strike, then counterattack. Watch your stamina.";
-                    case PrototypeStep.Bonfire: return "Collect the sentinel's Sun Shard, then follow the east path. F at the fire heals and saves.";
+                    case PrototypeStep.Bonfire: return "Press F beside the sentinel's Sun Shard, then follow the east path. F at the fire heals and saves.";
                     case PrototypeStep.Puzzle: return puzzle != null && puzzle.IsArmed
                         ? "Move down to the blue floor mark. Press E to recall through the blue target and open the door."
                         : "Stand on the gold floor mark. Hold E, aim at the gold target to the right, then release.";

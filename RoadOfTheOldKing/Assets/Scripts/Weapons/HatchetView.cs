@@ -16,6 +16,10 @@ namespace TheLostShrine.Weapons
         [SerializeField] private Vector3 groundVisualOffset;
         [SerializeField] private float groundAngle = 35f;
         [SerializeField] private bool bobOnGround = true;
+        [Header("Detached presentation")]
+        [SerializeField, Min(0.01f)] private float detachedScale = 1.15f;
+        [SerializeField, Min(0.1f)] private float rotationsPerSecond = 7f;
+        private Vector3 originalBladePosition;
         private HatchetWeapon weapon;
         private Color originalBlade;
         private Sprite originalSprite;
@@ -36,6 +40,7 @@ namespace TheLostShrine.Weapons
                 originalBlade = blade.color;
                 originalSprite = blade.sprite;
                 originalBladeScale = blade.transform.localScale;
+                originalBladePosition = blade.transform.localPosition;
                 originalSortingLayer = blade.sortingLayerID;
                 originalSortingOrder = blade.sortingOrder;
             }
@@ -52,7 +57,7 @@ namespace TheLostShrine.Weapons
             {
                 if (flying != wasFlying)
                     trail.Clear();
-                trail.emitting = flying && (registered == null || !registered.HasSpin);
+                trail.emitting = flying;
             }
             wasFlying = flying;
             if (arc != null)
@@ -66,9 +71,16 @@ namespace TheLostShrine.Weapons
                 blade.sprite = originalSprite;
                 blade.enabled = true;
                 blade.transform.localScale = originalBladeScale;
+                blade.transform.localPosition = originalBladePosition;
                 blade.flipX = false;
                 blade.sortingLayerID = originalSortingLayer;
                 blade.sortingOrder = originalSortingOrder;
+            }
+
+            if (useAnimatedGrip && weapon.IsAway && blade != null && originalSprite != null)
+            {
+                DrawDetached();
+                return;
             }
 
             if (registered != null && registered.TryApplyWeapon(model, blade))
@@ -128,13 +140,29 @@ namespace TheLostShrine.Weapons
                     break;
                 case HatchetState.Flying:
                 case HatchetState.Returning:
-                    angle = Time.time * -1000f;
+                    angle -= weapon.FlightSeconds * rotationsPerSecond * 360f;
                     break;
                 case HatchetState.Stuck:
                     angle = Mathf.Atan2(weapon.AttackDirection.y, weapon.AttackDirection.x) * Mathf.Rad2Deg - 25f;
                     break;
             }
             model.localRotation = Quaternion.Euler(0f, 0f, angle + spriteAngleOffset);
+        }
+
+        private void DrawDetached()
+        {
+            // The same top-down sprite, scale and center survive launch, impact and Recall.
+            // Do not lift the prop above its collision point and snap it down when it stops.
+            float angle = Mathf.Atan2(weapon.AttackDirection.y, weapon.AttackDirection.x) * Mathf.Rad2Deg;
+            angle += spriteAngleOffset;
+            angle += weapon.State == HatchetState.Stuck
+                ? -25f : -weapon.FlightSeconds * rotationsPerSecond * 360f;
+            model.SetPositionAndRotation(weapon.transform.position, Quaternion.Euler(0f, 0f, angle));
+
+            // The pickup's pivot is at its grip. Center detached rotation without changing
+            // the imported pivot used by walking, authored hands or the stump pickup.
+            blade.transform.localScale = originalBladeScale * detachedScale;
+            blade.transform.localPosition = -Vector3.Scale(originalSprite.bounds.center, blade.transform.localScale);
         }
 
         private float DrawLightSlash()
