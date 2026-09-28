@@ -12,8 +12,8 @@ var oldSimulation=Physics2D.simulationMode;
 var upgrade=ScriptableObject.CreateInstance<TheLostShrine.Weapons.HatchetUpgrade>();
 try {
     Physics2D.simulationMode=SimulationMode2D.Script;
-    var player=spawn("Assets/Prefabs/Player/TutorialPlayer.prefab").GetComponent<TheLostShrine.Player.PlayerCombatController>();
-    var weapon=spawn("Assets/Prefabs/Weapons/TutorialHatchet.prefab").GetComponent<TheLostShrine.Weapons.HatchetWeapon>();
+    var player=spawn("Assets/Prefabs/Player/Player.prefab").GetComponent<TheLostShrine.Player.PlayerCombatController>();
+    var weapon=spawn("Assets/Prefabs/Weapons/Hatchet.prefab").GetComponent<TheLostShrine.Weapons.HatchetWeapon>();
     var target=spawn("Assets/Prefabs/Combat/PracticeDummy.prefab");
     var hp=target.GetComponent<TheLostShrine.Combat.Damageable>();
     var stamina=player.GetComponent<TheLostShrine.Player.PlayerStamina>();

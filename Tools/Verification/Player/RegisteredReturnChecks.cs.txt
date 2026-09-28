@@ -39,7 +39,7 @@ check(rejected,"Invalid delta cannot poison the catch clock");
 bool ordered=true;for(int i=0;i<8;i++)ordered &= spin.Sample(i/32.0)==i;
 check(ordered && spin.Sample(.25)==0 && spin.Sample(1)==0,"Eight drawn exposures form four complete rotations in one second");
 check(spin.Sample(.125,1)==5 && spin.Sample(0,-1)==7,"Spin can start at an authored release phase");
-var settings=AssetDatabase.LoadAssetAtPath<TheLostShrine.Weapons.HatchetSettings>("Assets/Settings/Weapons/TutorialHatchetSettings.asset");
+var settings=AssetDatabase.LoadAssetAtPath<TheLostShrine.Weapons.HatchetSettings>("Assets/Settings/Weapons/HatchetSettings.asset");
 for(int v=0;v<catching.views.Length;v++) {
     var held=TheLostShrine.Editor.RegisteredReturnStudy.Sample(.119f,v,throwing,catching,spin,settings.throwAction);
     var released=TheLostShrine.Editor.RegisteredReturnStudy.Sample(.12f,v,throwing,catching,spin,settings.throwAction);

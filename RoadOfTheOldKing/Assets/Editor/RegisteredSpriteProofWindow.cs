@@ -37,7 +37,7 @@ namespace TheLostShrine.Editor
         {
             forehand = AssetDatabase.LoadAssetAtPath<RegisteredActionSprites>(RegisteredSpriteProofBuilder.ForehandAssetPath);
             throwing = AssetDatabase.LoadAssetAtPath<RegisteredActionSprites>(RegisteredSpriteProofBuilder.ThrowAssetPath);
-            settings = AssetDatabase.LoadAssetAtPath<HatchetSettings>("Assets/Settings/Weapons/TutorialHatchetSettings.asset");
+            settings = AssetDatabase.LoadAssetAtPath<HatchetSettings>("Assets/Settings/Weapons/HatchetSettings.asset");
             references.Clear();
             foreach (var asset in AssetDatabase.LoadAllAssetsAtPath("Assets/Art/Sprites/Player/PlayerSheet.png"))
                 if (asset is Sprite sprite) references[sprite.name] = sprite;

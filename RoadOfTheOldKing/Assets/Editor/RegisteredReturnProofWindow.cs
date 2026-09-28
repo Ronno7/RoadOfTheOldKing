@@ -96,7 +96,7 @@ namespace TheLostShrine.Editor
             throwing = AssetDatabase.LoadAssetAtPath<RegisteredActionSprites>(RegisteredSpriteProofBuilder.ThrowAssetPath);
             catching = AssetDatabase.LoadAssetAtPath<RegisteredActionSprites>(RegisteredSpriteProofBuilder.CatchAssetPath);
             spin = AssetDatabase.LoadAssetAtPath<AxeSpinSprites>(RegisteredSpriteProofBuilder.SpinAssetPath);
-            settings = AssetDatabase.LoadAssetAtPath<HatchetSettings>("Assets/Settings/Weapons/TutorialHatchetSettings.asset");
+            settings = AssetDatabase.LoadAssetAtPath<HatchetSettings>("Assets/Settings/Weapons/HatchetSettings.asset");
             previous = EditorApplication.timeSinceStartup; EditorApplication.update += Tick;
         }
         private void OnDisable() => EditorApplication.update -= Tick;

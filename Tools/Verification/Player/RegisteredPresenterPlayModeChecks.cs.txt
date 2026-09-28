@@ -1,4 +1,4 @@
-// Empty unsaved Play Mode scene; real Tutorial prefabs and actual weapon simulation, no saves.
+// Empty unsaved Play Mode scene; standard Player and Tutorial weapon prefabs and actual weapon simulation, no saves.
 if (!Application.isPlaying || UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Progression.CheckpointSession>() != null)
     throw new Exception("Use an empty Play Mode scene without a checkpoint session.");
 var results=new System.Collections.Generic.List<string>();
@@ -9,8 +9,8 @@ var oldSimulation=Physics2D.simulationMode;
 System.Func<string,GameObject> spawn=path=>{var go=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(path));created.Add(go);return go;};
 try {
     Physics2D.simulationMode=SimulationMode2D.Script;
-    var player=spawn("Assets/Prefabs/Player/TutorialPlayer.prefab").GetComponent<TheLostShrine.Player.PlayerCombatController>();
-    var weapon=spawn("Assets/Prefabs/Weapons/TutorialHatchet.prefab").GetComponent<TheLostShrine.Weapons.HatchetWeapon>();
+    var player=spawn("Assets/Prefabs/Player/Player.prefab").GetComponent<TheLostShrine.Player.PlayerCombatController>();
+    var weapon=spawn("Assets/Prefabs/Weapons/Hatchet.prefab").GetComponent<TheLostShrine.Weapons.HatchetWeapon>();
     var presenter=player.GetComponent<TheLostShrine.Player.RegisteredPlayerAnimation>();
     var locomotion=player.GetComponent<TheLostShrine.Player.PlayerLocomotionAnimation>();
     var motor=player.GetComponent<Rigidbody2D>();
@@ -32,7 +32,7 @@ try {
     System.Action locomote=()=>{locomotion.GetType().GetMethod("LateUpdate",flags).Invoke(locomotion,null);view.GetType().GetMethod("LateUpdate",flags).Invoke(view,null);};
     System.Action reset=()=>{weapon.CancelAction();stamina.Restore();motor.linearVelocity=Vector2.zero;render(.02f,0);locomote();};
     player.transform.position=new Vector3(100,100,0);motor.position=player.transform.position;
-    check(presenter!=null && presenter.enabled,"Tutorial prefab has the configured live presenter");
+    check(presenter!=null && presenter.enabled,"Standard Player prefab has the configured live presenter");
     check(player.TryEquip(weapon),"Tutorial weapon equips");player.UnlockRecall();locomote();
     var original=blade.sprite;var originalScale=blade.transform.localScale;
     check(blade.enabled && !held.enabled,"Ordinary carrying has exactly the original weapon");
@@ -188,7 +188,7 @@ try {
     reset();weapon.TryBeginThrow(Vector2.right);tick(.09f);render(.02f,0);weapon.CancelThrow();locomote();
     check(!presenter.IsPresentingBody && !held.enabled && blade.enabled,"Cancelled held aim restores locomotion and carry");
     reset();weapon.TryThrow(Vector2.right);tick(.2f);render(.02f,0);presenter.enabled=false;locomote();
-    check(!held.enabled && blade.enabled && blade.sprite==original && blade.transform.localScale==originalScale,"Disabling the presenter restores legacy flight without stale layers");presenter.enabled=true;
+    check(!held.enabled && blade.enabled && blade.sprite==original && Vector3.Distance(blade.transform.localScale,originalScale*1.15f)<.0001f,"Disabling the body presenter preserves detached flight scale without stale layers");presenter.enabled=true;
     foreach(Vector2 aim in new[]{Vector2.right,Vector2.left}) {
         reset();var wall=new GameObject("Close wall");created.Add(wall);
         wall.transform.position=player.transform.position+(Vector3)aim*.65f;

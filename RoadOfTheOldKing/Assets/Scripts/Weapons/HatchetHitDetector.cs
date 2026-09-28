@@ -37,6 +37,9 @@ namespace TheLostShrine.Weapons
         private bool IsCandidate(Collider2D collider) => collider != null &&
             !collider.transform.IsChildOf(owner) && !collider.transform.IsChildOf(weapon);
 
+        private bool BlocksMelee(Collider2D collider) => IsCandidate(collider) &&
+            collider.GetComponentInParent<IHitReceiver>() == null;
+
         private void Apply(Collider2D collider, CombatHit hit, Vector2 impactPoint)
         {
             var receiver = collider.GetComponentInParent<IHitReceiver>();
@@ -63,8 +66,7 @@ namespace TheLostShrine.Weapons
                 bool obstructed = false;
                 Physics2D.Linecast(center, point, filter, sight);
                 foreach (var blocker in sight)
-                    if (IsCandidate(blocker.collider) && blocker.collider != collider &&
-                        blocker.collider.GetComponentInParent<IHitReceiver>() == null)
+                    if (blocker.collider != collider && BlocksMelee(blocker.collider))
                     {
                         obstructed = true;
                         break;
