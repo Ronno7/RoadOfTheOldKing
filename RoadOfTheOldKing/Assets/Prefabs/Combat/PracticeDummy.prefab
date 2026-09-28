@@ -607,6 +607,7 @@ GameObject:
   - component: {fileID: 2086154063910928800}
   - component: {fileID: 4086400228175628725}
   - component: {fileID: 6491987110847126019}
+  - component: {fileID: 7415072471478945597}
   m_Layer: 7
   m_Name: PracticeDummy
   m_TagString: Untagged
@@ -742,6 +743,24 @@ MonoBehaviour:
   label: {fileID: 5145577561244279417}
   displayName: DUMMY
   resetDelay: 4
+--- !u!114 &7415072471478945597
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5723601562219740136}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc8908e9a5554aa489e50ba0a13435b7, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.EnemyImpactFeedback
+  body: {fileID: 4404063872055377810}
+  impactSound: {fileID: 8300000, guid: c1c5b78e1cffb774d821e48418e46675, type: 3}
+  volume: 0.48
+  audibleDistance: 18
+  particleCount: 7
+  visualHeight: 0.45
 --- !u!1 &7217996171078949710
 GameObject:
   m_ObjectHideFlags: 0

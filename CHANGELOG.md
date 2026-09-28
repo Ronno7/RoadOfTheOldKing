@@ -1,5 +1,14 @@
 # Changelog
 
+## 27SEP2026 - Confirmed-hit impact feedback
+
+- Added a short impact sound and directional pixel-fleck burst to enemies and practice targets, driven by accepted damage and contact direction. Misses and guarded hits remain silent; lethal hits retain impact feedback.
+
+
+## 27SEP2026 - Wolf enemy presentation
+
+- Added an original low-resolution wolf with twenty 48x48 sprites, mirrored side views, movement-driven gait, readable bite windup, hit reactions and directional death poses. The Wolf prefab reuses existing enemy combat, rewards and rest/reset behavior.
+
 ## 27SEP2026 - Combat readability and inspection tools
 
 - Added a cursor-following aim marker and restrained light-melee windup, active damage footprint and slash feedback. Attack reach, width, timing and terrain clipping follow the weapon's gameplay rules, including combos, upgrades and hit pause.

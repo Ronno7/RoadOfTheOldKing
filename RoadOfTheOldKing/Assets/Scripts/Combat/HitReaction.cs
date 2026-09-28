@@ -5,6 +5,9 @@ namespace TheLostShrine.Combat
     [DisallowMultipleComponent, RequireComponent(typeof(Damageable))]
     public sealed class HitReaction : MonoBehaviour
     {
+        [SerializeField, Min(0f)] private float knockbackMultiplier = 1f;
+        [SerializeField, Min(0f)] private float maxKnockbackImpulse;
+        [SerializeField] private bool replaceMovementOnHit;
         private Damageable health;
         private Rigidbody2D body;
         private float staggerUntil;
@@ -30,7 +33,14 @@ namespace TheLostShrine.Combat
         {
             staggerUntil = Mathf.Max(staggerUntil, Time.time + hit.StaggerDuration);
             if (body != null && body.bodyType == RigidbodyType2D.Dynamic)
-                body.AddForce(hit.Direction * hit.Knockback, ForceMode2D.Impulse);
+            {
+                float impulse = Mathf.Max(0f, hit.Knockback * knockbackMultiplier);
+                if (maxKnockbackImpulse > 0f) impulse = Mathf.Min(impulse, maxKnockbackImpulse);
+                if (impulse <= 0f) return;
+                // Approaching enemies must not absorb the impulse into forward movement.
+                if (replaceMovementOnHit) body.linearVelocity = Vector2.zero;
+                body.AddForce(hit.Direction * impulse, ForceMode2D.Impulse);
+            }
         }
     }
 }
