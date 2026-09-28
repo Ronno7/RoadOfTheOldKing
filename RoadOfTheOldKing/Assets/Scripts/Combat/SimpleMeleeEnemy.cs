@@ -29,12 +29,15 @@ namespace TheLostShrine.Combat
         private Collider2D bodyCollider;
         private Vector2 home;
         private float remaining;
+        private float stateDuration;
         private bool struck;
 
         public MeleeEnemyState State { get; private set; }
         public Vector2 FacingDirection { get; private set; } = Vector2.down;
         public float AttackReach => attackReach;
         public float AttackArc => attackArc;
+        public float StateProgress => stateDuration > 0f ? Mathf.Clamp01(1f - remaining / stateDuration) : 0f;
+        public int ResetVersion { get; private set; }
 
         private void Awake()
         {
@@ -173,6 +176,7 @@ namespace TheLostShrine.Combat
                 // Keep the impulse already applied by HitReaction.
                 State = MeleeEnemyState.Recovering;
                 remaining = Mathf.Max(recoveryDuration, hit.StaggerDuration);
+                stateDuration = remaining;
             }
         }
 
@@ -185,6 +189,7 @@ namespace TheLostShrine.Combat
 
         public void ResetOnRest()
         {
+            ResetVersion++;
             health.RestoreHealth();
             reaction.Clear();
             body.position = home;
@@ -198,6 +203,7 @@ namespace TheLostShrine.Combat
         {
             State = state;
             remaining = duration;
+            stateDuration = duration;
             struck = false;
             body.linearVelocity = Vector2.zero;
         }

@@ -445,6 +445,8 @@ GameObject:
   - component: {fileID: 298301189806305161}
   - component: {fileID: 9009435604842691915}
   - component: {fileID: 5720883974557716648}
+  - component: {fileID: 7443642198818164174}
+  - component: {fileID: 8022252305268609625}
   m_Layer: 0
   m_Name: MeleeSentinel
   m_TagString: Untagged
@@ -599,3 +601,40 @@ MonoBehaviour:
   facingMarker: {fileID: 3859988449232936508}
   attackOutline: {fileID: 3320637871006222145}
   label: {fileID: 991178592332182000}
+--- !u!114 &7443642198818164174
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9055788630328572994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66dead76a9dc0794392b1c7c8c51e277, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.EnemyHealthIndicator
+  body: {fileID: 4995579727582212372}
+  width: 1.05
+  height: 0.16
+  gap: 0.12
+  upperColor: {r: 0.86, g: 0.22, b: 0.23, a: 1}
+  lowerColor: {r: 0.58, g: 0.09, b: 0.14, a: 1}
+  emptyColor: {r: 0.19, g: 0.07, b: 0.09, a: 1}
+--- !u!114 &8022252305268609625
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9055788630328572994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc8908e9a5554aa489e50ba0a13435b7, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.EnemyImpactFeedback
+  body: {fileID: 4995579727582212372}
+  impactSound: {fileID: 8300000, guid: c1c5b78e1cffb774d821e48418e46675, type: 3}
+  volume: 0.48
+  audibleDistance: 18
+  particleCount: 7
+  visualHeight: 0.45

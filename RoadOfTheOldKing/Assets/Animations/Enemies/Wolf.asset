@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43544d9e736a1de4f8a1425c585a5e5d, type: 3}
+  m_Name: Wolf
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.WolfAnimationSet
+  side:
+    idle: {fileID: -1054153356, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
+    crouch: {fileID: 1295905143, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
+    bite: {fileID: -980353069, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
+    dead: {fileID: -1925033266, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
+    move:
+    - {fileID: 530069900, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
+    - {fileID: 449114428, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
+    - {fileID: -902499727, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
+    - {fileID: -659338061, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
+  south:
+    idle: {fileID: -466590193, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
+    crouch: {fileID: 1262966151, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
+    bite: {fileID: 968799213, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
+    dead: {fileID: -1843408016, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
+    move:
+    - {fileID: 1165578897, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
+    - {fileID: 539935884, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
+  north:
+    idle: {fileID: -1657330751, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
+    crouch: {fileID: 1287796110, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
+    bite: {fileID: 413781420, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
+    dead: {fileID: -526086187, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
+    move:
+    - {fileID: -126853109, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
+    - {fileID: -2056208303, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
+  strideDistance: 0.9
+  collapseDuration: 0.2
+  hitFlashDuration: 0.1
