@@ -1,16 +1,9 @@
 # Player source art
 
-These files preserve the source drawings and registration data behind the runtime player sprites.
+PixelLab exports of the hero, kept as delivered. Each export folder holds `metadata.json` (character prompt, canvas size, directions) and one folder per PixelLab state, with `rotations/<direction>.png` standing views and `animations/<Name>/<direction>/frame_###.png` sequences.
 
-| Directory | Contents |
+| Export | Contents |
 | --- | --- |
-| Forehand / Throw / Catch / Dash | Whole-body drawings, weapon masks and hidden-body underpaint |
-| Sprint | Directional sprint drawings and armed/unarmed source inputs |
-| Weapon | Pickup, held-weapon and detached-spin source artwork |
-| Registered | Combined masters, source-only reveal sheets and frame manifests |
+| A_small_hooded_wanderer_for_a_top-down_16-bit_acti | State `Idle`: eight standing views (32 x 32) and an eight-frame walk (40 x 40) |
 
-JSON recipes in `Tools/Art/Player` describe source rectangles, scale, foot anchors and masks. Runtime body and weapon layers reconstruct the combined master. Reveal sheets support editor inspection and are not runtime dependencies.
-
-[Provenance.json](Provenance.json) records original generation/edit briefs; names in historical briefs are not necessarily active dependencies.
-
-See [player animation](../../Docs/PlayerAnimation.md) for layering, timing and gameplay previews.
+Runtime copies live under `RoadOfTheOldKing/Assets/Art/Sprites/Player/<Slot>/`; the import pipeline is described in [player animation](../../Docs/PlayerAnimation.md#assets-and-import). The previous hand-assembled character was retired on 28 September 2026; samples are in [Docs/Art/Player/Legacy](../../Docs/Art/Player/Legacy) and the full sources remain in the repository history.

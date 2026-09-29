@@ -9,6 +9,7 @@ var created = new System.Collections.Generic.List<GameObject>();
 System.Func<string,GameObject> spawn = path => { var go = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(path)); created.Add(go); return go; };
 var previousSimulation = Physics2D.simulationMode;
 var upgrade = ScriptableObject.CreateInstance<TheLostShrine.Weapons.HatchetUpgrade>();
+TheLostShrine.Weapons.HatchetSettings isolated = null;
 try {
     Physics2D.simulationMode = SimulationMode2D.Script;
     var root = spawn("Assets/Prefabs/Player/Player.prefab");
@@ -18,8 +19,9 @@ try {
     var surface = (MeshRenderer)feedback.GetType().GetField("surface",flags).GetValue(feedback);
     var mesh = (Mesh)feedback.GetType().GetField("mesh",flags).GetValue(feedback);
     var stamina = root.GetComponent<TheLostShrine.Player.PlayerStamina>();
-    // Isolate window/geometry tests from the separate hit-pause subscriber.
-    root.GetComponent<TheLostShrine.Player.PlayerChopAnimation>().enabled = false;
+    // Isolate window/geometry tests from hit pause with a private settings copy; the shared asset is untouched.
+    isolated = UnityEngine.Object.Instantiate(weapon.Settings); isolated.lightHitPause = 0f;
+    weapon.GetType().GetField("settings",flags).SetValue(weapon,isolated);
     System.Action<float> tick = dt => weapon.GetType().GetMethod("Simulate",flags).Invoke(weapon,new object[]{dt});
     System.Action render = () => feedback.GetType().GetMethod("LateUpdate",flags).Invoke(feedback,null);
     System.Action reset = () => { weapon.CancelAction(); stamina.Restore(); };
@@ -97,5 +99,6 @@ try {
     Time.timeScale=1f;Physics2D.simulationMode=previousSimulation;
     foreach(var go in created) if(go!=null) UnityEngine.Object.DestroyImmediate(go);
     UnityEngine.Object.DestroyImmediate(upgrade);
+    if(isolated!=null)UnityEngine.Object.DestroyImmediate(isolated);
 }
 return string.Join("\n",results.ToArray());
