@@ -53,7 +53,7 @@ namespace TheLostShrine.Editor
         private void Refresh()
         {
             if (ownsTime && EditorApplication.isPlaying)
-                AudioListener.pause = mute || EditorApplication.isPaused;
+                TheLostShrine.UI.SimulationPause.SetAudioPaused(mute || EditorApplication.isPaused);
             if (EditorApplication.isPlaying && player == null)
                 player = FindFirstObjectByType<PlayerCombatController>();
             driver = player != null ? player.GetComponent<CombatPreviewDriver>() : null;
@@ -70,8 +70,8 @@ namespace TheLostShrine.Editor
         private void OwnTime()
         {
             if (ownsTime || !EditorApplication.isPlaying) return;
-            previousSpeed = Time.timeScale; previousPause = EditorApplication.isPaused;
-            previousAudioPause = AudioListener.pause; previousBackground = Application.runInBackground;
+            previousSpeed = TheLostShrine.UI.SimulationPause.UnpausedTimeScale; previousPause = EditorApplication.isPaused;
+            previousAudioPause = TheLostShrine.UI.SimulationPause.UnpausedAudio; previousBackground = Application.runInBackground;
             Application.runInBackground = true;
             ownsTime = true;
         }
@@ -79,15 +79,15 @@ namespace TheLostShrine.Editor
         private void ApplyTime()
         {
             OwnTime();
-            Time.timeScale = speed;
-            AudioListener.pause = mute || EditorApplication.isPaused;
+            TheLostShrine.UI.SimulationPause.SetTimeScale(speed);
+            TheLostShrine.UI.SimulationPause.SetAudioPaused(mute || EditorApplication.isPaused);
         }
 
         private void RestoreTime()
         {
             if (!ownsTime) return;
-            Time.timeScale = previousSpeed;
-            AudioListener.pause = previousAudioPause;
+            TheLostShrine.UI.SimulationPause.SetTimeScale(previousSpeed);
+            TheLostShrine.UI.SimulationPause.SetAudioPaused(previousAudioPause);
             Application.runInBackground = previousBackground;
             if (EditorApplication.isPlaying) EditorApplication.isPaused = previousPause;
             ownsTime = false;

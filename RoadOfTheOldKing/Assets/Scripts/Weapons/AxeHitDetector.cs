@@ -51,16 +51,20 @@ namespace TheLostShrine.Weapons
             }
         }
 
-        public void Melee(Vector2 center, Vector2 aim, float radius, float arc, CombatHit hit)
+        public void Melee(Vector2 center, Vector2 aim, float radius, float arc, CombatHit hit, float laneWidth = 0f)
         {
-            Physics2D.OverlapCircle(center, radius, filter, overlaps);
+            if (laneWidth > 0f)
+                Physics2D.OverlapBox(center + aim * (radius * 0.5f), new Vector2(radius, laneWidth),
+                    Mathf.Atan2(aim.y, aim.x) * Mathf.Rad2Deg, filter, overlaps);
+            else
+                Physics2D.OverlapCircle(center, radius, filter, overlaps);
             foreach (var collider in overlaps)
             {
                 if (!IsCandidate(collider))
                     continue;
                 Vector2 point = collider.ClosestPoint(center);
                 Vector2 direction = point - center;
-                if (arc < 360f && direction.sqrMagnitude > 0.001f && Vector2.Angle(aim, direction) > arc * 0.5f)
+                if (laneWidth <= 0f && arc < 360f && direction.sqrMagnitude > 0.001f && Vector2.Angle(aim, direction) > arc * 0.5f)
                     continue;
 
                 bool obstructed = false;

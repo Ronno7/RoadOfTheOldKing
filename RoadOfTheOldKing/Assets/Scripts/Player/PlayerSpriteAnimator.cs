@@ -142,7 +142,7 @@ namespace TheLostShrine.Player
                     var attack = weapon.ComboIndex == 0 ? animations.lightAttack1
                         : weapon.ComboIndex == 1 ? animations.lightAttack2 : animations.finisher;
                     return Play(AttackStates[Mathf.Clamp(weapon.ComboIndex, 0, 2)], attack, octant,
-                        weapon.AttackProgress, true, weapon.Settings.lightWindupFraction);
+                        weapon.AttackProgress, true, weapon.LightWindupFraction);
                 case AxeState.Charging:
                     return PlayTimed("Charge", animations.charge, octant);
                 case AxeState.Cleaving:

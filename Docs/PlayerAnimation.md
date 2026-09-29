@@ -18,7 +18,7 @@ Currently implemented: the standing views, an eight-frame walk and run, and a fo
 | --- | --- | --- |
 | Rotations | Any state without its own animation | Single standing view per direction |
 | Idle | Standing | Time, looping |
-| Walk / Run | Moving / sprinting | Distance travelled (3 / 4.5 units per cycle), so feet never slide |
+| Walk / Run | Moving / sprinting | Distance travelled; cycle lengths tuned on the player prefab (walk 1.8 / run 4 units) |
 | Dash | Dodge dash | Dash progress |
 | Light attack 1, 2, finisher | Three-hit combo | Weapon action progress, contact frame aligned with the damage window |
 | Charge / Cleave | Charged spin attack | Time while charging, action progress while cleaving |
@@ -48,7 +48,7 @@ The hero has no arms, so the weapon, an aged bronze halberd drawn at the same 16
 
 ![Halberd carry in each direction, standing and mid-stride](Art/Player/Hero-Halberd-Carry.png)
 
-During attacks and throws the weapon is still placed procedurally along the aim; a combat presentation that brings it to the ready, following the cursor, is planned. The weapon starts planted upright in the Tutorial's chopping stump. Detached flight, landing and Recall are unchanged.
+The light combo uses a procedural sweep, reverse sweep and thrust, synchronized to the same geometry and phases as damage and ground feedback. The finisher has a longer windup and a physics-driven lunge; dedicated body attack art remains pending. During throws the weapon is placed procedurally along the aim; a combat presentation that brings it to the ready, following the cursor, is planned. The weapon starts planted upright in the Tutorial's chopping stump. Detached flight, landing and Recall are unchanged.
 
 A confirmed light hit pauses only the swing's action clock. The pause belongs to `AxeWeapon` and is tuned on `AxeSettings` (`lightHitPause`, `finisherHitPauseMultiplier`); animation frames freeze with it because they sample that clock.
 

@@ -27,14 +27,17 @@ try {
  var body=(SpriteRenderer)new SerializedObject(view).FindProperty("bodyVisual").objectReferenceValue;
  var flash=new MaterialPropertyBlock();body.GetPropertyBlock(flash);
  check(flash.GetFloat("_FlashAmount")==1f,"Wolf ivory flash activates");
- var particles=new ParticleSystem.Particle[48];int count=ps.GetParticles(particles);
+ var particles=new ParticleSystem.Particle[96];int count=ps.GetParticles(particles);
  check(particles.Take(count).All(p=>Vector2.Dot(p.velocity,Vector2.right)>0),"Flecks travel along strike direction");
  check(particles.Take(count).All(p=>p.position.x<1.5f&&p.position.y>.3f),"Burst uses collider contact plus visual height");
+ check(particles.Take(count).All(p=>p.startSize>=2f/16f-.001f),"Flecks are at least two world pixels");
  weapon.GetType().GetMethod("Simulate",flags).Invoke(weapon,new object[]{.01f});check(ps.particleCount==count,"Same swing cannot repeat impact burst");
  wolf.GetComponent<TheLostShrine.Combat.SimpleMeleeEnemy>().ResetOnRest();update();
  check(ps.particleCount==0&&!sound.isPlaying,"Rest clears transient feedback");
  health.ReceiveHit(new TheLostShrine.Combat.CombatHit(player,TheLostShrine.Combat.AttackKind.Recall,999,Vector2.left,0,0,false,wolf.transform.position));
  check(ps.particleCount>0&&sound.isPlaying,"Lethal hit still produces feedback");
+ check(ps.particleCount>count*1.5f&&Time.timeScale==0f,"Killing blow throws a bigger burst and freezes the frame");
+ Time.timeScale=1f;
  count=ps.particleCount;health.ReceiveHit(new TheLostShrine.Combat.CombatHit(player,TheLostShrine.Combat.AttackKind.LightChop,1,Vector2.right,0,0));
  check(ps.particleCount==count,"Dead target cannot repeat feedback");
  feedback.enabled=false;check(ps.particleCount==0&&!sound.isPlaying,"Disable clears sound and particles");
@@ -45,5 +48,5 @@ try {
   var prefab=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Combat/"+path+".prefab");var data=new SerializedObject(prefab.GetComponent<TheLostShrine.Combat.EnemyImpactFeedback>());
   check(data.FindProperty("body").objectReferenceValue!=null&&data.FindProperty("impactSound").objectReferenceValue!=null,"Bound feedback "+path);
  }
-} finally {foreach(var go in created)if(go!=null)UnityEngine.Object.DestroyImmediate(go);}
+} finally {foreach(var go in created)if(go!=null)UnityEngine.Object.DestroyImmediate(go);Time.timeScale=1f;}
 return string.Join("\n",results.ToArray());

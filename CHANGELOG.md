@@ -1,30 +1,23 @@
 # Changelog
 
-## 28SEP2026 - New hero and PixelLab animation pipeline
+## 28SEP2026 - New hero and combat feel
 
-- Replaced the player with a new arm-less hero in a blue hooded cloak, generated with PixelLab in eight directions at the world's native 16 pixels per unit. Standing views, an eight-frame walk and run, and a four-frame dash are live; further animations arrive one at a time.
-- Replaced the layered four-direction animation system with one state-driven presenter and a one-command PixelLab importer. Walk and run follow distance travelled, actions follow the weapon's clocks, facing uses eight directions and keeps diagonals on key release, and states without artwork fall back to the standing views.
-- Added an aged bronze halberd as the weapon sprite, outlined to match the hero, carried upright on the edge of his right side out of combat with per-direction mirroring and layering, a cloak fold wrapping the grip, and a bob that follows his walk; it starts planted in the Tutorial stump.
-- Moved light-hit pause into the weapon and its settings, unchanged at 0.045 seconds (1.4x on the finisher).
-- Retired the previous character art, its animation assets and tools (samples kept in `Docs/Art/Player/Legacy`), the unused old axe sprites, and the world-only DemoTutorial scene; Tutorial is now the single world reference.
-- Renamed the weapon from "hatchet" to "axe" throughout code, assets, scenes and documentation. Existing saves keep their axe ownership and purchased upgrades.
+- Replaced the hero with eight-direction PixelLab artwork, animated walking, running and dashing, and a bronze halberd carried at his side.
+- Reworked the light combo into two sweeping attacks and a powerful thrust with a short forward lunge.
+- Strengthened knockback, hit particles and killing-blow feedback while shortening enemy stuns.
+- Added a wolf detection “!” cue and Left Alt freelook with a three-tile limit.
+- Added an Escape pause menu with checkpoint restart and quit.
+- Retired the old character pipeline and DemoTutorial scene; Tutorial is now the main world reference.
+- Renamed “hatchet” to “axe,” preserving existing saves and upgrades.
 
 ## 27SEP2026 - Wolf enemy, combat feedback and Tutorial integration
 
-- Added compact two-tone enemy health bars above the Wolf and MeleeSentinel, reading current and maximum health, hiding on defeat and returning on rest.
-- Added a short impact sound and directional pixel-fleck burst to enemies and practice targets, driven by accepted damage and contact direction. Misses and guarded hits remain silent; lethal hits retain impact feedback.
-- Added an original low-resolution wolf with twenty 48x48 sprites, mirrored side views, movement-driven gait, readable bite windup, hit reactions and directional death poses. The Wolf prefab reuses existing enemy combat, rewards and rest/reset behavior.
-- Added a cursor-following aim marker and restrained light-melee windup, active damage footprint and slash feedback. Attack reach, width and timing follow the weapon's gameplay rules, including combos, upgrades and hit pause; the effect shows the full potential sector while damage remains terrain-blocked.
-- Consolidated the finished character into one standard Player prefab shared by Tutorial and test scenes.
-- Promoted the finished weapon to an independent `Axe.prefab` for gameplay and combat previews; retained the old weapon as `PrototypeAxe.prefab` for PrototypeLoop, preserving existing scene references and tuning.
-- Added the Combat Effects Preview editor window.
-- Added explicit F interactions for initial equipment and item pickups, with contextual prompts and one-item-per-press selection shared with bonfire controls; thrown axes retain automatic walk-over retrieval for combat.
-- Simplified detached axe presentation to one larger sprite with faster spin, a short trail and consistent grounded placement; modestly increased Tutorial throw speed and reach.
-- Established the Tutorial enemy, unique Sun Shard reward and bonfire/checkpoint setup using existing prefabs, with separate Tutorial saves and a compact HUD.
-- Renamed the game to **Road of the Old King**, including Unity product settings, web presentation, editor menus and project folder paths.
-- Completed four-direction catch coverage, finishing the current player animation set. Accepted the artwork for now and moved future animation work into a ranked backlog so development can focus on Tutorial gameplay.
-- Organized animation definitions, sprite sheets, source art, previews and tools by purpose. Removed obsolete studies and temporary files while preserving working assets and useful development references.
-- Separated review-only reveal sheets from runtime animation assets, preserving editor inspection and source rebuilds without changing gameplay artwork or timing.
+- Added the animated wolf enemy and enemy health bars.
+- Added the aim marker, melee coverage effects, impact sounds and particles, plus a combat preview tool.
+- Added F-to-pick-up interactions and clearer axe flight effects; thrown axes still return to hand when approached.
+- Integrated the Tutorial's first enemy, Sun Shard reward and bonfire/checkpoint, with separate saves and a compact HUD.
+- Unified player and weapon prefabs and completed the previous hero's catch animations.
+- Renamed the game to **Road of the Old King**.
 
 ## 26SEP2026 - Directional movement and combat
 

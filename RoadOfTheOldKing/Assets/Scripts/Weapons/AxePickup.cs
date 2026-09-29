@@ -10,7 +10,7 @@ namespace TheLostShrine.Weapons
     {
         private AxeWeapon weapon;
         public override string Prompt => "Pick up axe";
-        protected override float PickupDistance => 1.1f;
+        protected override float PickupDistance => 1.6f;
         private void Awake() => weapon = GetComponent<AxeWeapon>();
 
         public override bool CanCollect(PlayerHealth player)

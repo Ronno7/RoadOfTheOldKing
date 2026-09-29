@@ -23,6 +23,34 @@ try {
     Action render=()=>view.GetType().GetMethod("LateUpdate",flags).Invoke(view,null);
     Action<Vector2> placeTarget=p=>{player.transform.position=p;player.GetComponent<Rigidbody2D>().position=p;Physics2D.SyncTransforms();};
     var sprites=AssetDatabase.LoadAllAssetsAtPath("Assets/Art/Sprites/Enemies/Wolf.png").OfType<Sprite>().ToArray();
+    var cue=root.GetComponent<TheLostShrine.Combat.EnemyAwarenessIndicator>();
+    var display=(MeshRenderer)cue.GetType().GetField("display",flags).GetValue(cue);
+    Action<float> present=dt=>cue.GetType().GetMethod("Present",flags).Invoke(cue,new object[]{dt});
+    int detections=0;enemy.PlayerDetected+=()=>detections++;
+    placeTarget(new Vector2(8,0));tick(.02f);present(0);
+    check(!enemy.IsAware&&!display.enabled,"Awareness hidden outside range");
+    var blocker=new GameObject("Awareness wall");created.Add(blocker);
+    blocker.transform.position=new Vector3(1.5f,0,0);blocker.AddComponent<BoxCollider2D>().size=new Vector2(.2f,4);
+    placeTarget(new Vector2(3,0));tick(.02f);present(0);
+    check(!enemy.IsAware&&detections==0,"Wall prevents detection cue");
+    blocker.SetActive(false);Physics2D.SyncTransforms();tick(.02f);render();present(0);
+    check(enemy.IsAware&&display.enabled&&detections==1,"Actual detection shows cue");
+    check(Mathf.Abs(display.bounds.center.x-body.bounds.center.x)<.001f&&display.bounds.min.y>body.bounds.max.y+.28f,"Cue centered above wolf with health bar clearance");
+    tick(.02f);present(.8f);present(0);
+    check(!display.enabled&&detections==1,"Cue expires without repeating during pursuit");
+    placeTarget(Vector2.right);tick(.02f);placeTarget(new Vector2(3,0));tick(1);tick(1);tick(1);present(0);
+    check(detections==1,"Attack cycles do not replay detection");
+    enemy.ResetOnRest();placeTarget(new Vector2(3,0));tick(.02f);present(0);
+    check(display.enabled&&detections==2,"Detection after rest survives same-frame reset");
+    float before=(float)cue.GetType().GetField("remaining",flags).GetValue(cue);present(0);
+    check((float)cue.GetType().GetField("remaining",flags).GetValue(cue)==before,"Paused clock holds cue");
+    placeTarget(new Vector2(8,0));tick(.02f);present(0);
+    check(!enemy.IsAware&&!display.enabled,"Leash loss clears cue");
+    tick(.02f);placeTarget(new Vector2(3,0));tick(.02f);present(0);
+    check(display.enabled&&detections==3,"Reacquisition shows fresh cue");
+    cue.enabled=false;check(!display.enabled,"Disable clears cue");cue.enabled=true;
+    enemy.ResetOnRest();present(0);check(!display.enabled,"Rest clears cue");
+    player.GetComponent<TheLostShrine.Combat.Damageable>().RestoreHealth();
     check(sprites.Length==20,"Exactly twenty production sprites");
     check(sprites.All(s=>s.rect.size==new Vector2(48,48)&&s.pivot==new Vector2(24,7.5f)&&s.pixelsPerUnit==24),"Shared native cell, pivot and scale");
     check(animations.side.move.Length==4&&animations.south.move.Length==2&&animations.north.move.Length==2,"Bounded directional gait budget");
@@ -68,6 +96,7 @@ try {
     rewardData.FindProperty("defeatSource").objectReferenceValue=health;rewardData.ApplyModifiedPropertiesWithoutUndo();rewardObject.SetActive(true);
     health.ReceiveHit(new TheLostShrine.Combat.CombatHit(player,TheLostShrine.Combat.AttackKind.LightChop,999,Vector2.right,0,0));render();
     check(enemy.State==TheLostShrine.Combat.MeleeEnemyState.Defeated&&!root.GetComponent<Collider2D>().enabled&&!line.enabled,"Defeat immediately disables combat/collision");
+    present(0);check(!enemy.IsAware&&!display.enabled,"Defeat clears awareness cue");
     check(reward.IsAvailable,"Existing defeat reward unlocks");
     health.ReceiveHit(new TheLostShrine.Combat.CombatHit(player,TheLostShrine.Combat.AttackKind.LightChop,999,Vector2.right,0,0));
     check(defeated==1,"Corpse cannot repeat defeat/reward event");
@@ -82,6 +111,11 @@ try {
         view.GetType().GetField("deathElapsed",flags).SetValue(view,.3f);render();
         check(body.sprite.name==names[i]+"_dead","Directional corpse "+names[i]);
     }
+    enemy.ResetOnRest();Time.timeScale=1;placeTarget(new Vector2(-3,0));
+    var rb=root.GetComponent<Rigidbody2D>();Vector2 start=rb.position;
+    health.ReceiveHit(new TheLostShrine.Combat.CombatHit(player,TheLostShrine.Combat.AttackKind.LightChop,999,Vector2.right,5.5f,.2f));
+    for(int s=0;s<60;s++)tick(.02f);
+    check(rb.position.x-start.x>.8f&&enemy.State==TheLostShrine.Combat.MeleeEnemyState.Defeated,"Killing blow slides the corpse");
 } finally {
     foreach(var go in created)if(go!=null)UnityEngine.Object.DestroyImmediate(go);
     Physics2D.simulationMode=previousSimulation;Time.timeScale=previousSpeed;

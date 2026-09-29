@@ -63,6 +63,8 @@ namespace TheLostShrine.Player
 
         private void FixedUpdate()
         {
+            Vector2 actionDisplacement = combat != null && combat.Weapon != null
+                ? combat.Weapon.ConsumeActionDisplacement() : Vector2.zero;
             dash.Tick(Time.fixedDeltaTime);
             bool dashRequested = movementInput.ConsumeDashPress();
             // Let the reaction's impulse move the body during stagger.
@@ -94,11 +96,11 @@ namespace TheLostShrine.Player
                 return;
             }
 
-            if (combat != null && combat.ControlsMovement)
+            if (combat != null && (combat.ControlsMovement || actionDisplacement.sqrMagnitude > 0f))
             {
                 IsSprinting = false;
                 FacingDirection = combat.ActionFacing;
-                body.linearVelocity = direction * moveSpeed * combat.ActionMovementScale;
+                body.linearVelocity = direction * moveSpeed * combat.ActionMovementScale + actionDisplacement / Time.fixedDeltaTime;
                 return;
             }
 

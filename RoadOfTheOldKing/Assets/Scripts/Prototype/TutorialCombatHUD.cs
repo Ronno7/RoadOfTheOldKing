@@ -20,6 +20,7 @@ namespace TheLostShrine.Prototype
         private bool confirmNewRun;
         private PlayerBonfireInteraction bonfireInteraction;
         private PlayerStamina stamina;
+        private TheLostShrine.UI.PauseMenuController pauseMenu;
         private bool showUpgrades;
         private readonly BonfireUpgradeMenu upgradeMenu = new BonfireUpgradeMenu();
 
@@ -29,11 +30,13 @@ namespace TheLostShrine.Prototype
             {
                 bonfireInteraction = player.GetComponent<PlayerBonfireInteraction>();
                 stamina = player.GetComponent<PlayerStamina>();
+                pauseMenu = player.GetComponent<TheLostShrine.UI.PauseMenuController>();
             }
         }
 
         private void Update()
         {
+            if (pauseMenu != null && pauseMenu.BlocksGameplay) return;
             bool canRestart = playerHealth != null && !playerHealth.IsAlive;
             if (canRestart && Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame)
                 Restart();
@@ -58,7 +61,7 @@ namespace TheLostShrine.Prototype
 
         private void OnGUI()
         {
-            if (player == null)
+            if (player == null || (pauseMenu != null && pauseMenu.BlocksGameplay))
                 return;
             if (title == null)
             {
@@ -121,7 +124,7 @@ namespace TheLostShrine.Prototype
                 "LMB: slash   |   Hold / release RMB: cleave   |   Space: dash / dodge\n" +
                 "Tap E: throw   |   Hold E: aim; release: throw; RMB: cancel" +
                 (player.CanRecall ? "   |   E while away: recall" : "\nWalk over your thrown axe to retrieve it") +
-                "\nF: pick up / rest   |   Esc: leave fire menu";
+                "\nF: pick up / rest   |   Esc: pause / leave fire menu   |   Left Alt: freelook";
             if (!compact)
             {
                 GUI.Box(new Rect(12f, screenHeight - 128f, Mathf.Min(760f, screenWidth - 24f), 116f), GUIContent.none);

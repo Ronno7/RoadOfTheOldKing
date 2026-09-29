@@ -546,7 +546,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Damageable
   maxHealth: 100
   protectionSource: {fileID: 0}
@@ -560,8 +560,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0a3d61830c75a1945a2ae1374af9f9a1, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.HitReaction
+  knockbackMultiplier: 1
+  maxKnockbackImpulse: 0
+  replaceMovementOnHit: 1
+  lethalKnockbackMultiplier: 1.6
 --- !u!114 &9009435604842691915
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -572,7 +576,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 60006aa55dea78645a6d560f141f19c5, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.SimpleMeleeEnemy
   target: {fileID: 0}
   moveSpeed: 2.1
@@ -585,6 +589,7 @@ MonoBehaviour:
   strikeDuration: 0.12
   recoveryDuration: 0.9
   damage: 20
+  hitRecovery: 0.1
 --- !u!114 &5720883974557716648
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -595,7 +600,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b62397dd6395cb14291d2812acea540d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Prototype.MeleeEnemyView
   bodyVisual: {fileID: 4995579727582212372}
   facingMarker: {fileID: 3859988449232936508}
@@ -611,7 +616,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 66dead76a9dc0794392b1c7c8c51e277, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.EnemyHealthIndicator
   body: {fileID: 4995579727582212372}
   width: 1.05
@@ -630,11 +635,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dc8908e9a5554aa489e50ba0a13435b7, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.EnemyImpactFeedback
   body: {fileID: 4995579727582212372}
   impactSound: {fileID: 8300000, guid: c1c5b78e1cffb774d821e48418e46675, type: 3}
   volume: 0.48
   audibleDistance: 18
-  particleCount: 7
+  particleCount: 10
+  fleckPixels: {x: 2, y: 3}
+  lethalBurst: 2.2
+  killFreeze: 0.08
   visualHeight: 0.45

@@ -27,6 +27,7 @@ namespace TheLostShrine.Weapons
         private Color originalBlade;
         private Sprite originalSprite;
         private Vector3 originalBladeScale;
+        private float bladeForwardExtent = 0.45f;
         private bool wasFlying;
         private int originalSortingLayer;
         private int originalSortingOrder;
@@ -45,6 +46,19 @@ namespace TheLostShrine.Weapons
                 originalBladePosition = blade.transform.localPosition;
                 originalSortingLayer = blade.sortingLayerID;
                 originalSortingOrder = blade.sortingOrder;
+                if (model != null && originalSprite != null)
+                {
+                    var bounds = originalSprite.bounds;
+                    var rotation = Quaternion.Euler(0f, 0f, spriteAngleOffset);
+                    bladeForwardExtent = 0f;
+                    for (int x = 0; x < 2; x++) for (int y = 0; y < 2; y++)
+                    {
+                        var corner = new Vector3(x == 0 ? bounds.min.x : bounds.max.x,
+                            y == 0 ? bounds.min.y : bounds.max.y, 0f);
+                        var local = model.InverseTransformPoint(blade.transform.TransformPoint(corner));
+                        bladeForwardExtent = Mathf.Max(bladeForwardExtent, (rotation * local).x);
+                    }
+                }
             }
         }
 
@@ -156,30 +170,41 @@ namespace TheLostShrine.Weapons
 
         private float DrawLightSlash()
         {
-            var settings = weapon.Settings;
             float progress = weapon.AttackProgress;
             float direction = weapon.ComboIndex == 1 ? -1f : 1f;
             float aimAngle = Mathf.Atan2(weapon.AttackDirection.y, weapon.AttackDirection.x) * Mathf.Rad2Deg;
             float halfArc = weapon.LightArc * 0.5f;
-            float slashTime = Mathf.InverseLerp(settings.lightWindupFraction, settings.lightSwingEndFraction, progress);
+            float slashTime = weapon.LightSwingProgress;
+            if (weapon.IsLightThrust)
+            {
+                // Place the tip at the lane end, accounting for the long halberd sprite.
+                float extension = Mathf.Max(0.15f, weapon.LightReach - bladeForwardExtent);
+                float radius = weapon.LightPhase == MeleePhase.Windup
+                    ? Mathf.Lerp(0.5f, 0.15f, progress / weapon.LightWindupFraction)
+                    : weapon.LightPhase == MeleePhase.Active ? Mathf.Lerp(0.15f, extension, slashTime)
+                    : Mathf.Lerp(extension, 0.5f, Mathf.SmoothStep(0f, 1f,
+                        Mathf.InverseLerp(weapon.LightSwingEndFraction, 1f, progress)));
+                model.localPosition = (Vector3)weapon.AttackDirection * radius;
+                return aimAngle;
+            }
             float sweepProgress = 1f - Mathf.Pow(1f - slashTime, 3f);
             float sweepAngle = aimAngle + Mathf.Lerp(-halfArc, halfArc, sweepProgress) * direction;
             float poseAngle = sweepAngle;
             float reach = Mathf.Max(0.25f, weapon.LightReach - 0.45f);
             float poseRadius;
 
-            if (progress < settings.lightWindupFraction)
+            if (progress < weapon.LightWindupFraction)
             {
-                float windup = Mathf.InverseLerp(0f, settings.lightWindupFraction, progress);
+                float windup = Mathf.InverseLerp(0f, weapon.LightWindupFraction, progress);
                 poseAngle = aimAngle - Mathf.Lerp(halfArc * 0.65f, halfArc, windup) * direction;
                 poseRadius = Mathf.Lerp(0.5f, 0.6f, windup);
             }
-            else if (progress <= settings.lightSwingEndFraction)
+            else if (progress <= weapon.LightSwingEndFraction)
                 poseRadius = Mathf.Lerp(0.6f, reach, sweepProgress);
             else
             {
                 float recovery = Mathf.SmoothStep(0f, 1f,
-                    Mathf.InverseLerp(settings.lightSwingEndFraction, 1f, progress));
+                    Mathf.InverseLerp(weapon.LightSwingEndFraction, 1f, progress));
                 poseAngle = Mathf.Lerp(sweepAngle, aimAngle, recovery);
                 poseRadius = Mathf.Lerp(reach, 0.5f, recovery);
             }

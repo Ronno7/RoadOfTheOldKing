@@ -184,6 +184,7 @@ namespace TheLostShrine.Player
             suppressCharge = true;
             if (Weapon != null)
             {
+                Weapon.CancelLightCombo();
                 Weapon.CancelCharge();
                 Weapon.CancelThrow();
             }

@@ -8,6 +8,7 @@ namespace TheLostShrine.Weapons
     public enum MeleePhase { None, Windup, Active, Recovery }
 
     [DisallowMultipleComponent]
+    [DefaultExecutionOrder(-50)] // Advance before the player motor consumes action displacement.
     public sealed class AxeWeapon : MonoBehaviour
     {
         [SerializeField] private AxeSettings settings;
@@ -23,6 +24,8 @@ namespace TheLostShrine.Weapons
         private Vector2 attackDirection = Vector2.right;
         private float lightSpeedMultiplier = 1f;
         private float addedLightArc;
+        private float finisherDamageMultiplier = 1f;
+        private Vector2 pendingActionDisplacement;
         private float addedCleaveRadius;
         private float impactPauseRemaining;
         private readonly ThrowActionClock throwAction = new ThrowActionClock();
@@ -51,8 +54,22 @@ namespace TheLostShrine.Weapons
         public int ComboStep => State == AxeState.LightChop ||
             (State == AxeState.Held && comboRemaining > 0f) ? ComboIndex + 1 : 0;
         public float ComboTimeRemaining => comboRemaining;
-        public float LightReach => settings.lightRadius + (ComboIndex == 2 ? 0.15f : 0f);
-        public float LightArc => Mathf.Clamp(settings.lightArc + addedLightArc, 20f, 180f);
+        public bool IsLightThrust => ComboIndex == 2;
+        public float LightReach => settings.lightRadius * (IsLightThrust ? settings.finisherReachMultiplier : 1f);
+        // Apply widening proportionally so the reverse sweep remains narrower even at the cap.
+        public float LightArc => IsLightThrust ? settings.finisherArc
+            : Mathf.Clamp(settings.lightArc + addedLightArc, 20f, 180f) *
+                (ComboIndex == 1 ? settings.secondLightArc / Mathf.Max(20f, settings.lightArc) : 1f);
+        public float LightLaneWidth => 2f * LightReach * Mathf.Tan(settings.finisherArc * 0.5f * Mathf.Deg2Rad);
+        public int LightDamage => IsLightThrust ? Mathf.RoundToInt(settings.finisherDamage * finisherDamageMultiplier) : settings.lightDamage;
+        public float LightWindupFraction => IsLightThrust ? settings.finisherWindupFraction : settings.lightWindupFraction;
+        public float LightSwingEndFraction => IsLightThrust ? settings.finisherSwingEndFraction : settings.lightSwingEndFraction;
+        public Vector2 ConsumeActionDisplacement()
+        {
+            var displacement = pendingActionDisplacement;
+            pendingActionDisplacement = Vector2.zero;
+            return displacement;
+        }
         public float CleaveRadius => settings.cleaveRadius + addedCleaveRadius;
         public bool IsAway => State == AxeState.Flying || State == AxeState.Stuck || State == AxeState.Returning;
         public bool IsAttacking => throwAction.IsActive || State == AxeState.LightChop || State == AxeState.Charging || State == AxeState.Cleaving;
@@ -74,8 +91,8 @@ namespace TheLostShrine.Weapons
         public float AttackProgress => Mathf.Clamp01(elapsed / (State == AxeState.Cleaving
             ? settings.cleaveDuration : LightDuration));
         public float LightDuration => settings.lightDuration * (ComboIndex == 2 ? settings.finisherDurationMultiplier : 1f) / lightSpeedMultiplier;
-        private float LightDamageStart => LightDuration * settings.lightWindupFraction;
-        private float LightDamageEnd => LightDuration * settings.lightSwingEndFraction;
+        private float LightDamageStart => LightDuration * LightWindupFraction;
+        private float LightDamageEnd => LightDuration * LightSwingEndFraction;
         // Presentation reads the same action clock/window as the physics interval below.
         public MeleePhase LightPhase => State != AxeState.LightChop ? MeleePhase.None
             : elapsed < LightDamageStart ? MeleePhase.Windup
@@ -86,12 +103,14 @@ namespace TheLostShrine.Weapons
         public void ApplyUpgrades(System.Collections.Generic.IEnumerable<AxeUpgrade> upgrades)
         {
             lightSpeedMultiplier = 1f;
+            finisherDamageMultiplier = 1f;
             addedLightArc = addedCleaveRadius = 0f;
             foreach (var upgrade in upgrades)
             {
                 lightSpeedMultiplier *= Mathf.Max(1f, upgrade.lightSpeedMultiplier);
                 addedLightArc += Mathf.Max(0f, upgrade.addedLightArc);
                 addedCleaveRadius += Mathf.Max(0f, upgrade.addedCleaveRadius);
+                finisherDamageMultiplier *= Mathf.Max(1f, upgrade.finisherDamageMultiplier);
             }
         }
 
@@ -185,6 +204,7 @@ namespace TheLostShrine.Weapons
         // Death cancels damage in progress, including a thrown or returning axe.
         public void CancelAction()
         {
+            pendingActionDisplacement = Vector2.zero;
             throwAction.Cancel();
             if (owner == null)
                 return;
@@ -192,6 +212,13 @@ namespace TheLostShrine.Weapons
             comboRemaining = 0f;
             transform.position = owner.transform.position;
             SetState(AxeState.Held);
+        }
+
+        public void CancelLightCombo()
+        {
+            comboRemaining = 0f;
+            pendingActionDisplacement = Vector2.zero;
+            if (State == AxeState.LightChop) CancelAction();
         }
 
         public bool TryThrow(Vector2 direction)
@@ -267,6 +294,7 @@ namespace TheLostShrine.Weapons
             }
 
             if (IsThrowing && !owner.CanContinueAction) CancelThrow();
+            if (State == AxeState.LightChop && !owner.CanContinueAction) CancelLightCombo();
             bool wasThrowing = IsThrowing;
             bool committedThrow = wasThrowing && !CanCancelThrowAim;
             if (throwAction.Advance(deltaTime, out float flightSeconds)) LaunchThrow();
@@ -294,12 +322,19 @@ namespace TheLostShrine.Weapons
                     break;
                 case AxeState.LightChop:
                     transform.position = owner.transform.position;
+                    if (IsLightThrust)
+                    {
+                        float activeSeconds = Mathf.Max(0f, Mathf.Min(elapsed, LightDamageEnd) - Mathf.Max(previousElapsed, LightDamageStart));
+                        pendingActionDisplacement += attackDirection * (settings.finisherLungeDistance * activeSeconds / (LightDamageEnd - LightDamageStart));
+                    }
                     if (elapsed >= LightDamageStart && previousElapsed < LightDamageEnd)
                         hits.Melee(owner.transform.position, attackDirection,
                             LightReach, LightArc,
                             new CombatHit(owner.gameObject, AttackKind.LightChop,
-                                ComboIndex == 2 ? settings.finisherDamage : settings.lightDamage,
-                                attackDirection, ComboIndex == 2 ? 2f : 0.6f, 0.12f));
+                                LightDamage,
+                                attackDirection, ComboIndex == 2 ? settings.finisherKnockback : settings.lightKnockback,
+                                ComboIndex == 2 ? settings.finisherStagger : settings.lightStagger),
+                            IsLightThrust ? LightLaneWidth : 0f);
                     if (elapsed >= LightDuration)
                     {
                         comboRemaining = settings.comboWindow;
@@ -350,7 +385,7 @@ namespace TheLostShrine.Weapons
             Vector2 origin = transform.position;
             float distance = Mathf.Min(settings.throwSpeed * deltaTime, settings.throwRange - travelled);
             Vector2 destination = origin + attackDirection * distance;
-            var hit = new CombatHit(owner.gameObject, AttackKind.Throw, settings.throwDamage, attackDirection, 1f, 0.15f);
+            var hit = new CombatHit(owner.gameObject, AttackKind.Throw, settings.throwDamage, attackDirection, settings.throwKnockback, 0.15f);
             if (hits.Flight(origin, destination, settings.flightRadius, hit, true, out RaycastHit2D impact))
             {
                 FlightSeconds += impact.distance / settings.throwSpeed;
@@ -381,7 +416,7 @@ namespace TheLostShrine.Weapons
             FlightSeconds += Vector2.Distance(origin, destination) / settings.recallSpeed;
             Vector2 direction = (destination - origin).normalized;
             hits.Flight(origin, destination, settings.flightRadius,
-                new CombatHit(owner.gameObject, AttackKind.Recall, settings.recallDamage, direction, 1.5f, 0.2f), false, out _);
+                new CombatHit(owner.gameObject, AttackKind.Recall, settings.recallDamage, direction, settings.recallKnockback, 0.2f), false, out _);
             transform.position = destination;
             // Return ignores solid terrain so the owned axe cannot get stranded.
             if (Vector2.Distance(destination, owner.transform.position) <= 0.1f)
@@ -400,6 +435,7 @@ namespace TheLostShrine.Weapons
 
         private void OnDisable()
         {
+            CancelLightCombo();
             CancelCharge();
             CancelThrow();
         }
