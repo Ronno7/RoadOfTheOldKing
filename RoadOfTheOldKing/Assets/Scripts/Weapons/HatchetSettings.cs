@@ -19,6 +19,9 @@ namespace TheLostShrine.Weapons
         [Min(1)] public int finisherDamage = 15;
         [Min(0f)] public float lightStaminaCost = 18f;
         [Min(0f)] public float finisherStaminaCost = 24f;
+        [Tooltip("Confirmed light hits pause only this swing's clock; enemies and world time keep running.")]
+        [Range(0f, 0.1f)] public float lightHitPause = 0.045f;
+        [Min(1f)] public float finisherHitPauseMultiplier = 1.4f;
         [Header("Charged cleave")]
         [Min(0.05f)] public float minimumCharge = 0.2f;
         [Min(0.1f)] public float fullCharge = 0.8f;

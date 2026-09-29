@@ -1,23 +1,21 @@
 # Changelog
 
-## 27SEP2026 - Confirmed-hit impact feedback
+## 28SEP2026 - New hero and PixelLab animation pipeline
 
+- Replaced the player with a new arm-less hero in a blue hooded cloak, generated with PixelLab in eight directions at the world's native 16 pixels per unit. Standing views and an eight-frame walk are live; further animations arrive one at a time.
+- Replaced the layered four-direction animation system with one state-driven presenter and a one-command PixelLab importer. Walk and run follow distance travelled, actions follow the weapon's clocks, facing uses eight directions and keeps diagonals on key release, and states without artwork fall back to the standing views.
+- Moved light-hit pause into the weapon and its settings, unchanged at 0.045 seconds (1.4x on the finisher).
+- Retired the previous character art, its animation assets and tools (samples kept in `Docs/Art/Player/Legacy`), and the world-only DemoTutorial scene; Tutorial is now the single world reference.
+
+## 27SEP2026 - Wolf enemy, combat feedback and Tutorial integration
+
+- Added compact two-tone enemy health bars above the Wolf and MeleeSentinel, reading current and maximum health, hiding on defeat and returning on rest.
 - Added a short impact sound and directional pixel-fleck burst to enemies and practice targets, driven by accepted damage and contact direction. Misses and guarded hits remain silent; lethal hits retain impact feedback.
-
-
-## 27SEP2026 - Wolf enemy presentation
-
 - Added an original low-resolution wolf with twenty 48x48 sprites, mirrored side views, movement-driven gait, readable bite windup, hit reactions and directional death poses. The Wolf prefab reuses existing enemy combat, rewards and rest/reset behavior.
-
-## 27SEP2026 - Combat readability and inspection tools
-
-- Added a cursor-following aim marker and restrained light-melee windup, active damage footprint and slash feedback. Attack reach, width, timing and terrain clipping follow the weapon's gameplay rules, including combos, upgrades and hit pause.
+- Added a cursor-following aim marker and restrained light-melee windup, active damage footprint and slash feedback. Attack reach, width and timing follow the weapon's gameplay rules, including combos, upgrades and hit pause; the effect shows the full potential sector while damage remains terrain-blocked.
 - Consolidated the finished character into one standard Player prefab shared by Tutorial and test scenes.
 - Promoted the finished weapon to an independent `Hatchet.prefab` for gameplay and combat previews; retained the old weapon as `PrototypeHatchet.prefab` for PrototypeLoop, preserving existing scene references and tuning.
 - Added the Combat Effects Preview editor window.
-
-## 27SEP2026 - Animation milestone, cleanup and Tutorial integration
-
 - Added explicit F interactions for initial equipment and item pickups, with contextual prompts and one-item-per-press selection shared with bonfire controls; thrown hatchets retain automatic walk-over retrieval for combat.
 - Simplified detached hatchet presentation to one larger sprite with faster spin, a short trail and consistent grounded placement; modestly increased Tutorial throw speed and reach.
 - Established the Tutorial enemy, unique Sun Shard reward and bonfire/checkpoint setup using existing prefabs, with separate Tutorial saves and a compact HUD.

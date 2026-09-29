@@ -58,6 +58,8 @@ namespace TheLostShrine.Weapons
         public bool IsAttacking => throwAction.IsActive || State == HatchetState.LightChop || State == HatchetState.Charging || State == HatchetState.Cleaving;
         public ThrowPhase ThrowPhase => throwAction.Phase;
         public int ThrowCelIndex => throwAction.CelIndex;
+        public float ThrowPhaseProgress => throwAction.PhaseProgress;
+        public float ThrowLaunchFraction => throwAction.LaunchFraction;
         public bool IsThrowing => throwAction.IsActive;
         public bool CanCancelThrowAim => throwAction.CanCancelAim;
         public bool ControlsMovement => IsThrowing || State == HatchetState.LightChop;
@@ -109,12 +111,19 @@ namespace TheLostShrine.Weapons
             if (!isActiveAndEnabled || State != HatchetState.OnGround || newOwner == null)
                 return false;
             owner = newOwner;
-            hits = new HatchetHitDetector(owner.transform, transform, hit => HitConfirmed?.Invoke(hit));
+            hits = new HatchetHitDetector(owner.transform, transform, OnHitConfirmed);
             if (pickupCollider != null)
                 pickupCollider.enabled = false;
             transform.position = owner.transform.position;
             SetState(HatchetState.Held);
             return true;
+        }
+
+        private void OnHitConfirmed(CombatHit hit)
+        {
+            if (hit.Kind == AttackKind.LightChop)
+                PauseOnImpact(settings.lightHitPause * (ComboIndex == 2 ? settings.finisherHitPauseMultiplier : 1f));
+            HitConfirmed?.Invoke(hit);
         }
 
         public void SetAim(Vector2 direction)

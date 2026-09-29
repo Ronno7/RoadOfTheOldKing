@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 1004}
   - component: {fileID: 1005}
   - component: {fileID: 1006}
-  - component: {fileID: 1013}
   - component: {fileID: 9215421230755382488}
   - component: {fileID: 3612271848531798894}
   - component: {fileID: 4217139744019354931}
@@ -23,10 +22,7 @@ GameObject:
   - component: {fileID: 5496248981985283440}
   - component: {fileID: 8027254562946123960}
   - component: {fileID: 8164189053318432841}
-  - component: {fileID: 4659443887975378939}
-  - component: {fileID: 895834466087692167}
-  - component: {fileID: 6146580636217453344}
-  - component: {fileID: 3799706640400356673}
+  - component: {fileID: 6845399670053713294}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -48,7 +44,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1008}
-  - {fileID: 1011}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!50 &1003
@@ -134,8 +129,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e5d4da9ce03b5880a37a447244f0a788, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1006
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -146,28 +141,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 606e228678bc5124861a6f2d9d70c10e, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   moveSpeed: 4.5
   sprintMultiplier: 1.6
   sprintCostPerSecond: 20
   minimumSprintStamina: 20
   initialFacing: {x: 0, y: -1}
   inputSource: {fileID: 1005}
---- !u!114 &1013
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1001}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5bfe9b1e9869509cad65da8b0d5987d9, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
-  marker: {fileID: 0}
-  markerDistance: 0.24
 --- !u!114 &9215421230755382488
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -178,7 +159,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6b451e47c64e54741ae1b9809145b43d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Input.PlayerCombatInput
 --- !u!114 &3612271848531798894
 MonoBehaviour:
@@ -190,7 +171,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 511025610d771e048af5bfdc734b16fe, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerCombatController
   inputSource: {fileID: 9215421230755382488}
   aimCamera: {fileID: 0}
@@ -206,7 +187,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Damageable
   maxHealth: 100
   protectionSource: {fileID: 7425349288622817033}
@@ -220,8 +201,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0a3d61830c75a1945a2ae1374af9f9a1, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.HitReaction
+  knockbackMultiplier: 1
+  maxKnockbackImpulse: 0
+  replaceMovementOnHit: 0
 --- !u!114 &7425349288622817033
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -232,7 +216,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 77ed5e44f82138e47a2ffd319bf6a318, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerHealth
   invulnerabilityDuration: 0.8
 --- !u!114 &405733286098808294
@@ -245,7 +229,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d592fa17525fa6d448b81267a9c0bdc8, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerBonfireInteraction
 --- !u!114 &5496248981985283440
 MonoBehaviour:
@@ -257,7 +241,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3306b6c8e8fa83747924e875fba4ea34, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerStamina
   maximum: 100
   recoveryPerSecond: 25
@@ -272,7 +256,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9bc50151568b4c840869471f5dd327e7, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerDash
   distance: 2.2
   duration: 0.18
@@ -289,7 +273,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2f454cae501b4ae4863e023da48c277e, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerAimIndicator
   body: {fileID: 1009}
   centerOffset: {x: 0, y: 0.75}
@@ -298,7 +282,7 @@ MonoBehaviour:
   chevronHalfWidth: 0.13
   strokeWidth: 0.045
   color: {r: 0.96, g: 0.89, b: 0.66, a: 0.9}
---- !u!114 &4659443887975378939
+--- !u!114 &6845399670053713294
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -307,393 +291,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1001}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 342195b4b3fde5f418e7cd4775efd74c, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerLocomotionAnimation
-  animator: {fileID: 8855684484376416841}
-  strideLength: 2.25
-  sprintStrideLength: 3.2
-  idleBreathAmount: 0.012
-  idleBreathPeriod: 3.2
-  idleSettleTime: 0.35
---- !u!114 &895834466087692167
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1001}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 36dac95313f2eca4b964f6106036ed79, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerWeaponGrip
+  m_Script: {fileID: 11500000, guid: e94254d6cd3f4cc4085f0d506cde1836, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerSpriteAnimator
   body: {fileID: 1009}
-  frames:
-  - sprite: {fileID: 2131032035, guid: f4041311381ad8449b3366c16288195f, type: 3}
-    position: {x: -0.426, y: 0.547}
-    angle: 14
-    flipX: 0
-  - sprite: {fileID: 82819816, guid: f4041311381ad8449b3366c16288195f, type: 3}
-    position: {x: -0.445, y: 0.555}
-    angle: 12
-    flipX: 0
-  - sprite: {fileID: -1432532458, guid: f4041311381ad8449b3366c16288195f, type: 3}
-    position: {x: -0.383, y: 0.629}
-    angle: 16
-    flipX: 0
-  - sprite: {fileID: 29575243, guid: f4041311381ad8449b3366c16288195f, type: 3}
-    position: {x: -0.414, y: 0.566}
-    angle: 12
-    flipX: 0
-  - sprite: {fileID: 660914831, guid: f4041311381ad8449b3366c16288195f, type: 3}
-    position: {x: 0.246, y: 0.5}
-    angle: -28
-    flipX: 1
-  - sprite: {fileID: -711932826, guid: f4041311381ad8449b3366c16288195f, type: 3}
-    position: {x: 0.215, y: 0.539}
-    angle: -25
-    flipX: 1
-  - sprite: {fileID: 43188130, guid: f4041311381ad8449b3366c16288195f, type: 3}
-    position: {x: 0.258, y: 0.551}
-    angle: -31
-    flipX: 1
-  - sprite: {fileID: 1759020035, guid: f4041311381ad8449b3366c16288195f, type: 3}
-    position: {x: 0.27, y: 0.543}
-    angle: -25
-    flipX: 1
-  - sprite: {fileID: 1363804303, guid: f4041311381ad8449b3366c16288195f, type: 3}
-    position: {x: -0.367, y: 0.512}
-    angle: 28
-    flipX: 0
-  - sprite: {fileID: -49006107, guid: f4041311381ad8449b3366c16288195f, type: 3}
-    position: {x: -0.289, y: 0.59}
-    angle: 25
-    flipX: 0
-  - sprite: {fileID: 973409709, guid: f4041311381ad8449b3366c16288195f, type: 3}
-    position: {x: -0.332, y: 0.535}
-    angle: 31
-    flipX: 0
-  - sprite: {fileID: 711320756, guid: f4041311381ad8449b3366c16288195f, type: 3}
-    position: {x: -0.309, y: 0.535}
-    angle: 25
-    flipX: 0
-  - sprite: {fileID: -1016550650, guid: f4041311381ad8449b3366c16288195f, type: 3}
-    position: {x: 0.352, y: 0.523}
-    angle: -18
-    flipX: 1
-  - sprite: {fileID: -948535507, guid: f4041311381ad8449b3366c16288195f, type: 3}
-    position: {x: 0.398, y: 0.578}
-    angle: -15
-    flipX: 1
-  - sprite: {fileID: -1787170307, guid: f4041311381ad8449b3366c16288195f, type: 3}
-    position: {x: 0.43, y: 0.551}
-    angle: -21
-    flipX: 1
-  - sprite: {fileID: -1521687406, guid: f4041311381ad8449b3366c16288195f, type: 3}
-    position: {x: 0.422, y: 0.551}
-    angle: -15
-    flipX: 1
---- !u!114 &6146580636217453344
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1001}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b082398a00905bc4892fb2dc8be4071c, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerChopAnimation
-  body: {fileID: 1009}
-  directions:
-  - name: South
-    opening:
-    - sprite: {fileID: -552787012, guid: 939a4b480452a474abb40d2df02765d7, type: 3}
-      grip: {x: -0.61625, y: 1.130625}
-      angle: 35
-      endAngle: 35
-      flipX: 0
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-    - sprite: {fileID: -962940914, guid: 939a4b480452a474abb40d2df02765d7, type: 3}
-      grip: {x: -0.446875, y: 1.515625}
-      angle: 15
-      endAngle: 15
-      flipX: 0
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-    - sprite: {fileID: 2110347717, guid: 939a4b480452a474abb40d2df02765d7, type: 3}
-      grip: {x: -0.180625, y: 0.556875}
-      angle: -145
-      endAngle: -195
-      flipX: 0
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-    - sprite: {fileID: 2049313858, guid: 939a4b480452a474abb40d2df02765d7, type: 3}
-      grip: {x: -0.170625, y: 0.338125}
-      angle: -185
-      endAngle: -185
-      flipX: 0
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-    backhandPreparation: []
-    backhand:
-      sprite: {fileID: -748814861, guid: 5e48b3280da7a9a498bb5fa3e71bc13b, type: 3}
-      grip: {x: 0.40163043, y: 0.90815216}
-      angle: 145
-      endAngle: 205
-      flipX: 0
-      handOverlay: {fileID: 2014554619, guid: 5e48b3280da7a9a498bb5fa3e71bc13b, type: 3}
-      weaponSprite: {fileID: 0}
-    backhandFollowThrough:
-      sprite: {fileID: 0}
-      grip: {x: 0, y: 0}
-      angle: 0
-      endAngle: 0
-      flipX: 0
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-    finisher:
-      sprite: {fileID: 1074178706, guid: 5e48b3280da7a9a498bb5fa3e71bc13b, type: 3}
-      grip: {x: 0.06195652, y: 0.20217392}
-      angle: -155
-      endAngle: -195
-      flipX: 0
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-    recovery:
-      sprite: {fileID: 2131032035, guid: f4041311381ad8449b3366c16288195f, type: 3}
-      grip: {x: -0.426, y: 0.547}
-      angle: 14
-      endAngle: 14
-      flipX: 0
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-  - name: East
-    opening:
-    - sprite: {fileID: 917630724, guid: 9c091fdb001001d4fa5239ba4c01da04, type: 3}
-      grip: {x: -0.53515625, y: 1.2382812}
-      angle: 35
-      endAngle: 35
-      flipX: 1
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-    - sprite: {fileID: -1643943539, guid: 9c091fdb001001d4fa5239ba4c01da04, type: 3}
-      grip: {x: -0.421875, y: 1.4804688}
-      angle: 15
-      endAngle: 15
-      flipX: 1
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-    - sprite: {fileID: 1760224869, guid: 9c091fdb001001d4fa5239ba4c01da04, type: 3}
-      grip: {x: 0.80859375, y: 0.79296875}
-      angle: -85
-      endAngle: -112
-      flipX: 1
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-    - sprite: {fileID: -130655961, guid: 9c091fdb001001d4fa5239ba4c01da04, type: 3}
-      grip: {x: 0.640625, y: 0.48828125}
-      angle: -115
-      endAngle: -115
-      flipX: 1
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-    backhandPreparation: []
-    backhand:
-      sprite: {fileID: 24152673, guid: 5e48b3280da7a9a498bb5fa3e71bc13b, type: 3}
-      grip: {x: 0.6255435, y: 1.0065217}
-      angle: -100
-      endAngle: -50
-      flipX: 1
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-    backhandFollowThrough:
-      sprite: {fileID: 0}
-      grip: {x: 0, y: 0}
-      angle: 0
-      endAngle: 0
-      flipX: 0
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-    finisher:
-      sprite: {fileID: 925135893, guid: 5e48b3280da7a9a498bb5fa3e71bc13b, type: 3}
-      grip: {x: 0.50923914, y: 0.26467392}
-      angle: -82
-      endAngle: -115
-      flipX: 1
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-    recovery:
-      sprite: {fileID: 660914831, guid: f4041311381ad8449b3366c16288195f, type: 3}
-      grip: {x: 0.246, y: 0.5}
-      angle: -28
-      endAngle: -28
-      flipX: 1
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-  - name: West
-    opening:
-    - sprite: {fileID: 1128779342, guid: 939a4b480452a474abb40d2df02765d7, type: 3}
-      grip: {x: 0.45625, y: 1.25}
-      angle: -35
-      endAngle: -35
-      flipX: 0
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-    - sprite: {fileID: 1257510373, guid: 939a4b480452a474abb40d2df02765d7, type: 3}
-      grip: {x: 0.306875, y: 1.4725}
-      angle: -15
-      endAngle: -15
-      flipX: 0
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-    - sprite: {fileID: -2126757829, guid: 939a4b480452a474abb40d2df02765d7, type: 3}
-      grip: {x: -0.888125, y: 0.900625}
-      angle: 85
-      endAngle: 112
-      flipX: 0
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-    - sprite: {fileID: 1017004338, guid: 939a4b480452a474abb40d2df02765d7, type: 3}
-      grip: {x: -0.706875, y: 0.545625}
-      angle: 115
-      endAngle: 115
-      flipX: 0
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-    backhandPreparation: []
-    backhand:
-      sprite: {fileID: -1614958390, guid: 5e48b3280da7a9a498bb5fa3e71bc13b, type: 3}
-      grip: {x: -0.65434784, y: 1.0070652}
-      angle: 100
-      endAngle: 50
-      flipX: 0
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-    backhandFollowThrough:
-      sprite: {fileID: 0}
-      grip: {x: 0, y: 0}
-      angle: 0
-      endAngle: 0
-      flipX: 0
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-    finisher:
-      sprite: {fileID: -1188999776, guid: 5e48b3280da7a9a498bb5fa3e71bc13b, type: 3}
-      grip: {x: -0.5320652, y: 0.26358697}
-      angle: 82
-      endAngle: 115
-      flipX: 0
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-    recovery:
-      sprite: {fileID: 1363804303, guid: f4041311381ad8449b3366c16288195f, type: 3}
-      grip: {x: -0.367, y: 0.512}
-      angle: 28
-      endAngle: 28
-      flipX: 0
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-  - name: North
-    opening:
-    - sprite: {fileID: -10410014, guid: 939a4b480452a474abb40d2df02765d7, type: 3}
-      grip: {x: 0.6125, y: 1.140625}
-      angle: -25
-      endAngle: 15
-      flipX: 1
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-    - sprite: {fileID: -1524242379, guid: 939a4b480452a474abb40d2df02765d7, type: 3}
-      grip: {x: 0.536875, y: 1.58875}
-      angle: 15
-      endAngle: 55
-      flipX: 1
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 913484402, guid: e60d844246f670a4daef87e0e90694d8, type: 3}
-    - sprite: {fileID: -1757998287, guid: 939a4b480452a474abb40d2df02765d7, type: 3}
-      grip: {x: 0.66, y: 1.595625}
-      angle: 55
-      endAngle: 25
-      flipX: 1
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-    - sprite: {fileID: -33237383, guid: 939a4b480452a474abb40d2df02765d7, type: 3}
-      grip: {x: 0.57125, y: 0.525}
-      angle: 25
-      endAngle: -18
-      flipX: 1
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 913484402, guid: e60d844246f670a4daef87e0e90694d8, type: 3}
-    backhandPreparation:
-    - sprite: {fileID: 1252603771, guid: 8ec626545e70e95489261e863b335ff0, type: 3}
-      grip: {x: 0.6391304, y: 0.6}
-      angle: -18
-      endAngle: -55
-      flipX: 1
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 913484402, guid: e60d844246f670a4daef87e0e90694d8, type: 3}
-    - sprite: {fileID: 1954515480, guid: 8ec626545e70e95489261e863b335ff0, type: 3}
-      grip: {x: 0.65652174, y: 1.2869565}
-      angle: -55
-      endAngle: -35
-      flipX: 0
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 1127681328, guid: e60d844246f670a4daef87e0e90694d8, type: 3}
-    backhand:
-      sprite: {fileID: -710991743, guid: 8ec626545e70e95489261e863b335ff0, type: 3}
-      grip: {x: 0.79565215, y: 1.2391304}
-      angle: -35
-      endAngle: 15
-      flipX: 0
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-    backhandFollowThrough:
-      sprite: {fileID: 1530653510, guid: 8ec626545e70e95489261e863b335ff0, type: 3}
-      grip: {x: 0.90869564, y: 1.0043478}
-      angle: 15
-      endAngle: -18
-      flipX: 0
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 1127681328, guid: e60d844246f670a4daef87e0e90694d8, type: 3}
-    finisher:
-      sprite: {fileID: 1278503501, guid: 5e48b3280da7a9a498bb5fa3e71bc13b, type: 3}
-      grip: {x: 0.71847826, y: 1.3815217}
-      angle: 60
-      endAngle: 30
-      flipX: 1
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-    recovery:
-      sprite: {fileID: -1016550650, guid: f4041311381ad8449b3366c16288195f, type: 3}
-      grip: {x: 0.352, y: 0.523}
-      angle: -18
-      endAngle: -18
-      flipX: 1
-      handOverlay: {fileID: 0}
-      weaponSprite: {fileID: 0}
-  hitPause: 0.045
---- !u!114 &3799706640400356673
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1001}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 41b630eb0130395438bb1d248e04c164, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.RegisteredPlayerAnimation
-  body: {fileID: 1009}
-  forehand: {fileID: 11400000, guid: d5e17603ecbf53b499f24312deac6034, type: 2}
-  throwing: {fileID: 11400000, guid: 49c63d74d86dff343af1a060f8577a57, type: 2}
-  catching: {fileID: 11400000, guid: 25c576910d69bff44a67f1de534a5f63, type: 2}
-  aimGaits: {fileID: 0}
-  dashSprites: {fileID: 11400000, guid: d7ddf025b82a4714fb911e87619e07c3, type: 2}
-  sprintSprites: {fileID: 11400000, guid: 0ab92c810d6aadc4aa8387cff68433d9, type: 2}
+  animations: {fileID: 11400000, guid: 1ec4469e34c15a04fbd61c720b2d4940, type: 2}
+  walkCycleLength: 3
+  runCycleLength: 4.5
+  diagonalReleaseGrace: 0.1
 --- !u!1 &1007
 GameObject:
   m_ObjectHideFlags: 0
@@ -704,7 +309,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1008}
   - component: {fileID: 1009}
-  - component: {fileID: 8855684484376416841}
   m_Layer: 6
   m_Name: Body
   m_TagString: Untagged
@@ -776,7 +380,7 @@ SpriteRenderer:
   m_SortingLayer: 3
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 2131032035, guid: f4041311381ad8449b3366c16288195f, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 50c0cc9685183704bae1ba50be6c4d90, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -786,116 +390,3 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
---- !u!95 &8855684484376416841
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1007}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: f2f4cf5f4631f5343b9ce4ce11765ab2, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage:
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
---- !u!1 &1010
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1011}
-  - component: {fileID: 1012}
-  m_Layer: 6
-  m_Name: FacingMarker
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &1011
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1010}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.24, z: 0}
-  m_LocalScale: {x: 0.16, y: 0.16, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1002}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!212 &1012
-SpriteRenderer:
-  serializedVersion: 2
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1010}
-  m_Enabled: 1
-  m_CastShadows: 0
-  m_ReceiveShadows: 0
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 0
-  m_ReflectionProbeUsage: 0
-  m_RayTracingMode: 0
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 0
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 300
-  m_SortingLayer: 3
-  m_SortingOrder: 1
-  m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: ab6058c4ddee5c148cd9d34a78a0a92e, type: 3}
-  m_Color: {r: 1, g: 0.968627, b: 0.862745, a: 1}
-  m_FlipX: 0
-  m_FlipY: 0
-  m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
-  m_AdaptiveModeThreshold: 0.5
-  m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0

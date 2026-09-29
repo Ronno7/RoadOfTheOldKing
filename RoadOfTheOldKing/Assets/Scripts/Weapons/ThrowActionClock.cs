@@ -60,6 +60,12 @@ namespace TheLostShrine.Weapons
             : Phase == ThrowPhase.Aim ? timing.preparation.Length + ThrowActionTiming.CelAt(timing.aim, elapsed)
             : Phase == ThrowPhase.Release ? timing.preparation.Length + timing.aim.Length +
                 ThrowActionTiming.CelAt(timing.release, elapsed) : -1;
+        // Presentation reads these to fit any frame count: progress through the current phase
+        // (Aim loops) and where the physical launch falls within Release.
+        public float PhaseProgress => !IsActive ? 0f : (float)(elapsed / ThrowActionTiming.Duration(
+            Phase == ThrowPhase.Preparation ? timing.preparation : Phase == ThrowPhase.Aim ? timing.aim : timing.release));
+        public float LaunchFraction => timing == null ? 0f : (float)(ThrowActionTiming.Duration(timing.release, timing.launchCel) /
+            ThrowActionTiming.Duration(timing.release));
         public float MovementScale => !IsActive ? 1f : CanCancelAim ? timing.aimMovementScale
             : Phase != ThrowPhase.Release ? 0f
             : Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(

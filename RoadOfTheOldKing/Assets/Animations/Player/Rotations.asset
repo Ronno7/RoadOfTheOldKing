@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fd1d18a98bcd30469bcfd0f78adfbfa, type: 3}
+  m_Name: Rotations
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.DirectionalSpriteAnimation
+  source: 'PixelLab state ''Idle'' (cloaked, no arms): rotations'
+  framesPerSecond: 1
+  loop: 1
+  contactFrame: -1
+  directions:
+  - sprites:
+    - {fileID: 21300000, guid: 4a1a8aff4a2526c4b9e263ff92442371, type: 3}
+  - sprites:
+    - {fileID: 21300000, guid: 0a8a27c3a520e4d4c99db3f63e4bf701, type: 3}
+  - sprites:
+    - {fileID: 21300000, guid: c54cac4448934184a8dece0cd45397ef, type: 3}
+  - sprites:
+    - {fileID: 21300000, guid: 650d75d03fa21ed4fa50a4df55409644, type: 3}
+  - sprites:
+    - {fileID: 21300000, guid: 89bd2dfa6e2f09a4c9f1d6eee9906db8, type: 3}
+  - sprites:
+    - {fileID: 21300000, guid: 780ed3e956e203e469b946143a449ff7, type: 3}
+  - sprites:
+    - {fileID: 21300000, guid: 50c0cc9685183704bae1ba50be6c4d90, type: 3}
+  - sprites:
+    - {fileID: 21300000, guid: 81fa36279e804f440a1907fe616f14d3, type: 3}

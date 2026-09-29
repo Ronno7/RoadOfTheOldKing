@@ -10,7 +10,8 @@ namespace TheLostShrine.Weapons
         [SerializeField] private SpriteRenderer blade;
         [SerializeField] private LineRenderer arc;
         [SerializeField] private TrailRenderer trail;
-        [Tooltip("Use the animated player's per-frame hand grips while carrying.")]
+        [Tooltip("Production detached presentation: one scaled sprite centred on the flight position. " +
+            "Held placement stays procedural until per-frame hand anchors exist.")]
         [SerializeField] private bool useAnimatedGrip;
         [SerializeField] private float spriteAngleOffset;
         [SerializeField] private Vector3 groundVisualOffset;
@@ -48,8 +49,6 @@ namespace TheLostShrine.Weapons
             if (model == null || weapon.Settings == null)
                 return;
             bool flying = weapon.State == HatchetState.Flying || weapon.State == HatchetState.Returning;
-            var registered = useAnimatedGrip && weapon.Owner != null
-                ? weapon.Owner.GetComponent<TheLostShrine.Player.RegisteredPlayerAnimation>() : null;
             if (trail != null)
             {
                 if (flying != wasFlying)
@@ -64,7 +63,6 @@ namespace TheLostShrine.Weapons
             if (blade != null)
             {
                 blade.color = Color.Lerp(originalBlade, new Color(1f, 0.85f, 0.25f), weapon.Charge01);
-                // Combat can supply perspective cels; all other states use the equipped sprite.
                 blade.sprite = originalSprite;
                 blade.enabled = true;
                 blade.transform.localScale = originalBladeScale;
@@ -78,25 +76,6 @@ namespace TheLostShrine.Weapons
             {
                 DrawDetached();
                 return;
-            }
-
-            if (registered != null && registered.TryApplyWeapon(model, blade))
-                return;
-
-            if (useAnimatedGrip && weapon.State == HatchetState.LightChop && weapon.Owner != null)
-            {
-                transform.position = weapon.Owner.transform.position;
-                var chop = weapon.Owner.GetComponent<TheLostShrine.Player.PlayerChopAnimation>();
-                if (chop != null && chop.TryApplyWeapon(model, blade))
-                    return;
-            }
-
-            if (useAnimatedGrip && weapon.State == HatchetState.Held && weapon.Owner != null)
-            {
-                transform.position = weapon.Owner.transform.position;
-                var grip = weapon.Owner.GetComponent<TheLostShrine.Player.PlayerWeaponGrip>();
-                if (grip != null && grip.TryApply(model, blade))
-                    return;
             }
 
             float angle = Mathf.Atan2(weapon.AimDirection.y, weapon.AimDirection.x) * Mathf.Rad2Deg;

@@ -1,0 +1,136 @@
+// Empty Play Mode scene without a CheckpointSession (for example, set the play-mode start scene to
+// Assets/Scenes/CombatEffectsPreview.unity without starting the preview). Drives the real Player
+// prefab with script-stepped physics and checks PlayerSpriteAnimator plus the weapon-owned hit pause.
+// A temporary in-memory walk clip exercises distance-driven cycling; no assets are modified.
+if (!Application.isPlaying || UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Progression.CheckpointSession>() != null)
+    throw new System.Exception("Use an empty Play Mode scene without a checkpoint session.");
+if (Time.deltaTime <= 0f) throw new System.Exception("Unpause Play Mode first; presentation skips zero-length frames.");
+var results = new System.Collections.Generic.List<string>();
+System.Action<bool,string> check = (ok,label) => results.Add((ok ? "PASS " : "FAIL ") + label);
+var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+var names = TheLostShrine.Player.DirectionalSpriteAnimation.DirectionNames;
+var created = new System.Collections.Generic.List<UnityEngine.Object>();
+var previousSimulation = Physics2D.simulationMode;
+try {
+    Physics2D.simulationMode = SimulationMode2D.Script;
+    var player = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Player/Player.prefab"), Vector3.zero, Quaternion.identity);
+    created.Add(player);
+    var animator = player.GetComponent<TheLostShrine.Player.PlayerSpriteAnimator>();
+    var movement = player.GetComponent<TheLostShrine.Player.PlayerMovement>();
+    var input = player.GetComponent<TheLostShrine.Input.PlayerMovementInput>();
+    var body = player.transform.Find("Body").GetComponent<SpriteRenderer>();
+    var motor = player.GetComponent<Rigidbody2D>();
+    motor.interpolation = RigidbodyInterpolation2D.None;
+    input.GetType().GetField("hasFocus",flags).SetValue(input,true);
+    var moveProp = input.GetType().GetProperty("MoveDirection");
+    var sprintProp = input.GetType().GetProperty("SprintHeld");
+    var motorStep = movement.GetType().GetMethod("FixedUpdate",flags);
+    var present = animator.GetType().GetMethod("LateUpdate",flags);
+    var heldSince = animator.GetType().GetField("heldSince",flags);
+    System.Action<Vector2,bool,int> steps = (direction,sprint,count) => {
+        moveProp.SetValue(input,direction,null); sprintProp.SetValue(input,sprint,null);
+        for (int i = 0; i < count; i++) { motorStep.Invoke(movement,null); Physics2D.Simulate(Time.fixedDeltaTime); present.Invoke(animator,null); }
+    };
+    var dirs = new Vector2[8];
+    for (int o = 0; o < 8; o++) dirs[o] = new Vector2(Mathf.Cos(o * 45f * Mathf.Deg2Rad), Mathf.Sin(o * 45f * Mathf.Deg2Rad));
+
+    var set = animator.Animations;
+    check(set != null && set.rotations != null && !set.rotations.IsEmpty, "Player prefab uses an animation set with rotations");
+    bool allDrawn = true;
+    for (int o = 0; o < 8; o++) allDrawn &= set.rotations.FrameCount(o) == 1 && set.rotations.ResolveOctant(o) == o;
+    check(allDrawn, "All eight rotations drawn");
+    bool pixelPivots = true;
+    for (int o = 0; o < 8; o++) { var p = set.rotations.Frame(o,0); pixelPivots &= p.pixelsPerUnit == 16f && p.pivot.y == Mathf.Round(p.pivot.y) && p.pivot.y > 0f; }
+    check(pixelPivots, "Rotations at 16 PPU with whole-pixel measured feet pivots");
+    check(player.GetComponentInChildren<Animator>() == null, "No legacy Animator on the player");
+
+    // The imported walk, if present, plays in every direction before the temporary clip replaces it.
+    if (set.walk != null && !set.walk.IsEmpty) {
+        bool realWalk = true;
+        for (int o = 0; o < 8; o++) { steps(dirs[o], false, 6); realWalk &= animator.State == "Walk" && animator.Octant == o && body.sprite == set.walk.Frame(o, animator.Frame); }
+        steps(Vector2.zero, false, 2);
+        check(realWalk && animator.State == "Idle", "Imported walk plays in all eight directions and stops to idle");
+        steps(dirs[6], false, 3); heldSince.SetValue(animator, Time.time - 1f); steps(Vector2.zero, false, 2); // Face south again.
+    }
+
+    // Temporary walk: four distinct frames per direction, in memory only.
+    var walk = ScriptableObject.CreateInstance<TheLostShrine.Player.DirectionalSpriteAnimation>(); created.Add(walk);
+    for (int o = 0; o < 8; o++) {
+        var frames = new Sprite[4];
+        for (int f = 0; f < 4; f++) frames[f] = set.rotations.Frame((o + f * 2) % 8, 0);
+        walk.SetFrames(o, frames);
+    }
+    walk.loop = true;
+    var testSet = UnityEngine.Object.Instantiate(set); created.Add(testSet);
+    testSet.walk = walk; testSet.run = null;
+    animator.GetType().GetField("animations",flags).SetValue(animator,testSet);
+
+    present.Invoke(animator,null);
+    check(animator.State == "Idle" && animator.Octant == 6 && body.sprite == set.rotations.Frame(6,0), "Starts idle facing south on its rotation");
+    for (int o = 0; o < 8; o++) {
+        steps(dirs[o], false, 6);
+        check(animator.State == "Walk" && animator.Octant == o && body.sprite == walk.Frame(o, animator.Frame), "Walks " + names[o] + " with that direction's frames");
+        heldSince.SetValue(animator, Time.time - 1f); // Held long enough: not a diagonal key release.
+        steps(Vector2.zero, false, 2);
+        check(animator.State == "Idle" && animator.Octant == o && body.sprite == set.rotations.Frame(o,0), "Stops facing " + names[o]);
+    }
+
+    steps(dirs[1], false, 6); steps(dirs[2], false, 1); steps(Vector2.zero, false, 2);
+    check(animator.Octant == 1, "Diagonal kept when its keys are released a moment apart");
+    steps(dirs[1], false, 6); steps(dirs[2], false, 1); heldSince.SetValue(animator, Time.time - 1f); steps(Vector2.zero, false, 2);
+    check(animator.Octant == 2, "Deliberate turn to a cardinal is kept");
+
+    float cycleLength = (float)animator.GetType().GetField("walkCycleLength",flags).GetValue(animator);
+    steps(Vector2.zero, false, 2);
+    float travelled = 0f; Vector2 last = motor.position; bool matches = true; int changes = 0, previousFrame = -1;
+    for (int i = 0; i < 80; i++) {
+        steps(Vector2.right, false, 1);
+        travelled += Vector2.Distance(motor.position, last); last = motor.position;
+        int expected = Mathf.FloorToInt(Mathf.Repeat(travelled / cycleLength, 1f) * 4);
+        matches &= animator.Frame == expected;
+        if (animator.Frame != previousFrame) { changes++; previousFrame = animator.Frame; }
+    }
+    check(matches && changes >= 8, "Walk frame follows distance travelled (" + travelled.ToString("0.00") + " units, " + changes + " frame changes)");
+
+    steps(Vector2.right, true, 5);
+    check(movement.IsSprinting && animator.State == "Walk", "Sprint without run frames keeps the walk cycle");
+    motor.position += new Vector2(20f, 0f); player.transform.position = motor.position; Physics2D.SyncTransforms();
+    present.Invoke(animator,null);
+    check(animator.State == "Idle", "A teleport does not fast-forward the walk cycle");
+
+    steps(Vector2.zero, false, 30); // Recover dash stamina/cooldown.
+    input.GetType().GetField("dashQueuedUntil",flags).SetValue(input, Time.time + 1f);
+    steps(dirs[4], false, 1);
+    check(player.GetComponent<TheLostShrine.Player.PlayerDash>().IsDashing && animator.State == "Walk" && animator.Octant == 4,
+        "Dash without its own animation falls back to the walk cycle in its direction");
+    steps(Vector2.zero, false, 40);
+
+    var hatchet = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Weapons/Hatchet.prefab")); created.Add(hatchet);
+    var weapon = hatchet.GetComponent<TheLostShrine.Weapons.HatchetWeapon>();
+    var combat = player.GetComponent<TheLostShrine.Player.PlayerCombatController>();
+    check(combat.TryEquip(weapon), "Standard player equips the hatchet");
+    var target = new GameObject("Animation check target"); created.Add(target);
+    target.AddComponent<CircleCollider2D>().radius = .25f;
+    var targetHealth = target.AddComponent<TheLostShrine.Combat.Damageable>();
+    target.transform.position = (Vector2)player.transform.position + dirs[3] * 1.2f; targetHealth.RestoreHealth(); Physics2D.SyncTransforms();
+    check(weapon.TryLightChop(dirs[3]), "Light chop starts toward north-west");
+    steps(Vector2.zero, false, 1);
+    check(animator.State == "Idle" && animator.Octant == 3, "An attack without its own animation faces the attack direction");
+    var simulate = weapon.GetType().GetMethod("Simulate",flags);
+    for (int i = 0; i < 60 && !weapon.IsImpactPaused && weapon.State == TheLostShrine.Weapons.HatchetState.LightChop; i++)
+        simulate.Invoke(weapon, new object[]{ .005f });
+    float pause = (float)weapon.GetType().GetField("impactPauseRemaining",flags).GetValue(weapon);
+    float progress = weapon.AttackProgress;
+    simulate.Invoke(weapon, new object[]{ .01f });
+    check(weapon.IsImpactPaused && pause > .03f && pause <= .045f && weapon.AttackProgress == progress && targetHealth.Health < targetHealth.MaxHealth,
+        "Confirmed light hit pauses only the swing clock (" + pause.ToString("0.000") + " s), now owned by the weapon");
+
+    player.GetComponent<TheLostShrine.Combat.Damageable>().ReceiveHit(new TheLostShrine.Combat.CombatHit(target, TheLostShrine.Combat.AttackKind.EnemyMelee, 1000, Vector2.right, 0f, 0f));
+    present.Invoke(animator,null);
+    check(!player.GetComponent<TheLostShrine.Combat.Damageable>().IsAlive && animator.State == "Idle", "Defeat without a death animation holds the idle view");
+} finally {
+    Physics2D.simulationMode = previousSimulation;
+    foreach (var o in created) if (o != null) UnityEngine.Object.DestroyImmediate(o);
+}
+int failed = results.FindAll(r => r.StartsWith("FAIL")).Count;
+return (results.Count - failed) + " passed, " + failed + " failed\n" + string.Join("\n", results.ToArray());
