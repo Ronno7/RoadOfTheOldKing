@@ -11,5 +11,7 @@ namespace TheLostShrine.Weapons
         [Min(1f)] public float lightSpeedMultiplier = 1f;
         [Min(0f)] public float addedLightArc;
         [Min(0f)] public float addedCleaveRadius;
+        [Tooltip("Deep Notch-style bonuses strengthen only the third hit, without widening its lane.")]
+        [Min(1f)] public float finisherDamageMultiplier = 1f;
     }
 }

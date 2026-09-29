@@ -72,6 +72,11 @@ namespace TheLostShrine.Weapons
             }
             visual.SetPositionAndRotation(weapon.Owner.transform.position, Quaternion.identity);
             bool active = phase == MeleePhase.Active;
+            if (weapon.IsLightThrust)
+            {
+                DrawLane(active);
+                return;
+            }
             float aim = Mathf.Atan2(weapon.AttackDirection.y, weapon.AttackDirection.x) * Mathf.Rad2Deg;
             float arc = weapon.LightArc;
             float reach = weapon.LightReach;
@@ -113,6 +118,39 @@ namespace TheLostShrine.Weapons
         }
 
         private Color Ink(float alpha) => new Color(tint.r, tint.g, tint.b, tint.a * alpha);
+
+        private void DrawLane(bool active)
+        {
+            vertices.Clear(); colors.Clear(); triangles.Clear();
+            Vector3 forward = weapon.AttackDirection;
+            Vector3 side = new Vector3(-forward.y, forward.x, 0f);
+            float halfWidth = weapon.LightLaneWidth * 0.5f;
+            float reach = weapon.LightReach;
+            if (active) LaneQuad(forward, side, 0f, reach, -halfWidth, halfWidth, Ink(areaOpacity));
+            Color edge = Ink(active ? edgeOpacity : windupOpacity);
+            float width = Mathf.Min(edgeWidth, halfWidth);
+            LaneQuad(forward, side, 0f, reach, -halfWidth, -halfWidth + width, edge);
+            LaneQuad(forward, side, 0f, reach, halfWidth - width, halfWidth, edge);
+            LaneQuad(forward, side, 0f, width, -halfWidth, halfWidth, edge);
+            LaneQuad(forward, side, reach - width, reach, -halfWidth, halfWidth, edge);
+            if (active)
+            {
+                float tip = Mathf.Lerp(width, reach, weapon.LightSwingProgress);
+                LaneQuad(forward, side, Mathf.Max(0f, tip - swipeWidth), tip,
+                    -halfWidth + width, halfWidth - width, Ink(0.8f));
+            }
+            mesh.Clear();
+            mesh.SetVertices(vertices); mesh.SetColors(colors); mesh.SetTriangles(triangles, 0);
+            mesh.RecalculateBounds();
+        }
+
+        private void LaneQuad(Vector3 forward, Vector3 side, float near, float far, float left, float right, Color color)
+        {
+            Vector3 a = forward * near + side * left, b = forward * far + side * left;
+            Vector3 c = forward * far + side * right, d = forward * near + side * right;
+            Triangle(a, b, c, color, color, color);
+            Triangle(a, c, d, color, color, color);
+        }
 
         private void Band(Vector3 a, Vector3 b, float width, Color color)
         {

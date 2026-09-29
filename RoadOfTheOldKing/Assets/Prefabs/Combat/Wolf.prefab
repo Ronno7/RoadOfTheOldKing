@@ -214,6 +214,7 @@ GameObject:
   - component: {fileID: 5930268802973902719}
   - component: {fileID: 8074335542534635188}
   - component: {fileID: 3247261679874770712}
+  - component: {fileID: 6748386845007584776}
   m_Layer: 0
   m_Name: Wolf
   m_TagString: Untagged
@@ -329,9 +330,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a3d61830c75a1945a2ae1374af9f9a1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.HitReaction
-  knockbackMultiplier: 4
-  maxKnockbackImpulse: 6
+  knockbackMultiplier: 1
+  maxKnockbackImpulse: 0
   replaceMovementOnHit: 1
+  lethalKnockbackMultiplier: 1.6
 --- !u!114 &8178164584314931740
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -355,6 +357,7 @@ MonoBehaviour:
   strikeDuration: 0.12
   recoveryDuration: 0.9
   damage: 20
+  hitRecovery: 0.1
 --- !u!114 &5930268802973902719
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -405,8 +408,26 @@ MonoBehaviour:
   impactSound: {fileID: 8300000, guid: c1c5b78e1cffb774d821e48418e46675, type: 3}
   volume: 0.48
   audibleDistance: 18
-  particleCount: 7
+  particleCount: 10
+  fleckPixels: {x: 2, y: 3}
+  lethalBurst: 2.2
+  killFreeze: 0.08
   visualHeight: 0.45
+--- !u!114 &6748386845007584776
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5631401983757112789}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ded85ff939c67a34cbdaf660090669c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.EnemyAwarenessIndicator
+  body: {fileID: 7297936848709932806}
+  duration: 0.75
+  gap: 0.375
 --- !u!1 &5862377389906941612
 GameObject:
   m_ObjectHideFlags: 0

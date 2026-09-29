@@ -1,0 +1,78 @@
+// Empty Play Mode start scene; no progression session. Virtual input devices are removed afterward.
+if (!Application.isPlaying || UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Progression.CheckpointSession>() != null)
+    throw new Exception("Use an empty Play Mode scene without a checkpoint session.");
+var results=new System.Collections.Generic.List<string>();
+Action<bool,string> check=(ok,label)=>results.Add((ok?"PASS ":"FAIL ")+label);
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var created=new System.Collections.Generic.List<GameObject>();
+var oldKeyboard=UnityEngine.InputSystem.Keyboard.current;
+var oldMouse=UnityEngine.InputSystem.Mouse.current;
+var keyboard=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
+var mouse=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Mouse>();
+float oldScale=Time.timeScale;
+try {
+    Time.timeScale=1;
+    var player=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Player/Player.prefab"));created.Add(player);
+    var cameraObject=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cameras/FollowCamera.prefab"));created.Add(cameraObject);
+    var follow=cameraObject.GetComponent<TheLostShrine.Cameras.CameraFollow2D>();
+    var look=cameraObject.GetComponent<TheLostShrine.Cameras.CameraFreelook2D>();
+    var adapter=cameraObject.GetComponent<TheLostShrine.Input.CameraLookInput>();
+    var camera=cameraObject.GetComponent<Camera>();
+    var movement=player.GetComponent<TheLostShrine.Input.PlayerMovementInput>();
+    movement.GetType().GetField("hasFocus",flags).SetValue(movement,true);
+    follow.SetTarget(player.transform);
+    Vector2 center=camera.pixelRect.center;
+    Action<bool,Vector2> input=(held,position)=>{
+        var state=held?new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.LeftAlt):new UnityEngine.InputSystem.LowLevel.KeyboardState();
+        UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,state);
+        UnityEngine.InputSystem.InputSystem.QueueStateEvent(mouse,new UnityEngine.InputSystem.LowLevel.MouseState{position=position});
+        UnityEngine.InputSystem.InputSystem.Update();
+    };
+    Action tick=()=>follow.GetType().GetMethod("LateUpdate",flags).Invoke(follow,null);
+    input(false,center);tick();check(!look.IsLooking&&look.LookOffset==Vector2.zero,"Idle has no freelook offset");
+    input(true,center);tick();check(look.IsLooking&&look.LookOffset.magnitude<.001f,"Left Alt at viewport center keeps player centered");
+    input(true,center+new Vector2(10000,10000));tick();
+    check(Mathf.Abs(look.LookOffset.magnitude-3f)<.001f,"Diagonal freelook has a radial three-tile limit");
+    for(int i=0;i<100;i++)tick();
+    check(((Vector2)(cameraObject.transform.position-player.transform.position)).magnitude<=3.001f,"Actual smoothed camera remains inside limit");
+    check(cameraObject.transform.position.z==-10f,"Freelook preserves camera depth");
+    var heldOffset=look.LookOffset;for(int i=0;i<30;i++)tick();
+    check(look.LookOffset==heldOffset,"Stationary pointer cannot create feedback drift");
+    input(false,center);for(int i=0;i<200;i++)tick();
+    check(!look.IsLooking&&((Vector2)(cameraObject.transform.position-player.transform.position)).magnitude<.02f,"Release returns smoothly to player");
+    input(true,center+Vector2.right*10000);tick();player.transform.position=new Vector3(20,15,0);tick();
+    check(((Vector2)(cameraObject.transform.position-player.transform.position)).magnitude<=3.001f,"Moving or relocated player remains distance-constrained");
+    follow.SnapToTarget();tick();
+    check(!look.IsLooking&&((Vector2)(cameraObject.transform.position-player.transform.position)).magnitude<.001f,"Respawn snap resets freelook while Alt is held");
+    input(false,center);tick();input(true,center+Vector2.right*10000);tick();
+    check(look.IsLooking,"New press works after snap reset");
+    adapter.GetType().GetMethod("OnApplicationFocus",flags).Invoke(adapter,new object[]{false});tick();
+    check(!look.IsLooking,"Focus loss clears freelook intent");
+    adapter.GetType().GetMethod("OnApplicationFocus",flags).Invoke(adapter,new object[]{true});tick();
+    check(!look.IsLooking,"Alt-Tab cannot resume freelook until release");
+    input(false,center);tick();input(true,center+Vector2.right*10000);tick();
+    Time.timeScale=0;look.Evaluate(player.transform,0);Time.timeScale=1;tick();
+    check(!look.IsLooking,"Pause clears held intent without replay on resume");
+    input(false,center);tick();input(true,center+Vector2.right*10000);tick();
+    movement.enabled=false;tick();check(!look.IsLooking,"Disabled player controls block freelook for menus/death");movement.enabled=true;
+    input(false,center);tick();input(true,center+Vector2.right*10000);tick();
+    look.enabled=false;tick();check(!look.IsLooking&&look.LookOffset==Vector2.zero,"Disabling freelook clears its offset");look.enabled=true;
+    for(int i=0;i<4;i++) {
+        float size=i%2==0?3:8;float aspect=i<2?4f/3f:21f/9f;
+        var delta=TheLostShrine.Cameras.CameraFreelook2D.PointerOffset(new Vector2(5000,5000),new Rect(100,50,1200,800),size,aspect,3);
+        check(Mathf.Abs(delta.magnitude-3)<.001f,"Zoom/aspect combination "+i+" obeys world-space limit");
+    }
+    check(TheLostShrine.Cameras.CameraFreelook2D.PointerOffset(new Vector2(700,450),new Rect(100,50,1200,800),5,1.5f,3)==Vector2.zero,"Offset viewport center maps to zero");
+    check(TheLostShrine.Cameras.CameraFreelook2D.PointerOffset(Vector2.one,new Rect(),5,1,3)==Vector2.zero,"Empty viewport is safe");
+    var standalone=new GameObject("Legacy standalone camera");created.Add(standalone);standalone.AddComponent<Camera>();standalone.AddComponent<TheLostShrine.Cameras.CameraFollow2D>();
+    check(standalone.GetComponent<TheLostShrine.Cameras.CameraFreelook2D>()!=null&&standalone.GetComponent<TheLostShrine.Input.CameraLookInput>()!=null,"Legacy scene cameras compose the feature automatically");
+    // Right Alt is deliberately not bound.
+    input(false,center);tick();UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.RightAlt));UnityEngine.InputSystem.InputSystem.Update();tick();
+    check(!look.IsLooking,"Right Alt does not activate freelook");
+} finally {
+    Time.timeScale=oldScale;
+    foreach(var go in created)if(go!=null)UnityEngine.Object.DestroyImmediate(go);
+    UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard);UnityEngine.InputSystem.InputSystem.RemoveDevice(mouse);
+    if(oldKeyboard!=null)oldKeyboard.MakeCurrent();if(oldMouse!=null)oldMouse.MakeCurrent();
+}
+return string.Join("\n",results.ToArray());

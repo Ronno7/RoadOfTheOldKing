@@ -205,6 +205,13 @@ namespace TheLostShrine.EditorTools
             var child=new GameObject("Artwork",typeof(SpriteRenderer));child.transform.SetParent(root.transform,false);
             child.transform.localPosition=new Vector3(0,prop.height/32f,0);
             var renderer=child.GetComponent<SpriteRenderer>();renderer.sprite=sprite;renderer.sortingLayerName="World";
+            if(prop.name=="Target_New"||prop.name=="Target_Worn")
+            {
+                // Solid ground footprint around the stand's feet at 16 PPU.
+                var collider=root.AddComponent<BoxCollider2D>();
+                collider.size=new Vector2(1.125f,.5f);
+                collider.offset=new Vector2(0,.3125f);
+            }
             return root;
         }
     }

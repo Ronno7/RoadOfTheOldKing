@@ -12,26 +12,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69d20bcd943624b409855b7f8ded6904, type: 3}
   m_Name: AxeSettings
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Weapons.AxeSettings
-  lightDuration: 0.3
-  finisherDurationMultiplier: 1.15
+  lightDuration: 0.2
+  finisherDurationMultiplier: 1.5
   lightWindupFraction: 0.32
   lightSwingEndFraction: 0.53
-  lightRadius: 2.4
-  lightArc: 110
+  lightRadius: 3.4
+  lightArc: 160
+  secondLightArc: 120
+  finisherArc: 15
+  finisherReachMultiplier: 1.3
+  finisherWindupFraction: 0.4
+  finisherSwingEndFraction: 0.6
+  finisherLungeDistance: 0.7
   comboWindow: 0.55
   lightDamage: 10
-  finisherDamage: 15
-  lightStaminaCost: 15
+  finisherDamage: 25
+  lightStaminaCost: 12
   finisherStaminaCost: 20
   lightHitPause: 0.045
-  finisherHitPauseMultiplier: 1.4
+  finisherHitPauseMultiplier: 1.8
+  lightKnockback: 5.5
+  finisherKnockback: 10
+  lightStagger: 0.2
+  finisherStagger: 0.3
   minimumCharge: 0.2
   fullCharge: 0.8
   cleaveDuration: 0.45
   cleaveRadius: 2.1
   cleaveDamage: 30
   cleaveStaminaCost: 35
-  cleaveKnockback: 6
+  cleaveKnockback: 10
   cleaveStagger: 0.7
   throwAction:
     preparation:
@@ -54,5 +64,7 @@ MonoBehaviour:
   flightRadius: 0.18
   throwDamage: 15
   recallDamage: 10
+  throwKnockback: 4
+  recallKnockback: 4
   throwStaminaCost: 25
-  retrieveDistance: 0.9
+  retrieveDistance: 1.4

@@ -21,6 +21,8 @@ namespace TheLostShrine.Combat
         [SerializeField, Min(0.02f)] private float strikeDuration = 0.12f;
         [SerializeField, Min(0.05f)] private float recoveryDuration = 0.9f;
         [SerializeField, Min(1)] private int damage = 20;
+        [Tooltip("Pause after a weapon stagger before acting again. The knockback keeps sliding through it.")]
+        [SerializeField, Min(0f)] private float hitRecovery = 0.1f;
         private readonly ContactFilter2D solidFilter = new ContactFilter2D { useTriggers = false };
         private readonly List<RaycastHit2D> sight = new List<RaycastHit2D>(12);
         private Damageable health;
@@ -31,6 +33,9 @@ namespace TheLostShrine.Combat
         private float remaining;
         private float stateDuration;
         private bool struck;
+        private bool knockedBack;
+        private Vector2 deathSlide;
+        private readonly RaycastHit2D[] slideHits = new RaycastHit2D[8];
 
         public MeleeEnemyState State { get; private set; }
         public Vector2 FacingDirection { get; private set; } = Vector2.down;
@@ -38,6 +43,8 @@ namespace TheLostShrine.Combat
         public float AttackArc => attackArc;
         public float StateProgress => stateDuration > 0f ? Mathf.Clamp01(1f - remaining / stateDuration) : 0f;
         public int ResetVersion { get; private set; }
+        public bool IsAware { get; private set; }
+        public event System.Action PlayerDetected;
 
         private void Awake()
         {
@@ -62,6 +69,7 @@ namespace TheLostShrine.Combat
 
         private void OnDisable()
         {
+            IsAware = false;
             health.HitReceived -= OnHit;
             health.Defeated -= OnDefeated;
             if (body != null)
@@ -72,10 +80,16 @@ namespace TheLostShrine.Combat
 
         private void Tick(float deltaTime)
         {
-            if (deltaTime <= 0f || State == MeleeEnemyState.Defeated)
+            if (State == MeleeEnemyState.Defeated)
+            {
+                SlideCorpse(deltaTime);
+                return;
+            }
+            if (deltaTime <= 0f)
                 return;
             if (target == null || !target.IsAlive)
             {
+                IsAware = false;
                 SetState(MeleeEnemyState.Idle);
                 return;
             }
@@ -100,7 +114,8 @@ namespace TheLostShrine.Combat
             }
             if (State == MeleeEnemyState.Recovering)
             {
-                body.linearVelocity = Vector2.zero;
+                // After a weapon hit the knockback slides out under damping instead of stopping dead.
+                if (!knockedBack) body.linearVelocity = Vector2.zero;
                 if (remaining > 0f)
                     return;
                 SetState(MeleeEnemyState.Idle);
@@ -111,6 +126,7 @@ namespace TheLostShrine.Combat
                 Vector2.Distance(body.position, home) > leashRadius;
             if (State == MeleeEnemyState.Returning || outsideHome)
             {
+                IsAware = false;
                 State = MeleeEnemyState.Returning;
                 Vector2 toHome = home - body.position;
                 if (toHome.magnitude <= 0.15f)
@@ -121,8 +137,14 @@ namespace TheLostShrine.Combat
             }
             if (toTarget.magnitude > noticeRadius || !HasLineOfSight(target.transform.position))
             {
+                IsAware = false;
                 SetState(MeleeEnemyState.Idle);
                 return;
+            }
+            if (!IsAware)
+            {
+                IsAware = true;
+                PlayerDetected?.Invoke();
             }
             if (toTarget.magnitude <= attackDistance)
             {
@@ -173,23 +195,53 @@ namespace TheLostShrine.Combat
         {
             if (health.IsAlive && hit.StaggerDuration > 0f)
             {
-                // Keep the impulse already applied by HitReaction.
+                // Keep the impulse already applied by HitReaction; the stagger itself runs first.
                 State = MeleeEnemyState.Recovering;
-                remaining = Mathf.Max(recoveryDuration, hit.StaggerDuration);
+                remaining = hitRecovery;
                 stateDuration = remaining;
+                struck = false;
+                knockedBack = true;
             }
         }
 
         private void OnDefeated()
         {
+            IsAware = false;
+            // Carry the killing blow's knockback into a short corpse slide. The collider switches off
+            // at once so throws and the player pass through, so the slide stops at walls by casting.
+            deathSlide = body.linearVelocity;
             SetState(MeleeEnemyState.Defeated);
             if (bodyCollider != null)
                 bodyCollider.enabled = false;
         }
 
+        private void SlideCorpse(float deltaTime)
+        {
+            if (deltaTime <= 0f || deathSlide.sqrMagnitude < 0.0004f)
+                return;
+            Vector2 step = deathSlide * deltaTime;
+            float distance = step.magnitude;
+            float radius = bodyCollider is CircleCollider2D circle ? circle.radius * 0.8f : 0.3f;
+            int count = Physics2D.CircleCast(body.position, radius, step / distance, solidFilter, slideHits, distance);
+            for (int i = 0; i < count; i++)
+            {
+                var other = slideHits[i].collider;
+                // Characters and dynamic props do not stop a corpse; terrain and static props do.
+                if (other == bodyCollider || (other.attachedRigidbody != null && other.attachedRigidbody.bodyType == RigidbodyType2D.Dynamic))
+                    continue;
+                distance = Mathf.Min(distance, Mathf.Max(0f, slideHits[i].distance - 0.02f));
+                deathSlide = Vector2.zero;
+            }
+            body.position += step.normalized * distance;
+            body.linearVelocity = Vector2.zero;
+            deathSlide *= Mathf.Exp(-body.linearDamping * deltaTime);
+        }
+
         public void ResetOnRest()
         {
+            IsAware = false;
             ResetVersion++;
+            deathSlide = Vector2.zero;
             health.RestoreHealth();
             reaction.Clear();
             body.position = home;
@@ -205,6 +257,7 @@ namespace TheLostShrine.Combat
             remaining = duration;
             stateDuration = duration;
             struck = false;
+            knockedBack = false;
             body.linearVelocity = Vector2.zero;
         }
     }

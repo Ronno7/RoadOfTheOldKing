@@ -710,7 +710,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Damageable
   maxHealth: 100
   protectionSource: {fileID: 0}
@@ -724,8 +724,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0a3d61830c75a1945a2ae1374af9f9a1, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.HitReaction
+  knockbackMultiplier: 0.35
+  maxKnockbackImpulse: 0
+  replaceMovementOnHit: 0
+  lethalKnockbackMultiplier: 1.6
 --- !u!114 &6491987110847126019
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -736,7 +740,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2e4f7b28d43cd024b95f5aafd5e3ddb8, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Prototype.PracticeTarget
   bodyVisual: {fileID: 4404063872055377810}
   healthFill: {fileID: 6332162794788831545}
@@ -753,13 +757,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dc8908e9a5554aa489e50ba0a13435b7, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.EnemyImpactFeedback
   body: {fileID: 4404063872055377810}
   impactSound: {fileID: 8300000, guid: c1c5b78e1cffb774d821e48418e46675, type: 3}
   volume: 0.48
   audibleDistance: 18
-  particleCount: 7
+  particleCount: 10
+  fleckPixels: {x: 2, y: 3}
+  lethalBurst: 2.2
+  killFreeze: 0.08
   visualHeight: 0.45
 --- !u!1 &7217996171078949710
 GameObject:

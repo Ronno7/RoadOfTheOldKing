@@ -13,8 +13,10 @@ GameObject:
   - component: {fileID: 1004}
   - component: {fileID: 1005}
   - component: {fileID: 4280390714884492857}
+  - component: {fileID: 6831975874592833725}
+  - component: {fileID: 7949957964516698870}
   m_Layer: 0
-  m_Name: Main Camera
+  m_Name: FollowCamera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -104,8 +106,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 517934d0ce5c5ce6a2e7605e01a921f4, type: 3}
-  m_Name: ''
-  m_EditorClassIdentifier: ''
+  m_Name: 
+  m_EditorClassIdentifier: 
   target: {fileID: 0}
   offset: {x: 0, y: 0, z: -10}
   smoothTime: 0.1
@@ -119,9 +121,35 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1269eb361ec7223438201fa82a9a5563, type: 3}
-  m_Name: ''
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Cameras.CameraZoom2D
   minSize: 3
   maxSize: 8
   scrollSensitivity: 0.5
   smoothTime: 0.08
+--- !u!114 &6831975874592833725
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 99ac53f7d7ffb5c49857c19219452f3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Input.CameraLookInput
+--- !u!114 &7949957964516698870
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e90cd733ef4c60c458f674ae80691751, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Cameras.CameraFreelook2D
+  inputSource: {fileID: 6831975874592833725}
+  maxDistance: 3

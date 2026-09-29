@@ -78,20 +78,97 @@ try {
 
     reset(); upgrade.addedLightArc=40f; upgrade.lightSpeedMultiplier=1.2f; weapon.ApplyUpgrades(new[]{upgrade});
     weapon.TryLightChop(Vector2.right); tick(weapon.LightDuration*weapon.Settings.lightWindupFraction+.001f); render();
-    check(Mathf.Abs(weapon.LightArc-150f)<.001f && Mathf.Abs(weapon.LightDuration-.25f)<.001f && weapon.LightPhase==TheLostShrine.Weapons.MeleePhase.Active,"Wider/faster upgrade changes shared geometry and timing");
+    check(Mathf.Abs(weapon.LightArc-180f)<.001f && Mathf.Abs(weapon.LightDuration-.25f)<.001f && weapon.LightPhase==TheLostShrine.Weapons.MeleePhase.Active,"Wider/faster upgrade changes shared geometry and timing");
     check(Vector2.Angle(Vector2.right,mesh.vertices[1])>70f,"Mesh expands to the upgraded arc");
     tick(.3f); stamina.Restore();weapon.TryLightChop(Vector2.right);tick(.1f);render();
-    check(weapon.ComboIndex==1 && surface.enabled,"Backhand uses the same active footprint");
+    check(weapon.ComboIndex==1 && surface.enabled && weapon.LightArc < 180f,"Backhand stays narrower after widening");
     tick(.3f);stamina.Restore();weapon.TryLightChop(Vector2.right);render();
-    check(weapon.ComboIndex==2 && Mathf.Abs(weapon.LightReach-(weapon.Settings.lightRadius+.15f))<.001f,"Finisher expands reach from gameplay stats");
+    check(weapon.ComboIndex==2 && Mathf.Abs(weapon.LightReach-weapon.Settings.lightRadius*1.3f)<.001f,"Finisher expands reach from gameplay stats");
     tick(weapon.LightDuration*.42f);render();
-    float farthest=0;foreach(var v in mesh.vertices) farthest=Mathf.Max(farthest,v.magnitude);
+    float farthest=0;foreach(var v in mesh.vertices) farthest=Mathf.Max(farthest,v.x);
     check(Mathf.Abs(farthest-weapon.LightReach)<.001f,"Finisher contour reaches its actual hit boundary");
     Time.timeScale=0;render();check(!surface.enabled,"Pause hides the footprint");Time.timeScale=1;render();check(surface.enabled,"Resume restores current action phase");
     feedback.enabled=false;check(!surface.enabled,"Disabling feedback clears its renderer");feedback.enabled=true;render();
     weapon.CancelAction();render();check(!surface.enabled,"Cancellation clears footprint immediately on presentation update");
     stamina.TrySpend(stamina.Current);check(!weapon.TryLightChop(Vector2.right),"Exhausted click cannot start a swing");render();check(!surface.enabled,"Rejected click has no swipe");
     stamina.Restore();weapon.TryLightChop(Vector2.right);tick(.6f);render();check(!surface.enabled,"Long physics step cannot leave stale active feedback");
+    // Combo contract and thrust lane, including all octants and terrain protection.
+    weapon.ApplyUpgrades(new TheLostShrine.Weapons.AxeUpgrade[0]);
+    System.Action<Vector2> thrust = aim => {
+        reset(); target.SetActive(false);
+        weapon.TryLightChop(aim); tick(weapon.LightDuration+.001f);
+        stamina.Restore(); weapon.TryLightChop(aim); tick(weapon.LightDuration+.001f);
+        stamina.Restore(); weapon.TryLightChop(aim);
+    };
+    reset();weapon.TryLightChop(Vector2.right);
+    check(weapon.LightArc==160f && weapon.LightDamage==10,"Opening sweep is broad at baseline damage");
+    float openerWindup=weapon.LightDuration*weapon.LightWindupFraction;
+    tick(weapon.LightDuration+.001f);stamina.Restore();weapon.TryLightChop(Vector2.right);
+    check(weapon.LightArc==120f && weapon.LightDamage==10,"Reverse sweep is narrower at equal damage");
+    tick(weapon.LightDuration+.001f);stamina.Restore();weapon.TryLightChop(Vector2.right);
+    check(weapon.IsLightThrust && weapon.LightDamage==25 && weapon.LightDuration*weapon.LightWindupFraction>openerWindup,"Thrust is stronger with the longest tell");
+    tick(weapon.LightDuration*weapon.LightSwingEndFraction);
+    var view=weapon.GetComponent<TheLostShrine.Weapons.AxeView>();
+    view.GetType().GetMethod("LateUpdate",flags).Invoke(view,null);
+    var blade=(SpriteRenderer)view.GetType().GetField("blade",flags).GetValue(view);
+    check(Mathf.Abs(blade.bounds.max.x-root.transform.position.x-weapon.LightReach)<.01f,"Thrust sprite tip reaches the lane end without overshooting");
+    upgrade.finisherDamageMultiplier=1.4f;upgrade.addedLightArc=40f;weapon.ApplyUpgrades(new[]{upgrade});
+    check(weapon.LightDamage==35 && weapon.LightArc==28f,"Finisher bonus strengthens the poke without widening it");
+    weapon.ApplyUpgrades(new TheLostShrine.Weapons.AxeUpgrade[0]);
+    for(int d=0;d<8;d++) {
+        Vector2 aim=new Vector2(Mathf.Cos(d*Mathf.PI/4),Mathf.Sin(d*Mathf.PI/4));
+        Vector2 side=new Vector2(-aim.y,aim.x);
+        for(int sample=0;sample<4;sample++) {
+            thrust(aim);target.SetActive(true);
+            float depth=sample==1 ? weapon.LightReach+.12f : sample==3 ? -.12f : weapon.LightReach*.75f;
+            float lateral=sample==2 ? weapon.LightLaneWidth*.5f+.12f : 0f;
+            place(aim*depth+side*lateral);
+            tick(weapon.LightDuration*weapon.LightWindupFraction+.001f);render();
+            check((health.Health==75)==(sample==0),"Thrust octant "+d+" range/side/rear sample "+sample);
+        }
+        bool inside=true;
+        foreach(var v in mesh.vertices) {
+            float x=Vector2.Dot(v,aim),y=Vector2.Dot(v,side);
+            if(x<-.001f||x>weapon.LightReach+.001f||Mathf.Abs(y)>weapon.LightLaneWidth*.5f+.001f)inside=false;
+        }
+        check(inside,"Thrust octant "+d+" lane matches damage bounds");
+    }
+    thrust(Vector2.right);target.SetActive(true);place(Vector2.right*2);
+    wall.SetActive(true);wall.transform.position=Vector2.right;
+    UnityEngine.Object.DestroyImmediate(wall.GetComponent<TheLostShrine.Combat.Damageable>());
+    Physics2D.SyncTransforms();tick(weapon.LightDuration*.45f);
+    check(health.Health==100,"Thrust cannot damage through a wall");wall.SetActive(false);
+    thrust(Vector2.right);target.SetActive(true);place(Vector2.right*2);
+    tick(weapon.LightDuration*.45f);tick(.01f);
+    check(health.Health==75,"Thrust damages once per attack");target.SetActive(false);
+    tick(weapon.LightDuration);stamina.Restore();weapon.TryLightChop(Vector2.right);
+    check(weapon.ComboIndex==0,"Completed finisher wraps to opener");
+    tick(weapon.LightDuration+weapon.Settings.comboWindow+.1f);tick(weapon.Settings.comboWindow+.1f);
+    stamina.Restore();weapon.TryLightChop(Vector2.right);
+    check(weapon.ComboIndex==0,"Expired combo restarts at opener");
+    thrust(Vector2.right);tick(weapon.LightDuration*.2f);weapon.CancelLightCombo();tick(.5f);
+    check(weapon.State==TheLostShrine.Weapons.AxeState.Held&&weapon.ConsumeActionDisplacement()==Vector2.zero,"Interrupted tell cannot lunge later");
+    // Run the actual motor/physics so the lunge cannot bypass solid collision.
+    var motor=root.GetComponent<TheLostShrine.Player.PlayerMovement>();
+    var body=root.GetComponent<Rigidbody2D>();body.interpolation=RigidbodyInterpolation2D.None;
+    var input=root.GetComponent<TheLostShrine.Input.PlayerMovementInput>();
+    input.GetType().GetField("hasFocus",flags).SetValue(input,true);
+    input.GetType().GetProperty("MoveDirection").SetValue(input,Vector2.zero,null);
+    System.Action moveStep=()=>{motor.GetType().GetMethod("FixedUpdate",flags).Invoke(motor,null);Physics2D.Simulate(Time.fixedDeltaTime);};
+    System.Action<bool> lunge=blocked=>{
+        body.position=Vector2.zero;root.transform.position=Vector3.zero;body.linearVelocity=Vector2.zero;
+        thrust(Vector2.right);wall.SetActive(blocked);wall.transform.position=new Vector3(.55f,0,0);Physics2D.SyncTransforms();
+        for(int i=0;i<30;i++){tick(Time.fixedDeltaTime);moveStep();}
+    };
+    lunge(false);check(Mathf.Abs(body.position.x-.4f)<.02f,"Motor delivers exactly the 0.4-unit lunge");
+    lunge(true);check(body.position.x<.3f && body.position.x>=0,"Lunge stops at solid wall");wall.SetActive(false);
+    body.position=Vector2.zero;root.transform.position=Vector3.zero;body.linearVelocity=Vector2.zero;
+    thrust(Vector2.right);tick(weapon.LightDuration*.4f);weapon.ConsumeActionDisplacement();weapon.PauseOnImpact(.04f);
+    tick(.02f);check(weapon.ConsumeActionDisplacement()==Vector2.zero,"Hit pause freezes lunge as well as weapon clock");
+    weapon.CancelLightCombo();check(weapon.ComboTimeRemaining==0,"Interruption clears combo continuation");
+    thrust(Vector2.right);player.GetType().GetMethod("OnApplicationFocus",flags).Invoke(player,new object[]{false});
+    check(weapon.State==TheLostShrine.Weapons.AxeState.Held&&weapon.ComboTimeRemaining==0,"Focus loss cancels the live combo");
+    player.GetType().GetField("controlsActive",flags).SetValue(player,true);
     reset();weapon.TryLightChop(Vector2.right);tick(.1f);
     root.GetComponent<TheLostShrine.Combat.Damageable>().ReceiveHit(new TheLostShrine.Combat.CombatHit(target,TheLostShrine.Combat.AttackKind.EnemyMelee,1000,Vector2.right,0f,0f));
     render();check(!surface.enabled && weapon.LightPhase==TheLostShrine.Weapons.MeleePhase.None,"Defeat cancels damage and its feedback");

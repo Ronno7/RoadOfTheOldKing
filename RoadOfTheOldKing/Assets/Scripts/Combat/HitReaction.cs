@@ -8,6 +8,8 @@ namespace TheLostShrine.Combat
         [SerializeField, Min(0f)] private float knockbackMultiplier = 1f;
         [SerializeField, Min(0f)] private float maxKnockbackImpulse;
         [SerializeField] private bool replaceMovementOnHit;
+        [Tooltip("Extra knockback on the killing blow, so defeats land harder.")]
+        [SerializeField, Min(1f)] private float lethalKnockbackMultiplier = 1.6f;
         private Damageable health;
         private Rigidbody2D body;
         private float staggerUntil;
@@ -36,6 +38,8 @@ namespace TheLostShrine.Combat
             {
                 float impulse = Mathf.Max(0f, hit.Knockback * knockbackMultiplier);
                 if (maxKnockbackImpulse > 0f) impulse = Mathf.Min(impulse, maxKnockbackImpulse);
+                // Health is already reduced when HitReceived fires, so a dead target took the killing blow.
+                if (!health.IsAlive) impulse *= lethalKnockbackMultiplier;
                 if (impulse <= 0f) return;
                 // Approaching enemies must not absorb the impulse into forward movement.
                 if (replaceMovementOnHit) body.linearVelocity = Vector2.zero;

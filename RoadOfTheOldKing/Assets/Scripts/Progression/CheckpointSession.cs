@@ -218,11 +218,18 @@ namespace TheLostShrine.Progression
         {
             if (loading || player == null || player.IsAlive)
                 return;
+            RestartFromCheckpoint();
+        }
+
+        // Restart preserves permanent progress, unlike the explicitly destructive StartNewRun.
+        public void RestartFromCheckpoint()
+        {
+            if (loading || player == null) return;
             // Permanent rewards also survive a death before the first rest.
             Capture();
             Save(HasCheckpoint ? "Returned to the last bonfire." : "Returned to the start.");
             loading = true;
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            SceneReload.Active();
         }
 
         public void StartNewRun()
@@ -236,7 +243,7 @@ namespace TheLostShrine.Progression
             upgrades = null;
             Status = "";
             loading = true;
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            SceneReload.Active();
         }
     }
 }

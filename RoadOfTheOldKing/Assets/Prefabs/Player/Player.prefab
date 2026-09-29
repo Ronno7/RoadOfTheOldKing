@@ -24,6 +24,9 @@ GameObject:
   - component: {fileID: 8164189053318432841}
   - component: {fileID: 6845399670053713294}
   - component: {fileID: 518245939509802014}
+  - component: {fileID: 3353789876922468842}
+  - component: {fileID: 1582186952523396501}
+  - component: {fileID: 9180351796924429262}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -146,8 +149,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 4.5
   sprintMultiplier: 1.6
-  sprintCostPerSecond: 20
-  minimumSprintStamina: 20
+  sprintCostPerSecond: 18
+  minimumSprintStamina: 18
   initialFacing: {x: 0, y: -1}
   inputSource: {fileID: 1005}
 --- !u!114 &9215421230755382488
@@ -207,6 +210,7 @@ MonoBehaviour:
   knockbackMultiplier: 1
   maxKnockbackImpulse: 0
   replaceMovementOnHit: 0
+  lethalKnockbackMultiplier: 1.6
 --- !u!114 &7425349288622817033
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -246,7 +250,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerStamina
   maximum: 100
   recoveryPerSecond: 25
-  recoveryDelay: 0.8
+  recoveryDelay: 0.5
 --- !u!114 &8027254562946123960
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -259,10 +263,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9bc50151568b4c840869471f5dd327e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerDash
-  distance: 2.2
+  distance: 3
   duration: 0.18
   staminaCost: 25
-  cooldown: 0.35
+  cooldown: 0.15
   dodgeWindow: 0.1
 --- !u!114 &8164189053318432841
 MonoBehaviour:
@@ -297,8 +301,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerSpriteAnimator
   body: {fileID: 1009}
   animations: {fileID: 11400000, guid: 1ec4469e34c15a04fbd61c720b2d4940, type: 2}
-  walkCycleLength: 3
-  runCycleLength: 4.5
+  walkCycleLength: 1.8
+  runCycleLength: 4
   diagonalReleaseGrace: 0.1
 --- !u!114 &518245939509802014
 MonoBehaviour:
@@ -347,6 +351,44 @@ MonoBehaviour:
     flipX: 1
     inFront: 1
     coverGrip: 1
+--- !u!114 &3353789876922468842
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6079b8eb467835d488b5c1fa6ef9ab30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.UI.PauseMenuView
+  layout: {fileID: 9197481963319205126, guid: 3d1562305ff0ef84d9e1e137deb92e09, type: 3}
+  panelSettings: {fileID: 11400000, guid: e8d13b02f4a53d441b064a4b1cf6e2bf, type: 2}
+--- !u!114 &1582186952523396501
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9f11206f951a4846ba78628444fab4c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.UI.PauseMenuInput
+--- !u!114 &9180351796924429262
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d504a6ce1ec4744fa55ad446f758603, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.UI.PauseMenuController
 --- !u!1 &1007
 GameObject:
   m_ObjectHideFlags: 0

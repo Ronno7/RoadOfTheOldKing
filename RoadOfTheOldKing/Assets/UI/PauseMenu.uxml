@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="PauseMenu.uss" />
+    <ui:VisualElement name="pause-overlay">
+        <ui:VisualElement name="pause-panel">
+            <ui:Label text="PAUSED" name="heading" />
+            <ui:VisualElement name="divider" />
+            <ui:VisualElement name="actions" />
+            <ui:Label name="description" />
+            <ui:Label text="ESC  Resume     ↑ ↓  Select     ENTER  Confirm" name="hint" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

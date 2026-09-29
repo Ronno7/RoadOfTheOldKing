@@ -11,7 +11,7 @@ namespace TheLostShrine.World
         private static readonly HashSet<WorldPickup> active = new HashSet<WorldPickup>();
         public static IEnumerable<WorldPickup> Active => active;
         public abstract string Prompt { get; }
-        protected virtual float PickupDistance => 1f;
+        protected virtual float PickupDistance => 1.5f;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetRegistry() => active.Clear();
