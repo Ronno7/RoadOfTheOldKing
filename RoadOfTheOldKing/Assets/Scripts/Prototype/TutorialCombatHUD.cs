@@ -77,6 +77,21 @@ namespace TheLostShrine.Prototype
             float width = Mathf.Min(440f, screenWidth - 24f);
             Color previousColor = GUI.color;
 
+            // The contextual GameHud owns vitals, shards, prompts, charge and notices when present;
+            // this placeholder keeps the modal bonfire/defeat screens and PrototypeLoop's legend.
+            bool contextualHud = TheLostShrine.UI.GameHud.Active != null;
+            if (contextualHud)
+            {
+                if (!compact)
+                {
+                    var box = new Rect((screenWidth - width) * 0.5f, 12f, width, 94f);
+                    GUI.Box(box, GUIContent.none);
+                    GUI.Label(new Rect(box.x + 12f, 18f, width - 24f, 24f), heading, title);
+                    GUI.Label(new Rect(box.x + 12f, 44f, width - 24f, 60f), guide != null ? guide.Instruction : "", text);
+                }
+            }
+            else
+            {
             GUI.Box(new Rect(12f, 12f, width, compact ? 94f : 186f), GUIContent.none);
             GUI.Label(new Rect(24f, 18f, width - 24f, 24f), heading, title);
             if (playerHealth != null && playerHealth.Health != null)
@@ -119,6 +134,7 @@ namespace TheLostShrine.Prototype
                         bonus > 0 ? "Permanent HP: +" + bonus : "3 fragments = +20 max HP", text);
                 }
             }
+            }
 
             string controls = "WASD / arrows: move   |   Shift: sprint   |   Mouse: aim   |   Scroll: zoom\n" +
                 "LMB: slash   |   Hold / release RMB: cleave   |   Space: dash / dodge\n" +
@@ -131,15 +147,17 @@ namespace TheLostShrine.Prototype
                 GUI.Label(new Rect(24f, screenHeight - 122f, Mathf.Min(738f, screenWidth - 48f), 110f), controls, text);
             }
 
-            if (bonfireInteraction != null && !string.IsNullOrEmpty(bonfireInteraction.Prompt))
-                GUI.Label(new Rect(24f, compact ? 116f : 235f, width - 24f, 28f), bonfireInteraction.Prompt, title);
-
-            var weapon = player.Weapon;
-            if (weapon != null && weapon.State == AxeState.Charging)
+            if (!contextualHud)
             {
-                GUI.color = weapon.Charge01 >= 1f ? new Color(1f, 0.8f, 0.2f) : new Color(0.5f, 0.8f, 1f);
-                GUI.DrawTexture(new Rect(12f, 206f, width * weapon.Charge01, 10f), Texture2D.whiteTexture);
-                GUI.color = previousColor;
+                if (bonfireInteraction != null && !string.IsNullOrEmpty(bonfireInteraction.Prompt))
+                    GUI.Label(new Rect(24f, compact ? 116f : 235f, width - 24f, 28f), bonfireInteraction.Prompt, title);
+                var weapon = player.Weapon;
+                if (weapon != null && weapon.State == AxeState.Charging)
+                {
+                    GUI.color = weapon.Charge01 >= 1f ? new Color(1f, 0.8f, 0.2f) : new Color(0.5f, 0.8f, 1f);
+                    GUI.DrawTexture(new Rect(12f, 206f, width * weapon.Charge01, 10f), Texture2D.whiteTexture);
+                    GUI.color = previousColor;
+                }
             }
 
             if (playerHealth != null && !playerHealth.IsAlive)
@@ -186,7 +204,8 @@ namespace TheLostShrine.Prototype
             float y = box.y + 16f;
             GUI.Label(new Rect(x, y, 384f, 28f), fire.DisplayName.ToUpperInvariant(), title);
             GUI.Label(new Rect(x, y + 34f, 384f, 48f), session.Status, text);
-            y += 90f;
+            GUI.Label(new Rect(x, y + 70f, 384f, 22f), "Sun Shards: " + session.Progress.sunShards, text);
+            y += 100f;
             if (confirmNewRun)
             {
                 GUI.Label(new Rect(x, y, 384f, 44f), "Start over? This clears this journey's saved progress.", text);

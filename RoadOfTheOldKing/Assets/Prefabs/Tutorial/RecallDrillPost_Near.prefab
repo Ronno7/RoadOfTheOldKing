@@ -1,0 +1,106 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &4898515677311884018
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2922548180637182769, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      propertyPath: m_Name
+      value: RecallDrillPost_Near
+      objectReference: {fileID: 0}
+    - target: {fileID: 3336597564122855636, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3336597564122855636, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3336597564122855636, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3336597564122855636, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3336597564122855636, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3336597564122855636, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3336597564122855636, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3336597564122855636, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3336597564122855636, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3336597564122855636, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2922548180637182769, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 103493756563743556}
+    - targetCorrespondingSourceObject: {fileID: 2922548180637182769, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9047757332265859740}
+  m_SourcePrefab: {fileID: 100100000, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+--- !u!4 &1472981277661865259 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6307874727680376793, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+  m_PrefabInstance: {fileID: 4898515677311884018}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &7743372314763112899 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2922548180637182769, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+  m_PrefabInstance: {fileID: 4898515677311884018}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &103493756563743556
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7743372314763112899}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7da7270ebebe9cc4fb7cd2f800125763, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.World.AxePuzzleTarget
+  puzzle: {fileID: 0}
+  anchor: 0
+  indicator: {fileID: 0}
+  label: {fileID: 0}
+--- !u!114 &9047757332265859740
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7743372314763112899}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e04ca334d9a4a1640a570caed47d9394, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.WoodTargetFeedback
+  visual: {fileID: 1472981277661865259}
+  chipSprite: {fileID: 21300000, guid: ab6058c4ddee5c148cd9d34a78a0a92e, type: 3}
+  impactSound: {fileID: 8300000, guid: 24ee50dcbf8b16e4badd6370399811d1, type: 3}
