@@ -15,7 +15,7 @@ namespace TheLostShrine.Progression
     {
         // Stable storage key across title changes; do not rename with display branding.
         [SerializeField] private string saveKey = "TheLostShrine.PrototypeLoop.Save.v1";
-        [SerializeField] private HatchetUpgradeTier[] upgradeTiers = Array.Empty<HatchetUpgradeTier>();
+        [SerializeField] private AxeUpgradeTier[] upgradeTiers = Array.Empty<AxeUpgradeTier>();
         private IProgressStore store;
         private PlayerHealth player;
         private PlayerCombatController combat;
@@ -73,9 +73,9 @@ namespace TheLostShrine.Progression
             var checkpoint = Fires.FirstOrDefault(f => f.Id == Progress.checkpointId);
             if (checkpoint != null && Progress.scenePath == scene.path)
                 MoveTo(checkpoint);
-            if (Progress.hasHatchet && combat.Weapon == null)
+            if (Progress.hasAxe && combat.Weapon == null)
             {
-                var weapon = FindFirstObjectByType<HatchetWeapon>();
+                var weapon = FindFirstObjectByType<AxeWeapon>();
                 if (weapon != null)
                     combat.TryEquip(weapon);
             }
@@ -94,7 +94,7 @@ namespace TheLostShrine.Progression
         {
             if (combat != null)
             {
-                Progress.hasHatchet = combat.Weapon != null;
+                Progress.hasAxe = combat.Weapon != null;
                 Progress.recallUnlocked = combat.CanRecall;
             }
             foreach (var participant in Participants<IProgressParticipant>())
@@ -173,7 +173,7 @@ namespace TheLostShrine.Progression
             return true;
         }
 
-        public bool TryPurchaseUpgrade(Bonfire fire, HatchetUpgrade choice)
+        public bool TryPurchaseUpgrade(Bonfire fire, AxeUpgrade choice)
         {
             if (loading || player == null || !player.IsAlive || combat.Weapon == null || fire == null ||
                 !fire.AllowsUpgrades || !Fires.Contains(fire) || !fire.CanUse(player.transform) ||

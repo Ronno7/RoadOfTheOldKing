@@ -23,6 +23,7 @@ GameObject:
   - component: {fileID: 8027254562946123960}
   - component: {fileID: 8164189053318432841}
   - component: {fileID: 6845399670053713294}
+  - component: {fileID: 518245939509802014}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -299,6 +300,53 @@ MonoBehaviour:
   walkCycleLength: 3
   runCycleLength: 4.5
   diagonalReleaseGrace: 0.1
+--- !u!114 &518245939509802014
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7cdde0e09131fdd49b81d7811f10da8d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerWeaponCarry
+  body: {fileID: 1009}
+  gripFold: {fileID: 21300000, guid: 620ae29e22a384141b3035c1e72a6165, type: 3}
+  holds:
+  - grip: {x: -4, y: 11}
+    flipX: 1
+    inFront: 1
+    coverGrip: 1
+  - grip: {x: 7, y: 11}
+    flipX: 0
+    inFront: 1
+    coverGrip: 1
+  - grip: {x: 8, y: 15}
+    flipX: 0
+    inFront: 0
+    coverGrip: 0
+  - grip: {x: 8, y: 15}
+    flipX: 0
+    inFront: 0
+    coverGrip: 0
+  - grip: {x: 4, y: 15}
+    flipX: 0
+    inFront: 0
+    coverGrip: 0
+  - grip: {x: -8, y: 15}
+    flipX: 1
+    inFront: 0
+    coverGrip: 0
+  - grip: {x: -8, y: 11}
+    flipX: 1
+    inFront: 1
+    coverGrip: 1
+  - grip: {x: -8, y: 11}
+    flipX: 1
+    inFront: 1
+    coverGrip: 1
 --- !u!1 &1007
 GameObject:
   m_ObjectHideFlags: 0

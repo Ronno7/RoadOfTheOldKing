@@ -9,7 +9,7 @@ var player=GameObject.Find("Player").GetComponent<TheLostShrine.Player.PlayerCom
 var stamina=player.GetComponent<TheLostShrine.Player.PlayerStamina>();
 var life=player.GetComponent<TheLostShrine.Player.PlayerHealth>();
 var body=player.GetComponent<Rigidbody2D>();
-var weapon=GameObject.Find("Hatchet Pickup").GetComponent<TheLostShrine.Weapons.HatchetWeapon>();
+var weapon=GameObject.Find("Axe Pickup").GetComponent<TheLostShrine.Weapons.AxeWeapon>();
 var guide=UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Prototype.PrototypeLoopGuide>();
 var enemy=UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Combat.SimpleMeleeEnemy>();
 var enemyHealth=enemy.GetComponent<TheLostShrine.Combat.Damageable>();
@@ -44,19 +44,19 @@ GameObject wall=null;
 try{
 Physics2D.simulationMode=SimulationMode2D.Script;
 check(life.Health.Health==100&&life.Health.MaxHealth==100&&life.IsAlive,"Player starts with 100 health");
-check(Vector2.Dot(player.GetComponent<TheLostShrine.Player.PlayerMovement>().FacingDirection,((Vector2)weapon.transform.position-body.position).normalized)>.99f,"Player faces the hatchet placed ahead at spawn");
+check(Vector2.Dot(player.GetComponent<TheLostShrine.Player.PlayerMovement>().FacingDirection,((Vector2)weapon.transform.position-body.position).normalized)>.99f,"Player faces the axe placed ahead at spawn");
 check(player.Weapon==null&&!player.CanRecall&&guide.Step==TheLostShrine.Prototype.PrototypeStep.Pickup,"Starts unarmed, Recall locked, pickup instruction active");
 check(closed("Practice Exit Gate")&&closed("Recall Return Gate")&&closed("Enemy Approach Gate"),"All progression gates start closed");
 check(!reachable(body.position,new Vector2(16.5f,-3.5f))&&!reachable(body.position,new Vector2(-17.5f,9.5f)),"Geometry prevents skipping directly to Recall or enemy");
 check(enemy.State==TheLostShrine.Combat.MeleeEnemyState.Idle,"Distant enemy stays idle");
 move(weapon.transform.position);Physics2D.Simulate(.02f);check(player.Weapon==null,"Starting pickup waits for F");player.GetComponent<TheLostShrine.Player.PlayerBonfireInteraction>().TryInteract();tickGuide();
 check(player.Weapon==weapon&&guide.Step==TheLostShrine.Prototype.PrototypeStep.Chop,"Actual pickup advances to melee lesson");
-check(!player.CanRecall,"Picking up the hatchet still does not grant Recall");
+check(!player.CanRecall,"Picking up the axe still does not grant Recall");
 var dummy=GameObject.Find("Practice Dummy 1").GetComponent<TheLostShrine.Combat.Damageable>();
 move((Vector2)dummy.transform.position+Vector2.down*1.2f);weapon.TryLightChop(Vector2.up);tickWeapon(.3f);tickGuide();
 check(dummy.Health==90&&guide.Step==TheLostShrine.Prototype.PrototypeStep.Throw,"Real slash damage advances to throw lesson");
 move((Vector2)dummy.transform.position+Vector2.down*3f);weapon.TryThrow(Vector2.up);tickWeapon(.4f);tickGuide();
-check(dummy.Health==75&&weapon.State==TheLostShrine.Weapons.HatchetState.Stuck&&guide.Step==TheLostShrine.Prototype.PrototypeStep.Retrieve,"Actual throw hits dummy and teaches manual retrieval");
+check(dummy.Health==75&&weapon.State==TheLostShrine.Weapons.AxeState.Stuck&&guide.Step==TheLostShrine.Prototype.PrototypeStep.Retrieve,"Actual throw hits dummy and teaches manual retrieval");
 check(!weapon.TryRecall()&&closed("Practice Exit Gate"),"Recall and route stay locked until manual retrieval");
 move(weapon.transform.position);tickWeapon(.02f);tickGuide();
 check(guide.Step==TheLostShrine.Prototype.PrototypeStep.Bushes&&!closed("Practice Exit Gate"),"Retrieving opens the east practice exit");
@@ -76,7 +76,7 @@ check(!reachable(body.position,new Vector2(-17.5f,9.5f)),"Enemy corner stays blo
 dummy.GetComponent<TheLostShrine.Prototype.PracticeTarget>().ResetTarget();
 Vector2 dummyPosition=dummy.transform.position;
 move(dummyPosition+new Vector2(1f,-2f));weapon.TryThrow(Vector2.up);tickWeapon(.7f);
-check(weapon.State==TheLostShrine.Weapons.HatchetState.Stuck&&dummy.Health==100,"Throw beside dummy sets up a return shot");
+check(weapon.State==TheLostShrine.Weapons.AxeState.Stuck&&dummy.Health==100,"Throw beside dummy sets up a return shot");
 move(dummyPosition+Vector2.down*2f);weapon.TryRecall();tickWeapon(.8f);tickGuide();
 check(dummy.Health==90&&guide.Step==TheLostShrine.Prototype.PrototypeStep.Enemy&&!closed("Enemy Approach Gate"),"Real repositioned Recall damages original dummy and unlocks enemy route");
 check(reachable(body.position,new Vector2(-17.5f,9.5f)),"Final enemy corner is now reachable");
@@ -121,7 +121,7 @@ move(new Vector2(-14.5f,-6.5f));weapon.CancelAction();weapon.TryThrow(Vector2.ri
 expireProtection();life.Health.ReceiveHit(new TheLostShrine.Combat.CombatHit(enemy.gameObject,TheLostShrine.Combat.AttackKind.EnemyMelee,1000,Vector2.down,0,0));
 check(life.Health.Health==0&&!life.IsAlive&&deaths==1,"Lethal damage clamps health to zero and emits one defeat");
 check(!player.enabled&&!player.GetComponent<TheLostShrine.Player.PlayerMovement>().enabled&&!body.simulated,"Death stops movement, combat input and physics");
-check(weapon.State==TheLostShrine.Weapons.HatchetState.Held,"Death cancels an in-flight hatchet without further damage");
+check(weapon.State==TheLostShrine.Weapons.AxeState.Held,"Death cancels an in-flight axe without further damage");
 expireProtection();check(!life.Health.ReceiveHit(enemyHit)&&deaths==1,"Dead player rejects subsequent hits");
 }finally{
 if(wall!=null)UnityEngine.Object.DestroyImmediate(wall);

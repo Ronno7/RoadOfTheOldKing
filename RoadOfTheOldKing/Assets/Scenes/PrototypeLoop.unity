@@ -384,7 +384,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bf11d1c95d47ac24ca9980ca8aa1d435, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Breakable
 --- !u!1 &42567375
 GameObject:
@@ -8900,7 +8900,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2f92a9811717eb34db63bfac7e90429f, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.World.Bonfire
 --- !u!1 &147882691
 GameObject:
@@ -10180,7 +10180,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Damageable
 --- !u!1 &319886297
 GameObject:
@@ -10767,7 +10767,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bf11d1c95d47ac24ca9980ca8aa1d435, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Breakable
 --- !u!1 &416996822
 GameObject:
@@ -12658,7 +12658,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Damageable
 --- !u!1 &708060280
 GameObject:
@@ -13143,7 +13143,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5c82955aa2daeaa458d074d7380cbce1, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.World.PersistentBreakable
   progressId: prototype/obstacle/0
 --- !u!1001 &764899843
@@ -13212,7 +13212,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1005, guid: a050ba8926be537b8e4337e997bddc34, type: 3}
       propertyPath: target
-      value:
+      value: 
       objectReference: {fileID: 1569544558}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -53289,11 +53289,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 906b59732e7d04c4f9cdba70a9557718, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Prototype.TutorialCombatHUD
   player: {fileID: 1569544559}
   playerHealth: {fileID: 1569544560}
   guide: {fileID: 874150797}
+  heading: PROTOTYPE LOOP
+  compact: 0
 --- !u!4 &874150796
 Transform:
   m_ObjectHideFlags: 0
@@ -53319,7 +53321,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3105ed96251a08e42bdc42e8fc234be6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Prototype.PrototypeLoopGuide
   player: {fileID: 1569544559}
   dummies:
@@ -53546,7 +53548,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9009435604842691915, guid: c1fa4c848d1d17a43b5934c24a272e5e, type: 3}
       propertyPath: target
-      value:
+      value: 
       objectReference: {fileID: 1569544560}
     - target: {fileID: 9055788630328572994, guid: c1fa4c848d1d17a43b5934c24a272e5e, type: 3}
       propertyPath: m_Name
@@ -53571,7 +53573,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Damageable
 --- !u!1 &941052598
 GameObject:
@@ -53891,7 +53893,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9004386297107476432, guid: 82f144a445197664aa1a134666757137, type: 3}
       propertyPath: puzzleSource
-      value:
+      value: 
       objectReference: {fileID: 1962793957}
     - target: {fileID: 9004386297107476432, guid: 82f144a445197664aa1a134666757137, type: 3}
       propertyPath: awardImmediately
@@ -54670,7 +54672,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1e2e35f10ff2084b82dc32b822bdeaa, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Progression.CheckpointSession
   saveKey: TheLostShrine.PrototypeLoop.Save.v1
   upgradeTiers:
@@ -55984,7 +55986,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bf11d1c95d47ac24ca9980ca8aa1d435, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Breakable
 --- !u!114 &1348817734
 MonoBehaviour:
@@ -55996,7 +55998,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5c82955aa2daeaa458d074d7380cbce1, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.World.PersistentBreakable
   progressId: prototype/obstacle/2
 --- !u!1 &1350438320
@@ -56474,7 +56476,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Damageable
 --- !u!1 &1408003176
 GameObject:
@@ -57862,7 +57864,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 511025610d771e048af5bfdc734b16fe, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerCombatController
 --- !u!114 &1569544560 stripped
 MonoBehaviour:
@@ -57873,7 +57875,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 77ed5e44f82138e47a2ffd319bf6a318, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerHealth
 --- !u!1 &1592669054
 GameObject:
@@ -58432,7 +58434,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 26978106891378122, guid: d89fc2af1e9a8d94092f45d808c39e6e, type: 3}
       propertyPath: m_Name
-      value: Hatchet Pickup
+      value: Axe Pickup
       objectReference: {fileID: 0}
     - target: {fileID: 4513651345661334128, guid: d89fc2af1e9a8d94092f45d808c39e6e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -58687,7 +58689,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2f92a9811717eb34db63bfac7e90429f, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.World.Bonfire
 --- !u!1 &1737098346
 GameObject:
@@ -59319,7 +59321,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Damageable
 --- !u!1 &1861377532
 GameObject:
@@ -60363,7 +60365,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba8cab5154454574e91820b4f43a3d3e, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.World.ThrowRecallPuzzle
 --- !u!1 &1974887440
 GameObject:
@@ -61182,7 +61184,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9004386297107476432, guid: 82f144a445197664aa1a134666757137, type: 3}
       propertyPath: defeatSource
-      value:
+      value: 
       objectReference: {fileID: 919991578}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -61502,7 +61504,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5c82955aa2daeaa458d074d7380cbce1, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.World.PersistentBreakable
   progressId: prototype/obstacle/1
 --- !u!1 &2106410340

@@ -46,7 +46,7 @@ namespace TheLostShrine.Weapons
         }
     }
 
-    // No input, damage, transforms, or animation events. HatchetWeapon advances this once per step.
+    // No input, damage, transforms, or animation events. AxeWeapon advances this once per step.
     public sealed class ThrowActionClock
     {
         private ThrowActionTiming timing;

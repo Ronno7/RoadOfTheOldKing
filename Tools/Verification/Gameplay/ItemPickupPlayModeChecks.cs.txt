@@ -13,7 +13,7 @@ var combat=player.GetComponent<TheLostShrine.Player.PlayerCombatController>();
 var body=player.GetComponent<Rigidbody2D>();
 var interaction=player.GetComponent<TheLostShrine.Player.PlayerBonfireInteraction>();
 var stamina=player.GetComponent<TheLostShrine.Player.PlayerStamina>();
-var weapon=UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Weapons.HatchetWeapon>();
+var weapon=UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Weapons.AxeWeapon>();
 var enemy=UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Combat.SimpleMeleeEnemy>();
 var reward=UnityEngine.Object.FindFirstObjectByType<TheLostShrine.World.SunShardReward>();
 var fire=session.Fires.Single();
@@ -26,21 +26,21 @@ Action<Vector2> move=p=>{body.position=p;body.linearVelocity=Vector2.zero;player
 try {
     Physics2D.simulationMode=SimulationMode2D.Script;
     combat.GetType().GetMethod("ProcessInput",flags).Invoke(combat,new object[]{new TheLostShrine.Input.CombatInputFrame{Active=true}});
-    check(combat.Weapon==null,"Fresh player starts without the hatchet");
+    check(combat.Weapon==null,"Fresh player starts without the axe");
     move(weapon.transform.position);Physics2D.Simulate(.02f);tick(.02f);refresh();
-    check(combat.Weapon==null && weapon.State==TheLostShrine.Weapons.HatchetState.OnGround,"Standing over starting hatchet never equips it");
-    check(interaction.Prompt=="F - Pick up hatchet","Starting pickup shows F prompt");
-    check(interaction.TryInteract() && combat.Weapon==weapon && store.Load().hasHatchet,"F action equips and saves starting hatchet");
-    check(!interaction.TryInteract(),"Repeated pickup cannot equip a second hatchet");
+    check(combat.Weapon==null && weapon.State==TheLostShrine.Weapons.AxeState.OnGround,"Standing over starting axe never equips it");
+    check(interaction.Prompt=="F - Pick up axe","Starting pickup shows F prompt");
+    check(interaction.TryInteract() && combat.Weapon==weapon && store.Load().hasAxe,"F action equips and saves starting axe");
+    check(!interaction.TryInteract(),"Repeated pickup cannot equip a second axe");
     move(new Vector2(1000,1000));stamina.Restore();weapon.TryThrow(Vector2.right);tick(1);
-    check(weapon.State==TheLostShrine.Weapons.HatchetState.Stuck,"Throw lands normally");
+    check(weapon.State==TheLostShrine.Weapons.AxeState.Stuck,"Throw lands normally");
     move(weapon.transform.position);tick(.1f);refresh();
-    check(weapon.State==TheLostShrine.Weapons.HatchetState.Held,"Walking onto thrown hatchet retrieves it automatically");
-    check(!interaction.TryInteract() && interaction.Prompt=="","Owned hatchet does not offer a redundant F interaction");
+    check(weapon.State==TheLostShrine.Weapons.AxeState.Held,"Walking onto thrown axe retrieves it automatically");
+    check(!interaction.TryInteract() && interaction.Prompt=="","Owned axe does not offer a redundant F interaction");
     stamina.Restore();combat.UnlockRecall();weapon.TryThrow(Vector2.right);tick(1);
     check(weapon.TryRecall(),"Recall remains available");
     tick(1);
-    check(weapon.State==TheLostShrine.Weapons.HatchetState.Held,"Recall catches automatically without F");
+    check(weapon.State==TheLostShrine.Weapons.AxeState.Held,"Recall catches automatically without F");
 
     enemy.GetComponent<TheLostShrine.Combat.Damageable>().ReceiveHit(new TheLostShrine.Combat.CombatHit(
         player.gameObject,TheLostShrine.Combat.AttackKind.ChargedCleave,1000,Vector2.up,0,0,true));

@@ -98,7 +98,7 @@ namespace TheLostShrine.Prototype
                 if (stamina.WasSpendRejected)
                     GUI.Label(new Rect(24f, 207f, width - 24f, 24f), "Not enough stamina - walk to recover.", text);
             }
-            string instruction = guide != null ? guide.Instruction : "Press F near the hatchet to pick it up and practice.";
+            string instruction = guide != null ? guide.Instruction : "Press F near the axe to pick it up and practice.";
             if (!compact)
                 GUI.Label(new Rect(24f, 107f, width - 24f, 82f), instruction, text);
             var progress = CheckpointSession.Instance;
@@ -132,7 +132,7 @@ namespace TheLostShrine.Prototype
                 GUI.Label(new Rect(24f, compact ? 116f : 235f, width - 24f, 28f), bonfireInteraction.Prompt, title);
 
             var weapon = player.Weapon;
-            if (weapon != null && weapon.State == HatchetState.Charging)
+            if (weapon != null && weapon.State == AxeState.Charging)
             {
                 GUI.color = weapon.Charge01 >= 1f ? new Color(1f, 0.8f, 0.2f) : new Color(0.5f, 0.8f, 1f);
                 GUI.DrawTexture(new Rect(12f, 206f, width * weapon.Charge01, 10f), Texture2D.whiteTexture);
@@ -198,7 +198,7 @@ namespace TheLostShrine.Prototype
             y += 42f;
             if (fire.AllowsUpgrades)
             {
-                if (GUI.Button(new Rect(x, y, 384f, 32f), "Hatchet upgrades (Sun Shards: " + session.Progress.sunShards + ")"))
+                if (GUI.Button(new Rect(x, y, 384f, 32f), "Axe upgrades (Sun Shards: " + session.Progress.sunShards + ")"))
                     showUpgrades = true;
                 y += 38f;
             }

@@ -13,9 +13,13 @@ namespace TheLostShrine.Progression
         {
             if (!PlayerPrefs.HasKey(key))
                 return new ProgressState();
-            var state = JsonUtility.FromJson<ProgressState>(PlayerPrefs.GetString(key));
+            string json = PlayerPrefs.GetString(key);
+            var state = JsonUtility.FromJson<ProgressState>(json);
             if (state == null || state.version != 1 || state.discoveredFires == null || state.completedIds == null)
                 throw new InvalidOperationException("Unrecognized prototype save.");
+            // Saves written before the axe rename store ownership as "hasHatchet"; JsonUtility
+            // ignores FormerlySerializedAs, so carry it over here. The next save writes "hasAxe".
+            if (!state.hasAxe && json.Contains("\"hasHatchet\":true")) state.hasAxe = true;
             // Existing version-one saves predate upgrades and start with an empty choice list.
             if (state.upgrades == null) state.upgrades = new System.Collections.Generic.List<UpgradeSelection>();
             if (state.sunShards < 0 || state.upgrades.Exists(s => s == null ||

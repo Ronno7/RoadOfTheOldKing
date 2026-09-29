@@ -1,0 +1,99 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fd1d18a98bcd30469bcfd0f78adfbfa, type: 3}
+  m_Name: Run
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.DirectionalSpriteAnimation
+  source: 'PixelLab state ''Idle'': Running, 8 frames'
+  framesPerSecond: 12
+  loop: 1
+  contactFrame: -1
+  directions:
+  - sprites:
+    - {fileID: 21300000, guid: 24ed0651fa161b84eb3749b54f88d358, type: 3}
+    - {fileID: 21300000, guid: 4cff1bf947c3f4b42bbde72532631564, type: 3}
+    - {fileID: 21300000, guid: 3967120549b120541b549d8e66330789, type: 3}
+    - {fileID: 21300000, guid: 8e05feab5d9b1e74c852c422cc88317a, type: 3}
+    - {fileID: 21300000, guid: de9ef697b6afd5d4895da17e2c709ab7, type: 3}
+    - {fileID: 21300000, guid: ca788cbad13da7e4fab12ad03373c51b, type: 3}
+    - {fileID: 21300000, guid: b0b719962ec25a54796d20ff6eb8a5dd, type: 3}
+    - {fileID: 21300000, guid: 46734347f23add9458a08f8bdb4e8e20, type: 3}
+    heights: 1b0000001a0000001a0000001b0000001b0000001a0000001a0000001b000000
+  - sprites:
+    - {fileID: 21300000, guid: c8dccca91ec44b044bc445ebbe00338f, type: 3}
+    - {fileID: 21300000, guid: 04e32588daf7fde44b249f9e44a3cb0b, type: 3}
+    - {fileID: 21300000, guid: 7806d154b8423da43b6b9d7e62b5c5da, type: 3}
+    - {fileID: 21300000, guid: 554f4ba2dcedeee4198b153e20897290, type: 3}
+    - {fileID: 21300000, guid: ca63461f5d251ef459476c8357cb3a0c, type: 3}
+    - {fileID: 21300000, guid: 053355abbe0067c498e409f36a39116f, type: 3}
+    - {fileID: 21300000, guid: dcd8c005e54059042951b03bf67e8f3d, type: 3}
+    - {fileID: 21300000, guid: a357ba49b3aa72d448818843778449ee, type: 3}
+    heights: 1b0000001b0000001a0000001a0000001b0000001b0000001a0000001a000000
+  - sprites:
+    - {fileID: 21300000, guid: 7a34884ed23fbf445b5fe2e1b8b2ee48, type: 3}
+    - {fileID: 21300000, guid: a182a1f22ae9b3243b5fd4365e06c543, type: 3}
+    - {fileID: 21300000, guid: 55f76441dff8b4444b1090874bbc2c5e, type: 3}
+    - {fileID: 21300000, guid: efd6864671e0eab4ea64d22c1be7e30e, type: 3}
+    - {fileID: 21300000, guid: 6c21d9cc0721c0e41b8b91265e86dcbc, type: 3}
+    - {fileID: 21300000, guid: 4101e95797c3cf342a06a7578d6ed917, type: 3}
+    - {fileID: 21300000, guid: ca97ac417698e8243aca21394e13ec78, type: 3}
+    - {fileID: 21300000, guid: ed71f3cc40acec9418ff576a5aa6267f, type: 3}
+    heights: 1a0000001b0000001a0000001a0000001a0000001b0000001a0000001a000000
+  - sprites:
+    - {fileID: 21300000, guid: afa0a33448050ba4ba562351231cc029, type: 3}
+    - {fileID: 21300000, guid: 0eeb0a3aff4150341b2c8aa3b5e51119, type: 3}
+    - {fileID: 21300000, guid: 53bb062f8048a2e4594dd19909ad5764, type: 3}
+    - {fileID: 21300000, guid: b58cb427a8f3fa3468d5198c7dbb989d, type: 3}
+    - {fileID: 21300000, guid: 29313ffa4e2f4d9478af8f23af508c42, type: 3}
+    - {fileID: 21300000, guid: c508efbc9f3b23f45bef7aa565be8859, type: 3}
+    - {fileID: 21300000, guid: d48b641fd6b69594894d89bfaec112bd, type: 3}
+    - {fileID: 21300000, guid: 957ddac72faa1524ba53fe45f642e8af, type: 3}
+    heights: 1b0000001b0000001a0000001a0000001b0000001b0000001a0000001a000000
+  - sprites:
+    - {fileID: 21300000, guid: 9bb09a520272e2c47a1207cea1565c53, type: 3}
+    - {fileID: 21300000, guid: c75bd59e54401d742ac1cae605b55586, type: 3}
+    - {fileID: 21300000, guid: ef97aa27f52cc534ab37e9fb4f71c794, type: 3}
+    - {fileID: 21300000, guid: 0c9bcbe64e1d61543981f53294c26397, type: 3}
+    - {fileID: 21300000, guid: 606a784a5f2ef6d49bf17a8f52c01b3f, type: 3}
+    - {fileID: 21300000, guid: 72c83fc525d30f84dbd905f6f6508dbf, type: 3}
+    - {fileID: 21300000, guid: 619bae4c166f1d24eb0023aeac68aa92, type: 3}
+    - {fileID: 21300000, guid: c4651ad956da7c147ab64eaf938d1e62, type: 3}
+    heights: 1b0000001a0000001a0000001b0000001b0000001a0000001a0000001b000000
+  - sprites:
+    - {fileID: 21300000, guid: 0669dd71f69cd5245965e09f9a216d63, type: 3}
+    - {fileID: 21300000, guid: f4151cbe8ea46b74fba8584dbf06080f, type: 3}
+    - {fileID: 21300000, guid: e05824b881197a84881579a60784c61a, type: 3}
+    - {fileID: 21300000, guid: a8b468c2c81b33b468471fb4165ce06c, type: 3}
+    - {fileID: 21300000, guid: 504b62dcf9ef94d4087d96fd0dddbbd3, type: 3}
+    - {fileID: 21300000, guid: 7a1fea25e1d03b149bd9c56fbb649793, type: 3}
+    - {fileID: 21300000, guid: 1e97856c02efeec4ab1ccc8555d10d63, type: 3}
+    - {fileID: 21300000, guid: db2cdbd41ea0cb549b6ba6c0ffc5621f, type: 3}
+    heights: 1a0000001a00000019000000190000001a0000001a0000001900000019000000
+  - sprites:
+    - {fileID: 21300000, guid: db99c903b8883f045bdc1d3bc8100a01, type: 3}
+    - {fileID: 21300000, guid: e2effb34a7fbded4b97436af878ff4d5, type: 3}
+    - {fileID: 21300000, guid: 36694f31bebca80489cea7561b30c30a, type: 3}
+    - {fileID: 21300000, guid: 46a8ade7ed1e62f4085c7af25b551f8f, type: 3}
+    - {fileID: 21300000, guid: 9312a92d478c30a4784573a5e2db165f, type: 3}
+    - {fileID: 21300000, guid: 8b9769b5894244e4eaa9220e5d3cab7d, type: 3}
+    - {fileID: 21300000, guid: 48518f8af0accd840916c39cf77319f9, type: 3}
+    - {fileID: 21300000, guid: f0827d36395262548a341d9332355ca9, type: 3}
+    heights: 1a0000001b0000001b0000001a0000001a0000001b0000001b0000001a000000
+  - sprites:
+    - {fileID: 21300000, guid: efd29459dc5f923478766455133a4e9e, type: 3}
+    - {fileID: 21300000, guid: c3d6b7ad20a0d3441bcb8403ad878146, type: 3}
+    - {fileID: 21300000, guid: 27e17b1a6d417e440928dcd31e1da3a5, type: 3}
+    - {fileID: 21300000, guid: b2890273db6816a46b9fac03f1d2e8b9, type: 3}
+    - {fileID: 21300000, guid: eef411918c2ba9644a7734bb490fe651, type: 3}
+    - {fileID: 21300000, guid: cea4069097eb38145b00d4f17486b57b, type: 3}
+    - {fileID: 21300000, guid: 56dd20590f0c0e5449709c8dc3df327a, type: 3}
+    - {fileID: 21300000, guid: 0b641ba068c792a4e8fbe8f1874fcfeb, type: 3}
+    heights: 1a0000001a00000019000000190000001a0000001a0000001900000019000000

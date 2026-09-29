@@ -2,10 +2,12 @@
 
 ## 28SEP2026 - New hero and PixelLab animation pipeline
 
-- Replaced the player with a new arm-less hero in a blue hooded cloak, generated with PixelLab in eight directions at the world's native 16 pixels per unit. Standing views and an eight-frame walk are live; further animations arrive one at a time.
+- Replaced the player with a new arm-less hero in a blue hooded cloak, generated with PixelLab in eight directions at the world's native 16 pixels per unit. Standing views, an eight-frame walk and run, and a four-frame dash are live; further animations arrive one at a time.
 - Replaced the layered four-direction animation system with one state-driven presenter and a one-command PixelLab importer. Walk and run follow distance travelled, actions follow the weapon's clocks, facing uses eight directions and keeps diagonals on key release, and states without artwork fall back to the standing views.
+- Added an aged bronze halberd as the weapon sprite, outlined to match the hero, carried upright on the edge of his right side out of combat with per-direction mirroring and layering, a cloak fold wrapping the grip, and a bob that follows his walk; it starts planted in the Tutorial stump.
 - Moved light-hit pause into the weapon and its settings, unchanged at 0.045 seconds (1.4x on the finisher).
-- Retired the previous character art, its animation assets and tools (samples kept in `Docs/Art/Player/Legacy`), and the world-only DemoTutorial scene; Tutorial is now the single world reference.
+- Retired the previous character art, its animation assets and tools (samples kept in `Docs/Art/Player/Legacy`), the unused old axe sprites, and the world-only DemoTutorial scene; Tutorial is now the single world reference.
+- Renamed the weapon from "hatchet" to "axe" throughout code, assets, scenes and documentation. Existing saves keep their axe ownership and purchased upgrades.
 
 ## 27SEP2026 - Wolf enemy, combat feedback and Tutorial integration
 
@@ -14,10 +16,10 @@
 - Added an original low-resolution wolf with twenty 48x48 sprites, mirrored side views, movement-driven gait, readable bite windup, hit reactions and directional death poses. The Wolf prefab reuses existing enemy combat, rewards and rest/reset behavior.
 - Added a cursor-following aim marker and restrained light-melee windup, active damage footprint and slash feedback. Attack reach, width and timing follow the weapon's gameplay rules, including combos, upgrades and hit pause; the effect shows the full potential sector while damage remains terrain-blocked.
 - Consolidated the finished character into one standard Player prefab shared by Tutorial and test scenes.
-- Promoted the finished weapon to an independent `Hatchet.prefab` for gameplay and combat previews; retained the old weapon as `PrototypeHatchet.prefab` for PrototypeLoop, preserving existing scene references and tuning.
+- Promoted the finished weapon to an independent `Axe.prefab` for gameplay and combat previews; retained the old weapon as `PrototypeAxe.prefab` for PrototypeLoop, preserving existing scene references and tuning.
 - Added the Combat Effects Preview editor window.
-- Added explicit F interactions for initial equipment and item pickups, with contextual prompts and one-item-per-press selection shared with bonfire controls; thrown hatchets retain automatic walk-over retrieval for combat.
-- Simplified detached hatchet presentation to one larger sprite with faster spin, a short trail and consistent grounded placement; modestly increased Tutorial throw speed and reach.
+- Added explicit F interactions for initial equipment and item pickups, with contextual prompts and one-item-per-press selection shared with bonfire controls; thrown axes retain automatic walk-over retrieval for combat.
+- Simplified detached axe presentation to one larger sprite with faster spin, a short trail and consistent grounded placement; modestly increased Tutorial throw speed and reach.
 - Established the Tutorial enemy, unique Sun Shard reward and bonfire/checkpoint setup using existing prefabs, with separate Tutorial saves and a compact HUD.
 - Renamed the game to **Road of the Old King**, including Unity product settings, web presentation, editor menus and project folder paths.
 - Completed four-direction catch coverage, finishing the current player animation set. Accepted the artwork for now and moved future animation work into a ranked backlog so development can focus on Tutorial gameplay.
@@ -27,12 +29,12 @@
 ## 26SEP2026 - Directional movement and combat
 
 - Completed four-direction sprint, dash, opening swings and stationary throws, with armed/empty-hand presentation and movement-driven foot timing.
-- Established consistent character proportions, muted colors, patterned cap trim, simple hands and hatchet geometry to preserve the original sprite's old-school feel.
+- Established consistent character proportions, muted colors, patterned cap trim, simple hands and axe geometry to preserve the original sprite's old-school feel.
 - Kept moving aim functional with existing walking art; dedicated aim-walk and moving-catch artwork remain future work.
 
-## 25SEP2026 - Player and hatchet integration
+## 25SEP2026 - Player and axe integration
 
-- Integrated the animated Tutorial player, directional locomotion, idle breathing, follow/zoom camera and stump hatchet pickup/carrying; refined weapon scale and clarity.
+- Integrated the animated Tutorial player, directional locomotion, idle breathing, follow/zoom camera and stump axe pickup/carrying; refined weapon scale and clarity.
 - Added the initial combo presentation and practice-target recoil, wood chips and impact audio. Retired the rejected articulated rig and selected authored full-body sprites for the replacement.
 - Implemented tap E to quick throw, hold E to aim and release, moving aim, a collision-aware guide and shared release timing. Gameplay now owns movement limits, once-per-throw stamina cost and interruption/Recall handling.
 - Completed the east/north sprite proof: 36 matched forehand/throw/catch body cels and eight fast axe-spin cels. Matched pickup/carry and north combo axe views to the drawn weapon, corrected catch scale and perspective.
@@ -68,7 +70,7 @@
 
 ## 21SEP2026 - Combat and prototype loop
 
-- Added hatchet pickup, mouse aiming, a buffered three-hit combo, charged cleave, throwing, retrieval and Recall.
+- Added axe pickup, mouse aiming, a buffered three-hit combo, charged cleave, throwing, retrieval and Recall.
 - Added practice targets, shields, breakable bushes and cracked stone, plus a telegraphed melee enemy.
 - Added player health, damage immunity, knockback, defeat and restart handling.
 - Built the guided prototype route, Recall puzzle, bonfires, checkpoint saves and travel between discovered fires.

@@ -33,10 +33,10 @@ namespace TheLostShrine.Prototype
             {
                 switch (Step)
                 {
-                    case PrototypeStep.Pickup: return "Approach the hatchet and press F to pick it up.";
+                    case PrototypeStep.Pickup: return "Approach the axe and press F to pick it up.";
                     case PrototypeStep.Chop: return "Aim at a plain dummy and left-click to slash. Attacks use stamina; walk to recover.";
                     case PrototypeStep.Throw: return "Tap E to quick throw, or hold E to aim and release. Move while aiming; RMB cancels.";
-                    case PrototypeStep.Retrieve: return "Walk over to retrieve your thrown hatchet. Recall comes later.";
+                    case PrototypeStep.Retrieve: return "Walk over to retrieve your thrown axe. Recall comes later.";
                     case PrototypeStep.Bushes: return "The east gate is open. Chop both bushes along the path.";
                     case PrototypeStep.Stone: return "Hold right-click until gold, then release beside the cracked stone.";
                     case PrototypeStep.UnlockRecall: return "Continue east to the Recall altar and press F.";
@@ -48,7 +48,7 @@ namespace TheLostShrine.Prototype
                         : "Stand on the gold floor mark. Hold E, aim at the gold target to the right, then release.";
                     case PrototypeStep.ExitBonfire: return "Puzzle solved: one Sun Shard earned. Explore the side path beyond the door, then F at the second fire to upgrade.";
                     default: return CheckpointSession.Instance != null && CheckpointSession.Instance.Upgrades.NextTier != null
-                        ? "Find all 3 Sun Shards: sentinel, puzzle, and the side path beyond the door. Spend them at the second fire for one hatchet upgrade."
+                        ? "Find all 3 Sun Shards: sentinel, puzzle, and the side path beyond the door. Spend them at the second fire for one axe upgrade."
                         : "Upgrade chosen. Travel back to try it on the dummies or sentinel. Resting never replenishes Sun Shards.";
                 }
             }
@@ -73,7 +73,7 @@ namespace TheLostShrine.Prototype
                 return;
             if (Step == PrototypeStep.Pickup && player.Weapon != null)
                 Step = PrototypeStep.Chop;
-            else if (Step == PrototypeStep.Retrieve && player.Weapon != null && player.Weapon.State == HatchetState.Held)
+            else if (Step == PrototypeStep.Retrieve && player.Weapon != null && player.Weapon.State == AxeState.Held)
                 Step = PrototypeStep.Bushes;
             else if (Step == PrototypeStep.Bushes && System.Array.TrueForAll(bushes, b => b != null && b.IsBroken))
                 Step = PrototypeStep.Stone;

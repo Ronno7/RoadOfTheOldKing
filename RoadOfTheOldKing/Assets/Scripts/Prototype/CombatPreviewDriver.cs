@@ -14,7 +14,7 @@ namespace TheLostShrine.Editor
     {
         public enum Action { Chop, Combo, Cleave, ThrowRecall }
         public PlayerCombatController Player;
-        public HatchetWeapon Weapon;
+        public AxeWeapon Weapon;
         public Camera Camera;
         public PracticeTarget Target;
         public GameObject Wall;
@@ -88,9 +88,9 @@ namespace TheLostShrine.Editor
                 case Action.Chop:
                 case Action.Combo:
                     int count = runningAction == Action.Combo ? 3 : 1;
-                    if (Weapon.State == HatchetState.Held && stage < count)
+                    if (Weapon.State == AxeState.Held && stage < count)
                     { frame.LightPressed = true; stage++; }
-                    else if (stage == count && Weapon.State == HatchetState.Held) Finish();
+                    else if (stage == count && Weapon.State == AxeState.Held) Finish();
                     break;
                 case Action.Cleave:
                     if (stage == 0) { frame.ChargePressed = frame.ChargeHeld = true; stage = 1; }

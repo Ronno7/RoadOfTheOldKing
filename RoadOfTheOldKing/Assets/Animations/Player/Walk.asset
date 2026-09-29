@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1fd1d18a98bcd30469bcfd0f78adfbfa, type: 3}
   m_Name: Walk
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.DirectionalSpriteAnimation
-  source: 'PixelLab state ''Idle'' (cloaked, no arms): Walking, 8 frames'
+  source: 'PixelLab state ''Idle'': Walking, 8 frames (NE/NW regenerated 28 Sep)'
   framesPerSecond: 10
   loop: 1
   contactFrame: -1
@@ -26,6 +26,7 @@ MonoBehaviour:
     - {fileID: 21300000, guid: eecbb2942595b86438ec3912c656b673, type: 3}
     - {fileID: 21300000, guid: 3f8c82ae18bdabc48ad0fe531379afe3, type: 3}
     - {fileID: 21300000, guid: c605edde48a9b164cba5c80fab102deb, type: 3}
+    heights: 1b0000001b0000001a0000001b0000001b0000001a0000001a0000001b000000
   - sprites:
     - {fileID: 21300000, guid: 17bbbf1a5b96748489c07f1820b15814, type: 3}
     - {fileID: 21300000, guid: 681285ec706fc9a43b81a9507999d8e7, type: 3}
@@ -35,6 +36,7 @@ MonoBehaviour:
     - {fileID: 21300000, guid: c7646d0c9c0121e459b29fb643d92015, type: 3}
     - {fileID: 21300000, guid: 7020ce4640d47574796fc36e5bdc0ea0, type: 3}
     - {fileID: 21300000, guid: 2002a1f9683208541879d3946a5586cf, type: 3}
+    heights: 1b0000001b0000001b0000001b0000001b0000001b0000001b0000001b000000
   - sprites:
     - {fileID: 21300000, guid: 75c1808bf47914a4692c7d69da045d4f, type: 3}
     - {fileID: 21300000, guid: 7e8fa5dbe89cdc540bc1902f346a3be4, type: 3}
@@ -44,6 +46,7 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 241ec83935a79914aade0f0d01dfcf9c, type: 3}
     - {fileID: 21300000, guid: fc128aca824552a4491aaf1690e7a557, type: 3}
     - {fileID: 21300000, guid: ba3bca90e0ef21b438dcf401f0e15f70, type: 3}
+    heights: 1c0000001c0000001c0000001c0000001c0000001c0000001c0000001c000000
   - sprites:
     - {fileID: 21300000, guid: 0dbefeac36ed04449a4d0ca9f25f3b25, type: 3}
     - {fileID: 21300000, guid: 55ac22808fb196d449f6bae5bf590272, type: 3}
@@ -53,6 +56,7 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 6eb8d8313bff29d4a81c99b74828fc58, type: 3}
     - {fileID: 21300000, guid: a6097668565fe434589a47ba1c9c2878, type: 3}
     - {fileID: 21300000, guid: 0931566e8317f534492269bb291fea23, type: 3}
+    heights: 1b0000001b0000001b0000001b0000001b0000001b0000001b0000001b000000
   - sprites:
     - {fileID: 21300000, guid: dd04627222ffde54db2f2a5cbfcdfe2f, type: 3}
     - {fileID: 21300000, guid: b04d9ffe8e569e3419710d3b1e0c57d6, type: 3}
@@ -62,6 +66,7 @@ MonoBehaviour:
     - {fileID: 21300000, guid: d8bf1b528a501694fbdd2e9d6179f0ed, type: 3}
     - {fileID: 21300000, guid: c119f06e466234e438ebee98c9466c75, type: 3}
     - {fileID: 21300000, guid: 2b206e1e3d300d140aca31d9ac09f8da, type: 3}
+    heights: 1b0000001b0000001a0000001b0000001b0000001a0000001a0000001b000000
   - sprites:
     - {fileID: 21300000, guid: eb8aa872879fc2946aad7dc7b574af7f, type: 3}
     - {fileID: 21300000, guid: fab5540b6e82b614a904b7dcdbdc152b, type: 3}
@@ -71,6 +76,7 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 0dbc0b90675cc304b88fff9162bb7c12, type: 3}
     - {fileID: 21300000, guid: 2d1a1f95d873075458b800a9bbe8b068, type: 3}
     - {fileID: 21300000, guid: 8abd79fb6141dd64b9e85594c3da43ec, type: 3}
+    heights: 1c0000001b0000001b0000001c0000001c0000001c0000001b0000001b000000
   - sprites:
     - {fileID: 21300000, guid: 1f18512657786b94e8e29c6b0a1e54c5, type: 3}
     - {fileID: 21300000, guid: 1e282ef9040c60144af4ee463a1068a3, type: 3}
@@ -80,6 +86,7 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 522ac21275f119c439ff2dadd5a46699, type: 3}
     - {fileID: 21300000, guid: f8e281fd044cb8b43b546cd8884ce63a, type: 3}
     - {fileID: 21300000, guid: fc0c640a56622c245bc42be7ab89894c, type: 3}
+    heights: 1b0000001c0000001c0000001b0000001b0000001c0000001c0000001b000000
   - sprites:
     - {fileID: 21300000, guid: 4e4bd621ab419a44cb6ea2f41eb3cd02, type: 3}
     - {fileID: 21300000, guid: ee6c9650920f5284f8fca0f19791945d, type: 3}
@@ -89,3 +96,4 @@ MonoBehaviour:
     - {fileID: 21300000, guid: 4aaa2cf7f0130e94780b2443428b687f, type: 3}
     - {fileID: 21300000, guid: 6d8175be371939347af5d6182e036f69, type: 3}
     - {fileID: 21300000, guid: 0f4f1d24c1bc662479ddc2f8ce8a422b, type: 3}
+    heights: 1c0000001b0000001b0000001c0000001c0000001c0000001b0000001b000000

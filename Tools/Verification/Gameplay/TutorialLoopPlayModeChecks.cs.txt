@@ -42,8 +42,8 @@ if (phase == 0) {
     check(!session.HasCheckpoint && session.Progress.sunShards == 0 && !reward.IsAvailable, "Fresh run has no checkpoint or reward");
     check(Vector2.Distance(player.transform.position, new Vector2(15, 13)) < .1f && !combat.CanRecall, "Home start; Recall locked");
     check(!session.Rest(fire) && !reward.TryCollect(player), "Remote rest and locked pickup rejected");
-    var weapon = UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Weapons.HatchetWeapon>();
-    check(combat.TryEquip(weapon), "Existing hatchet equips");
+    var weapon = UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Weapons.AxeWeapon>();
+    check(combat.TryEquip(weapon), "Existing axe equips");
     enemyHealth.ReceiveHit(killingHit);
     check(reward.IsAvailable && !reward.IsCollected && session.Progress.sunShards == 0, "Defeat unlocks a physical shard");
     check(store.Load().Has("shard/available/tutorial/first-enemy"), "Uncollected drop saved before first rest");
@@ -51,7 +51,7 @@ if (phase == 0) {
     die();
 } else if (phase == 1) {
     check(player.IsAlive && !session.HasCheckpoint && Vector2.Distance(player.transform.position, new Vector2(15,13)) < .1f, "Death before rest returns home");
-    check(combat.Weapon != null && !combat.CanRecall, "Hatchet ownership restored without unlocking Recall");
+    check(combat.Weapon != null && !combat.CanRecall, "Axe ownership restored without unlocking Recall");
     check(reward.IsAvailable && !reward.IsCollected && enemyHealth.IsAlive, "Uncollected shard survives reload and enemy respawn");
     move(reward.transform.position);
     check(reward.TryCollect(player) && session.Progress.sunShards == 1, "Pickup credits exactly one shard");

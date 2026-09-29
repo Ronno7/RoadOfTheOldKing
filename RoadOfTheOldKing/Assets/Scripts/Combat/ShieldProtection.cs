@@ -41,7 +41,7 @@ namespace TheLostShrine.Combat
             if (hit.Kind != AttackKind.Recall || !hit.ImpactPoint.HasValue)
                 return false;
 
-            // Use where the hatchet actually contacts us, not its owner's position.
+            // Use where the axe actually contacts us, not its owner's position.
             Vector2 toImpact = hit.ImpactPoint.Value - (Vector2)transform.position;
             if (toImpact.sqrMagnitude <= 0.000001f)
                 return false;
