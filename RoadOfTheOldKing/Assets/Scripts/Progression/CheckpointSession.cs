@@ -29,6 +29,10 @@ namespace TheLostShrine.Progression
         public string Status { get; private set; } = "";
         public Bonfire[] Fires { get; private set; } = Array.Empty<Bonfire>();
         public WeaponUpgradeProgression Upgrades => upgrades ?? (upgrades = new WeaponUpgradeProgression(Progress, upgradeTiers));
+        // Presentation hooks, raised only after the progress change succeeded.
+        public event Action<int> ShardCollected;                 // new balance
+        public event Action<int, bool> HeartFragmentCollected;   // total fragments, completed a heart
+        public event Action<Bonfire> Rested;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatic() => Instance = null;
@@ -112,6 +116,7 @@ namespace TheLostShrine.Progression
             Capture();
             RestoreCombatArea();
             Save("Rested at " + fire.DisplayName + ". HP and stamina restored; enemies reset; progress saved.");
+            Rested?.Invoke(fire);
             return true;
         }
 
@@ -170,6 +175,7 @@ namespace TheLostShrine.Progression
             Progress.sunShards++;
             Capture();
             Save("Sun Shard collected. " + Progress.sunShards + " available.");
+            ShardCollected?.Invoke(Progress.sunShards);
             return true;
         }
 
@@ -195,6 +201,7 @@ namespace TheLostShrine.Progression
             Save(count % HeartFragmentProgression.FragmentsPerHeart == 0
                 ? "Heart complete! Maximum HP +20."
                 : "Heart fragment collected: " + count % HeartFragmentProgression.FragmentsPerHeart + " / 3.");
+            HeartFragmentCollected?.Invoke(count, count % HeartFragmentProgression.FragmentsPerHeart == 0);
             return true;
         }
 

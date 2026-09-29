@@ -27,6 +27,8 @@ GameObject:
   - component: {fileID: 3353789876922468842}
   - component: {fileID: 1582186952523396501}
   - component: {fileID: 9180351796924429262}
+  - component: {fileID: 8033240405425768703}
+  - component: {fileID: 5021361952452321745}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -153,6 +155,14 @@ MonoBehaviour:
   minimumSprintStamina: 18
   initialFacing: {x: 0, y: -1}
   inputSource: {fileID: 1005}
+  useMomentum: 1
+  acceleration: 40
+  deceleration: 15
+  turnAcceleration: 45
+  wallBounce: 0.45
+  bounceMinSpeed: 5
+  bounceRecovery: 0.15
+  bounceCooldown: 0.35
 --- !u!114 &9215421230755382488
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -301,8 +311,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerSpriteAnimator
   body: {fileID: 1009}
   animations: {fileID: 11400000, guid: 1ec4469e34c15a04fbd61c720b2d4940, type: 2}
-  walkCycleLength: 1.8
-  runCycleLength: 4
+  walkCycleLength: 2
+  runCycleLength: 3
   diagonalReleaseGrace: 0.1
 --- !u!114 &518245939509802014
 MonoBehaviour:
@@ -389,6 +399,48 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d504a6ce1ec4744fa55ad446f758603, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.UI.PauseMenuController
+--- !u!114 &8033240405425768703
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2aa7a6b12df333d48aad5bbf5af71772, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerSprintDust
+  body: {fileID: 1009}
+  colors:
+  - {r: 0.8745098, g: 0.7607843, b: 0.5686275, a: 1}
+  - {r: 0.94509804, g: 0.87058824, b: 0.6901961, a: 1}
+  footOffset: {x: 0, y: 0.06}
+  trailStart: 0.7
+  trailStride: {x: 1.5, y: 0.6}
+  trailLifetime: {x: 0.28, y: 0.42}
+  skidThreshold: 10
+  skidMinSpeed: 0.6
+  skidBurst: {x: 2, y: 12}
+  skidSprayPerSpeed: 1.2
+  cloudLifetime: {x: 0.4, y: 0.65}
+--- !u!114 &5021361952452321745
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4dde2f1ab77bb5449cdeebb72c42ce8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.UI.GameHud
+  layout: {fileID: 9197481963319205126, guid: b3a1d266480df244f82049975a84cfc6, type: 3}
+  panelSettings: {fileID: 11400000, guid: 23023f83a02a11e498eeeed8417348a0, type: 2}
+  vitalsHold: 3
+  promptHeight: 1.25
+  chargeOffset: -0.35
 --- !u!1 &1007
 GameObject:
   m_ObjectHideFlags: 0

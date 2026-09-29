@@ -4,7 +4,7 @@
 
 Road of the Old King separates input, gameplay state, presentation and persistence into focused components. The systems below describe the working PrototypeLoop mechanics unless stated otherwise.
 
-**Current scope:** PrototypeLoop remains the default build scene; Tutorial is also enabled for scene reloads. Tutorial includes the animated player, camera, axe pickup, practice dummy and the first enemy/shard/bonfire setup. Its teaching sequence, Recall awakening and overworld transition remain in development. The published browser build predates the newer Tutorial presentation.
+**Current scope:** PrototypeLoop remains the default build scene; Tutorial is also enabled for scene reloads. Tutorial includes the animated player, camera, axe pickup, a throw-and-retrieve lesson at the practice stands, practice dummy, the Recall awakening (a thrown hit on the ancient sun-wheel stone unlocks Recall) and the first enemy/shard/bonfire setup. A step-based Tutorial guide teaches the route one hint at a time, completing each step from real outcomes (movement, pickup, throw/retrieve, dummy hits, dodge, awakening, a Recall drill, the first shard, resting) and saving progress. A contextual HUD shows health and stamina when relevant, interaction prompts beside objects, a weapon-away indicator, reward receipts and a Tab status panel. The overworld transition remains in development; the Tutorial currently ends at the exit trail. The published browser build predates the newer Tutorial presentation.
 
 **Player animation:** the hero is drawn in eight directions at the world's 16 pixels per unit. `PlayerSpriteAnimator` samples gameplay state (travel distance, weapon action clocks, dash progress, stagger, health) and falls back to the directional standing views wherever an animation has not been supplied yet. Gameplay never waits on animation. See [player animation](PlayerAnimation.md) for the state slots, import pipeline and playback rules.
 
@@ -16,7 +16,7 @@ Road of the Old King separates input, gameplay state, presentation and persisten
 
    All gameplay and movement-test scenes use the same finished `Assets/Prefabs/Player/Player.prefab`, including its artwork, animation and gameplay components. Movement and facing support eight directions, while weapon aim follows the mouse. `PlayerAimIndicator` draws a small outlined ivory chevron around the sprite using continuous cursor aim. It previews input aim even before equipping the axe; committed attacks retain their existing direction. It hides while controls are blocked. Center, radius, size and color are configured on the player prefab. Controls are keyboard and mouse only. Separating input from movement keeps key bindings out of movement rules.
 
-3. **Camera follow and zoom.** `CameraFollow2D` smoothly follows a target after movement updates. It needs only the target's position, so it can follow objects other than the player. `CameraZoom2D` separately handles smooth scroll-wheel zoom, starting at size 5.5 and staying within 3-8. Smaller orthographic sizes show a closer view. Both components live on the reusable camera prefab.
+3. **Camera follow and zoom.** `CameraFollow2D` smoothly follows a target after movement updates. It needs only the target's position, so it can follow objects other than the player. `CameraZoom2D` separately handles smooth scroll-wheel zoom, starting at size 5.5 and staying within 3-8 (Tutorial allows zooming out to 10). Smaller orthographic sizes show a closer view. Both components live on the reusable `FollowCamera` prefab, which every gameplay scene uses instead of its own camera.
 
    Hold **Left Alt** to look toward the cursor; release to smoothly return. `CameraLookInput` implements `ICameraLookInput`, while `CameraFreelook2D` supplies the offset and radial distance constraint (default three world units/tiles). `CameraFollow2D` remains the sole position writer and clamps the actual smoothed position relative to its normal follow center. Viewport-relative input avoids camera/cursor feedback drift and supports zoom and aspect changes. Focus loss, pause, disabled player controls and respawn clear freelook; held Alt must be released before restarting after interruption. The camera prefab includes these components; older standalone follow cameras compose them at runtime without rewriting scene assets.
 
@@ -133,10 +133,14 @@ Practice runs in a separate editor launch scene without a checkpoint/save sessio
 
 | Responsibility | Source |
 | --- | --- |
-| Movement, sprint and velocity ownership | [PlayerMovement](../RoadOfTheOldKing/Assets/Scripts/Player/PlayerMovement.cs) |
+| Movement, sprint, momentum (eased start/stop, wall rebound) and velocity ownership | [PlayerMovement](../RoadOfTheOldKing/Assets/Scripts/Player/PlayerMovement.cs) |
 | Weapon action state and ownership | [AxeWeapon](../RoadOfTheOldKing/Assets/Scripts/Weapons/AxeWeapon.cs) |
 | Aim, release and throw timing | [ThrowActionClock](../RoadOfTheOldKing/Assets/Scripts/Weapons/ThrowActionClock.cs) |
 | Player sprite presentation | [PlayerSpriteAnimator](../RoadOfTheOldKing/Assets/Scripts/Player/PlayerSpriteAnimator.cs) |
+| Tutorial steps and hints (data-driven, saved as milestones) | [TutorialGuide](../RoadOfTheOldKing/Assets/Scripts/Tutorial/TutorialGuide.cs) |
+| Contextual HUD: vitals, prompts, receipts, hint, status (presentation only) | [GameHud](../RoadOfTheOldKing/Assets/Scripts/UI/GameHud.cs) |
+| Shared in-combat signal for presentation | [EncounterState](../RoadOfTheOldKing/Assets/Scripts/Combat/EncounterState.cs) |
+| Movement dust: speed-scaled trail and inertia skid clouds (presentation only) | [PlayerMovementDust](../RoadOfTheOldKing/Assets/Scripts/Player/PlayerMovementDust.cs) |
 | Checkpoints and persistent progress | [CheckpointSession](../RoadOfTheOldKing/Assets/Scripts/Progression/CheckpointSession.cs) |
 | Upgrade selection and exclusions | [WeaponUpgradeProgression](../RoadOfTheOldKing/Assets/Scripts/Progression/WeaponUpgradeProgression.cs) |
 

@@ -23,7 +23,12 @@ namespace TheLostShrine.World
                 flame.transform.localScale = flameScale * (1f + Mathf.Sin(Time.time * 8f) * 0.06f);
             }
             if (label != null)
-                label.text = fire.DisplayName + (fire.IsDiscovered ? "\nF - REST / TRAVEL" : "\nF - LIGHT & REST");
+            {
+                // Prototype world label; the contextual HUD's interaction prompt replaces it.
+                bool show = TheLostShrine.UI.GameHud.Active == null;
+                if (label.gameObject.activeSelf != show) label.gameObject.SetActive(show);
+                if (show) label.text = fire.DisplayName + (fire.IsDiscovered ? "\nF - REST / TRAVEL" : "\nF - LIGHT & REST");
+            }
         }
     }
 }

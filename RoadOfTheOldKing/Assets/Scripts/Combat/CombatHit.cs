@@ -30,5 +30,7 @@ namespace TheLostShrine.Combat
     }
 
     public interface IHitReceiver { bool ReceiveHit(CombatHit hit); }
+    // Accepted hits only; presentation subscribes without depending on health.
+    public interface IHitEventSource { event System.Action<CombatHit> HitReceived; }
     public interface IHitProtection { bool Blocks(CombatHit hit); }
 }

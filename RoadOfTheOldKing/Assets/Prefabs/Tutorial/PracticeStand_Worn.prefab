@@ -1,0 +1,102 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &2987646451497002428
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2922548180637182769, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      propertyPath: m_Name
+      value: PracticeStand_Worn
+      objectReference: {fileID: 0}
+    - target: {fileID: 3336597564122855636, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3336597564122855636, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3336597564122855636, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3336597564122855636, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3336597564122855636, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3336597564122855636, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3336597564122855636, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3336597564122855636, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3336597564122855636, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3336597564122855636, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2922548180637182769, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5100236857955556969}
+    - targetCorrespondingSourceObject: {fileID: 2922548180637182769, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1193802167485975308}
+  m_SourcePrefab: {fileID: 100100000, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+--- !u!1 &142068482852818573 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2922548180637182769, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+  m_PrefabInstance: {fileID: 2987646451497002428}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5100236857955556969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 142068482852818573}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf9bb092bb163a844b804b67ba562e5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Tutorial.ThrowPracticeStand
+--- !u!114 &1193802167485975308
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 142068482852818573}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e04ca334d9a4a1640a570caed47d9394, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.WoodTargetFeedback
+  visual: {fileID: 9150278954670758501}
+  chipSprite: {fileID: 21300000, guid: ab6058c4ddee5c148cd9d34a78a0a92e, type: 3}
+  impactSound: {fileID: 8300000, guid: 24ee50dcbf8b16e4badd6370399811d1, type: 3}
+--- !u!4 &9150278954670758501 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6307874727680376793, guid: 389fa61e01c658c4986c9bcf1125a471, type: 3}
+  m_PrefabInstance: {fileID: 2987646451497002428}
+  m_PrefabAsset: {fileID: 0}

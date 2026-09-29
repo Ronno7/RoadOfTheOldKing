@@ -4,7 +4,7 @@ using UnityEngine;
 namespace TheLostShrine.Combat
 {
     [DisallowMultipleComponent]
-    public sealed class Damageable : MonoBehaviour, IHitReceiver
+    public sealed class Damageable : MonoBehaviour, IHitReceiver, IHitEventSource
     {
         [SerializeField, Min(1)] private int maxHealth = 100;
         [SerializeField] private MonoBehaviour protectionSource;

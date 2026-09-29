@@ -1,19 +1,31 @@
+using System;
 using TheLostShrine.Combat;
 using UnityEngine;
 
 namespace TheLostShrine.World
 {
     // Any weapon using IHitReceiver can drive this adapter without knowing door logic.
-    public sealed class AxePuzzleTarget : MonoBehaviour, IHitReceiver
+    // Accepted hits are also published (IHitEventSource) so presentation such as WoodTargetFeedback
+    // can react. Indicator and label are optional prototype placeholders.
+    public sealed class AxePuzzleTarget : MonoBehaviour, IHitReceiver, IHitEventSource
     {
         [SerializeField] private ThrowRecallPuzzle puzzle;
         [SerializeField] private bool anchor;
         [SerializeField] private SpriteRenderer indicator;
         [SerializeField] private TextMesh label;
-        public bool ReceiveHit(CombatHit hit) => puzzle != null && puzzle.ReceiveTargetHit(anchor, hit);
+        public event Action<CombatHit> HitReceived;
+        public bool IsAnchor => anchor;
+
+        public bool ReceiveHit(CombatHit hit)
+        {
+            if (puzzle == null || !puzzle.ReceiveTargetHit(anchor, hit)) return false;
+            HitReceived?.Invoke(hit);
+            return true;
+        }
+
         private void LateUpdate()
         {
-            if (puzzle == null)
+            if (puzzle == null || (indicator == null && label == null))
                 return;
             bool active = puzzle.IsSolved || (anchor && puzzle.IsArmed);
             if (indicator != null)

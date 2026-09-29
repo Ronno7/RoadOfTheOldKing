@@ -2,12 +2,14 @@ using UnityEngine;
 
 namespace TheLostShrine.Combat
 {
-    [DisallowMultipleComponent, RequireComponent(typeof(Damageable))]
+    // Reacts to any IHitEventSource: a Damageable dummy or an indestructible practice stand.
+    [DisallowMultipleComponent]
     public sealed class WoodTargetFeedback : MonoBehaviour
     {
         [SerializeField] private Transform visual;
         [SerializeField] private Sprite chipSprite;
         [SerializeField] private AudioClip impactSound;
+        private IHitEventSource hits;
         private Damageable health;
         private AudioSource audioSource;
         private SpriteRenderer[] chips;
@@ -23,7 +25,9 @@ namespace TheLostShrine.Combat
 
         private void Awake()
         {
+            hits = GetComponent<IHitEventSource>();
             health = GetComponent<Damageable>();
+            if (hits == null) Debug.LogError("WoodTargetFeedback needs an IHitEventSource.", this);
             restPosition = visual.localPosition;
             restRotation = visual.localRotation;
             audioSource = gameObject.AddComponent<AudioSource>();
@@ -47,10 +51,10 @@ namespace TheLostShrine.Combat
             }
         }
 
-        private void OnEnable() => health.HitReceived += OnHit;
+        private void OnEnable() { if (hits != null) hits.HitReceived += OnHit; }
         private void OnDisable()
         {
-            health.HitReceived -= OnHit;
+            if (hits != null) hits.HitReceived -= OnHit;
             if (visual != null)
             {
                 visual.localPosition = restPosition;
@@ -88,7 +92,7 @@ namespace TheLostShrine.Combat
         private void Tick(float deltaTime)
         {
             age += deltaTime;
-            targetSprite.color = health.IsAlive ? restColor : restColor * new Color(.55f, .55f, .55f, .6f);
+            targetSprite.color = health == null || health.IsAlive ? restColor : restColor * new Color(.55f, .55f, .55f, .6f);
             // Briefly hold compression, then settle around the unchanged collision footprint.
             float t = Mathf.Max(0f, age - 0.045f);
             float recoil = age < 0.045f ? 1f : Mathf.Cos(t * 25f) * Mathf.Exp(-t * 18f);

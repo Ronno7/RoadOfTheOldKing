@@ -1,5 +1,14 @@
 # Changelog
 
+## 29SEP2026 - Tutorial guide, Recall awakening and movement feel
+
+- Added a step-by-step Tutorial guide with one contextual hint at a time, saved progress and lessons completed from real actions: throwing at targets, dummy strikes, dodging, a Recall drill, the first shard, resting and the exit trail.
+- Added a contextual HUD: health and stamina shown when relevant, interaction prompts beside objects, a weapon-away indicator, reward receipts and a Tab status panel.
+- The ancient sun-wheel stone now awakens Recall when struck by a thrown axe, with new pixel art.
+- Movement now glides and rebounds lightly off walls, with speed-scaled dust trails and skid clouds.
+- Route-side trees now block the player and layer correctly; the Tutorial uses the shared follow camera and a tidier hierarchy.
+- Added an F3 developer stats panel in the Editor and development builds.
+
 ## 28SEP2026 - New hero and combat feel
 
 - Replaced the hero with eight-direction PixelLab artwork, animated walking, running and dashing, and a bronze halberd carried at his side.

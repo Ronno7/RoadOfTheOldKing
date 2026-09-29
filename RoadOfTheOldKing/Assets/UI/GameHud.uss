@@ -1,0 +1,57 @@
+/* Placeholder HUD in the pause menu's palette: charcoal panels, warm ivory text, gold accents,
+   restrained red health, muted green stamina. Pixel-art assets replace these blocks later. */
+#hud-root {
+    position: absolute; left: 0; right: 0; top: 0; bottom: 0;
+    color: rgb(242, 229, 193);
+}
+.panel {
+    background-color: rgba(28, 31, 27, 0.88);
+    border-width: 2px; border-color: rgb(82, 83, 65); border-radius: 0;
+}
+.chip { flex-direction: row; align-items: center; padding: 3px 8px; }
+.world { position: absolute; }
+
+/* Vitals and weapon-away, upper left */
+#top-left { position: absolute; left: 10px; top: 10px; flex-direction: row; align-items: flex-start; }
+#vitals { padding: 6px 8px; }
+.meter-row { flex-direction: row; align-items: center; margin-bottom: 3px; }
+.meter-icon { width: 8px; height: 8px; margin-right: 6px; border-width: 1px; border-color: rgb(20, 20, 18); }
+.health-icon { background-color: rgb(178, 72, 64); }
+.stamina-icon { background-color: rgb(118, 160, 112); }
+.bar { width: 132px; height: 10px; background-color: rgb(52, 50, 45); border-width: 1px; border-color: rgb(20, 20, 18); }
+.bar.thin { width: 110px; height: 6px; }
+.fill { height: 100%; width: 100%; }
+.health-fill { background-color: rgb(178, 72, 64); border-top-width: 2px; border-top-color: rgb(214, 112, 96); }
+.stamina-fill { background-color: rgb(118, 160, 112); }
+.stamina-fill.low { background-color: rgb(196, 164, 84); }
+#stamina-bar.rejected { border-color: rgb(231, 184, 92); }
+#stamina-warning { font-size: 10px; color: rgb(231, 184, 92); -unity-text-align: middle-left; margin: 0; padding: 0; }
+#weapon-away { margin-left: 8px; }
+.axe-icon { width: 7px; height: 12px; margin-right: 6px; background-color: rgb(186, 140, 72); border-width: 1px; border-color: rgb(20, 20, 18); }
+#weapon-away-text { font-size: 11px; margin: 0; padding: 0; }
+
+/* Interaction prompt and charge bar, anchored to the world by code */
+#prompt-text { font-size: 12px; -unity-font-style: bold; margin: 0; padding: 0; }
+#charge { width: 34px; height: 5px; background-color: rgb(52, 50, 45); border-width: 1px; border-color: rgb(20, 20, 18); }
+#charge-fill { height: 100%; width: 0; background-color: rgb(140, 170, 190); }
+#charge-fill.ready { background-color: rgb(231, 184, 92); }
+
+/* Reward receipts, lower left */
+#receipts { position: absolute; left: 10px; bottom: 12px; flex-direction: column-reverse; align-items: flex-start; }
+.receipt {
+    font-size: 12px; margin-top: 4px; padding: 4px 8px; white-space: normal; max-width: 300px;
+    background-color: rgba(28, 31, 27, 0.88); border-width: 2px; border-color: rgb(82, 83, 65);
+    border-left-color: rgb(231, 184, 92); border-left-width: 3px;
+}
+
+/* One teaching hint, lower centre */
+#hint { position: absolute; bottom: 14px; left: 30%; right: 30%; padding: 6px 12px; border-color: rgb(103, 93, 68); }
+#hint.completed { border-color: rgb(231, 184, 92); }
+#hint-text { font-size: 13px; white-space: normal; -unity-text-align: middle-center; margin: 0; padding: 0; }
+#hint.completed #hint-text { color: rgb(231, 184, 92); }
+
+/* Status, toggled with Tab; readable without stopping play */
+#status { position: absolute; right: 12px; top: 60px; width: 220px; padding: 10px 12px; border-color: rgb(103, 93, 68); }
+#status-heading { font-size: 14px; -unity-font-style: bold; letter-spacing: 2px; margin: 0; padding: 0; }
+.divider { height: 2px; background-color: rgb(176, 144, 81); margin-top: 6px; margin-bottom: 8px; }
+#status-text { font-size: 12px; white-space: normal; margin: 0; padding: 0; }
