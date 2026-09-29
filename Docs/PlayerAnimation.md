@@ -8,7 +8,7 @@ The hero is a small, arm-less wanderer wrapped in a blue hooded cloak, drawn as 
 
 ![Walk cycle, east and south](Art/Player/Hero-Walk.png)
 
-Currently implemented: the standing views and an eight-frame walk in all directions. Further animations are added one slot at a time.
+Currently implemented: the standing views, an eight-frame walk and run, and a four-frame dash in all directions. Light attacks, the finisher, the charged cleave, throw, catch, hurt, death, resting and pickup animations are still to come; until then those states fall back as described below.
 
 ## Presentation
 
@@ -44,10 +44,14 @@ Playback rate, looping and contact frames are edited on the animation asset and 
 
 ## Weapon and hit pause
 
-The hero has no arms, so the weapon is always a separate sprite and never part of the body frames. While held, it is currently placed procedurally along the aim, and swings draw a procedural arc alongside the ground-plane attack footprint. The planned presentation carries it across his back out of combat and brings it to the ready, following the cursor, during combat, with body attack animations supplying the lean behind each swing. Detached flight, landing and Recall are unchanged.
+The hero has no arms, so the weapon, an aged bronze halberd drawn at the same 16 pixels per unit, is always a separate sprite and never part of the body frames. Out of combat, `PlayerWeaponCarry` stands it upright at his right side, butt down, with one hold per facing: a whole-pixel grip offset, mirroring, and whether it draws in front of or behind him. On the camera side it stands a few pixels lower as a depth cue, and a small fold of his cloak (a 5 x 4 pixel sprite in his own palette, mirrored per side) wraps the grip, so a hand hidden inside the cloak appears to hold the haft. In the east view the haft runs in line with his back half; facing west it stands behind him in line with his body, and facing north behind his right side with a strip of handle showing, so he masks most of the haft and the head shows over his shoulder, as if held in front of him. Blades always point away from his face. The importer measures every frame's figure height, so the weapon and fold rise and fall with the walk's bob.
 
-A confirmed light hit pauses only the swing's action clock. The pause belongs to `HatchetWeapon` and is tuned on `HatchetSettings` (`lightHitPause`, `finisherHitPauseMultiplier`); animation frames freeze with it because they sample that clock.
+![Halberd carry in each direction, standing and mid-stride](Art/Player/Hero-Halberd-Carry.png)
+
+During attacks and throws the weapon is still placed procedurally along the aim; a combat presentation that brings it to the ready, following the cursor, is planned. The weapon starts planted upright in the Tutorial's chopping stump. Detached flight, landing and Recall are unchanged.
+
+A confirmed light hit pauses only the swing's action clock. The pause belongs to `AxeWeapon` and is tuned on `AxeSettings` (`lightHitPause`, `finisherHitPauseMultiplier`); animation frames freeze with it because they sample that clock.
 
 ## Previous character art
 
-Until 28 September 2026 the player used a hand-assembled four-direction set at 128 pixels per unit, with separately registered body and hatchet layers. It was retired in favor of the native-density PixelLab hero. A few samples remain for reference: the [original character sheet](Art/Player/Legacy/PlayerSheet.png), [reference board](Art/Player/Legacy/Original-Reference.png), [walk cycle](Art/Player/Legacy/Locomotion.gif) and [combat loop](Art/Player/Legacy/Live-Action-Loop.gif). The complete sources, exporters and captures remain in the repository history.
+Until 28 September 2026 the player used a hand-assembled four-direction set at 128 pixels per unit, with separately registered body and axe layers. It was retired in favor of the native-density PixelLab hero. A few samples remain for reference: the [original character sheet](Art/Player/Legacy/PlayerSheet.png), [reference board](Art/Player/Legacy/Original-Reference.png), [walk cycle](Art/Player/Legacy/Locomotion.gif) and [combat loop](Art/Player/Legacy/Live-Action-Loop.gif). The complete sources, exporters and captures remain in the repository history.

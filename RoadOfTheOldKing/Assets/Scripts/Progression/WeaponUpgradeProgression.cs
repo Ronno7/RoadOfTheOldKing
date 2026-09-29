@@ -15,14 +15,14 @@ namespace TheLostShrine.Progression
     public sealed class WeaponUpgradeProgression
     {
         private readonly ProgressState state;
-        private readonly HatchetUpgradeTier[] tiers;
-        public WeaponUpgradeProgression(ProgressState state, HatchetUpgradeTier[] tiers)
+        private readonly AxeUpgradeTier[] tiers;
+        public WeaponUpgradeProgression(ProgressState state, AxeUpgradeTier[] tiers)
         {
             this.state = state;
-            this.tiers = tiers ?? Array.Empty<HatchetUpgradeTier>();
+            this.tiers = tiers ?? Array.Empty<AxeUpgradeTier>();
         }
 
-        public HatchetUpgradeTier NextTier
+        public AxeUpgradeTier NextTier
         {
             get
             {
@@ -33,7 +33,7 @@ namespace TheLostShrine.Progression
             }
         }
 
-        public bool TryPurchase(HatchetUpgrade choice)
+        public bool TryPurchase(AxeUpgrade choice)
         {
             var tier = NextTier;
             if (tier == null || string.IsNullOrEmpty(tier.id) || tier.shardCost < 1 ||
@@ -45,7 +45,7 @@ namespace TheLostShrine.Progression
             return true;
         }
 
-        public IEnumerable<HatchetUpgrade> Selected
+        public IEnumerable<AxeUpgrade> Selected
         {
             get
             {

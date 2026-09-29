@@ -7,7 +7,8 @@ namespace TheLostShrine.Progression
     public sealed class ProgressState
     {
         public int version = 1;
-        public bool hasHatchet;
+        // Saves written before the axe rename store this as "hasHatchet"; PlayerPrefsProgressStore migrates it.
+        public bool hasAxe;
         public bool recallUnlocked;
         public string checkpointId = "";
         public string scenePath = "";

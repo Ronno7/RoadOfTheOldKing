@@ -16,6 +16,8 @@ namespace TheLostShrine.Player
         public sealed class Frames
         {
             public Sprite[] sprites = Array.Empty<Sprite>();
+            [Tooltip("Opaque height above the ground line per frame, in pixels; measured by the importer.")]
+            public int[] heights = Array.Empty<int>();
         }
 
         [Tooltip("PixelLab template or custom action this was generated from, for reference.")]
@@ -104,11 +106,25 @@ namespace TheLostShrine.Player
             return Frame(octant, frame);
         }
 
-        public void SetFrames(int octant, Sprite[] sprites)
+        // Figure height above the ground line in pixels, or -1 when it was not measured.
+        public int Height(int octant, int frame)
+        {
+            octant = ResolveOctant(octant);
+            if (octant < 0)
+                return -1;
+            var set = directions[octant];
+            int count = set.sprites.Length;
+            if (set.heights == null || set.heights.Length != count)
+                return -1;
+            return set.heights[loop ? (frame % count + count) % count : Mathf.Clamp(frame, 0, count - 1)];
+        }
+
+        public void SetFrames(int octant, Sprite[] sprites, int[] heights = null)
         {
             if (directions == null || directions.Length != DirectionCount)
                 directions = NewDirections();
             directions[octant].sprites = sprites ?? Array.Empty<Sprite>();
+            directions[octant].heights = heights ?? Array.Empty<int>();
         }
 
         private bool Has(int octant) => directions != null && directions.Length == DirectionCount &&

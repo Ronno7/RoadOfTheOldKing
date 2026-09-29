@@ -9,7 +9,7 @@ var player=GameObject.Find("Player").GetComponent<TheLostShrine.Player.PlayerCom
 var health=player.GetComponent<TheLostShrine.Player.PlayerHealth>();var body=player.GetComponent<Rigidbody2D>();
 var stamina=player.GetComponent<TheLostShrine.Player.PlayerStamina>();
 var interaction=player.GetComponent<TheLostShrine.Player.PlayerBonfireInteraction>();
-var weapon=UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Weapons.HatchetWeapon>();
+var weapon=UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Weapons.AxeWeapon>();
 var enemy=UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Combat.SimpleMeleeEnemy>();
 var enemyHealth=enemy.GetComponent<TheLostShrine.Combat.Damageable>();
 var puzzle=UnityEngine.Object.FindFirstObjectByType<TheLostShrine.World.ThrowRecallPuzzle>();
@@ -62,7 +62,7 @@ check(ground.HasTile(new Vector3Int(18,20,0))&&!water.HasTile(new Vector3Int(18,
 move(exploration.transform.position);check(exploration.TryCollect(health)&&session.Progress.sunShards==3,"Optional detour supplies the third shard");
 move(camp.SpawnPosition);session.Rest(camp);check(session.Progress.sunShards==3&&combatReward.IsCollected&&exploration.IsCollected,"Rest keeps all shards collected");
 move(exit.SpawnPosition);interaction.Open(exit);
-var foreign=ScriptableObject.CreateInstance<TheLostShrine.Weapons.HatchetUpgrade>();foreign.id="foreign";
+var foreign=ScriptableObject.CreateInstance<TheLostShrine.Weapons.AxeUpgrade>();foreign.id="foreign";
 check(!session.TryPurchaseUpgrade(exit,foreign)&&session.Progress.sunShards==3,"Upgrade outside the offered tier cannot be purchased");UnityEngine.Object.DestroyImmediate(foreign);
 check(session.TryPurchaseUpgrade(exit,tier.choices[0]),"Three shards purchase Quick Hands at the open second bonfire");
 check(session.Progress.sunShards==0&&session.Progress.upgrades.Count==1&&session.Upgrades.NextTier==null,"Purchase spends exactly three and permanently completes this tier");
@@ -72,10 +72,10 @@ var saved=store.Load();check(saved.sunShards==0&&saved.upgrades.Count==1&&saved.
 weapon.ApplyUpgrades(session.Upgrades.Selected);weapon.ApplyUpgrades(session.Upgrades.Selected);
 check(Mathf.Abs(weapon.LightDuration-.2f/1.2f)<.0001f,"Reapplying saved upgrades does not stack the same bonus twice");
 interaction.Close();move(new Vector2(100,100));weapon.CancelAction();stamina.Restore();
-weapon.TryLightChop(Vector2.right);tick(.18f);check(weapon.State==TheLostShrine.Weapons.HatchetState.Held&&Mathf.Abs(stamina.Current-82)<.001f,"Faster light slash finishes earlier and still costs 18 stamina");
+weapon.TryLightChop(Vector2.right);tick(.18f);check(weapon.State==TheLostShrine.Weapons.AxeState.Held&&Mathf.Abs(stamina.Current-82)<.001f,"Faster light slash finishes earlier and still costs 18 stamina");
 // Verify both geometry upgrades against real physics targets, and base settings remain unchanged.
 dummy=new GameObject("Upgrade geometry target");dummy.AddComponent<CircleCollider2D>().radius=.05f;var target=dummy.AddComponent<TheLostShrine.Combat.Damageable>();
-System.Action<TheLostShrine.Weapons.HatchetUpgrade> equip=u=>{weapon.CancelAction();stamina.Restore();weapon.ApplyUpgrades(u==null?new TheLostShrine.Weapons.HatchetUpgrade[0]:new[]{u});target.RestoreHealth();};
+System.Action<TheLostShrine.Weapons.AxeUpgrade> equip=u=>{weapon.CancelAction();stamina.Restore();weapon.ApplyUpgrades(u==null?new TheLostShrine.Weapons.AxeUpgrade[0]:new[]{u});target.RestoreHealth();};
 dummy.transform.position=player.transform.position+new Vector3(Mathf.Cos(68*Mathf.Deg2Rad),Mathf.Sin(68*Mathf.Deg2Rad),0);Physics2D.SyncTransforms();
 equip(null);weapon.TryLightChop(Vector2.right);tick(.3f);check(target.Health==100,"Base slash misses a target outside its 110-degree arc");
 equip(tier.choices[1]);weapon.TryLightChop(Vector2.right);tick(.3f);check(target.Health==90&&weapon.LightArc==150f,"Sweeping Edge hits the same target inside its 150-degree arc for normal damage");
@@ -87,14 +87,14 @@ check(target.Health==70&&Mathf.Abs(weapon.CleaveRadius-2.6f)<.001f&&Mathf.Abs(st
 check(weapon.Settings.lightDuration==.2f&&weapon.Settings.lightArc==110f&&weapon.Settings.cleaveRadius==2.1f,"Shared base settings remain unchanged by all upgrades");
 weapon.ApplyUpgrades(session.Upgrades.Selected);
 // Data-driven next tiers keep earlier selections and reject replaying old choices.
-var next=ScriptableObject.CreateInstance<TheLostShrine.Weapons.HatchetUpgradeTier>();next.id="verification/tier-2";next.shardCost=4;next.choices=new[]{tier.choices[1]};
+var next=ScriptableObject.CreateInstance<TheLostShrine.Weapons.AxeUpgradeTier>();next.id="verification/tier-2";next.shardCost=4;next.choices=new[]{tier.choices[1]};
 var copy=JsonUtility.FromJson<TheLostShrine.Progression.ProgressState>(JsonUtility.ToJson(session.Progress));copy.sunShards=4;
 var progression=new TheLostShrine.Progression.WeaponUpgradeProgression(copy,new[]{tier,next});
 check(progression.NextTier==next&&!progression.TryPurchase(tier.choices[0]),"Later tiers are reached sequentially and reject prior-tier choices");
 check(progression.TryPurchase(tier.choices[1])&&copy.upgrades.Count==2&&copy.sunShards==0,"A future data asset tier can add another permanent choice at its own cost");
 weapon.ApplyUpgrades(progression.Selected);check(weapon.LightArc==150&&Mathf.Abs(weapon.LightDuration-.2f/1.2f)<.001f,"Different tier effects compound on the same weapon");UnityEngine.Object.DestroyImmediate(next);weapon.ApplyUpgrades(session.Upgrades.Selected);
-string legacy=key+".legacy";PlayerPrefs.SetString(legacy,"{\"version\":1,\"hasHatchet\":true,\"recallUnlocked\":true,\"checkpointId\":\"\",\"scenePath\":\"\",\"discoveredFires\":[],\"completedIds\":[]}");
-var migrated=new TheLostShrine.Progression.PlayerPrefsProgressStore(legacy).Load();check(migrated.hasHatchet&&migrated.sunShards==0&&migrated.upgrades!=null&&migrated.upgrades.Count==0,"Pre-upgrade version-one saves load without losing existing progress");PlayerPrefs.DeleteKey(legacy);
+string legacy=key+".legacy";PlayerPrefs.SetString(legacy,"{\"version\":1,\"hasAxe\":true,\"recallUnlocked\":true,\"checkpointId\":\"\",\"scenePath\":\"\",\"discoveredFires\":[],\"completedIds\":[]}");
+var migrated=new TheLostShrine.Progression.PlayerPrefsProgressStore(legacy).Load();check(migrated.hasAxe&&migrated.sunShards==0&&migrated.upgrades!=null&&migrated.upgrades.Count==0,"Pre-upgrade version-one saves load without losing existing progress");PlayerPrefs.DeleteKey(legacy);
 move(exit.SpawnPosition);interaction.Open(exit);
 check(session.Progress.sunShards==0&&session.Progress.upgrades.Count==1,"Rest retains the purchased upgrade and spent balance");
 }finally{if(dummy!=null)UnityEngine.Object.DestroyImmediate(dummy);Physics2D.simulationMode=oldSimulation;}

@@ -28,7 +28,7 @@ namespace TheLostShrine.Player
         private HitReaction reaction;
         private Damageable health;
         private Rigidbody2D motor;
-        private HatchetWeapon weapon;
+        private AxeWeapon weapon;
         private Vector2 previousPosition;
         private float frameDelta, stateTime, cycle, catchRemaining, heldSince;
         private int heldOctant = 6, previousOctant = 6, restingOctant = 6, catchOctant = 6;
@@ -38,6 +38,20 @@ namespace TheLostShrine.Player
         public int Octant { get; private set; } = 6;
         public int Frame { get; private set; }
         public PlayerAnimationSet Animations => animations;
+
+        // Pixels the shown figure stands above (+) or below (-) its standing view, so carried items
+        // bob with the step. Zero when either height was not measured.
+        public int Lift
+        {
+            get
+            {
+                if (currentClip == null || animations == null || animations.rotations == null) return 0;
+                int now = currentClip.Height(Octant, Frame), rest = animations.rotations.Height(Octant, 0);
+                return now < 0 || rest < 0 ? 0 : Mathf.Clamp(now - rest, -2, 2);
+            }
+        }
+
+        private DirectionalSpriteAnimation currentClip;
 
         private void Awake()
         {
@@ -124,14 +138,14 @@ namespace TheLostShrine.Player
             int octant = DirectionalSpriteAnimation.Octant(combat.ActionFacing);
             switch (weapon.State)
             {
-                case HatchetState.LightChop:
+                case AxeState.LightChop:
                     var attack = weapon.ComboIndex == 0 ? animations.lightAttack1
                         : weapon.ComboIndex == 1 ? animations.lightAttack2 : animations.finisher;
                     return Play(AttackStates[Mathf.Clamp(weapon.ComboIndex, 0, 2)], attack, octant,
                         weapon.AttackProgress, true, weapon.Settings.lightWindupFraction);
-                case HatchetState.Charging:
+                case AxeState.Charging:
                     return PlayTimed("Charge", animations.charge, octant);
-                case HatchetState.Cleaving:
+                case AxeState.Cleaving:
                     return Play("Cleave", animations.cleave, octant, weapon.AttackProgress, true);
             }
             if (!weapon.IsThrowing)
@@ -215,6 +229,7 @@ namespace TheLostShrine.Player
             State = state;
             Octant = octant;
             Frame = frame;
+            currentClip = clip;
             body.sprite = sprite;
             body.flipX = false;
             return true;

@@ -104,7 +104,7 @@ namespace TheLostShrine.Editor
             EditorGUILayout.LabelField("Combat effects", EditorStyles.boldLabel);
             if (!EditorApplication.isPlaying)
             {
-                EditorGUILayout.HelpBox("Launch the save-free practice scene with the standard player, hatchet and dummy. Your open scenes return when Play Mode ends.", MessageType.Info);
+                EditorGUILayout.HelpBox("Launch the save-free practice scene with the standard player, axe and dummy. Your open scenes return when Play Mode ends.", MessageType.Info);
                 using (new EditorGUI.DisabledScope(EditorApplication.isPlayingOrWillChangePlaymode))
                     if (GUILayout.Button("Start practice preview", GUILayout.Height(30))) CombatPreviewSession.Start();
             }
@@ -168,7 +168,7 @@ namespace TheLostShrine.Editor
                 EditorGUILayout.LabelField("Windup / active / recovery", string.Format("{0:0} / {1:0} / {2:0} ms", duration * weapon.Settings.lightWindupFraction * 1000,
                     duration * (weapon.Settings.lightSwingEndFraction - weapon.Settings.lightWindupFraction) * 1000, duration * (1 - weapon.Settings.lightSwingEndFraction) * 1000));
                 var bar = GUILayoutUtility.GetRect(10, 18, GUILayout.ExpandWidth(true));
-                EditorGUI.ProgressBar(bar, weapon.State == HatchetState.LightChop ? weapon.AttackProgress : 0, "Swing progress");
+                EditorGUI.ProgressBar(bar, weapon.State == AxeState.LightChop ? weapon.AttackProgress : 0, "Swing progress");
                 if (driver != null) EditorGUILayout.LabelField("Confirmed hits", driver.Hits.ToString());
             }
             Rect area = GUILayoutUtility.GetRect(10, Mathf.Max(180, position.height - 550), GUILayout.ExpandWidth(true));
@@ -260,7 +260,7 @@ namespace TheLostShrine.Editor
             serialized.FindProperty("inputSource").objectReferenceValue = input;
             serialized.FindProperty("aimCamera").objectReferenceValue = camera;
             serialized.ApplyModifiedPropertiesWithoutUndo();
-            input.Weapon = Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Weapons/Hatchet.prefab")).GetComponent<HatchetWeapon>();
+            input.Weapon = Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Weapons/Axe.prefab")).GetComponent<AxeWeapon>();
             input.Target = Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Combat/PracticeDummy.prefab"), new Vector3(1.4f, 0, 0), Quaternion.identity).GetComponent<PracticeTarget>();
             var square = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Sprites/WhiteSquare.png");
             var wall = new GameObject("Preview blocking wall");

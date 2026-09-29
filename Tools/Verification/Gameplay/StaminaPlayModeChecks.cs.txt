@@ -15,7 +15,7 @@ var movement = player.GetComponent<TheLostShrine.Player.PlayerMovement>();
 var input = player.GetComponent<TheLostShrine.Input.PlayerMovementInput>();
 var body = player.GetComponent<Rigidbody2D>();
 var reaction = player.GetComponent<TheLostShrine.Combat.HitReaction>();
-var weapon = UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Weapons.HatchetWeapon>();
+var weapon = UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Weapons.AxeWeapon>();
 var sim = weapon.GetType().GetMethod("Simulate",flags);
 var recover = stamina.GetType().GetMethod("Tick",flags);
 var moveUpdate = movement.GetType().GetMethod("FixedUpdate",flags);
@@ -96,7 +96,7 @@ try {
     check(weapon.TryReleaseCharge(Vector2.right) && near(stamina.Current,65),"Cleave release does not charge twice");moveTick();
     check(!movement.IsSprinting,"Cleave animation also prevents sprint");tick(.46f);
     stamina.Restore();weapon.TryBeginCharge();weapon.CancelCharge();
-    check(near(stamina.Current,65) && weapon.State==TheLostShrine.Weapons.HatchetState.Held,"Cancelling a charge does not refund its commitment cost");
+    check(near(stamina.Current,65) && weapon.State==TheLostShrine.Weapons.AxeState.Held,"Cancelling a charge does not refund its commitment cost");
     stamina.Restore();weapon.TryBeginCharge();tick(.1f);
     check(!weapon.TryReleaseCharge(Vector2.right) && near(stamina.Current,65),"An early charge release cannot create a free attack");
     keys(new UnityEngine.InputSystem.Key[0]);moveTick();weapon.CancelAction();stamina.Restore();
@@ -104,9 +104,9 @@ try {
     check(!weapon.TryThrow(Vector2.right) && near(stamina.Current,75),"Repeated E while away cannot charge another throw");
     stamina.TrySpend(75);check(!weapon.TryRecall(),"Zero stamina does not bypass the Recall unlock requirement");
     player.UnlockRecall();check(weapon.TryRecall() && near(stamina.Current,0),"Unlocked Recall remains available at zero stamina");tick(.2f);
-    check(weapon.State==TheLostShrine.Weapons.HatchetState.Held,"Free Recall retrieves the weapon at exhaustion");
+    check(weapon.State==TheLostShrine.Weapons.AxeState.Held,"Free Recall retrieves the weapon at exhaustion");
     check(!weapon.TryLightChop(Vector2.right) && !weapon.TryBeginCharge() && !weapon.TryThrow(Vector2.right),"Empty stamina blocks both attacks and new throws");
-    check(weapon.State==TheLostShrine.Weapons.HatchetState.Held && near(stamina.Current,0),"Rejected actions leave the weapon usable and stamina unchanged");
+    check(weapon.State==TheLostShrine.Weapons.AxeState.Held && near(stamina.Current,0),"Rejected actions leave the weapon usable and stamina unchanged");
     stamina.Restore();weapon.CancelAction();
     for(int i=0;i<4;i++){weapon.TryThrow(Vector2.right);tick(.12f);weapon.TryRecall();tick(.2f);}
     check(near(stamina.Current,0) && !weapon.TryThrow(Vector2.right),"Rapid throw/Recall spam stops after four throws");

@@ -7,7 +7,7 @@ var created=new System.Collections.Generic.List<GameObject>();
 Func<string,GameObject> spawn=path=>{var go=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(path));created.Add(go);return go;};
 try {
  var player=spawn("Assets/Prefabs/Player/Player.prefab");
- var weapon=spawn("Assets/Prefabs/Weapons/Hatchet.prefab").GetComponent<TheLostShrine.Weapons.HatchetWeapon>();
+ var weapon=spawn("Assets/Prefabs/Weapons/Axe.prefab").GetComponent<TheLostShrine.Weapons.AxeWeapon>();
  player.GetComponent<TheLostShrine.Player.PlayerCombatController>().TryEquip(weapon);
  var wolf=spawn("Assets/Prefabs/Combat/Wolf.prefab");wolf.transform.position=new Vector3(1.5f,0,0);wolf.GetComponent<Rigidbody2D>().position=wolf.transform.position;
  var health=wolf.GetComponent<TheLostShrine.Combat.Damageable>();var feedback=wolf.GetComponent<TheLostShrine.Combat.EnemyImpactFeedback>();
@@ -15,9 +15,9 @@ try {
  Action update=()=>feedback.GetType().GetMethod("LateUpdate",flags).Invoke(feedback,null);
  Physics2D.SyncTransforms();
  check(ps.particleCount==0&&!sound.isPlaying,"No idle feedback");
- check(weapon.TryLightChop(Vector2.right),"Standard hatchet chop starts");
+ check(weapon.TryLightChop(Vector2.right),"Standard axe chop starts");
  weapon.GetType().GetMethod("Simulate",flags).Invoke(weapon,new object[]{.105f});
- check(health.Health<health.MaxHealth,"Real hatchet damages wolf");
+ check(health.Health<health.MaxHealth,"Real axe damages wolf");
  check(ps.particleCount>0,"Accepted weapon hit emits particles");
  check(sound.isPlaying,"Accepted weapon hit plays impact clip");
  check(weapon.IsImpactPaused,"Existing light-chop action pause activates");

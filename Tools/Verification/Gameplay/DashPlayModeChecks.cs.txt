@@ -15,7 +15,7 @@ var life=player.GetComponent<TheLostShrine.Player.PlayerHealth>();
 var reaction=player.GetComponent<TheLostShrine.Combat.HitReaction>();
 var body=player.GetComponent<Rigidbody2D>();
 var input=player.GetComponent<TheLostShrine.Input.PlayerMovementInput>();
-var weapon=UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Weapons.HatchetWeapon>();
+var weapon=UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Weapons.AxeWeapon>();
 var source=UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Combat.SimpleMeleeEnemy>().gameObject;
 var inputUpdate=input.GetType().GetMethod("Update",flags);
 var moveUpdate=movement.GetType().GetMethod("FixedUpdate",flags);
@@ -93,7 +93,7 @@ try {
     weaponSim.Invoke(weapon,new object[]{.9f});weapon.TryReleaseCharge(Vector2.right);
     check(!dash.TryStart(Vector2.up),"Dash cannot cancel the cleave animation");
     reset();weapon.TryThrow(Vector2.right);weaponSim.Invoke(weapon,new object[]{.7f});player.UnlockRecall();
-    check(dash.TryStart(Vector2.left) && weapon.TryRecall(),"Dash remains available while the hatchet is away and permits Recall");
+    check(dash.TryStart(Vector2.left) && weapon.TryRecall(),"Dash remains available while the axe is away and permits Recall");
 
     reset();dash.TryStart(Vector2.right);dash.Tick(.12f);
     check(dash.IsDashing && !dash.HasDodgeProtection,"Protection covers only the opening 0.1 seconds of the dash");

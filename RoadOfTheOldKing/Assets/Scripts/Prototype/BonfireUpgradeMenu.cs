@@ -8,13 +8,13 @@ namespace TheLostShrine.Prototype
     // Presentation only. The session validates location; progression owns spending and choices.
     public sealed class BonfireUpgradeMenu
     {
-        private HatchetUpgrade pending;
+        private AxeUpgrade pending;
         public void Reset() => pending = null;
 
         public void Draw(Rect area, CheckpointSession session, Bonfire fire, GUIStyle title, GUIStyle text)
         {
             float x = area.x + 18f, y = area.y + 16f, width = area.width - 36f;
-            GUI.Label(new Rect(x, y, width, 28f), "HATCHET UPGRADE  |  Sun Shards: " + session.Progress.sunShards, title);
+            GUI.Label(new Rect(x, y, width, 28f), "AXE UPGRADE  |  Sun Shards: " + session.Progress.sunShards, title);
             y += 38f;
             var tier = session.Upgrades.NextTier;
             if (tier == null)

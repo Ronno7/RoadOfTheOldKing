@@ -23,7 +23,7 @@ namespace TheLostShrine.Player
         private bool suppressCharge;
         private bool controlsActive = true;
 
-        public HatchetWeapon Weapon { get; private set; }
+        public AxeWeapon Weapon { get; private set; }
         public Vector2 AimDirection { get; private set; } = Vector2.down;
         public bool CanRecall => recallUnlocked;
         public IStamina Stamina { get; private set; }
@@ -120,7 +120,7 @@ namespace TheLostShrine.Player
                 Weapon.TryBeginCharge();
             }
             // A rejected E press must not swallow the release of an existing cleave.
-            if (Weapon.State == HatchetState.Charging)
+            if (Weapon.State == AxeState.Charging)
             {
                 if (frame.ChargeReleased && !chargeBlocked) Weapon.TryReleaseCharge(AimDirection);
                 else if (!frame.ChargeHeld) Weapon.CancelCharge();
@@ -130,7 +130,7 @@ namespace TheLostShrine.Player
                 queuedLightUntil = -1f;
                 return;
             }
-            if (frame.LightPressed && (Weapon.State == HatchetState.Held || Weapon.State == HatchetState.LightChop))
+            if (frame.LightPressed && (Weapon.State == AxeState.Held || Weapon.State == AxeState.LightChop))
                 queuedLightUntil = Time.time + lightInputBuffer;
             if (queuedLightUntil >= Time.time && Weapon.TryLightChop(AimDirection))
                 queuedLightUntil = -1f;
@@ -151,7 +151,7 @@ namespace TheLostShrine.Player
                 AimDirection = direction.normalized;
         }
 
-        public bool TryEquip(HatchetWeapon weapon)
+        public bool TryEquip(AxeWeapon weapon)
         {
             if (Weapon != null || weapon == null || !weapon.TryEquip(this))
                 return false;

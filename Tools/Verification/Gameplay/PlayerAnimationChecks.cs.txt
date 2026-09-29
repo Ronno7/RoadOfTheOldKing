@@ -50,6 +50,12 @@ try {
         for (int o = 0; o < 8; o++) { steps(dirs[o], false, 6); realWalk &= animator.State == "Walk" && animator.Octant == o && body.sprite == set.walk.Frame(o, animator.Frame); }
         steps(Vector2.zero, false, 2);
         check(realWalk && animator.State == "Idle", "Imported walk plays in all eight directions and stops to idle");
+        if (set.run != null && !set.run.IsEmpty) {
+            bool realRun = true;
+            for (int o = 0; o < 8; o++) { steps(dirs[o], true, 6); realRun &= movement.IsSprinting && animator.State == "Run" && animator.Octant == o && body.sprite == set.run.Frame(o, animator.Frame); }
+            steps(Vector2.zero, false, 40); // recover stamina
+            check(realRun, "Imported run plays while sprinting in all eight directions");
+        }
         steps(dirs[6], false, 3); heldSince.SetValue(animator, Time.time - 1f); steps(Vector2.zero, false, 2); // Face south again.
     }
 
@@ -101,14 +107,49 @@ try {
     steps(Vector2.zero, false, 30); // Recover dash stamina/cooldown.
     input.GetType().GetField("dashQueuedUntil",flags).SetValue(input, Time.time + 1f);
     steps(dirs[4], false, 1);
-    check(player.GetComponent<TheLostShrine.Player.PlayerDash>().IsDashing && animator.State == "Walk" && animator.Octant == 4,
-        "Dash without its own animation falls back to the walk cycle in its direction");
+    if (testSet.dash != null && !testSet.dash.IsEmpty) {
+        var dash = player.GetComponent<TheLostShrine.Player.PlayerDash>();
+        bool dashed = dash.IsDashing && animator.State == "Dash" && animator.Octant == 4 && body.sprite == testSet.dash.Frame(4, animator.Frame);
+        int firstFrame = animator.Frame;
+        int guard = 0; while (dash.IsDashing && guard++ < 100) steps(dirs[4], false, 1);
+        check(dashed && firstFrame == 0, "Imported dash plays in its direction from its first frame");
+    } else
+        check(player.GetComponent<TheLostShrine.Player.PlayerDash>().IsDashing && animator.State == "Walk" && animator.Octant == 4,
+            "Dash without its own animation falls back to the walk cycle in its direction");
     steps(Vector2.zero, false, 40);
 
-    var hatchet = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Weapons/Hatchet.prefab")); created.Add(hatchet);
-    var weapon = hatchet.GetComponent<TheLostShrine.Weapons.HatchetWeapon>();
+    var axe = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Weapons/Axe.prefab")); created.Add(axe);
+    var weapon = axe.GetComponent<TheLostShrine.Weapons.AxeWeapon>();
     var combat = player.GetComponent<TheLostShrine.Player.PlayerCombatController>();
-    check(combat.TryEquip(weapon), "Standard player equips the hatchet");
+    check(combat.TryEquip(weapon), "Standard player equips the axe");
+    // Out-of-combat carry at his right side (PlayerWeaponCarry via AxeView).
+    var view = axe.GetComponent("AxeView"); var viewStep = view.GetType().GetMethod("LateUpdate",flags);
+    var blade = axe.transform.Find("Model/Sprite").GetComponent<SpriteRenderer>();
+    var model = axe.transform.Find("Model");
+    var fold = player.transform.Find("Grip Fold").GetComponent<SpriteRenderer>();
+    animator.GetType().GetField("animations",flags).SetValue(animator,set); // real walk, with measured heights
+    steps(dirs[6], false, 3); heldSince.SetValue(animator, Time.time - 1f); steps(Vector2.zero, false, 2); viewStep.Invoke(view, null);
+    check(animator.Octant == 6 && blade.sortingOrder == body.sortingOrder + 1 && blade.flipX && fold.enabled && !fold.flipX &&
+        fold.sortingOrder == body.sortingOrder + 2 && Vector2.Distance(fold.transform.position, model.position) < .001f &&
+        Vector2.Distance(model.position, (Vector2)body.transform.position + new Vector2(-8f, 11f) / 16f) < .001f,
+        "Facing south: carried on his right-side silhouette edge, in front, mirrored, cloak fold over the grip");
+    if (set.walk != null && !set.walk.IsEmpty && set.walk.Height(6, 0) > 0) {
+        var seen = new System.Collections.Generic.HashSet<int>(); bool follows = true;
+        for (int i = 0; i < 40; i++) {
+            steps(dirs[6], false, 1); viewStep.Invoke(view, null);
+            seen.Add(animator.Lift);
+            follows &= Vector2.Distance(model.position, (Vector2)body.transform.position + new Vector2(-8f, 11f + animator.Lift) / 16f) < .001f;
+        }
+        check(follows && seen.Contains(0) && seen.Contains(1), "Walking south, the halberd and fold rise and fall with the body's measured bob");
+    }
+    steps(dirs[4], false, 3); heldSince.SetValue(animator, Time.time - 1f); steps(Vector2.zero, false, 2); viewStep.Invoke(view, null);
+    check(animator.Octant == 4 && blade.sortingOrder == body.sortingOrder - 1 && !fold.enabled, "Facing west: carried on the far side, behind him, no fold");
+    steps(dirs[1], false, 3); heldSince.SetValue(animator, Time.time - 1f); steps(Vector2.zero, false, 2); viewStep.Invoke(view, null);
+    check(animator.Octant == 1 && !blade.flipX && fold.enabled && fold.flipX, "Facing north-east: right edge, fold mirrored outward");
+    steps(dirs[2], false, 3); heldSince.SetValue(animator, Time.time - 1f); steps(Vector2.zero, false, 2); viewStep.Invoke(view, null);
+    check(animator.Octant == 2 && blade.sortingOrder == body.sortingOrder - 1 && !fold.enabled &&
+        Vector2.Distance(model.position, (Vector2)body.transform.position + new Vector2(8f, 15f) / 16f) < .001f,
+        "Facing north: held in front of him, behind his head, butt off the ground");
     var target = new GameObject("Animation check target"); created.Add(target);
     target.AddComponent<CircleCollider2D>().radius = .25f;
     var targetHealth = target.AddComponent<TheLostShrine.Combat.Damageable>();
@@ -117,7 +158,7 @@ try {
     steps(Vector2.zero, false, 1);
     check(animator.State == "Idle" && animator.Octant == 3, "An attack without its own animation faces the attack direction");
     var simulate = weapon.GetType().GetMethod("Simulate",flags);
-    for (int i = 0; i < 60 && !weapon.IsImpactPaused && weapon.State == TheLostShrine.Weapons.HatchetState.LightChop; i++)
+    for (int i = 0; i < 60 && !weapon.IsImpactPaused && weapon.State == TheLostShrine.Weapons.AxeState.LightChop; i++)
         simulate.Invoke(weapon, new object[]{ .005f });
     float pause = (float)weapon.GetType().GetField("impactPauseRemaining",flags).GetValue(weapon);
     float progress = weapon.AttackProgress;

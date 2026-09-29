@@ -100,10 +100,10 @@ namespace TheLostShrine.EditorTools
                         continue;
                     }
                     // Feet stay on the ground line: the lowest opaque row across the direction's frames.
-                    int ground = MeasureGround(paths, out int height, out string warning);
+                    int ground = MeasureGround(paths, out int height, out string warning, out int[] heights);
                     foreach (string path in paths)
                         SetPivot(path, new Vector2(0.5f, ground / (float)height));
-                    clip.SetFrames(octant, paths.Select(AssetDatabase.LoadAssetAtPath<Sprite>).ToArray());
+                    clip.SetFrames(octant, paths.Select(AssetDatabase.LoadAssetAtPath<Sprite>).ToArray(), heights);
                     line.Append($" {DirectionalSpriteAnimation.DirectionNames[octant]} {paths.Count}f ground {ground}{warning};");
                 }
                 EditorUtility.SetDirty(clip);
@@ -156,27 +156,33 @@ namespace TheLostShrine.EditorTools
             return result;
         }
 
-        private static int MeasureGround(List<string> paths, out int height, out string warning)
+        // Also returns each frame's figure height above that ground, which lets carried items bob with the body.
+        private static int MeasureGround(List<string> paths, out int height, out string warning, out int[] heights)
         {
             int ground = int.MaxValue;
             height = 0;
             warning = "";
+            var tops = new int[paths.Count];
             var texture = new Texture2D(2, 2);
             try
             {
-                foreach (string path in paths)
+                for (int k = 0; k < paths.Count; k++)
                 {
-                    texture.LoadImage(File.ReadAllBytes(path));
+                    texture.LoadImage(File.ReadAllBytes(paths[k]));
                     if (height != 0 && texture.height != height) warning = " (mixed canvas sizes)";
                     height = texture.height;
                     var pixels = texture.GetPixels32();
-                    // LoadImage rows run bottom-up, so the first opaque row found is the lowest.
+                    // LoadImage rows run bottom-up: the first opaque pixel is on the lowest row, the last on the highest.
                     for (int i = 0; i < pixels.Length; i++)
                         if (pixels[i].a > 0) { ground = Mathf.Min(ground, i / texture.width); break; }
+                    for (int i = pixels.Length - 1; i >= 0; i--)
+                        if (pixels[i].a > 0) { tops[k] = i / texture.width; break; }
                 }
             }
             finally { Object.DestroyImmediate(texture); }
-            return ground == int.MaxValue ? 0 : ground;
+            if (ground == int.MaxValue) ground = 0;
+            heights = tops.Select(top => top - ground + 1).ToArray();
+            return ground;
         }
 
         private static void SetPivot(string path, Vector2 pivot)

@@ -36,8 +36,8 @@ check(!clock.Advance(float.NaN, out flight) && !clock.Advance(float.PositiveInfi
 clock.Cancel();
 check(!clock.Begin(new TheLostShrine.Weapons.ThrowActionTiming { preparation = new float[0] }) &&
     !clock.Begin(new TheLostShrine.Weapons.ThrowActionTiming { launchCel = 4 }), "Invalid exposure/marker data rejected");
-foreach (string path in new[]{"Assets/Settings/Weapons/PrototypeHatchetSettings.asset", "Assets/Settings/Weapons/HatchetSettings.asset"}) {
-    var settings = AssetDatabase.LoadAssetAtPath<TheLostShrine.Weapons.HatchetSettings>(path);
+foreach (string path in new[]{"Assets/Settings/Weapons/PrototypeAxeSettings.asset", "Assets/Settings/Weapons/AxeSettings.asset"}) {
+    var settings = AssetDatabase.LoadAssetAtPath<TheLostShrine.Weapons.AxeSettings>(path);
     check(clock.Begin(settings.throwAction), "Serialized timing loads: " + settings.name); clock.Cancel();
 }
 return string.Join("\n", results.ToArray());

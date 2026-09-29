@@ -8,14 +8,14 @@ var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingF
 var created = new System.Collections.Generic.List<GameObject>();
 System.Func<string,GameObject> spawn = path => { var go = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(path)); created.Add(go); return go; };
 var previousSimulation = Physics2D.simulationMode;
-var upgrade = ScriptableObject.CreateInstance<TheLostShrine.Weapons.HatchetUpgrade>();
-TheLostShrine.Weapons.HatchetSettings isolated = null;
+var upgrade = ScriptableObject.CreateInstance<TheLostShrine.Weapons.AxeUpgrade>();
+TheLostShrine.Weapons.AxeSettings isolated = null;
 try {
     Physics2D.simulationMode = SimulationMode2D.Script;
     var root = spawn("Assets/Prefabs/Player/Player.prefab");
     var player = root.GetComponent<TheLostShrine.Player.PlayerCombatController>();
-    var weapon = spawn("Assets/Prefabs/Weapons/Hatchet.prefab").GetComponent<TheLostShrine.Weapons.HatchetWeapon>();
-    var feedback = weapon.GetComponent<TheLostShrine.Weapons.HatchetMeleeFeedback>();
+    var weapon = spawn("Assets/Prefabs/Weapons/Axe.prefab").GetComponent<TheLostShrine.Weapons.AxeWeapon>();
+    var feedback = weapon.GetComponent<TheLostShrine.Weapons.AxeMeleeFeedback>();
     var surface = (MeshRenderer)feedback.GetType().GetField("surface",flags).GetValue(feedback);
     var mesh = (Mesh)feedback.GetType().GetField("mesh",flags).GetValue(feedback);
     var stamina = root.GetComponent<TheLostShrine.Player.PlayerStamina>();
