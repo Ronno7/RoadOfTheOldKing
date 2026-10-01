@@ -8,7 +8,7 @@ Tutorial moves from a sheltered village and practice terrace through woodland, a
 
 [Village and work yard](Art/Tutorial/Previews/tutorial-populated-home.png) · [Practice terrace](Art/Tutorial/Previews/tutorial-populated-practice.png) · [Forest road](Art/Tutorial/Previews/tutorial-forest-road.png) · [Ruined courtyard](Art/Tutorial/Previews/tutorial-recall-courtyard.png)
 
-The environment and player systems are integrated in Tutorial. The first enemy, shard reward and bonfire setup reuse the gameplay prefabs. Its teaching sequence, Recall awakening and overworld transition remain in development. The new and worn target stands have solid ground-footprint colliders, but target hit feedback and lesson detection remain pending. Static ruin artwork alone does not imply its interactions are implemented.
+The Tutorial combines this environment with its full teaching route. Gameplay objects (axe pickup, target stands, practice dummy, Recall stone and drill posts, wolf, Sun Shard and bonfire) are prefab instances placed over the tilemaps; the [systems overview](SystemsOverview.md#tutorial) describes how they work. Static ruin artwork alone does not imply an interaction. The transition to the overworld is in development.
 
 ## Tilemap composition
 

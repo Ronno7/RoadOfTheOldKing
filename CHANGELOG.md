@@ -8,6 +8,7 @@
 - Movement now glides and rebounds lightly off walls, with speed-scaled dust trails and skid clouds.
 - Route-side trees now block the player and layer correctly; the Tutorial uses the shared follow camera and a tidier hierarchy.
 - Added an F3 developer stats panel in the Editor and development builds.
+- The browser build now plays the Tutorial. The earlier PrototypeLoop mechanics scene is retired from the build and kept in the project for reference.
 
 ## 28SEP2026 - New hero and combat feel
 
