@@ -1,97 +1,163 @@
 # Changelog
 
-## 29SEP2026 - Tutorial guide, Recall awakening and movement feel
+## Unreleased
 
-- Added a step-by-step Tutorial guide with one contextual hint at a time, saved progress and lessons completed from real actions: throwing at targets, dummy strikes, dodging, a Recall drill, the first shard, resting and the exit trail.
-- Added a contextual HUD: health and stamina shown when relevant, interaction prompts beside objects, a weapon-away indicator, reward receipts and a Tab status panel.
-- The ancient sun-wheel stone now awakens Recall when struck by a thrown axe, with new pixel art.
-- Movement now glides and rebounds lightly off walls, with speed-scaled dust trails and skid clouds.
-- Route-side trees now block the player and layer correctly; the Tutorial uses the shared follow camera and a tidier hierarchy.
-- Added an F3 developer stats panel in the Editor and development builds.
-- The browser build now plays the Tutorial. The earlier PrototypeLoop mechanics scene is retired from the build and kept in the project for reference.
+**Added**
+- A breathing idle animation for the hero in all eight directions.
 
-## 28SEP2026 - New hero and combat feel
+**Changed**
+- Rewrote the [systems overview](Docs/SystemsOverview.md) as a guide to the game's architecture, with diagrams.
 
-- Replaced the hero with eight-direction PixelLab artwork, animated walking, running and dashing, and a bronze halberd carried at his side.
-- Reworked the light combo into two sweeping attacks and a powerful thrust with a short forward lunge.
-- Strengthened knockback, hit particles and killing-blow feedback while shortening enemy stuns.
-- Added a wolf detection “!” cue and Left Alt freelook with a three-tile limit.
-- Added an Escape pause menu with checkpoint restart and quit.
-- Retired the old character pipeline and DemoTutorial scene; Tutorial is now the main world reference.
-- Renamed “hatchet” to “axe,” preserving existing saves and upgrades.
+## 0.4 — Vertical slice
 
-## 27SEP2026 - Wolf enemy, combat feedback and Tutorial integration
+### 0.4.6 — 2026-09-29 · Tutorial guide and movement feel
 
-- Added the animated wolf enemy and enemy health bars.
-- Added the aim marker, melee coverage effects, impact sounds and particles, plus a combat preview tool.
-- Added F-to-pick-up interactions and clearer axe flight effects; thrown axes still return to hand when approached.
-- Integrated the Tutorial's first enemy, Sun Shard reward and bonfire/checkpoint, with separate saves and a compact HUD.
-- Unified player and weapon prefabs and completed the previous hero's catch animations.
-- Renamed the game to **Road of the Old King**.
+**Browser build:** now plays the Tutorial.
 
-## 26SEP2026 - Directional movement and combat
+**Added**
+- A Tutorial guide that teaches the route one hint at a time and completes each lesson when the player actually does it. Progress is saved.
+- A contextual HUD: health and stamina appear when they matter, interaction prompts sit beside objects, and Tab opens a status panel.
+- Recall awakening: striking the ancient sun-wheel stone with a thrown axe unlocks Recall, followed by a short Recall drill.
+- Dust trails while running and skid clouds on sharp stops and turns.
+- An F3 developer stats panel in the Editor and development builds.
 
-- Completed four-direction sprint, dash, opening swings and stationary throws, with armed/empty-hand presentation and movement-driven foot timing.
-- Established consistent character proportions, muted colors, patterned cap trim, simple hands and axe geometry to preserve the original sprite's old-school feel.
-- Kept moving aim functional with existing walking art; dedicated aim-walk and moving-catch artwork remain future work.
+**Changed**
+- Movement now has momentum and a light rebound off walls.
+- Trees along the route now block the player and layer correctly.
 
-## 25SEP2026 - Player and axe integration
+**Removed**
+- The old prototype scene from the build. It stays in the project for reference.
 
-- Integrated the animated Tutorial player, directional locomotion, idle breathing, follow/zoom camera and stump axe pickup/carrying; refined weapon scale and clarity.
-- Added the initial combo presentation and practice-target recoil, wood chips and impact audio. Retired the rejected articulated rig and selected authored full-body sprites for the replacement.
-- Implemented tap E to quick throw, hold E to aim and release, moving aim, a collision-aware guide and shared release timing. Gameplay now owns movement limits, once-per-throw stamina cost and interruption/Recall handling.
-- Completed the east/north sprite proof: 36 matched forehand/throw/catch body cels and eight fast axe-spin cels. Matched pickup/carry and north combo axe views to the drawn weapon, corrected catch scale and perspective.
-- Connected the east/north opening swing, stationary throw/catch and fast spinning axe to live Tutorial gameplay, with synchronized release/Recall handoffs, movement fallbacks.
-- Consolidated animation documentation and rebuild instructions, preserved milestone GIFs and source art, and removed the superseded browser review and disposable captures.
+### 0.4.5 — 2026-09-28 · New hero and combat feel
 
-## 24SEP2026 - Player art and tutorial world
+**Added**
+- A new eight-direction hero with walk, run and dash animations, carrying a bronze halberd at his side.
+- Freelook: hold Left Alt to look toward the cursor.
+- A pause menu with restart and quit.
+- An alert cue when the wolf spots the player.
 
-- Added the 16-frame weapon-free character sheet with simplified shading and softer outlines.
-- Rebuilt the houses as a 6x5 workshop and an 8x6 thatched longhouse.
-- Built Tutorial terrain, paths, village dressing, forest boundaries, practice terrace and separate collision.
-- Fixed cliff and ledge seams, ramp returns and waterfall direction; increased waterfall speed and landing splash.
-- Moved the bridge south and added the winding forest road, Recall ruins, stone placeholder and safe practice clearing.
-- Extended surrounding woodland for camera coverage and checked route clearance.
+**Changed**
+- Reworked the light combo into two wide sweeps and a hard-hitting thrust finisher with a short lunge.
+- Stronger knockback, hit particles and killing blows, with shorter enemy stuns.
+- Renamed the hatchet to the axe. Existing saves carry over.
 
-## 23SEP2026 - Environment and decoration
+**Removed**
+- The previous character art and its pipeline.
 
-- Added 31 environment objects and 12 decoration designs using the tutorial palette.
-- Dressed DemoTutorial with village work areas, a practice yard, bridge and ruins.
-- Added separate collision footprints and overhead sorting for trees, roofs and ruins.
-- Consolidated production assets, painting palettes and rebuild sources.
+### 0.4.4 — 2026-09-27 · Wolf enemy and Tutorial integration
 
-## 22SEP2026 - Art kits and progression
+**Added**
+- The animated wolf enemy and enemy health bars.
+- An aim marker, attack coverage effects, impact sounds and hit particles.
+- The Tutorial's first fight, a Sun Shard reward and a bonfire checkpoint, with their own save.
+- Press F to pick up items. A thrown axe is still retrieved by walking over it.
+- A combat effects preview tool for the Editor.
 
-- Added ground, terrain and path kits with automatic connections, painting palettes and animated water.
-- Added DemoTutorial as the art reference scene and consolidated the blank zone template.
-- Added sprinting, stamina costs and recovery, plus a short directional dash with an opening dodge window.
-- Rebalanced player, enemy and dummy health to 100-point pools and updated attack damage.
-- Added automatic Recall beyond 10 units after unlocking the ability.
-- Added three unique Sun Shards, persistent rewards and a three-shard weapon upgrade choice in PrototypeLoop.
-- Added heart fragments: every three grant 20 permanent maximum HP, with persistent collection and HUD feedback.
-- Added verification for stamina, dodge, Recall, rewards, upgrades and heart fragments.
+**Changed**
+- The game is now called **Road of the Old King**.
 
-## 21SEP2026 - Combat and prototype loop
+### 0.4.3 — 2026-09-26 · Directional movement and combat
 
-- Added axe pickup, mouse aiming, a buffered three-hit combo, charged cleave, throwing, retrieval and Recall.
-- Added practice targets, shields, breakable bushes and cracked stone, plus a telegraphed melee enemy.
-- Added player health, damage immunity, knockback, defeat and restart handling.
-- Built the guided prototype route, Recall puzzle, bonfires, checkpoint saves and travel between discovered fires.
-- Added persistent lesson and puzzle progress, checkpoint respawning and a new-run option.
-- Renamed the original Tutorial scene to PrototypeLoop and set it as the build scene.
-- Added attack effects and combo indicators; fixed backhand slash direction and rear Recall hits on shields.
-- Changed movement to eight directions with normalized diagonal speed and four-direction visual facing.
-- Added gameplay verification, the systems overview and the game-loop diagram.
+**Added**
+- Four-direction sprint, dash, attack and throw animations for the previous hero.
 
-## 20SEP2026 - Initial tutorial prototype
+**Changed**
+- Unified the hero's proportions and colours for a consistent old-school look.
 
-- Added 64 pixel-art tiles, a painting palette and a sample-map prefab.
-- Built the initial tutorial clearing with paths, flowers, a pond and solid boundaries.
-- Added mouse-wheel camera zoom with a starting size of 5.5 and limits of 3-8.
-- Updated the browser build with the tutorial area and camera zoom.
+### 0.4.2 — 2026-09-25 · Player and axe integration
 
-## 14SEP2026 - Movement foundation
+**Added**
+- The animated player in the Tutorial, picking the axe up from its stump.
+- Tap E to throw quickly, or hold E to aim (while moving) and release, with an aim guide that stops at walls.
+- Practice targets that react to hits with wood chips and impact audio.
 
-- Added keyboard movement, physics collision, smooth camera follow and a movement test scene.
-- Added reusable player, obstacle and camera prefabs with separate input and movement components.
-- Organized project folders and added title and banner artwork.
+**Changed**
+- Replaced the articulated character rig with hand-drawn sprites.
+
+### 0.4.1 — 2026-09-24 · Tutorial world
+
+**Added**
+- The Tutorial map: a village, a raised practice terrace, a forest road, a river crossing and old ruins, enclosed by dense woodland.
+
+**Changed**
+- Larger, redesigned village houses.
+
+**Fixed**
+- Cliff seams and the waterfall's direction.
+
+### 0.4.0 — 2026-09-23 · World art kits
+
+**Added**
+- Ground, terrain and path tile sets that connect their edges automatically, plus animated water and waterfalls.
+- Environment objects and decorations for the Tutorial village and forest.
+- Trees, roofs and ruins that the player can walk behind.
+
+## 0.3 — Gameplay loop prototype
+
+### 0.3.1 — 2026-09-22 · Stamina and progression
+
+**Added**
+- Sprinting, stamina and a short dodge dash.
+- The axe returns automatically when it ends up too far away.
+- Sun Shards, spent at a bonfire on one of three weapon upgrades.
+- Heart fragments: every three raise maximum health.
+
+**Changed**
+- Rebalanced health and damage for the player, enemies and dummies.
+
+### 0.3.0 — 2026-09-21 · Prototype loop
+
+**Browser build**
+
+**Added**
+- Player health, defeat and restart.
+- A melee enemy with a telegraphed attack.
+- A guided test route with a throw-and-Recall puzzle.
+- Bonfires that save progress, set the respawn point and allow travel between discovered fires.
+
+## 0.2 — Core prototype
+
+### 0.2.0 — 2026-09-21 · Axe combat
+
+**Browser build**
+
+**Added**
+- Axe combat: a three-hit combo, a charged spinning cleave, throwing, retrieving the axe on foot, and Recall.
+- Practice targets, shielded dummies broken by a full cleave or flanked with Recall, and breakable bushes and stones.
+
+**Changed**
+- Movement in eight directions.
+
+## 0.1 — Pre-production
+
+### 0.1.1 — 2026-09-20 · First tiles
+
+**Browser build**
+
+**Added**
+- First pixel-art tiles and a small test map.
+- Mouse-wheel camera zoom.
+
+### 0.1.0 — 2026-09-14 · Movement foundation
+
+**Browser build**
+
+**Added**
+- Player movement, collision and a following camera.
+- Title and banner artwork.
+
+## Versioning
+
+The minor number is the development phase; the patch number is each notable update within it. **Browser build** marks updates published to the [playable web version](https://ronno7.github.io/RoadOfTheOldKing/).
+
+| Version | Phase |
+| --- | --- |
+| 0.1 | Pre-production |
+| 0.2 | Core prototype |
+| 0.3 | Gameplay loop prototype |
+| **0.4** | **Vertical slice (current)** |
+| 0.5–0.6 | Full production |
+| 0.7 | Alpha |
+| 0.8 | Beta |
+| 0.9 | Release candidate |
+| 1.0 | Release |
