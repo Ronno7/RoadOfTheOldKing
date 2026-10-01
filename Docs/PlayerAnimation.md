@@ -8,7 +8,7 @@ The hero is a small, arm-less wanderer wrapped in a blue hooded cloak, drawn as 
 
 ![Walk cycle, east and south](Art/Player/Hero-Walk.png)
 
-Currently implemented: the standing views, an eight-frame walk and run, and a four-frame dash in all directions. Light attacks, the finisher, the charged cleave, throw, catch, hurt, death, resting and pickup animations are still to come; until then those states fall back as described below.
+Currently implemented: the standing views, an eight-frame breathing idle, walk and run, and a four-frame dash in all directions. Light attacks, the finisher, the charged cleave, throw, catch, hurt, death, resting and pickup animations are still to come; until then those states fall back as described below.
 
 ## Presentation
 

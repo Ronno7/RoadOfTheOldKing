@@ -1,0 +1,99 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fd1d18a98bcd30469bcfd0f78adfbfa, type: 3}
+  m_Name: Idle
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.DirectionalSpriteAnimation
+  source: 'PixelLab v3 custom: idle breathing (hero aef4a63b, group 66e8b22f)'
+  framesPerSecond: 6
+  loop: 1
+  contactFrame: -1
+  directions:
+  - sprites:
+    - {fileID: 21300000, guid: d77777b871f65ba498fc008691420a5d, type: 3}
+    - {fileID: 21300000, guid: 18b6bf3c2e4863a4591c15fc060fc508, type: 3}
+    - {fileID: 21300000, guid: eed58a29e2730ee47a9a1f9ed18f9974, type: 3}
+    - {fileID: 21300000, guid: 8b1c31d0923f27e4fb239c9370674bdc, type: 3}
+    - {fileID: 21300000, guid: a80e42e2236b4f246adcf14c06c65557, type: 3}
+    - {fileID: 21300000, guid: a072ccbf955eafb448a541b31f3d0963, type: 3}
+    - {fileID: 21300000, guid: 99a02f6c61951c646b5967ce1416a7b4, type: 3}
+    - {fileID: 21300000, guid: b15fdb60c5623b948a312f576200577f, type: 3}
+    heights: 1a00000019000000190000001800000018000000190000001900000019000000
+  - sprites:
+    - {fileID: 21300000, guid: 153bc07bb31c9914ba53bdc8bf94697f, type: 3}
+    - {fileID: 21300000, guid: b5f44bdce93390d40b9ecb0336a7063e, type: 3}
+    - {fileID: 21300000, guid: 681eb2f06949ebf4db0de38cf7bc8369, type: 3}
+    - {fileID: 21300000, guid: f4af6d82aadca6e4cbc511bab74c2f62, type: 3}
+    - {fileID: 21300000, guid: 43da5b537d79b1f468c09ff7eaa07853, type: 3}
+    - {fileID: 21300000, guid: 0fb08581f09fede439004e763e62fade, type: 3}
+    - {fileID: 21300000, guid: 49fe2d86c71494a44831099083c48f90, type: 3}
+    - {fileID: 21300000, guid: 8284a8020d01fe148a2e477a38a88e16, type: 3}
+    heights: 19000000190000001a0000001a0000001a0000001a0000001a00000019000000
+  - sprites:
+    - {fileID: 21300000, guid: a32b8f9e7d708c04583be5d7ea5956f0, type: 3}
+    - {fileID: 21300000, guid: fc9ac2c0f2cd37e48aa30ba5dab1325f, type: 3}
+    - {fileID: 21300000, guid: b2fa91f5f0a89b24b971f2a0989929bd, type: 3}
+    - {fileID: 21300000, guid: 485d88827a09d3347aa3a073ea64d70a, type: 3}
+    - {fileID: 21300000, guid: 8e469154b7fcf3f48b2f4789218f5f79, type: 3}
+    - {fileID: 21300000, guid: ee671f6f43158f146a19d5931a5a5b9b, type: 3}
+    - {fileID: 21300000, guid: 217036db8a72ff149948528f4fa599bb, type: 3}
+    - {fileID: 21300000, guid: 4ffd2748e49fdc24996bc1401b39706a, type: 3}
+    heights: 1b0000001b0000001a0000001900000018000000180000001a0000001a000000
+  - sprites:
+    - {fileID: 21300000, guid: 015d03231d0cc5e4f9c0a3db46fec071, type: 3}
+    - {fileID: 21300000, guid: 1911a18b23731df45b27deaad87787d5, type: 3}
+    - {fileID: 21300000, guid: ce69a833668165f42b2a14d1784b6c18, type: 3}
+    - {fileID: 21300000, guid: 476ce61c6ac64044a8fbdd102b717549, type: 3}
+    - {fileID: 21300000, guid: 61271adf21a06fe4f9eaee8e475625a5, type: 3}
+    - {fileID: 21300000, guid: 90273ea5d842ce6409682443369b0f43, type: 3}
+    - {fileID: 21300000, guid: 2f61b311f5625ea42a7a22691ad0af86, type: 3}
+    - {fileID: 21300000, guid: 0c836759fb0b2e94e9f90119dbf84b94, type: 3}
+    heights: 19000000190000001a0000001a0000001a0000001a0000001a00000019000000
+  - sprites:
+    - {fileID: 21300000, guid: 02d94aaa29a601347a917c5df31e4b13, type: 3}
+    - {fileID: 21300000, guid: 07f6d522a960c77418af190b87fc9e03, type: 3}
+    - {fileID: 21300000, guid: 692003372cf1c0c45b1a4e1a225de2dc, type: 3}
+    - {fileID: 21300000, guid: f122f5bdb98c61243b9cacea8f94d548, type: 3}
+    - {fileID: 21300000, guid: 8f20868406151714aa640d33e3aec8bb, type: 3}
+    - {fileID: 21300000, guid: c701b82017a222f42b3a172cbd8bc844, type: 3}
+    - {fileID: 21300000, guid: efc9d5ea7f7435847b9093054958190c, type: 3}
+    - {fileID: 21300000, guid: 658a5279440189b478e9a2b8bef546c0, type: 3}
+    heights: 1a00000019000000190000001800000018000000190000001900000019000000
+  - sprites:
+    - {fileID: 21300000, guid: 39c41c5bf1c707147a2331f2ae8793b2, type: 3}
+    - {fileID: 21300000, guid: 8da34c2b777a8c6479bf376815075aba, type: 3}
+    - {fileID: 21300000, guid: 0dfd45bc698b106458f1e7dab16146d6, type: 3}
+    - {fileID: 21300000, guid: ba4cc76fcdcb7e04eb101d53c4f47d0a, type: 3}
+    - {fileID: 21300000, guid: 53b8166c161796b49ad7c8d021c07b20, type: 3}
+    - {fileID: 21300000, guid: 95a26727967b943489c1b5675c12be8f, type: 3}
+    - {fileID: 21300000, guid: 4f80c0fff46cbb2428b8d083d842dc35, type: 3}
+    - {fileID: 21300000, guid: 03ff80fc9e0ce4644b80a4b26f165291, type: 3}
+    heights: 1b0000001a0000001a0000001900000019000000190000001a0000001a000000
+  - sprites:
+    - {fileID: 21300000, guid: c1e5a209e8753984387d88e0f66d17d3, type: 3}
+    - {fileID: 21300000, guid: d49c58d640c113f4c8e6689ab21747a4, type: 3}
+    - {fileID: 21300000, guid: d2aa53fef981f1f4f97a79d764348e2d, type: 3}
+    - {fileID: 21300000, guid: 880245fe3a59741469efc856b9e4f4fc, type: 3}
+    - {fileID: 21300000, guid: d844264764753e24387ccded0e1954a5, type: 3}
+    - {fileID: 21300000, guid: cbbe519257fe8bf4f8e7defa16337a43, type: 3}
+    - {fileID: 21300000, guid: 3647e03aabab9574f920c61d48747b65, type: 3}
+    - {fileID: 21300000, guid: f86619290a66f2141a03f03af245b220, type: 3}
+    heights: 19000000190000001a0000001b0000001b0000001a0000001a00000019000000
+  - sprites:
+    - {fileID: 21300000, guid: 76e7fa7d41f205c4da173c4829010056, type: 3}
+    - {fileID: 21300000, guid: e52025a1b6a2b9e42ba33bb6185c0c6a, type: 3}
+    - {fileID: 21300000, guid: d46c01f1987983245a9575c0f92a00d6, type: 3}
+    - {fileID: 21300000, guid: 8f0bedfe5f1a6be42a207e6d0c24314d, type: 3}
+    - {fileID: 21300000, guid: 91cb4dd408811184394eb702f9b5ef9a, type: 3}
+    - {fileID: 21300000, guid: 95f705a8e36265e4fadb262cc820318c, type: 3}
+    - {fileID: 21300000, guid: f8257926be6cb1746a9aa3623dd75fe6, type: 3}
+    - {fileID: 21300000, guid: 393c752100cfb534f9755779e41f2e1f, type: 3}
+    heights: 1b0000001b0000001a000000190000001900000019000000190000001a000000

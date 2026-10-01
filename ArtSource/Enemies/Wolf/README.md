@@ -7,3 +7,5 @@ The production output is Assets/Art/Sprites/Enemies/Wolf.png: twenty 48x48 sprit
 Unity's WolfAssets exporter extracts the principal opaque animal in each source cell, rejects matte/adjacent-row fragments, applies one scale per source sheet, aligns ground contact, quantizes to the fixed palette and retains authored eye accents as native pixels. Native sprite IDs remain stable on rebuild. Sources are larger drawings; only the exported native sheet is used by the game.
 
 The Wolf prefab and WolfAnimationSet provide production presentation. SimpleMeleeEnemy owns movement and damage; WolfView samples state/progress and actual travel. MeleeSentinel remains the prototype presentation.
+
+`Idle/` and `metadata.json` hold a newer PixelLab export (29 Sep): an eight-direction wolf on 48 px canvases with Idle, Fast_Walk, Run and Bark animations. It is not used by the game yet.
