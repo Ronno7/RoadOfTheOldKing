@@ -12,6 +12,7 @@ namespace TheLostShrine.Input
         public bool ThrowPressed;
         public bool ThrowHeld;
         public bool ThrowReleased;
+        public bool HealPressed;
         public Vector2 PointerPosition;
     }
 

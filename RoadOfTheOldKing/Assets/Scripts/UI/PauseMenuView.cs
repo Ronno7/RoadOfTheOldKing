@@ -11,12 +11,9 @@ namespace TheLostShrine.UI
         [SerializeField] private VisualTreeAsset layout;
         [SerializeField] private PanelSettings panelSettings;
         private UIDocument document;
-        private VisualElement overlay, buttons;
-        private Label description;
-        private readonly List<Button> controls = new List<Button>();
-        private IReadOnlyList<PauseMenuAction> actions;
+        private VisualElement overlay;
+        private MenuList list;
         private Action<PauseMenuAction> invoke;
-        private int selected;
         public bool IsVisible => overlay != null && overlay.style.display.value != DisplayStyle.None;
 
         public bool Show(IReadOnlyList<PauseMenuAction> commands, Action<PauseMenuAction> onAction)
@@ -29,39 +26,16 @@ namespace TheLostShrine.UI
                 document = child.AddComponent<UIDocument>(); document.panelSettings = panelSettings;
                 document.visualTreeAsset = layout; child.SetActive(true);
                 overlay = document.rootVisualElement.Q("pause-overlay");
-                buttons = overlay.Q("actions"); description = overlay.Q<Label>("description");
+                list = new MenuList(overlay.Q("actions"), overlay.Q<Label>("description"), action => invoke?.Invoke(action));
             }
-            actions = commands; invoke = onAction; controls.Clear(); buttons.Clear(); selected = 0;
-            for (int i = 0; i < commands.Count; i++)
-            {
-                int index = i;
-                var button = new Button(() => invoke(actions[index])) { text = commands[i].Label, tooltip = commands[i].Description };
-                button.AddToClassList("menu-button"); button.SetEnabled(commands[i].Enabled);
-                button.RegisterCallback<FocusInEvent>(_ => Select(index));
-                button.RegisterCallback<PointerEnterEvent>(_ => Select(index));
-                // Navigation is owned by PauseMenuInput, avoiding duplicate submit/move events.
-                button.RegisterCallback<NavigationSubmitEvent>(e => e.StopPropagation());
-                button.RegisterCallback<NavigationMoveEvent>(e => e.StopPropagation());
-                controls.Add(button); buttons.Add(button);
-            }
+            invoke = onAction;
             overlay.style.display = DisplayStyle.Flex;
-            Select(0); overlay.schedule.Execute(() => { if (IsVisible && controls.Count > 0) controls[selected].Focus(); });
+            list.Show(commands);
             return true;
         }
 
-        private void Select(int index)
-        {
-            selected = index;
-            for (int i = 0; i < controls.Count; i++) controls[i].EnableInClassList("selected", i == selected);
-            description.text = actions[selected].Description;
-        }
-        public void Navigate(int direction)
-        {
-            if (!IsVisible || controls.Count == 0) return;
-            Select((selected + direction + controls.Count) % controls.Count);
-            controls[selected].Focus();
-        }
-        public void Submit() { if (IsVisible && actions.Count > 0) invoke(actions[selected]); }
+        public void Navigate(int direction) { if (IsVisible) list.Navigate(direction); }
+        public void Submit() { if (IsVisible) list.Submit(); }
         public void Hide() { if (overlay != null) overlay.style.display = DisplayStyle.None; }
         private void OnDisable() => Hide();
         private void OnDestroy() { if (document != null) Destroy(document.gameObject); }

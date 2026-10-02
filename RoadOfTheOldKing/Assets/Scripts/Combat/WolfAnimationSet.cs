@@ -17,6 +17,8 @@ namespace TheLostShrine.Combat
         [Min(.1f)] public float stalkCycleLength = 1.8f;
         [Min(.1f)] public float walkCycleLength = 2.4f;
         [Min(.1f)] public float runCycleLength = 3.6f;
+        [Tooltip("Measured speed (units/s) at or above which any travel shows the run cycle.")]
+        [Min(.1f)] public float runAnimationSpeed = 4.8f;
 
         [Header("Attack")]
         [Tooltip("Share of the recovery that finishes the bite before returning to idle.")]

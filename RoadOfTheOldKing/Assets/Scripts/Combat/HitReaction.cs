@@ -19,6 +19,8 @@ namespace TheLostShrine.Combat
         [SerializeField, Min(0f)] private float poiseResetDelay = 2.5f;
         [Tooltip("Share of knockback kept by a hit that doesn't stagger.")]
         [SerializeField, Range(0f, 1f)] private float unstaggeredKnockback = .2f;
+        [Tooltip("Share of a thrown or Recall hit's damage that counts toward breaking poise; melee breaks guards.")]
+        [SerializeField, Range(0f, 1f)] private float rangedPoiseMultiplier = .5f;
 
         private Damageable health;
         private Rigidbody2D body;
@@ -57,7 +59,8 @@ namespace TheLostShrine.Combat
             if (staggers && poise > 0f && !lethal)
             {
                 if (Time.time - lastHitAt > poiseResetDelay) poiseDamage = 0f;
-                poiseDamage += hit.Damage;
+                bool ranged = hit.Kind == AttackKind.Throw || hit.Kind == AttackKind.Recall;
+                poiseDamage += hit.Damage * (ranged ? rangedPoiseMultiplier : 1f);
                 staggers = poiseDamage >= poise;
                 if (staggers) poiseDamage = 0f;
             }

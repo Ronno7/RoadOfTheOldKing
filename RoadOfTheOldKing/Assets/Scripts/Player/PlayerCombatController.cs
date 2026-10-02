@@ -13,9 +13,12 @@ namespace TheLostShrine.Player
         [SerializeField] private Camera aimCamera;
         [SerializeField] private bool recallUnlocked;
         [SerializeField, Min(0f)] private float lightInputBuffer = 0.25f;
+        [Tooltip("Charge share after which the charged cleave has hyper-armor (hits still hurt but cannot stagger), through the spin.")]
+        [SerializeField, Range(0f, 1f)] private float heavyArmorCharge = 0.5f;
         private ICombatInput input;
         private float queuedLightUntil = -1f;
         private PlayerDash dash;
+        private PlayerFlask flask;
         private PlayerHealth health;
         private HitReaction reaction;
         private enum ThrowIntent { None, Throw, Recall, Consumed }
@@ -31,7 +34,7 @@ namespace TheLostShrine.Player
         public bool CanContinueAction => isActiveAndEnabled && controlsActive &&
             inputSource != null && inputSource.isActiveAndEnabled && Time.timeScale > 0f &&
             (health == null || health.IsAlive) && (reaction == null || !reaction.IsStaggered);
-        public bool CanStartAttack => CanContinueAction && (dash == null || !dash.IsDashing);
+        public bool CanStartAttack => CanContinueAction && (dash == null || !dash.IsDashing) && (flask == null || !flask.IsDrinking);
         public bool CanCancelThrowAim => Weapon != null && Weapon.CanCancelThrowAim;
         public bool ControlsMovement => Weapon != null && Weapon.ControlsMovement;
         public float ActionMovementScale => Weapon != null ? Weapon.ActionMovementScale : 1f;
@@ -43,6 +46,7 @@ namespace TheLostShrine.Player
         {
             Stamina = GetComponent<IStamina>();
             dash = GetComponent<PlayerDash>();
+            flask = GetComponent<PlayerFlask>();
             health = GetComponent<PlayerHealth>();
             reaction = GetComponent<HitReaction>();
             if (inputSource == null)
@@ -60,6 +64,9 @@ namespace TheLostShrine.Player
             CombatInputFrame frame = inputSource != null && inputSource.isActiveAndEnabled
                 ? input.Read() : default;
             ProcessInput(frame);
+            // The heavy attack trades: once committed it cannot be interrupted.
+            if (reaction != null) reaction.Armored = Weapon != null && (Weapon.State == AxeState.Cleaving ||
+                (Weapon.State == AxeState.Charging && Weapon.Charge01 >= heavyArmorCharge));
         }
 
         private void ProcessInput(CombatInputFrame frame)
@@ -86,7 +93,7 @@ namespace TheLostShrine.Player
                 if (Weapon.IsAway)
                 {
                     throwIntent = ThrowIntent.Recall;
-                    if (CanRecall) Weapon.TryRecall();
+                    if (CanRecall) Weapon.TryPlayerRecall();
                 }
                 else if (CanStartAttack && Weapon.TryBeginThrow(AimDirection))
                     throwIntent = ThrowIntent.Throw;
@@ -190,7 +197,7 @@ namespace TheLostShrine.Player
             }
         }
 
-        private void OnDisable() { controlsActive = false; ClearActionInput(); }
+        private void OnDisable() { controlsActive = false; ClearActionInput(); if (reaction != null) reaction.Armored = false; }
         private void OnApplicationFocus(bool focused) { if (!focused) { controlsActive = false; ClearActionInput(); } }
         private void OnApplicationPause(bool paused) { if (paused) { controlsActive = false; ClearActionInput(); } }
     }

@@ -50,6 +50,7 @@ namespace TheLostShrine.Player
             invulnerableUntil = 0f;
             GetComponent<HitReaction>().Clear();
             GetComponent<PlayerStamina>()?.Restore();
+            GetComponent<PlayerFlask>()?.Refill();
             if (dash != null)
                 dash.ResetAtRest();
         }

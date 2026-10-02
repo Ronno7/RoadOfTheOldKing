@@ -35,8 +35,7 @@ namespace TheLostShrine.Tutorial
         [Tooltip("Catches throws aimed at the carving; the player walks behind it (collision ignored for the player only).")]
         [SerializeField] private Collider2D hitBody;
         [SerializeField, TextArea] private string awakenedNotice = "Recall awakened. While your axe is away, press {recall} to call it back.";
-        private PlayerMovementInput lockedMovement;
-        private PlayerCombatInput lockedCombat;
+        private PlayerControlLocks locks;
         private PlayerHealth lockedHealth;
         private Coroutine sequence;
 
@@ -122,26 +121,19 @@ namespace TheLostShrine.Tutorial
             Show(IsAwakened ? Look.Awakened : Look.Dormant);
         }
 
-        // Same mechanism as the bonfire menu; only re-enable what this sequence disabled.
+        // A control-lock lease, like the bonfire menu; released only by this sequence.
         private void LockControls(PlayerCombatController player)
         {
             lockedHealth = player.GetComponent<PlayerHealth>();
-            lockedMovement = player.GetComponent<PlayerMovementInput>();
-            lockedCombat = player.GetComponent<PlayerCombatInput>();
-            if (lockedMovement != null && lockedMovement.enabled) lockedMovement.enabled = false; else lockedMovement = null;
-            if (lockedCombat != null && lockedCombat.enabled) lockedCombat.enabled = false; else lockedCombat = null;
+            locks = player.GetComponent<PlayerControlLocks>();
+            if (locks != null) locks.Lock(this);
         }
 
         private void UnlockControls()
         {
-            // Defeat owns the player's disabled state; never revive input for a dead player.
-            if (PlayerAlive())
-            {
-                if (lockedMovement != null) lockedMovement.enabled = true;
-                if (lockedCombat != null) lockedCombat.enabled = true;
-            }
-            lockedMovement = null;
-            lockedCombat = null;
+            // Death disables input separately; releasing the lease never revives a dead player.
+            if (locks != null) locks.Unlock(this);
+            locks = null;
         }
 
         private void OnDisable()

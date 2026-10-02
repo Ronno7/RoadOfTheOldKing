@@ -1,12 +1,12 @@
 using TheLostShrine.Player;
-using TheLostShrine.Weapons;
-using TheLostShrine.Progression;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.SceneManagement;
 
 namespace TheLostShrine.Prototype
 {
+    // Legacy placeholder kept for the retired PrototypeLoop: its heading, guide instruction and controls
+    // legend (IMGUI). Vitals, prompts and receipts belong to GameHud; the bonfire and defeat screens are
+    // the UI Toolkit BonfireMenu and DefeatScreen on the Player prefab. In compact mode (Tutorial) it
+    // draws nothing.
     public sealed class TutorialCombatHUD : MonoBehaviour
     {
         [SerializeField] private PlayerCombatController player;
@@ -16,233 +16,36 @@ namespace TheLostShrine.Prototype
         [SerializeField] private bool compact;
         private GUIStyle title;
         private GUIStyle text;
-        private bool restarting;
-        private bool confirmNewRun;
-        private PlayerBonfireInteraction bonfireInteraction;
-        private PlayerStamina stamina;
-        private TheLostShrine.UI.PauseMenuController pauseMenu;
-        private bool showUpgrades;
-        private readonly BonfireUpgradeMenu upgradeMenu = new BonfireUpgradeMenu();
-
-        private void Start()
-        {
-            if (player != null)
-            {
-                bonfireInteraction = player.GetComponent<PlayerBonfireInteraction>();
-                stamina = player.GetComponent<PlayerStamina>();
-                pauseMenu = player.GetComponent<TheLostShrine.UI.PauseMenuController>();
-            }
-        }
-
-        private void Update()
-        {
-            if (pauseMenu != null && pauseMenu.BlocksGameplay) return;
-            bool canRestart = playerHealth != null && !playerHealth.IsAlive;
-            if (canRestart && Keyboard.current != null && Keyboard.current.rKey.wasPressedThisFrame)
-                Restart();
-            if (bonfireInteraction == null || !bonfireInteraction.IsOpen)
-            {
-                confirmNewRun = false;
-                showUpgrades = false;
-                upgradeMenu.Reset();
-            }
-        }
-
-        private void Restart()
-        {
-            if (restarting)
-                return;
-            restarting = true;
-            if (CheckpointSession.Instance != null)
-                CheckpointSession.Instance.Respawn();
-            else
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        }
 
         private void OnGUI()
         {
-            if (player == null || (pauseMenu != null && pauseMenu.BlocksGameplay))
+            if (compact || player == null || Time.timeScale <= 0f || TheLostShrine.UI.MenuStack.IsAnyOpen)
                 return;
             if (title == null)
             {
                 title = new GUIStyle(GUI.skin.label) { fontSize = 17, fontStyle = FontStyle.Bold };
                 text = new GUIStyle(GUI.skin.label) { fontSize = 14, wordWrap = true };
             }
-            // Keep this placeholder readable in small Game views as well as full screen.
             float scale = Mathf.Clamp(Screen.width / 960f, 0.6f, 1.25f);
             Matrix4x4 previousMatrix = GUI.matrix;
             GUI.matrix = Matrix4x4.Scale(Vector3.one * scale);
             float screenWidth = Screen.width / scale;
             float screenHeight = Screen.height / scale;
             float width = Mathf.Min(440f, screenWidth - 24f);
-            Color previousColor = GUI.color;
 
-            // The contextual GameHud owns vitals, shards, prompts, charge and notices when present;
-            // this placeholder keeps the modal bonfire/defeat screens and PrototypeLoop's legend.
-            bool contextualHud = TheLostShrine.UI.GameHud.Active != null;
-            if (contextualHud)
-            {
-                if (!compact)
-                {
-                    var box = new Rect((screenWidth - width) * 0.5f, 12f, width, 94f);
-                    GUI.Box(box, GUIContent.none);
-                    GUI.Label(new Rect(box.x + 12f, 18f, width - 24f, 24f), heading, title);
-                    GUI.Label(new Rect(box.x + 12f, 44f, width - 24f, 60f), guide != null ? guide.Instruction : "", text);
-                }
-            }
-            else
-            {
-            GUI.Box(new Rect(12f, 12f, width, compact ? 94f : 186f), GUIContent.none);
-            GUI.Label(new Rect(24f, 18f, width - 24f, 24f), heading, title);
-            if (playerHealth != null && playerHealth.Health != null)
-            {
-                var health = playerHealth.Health;
-                GUI.Label(new Rect(24f, 46f, 140f, 24f), "HP  " + health.Health + " / " + health.MaxHealth, title);
-                GUI.color = new Color(0.2f, 0.2f, 0.2f);
-                GUI.DrawTexture(new Rect(174f, 50f, width - 186f, 14f), Texture2D.whiteTexture);
-                GUI.color = playerHealth.IsInvulnerable ? Color.white : new Color(0.9f, 0.3f, 0.3f);
-                GUI.DrawTexture(new Rect(174f, 50f, (width - 186f) * health.Health / health.MaxHealth, 14f), Texture2D.whiteTexture);
-                GUI.color = previousColor;
-            }
-            if (stamina != null)
-            {
-                GUI.Label(new Rect(24f, 76f, 140f, 24f), "STA  " + Mathf.FloorToInt(stamina.Current) + " / " + Mathf.RoundToInt(stamina.Maximum), text);
-                GUI.color = new Color(0.2f, 0.2f, 0.2f);
-                GUI.DrawTexture(new Rect(174f, 80f, width - 186f, 14f), Texture2D.whiteTexture);
-                GUI.color = stamina.WasSpendRejected ? new Color(1f, 0.3f, 0.2f) :
-                    stamina.Normalized < 0.25f ? new Color(1f, 0.7f, 0.2f) : new Color(0.3f, 0.85f, 0.55f);
-                GUI.DrawTexture(new Rect(174f, 80f, (width - 186f) * stamina.Normalized, 14f), Texture2D.whiteTexture);
-                GUI.color = previousColor;
-                if (stamina.WasSpendRejected)
-                    GUI.Label(new Rect(24f, 207f, width - 24f, 24f), "Not enough stamina - walk to recover.", text);
-            }
-            string instruction = guide != null ? guide.Instruction : "Press F near the axe to pick it up and practice.";
-            if (!compact)
-                GUI.Label(new Rect(24f, 107f, width - 24f, 82f), instruction, text);
-            var progress = CheckpointSession.Instance;
-            if (progress != null)
-            {
-                GUI.Box(new Rect(screenWidth - 218f, 12f, 206f, compact ? 42f : 102f), GUIContent.none);
-                GUI.Label(new Rect(screenWidth - 206f, 18f, 190f, 26f), "SUN SHARDS  " + progress.Progress.sunShards, title);
-                if (!compact)
-                {
-                    int fragments = HeartFragmentProgression.Count(progress.Progress);
-                    int bonus = HeartFragmentProgression.BonusHealth(progress.Progress);
-                    GUI.Label(new Rect(screenWidth - 206f, 46f, 190f, 26f),
-                        "FRAGMENTS  " + fragments % HeartFragmentProgression.FragmentsPerHeart + " / 3", text);
-                    GUI.Label(new Rect(screenWidth - 206f, 72f, 190f, 34f),
-                        bonus > 0 ? "Permanent HP: +" + bonus : "3 fragments = +20 max HP", text);
-                }
-            }
-            }
+            var box = new Rect((screenWidth - width) * 0.5f, 12f, width, 94f);
+            GUI.Box(box, GUIContent.none);
+            GUI.Label(new Rect(box.x + 12f, 18f, width - 24f, 24f), heading, title);
+            GUI.Label(new Rect(box.x + 12f, 44f, width - 24f, 60f), guide != null ? guide.Instruction : "", text);
 
             string controls = "WASD / arrows: move   |   Shift: sprint   |   Mouse: aim   |   Scroll: zoom\n" +
-                "LMB: slash   |   Hold / release RMB: cleave   |   Space: dash / dodge\n" +
+                "LMB: slash   |   Hold / release RMB: cleave   |   Space: dodge   |   Q: flask\n" +
                 "Tap E: throw   |   Hold E: aim; release: throw; RMB: cancel" +
                 (player.CanRecall ? "   |   E while away: recall" : "\nWalk over your thrown axe to retrieve it") +
-                "\nF: pick up / rest   |   Esc: pause / leave fire menu   |   Left Alt: freelook";
-            if (!compact)
-            {
-                GUI.Box(new Rect(12f, screenHeight - 128f, Mathf.Min(760f, screenWidth - 24f), 116f), GUIContent.none);
-                GUI.Label(new Rect(24f, screenHeight - 122f, Mathf.Min(738f, screenWidth - 48f), 110f), controls, text);
-            }
-
-            if (!contextualHud)
-            {
-                if (bonfireInteraction != null && !string.IsNullOrEmpty(bonfireInteraction.Prompt))
-                    GUI.Label(new Rect(24f, compact ? 116f : 235f, width - 24f, 28f), bonfireInteraction.Prompt, title);
-                var weapon = player.Weapon;
-                if (weapon != null && weapon.State == AxeState.Charging)
-                {
-                    GUI.color = weapon.Charge01 >= 1f ? new Color(1f, 0.8f, 0.2f) : new Color(0.5f, 0.8f, 1f);
-                    GUI.DrawTexture(new Rect(12f, 206f, width * weapon.Charge01, 10f), Texture2D.whiteTexture);
-                    GUI.color = previousColor;
-                }
-            }
-
-            if (playerHealth != null && !playerHealth.IsAlive)
-            {
-                var box = new Rect((screenWidth - 310f) * 0.5f, (screenHeight - 138f) * 0.5f, 310f, 138f);
-                GUI.Box(box, GUIContent.none);
-                GUI.Label(new Rect(box.x + 18f, box.y + 14f, 270f, 28f), "YOU WERE DEFEATED", title);
-                bool checkpoint = CheckpointSession.Instance != null && CheckpointSession.Instance.HasCheckpoint;
-                GUI.Label(new Rect(box.x + 18f, box.y + 47f, 274f, 32f), checkpoint ? "Press R to return to your bonfire." : "Press R to retry from the start.", text);
-                if (GUI.Button(new Rect(box.x + 18f, box.y + 86f, 274f, 34f), checkpoint ? "Return to bonfire" : "Restart"))
-                    Restart();
-            }
-            else if (bonfireInteraction != null && bonfireInteraction.IsOpen)
-                DrawBonfireMenu(screenWidth, screenHeight);
-            GUI.color = previousColor;
+                "\nF: pick up / rest   |   Esc: pause / back   |   Left Alt: freelook";
+            GUI.Box(new Rect(12f, screenHeight - 128f, Mathf.Min(760f, screenWidth - 24f), 116f), GUIContent.none);
+            GUI.Label(new Rect(24f, screenHeight - 122f, Mathf.Min(738f, screenWidth - 48f), 110f), controls, text);
             GUI.matrix = previousMatrix;
-        }
-
-        private void DrawBonfireMenu(float screenWidth, float screenHeight)
-        {
-            var session = CheckpointSession.Instance;
-            if (session == null)
-                return;
-            var fire = bonfireInteraction.ActiveFire;
-            float menuWidth = showUpgrades ? 520f : 420f;
-            float menuHeight = showUpgrades ? 426f : 372f;
-            var box = new Rect((screenWidth - menuWidth) * 0.5f, (screenHeight - menuHeight) * 0.5f, menuWidth, menuHeight);
-            Color menuColor = GUI.color;
-            GUI.color = new Color(0.06f, 0.08f, 0.08f, 0.97f);
-            GUI.DrawTexture(box, Texture2D.whiteTexture);
-            GUI.color = menuColor;
-            GUI.Box(box, GUIContent.none);
-            if (showUpgrades)
-            {
-                upgradeMenu.Draw(box, session, fire, title, text);
-                if (GUI.Button(new Rect(box.x + 18f, box.yMax - 46f, box.width - 36f, 30f), "Back to bonfire"))
-                {
-                    showUpgrades = false;
-                    upgradeMenu.Reset();
-                }
-                return;
-            }
-            float x = box.x + 18f;
-            float y = box.y + 16f;
-            GUI.Label(new Rect(x, y, 384f, 28f), fire.DisplayName.ToUpperInvariant(), title);
-            GUI.Label(new Rect(x, y + 34f, 384f, 48f), session.Status, text);
-            GUI.Label(new Rect(x, y + 70f, 384f, 22f), "Sun Shards: " + session.Progress.sunShards, text);
-            y += 100f;
-            if (confirmNewRun)
-            {
-                GUI.Label(new Rect(x, y, 384f, 44f), "Start over? This clears this journey's saved progress.", text);
-                if (GUI.Button(new Rect(x, y + 54f, 188f, 34f), "Start new run"))
-                    session.StartNewRun();
-                if (GUI.Button(new Rect(x + 196f, y + 54f, 188f, 34f), "Keep playing"))
-                    confirmNewRun = false;
-                return;
-            }
-            if (GUI.Button(new Rect(x, y, 384f, 32f), "Rest again (restore HP / stamina / save)"))
-                session.Rest(fire);
-            y += 42f;
-            if (fire.AllowsUpgrades)
-            {
-                if (GUI.Button(new Rect(x, y, 384f, 32f), "Axe upgrades (Sun Shards: " + session.Progress.sunShards + ")"))
-                    showUpgrades = true;
-                y += 38f;
-            }
-            bool travelAvailable = false;
-            foreach (var destination in session.Fires)
-            {
-                if (destination == fire || !destination.IsDiscovered)
-                    continue;
-                travelAvailable = true;
-                if (GUI.Button(new Rect(x, y, 384f, 32f), "Travel to " + destination.DisplayName) && session.Travel(destination, fire))
-                    bonfireInteraction.Close();
-                y += 38f;
-            }
-            if (!travelAvailable)
-            {
-                GUI.Label(new Rect(x, y, 384f, 36f), "Light another fire to unlock travel.", text);
-                y += 38f;
-            }
-            if (GUI.Button(new Rect(x, box.yMax - 86f, 384f, 30f), "New run..."))
-                confirmNewRun = true;
-            if (GUI.Button(new Rect(x, box.yMax - 46f, 384f, 30f), "Leave (F / Esc)"))
-                bonfireInteraction.Close();
         }
     }
 }

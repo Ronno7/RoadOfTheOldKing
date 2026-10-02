@@ -18,6 +18,7 @@ namespace TheLostShrine.Player
         private PlayerCombatController combat;
         private PlayerHealth health;
         private HitReaction reaction;
+        private PlayerFlask flask;
         private float remaining;
         private float cooldownRemaining;
 
@@ -36,6 +37,7 @@ namespace TheLostShrine.Player
             combat = GetComponent<PlayerCombatController>();
             health = GetComponent<PlayerHealth>();
             reaction = GetComponent<HitReaction>();
+            flask = GetComponent<PlayerFlask>();
         }
 
         public bool TryStart(Vector2 direction)
@@ -43,7 +45,7 @@ namespace TheLostShrine.Player
             if (!isActiveAndEnabled || IsDashing || cooldownRemaining > 0f ||
                 direction.sqrMagnitude < 0.001f || (health != null && !health.IsAlive) ||
                 (reaction != null && reaction.IsStaggered) ||
-                (combat != null && combat.IsAttacking && !combat.CanCancelThrowAim))
+                (combat != null && combat.IsAttacking && !combat.CanCancelThrowAim) || (flask != null && flask.IsDrinking))
                 return false;
             if (!stamina.TrySpend(staminaCost))
                 return false;

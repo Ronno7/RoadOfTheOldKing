@@ -40,6 +40,9 @@ namespace TheLostShrine.UI
 
         private UIDocument document;
         private VisualElement root, vignette, vitals, healthFill, staminaFill, staminaBar, weaponAway, prompt, charge, chargeFill, receipts, hint, status;
+        private Label flaskCount;
+        private VisualElement flaskRow;
+        private PlayerFlask flask;
         private Label staminaWarning, weaponAwayText, promptText, hintText, statusText;
         private PlayerHealth player;
         private Damageable playerDamageable;
@@ -60,6 +63,7 @@ namespace TheLostShrine.UI
             // Read directly: PlayerHealth.Health is only set in its own Awake, which may run after this OnEnable.
             playerDamageable = GetComponent<Damageable>();
             stamina = GetComponent<PlayerStamina>();
+            flask = GetComponent<PlayerFlask>();
             combat = GetComponent<PlayerCombatController>();
             interaction = GetComponent<PlayerBonfireInteraction>();
             pauseMenu = GetComponent<PauseMenuController>();
@@ -70,6 +74,7 @@ namespace TheLostShrine.UI
             Active = this;
             if (!Build()) { enabled = false; return; }
             if (playerDamageable != null) playerDamageable.HitReceived += OnPlayerHit;
+            if (flask != null) flask.DrinkRefused += OnFlaskEmpty;
             Subscribe();
             Reveal();
         }
@@ -78,6 +83,7 @@ namespace TheLostShrine.UI
         {
             if (Active == this) Active = null;
             if (playerDamageable != null) playerDamageable.HitReceived -= OnPlayerHit;
+            if (flask != null) flask.DrinkRefused -= OnFlaskEmpty;
             Unsubscribe();
             if (root != null) root.style.display = DisplayStyle.None;
         }
@@ -98,6 +104,7 @@ namespace TheLostShrine.UI
             root = document.rootVisualElement.Q("hud-root");
             vitals = root.Q("vitals"); healthFill = root.Q("health-fill"); staminaFill = root.Q("stamina-fill");
             staminaBar = root.Q("stamina-bar"); staminaWarning = root.Q<Label>("stamina-warning");
+            flaskRow = root.Q("flask-row"); flaskCount = root.Q<Label>("flask-count");
             weaponAway = root.Q("weapon-away"); weaponAwayText = root.Q<Label>("weapon-away-text");
             prompt = root.Q("prompt"); promptText = root.Q<Label>("prompt-text");
             charge = root.Q("charge"); chargeFill = root.Q("charge-fill");
@@ -134,12 +141,13 @@ namespace TheLostShrine.UI
             : "Heart fragment · " + total % HeartFragmentProgression.FragmentsPerHeart + " / " + HeartFragmentProgression.FragmentsPerHeart, 4.5f);
 
         private void Reveal() => vitalsUntil = Time.time + vitalsHold;
+        private void OnFlaskEmpty() { Reveal(); HudNotifications.Post("No flasks left. Rest at a bonfire to refill."); }
 
         private void Update()
         {
             if (document == null) return;
             Subscribe();
-            bool menuOpen = (interaction != null && interaction.IsOpen) || (pauseMenu != null && pauseMenu.BlocksGameplay);
+            bool menuOpen = MenuStack.IsAnyOpen || (interaction != null && interaction.IsOpen) || (pauseMenu != null && pauseMenu.BlocksGameplay);
             bool alive = player.IsAlive;
             var keyboard = Keyboard.current;
             if (keyboard != null && keyboard.tabKey.wasPressedThisFrame && !menuOpen && alive && Time.timeScale > 0f) statusOpen = !statusOpen;
@@ -167,6 +175,14 @@ namespace TheLostShrine.UI
             staminaFill.EnableInClassList("low", staminaRatio < 0.25f);
             bool rejected = stamina != null && stamina.WasSpendRejected;
             staminaBar.EnableInClassList("rejected", rejected);
+            staminaBar.EnableInClassList("exhausted", stamina != null && stamina.IsExhausted);
+            SetVisible(flaskRow, flask != null && flask.MaxCharges > 0);
+            if (flask != null)
+            {
+                flaskCount.text = "x" + flask.Charges;
+                flaskRow.EnableInClassList("empty", flask.Charges == 0);
+                if (flask.IsDrinking) Reveal();
+            }
             SetVisible(staminaWarning, rejected);
             if (healthRatio < 0.999f || staminaRatio < 0.999f || EncounterState.InCombat || !player.IsAlive || statusOpen) Reveal();
             SetVisible(vitals, Time.time < vitalsUntil);
@@ -294,6 +310,7 @@ namespace TheLostShrine.UI
             var weapon = combat != null ? combat.Weapon : null;
             text.Append("Axe  ").Append(weapon == null ? "not yet found" : weapon.IsAway ? "away" : "in hand").Append('\n');
             text.Append("Recall  ").Append(combat != null && combat.CanRecall ? "awakened" : "dormant").Append('\n');
+            if (flask != null) text.Append("Flasks  ").Append(flask.Charges).Append(" / ").Append(flask.MaxCharges).Append("  (").Append(ControlLabels.Get("heal")).Append(" to drink)\n");
             if (CheckpointSession.Instance != null)
             {
                 bool any = false;

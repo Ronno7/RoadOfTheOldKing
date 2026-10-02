@@ -60,6 +60,10 @@ namespace TheLostShrine.Combat
         [SerializeField, Min(.1f)] private float evadeDistance = 2.4f;
         [SerializeField, Min(.05f)] private float evadeDuration = .2f;
         [SerializeField, Min(0f)] private float evadeCooldown = 1.5f;
+        [Tooltip("Chance to sidestep an axe thrown straight at it.")]
+        [SerializeField, Range(0f, 1f)] private float sidestepChance = .45f;
+        [Tooltip("How far off the axe's line (degrees) still counts as thrown at it.")]
+        [SerializeField, Range(1f, 60f)] private float throwThreatAngle = 25f;
         [Tooltip("Extra distance beyond the player's weapon reach that still counts as threatened.")]
         [SerializeField, Min(0f)] private float threatMargin = .6f;
         [Tooltip("Chance to attack at once when the player whiffs (attack recovery) or throws the axe away.")]
@@ -116,10 +120,12 @@ namespace TheLostShrine.Combat
         private Collider2D bodyCollider;
         private PlayerCombatController combat;
         private PlayerStamina stamina;
+        private PlayerFlask flask;
         private Vector2 home, previousPosition, repositionPoint, deathSlide, lungeOrigin, evadeDirection;
         private float elapsed, duration, stalkFor, feintAt, lastSeen, blockedTime, actualSpeed, evadeReadyAt;
         private int circleSign = 1;
         private bool struck, feint, hitPending, playerWasSwinging, playerWasExposed;
+        private uint lastFlightSequence;
 
         public WolfState State { get; private set; }
         public Vector2 FacingDirection { get; private set; } = Vector2.down;
@@ -162,12 +168,13 @@ namespace TheLostShrine.Combat
             {
                 var w = PlayerWeapon;
                 if (combat == null) return false;
-                return w == null || w.IsAway || (w.State == AxeState.LightChop && w.LightPhase == MeleePhase.Recovery) ||
+                return w == null || w.IsAway || w.IsCatching || (flask != null && flask.IsDrinking) || (w.State == AxeState.LightChop && w.LightPhase == MeleePhase.Recovery) ||
                     (w.IsThrowing && !w.CanCancelThrowAim);
             }
         }
 
         private bool PlayerTired => stamina != null && stamina.Current < tiredStamina;
+        private bool PlayerAxeAway => PlayerWeapon != null && PlayerWeapon.IsAway;
 
         private float PlayerThreatRange
         {
@@ -196,6 +203,7 @@ namespace TheLostShrine.Combat
             {
                 combat = target.GetComponent<PlayerCombatController>();
                 stamina = target.GetComponent<PlayerStamina>();
+                flask = target.GetComponent<PlayerFlask>();
             }
         }
 
@@ -243,6 +251,10 @@ namespace TheLostShrine.Combat
             playerWasExposed = exposed;
             bool wasHit = hitPending;
             hitPending = false;
+            // A new throw launched this tick (flight sequence advanced).
+            var weapon = PlayerWeapon;
+            bool throwLaunched = weapon != null && weapon.FlightSequence != lastFlightSequence && weapon.State == AxeState.Flying;
+            if (weapon != null) lastFlightSequence = weapon.FlightSequence;
 
             // Weapon knockback owns the body while staggered; then a short recovery before acting.
             if (State == WolfState.Staggered)
@@ -263,7 +275,7 @@ namespace TheLostShrine.Combat
             }
 
             bool free = State == WolfState.Stalk || State == WolfState.Reposition || State == WolfState.Chase;
-            if (IsAware && free && Reacted(distance, toward, sees, swingStarted, openingStarted, wasHit)) return;
+            if (IsAware && free && Reacted(distance, toward, sees, swingStarted, openingStarted, wasHit, throwLaunched)) return;
 
             switch (State)
             {
@@ -348,8 +360,23 @@ namespace TheLostShrine.Combat
         }
 
         // Reactions available while circling, repositioning or chasing. Returns true when it acted.
-        private bool Reacted(float distance, Vector2 toward, bool sees, bool swingStarted, bool openingStarted, bool wasHit)
+        private bool Reacted(float distance, Vector2 toward, bool sees, bool swingStarted, bool openingStarted, bool wasHit, bool throwLaunched)
         {
+            // An axe thrown straight at it: step off the line (the side it is already on).
+            var weapon = PlayerWeapon;
+            if (throwLaunched && weapon != null && Time.time >= evadeReadyAt && distance <= weapon.Settings.throwRange + 1f)
+            {
+                Vector2 line = weapon.AttackDirection, fromPlayer = -toward;
+                if (Vector2.Angle(line, fromPlayer) <= throwThreatAngle && Random.value < sidestepChance)
+                {
+                    float side = line.x * fromPlayer.y - line.y * fromPlayer.x;
+                    if (Mathf.Abs(side) < .001f) side = Random.value < .5f ? -1f : 1f;
+                    evadeReadyAt = Time.time + evadeCooldown;
+                    evadeDirection = new Vector2(-line.y, line.x) * Mathf.Sign(side);
+                    Enter(WolfState.Evade, evadeDuration);
+                    return true;
+                }
+            }
             // Hit without breaking its poise: bite back.
             if (wasHit && distance <= snapRange + .3f && Random.value < retaliateChance && AttackTokens.TryAcquire(this))
             {
@@ -380,6 +407,8 @@ namespace TheLostShrine.Combat
         private void Stalk(float distance, Vector2 toward, bool sees, bool exposed, float dt)
         {
             if (distance > chaseDistance) { Enter(WolfState.Chase); return; }
+            // Unarmed player (axe away): close in at a run instead of circling.
+            if (PlayerAxeAway && distance > lungeRange.y * .9f) { Move(toward, runSpeed, dt); return; }
             bool hugged = distance < snapRange * .8f;
             float patience = exposed || PlayerTired ? stalkFor * pressureScale : stalkFor;
             if (sees && (elapsed >= patience || hugged))

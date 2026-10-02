@@ -12,11 +12,13 @@ namespace TheLostShrine.Player
     {
         private PlayerHealth health;
         private PlayerCombatController combat;
-        private PlayerMovementInput movementInput;
-        private PlayerCombatInput combatInput;
+        private PlayerControlLocks locks;
         public Bonfire Nearby { get; private set; }
         public Bonfire ActiveFire { get; private set; }
         public bool IsOpen => ActiveFire != null;
+        // The bonfire menu presents these; this component only owns resting and the control lock.
+        public event System.Action<Bonfire> Opened;
+        public event System.Action Closed;
         public WorldPickup NearbyPickup { get; private set; }
         public string Prompt => IsOpen || !CanInteract ? "" : NearbyPickup != null
             ? "F - " + NearbyPickup.Prompt : Nearby != null ? "F - Rest at " + Nearby.DisplayName : "";
@@ -27,8 +29,7 @@ namespace TheLostShrine.Player
         {
             health = GetComponent<PlayerHealth>();
             combat = GetComponent<PlayerCombatController>();
-            movementInput = GetComponent<PlayerMovementInput>();
-            combatInput = GetComponent<PlayerCombatInput>();
+            locks = GetComponent<PlayerControlLocks>();
         }
 
         private void Update()
@@ -39,8 +40,9 @@ namespace TheLostShrine.Player
                 Close();
                 return;
             }
+            // Escape is routed to the bonfire menu through MenuStack; F toggles here.
             var keyboard = Keyboard.current;
-            if (IsOpen && (Nearby != ActiveFire || (keyboard != null && keyboard.escapeKey.wasPressedThisFrame)))
+            if (IsOpen && Nearby != ActiveFire)
                 Close();
             else if (Time.timeScale > 0f && Application.isFocused && keyboard != null && keyboard.fKey.wasPressedThisFrame)
                 TryInteract();
@@ -92,8 +94,8 @@ namespace TheLostShrine.Player
             if (session == null || !session.Rest(fire))
                 return false;
             ActiveFire = fire;
-            if (movementInput != null) movementInput.enabled = false;
-            if (combatInput != null) combatInput.enabled = false;
+            if (locks != null) locks.Lock(this);
+            Opened?.Invoke(fire);
             return true;
         }
 
@@ -102,11 +104,8 @@ namespace TheLostShrine.Player
             if (!IsOpen)
                 return;
             ActiveFire = null;
-            if (health != null && health.IsAlive)
-            {
-                if (movementInput != null) movementInput.enabled = true;
-                if (combatInput != null) combatInput.enabled = true;
-            }
+            if (locks != null) locks.Unlock(this);
+            Closed?.Invoke();
         }
 
         private void OnDisable() => Close();

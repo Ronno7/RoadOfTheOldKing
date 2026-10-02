@@ -13,7 +13,7 @@ namespace TheLostShrine.UI
         {
             { "move", "WASD" }, { "sprint", "Shift" }, { "dash", "Space" }, { "interact", "F" },
             { "attack", "LMB" }, { "cleave", "RMB" }, { "throw", "E" },
-            { "recall", "E" }, { "pause", "Esc" }, { "status", "Tab" }, { "look", "Left Alt" },
+            { "recall", "E" }, { "pause", "Esc" }, { "status", "Tab" }, { "look", "Left Alt" }, { "heal", "Q" },
         };
 
         public static string Get(string token) => labels.TryGetValue(token, out var label) ? label : token;

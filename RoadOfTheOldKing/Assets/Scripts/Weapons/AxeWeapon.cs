@@ -28,6 +28,9 @@ namespace TheLostShrine.Weapons
         private Vector2 pendingActionDisplacement;
         private float addedCleaveRadius;
         private float impactPauseRemaining;
+        // The current attack's cost pushed stamina below zero: it hits weaker.
+        private bool exhaustedAttack;
+        private float catchRecoveryRemaining;
         private readonly ThrowActionClock throwAction = new ThrowActionClock();
         public event System.Action<CombatHit> HitConfirmed;
         // Successful Recall arrival only; cancellation, equip and ground pickup do not catch.
@@ -72,7 +75,9 @@ namespace TheLostShrine.Weapons
         }
         public float CleaveRadius => settings.cleaveRadius + addedCleaveRadius;
         public bool IsAway => State == AxeState.Flying || State == AxeState.Stuck || State == AxeState.Returning;
-        public bool IsAttacking => throwAction.IsActive || State == AxeState.LightChop || State == AxeState.Charging || State == AxeState.Cleaving;
+        public bool IsAttacking => throwAction.IsActive || State == AxeState.LightChop || State == AxeState.Charging || State == AxeState.Cleaving || IsCatching;
+        // Just caught a recalled axe: no attack or dodge until this ends.
+        public bool IsCatching => State == AxeState.Held && catchRecoveryRemaining > 0f;
         public ThrowPhase ThrowPhase => throwAction.Phase;
         public int ThrowCelIndex => throwAction.CelIndex;
         public float ThrowPhaseProgress => throwAction.PhaseProgress;
@@ -84,13 +89,16 @@ namespace TheLostShrine.Weapons
         public float AimDistance => hits == null || owner == null ? 0f : hits.PreviewFlightDistance(
             owner.transform.position, AimDirection, settings.throwRange, settings.flightRadius);
         public float ActionMovementScale => IsThrowing ? throwAction.MovementScale
-            : State == AxeState.LightChop ? Mathf.SmoothStep(0f, 1f,
-                Mathf.InverseLerp(ComboIndex == 2 ? 0.84f : 0.78f, 1f, AttackProgress)) : 1f;
+            : State == AxeState.LightChop ? Mathf.Max(settings.lightMovementScale, Mathf.SmoothStep(0f, 1f,
+                Mathf.InverseLerp(ComboIndex == 2 ? 0.84f : 0.78f, 1f, AttackProgress))) : 1f;
         public float Charge01 => State == AxeState.Charging
             ? Mathf.Clamp01(elapsed / settings.fullCharge) : State == AxeState.Cleaving ? cleaveStrength : 0f;
         public float AttackProgress => Mathf.Clamp01(elapsed / (State == AxeState.Cleaving
-            ? settings.cleaveDuration : LightDuration));
-        public float LightDuration => settings.lightDuration * (ComboIndex == 2 ? settings.finisherDurationMultiplier : 1f) / lightSpeedMultiplier;
+            ? CleaveDuration : LightDuration));
+        public float LightDuration => settings.lightDuration * (ComboIndex == 2 ? settings.finisherDurationMultiplier : 1f) / lightSpeedMultiplier / ExhaustedSpeed;
+        public float CleaveDuration => settings.cleaveDuration / ExhaustedSpeed;
+        // An attack made into a stamina deficit plays slower (and hits weaker): an opening for the enemy.
+        private float ExhaustedSpeed => exhaustedAttack ? Mathf.Max(0.1f, settings.exhaustedSpeedMultiplier) : 1f;
         private float LightDamageStart => LightDuration * LightWindupFraction;
         private float LightDamageEnd => LightDuration * LightSwingEndFraction;
         // Presentation reads the same action clock/window as the physics interval below.
@@ -153,11 +161,12 @@ namespace TheLostShrine.Weapons
 
         public bool TryLightChop(Vector2 direction)
         {
-            if (!isActiveAndEnabled || State != AxeState.Held || IsThrowing || !owner.CanStartAttack)
+            if (!isActiveAndEnabled || State != AxeState.Held || IsThrowing || IsCatching || !owner.CanStartAttack)
                 return false;
             int nextComboIndex = comboRemaining > 0f ? (ComboIndex + 1) % 3 : 0;
             if (!owner.Stamina.TrySpend(nextComboIndex == 2 ? settings.finisherStaminaCost : settings.lightStaminaCost))
                 return false;
+            exhaustedAttack = owner.Stamina.IsExhausted;
             SetAim(direction);
             attackDirection = AimDirection;
             ComboIndex = nextComboIndex;
@@ -168,11 +177,12 @@ namespace TheLostShrine.Weapons
 
         public bool TryBeginCharge()
         {
-            if (!isActiveAndEnabled || State != AxeState.Held || IsThrowing || !owner.CanStartAttack)
+            if (!isActiveAndEnabled || State != AxeState.Held || IsThrowing || IsCatching || !owner.CanStartAttack)
                 return false;
             // Pay once on commitment. Holding or cancelling cannot generate a free cleave.
             if (!owner.Stamina.TrySpend(settings.cleaveStaminaCost))
                 return false;
+            exhaustedAttack = owner.Stamina.IsExhausted;
             comboRemaining = 0f;
             SetState(AxeState.Charging);
             return true;
@@ -205,6 +215,7 @@ namespace TheLostShrine.Weapons
         public void CancelAction()
         {
             pendingActionDisplacement = Vector2.zero;
+            catchRecoveryRemaining = 0f;
             throwAction.Cancel();
             if (owner == null)
                 return;
@@ -228,7 +239,7 @@ namespace TheLostShrine.Weapons
 
         public bool TryBeginThrow(Vector2 direction)
         {
-            if (!isActiveAndEnabled || State != AxeState.Held || owner == null || !owner.CanStartAttack ||
+            if (!isActiveAndEnabled || State != AxeState.Held || IsCatching || owner == null || !owner.CanStartAttack ||
                 !throwAction.Begin(settings.throwAction))
                 return false;
             SetAim(direction);
@@ -244,6 +255,7 @@ namespace TheLostShrine.Weapons
                 CancelThrow();
                 return false;
             }
+            exhaustedAttack = owner.Stamina.IsExhausted;
             SetAim(direction);
             attackDirection = AimDirection;
             return throwAction.Commit();
@@ -265,13 +277,24 @@ namespace TheLostShrine.Weapons
             SetState(AxeState.Flying);
         }
 
+        // A Recall the player asks for costs stamina; refused at zero stamina, so the axe must be fetched on foot.
+        public bool TryPlayerRecall()
+        {
+            if (!isActiveAndEnabled || owner == null || !owner.CanRecall || (State != AxeState.Flying && State != AxeState.Stuck))
+                return false;
+            return owner.Stamina.TrySpend(settings.recallStaminaCost) && TryRecall();
+        }
+
+        // Free Recall: automatic distance returns and scripted sequences.
         public bool TryRecall()
         {
             if (!isActiveAndEnabled || owner == null || !owner.CanRecall ||
                 (State != AxeState.Flying && State != AxeState.Stuck))
                 return false;
+            hits.BeginAttack(); // A target can be hit once outbound and once on return...
+            // ...but not the one the axe is embedded in: Recall damage comes from routing the return through enemies.
+            if (stuckTarget != null) hits.Exclude(stuckTarget.GetComponentInParent<IHitReceiver>());
             stuckTarget = null;
-            hits.BeginAttack(); // A target can be hit once outbound and once on return.
             ReturnApproachDirection = ((Vector2)(transform.position - owner.transform.position)).normalized;
             SetState(AxeState.Returning);
             return true;
@@ -315,6 +338,7 @@ namespace TheLostShrine.Weapons
             {
                 case AxeState.Held:
                     comboRemaining = Mathf.Max(0f, comboRemaining - deltaTime);
+                    catchRecoveryRemaining = Mathf.Max(0f, catchRecoveryRemaining - deltaTime);
                     transform.position = owner.transform.position;
                     break;
                 case AxeState.Charging:
@@ -331,7 +355,7 @@ namespace TheLostShrine.Weapons
                         hits.Melee(owner.transform.position, attackDirection,
                             LightReach, LightArc,
                             new CombatHit(owner.gameObject, AttackKind.LightChop,
-                                LightDamage,
+                                Exhausted(LightDamage),
                                 attackDirection, ComboIndex == 2 ? settings.finisherKnockback : settings.lightKnockback,
                                 ComboIndex == 2 ? settings.finisherStagger : settings.lightStagger),
                             IsLightThrust ? LightLaneWidth : 0f);
@@ -343,13 +367,13 @@ namespace TheLostShrine.Weapons
                     break;
                 case AxeState.Cleaving:
                     transform.position = owner.transform.position;
-                    if (elapsed >= settings.cleaveDuration * 0.15f && previousElapsed <= settings.cleaveDuration * 0.8f)
+                    if (elapsed >= CleaveDuration * 0.15f && previousElapsed <= CleaveDuration * 0.8f)
                         hits.Melee(owner.transform.position, attackDirection, CleaveRadius, 360f,
                             new CombatHit(owner.gameObject, AttackKind.ChargedCleave,
-                                Mathf.Max(1, Mathf.RoundToInt(settings.cleaveDamage * Mathf.Lerp(0.5f, 1f, cleaveStrength))),
+                                Exhausted(Mathf.Max(1, Mathf.RoundToInt(settings.cleaveDamage * Mathf.Lerp(0.5f, 1f, cleaveStrength)))),
                                 attackDirection, settings.cleaveKnockback * cleaveStrength,
                                 settings.cleaveStagger * cleaveStrength, cleaveStrength >= 0.999f));
-                    if (elapsed >= settings.cleaveDuration)
+                    if (elapsed >= CleaveDuration)
                         SetState(AxeState.Held);
                     break;
                 case AxeState.Flying:
@@ -380,12 +404,14 @@ namespace TheLostShrine.Weapons
                 TryRecall();
         }
 
+        private int Exhausted(int damage) => exhaustedAttack ? Mathf.Max(1, Mathf.RoundToInt(damage * settings.exhaustedDamageMultiplier)) : damage;
+
         private void FlyOut(float deltaTime)
         {
             Vector2 origin = transform.position;
             float distance = Mathf.Min(settings.throwSpeed * deltaTime, settings.throwRange - travelled);
             Vector2 destination = origin + attackDirection * distance;
-            var hit = new CombatHit(owner.gameObject, AttackKind.Throw, settings.throwDamage, attackDirection, settings.throwKnockback, 0.15f);
+            var hit = new CombatHit(owner.gameObject, AttackKind.Throw, Exhausted(settings.throwDamage), attackDirection, settings.throwKnockback, 0.15f);
             if (hits.Flight(origin, destination, settings.flightRadius, hit, true, out RaycastHit2D impact))
             {
                 FlightSeconds += impact.distance / settings.throwSpeed;
@@ -422,6 +448,7 @@ namespace TheLostShrine.Weapons
             if (Vector2.Distance(destination, owner.transform.position) <= 0.1f)
             {
                 SetState(AxeState.Held);
+                catchRecoveryRemaining = settings.catchRecovery;
                 ReturnedToHand?.Invoke();
             }
         }

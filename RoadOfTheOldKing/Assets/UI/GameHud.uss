@@ -17,6 +17,11 @@
 .meter-row { flex-direction: row; align-items: center; margin-bottom: 3px; }
 .meter-icon { width: 8px; height: 8px; margin-right: 6px; border-width: 1px; border-color: rgb(20, 20, 18); }
 .health-icon { background-color: rgb(178, 72, 64); }
+/* Healing flask: warm amber charge count; dims when empty. */
+.flask-icon { background-color: rgb(214, 150, 64); }
+#flask-count { font-size: 10px; color: rgb(242, 228, 196); margin: 0; padding: 0; -unity-text-align: middle-left; }
+#flask-row.empty .flask-icon { background-color: rgb(70, 62, 54); }
+#flask-row.empty #flask-count { color: rgb(150, 138, 120); }
 .stamina-icon { background-color: rgb(118, 160, 112); }
 .bar { width: 132px; height: 10px; background-color: rgb(52, 50, 45); border-width: 1px; border-color: rgb(20, 20, 18); }
 .bar.thin { width: 110px; height: 6px; }
@@ -25,6 +30,8 @@
 .stamina-fill { background-color: rgb(118, 160, 112); }
 .stamina-fill.low { background-color: rgb(196, 164, 84); }
 #stamina-bar.rejected { border-color: rgb(231, 184, 92); }
+/* Stamina below zero (Souls-style deficit): the empty bar reads dark red until it recovers. */
+#stamina-bar.exhausted { background-color: rgb(92, 34, 30); }
 #stamina-warning { font-size: 10px; color: rgb(231, 184, 92); -unity-text-align: middle-left; margin: 0; padding: 0; }
 #weapon-away { margin-left: 8px; }
 .axe-icon { width: 7px; height: 12px; margin-right: 6px; background-color: rgb(186, 140, 72); border-width: 1px; border-color: rgb(20, 20, 18); }

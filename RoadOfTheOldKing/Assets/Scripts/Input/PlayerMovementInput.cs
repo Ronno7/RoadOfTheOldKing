@@ -16,10 +16,12 @@ namespace TheLostShrine.Input
 
         public Vector2 MoveDirection { get; private set; }
         public bool SprintHeld { get; private set; }
-        public bool IsActive => isActiveAndEnabled && hasFocus && !paused && Time.timeScale > 0f;
+        public bool IsActive => isActiveAndEnabled && hasFocus && !paused && Time.timeScale > 0f && (locks == null || !locks.IsLocked);
+        private TheLostShrine.Player.PlayerControlLocks locks;
 
         private void Awake()
         {
+            locks = GetComponent<TheLostShrine.Player.PlayerControlLocks>();
             actions = new InputActionMap("Player Movement");
             move = actions.AddAction("Move", InputActionType.Value, expectedControlLayout: "Vector2");
 

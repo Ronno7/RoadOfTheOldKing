@@ -30,6 +30,10 @@ GameObject:
   - component: {fileID: 8033240405425768703}
   - component: {fileID: 5021361952452321745}
   - component: {fileID: 5573167816240498612}
+  - component: {fileID: 1148609977363456808}
+  - component: {fileID: 8916193356242753977}
+  - component: {fileID: 637550051732109431}
+  - component: {fileID: 8525511693263056149}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -192,6 +196,7 @@ MonoBehaviour:
   aimCamera: {fileID: 0}
   recallUnlocked: 0
   lightInputBuffer: 0.25
+  heavyArmorCharge: 0.5
 --- !u!114 &4217139744019354931
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -225,6 +230,7 @@ MonoBehaviour:
   poise: 0
   poiseResetDelay: 2.5
   unstaggeredKnockback: 0.2
+  rangedPoiseMultiplier: 0.5
 --- !u!114 &7425349288622817033
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -263,8 +269,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerStamina
   maximum: 100
-  recoveryPerSecond: 25
-  recoveryDelay: 0.5
+  recoveryPerSecond: 40
+  recoveryDelay: 0.6
+  deficitLimit: 40
 --- !u!114 &8027254562946123960
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -277,11 +284,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9bc50151568b4c840869471f5dd327e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerDash
-  distance: 3
-  duration: 0.18
-  staminaCost: 25
-  cooldown: 0.15
-  dodgeWindow: 0.1
+  distance: 3.2
+  duration: 0.36
+  staminaCost: 18
+  cooldown: 0
+  dodgeWindow: 0.24
 --- !u!114 &8164189053318432841
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -464,11 +471,72 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerHitFeedback
   body: {fileID: 1009}
   flashColor: {r: 1, g: 0.32, b: 0.26, a: 1}
+  healFlashColor: {r: 1, g: 0.84, b: 0.45, a: 1}
+  healFlashDuration: 0.18
   flashDuration: 0.1
   hitStop: 0.06
   cameraKick: 0.22
   blinkInterval: 0.07
   blinkAlpha: 0.3
+--- !u!114 &1148609977363456808
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d911b09e4c130014fac645b7cd537e1f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerFlask
+  maxCharges: 3
+  healAmount: 40
+  drinkDuration: 0.9
+  healAt: 0.65
+  moveScale: 0.35
+  interruptWastesCharge: 1
+--- !u!114 &8916193356242753977
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b6f37d7ec8bebd4d93568a0a547659d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerControlLocks
+--- !u!114 &637550051732109431
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 15cd829526ac15148ab847dd67288963, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.UI.BonfireMenu
+  layout: {fileID: 9197481963319205126, guid: 60a04a45aad05b74485a2e26af5268f1, type: 3}
+  panelSettings: {fileID: 11400000, guid: e8d13b02f4a53d441b064a4b1cf6e2bf, type: 2}
+--- !u!114 &8525511693263056149
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 240e170ea1c88d04bae314ea779dda85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.UI.DefeatScreen
+  layout: {fileID: 9197481963319205126, guid: 21187f149d5dcc74fb103cca1e6ea226, type: 3}
+  panelSettings: {fileID: 11400000, guid: e8d13b02f4a53d441b064a4b1cf6e2bf, type: 2}
+  showDelay: 0.9
 --- !u!1 &1007
 GameObject:
   m_ObjectHideFlags: 0
