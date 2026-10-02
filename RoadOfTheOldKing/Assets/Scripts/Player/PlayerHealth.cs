@@ -16,6 +16,8 @@ namespace TheLostShrine.Player
 
         public Damageable Health => health;
         public bool IsAlive => health != null && health.IsAlive;
+        // Post-hit invulnerability only (not the dash's dodge window): presentation blinks during it.
+        public bool IsRecoveringFromHit => Time.time < invulnerableUntil;
         public bool IsInvulnerable => Time.time < invulnerableUntil || (dash != null && dash.HasDodgeProtection);
 
         private void Awake()

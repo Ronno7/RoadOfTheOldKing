@@ -23,12 +23,12 @@ namespace TheLostShrine.Combat
         private ParticleSystemRenderer particleRenderer;
         private AudioSource speaker;
         private int resetVersion;
-        private SimpleMeleeEnemy enemy;
+        private IEnemy enemy;
 
         private void Awake()
         {
             health = GetComponent<Damageable>();
-            enemy = GetComponent<SimpleMeleeEnemy>();
+            enemy = GetComponent<IEnemy>();
             if (body == null) body = GetComponentInChildren<SpriteRenderer>();
             var child = new GameObject("Confirmed hit feedback");
             child.layer = gameObject.layer;

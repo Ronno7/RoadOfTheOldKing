@@ -356483,20 +356483,12 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: attackReach
-      value: 1.8
-      objectReference: {fileID: 0}
-    - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
       propertyPath: leashRadius
       value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
       propertyPath: noticeRadius
       value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: attackDistance
-      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
       propertyPath: windupDuration
@@ -542050,11 +542042,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1002, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 12.42
+      value: 37.8
       objectReference: {fileID: 0}
     - target: {fileID: 1002, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 36.47
+      value: 24.8
       objectReference: {fileID: 0}
     - target: {fileID: 1002, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
       propertyPath: m_LocalPosition.z
@@ -649297,7 +649289,7 @@ Tilemap:
       - {fileID: 531993020, guid: 0c8ce66f5d13841438cbe9a1304bc3c5, type: 3}
       - {fileID: -17329033, guid: 0c8ce66f5d13841438cbe9a1304bc3c5, type: 3}
       - {fileID: -1198973985, guid: 0c8ce66f5d13841438cbe9a1304bc3c5, type: 3}
-      m_AnimationSpeed: 1.25
+      m_AnimationSpeed: 1.2500001
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: 65, y: 84, z: 0}

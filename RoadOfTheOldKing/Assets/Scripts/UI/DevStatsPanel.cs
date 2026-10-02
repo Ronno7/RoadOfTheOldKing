@@ -126,11 +126,10 @@ namespace TheLostShrine.UI
             {
                 enemyRefreshIn = 1f;
                 enemiesAlive = enemiesTotal = 0;
-                foreach (var enemy in FindObjectsByType<SimpleMeleeEnemy>(FindObjectsSortMode.None))
+                foreach (var enemy in EnemyRegistry.Active)
                 {
                     enemiesTotal++;
-                    var health = enemy.GetComponent<Damageable>();
-                    if (health == null || health.IsAlive) enemiesAlive++;
+                    if (!enemy.IsDefeated) enemiesAlive++;
                 }
             }
             text.Append("enemies ").Append(enemiesAlive).Append('/').Append(enemiesTotal).Append(" alive\n");

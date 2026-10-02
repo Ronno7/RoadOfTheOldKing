@@ -27,19 +27,29 @@ namespace TheLostShrine.UI
         [SerializeField] private float promptHeight = 1.25f;
         [Tooltip("World offset below the player's pivot for the charge bar.")]
         [SerializeField] private float chargeOffset = -0.35f;
+        [Header("Hurt vignette")]
+        [Tooltip("Screen-edge flash strength when the player takes damage.")]
+        [SerializeField, Range(0f, 1f)] private float hurtFlash = .55f;
+        [SerializeField, Min(.05f)] private float hurtFade = .45f;
+        [Tooltip("Health share below which the edges pulse like a heartbeat.")]
+        [SerializeField, Range(0f, 1f)] private float lowHealth = .3f;
+        [SerializeField, Range(0f, 1f)] private float lowHealthPulse = .3f;
+        [SerializeField, Min(.2f)] private float heartbeatPeriod = 1.1f;
 
         public static GameHud Active { get; private set; }
 
         private UIDocument document;
-        private VisualElement root, vitals, healthFill, staminaFill, staminaBar, weaponAway, prompt, charge, chargeFill, receipts, hint, status;
+        private VisualElement root, vignette, vitals, healthFill, staminaFill, staminaBar, weaponAway, prompt, charge, chargeFill, receipts, hint, status;
         private Label staminaWarning, weaponAwayText, promptText, hintText, statusText;
         private PlayerHealth player;
+        private Damageable playerDamageable;
         private PlayerStamina stamina;
         private PlayerCombatController combat;
         private PlayerBonfireInteraction interaction;
         private PauseMenuController pauseMenu;
         private CheckpointSession session;
-        private float vitalsUntil;
+        private float vitalsUntil, hurtAmount;
+        private Texture2D vignetteTexture;
         private int receiptsVersion = -1, hintVersion = -1;
         private bool statusOpen;
         private readonly StringBuilder text = new StringBuilder(256);
@@ -47,6 +57,8 @@ namespace TheLostShrine.UI
         private void Awake()
         {
             player = GetComponent<PlayerHealth>();
+            // Read directly: PlayerHealth.Health is only set in its own Awake, which may run after this OnEnable.
+            playerDamageable = GetComponent<Damageable>();
             stamina = GetComponent<PlayerStamina>();
             combat = GetComponent<PlayerCombatController>();
             interaction = GetComponent<PlayerBonfireInteraction>();
@@ -57,7 +69,7 @@ namespace TheLostShrine.UI
         {
             Active = this;
             if (!Build()) { enabled = false; return; }
-            if (player.Health != null) player.Health.HitReceived += OnPlayerHit;
+            if (playerDamageable != null) playerDamageable.HitReceived += OnPlayerHit;
             Subscribe();
             Reveal();
         }
@@ -65,12 +77,16 @@ namespace TheLostShrine.UI
         private void OnDisable()
         {
             if (Active == this) Active = null;
-            if (player != null && player.Health != null) player.Health.HitReceived -= OnPlayerHit;
+            if (playerDamageable != null) playerDamageable.HitReceived -= OnPlayerHit;
             Unsubscribe();
             if (root != null) root.style.display = DisplayStyle.None;
         }
 
-        private void OnDestroy() { if (document != null) Destroy(document.gameObject); }
+        private void OnDestroy()
+        {
+            if (document != null) Destroy(document.gameObject);
+            if (vignetteTexture != null) Destroy(vignetteTexture);
+        }
 
         private bool Build()
         {
@@ -91,6 +107,7 @@ namespace TheLostShrine.UI
             foreach (var label in new[] { staminaWarning, weaponAwayText, promptText, hintText, statusText }) label.enableRichText = true;
             SetVisible(prompt, false); SetVisible(charge, false); SetVisible(hint, false); SetVisible(status, false);
             SetVisible(weaponAway, false); SetVisible(staminaWarning, false);
+            BuildVignette();
             return true;
         }
 
@@ -110,7 +127,7 @@ namespace TheLostShrine.UI
             session = null;
         }
 
-        private void OnPlayerHit(CombatHit hit) { EncounterState.ReportThreat(); Reveal(); }
+        private void OnPlayerHit(CombatHit hit) { EncounterState.ReportThreat(); Reveal(); if (hit.Damage > 0) hurtAmount = 1f; }
         private void OnShard(int total) => HudNotifications.Post("Sun Shard +1 · " + total + (total == 1 ? " shard" : " shards"));
         private void OnFragment(int total, bool completedHeart) => HudNotifications.Post(completedHeart
             ? "Heart complete · Maximum health " + player.Health.MaxHealth
@@ -129,6 +146,7 @@ namespace TheLostShrine.UI
             if (menuOpen || !alive) statusOpen = false;
 
             UpdateVitals();
+            UpdateVignette(alive);
             UpdateWeaponAway(alive && !menuOpen);
             UpdatePrompt(alive && !menuOpen);
             UpdateCharge(alive && !menuOpen);
@@ -152,6 +170,49 @@ namespace TheLostShrine.UI
             SetVisible(staminaWarning, rejected);
             if (healthRatio < 0.999f || staminaRatio < 0.999f || EncounterState.InCombat || !player.IsAlive || statusOpen) Reveal();
             SetVisible(vitals, Time.time < vitalsUntil);
+        }
+
+        // A soft red frame behind the HUD: a flash on damage and a heartbeat pulse at low health.
+        // Real time, so it reads through hit-stop; scaled by the flash accessibility setting.
+        private void BuildVignette()
+        {
+            const int width = 64, height = 36;
+            vignetteTexture = new Texture2D(width, height, TextureFormat.RGBA32, false)
+                { name = "Hurt vignette", wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Bilinear, hideFlags = HideFlags.DontSave };
+            var pixels = new Color32[width * height];
+            for (int y = 0; y < height; y++) for (int x = 0; x < width; x++)
+            {
+                float dx = Mathf.Abs((x + .5f) / width * 2f - 1f), dy = Mathf.Abs((y + .5f) / height * 2f - 1f);
+                float edge = Mathf.Max(dx, dy) * .7f + Mathf.Sqrt(dx * dx + dy * dy) * .3f;
+                float alpha = Mathf.Pow(Mathf.Clamp01((edge - .55f) / .45f), 1.6f);
+                pixels[y * width + x] = new Color32(150, 20, 16, (byte)(alpha * 255f));
+            }
+            vignetteTexture.SetPixels32(pixels);
+            vignetteTexture.Apply(false, true);
+            vignette = new VisualElement { name = "hurt-vignette", pickingMode = PickingMode.Ignore };
+            vignette.style.position = Position.Absolute;
+            vignette.style.left = vignette.style.right = vignette.style.top = vignette.style.bottom = 0;
+            vignette.style.backgroundImage = new StyleBackground(vignetteTexture);
+            vignette.style.opacity = 0f;
+            root.Insert(0, vignette);
+        }
+
+        private void UpdateVignette(bool alive)
+        {
+            if (vignette == null) return;
+            hurtAmount = Mathf.Max(0f, hurtAmount - Time.unscaledDeltaTime / hurtFade);
+            var health = player.Health;
+            float ratio = health != null && health.MaxHealth > 0 ? (float)health.Health / health.MaxHealth : 1f;
+            float pulse = 0f;
+            if (alive && ratio < lowHealth)
+            {
+                // Two beats per period, like a heartbeat, stronger as health falls.
+                float t = Mathf.Repeat(Time.unscaledTime / heartbeatPeriod, 1f);
+                float beat = Mathf.Max(Mathf.Exp(-Mathf.Pow((t - .1f) / .06f, 2f)), .7f * Mathf.Exp(-Mathf.Pow((t - .3f) / .06f, 2f)));
+                pulse = lowHealthPulse * (.5f + .5f * (1f - ratio / lowHealth)) * (.35f + .65f * beat);
+            }
+            float opacity = Mathf.Max(hurtAmount * hurtAmount * hurtFlash, pulse) * Mathf.Clamp01(FeedbackSettings.FlashScale);
+            vignette.style.opacity = opacity;
         }
 
         private void UpdateWeaponAway(bool allowed)

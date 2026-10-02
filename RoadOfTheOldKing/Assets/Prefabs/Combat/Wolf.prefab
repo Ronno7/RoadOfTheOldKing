@@ -210,11 +210,11 @@ GameObject:
   - component: {fileID: 1022530086274969668}
   - component: {fileID: 1220608268331909534}
   - component: {fileID: 5467780097179905967}
-  - component: {fileID: 8178164584314931740}
   - component: {fileID: 5930268802973902719}
   - component: {fileID: 8074335542534635188}
   - component: {fileID: 3247261679874770712}
   - component: {fileID: 6748386845007584776}
+  - component: {fileID: 1047016559863015029}
   m_Layer: 0
   m_Name: Wolf
   m_TagString: Untagged
@@ -303,7 +303,7 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 0.42
+  m_Radius: 0.55
 --- !u!114 &1220608268331909534
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -334,30 +334,9 @@ MonoBehaviour:
   maxKnockbackImpulse: 0
   replaceMovementOnHit: 1
   lethalKnockbackMultiplier: 1.6
---- !u!114 &8178164584314931740
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5631401983757112789}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 60006aa55dea78645a6d560f141f19c5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.SimpleMeleeEnemy
-  target: {fileID: 0}
-  moveSpeed: 2.1
-  noticeRadius: 5
-  leashRadius: 5.5
-  attackDistance: 1.25
-  attackReach: 1.65
-  attackArc: 85
-  windupDuration: 0.65
-  strikeDuration: 0.12
-  recoveryDuration: 0.9
-  damage: 20
-  hitRecovery: 0.1
+  poise: 30
+  poiseResetDelay: 2.5
+  unstaggeredKnockback: 0.2
 --- !u!114 &5930268802973902719
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -373,6 +352,7 @@ MonoBehaviour:
   animations: {fileID: 11400000, guid: 7d326a6e6fc09e746850cfce4ccef82c, type: 2}
   bodyVisual: {fileID: 7297936848709932806}
   attackOutline: {fileID: 1312492780506765286}
+  facingHysteresis: 8
 --- !u!114 &8074335542534635188
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -428,6 +408,66 @@ MonoBehaviour:
   body: {fileID: 7297936848709932806}
   duration: 0.75
   gap: 0.375
+--- !u!114 &1047016559863015029
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5631401983757112789}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2ac9be31ec5cf44f89b146f402fd48f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.WolfAI
+  target: {fileID: 0}
+  noticeRadius: 10
+  leashRadius: 20
+  alertDuration: 0.4
+  loseSightTime: 2.5
+  stalkSpeed: 2.6
+  trotSpeed: 4.2
+  runSpeed: 6.5
+  acceleration: 40
+  circleRadius: 3.2
+  circleTolerance: 0.6
+  chaseDistance: 6
+  packSpacing: 2.2
+  stalkTime: {x: 0.4, y: 1.1}
+  pressureScale: 0.35
+  tiredStamina: 25
+  feintChance: 0.25
+  evadeChance: 0.45
+  evadeDistance: 2.4
+  evadeDuration: 0.2
+  evadeCooldown: 1.5
+  threatMargin: 0.6
+  punishChance: 0.8
+  retaliateChance: 0.5
+  counterChance: 0.35
+  lungeWindup: {x: 0.35, y: 0.85}
+  lockLead: 0.25
+  lungeDistance: 3.4
+  lungeDuration: 0.26
+  lungeRecovery: 0.45
+  lungeRange: {x: 2, y: 4.8}
+  followUpChance: 0.5
+  snoutOffset: 1
+  biteRadius: 0.75
+  lungeDamage: 20
+  lungeKnockback: 4
+  lungeStagger: 0.25
+  snapRange: 1.9
+  snapWindup: 0.3
+  quickSnapWindup: 0.22
+  snapActive: 0.12
+  snapRecovery: 0.3
+  snapReach: 2.1
+  snapArc: 80
+  snapDamage: 15
+  snapKnockback: 2.4
+  snapStagger: 0.18
+  hitRecovery: 0.15
 --- !u!1 &5862377389906941612
 GameObject:
   m_ObjectHideFlags: 0
@@ -660,7 +700,7 @@ SpriteRenderer:
   m_SortingLayer: 3
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -1054153356, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 995351223b4ae3d468af56c364359af1, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

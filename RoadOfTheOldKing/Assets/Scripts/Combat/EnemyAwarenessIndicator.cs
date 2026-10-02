@@ -4,7 +4,7 @@ using UnityEngine;
 namespace TheLostShrine.Combat
 {
     // World-space pixel UI. Detection belongs to the enemy; this only presents its transition.
-    [DisallowMultipleComponent, RequireComponent(typeof(SimpleMeleeEnemy))]
+    [DisallowMultipleComponent]
     [DefaultExecutionOrder(310)]
     public sealed class EnemyAwarenessIndicator : MonoBehaviour
     {
@@ -12,7 +12,8 @@ namespace TheLostShrine.Combat
         [SerializeField, Min(.1f)] private float duration = .75f;
         [Tooltip("Clearance above the body bounds, leaving room for the health bar.")]
         [SerializeField, Min(0f)] private float gap = .375f;
-        private SimpleMeleeEnemy enemy;
+        private IEnemy enemy;
+        private Behaviour enemyBehaviour;
         private MeshRenderer display;
         private Mesh mesh;
         private float remaining;
@@ -21,7 +22,9 @@ namespace TheLostShrine.Combat
 
         private void Awake()
         {
-            enemy = GetComponent<SimpleMeleeEnemy>();
+            enemy = GetComponent<IEnemy>();
+            enemyBehaviour = enemy as Behaviour;
+            if (enemy == null) { enabled = false; return; }
             if (body == null) body = GetComponentInChildren<SpriteRenderer>();
             if (body == null) { enabled = false; return; }
             var child = new GameObject("Enemy awareness !");
@@ -60,7 +63,7 @@ namespace TheLostShrine.Combat
         private void Present(float deltaTime)
         {
             if (display == null) return;
-            if (!enemy.isActiveAndEnabled || !enemy.IsAware || resetVersion != enemy.ResetVersion)
+            if (!enemyBehaviour.isActiveAndEnabled || !enemy.IsAware || resetVersion != enemy.ResetVersion)
             {
                 remaining = 0f;
                 resetVersion = enemy.ResetVersion;

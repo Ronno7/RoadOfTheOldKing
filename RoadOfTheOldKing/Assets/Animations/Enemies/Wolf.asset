@@ -12,32 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43544d9e736a1de4f8a1425c585a5e5d, type: 3}
   m_Name: Wolf
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.WolfAnimationSet
-  side:
-    idle: {fileID: -1054153356, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
-    crouch: {fileID: 1295905143, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
-    bite: {fileID: -980353069, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
-    dead: {fileID: -1925033266, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
-    move:
-    - {fileID: 530069900, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
-    - {fileID: 449114428, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
-    - {fileID: -902499727, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
-    - {fileID: -659338061, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
-  south:
-    idle: {fileID: -466590193, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
-    crouch: {fileID: 1262966151, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
-    bite: {fileID: 968799213, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
-    dead: {fileID: -1843408016, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
-    move:
-    - {fileID: 1165578897, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
-    - {fileID: 539935884, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
-  north:
-    idle: {fileID: -1657330751, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
-    crouch: {fileID: 1287796110, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
-    bite: {fileID: 413781420, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
-    dead: {fileID: -526086187, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
-    move:
-    - {fileID: -126853109, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
-    - {fileID: -2056208303, guid: 97f260a9e71db254182c6917f7cd4898, type: 3}
-  strideDistance: 0.9
-  collapseDuration: 0.2
+  rotations: {fileID: 11400000, guid: 7203b35edd2e17a4aa4a52b2b7903c6b, type: 2}
+  idle: {fileID: 11400000, guid: 9934a4760fab6134fa79c9c5da3dc4bd, type: 2}
+  walk: {fileID: 11400000, guid: 027fea5e17895a8408b6ea59b81e3db7, type: 2}
+  run: {fileID: 11400000, guid: ee50c35b42d731a47a72ef52ee36771b, type: 2}
+  bark: {fileID: 0}
+  bite: {fileID: 11400000, guid: 1bf08abcd1a583f42b2cd3d62a0ada5e, type: 2}
+  hurt: {fileID: 0}
+  death: {fileID: 11400000, guid: b47dfcd8f7db67b4383bf65af5e520cf, type: 2}
+  walkCycleLength: 2.4
+  runCycleLength: 3.6
+  runSpeed: 3
+  biteRecoveryShare: 0.5
   hitFlashDuration: 0.1
+  deathFadeDuration: 0.5
