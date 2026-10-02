@@ -14,6 +14,9 @@ namespace TheLostShrine.Player
     {
         [SerializeField] private SpriteRenderer body;
         [SerializeField] private Color flashColor = new Color(1f, .32f, .26f, 1f);
+        [Tooltip("Flash when a healing flask's heal lands.")]
+        [SerializeField] private Color healFlashColor = new Color(1f, .84f, .45f, 1f);
+        [SerializeField, Min(0f)] private float healFlashDuration = .18f;
         [SerializeField, Min(0f)] private float flashDuration = .1f;
         [Tooltip("Global freeze on taking damage (only from normal speed).")]
         [SerializeField, Min(0f)] private float hitStop = .06f;
@@ -26,20 +29,30 @@ namespace TheLostShrine.Player
         private Damageable health;
         private MaterialPropertyBlock properties;
         private float flashUntil;
+        private Color currentFlash;
+        private PlayerFlask flask;
 
         private void Awake()
         {
             player = GetComponent<PlayerHealth>();
             health = GetComponent<Damageable>();
+            flask = GetComponent<PlayerFlask>();
             properties = new MaterialPropertyBlock();
             if (body == null) body = GetComponentInChildren<SpriteRenderer>();
         }
 
-        private void OnEnable() { if (health != null) health.HitReceived += OnHit; }
+        private void OnEnable()
+        {
+            if (health != null) health.HitReceived += OnHit;
+            if (flask != null) flask.Healed += OnHealed;
+        }
+
+        private void OnHealed() { currentFlash = healFlashColor; flashUntil = Time.unscaledTime + healFlashDuration; }
 
         private void OnDisable()
         {
             if (health != null) health.HitReceived -= OnHit;
+            if (flask != null) flask.Healed -= OnHealed;
             flashUntil = 0f;
             Apply(0f, 1f);
         }
@@ -47,6 +60,7 @@ namespace TheLostShrine.Player
         private void OnHit(CombatHit hit)
         {
             if (hit.Damage <= 0) return;
+            currentFlash = flashColor;
             flashUntil = Time.unscaledTime + flashDuration;
             HitStop.Freeze(hitStop);
             var cam = Camera.main != null ? Camera.main.GetComponent<CameraFollow2D>() : null;
@@ -68,7 +82,7 @@ namespace TheLostShrine.Player
             body.color = color;
             body.GetPropertyBlock(properties);
             properties.SetFloat("_FlashAmount", flash);
-            properties.SetColor("_FlashColor", flashColor);
+            properties.SetColor("_FlashColor", currentFlash);
             body.SetPropertyBlock(properties);
         }
     }

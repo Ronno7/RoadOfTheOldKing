@@ -160,7 +160,7 @@ namespace TheLostShrine.Tutorial
 
         private void Present()
         {
-            bool blocked = !player.IsAlive || (interaction != null && interaction.IsOpen) ||
+            bool blocked = !player.IsAlive || UI.MenuStack.IsAnyOpen || (interaction != null && interaction.IsOpen) ||
                 (pauseMenu != null && pauseMenu.BlocksGameplay) || Time.time < showAfter ||
                 // Defer teaching text while fighting; prompts and receipts still show.
                 EncounterState.InCombat;

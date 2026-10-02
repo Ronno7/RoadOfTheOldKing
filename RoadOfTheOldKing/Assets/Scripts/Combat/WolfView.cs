@@ -122,6 +122,9 @@ namespace TheLostShrine.Combat
                 case WolfState.Chase:
                     return Locomotion("Run", animations.run, animations.runCycleLength, distance, dt);
                 case WolfState.Stalk:
+                    // Rushing an unarmed player happens at a run.
+                    if (speed >= animations.runAnimationSpeed)
+                        return Locomotion("Run", animations.run, animations.runCycleLength, distance, dt);
                     return Locomotion("Stalk", animations.stalk, animations.stalkCycleLength, distance, dt);
                 case WolfState.Reposition:
                 case WolfState.Return:

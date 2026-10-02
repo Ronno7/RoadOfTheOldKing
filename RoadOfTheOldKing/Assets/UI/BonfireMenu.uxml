@@ -1,0 +1,15 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="MenuTheme.uss" />
+    <ui:Style src="BonfireMenu.uss" />
+    <ui:VisualElement name="bonfire-overlay" class="menu-overlay">
+        <ui:VisualElement name="bonfire-panel" class="menu-panel">
+            <ui:Label name="heading" class="menu-heading" />
+            <ui:VisualElement class="menu-divider" />
+            <ui:Label name="status" class="menu-text" />
+            <ui:Label name="shards" class="menu-meta" />
+            <ui:VisualElement name="actions" />
+            <ui:Label name="description" class="menu-description" />
+            <ui:Label text="ESC  Back     ↑ ↓  Select     ENTER  Confirm     F  Leave" class="menu-hint" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

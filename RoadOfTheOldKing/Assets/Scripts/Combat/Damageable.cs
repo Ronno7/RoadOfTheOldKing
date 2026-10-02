@@ -45,5 +45,8 @@ namespace TheLostShrine.Combat
         }
 
         public void RestoreHealth() => Health = MaxHealth;
+
+        // Healing never revives: a defeated target stays defeated.
+        public void Heal(int amount) { if (IsAlive && amount > 0) Health = Mathf.Min(MaxHealth, Health + amount); }
     }
 }

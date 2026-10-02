@@ -1,12 +1,13 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="MenuTheme.uss" />
     <ui:Style src="PauseMenu.uss" />
-    <ui:VisualElement name="pause-overlay">
-        <ui:VisualElement name="pause-panel">
-            <ui:Label text="PAUSED" name="heading" />
-            <ui:VisualElement name="divider" />
+    <ui:VisualElement name="pause-overlay" class="menu-overlay">
+        <ui:VisualElement name="pause-panel" class="menu-panel">
+            <ui:Label text="PAUSED" name="heading" class="menu-heading" />
+            <ui:VisualElement name="divider" class="menu-divider" />
             <ui:VisualElement name="actions" />
-            <ui:Label name="description" />
-            <ui:Label text="ESC  Resume     ↑ ↓  Select     ENTER  Confirm" name="hint" />
+            <ui:Label name="description" class="menu-description" />
+            <ui:Label text="ESC  Resume     ↑ ↓  Select     ENTER  Confirm" name="hint" class="menu-hint" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

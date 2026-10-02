@@ -302,8 +302,8 @@ CircleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_Radius: 0.55
+  m_Offset: {x: 0, y: 1.3}
+  m_Radius: 1
 --- !u!114 &1220608268331909534
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -337,6 +337,7 @@ MonoBehaviour:
   poise: 30
   poiseResetDelay: 2.5
   unstaggeredKnockback: 0.2
+  rangedPoiseMultiplier: 0.5
 --- !u!114 &5930268802973902719
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -441,6 +442,8 @@ MonoBehaviour:
   evadeDistance: 2.4
   evadeDuration: 0.2
   evadeCooldown: 1.5
+  sidestepChance: 0.45
+  throwThreatAngle: 25
   threatMargin: 0.6
   punishChance: 0.8
   retaliateChance: 0.5

@@ -45,6 +45,7 @@ namespace TheLostShrine.Player
         private PlayerStamina stamina;
         private PlayerCombatController combat;
         private PlayerDash dash;
+        private PlayerFlask flask;
 
         public float MoveSpeed => moveSpeed;
         public float SprintSpeed => moveSpeed * sprintMultiplier;
@@ -63,6 +64,7 @@ namespace TheLostShrine.Player
             stamina = GetComponent<PlayerStamina>();
             combat = GetComponent<PlayerCombatController>();
             dash = GetComponent<PlayerDash>();
+            flask = GetComponent<PlayerFlask>();
             FacingDirection = initialFacing.sqrMagnitude > 0f ? initialFacing.normalized : Vector2.down;
             body.bodyType = RigidbodyType2D.Dynamic;
             body.gravityScale = 0f;
@@ -133,15 +135,16 @@ namespace TheLostShrine.Player
             if (direction.sqrMagnitude > 0f)
                 FacingDirection = direction.normalized;
 
-            bool wantsSprint = direction.sqrMagnitude > 0f && movementInput.SprintHeld &&
+            bool drinking = flask != null && flask.IsDrinking;
+            bool wantsSprint = !drinking && direction.sqrMagnitude > 0f && movementInput.SprintHeld &&
                 (combat == null || !combat.IsAttacking);
             IsSprinting = wantsSprint && stamina != null &&
                 (IsSprinting || stamina.Current >= minimumSprintStamina) &&
-                stamina.TrySpend(sprintCostPerSecond * Time.fixedDeltaTime);
+                stamina.TryDrain(sprintCostPerSecond * Time.fixedDeltaTime);
 
             // Velocity is units per second. Unity applies the physics time step.
             // Moving the Rigidbody, instead of the Transform, preserves collisions.
-            Vector2 target = direction * (IsSprinting ? SprintSpeed : moveSpeed);
+            Vector2 target = direction * (IsSprinting ? SprintSpeed : moveSpeed) * (drinking ? flask.MoveScale : 1f);
             if (bounceRemaining > 0f)
             {
                 // Let the rebound play out under friction before input steers again.

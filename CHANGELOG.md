@@ -5,9 +5,15 @@
 **Added**
 - Smarter wolves: they circle, lunge along a telegraphed lane that locks just before the leap, snap when you get close, feint, dodge your swings, punish missed attacks and leave a short opening after each attack. Packs take turns attacking.
 - Enemy poise: tougher enemies shrug off light hits until enough damage breaks their stance.
+- Healing flasks: three charges refilled at bonfires. Press Q to drink; it heals near the end of the drink and can be interrupted, and wolves punish careless drinking.
 - Clear hit feedback for the hero: a flinch animation, red flash, brief impact freeze, camera kick, invulnerability blink, and a red screen-edge flash that pulses at low health.
 
 **Changed**
+- Souls-style stamina: any action can start while you have stamina left and may push you into a deficit, which slows recovery and makes that attack weaker and slower. Stamina recovers faster between actions.
+- The dodge is now a longer roll with more invincibility and no cooldown; stamina is the only limit.
+- You can keep moving while making light attacks, and the charged cleave can't be interrupted once committed.
+- Rebuilt the bonfire, upgrade and defeat screens with Unity's UI Toolkit: consistent menus, keyboard and mouse, with Escape stepping back through pages.
+- Throw and Recall rebalanced: Recall now costs stamina, catching the axe leaves a brief opening, a recalled axe no longer hits the enemy it is pulled out of, thrown hits barely affect an enemy's guard, and wolves sidestep throws and rush you while your axe is away.
 - Light attacks have shorter reach and cost more stamina.
 - The wolf is redrawn as a larger eight-direction animal with walk, run, bite and death animations; the bite is timed to its attack.
 - Rewrote the [systems overview](Docs/SystemsOverview.md) as a guide to the game's architecture, with diagrams.

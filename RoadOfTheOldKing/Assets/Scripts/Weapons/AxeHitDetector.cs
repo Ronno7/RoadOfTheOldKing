@@ -25,6 +25,9 @@ namespace TheLostShrine.Weapons
 
         public void BeginAttack() => hitTargets.Clear();
 
+        // Counts a target as already hit for this attack (e.g. the one a recalled axe is pulled out of).
+        public void Exclude(IHitReceiver receiver) { if (receiver != null) hitTargets.Add(receiver); }
+
         // The aim guide uses the same swept radius and exclusions as flight, without hits.
         public float PreviewFlightDistance(Vector2 origin, Vector2 direction, float distance, float radius)
         {

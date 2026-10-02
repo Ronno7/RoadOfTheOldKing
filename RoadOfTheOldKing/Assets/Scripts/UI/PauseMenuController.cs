@@ -1,21 +1,22 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using TheLostShrine.Input;
 using TheLostShrine.Player;
 using UnityEngine;
 
 namespace TheLostShrine.UI
 {
+    // Owns the pause modal and routes menu input. Escape steps back in whichever menu is on top of the
+    // MenuStack (bonfire, defeat...) and opens pause only when none is open.
     [DisallowMultipleComponent, RequireComponent(typeof(PauseMenuView), typeof(PauseMenuInput))]
-    public sealed class PauseMenuController : MonoBehaviour
+    public sealed class PauseMenuController : MonoBehaviour, IModalMenu
     {
         private PauseMenuInput input;
         private PauseMenuView view;
         private PlayerHealth health;
-        private PlayerBonfireInteraction bonfire;
+        private PlayerControlLocks locks;
+        private PlayerDash dash;
         private IDisposable pause;
-        private readonly List<Behaviour> suspended = new List<Behaviour>();
         private IReadOnlyList<PauseMenuAction> actions;
         private Coroutine restoring;
         public bool IsOpen => pause != null;
@@ -24,68 +25,74 @@ namespace TheLostShrine.UI
         private void Awake()
         {
             input = GetComponent<PauseMenuInput>(); view = GetComponent<PauseMenuView>();
-            health = GetComponent<PlayerHealth>(); bonfire = GetComponent<PlayerBonfireInteraction>();
+            health = GetComponent<PlayerHealth>(); locks = GetComponent<PlayerControlLocks>();
+            dash = GetComponent<PlayerDash>();
             actions = PauseMenuCommands.CreateDefault();
         }
+
         private void OnEnable()
         {
-            input.ToggleRequested += Toggle; input.NavigationRequested += Navigate; input.SubmitRequested += Submit;
+            input.ToggleRequested += Toggle; input.NavigationRequested += RouteNavigate; input.SubmitRequested += RouteSubmit;
         }
+
         // Composition seam for additional commands and save-free verification.
         public void ConfigureActions(IReadOnlyList<PauseMenuAction> commands)
         {
             if (BlocksGameplay) throw new InvalidOperationException("Close the menu before replacing its actions.");
             actions = commands ?? throw new ArgumentNullException(nameof(commands));
         }
+
         public void Toggle()
         {
             if (restoring != null) return;
-            if (IsOpen) { Close(); return; }
-            // Escape dismisses the current bonfire modal first, without opening two menus.
-            if (bonfire != null && bonfire.IsOpen) { bonfire.Close(); return; }
+            var top = MenuStack.Top;
+            // Escape belongs to the top menu: step back or close it, never open two menus.
+            if (top != null) { top.Back(); return; }
             Open();
         }
+
+        private void RouteNavigate(int direction) => MenuStack.Top?.Navigate(direction);
+        private void RouteSubmit() => MenuStack.Top?.Submit();
+
         public bool Open()
         {
-            if (!isActiveAndEnabled || BlocksGameplay || health == null || !health.IsAlive) return false;
-            if (bonfire != null && bonfire.IsOpen) return false;
+            if (!isActiveAndEnabled || BlocksGameplay || health == null || !health.IsAlive || MenuStack.IsAnyOpen) return false;
             if (!view.Show(actions, Execute)) return false;
-            Suspend(GetComponent<PlayerMovementInput>()); Suspend(GetComponent<PlayerCombatInput>());
-            Suspend(GetComponent<PlayerCombatController>()); Suspend(bonfire);
-            GetComponent<PlayerDash>()?.Cancel();
+            if (locks != null) locks.Lock(this);
+            if (dash != null) dash.Cancel();
             pause = SimulationPause.Acquire(true);
+            MenuStack.Push(this);
             return true;
         }
-        private void Suspend(Behaviour component)
-        {
-            if (component != null && component.enabled) { suspended.Add(component); component.enabled = false; }
-        }
-        private void RestoreInputs()
-        {
-            if (health != null && health.IsAlive)
-                foreach (var component in suspended) if (component != null) component.enabled = true;
-            suspended.Clear();
-        }
+
         public void Close()
         {
             if (!IsOpen) return;
+            MenuStack.Remove(this);
             view.Hide(); pause.Dispose(); pause = null;
             // Keep the closing key/click out of gameplay for the rest of this frame.
-            restoring = StartCoroutine(RestoreNextFrame());
+            restoring = StartCoroutine(UnlockNextFrame());
         }
-        private IEnumerator RestoreNextFrame() { yield return null; RestoreInputs(); restoring = null; }
+
+        private IEnumerator UnlockNextFrame() { yield return null; if (locks != null) locks.Unlock(this); restoring = null; }
+
+        public void Back() => Close();
+        public void Navigate(int direction) => view.Navigate(direction);
+        public void Submit() => view.Submit();
+
         private void Execute(PauseMenuAction action)
         {
             if (!IsOpen || !action.Enabled) return;
             Close(); action.Execute();
         }
-        private void Navigate(int direction) { if (IsOpen) view.Navigate(direction); }
-        private void Submit() { if (IsOpen) view.Submit(); }
+
         private void OnDisable()
         {
-            input.ToggleRequested -= Toggle; input.NavigationRequested -= Navigate; input.SubmitRequested -= Submit;
+            input.ToggleRequested -= Toggle; input.NavigationRequested -= RouteNavigate; input.SubmitRequested -= RouteSubmit;
             if (restoring != null) { StopCoroutine(restoring); restoring = null; }
-            view.Hide(); pause?.Dispose(); pause = null; RestoreInputs();
+            MenuStack.Remove(this);
+            view.Hide(); pause?.Dispose(); pause = null;
+            if (locks != null) locks.Unlock(this);
         }
     }
 }

@@ -1,0 +1,4 @@
+/* The world stays visible at a bonfire (it is not paused): a light veil and the panel on the right,
+   leaving the left of the screen for the planned bonfire camera framing of the resting hero. */
+#bonfire-overlay { align-items: flex-end; padding-right: 6%; background-color: rgba(15, 19, 18, 0.25); }
+#bonfire-panel { width: 400px; }

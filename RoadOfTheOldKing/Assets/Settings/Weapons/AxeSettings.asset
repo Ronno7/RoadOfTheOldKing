@@ -25,6 +25,9 @@ MonoBehaviour:
   finisherSwingEndFraction: 0.6
   finisherLungeDistance: 0.7
   comboWindow: 0.55
+  lightMovementScale: 0.55
+  exhaustedDamageMultiplier: 0.6
+  exhaustedSpeedMultiplier: 0.75
   lightDamage: 10
   finisherDamage: 25
   lightStaminaCost: 16
@@ -66,5 +69,7 @@ MonoBehaviour:
   recallDamage: 10
   throwKnockback: 4
   recallKnockback: 4
-  throwStaminaCost: 25
+  throwStaminaCost: 20
+  recallStaminaCost: 10
+  catchRecovery: 0.25
   retrieveDistance: 1.4
