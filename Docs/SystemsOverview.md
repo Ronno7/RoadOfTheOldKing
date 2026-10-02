@@ -66,7 +66,7 @@ flowchart LR
 | `UI` | HUD, notification channel, pause menu, time control, F3 dev panel |
 | `Prototype` | Code for the retired PrototypeLoop (its guide, legend and placeholder views) |
 
-Namespaces still use the project's former name (`TheLostShrine.*`) for compatibility.
+Namespaces still use the project's former name (`TheLostShrine.*`) for compatibility. Rendering uses the Universal Render Pipeline with its 2D Renderer; sprites currently use unlit materials, so 2D lighting is available for a later atmosphere pass.
 
 ## Player
 
@@ -75,11 +75,11 @@ Namespaces still use the project's former name (`TheLostShrine.*`) for compatibi
 | Role | Components |
 | --- | --- |
 | Input | `PlayerMovementInput`, `PlayerCombatInput` |
-| Motor | `PlayerMovement`, `PlayerDash`, `PlayerStamina` |
-| Combat and health | `PlayerCombatController`, `PlayerHealth`, `Damageable`, `HitReaction` |
+| Motor | `PlayerMovement`, `PlayerDash`, `PlayerStamina`, `PlayerControlLocks` |
+| Combat and health | `PlayerCombatController`, `PlayerHealth`, `Damageable`, `HitReaction`, `PlayerFlask` |
 | Interaction | `PlayerBonfireInteraction` (pickups and bonfires) |
-| Presentation | `PlayerSpriteAnimator`, `PlayerWeaponCarry`, `PlayerAimIndicator`, `PlayerMovementDust` |
-| UI | `GameHud`, pause menu (`PauseMenuInput`, `PauseMenuController`, `PauseMenuView`) |
+| Presentation | `PlayerSpriteAnimator`, `PlayerWeaponCarry`, `PlayerAimIndicator`, `PlayerMovementDust`, `PlayerHitFeedback` |
+| UI | `GameHud`, pause menu (`PauseMenuInput`, `PauseMenuController`, `PauseMenuView`), `BonfireMenu`, `DefeatScreen` |
 
 ### Controls
 
@@ -355,7 +355,8 @@ Presentation components read gameplay state and never change it, so art can be r
 - **Vitals:** health and stamina appear on damage, spending or combat, and hide 3 s after both are full and no threat remains.
 - **Prompt:** one `[F] <verb>` prompt above whatever the interaction selector chose.
 - **Contextual pieces:** a weapon-away chip, the cleave charge bar, up to three reward receipts and the single guide hint.
-- **Status:** Tab toggles a panel with health, stamina, shards, fragments, axe, Recall and upgrades.
+- **Status:** Tab toggles a panel with health, stamina, flasks, shards, fragments, axe, Recall and upgrades.
+- **Flasks:** a small amber flask count sits under the health and stamina bars.
 
 Gameplay posts text through `HudNotifications` (receipts and the hint), and the HUD never writes gameplay state.
 
