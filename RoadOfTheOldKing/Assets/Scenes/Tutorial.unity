@@ -287204,6 +287204,14 @@ MonoBehaviour:
     milestone: shard/collected/tutorial/first-enemy
     area: {x: 0, y: 0}
     radius: 4
+  - id: flask
+    hint: Hurt? Press {heal} to drink a flask and recover health. Resting at a bonfire
+      refills your flasks.
+    condition: 8
+    amount: 1
+    milestone: 
+    area: {x: 0, y: 0}
+    radius: 4
   - id: rest
     hint: Rest at the roadside bonfire with {interact}. Resting heals you and saves.
     condition: 5
@@ -649344,7 +649352,7 @@ Tilemap:
       - {fileID: 1990853355, guid: 0c8ce66f5d13841438cbe9a1304bc3c5, type: 3}
       - {fileID: -1477547607, guid: 0c8ce66f5d13841438cbe9a1304bc3c5, type: 3}
       - {fileID: 1609360619, guid: 0c8ce66f5d13841438cbe9a1304bc3c5, type: 3}
-      m_AnimationSpeed: 1.2500001
+      m_AnimationSpeed: 1.25
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: 64, y: 87, z: 0}

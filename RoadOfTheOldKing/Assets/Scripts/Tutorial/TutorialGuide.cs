@@ -19,6 +19,7 @@ namespace TheLostShrine.Tutorial
         Rested,         // has rested at any bonfire (a checkpoint exists)
         Milestone,      // progress contains `milestone` (lessons, rewards, exits...)
         ReachArea,      // came within `radius` of `area`
+        DrankFlask,     // started `amount` flask drinks (at least once)
     }
 
     [Serializable]
@@ -29,7 +30,7 @@ namespace TheLostShrine.Tutorial
         [TextArea(2, 4), Tooltip("Hint text. {tokens} become key names, e.g. {interact}, {throw}, {recall}.")]
         public string hint;
         public TutorialCondition condition;
-        [Tooltip("Units for Moved/Sprinted, count for Dodged.")] public float amount = 1f;
+        [Tooltip("Units for Moved/Sprinted, count for Dodged/DrankFlask.")] public float amount = 1f;
         [Tooltip("Progress id for Milestone.")] public string milestone;
         [Tooltip("World position for ReachArea (layout anchors are editor-only, so positions are stored).")] public Vector2 area;
         [Min(0.5f)] public float radius = 4f;
@@ -56,11 +57,13 @@ namespace TheLostShrine.Tutorial
         private PlayerMovement movement;
         private PlayerCombatController combat;
         private PlayerDash dash;
+        private PlayerFlask flask;
         private PlayerBonfireInteraction interaction;
         private UI.PauseMenuController pauseMenu;
         private Vector2 lastPosition;
         private float moved, sprinted;
-        private int dashes;
+        private int dashes, drinks;
+        private bool wasDrinking;
         private uint lastDashSequence;
         private bool restored;
         private float showAfter;
@@ -92,6 +95,7 @@ namespace TheLostShrine.Tutorial
             movement = player.GetComponent<PlayerMovement>();
             combat = player.GetComponent<PlayerCombatController>();
             dash = player.GetComponent<PlayerDash>();
+            flask = player.GetComponent<PlayerFlask>();
             interaction = player.GetComponent<PlayerBonfireInteraction>();
             pauseMenu = player.GetComponent<UI.PauseMenuController>();
             lastPosition = player.transform.position;
@@ -124,6 +128,9 @@ namespace TheLostShrine.Tutorial
                 lastDashSequence = dash.Sequence;
                 if (dash.IsDashing) dashes++;
             }
+            bool drinking = flask != null && flask.IsDrinking;
+            if (drinking && !wasDrinking) drinks++;
+            wasDrinking = drinking;
         }
 
         private bool IsMet(TutorialStep step)
@@ -138,6 +145,7 @@ namespace TheLostShrine.Tutorial
                 case TutorialCondition.RecallUnlocked: return combat != null && combat.CanRecall;
                 case TutorialCondition.Rested: return CheckpointSession.Instance != null && CheckpointSession.Instance.HasCheckpoint;
                 case TutorialCondition.Milestone: return progress != null && progress.Has(step.milestone);
+                case TutorialCondition.DrankFlask: return drinks >= Mathf.Max(1f, step.amount);
                 case TutorialCondition.ReachArea: return player.IsAlive && ((Vector2)player.transform.position - step.area).sqrMagnitude <= step.radius * step.radius;
                 default: return false;
             }
@@ -198,6 +206,7 @@ namespace TheLostShrine.Tutorial
             new TutorialStep("stone", "A carved stone stands in the ruins past the bridge. Throw your axe at it.", TutorialCondition.RecallUnlocked),
             new TutorialStep("recall-drill", "In the clearing north of the stone: throw into the far post, then move so the near post is between you and the axe, and press {recall}.", TutorialCondition.Milestone) { milestone = "tutorial/lesson/recall-drill" },
             new TutorialStep("first-shard", "Something prowls the clearing to the north. Defeat it, then press {interact} to take the Sun Shard.", TutorialCondition.Milestone) { milestone = "shard/collected/tutorial/first-enemy" },
+            new TutorialStep("flask", "Hurt? Press {heal} to drink a flask and recover health. Resting at a bonfire refills your flasks.", TutorialCondition.DrankFlask),
             new TutorialStep("rest", "Rest at the roadside bonfire with {interact}. Resting heals you and saves.", TutorialCondition.Rested),
             new TutorialStep("exit", "The old road leads northeast, out to the Green Lowlands.", TutorialCondition.Milestone) { milestone = "tutorial/complete" },
         };

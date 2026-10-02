@@ -5,7 +5,7 @@
 **Added**
 - Smarter wolves: they circle, lunge along a telegraphed lane that locks just before the leap, snap when you get close, feint, dodge your swings, punish missed attacks and leave a short opening after each attack. Packs take turns attacking.
 - Enemy poise: tougher enemies shrug off light hits until enough damage breaks their stance.
-- Healing flasks: three charges refilled at bonfires. Press Q to drink; it heals near the end of the drink and can be interrupted, and wolves punish careless drinking.
+- Healing flasks: three charges refilled at bonfires. Press Q to drink; it heals near the end of the drink and can be interrupted, and wolves punish careless drinking. The Tutorial guide teaches it after the first wolf.
 - Clear hit feedback for the hero: a flinch animation, red flash, brief impact freeze, camera kick, invulnerability blink, and a red screen-edge flash that pulses at low health.
 
 **Changed**

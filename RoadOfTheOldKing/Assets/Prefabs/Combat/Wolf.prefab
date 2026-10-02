@@ -434,7 +434,7 @@ MonoBehaviour:
   circleTolerance: 0.6
   chaseDistance: 6
   packSpacing: 2.2
-  stalkTime: {x: 0.4, y: 1.1}
+  stalkTime: {x: 0.5, y: 1.3}
   pressureScale: 0.35
   tiredStamina: 25
   feintChance: 0.25
@@ -448,11 +448,11 @@ MonoBehaviour:
   punishChance: 0.8
   retaliateChance: 0.5
   counterChance: 0.35
-  lungeWindup: {x: 0.35, y: 0.85}
-  lockLead: 0.25
+  lungeWindup: {x: 0.42, y: 0.95}
+  lockLead: 0.32
   lungeDistance: 3.4
-  lungeDuration: 0.26
-  lungeRecovery: 0.45
+  lungeDuration: 0.3
+  lungeRecovery: 0.55
   lungeRange: {x: 2, y: 4.8}
   followUpChance: 0.5
   snoutOffset: 1
@@ -461,10 +461,10 @@ MonoBehaviour:
   lungeKnockback: 4
   lungeStagger: 0.25
   snapRange: 1.9
-  snapWindup: 0.3
-  quickSnapWindup: 0.22
+  snapWindup: 0.36
+  quickSnapWindup: 0.27
   snapActive: 0.12
-  snapRecovery: 0.3
+  snapRecovery: 0.36
   snapReach: 2.1
   snapArc: 80
   snapDamage: 15
