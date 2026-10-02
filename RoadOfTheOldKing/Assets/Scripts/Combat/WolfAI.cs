@@ -46,7 +46,7 @@ namespace TheLostShrine.Combat
 
         [Header("Stalking")]
         [Tooltip("Seconds of circling before trying an attack (random within the range).")]
-        [SerializeField] private Vector2 stalkTime = new Vector2(.4f, 1.1f);
+        [SerializeField] private Vector2 stalkTime = new Vector2(.5f, 1.3f);
         [Tooltip("Circling time multiplier while the player is exposed (axe away) or tired.")]
         [SerializeField, Range(.05f, 1f)] private float pressureScale = .35f;
         [Tooltip("Player stamina below which it presses the attack.")]
@@ -75,13 +75,13 @@ namespace TheLostShrine.Combat
 
         [Header("Lunge")]
         [Tooltip("Windup length varies within this range (delayed lunges), but the lane always locks lockLead before the leap.")]
-        [SerializeField] private Vector2 lungeWindup = new Vector2(.35f, .85f);
+        [SerializeField] private Vector2 lungeWindup = new Vector2(.42f, .95f);
         [Tooltip("Seconds between the lane locking and the leap: the honest dodge cue.")]
-        [SerializeField, Min(.05f)] private float lockLead = .25f;
+        [SerializeField, Min(.05f)] private float lockLead = .32f;
         [SerializeField, Min(.5f)] private float lungeDistance = 3.4f;
-        [SerializeField, Min(.05f)] private float lungeDuration = .26f;
+        [SerializeField, Min(.05f)] private float lungeDuration = .3f;
         [Tooltip("Standing still after a lunge: the player's punish window.")]
-        [SerializeField, Min(0f)] private float lungeRecovery = .45f;
+        [SerializeField, Min(0f)] private float lungeRecovery = .55f;
         [Tooltip("Player distance (min, max) from which it lunges.")]
         [SerializeField] private Vector2 lungeRange = new Vector2(2f, 4.8f);
         [Tooltip("Chance to chain a quick follow-up when a lunge misses.")]
@@ -96,11 +96,11 @@ namespace TheLostShrine.Combat
         [Header("Snap")]
         [Tooltip("Player distance within which it snaps instead of lunging.")]
         [SerializeField, Min(.1f)] private float snapRange = 1.9f;
-        [SerializeField, Min(.05f)] private float snapWindup = .3f;
+        [SerializeField, Min(.05f)] private float snapWindup = .36f;
         [Tooltip("Windup for reactive snaps (punish, retaliation, follow-up).")]
-        [SerializeField, Min(.05f)] private float quickSnapWindup = .22f;
+        [SerializeField, Min(.05f)] private float quickSnapWindup = .27f;
         [SerializeField, Min(.02f)] private float snapActive = .12f;
-        [SerializeField, Min(0f)] private float snapRecovery = .3f;
+        [SerializeField, Min(0f)] private float snapRecovery = .36f;
         [SerializeField, Min(.1f)] private float snapReach = 2.1f;
         [SerializeField, Range(1f, 180f)] private float snapArc = 80f;
         [SerializeField, Min(1)] private int snapDamage = 15;
