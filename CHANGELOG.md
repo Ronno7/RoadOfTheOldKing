@@ -3,9 +3,13 @@
 ## Unreleased
 
 **Added**
-- A breathing idle animation for the hero in all eight directions.
+- Smarter wolves: they circle, lunge along a telegraphed lane that locks just before the leap, snap when you get close, feint, dodge your swings, punish missed attacks and leave a short opening after each attack. Packs take turns attacking.
+- Enemy poise: tougher enemies shrug off light hits until enough damage breaks their stance.
+- Clear hit feedback for the hero: a flinch animation, red flash, brief impact freeze, camera kick, invulnerability blink, and a red screen-edge flash that pulses at low health.
 
 **Changed**
+- Light attacks have shorter reach and cost more stamina.
+- The wolf is redrawn as a larger eight-direction animal with walk, run, bite and death animations; the bite is timed to its attack.
 - Rewrote the [systems overview](Docs/SystemsOverview.md) as a guide to the game's architecture, with diagrams.
 
 ## 0.4 — Vertical slice

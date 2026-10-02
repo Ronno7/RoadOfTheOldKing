@@ -52,6 +52,8 @@ namespace TheLostShrine.Player
         }
 
         private DirectionalSpriteAnimation currentClip;
+        // The flinch outlasts the brief stagger: it finishes unless the player moves, dashes or attacks.
+        private float hurtUntil;
 
         private void Awake()
         {
@@ -73,6 +75,8 @@ namespace TheLostShrine.Player
             previousPosition = transform.position;
             cycle = catchRemaining = 0f;
             wasWalking = wasResting = false;
+            hurtUntil = 0f;
+            if (health != null) health.HitReceived += OnHurt;
             if (combat == null) return;
             combat.WeaponEquipped += ObserveWeapon;
             ObserveWeapon();
@@ -80,6 +84,7 @@ namespace TheLostShrine.Player
 
         private void OnDisable()
         {
+            if (health != null) health.HitReceived -= OnHurt;
             if (combat != null) combat.WeaponEquipped -= ObserveWeapon;
             if (weapon != null) weapon.ReturnedToHand -= OnReturned;
             weapon = null;
@@ -91,6 +96,12 @@ namespace TheLostShrine.Player
             weapon = combat.Weapon;
             catchRemaining = 0f;
             if (weapon != null) weapon.ReturnedToHand += OnReturned;
+        }
+
+        private void OnHurt(CombatHit hit)
+        {
+            var clip = animations != null ? animations.hurt : null;
+            if (clip != null && !clip.IsEmpty) hurtUntil = Time.time + clip.Duration(Octant);
         }
 
         private void OnReturned()
@@ -120,7 +131,9 @@ namespace TheLostShrine.Player
             catchRemaining = walking ? 0f : Mathf.Max(0f, catchRemaining - frameDelta);
 
             if (health != null && !health.IsAlive && PlayTimed("Death", animations.death, facing)) return;
-            if (staggered && PlayTimed("Hurt", animations.hurt, facing)) return;
+            bool flinching = Time.time < hurtUntil && !walking && (dash == null || !dash.IsDashing) &&
+                (weapon == null || !weapon.IsAttacking);
+            if ((staggered || flinching) && PlayTimed("Hurt", animations.hurt, facing)) return;
             if (dash != null && dash.IsDashing)
             {
                 int octant = DirectionalSpriteAnimation.Octant(dash.Direction);

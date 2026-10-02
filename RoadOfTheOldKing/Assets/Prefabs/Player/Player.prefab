@@ -29,6 +29,7 @@ GameObject:
   - component: {fileID: 9180351796924429262}
   - component: {fileID: 8033240405425768703}
   - component: {fileID: 5021361952452321745}
+  - component: {fileID: 5573167816240498612}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -221,6 +222,9 @@ MonoBehaviour:
   maxKnockbackImpulse: 0
   replaceMovementOnHit: 0
   lethalKnockbackMultiplier: 1.6
+  poise: 0
+  poiseResetDelay: 2.5
+  unstaggeredKnockback: 0.2
 --- !u!114 &7425349288622817033
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -441,6 +445,30 @@ MonoBehaviour:
   vitalsHold: 3
   promptHeight: 1.25
   chargeOffset: -0.35
+  hurtFlash: 0.55
+  hurtFade: 0.45
+  lowHealth: 0.3
+  lowHealthPulse: 0.3
+  heartbeatPeriod: 1.1
+--- !u!114 &5573167816240498612
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b987282df7b79247b57f6d8f9501030, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerHitFeedback
+  body: {fileID: 1009}
+  flashColor: {r: 1, g: 0.32, b: 0.26, a: 1}
+  flashDuration: 0.1
+  hitStop: 0.06
+  cameraKick: 0.22
+  blinkInterval: 0.07
+  blinkAlpha: 0.3
 --- !u!1 &1007
 GameObject:
   m_ObjectHideFlags: 0
@@ -499,7 +527,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 6dbb7ea820d986f459b596d399d3f3dd, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

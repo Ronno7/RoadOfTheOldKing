@@ -23,7 +23,7 @@ flowchart LR
     PC[PlayerCombatController]
     AW[AxeWeapon]
     HP["Damageable + HitReaction"]
-    EN[SimpleMeleeEnemy]
+    EN[WolfAI]
   end
   subgraph Presentation
     AN[PlayerSpriteAnimator]
@@ -181,8 +181,8 @@ stateDiagram-v2
 
 | Attack | Shape | Damage | Stamina |
 | --- | --- | --- | --- |
-| Light 1 / 2 | 160° sweep, then a reversed 120° sweep; reach 3.4 | 10 / 10 | 12 / 12 |
-| Light 3 (finisher) | Straight thrust lane at 1.3x reach, with a 0.7-unit lunge | 25 | 20 |
+| Light 1 / 2 | 160° sweep, then a reversed 120° sweep; reach 2.6 | 10 / 10 | 16 / 16 |
+| Light 3 (finisher) | Straight thrust lane at 1.3x reach, with a 0.7-unit lunge | 25 | 24 |
 | Charged cleave | 360° spin, radius 2.1; a full charge breaks guards | up to 30 | 35 |
 | Throw | Flies 7 units at 12 u/s and sticks in what it hits | 15 | 25 |
 | Recall | Returns at 16 u/s, hitting everything on its path | 10 | free |
@@ -196,7 +196,7 @@ These values live in `Assets/Settings/Weapons/AxeSettings.asset` and are a tunin
 
 ### Reactions
 
-`HitReaction` turns accepted hits into stagger and a physics knockback impulse. Knockback slides out under damping instead of stopping dead, and a killing blow pushes 1.6x harder. Feedback listens to the same events:
+`HitReaction` turns accepted hits into stagger and a physics knockback impulse. Knockback slides out under damping instead of stopping dead, and a killing blow pushes 1.6x harder. Enemies can have **poise**: damage accumulates and only staggers once it passes a threshold (the meter resets after a pause), and an AI can switch on **hyper-armor** during committed attacks. Hits that don't stagger keep only a nudge of knockback. The player and practice dummies have no poise, so every staggering hit staggers them. Feedback listens to the same events:
 
 - `EnemyImpactFeedback`: impact sound and whole-pixel particles at the contact point;
 - `WoodTargetFeedback`: wood chips and sound on practice targets;
@@ -204,34 +204,41 @@ These values live in `Assets/Settings/Weapons/AxeSettings.asset` and are a tunin
 
 ## Enemies
 
-`SimpleMeleeEnemy` is the shared melee AI. The wolf is that AI plus its own presenter.
+Enemy AIs implement `IEnemy` (aware, defeated, reset, a `PlayerDetected` event) and register themselves in `EnemyRegistry`, so shared systems such as the combat signal, the "!" cue, impact effects and the F3 panel work with any enemy without searching the scene.
+
+`WolfAI` is the wolf's brain. Its rhythm is **stalk, commit, punish, reposition**:
 
 ```mermaid
 stateDiagram-v2
   [*] --> Idle
-  Idle --> Pursuing: player within notice radius and in sight
-  Pursuing --> Windup: in attack range, direction locks
-  Windup --> Striking
-  Striking --> Recovering: one damage check per swing
-  Recovering --> Idle
-  Pursuing --> Returning: player or enemy leaves the leash radius
-  Returning --> Idle: back home
-  note right of Recovering
-    A weapon hit from any state staggers into Recovering.
-    At zero health the enemy is Defeated
-    and its corpse slides with the blow.
+  Idle --> Alert: player seen within notice radius
+  Alert --> Chase: player far away
+  Alert --> Stalk
+  Chase --> Stalk: reaches the circling ring
+  Stalk --> Windup: opening and attack token
+  Windup --> Lunge: lane locks, then leap
+  Windup --> Snap: player close
+  Windup --> Reposition: feint
+  Lunge --> Recover
+  Snap --> Recover
+  Recover --> Reposition: punish window ends
+  Reposition --> Stalk
+  note right of Stalk
+    A weapon hit staggers it from any state, then it repositions
+    or counter-snaps. Leaving the leash or losing sight returns it home.
   end note
 ```
 
-- **Telegraph:** the windup is the readable tell. The strike then checks reach, arc and line of sight once.
-- **Leash and reset:** the leash keeps encounters in their space, and resting at a bonfire resets every enemy through `IResetOnRest`.
-- **Encounter signal:** `EncounterState` is the shared "in combat" flag. It's true while any living enemy is aware of the player or the player was just hit, plus 3 s of grace. Several pursuers never fight over it. The HUD uses it today; camera framing and combat posture are meant to use it later.
-- **`Wolf.prefab`:** combines `SimpleMeleeEnemy` with
-  - `WolfView`: 20 sprites, gait driven by distance travelled, state-driven poses and a directional corpse;
-  - `EnemyAwarenessIndicator`: a "!" when the wolf detects the player;
-  - `EnemyHealthIndicator` and `EnemyImpactFeedback`.
+- **Stalk:** circles the player at a distance, reversing when blocked, which leaves openings for throws and Recall.
+- **Lunge:** the main attack. The windup tracks the player, then the direction **locks** and the wolf leaps along a lane drawn on the ground (thin while tracking, thick once locked, red while active), so a sidestep after the lock avoids it. Some windups are feints that break off.
+- **Snap:** a quick bite if the player stays close.
+- **Recover:** a short pause after every attack, the player's punish window, before it trots back out to the ring.
+- **Reading the player:** it hops back from swings, attacks at once when the player whiffs or throws the axe away, presses a tired player, and bites back when a hit fails to break its poise. Lunges are armored, and windups vary in length while the lock always comes a fixed beat before the leap.
+- **Packs:** `AttackTokens` lets one enemy attack at a time while the others keep circling, spaced apart.
 
-  The Tutorial's wolf uses easier per-instance overrides.
+`WolfView` samples the AI: circling, repositioning and chasing use stalk, walk and run animations driven by distance travelled; the bite's frames follow the windup clock so the jaws open on the leap; death plays once and holds as the corpse. The wolf also carries `EnemyHealthIndicator`, `EnemyAwarenessIndicator` and `EnemyImpactFeedback`. `EncounterState` is the shared "in combat" signal: true while any registered enemy is aware of the player or the player was just hit, plus 3 s of grace.
+
+The prototype `SimpleMeleeEnemy` (approach, windup, single strike, recovery) remains for the retired PrototypeLoop sentinel.
 
 ## Progression and saving
 
@@ -350,6 +357,8 @@ Presentation components read gameplay state and never change it, so art can be r
 
 Gameplay posts text through `HudNotifications` (receipts and the hint), and the HUD never writes gameplay state. The bonfire and defeat screens still use the older IMGUI `TutorialCombatHUD` until they are migrated.
 
+**Getting hit.** `PlayerHitFeedback` makes damage unmistakable: a red sprite flash, a tiny global hit-stop, a capped camera kick along the blow and a blink for the rest of the post-hit invulnerability, while the animator plays the flinch and the HUD flashes a red screen-edge vignette (which pulses like a heartbeat at low health). `FeedbackSettings` scales every flash and kick for players who prefer less.
+
 **Pause and time.** `SimulationPause` hands out leases. The pause menu, hit stop and the combat preview tool each hold one, and time resumes only when the last lease ends, so overlapping freezes can't restart the game early. The Esc menu offers Restart (reload at the checkpoint, progress kept) and Quit; its input, controller, commands and view are separate classes.
 
 ## Tools and verification
@@ -376,7 +385,7 @@ Gameplay posts text through `HudNotifications` (receipts and the hint), and the 
 | Weapon state machine and attacks | [AxeWeapon](../RoadOfTheOldKing/Assets/Scripts/Weapons/AxeWeapon.cs) |
 | Hit geometry, line of sight and deduplication | [AxeHitDetector](../RoadOfTheOldKing/Assets/Scripts/Weapons/AxeHitDetector.cs) |
 | Hit data and receiver interfaces | [CombatHit](../RoadOfTheOldKing/Assets/Scripts/Combat/CombatHit.cs) |
-| Enemy AI | [SimpleMeleeEnemy](../RoadOfTheOldKing/Assets/Scripts/Combat/SimpleMeleeEnemy.cs) |
+| Wolf AI and the shared enemy interface | [WolfAI](../RoadOfTheOldKing/Assets/Scripts/Combat/WolfAI.cs), [IEnemy](../RoadOfTheOldKing/Assets/Scripts/Combat/IEnemy.cs) |
 | Checkpoints, saving and permanent progress | [CheckpointSession](../RoadOfTheOldKing/Assets/Scripts/Progression/CheckpointSession.cs) |
 | Save format and participant interfaces | [ProgressState](../RoadOfTheOldKing/Assets/Scripts/Progression/ProgressState.cs) |
 | Tutorial steps and hints | [TutorialGuide](../RoadOfTheOldKing/Assets/Scripts/Tutorial/TutorialGuide.cs) |

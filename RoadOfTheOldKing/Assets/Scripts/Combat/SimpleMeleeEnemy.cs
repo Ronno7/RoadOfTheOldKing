@@ -8,7 +8,7 @@ namespace TheLostShrine.Combat
     public enum MeleeEnemyState { Idle, Pursuing, Windup, Striking, Recovering, Returning, Defeated }
 
     [DisallowMultipleComponent, RequireComponent(typeof(Damageable), typeof(HitReaction), typeof(Rigidbody2D))]
-    public sealed class SimpleMeleeEnemy : MonoBehaviour, IResetOnRest
+    public sealed class SimpleMeleeEnemy : MonoBehaviour, IEnemy, IResetOnRest
     {
         [SerializeField] private PlayerHealth target;
         [SerializeField, Min(0.1f)] private float moveSpeed = 2.1f;
@@ -44,6 +44,7 @@ namespace TheLostShrine.Combat
         public float StateProgress => stateDuration > 0f ? Mathf.Clamp01(1f - remaining / stateDuration) : 0f;
         public int ResetVersion { get; private set; }
         public bool IsAware { get; private set; }
+        public bool IsDefeated => State == MeleeEnemyState.Defeated;
         public event System.Action PlayerDetected;
 
         private void Awake()
@@ -63,12 +64,14 @@ namespace TheLostShrine.Combat
 
         private void OnEnable()
         {
+            EnemyRegistry.Register(this);
             health.HitReceived += OnHit;
             health.Defeated += OnDefeated;
         }
 
         private void OnDisable()
         {
+            EnemyRegistry.Unregister(this);
             IsAware = false;
             health.HitReceived -= OnHit;
             health.Defeated -= OnDefeated;

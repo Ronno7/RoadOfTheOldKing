@@ -1,0 +1,99 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fd1d18a98bcd30469bcfd0f78adfbfa, type: 3}
+  m_Name: Run
+  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.DirectionalSpriteAnimation
+  source: PixelLab template running-8-frames
+  framesPerSecond: 12
+  loop: 1
+  contactFrame: -1
+  directions:
+  - sprites:
+    - {fileID: 21300000, guid: 0c9fe13caacca0a40b4fd67da378bb40, type: 3}
+    - {fileID: 21300000, guid: 58e73aeae05fb4241bdaf205a91b0978, type: 3}
+    - {fileID: 21300000, guid: 6d42ae7b1f20cb042ab1216c5eab0c7d, type: 3}
+    - {fileID: 21300000, guid: f73fd727e7e090f4e916904815d5de51, type: 3}
+    - {fileID: 21300000, guid: ebfed23c6a4997e479e00849ad4d1f2d, type: 3}
+    - {fileID: 21300000, guid: 832d5499d9b7185439ce482c392459f1, type: 3}
+    - {fileID: 21300000, guid: 20b71943d17d8324c95fb1764a804887, type: 3}
+    - {fileID: 21300000, guid: 0390470276b0af143825df127db1928a, type: 3}
+    heights: 1800000017000000180000001600000017000000160000001600000017000000
+  - sprites:
+    - {fileID: 21300000, guid: 0650bd98364a90045ba4987781136136, type: 3}
+    - {fileID: 21300000, guid: b1bc190b574a1b541802e1365e9a37e3, type: 3}
+    - {fileID: 21300000, guid: fa1710b7d44a5bc4a9d913f06db6afbb, type: 3}
+    - {fileID: 21300000, guid: d870d9f7c388c7042b3f8e794c2886af, type: 3}
+    - {fileID: 21300000, guid: 6eb455850ca17944da2a30fcd1b05665, type: 3}
+    - {fileID: 21300000, guid: 39a26a0074ff19f4b81385d079dc745c, type: 3}
+    - {fileID: 21300000, guid: f1610bf67d63a9a44b50212053e93b64, type: 3}
+    - {fileID: 21300000, guid: 038fb457a197ae748b26e6c78d5d8461, type: 3}
+    heights: 200000001f0000001e0000001c0000001c0000001c0000001d0000001e000000
+  - sprites:
+    - {fileID: 21300000, guid: fe52ea8d960d1ed4495e724b11e88fae, type: 3}
+    - {fileID: 21300000, guid: 9e3cfe4b58c0cda4887cf2a12455a830, type: 3}
+    - {fileID: 21300000, guid: a7428814898641e4d98faef2fd903a6b, type: 3}
+    - {fileID: 21300000, guid: ed1ce358d16ec994dbce22b15a31d72a, type: 3}
+    - {fileID: 21300000, guid: 7dc939d50e58dc14385d12fc5151bed9, type: 3}
+    - {fileID: 21300000, guid: 9b507f72d6e4d0e49878ae4a9756771a, type: 3}
+    - {fileID: 21300000, guid: 900f09105190b634487cee2123be0ef0, type: 3}
+    - {fileID: 21300000, guid: 004e6817a877dc84db99217c7f7244ff, type: 3}
+    heights: 210000001f0000001f0000001c0000001d0000001e0000001f00000020000000
+  - sprites:
+    - {fileID: 21300000, guid: 63c5b67c2cf583347981b761f5837421, type: 3}
+    - {fileID: 21300000, guid: f552b556d95c43a46acbb9b923cd978d, type: 3}
+    - {fileID: 21300000, guid: ceba1ed92aa7c7249a89b1acaab1679e, type: 3}
+    - {fileID: 21300000, guid: 6bdc6d1c2d41e1b4cb2b011291c2851b, type: 3}
+    - {fileID: 21300000, guid: 500208ce007d04343b2d75fa812f772a, type: 3}
+    - {fileID: 21300000, guid: 4520fee8e15f26449a668fcd354f19f9, type: 3}
+    - {fileID: 21300000, guid: 67b38ea6e82cd5446ad21102b345b47e, type: 3}
+    - {fileID: 21300000, guid: 1b7a4d885a6a1374aae18435c6faf8fd, type: 3}
+    heights: 200000001f0000001e0000001c0000001c0000001c0000001d0000001e000000
+  - sprites:
+    - {fileID: 21300000, guid: 048d9a26721c5d042bab86d885fbdbd3, type: 3}
+    - {fileID: 21300000, guid: 57a60450f5b5c9c49901899113fa33e3, type: 3}
+    - {fileID: 21300000, guid: 3d78199001cb4ca43875228f33fabb51, type: 3}
+    - {fileID: 21300000, guid: e4c2586a9670f4043953b4f75c87ade5, type: 3}
+    - {fileID: 21300000, guid: b6074fecec4476e41891bc0242ff6363, type: 3}
+    - {fileID: 21300000, guid: 4364e6560457c08409bc143ea5b5f895, type: 3}
+    - {fileID: 21300000, guid: 5365441242937ec459ee39b2c3a6447c, type: 3}
+    - {fileID: 21300000, guid: 9ff627677474222468038b64e04f0b21, type: 3}
+    heights: 1800000017000000180000001600000017000000160000001600000017000000
+  - sprites:
+    - {fileID: 21300000, guid: 3be831396a7c2a84aa950666db835f05, type: 3}
+    - {fileID: 21300000, guid: 7b72d156c99f06c49a0c88f39fab7ba1, type: 3}
+    - {fileID: 21300000, guid: f42af3ca85ceda24db3753025ba31c52, type: 3}
+    - {fileID: 21300000, guid: 6624e805515cd3b499849c1ec373a733, type: 3}
+    - {fileID: 21300000, guid: e10ace4225addad4aa07f45c0943364d, type: 3}
+    - {fileID: 21300000, guid: 0902f9117a915d845b8c4a2b3bf21d0d, type: 3}
+    - {fileID: 21300000, guid: 5fd1990b7be5b924ca72b84e7b491cdb, type: 3}
+    - {fileID: 21300000, guid: c693a56a55cc9b7429a32ac9383f8c5e, type: 3}
+    heights: 1c0000001c0000001d0000001a0000001b0000001c0000001d0000001a000000
+  - sprites:
+    - {fileID: 21300000, guid: 4677616d69ffe4648b725124f427f8f8, type: 3}
+    - {fileID: 21300000, guid: bb4409b861aeb4748a078df60e402072, type: 3}
+    - {fileID: 21300000, guid: 4b3d4866bcce9d641b5bffa7c6b67cbf, type: 3}
+    - {fileID: 21300000, guid: a733c8155bbe0464890289a6d8e0edcf, type: 3}
+    - {fileID: 21300000, guid: 5dd921bf4f84bc0459d481af51aa34b0, type: 3}
+    - {fileID: 21300000, guid: 890968446b5eb2448a58a3c41ad2148c, type: 3}
+    - {fileID: 21300000, guid: 03c3571eddfa2b34280d331a77e12d90, type: 3}
+    - {fileID: 21300000, guid: e2436af96b5cc8c44bbf851ca629fc9b, type: 3}
+    heights: 2500000023000000210000002200000021000000200000002200000025000000
+  - sprites:
+    - {fileID: 21300000, guid: 5feb55e3ac58ffa4f878fd4529e439f1, type: 3}
+    - {fileID: 21300000, guid: faa3b198c3ae71e4bbf471f63fff7a2c, type: 3}
+    - {fileID: 21300000, guid: 1746cf75b1d7af2408e605a11a2ff3eb, type: 3}
+    - {fileID: 21300000, guid: dbd32ac09ac5620419c448dec3f63d3d, type: 3}
+    - {fileID: 21300000, guid: 499b14e437f2e9849b7dbe4aa0884ba4, type: 3}
+    - {fileID: 21300000, guid: 3444915ce4a4b614f8aa7efe5fa9e6f0, type: 3}
+    - {fileID: 21300000, guid: 959cd7e8abc3d79438dc0b0d1351d29b, type: 3}
+    - {fileID: 21300000, guid: 01999f5358a9b364782724cb7a6d23ee, type: 3}
+    heights: 1c0000001c0000001d0000001a0000001b0000001c0000001d0000001a000000
