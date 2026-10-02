@@ -17,6 +17,7 @@
 - Light attacks have shorter reach and cost more stamina.
 - The wolf is redrawn as a larger eight-direction animal with walk, run, bite and death animations; the bite is timed to its attack.
 - Rewrote the [systems overview](Docs/SystemsOverview.md) as a guide to the game's architecture, with diagrams.
+- Moved rendering to Unity's Universal Render Pipeline (2D Renderer), opening the way for 2D lighting, shader-based effects and post-processing. The game looks the same.
 
 ## 0.4 — Vertical slice
 
