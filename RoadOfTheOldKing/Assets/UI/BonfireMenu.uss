@@ -1,4 +1,12 @@
-/* The world stays visible at a bonfire (it is not paused): a light veil and the panel on the right,
-   leaving the left of the screen for the planned bonfire camera framing of the resting hero. */
-#bonfire-overlay { align-items: flex-end; padding-right: 6%; background-color: rgba(15, 19, 18, 0.25); }
-#bonfire-panel { width: 400px; }
+/* The world stays visible at a bonfire (it is not paused): a light veil and a compact panel on the right,
+   while the camera zooms in and frames the resting hero on the left third (BonfireMenu). Half the size of
+   the shared menu panel (user, 3 Oct). */
+#bonfire-overlay { align-items: flex-end; padding-right: 8%; background-color: rgba(15, 19, 18, 0.2); }
+#bonfire-panel { width: 201px; padding: 12px; }
+#bonfire-panel .menu-heading { font-size: 20px; }
+#bonfire-panel .menu-divider { margin-top: 6px; margin-bottom: 6px; }
+#bonfire-panel .menu-text, #bonfire-panel .menu-meta, #bonfire-panel .menu-description { font-size: 10px; }
+#bonfire-panel .menu-meta { margin-bottom: 6px; }
+#bonfire-panel .menu-button { height: 21px; margin-bottom: 3px; font-size: 10px; }
+#bonfire-panel .menu-description { min-height: 12px; }
+#bonfire-panel .menu-hint { margin-top: 6px; }

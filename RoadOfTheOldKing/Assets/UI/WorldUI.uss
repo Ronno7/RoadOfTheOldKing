@@ -1,0 +1,29 @@
+/* World-space HUD pieces on WorldPanel.asset (32 panel px per unit, so 2 px = 1 art pixel at 16 PPU).
+   Same placeholder palette as GameHud.uss. Each document's top element is absolute so it keeps its
+   own size (a world document's root otherwise collapses to nothing). */
+.world-root { position: absolute; }
+.world-chip {
+    flex-direction: row; align-items: center; padding: 4px 6px;
+    /* A plain texture, not a sprite: a 9-slice sprite stops the whole element drawing on a world panel. */
+    background-image: url("project://database/Assets/Art/Sprites/UI/PanelWorld.png");
+    -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2; -unity-slice-scale: 2px;
+    color: rgb(242, 229, 193); -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKPixel.asset");
+}
+
+/* Interaction prompt above the object the selector chose */
+/* Font size 20 on this 32-PPU panel: one font pixel = one art pixel. */
+#prompt-text { font-size: 20px; margin: 0; padding: 0; white-space: nowrap; -unity-font-style: normal; }
+
+/* Heavy-attack charge under the player */
+#charge { width: 22px; height: 4px; background-color: rgb(52, 50, 45); border-width: 1px; border-color: rgb(20, 20, 18); }
+#charge-fill { height: 100%; width: 0; background-color: rgb(140, 170, 190); }
+#charge-fill.ready { background-color: rgb(231, 184, 92); }
+
+/* Enemy health is a PixelBar (drawn in code, health palette): no styles needed beyond .world-root */
+
+/* Awareness "!" (5x11 art pixels) */
+#awareness-mark {
+    width: 10px; height: 22px;
+    background-image: url("project://database/Assets/Art/Sprites/UI/AwarenessMark.png");
+    -unity-background-scale-mode: scale-to-fit;
+}

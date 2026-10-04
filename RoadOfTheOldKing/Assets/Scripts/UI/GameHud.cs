@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text;
 using TheLostShrine.Combat;
 using TheLostShrine.Player;
@@ -12,15 +13,30 @@ namespace TheLostShrine.UI
 {
     // Contextual HUD (placeholder art, production structure). Lives on the Player prefab and only
     // presents: it reads gameplay components and events and never edits gameplay or save state.
-    //  Vitals appear on damage, spending, recovery or combat and hide after a hold once full and safe.
+    //  Corner vitals (pixel art: health, flasks; stamina too with HudSettings.AlwaysShowVitals) appear on
+    //  damage, healing or combat and hide after a hold once full and safe.
+    //  Stamina otherwise is a pixel arc over the hero, shown only in combat.
     //  One interaction prompt beside the object the interaction selector actually chose.
     //  Weapon-away chip, charge bar near the player, reward receipts, one Tutorial hint, Tab status.
-    // Modal menus (bonfire, defeat) remain in TutorialCombatHUD for now.
+    // The prompt, charge bar and stamina arc are world-space documents (WorldUIDocument); the rest is a screen panel.
     [DisallowMultipleComponent, RequireComponent(typeof(PlayerHealth))]
     public sealed class GameHud : MonoBehaviour
     {
         [SerializeField] private VisualTreeAsset layout;
         [SerializeField] private PanelSettings panelSettings;
+        [Header("World space")]
+        [SerializeField] private PanelSettings worldPanel;
+        [SerializeField] private VisualTreeAsset promptLayout;
+        [SerializeField] private VisualTreeAsset chargeLayout;
+        [SerializeField] private VisualTreeAsset staminaArcLayout;
+        [Tooltip("Height above the player's pivot of the stamina arc's lowest pixel (world units). 44 px clears " +
+            "the carried halberd by 1 px in every hold, walk bob included, for the 18 px / 85° arc (the far-side holds set the limit).")]
+        [SerializeField] private float arcBottomHeight = 44f / 16f;
+        [Tooltip("Seconds for the stamina arc to fade in, then out.")]
+        [SerializeField] private Vector2 arcFade = new Vector2(.15f, .4f);
+        [Header("Corner vitals")]
+        [Tooltip("Bar length in art pixels per point of maximum health or stamina, so bars grow with their maximum.")]
+        [SerializeField, Min(.05f)] private float barPixelsPerPoint = .5f;
         [Tooltip("Seconds the vitals stay after everything is full and no threat remains.")]
         [SerializeField, Min(0f)] private float vitalsHold = 3f;
         [Tooltip("World offset above an interactable where its prompt appears.")]
@@ -39,11 +55,17 @@ namespace TheLostShrine.UI
         public static GameHud Active { get; private set; }
 
         private UIDocument document;
-        private VisualElement root, vignette, vitals, healthFill, staminaFill, staminaBar, weaponAway, prompt, charge, chargeFill, receipts, hint, status;
-        private Label flaskCount;
-        private VisualElement flaskRow;
+        // Corner art is authored in art pixels and drawn at 3 reference px each: the world's density at camera size 5.5.
+        private const float HudPixel = 3f;
+        private VisualElement root, vignette, vitals, healthBar, healthFill, staminaRow, staminaBar, staminaFill, staminaDebt, flaskRow;
+        private VisualElement weaponAway, chargeFill, receipts, hint, status;
+        private readonly List<VisualElement> flaskIcons = new List<VisualElement>();
+        private WorldUIDocument prompt, charge, staminaArc, tutorialCue;
+        private Label tutorialText;
+        private bool promptVisible;
+        private PixelArc arc;
         private PlayerFlask flask;
-        private Label staminaWarning, weaponAwayText, promptText, hintText, statusText;
+        private Label weaponAwayText, promptText, hintText, statusText;
         private PlayerHealth player;
         private Damageable playerDamageable;
         private PlayerStamina stamina;
@@ -53,8 +75,9 @@ namespace TheLostShrine.UI
         private CheckpointSession session;
         private float vitalsUntil, hurtAmount;
         private Texture2D vignetteTexture;
-        private int receiptsVersion = -1, hintVersion = -1;
+        private int receiptsVersion = -1;
         private bool statusOpen;
+        private float arcAlpha;
         private readonly StringBuilder text = new StringBuilder(256);
 
         private void Awake()
@@ -86,6 +109,11 @@ namespace TheLostShrine.UI
             if (flask != null) flask.DrinkRefused -= OnFlaskEmpty;
             Unsubscribe();
             if (root != null) root.style.display = DisplayStyle.None;
+            if (prompt != null) prompt.Show(false);
+            if (charge != null) charge.Show(false);
+            if (tutorialCue != null) tutorialCue.Show(false);
+            if (staminaArc != null) staminaArc.Show(false);
+            arcAlpha = 0f;
         }
 
         private void OnDestroy()
@@ -97,23 +125,36 @@ namespace TheLostShrine.UI
         private bool Build()
         {
             if (document != null) { root.style.display = DisplayStyle.Flex; return true; }
-            if (layout == null || panelSettings == null) { Debug.LogError("GameHud needs its layout and panel settings.", this); return false; }
+            if (layout == null || panelSettings == null || worldPanel == null || promptLayout == null || chargeLayout == null || staminaArcLayout == null)
+            { Debug.LogError("GameHud needs its layouts and panel settings.", this); return false; }
             var child = new GameObject("HUD UI"); child.SetActive(false); child.transform.SetParent(transform, false);
             document = child.AddComponent<UIDocument>(); document.panelSettings = panelSettings; document.visualTreeAsset = layout;
             child.SetActive(true);
             root = document.rootVisualElement.Q("hud-root");
-            vitals = root.Q("vitals"); healthFill = root.Q("health-fill"); staminaFill = root.Q("stamina-fill");
-            staminaBar = root.Q("stamina-bar"); staminaWarning = root.Q<Label>("stamina-warning");
-            flaskRow = root.Q("flask-row"); flaskCount = root.Q<Label>("flask-count");
+            vitals = root.Q("vitals"); healthBar = root.Q("health-bar"); healthFill = root.Q("health-fill");
+            staminaRow = root.Q("stamina-row"); staminaBar = root.Q("stamina-bar"); staminaFill = root.Q("stamina-fill"); staminaDebt = root.Q("stamina-debt");
+            flaskRow = root.Q("flask-row");
             weaponAway = root.Q("weapon-away"); weaponAwayText = root.Q<Label>("weapon-away-text");
-            prompt = root.Q("prompt"); promptText = root.Q<Label>("prompt-text");
-            charge = root.Q("charge"); chargeFill = root.Q("charge-fill");
+            prompt = WorldUIDocument.Create("Interaction prompt", transform, worldPanel, promptLayout, 30010, Pivot.BottomCenter);
+            promptText = prompt.Q<Label>("prompt-text");
+            tutorialCue = WorldUIDocument.Create("Tutorial cue", transform, worldPanel, promptLayout, 30012, Pivot.BottomCenter);
+            tutorialText = tutorialCue.Q<Label>("prompt-text");
+            tutorialText.style.whiteSpace = WhiteSpace.Normal;
+            tutorialText.style.width = 160;
+            tutorialText.style.fontSize = 10;
+            tutorialText.style.unityTextAlign = TextAnchor.MiddleCenter;
+            tutorialText.enableRichText = true;
+            tutorialCue.Show(false);
+            charge = WorldUIDocument.Create("Charge bar", transform, worldPanel, chargeLayout, 30005, Pivot.TopCenter);
+            chargeFill = charge.Q<VisualElement>("charge-fill");
+            staminaArc = WorldUIDocument.Create("Stamina arc", transform, worldPanel, staminaArcLayout, 30008, Pivot.BottomCenter);
+            arc = staminaArc.Q<PixelArc>("stamina-arc");
             receipts = root.Q("receipts");
             hint = root.Q("hint"); hintText = root.Q<Label>("hint-text");
             status = root.Q("status"); statusText = root.Q<Label>("status-text");
-            foreach (var label in new[] { staminaWarning, weaponAwayText, promptText, hintText, statusText }) label.enableRichText = true;
-            SetVisible(prompt, false); SetVisible(charge, false); SetVisible(hint, false); SetVisible(status, false);
-            SetVisible(weaponAway, false); SetVisible(staminaWarning, false);
+            foreach (var label in new[] { weaponAwayText, promptText, hintText, statusText }) label.enableRichText = true;
+            prompt.Show(false); charge.Show(false); staminaArc.Show(false); SetVisible(hint, false); SetVisible(status, false);
+            SetVisible(weaponAway, false);
             BuildVignette();
             return true;
         }
@@ -135,57 +176,110 @@ namespace TheLostShrine.UI
         }
 
         private void OnPlayerHit(CombatHit hit) { EncounterState.ReportThreat(); Reveal(); if (hit.Damage > 0) hurtAmount = 1f; }
-        private void OnShard(int total) => HudNotifications.Post("Sun Shard +1 · " + total + (total == 1 ? " shard" : " shards"));
+        private void OnShard(int total) => HudNotifications.Post("Sun Shard +1 · " + total);
         private void OnFragment(int total, bool completedHeart) => HudNotifications.Post(completedHeart
-            ? "Heart complete · Maximum health " + player.Health.MaxHealth
-            : "Heart fragment · " + total % HeartFragmentProgression.FragmentsPerHeart + " / " + HeartFragmentProgression.FragmentsPerHeart, 4.5f);
+            ? "Max health " + player.Health.MaxHealth
+            : "Heart fragment " + total % HeartFragmentProgression.FragmentsPerHeart + "/" + HeartFragmentProgression.FragmentsPerHeart, 4.5f);
 
         private void Reveal() => vitalsUntil = Time.time + vitalsHold;
-        private void OnFlaskEmpty() { Reveal(); HudNotifications.Post("No flasks left. Rest at a bonfire to refill."); }
+        private void OnFlaskEmpty() { Reveal(); HudNotifications.Post("No flasks. Rest to refill."); }
 
         private void Update()
         {
             if (document == null) return;
             Subscribe();
             bool menuOpen = MenuStack.IsAnyOpen || (interaction != null && interaction.IsOpen) || (pauseMenu != null && pauseMenu.BlocksGameplay);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+            menuOpen |= DevToolsPanel.CapturesInput;
+#endif
             bool alive = player.IsAlive;
             var keyboard = Keyboard.current;
             if (keyboard != null && keyboard.tabKey.wasPressedThisFrame && !menuOpen && alive && Time.timeScale > 0f) statusOpen = !statusOpen;
             if (menuOpen || !alive) statusOpen = false;
 
             UpdateVitals();
+            UpdateStaminaArc(alive && !menuOpen);
             UpdateVignette(alive);
-            UpdateWeaponAway(alive && !menuOpen);
-            UpdatePrompt(alive && !menuOpen);
+            bool scripted = GetComponent<PlayerControlLocks>()?.IsLocked == true && !menuOpen;
+            UpdateWeaponAway(alive && !menuOpen && !scripted && !HudNotifications.HintCompleted && !HudNotifications.HintWorldPosition.HasValue);
+            UpdatePrompt(alive && !menuOpen && !scripted);
             UpdateCharge(alive && !menuOpen);
             UpdateReceipts();
-            UpdateHint(alive && !menuOpen);
+            SetVisible(receipts, alive && !menuOpen && !scripted && !EncounterState.InCombat && !HudNotifications.HintCompleted);
+            UpdateHint(alive && !menuOpen && !scripted);
             SetVisible(status, statusOpen);
             if (statusOpen) UpdateStatus();
         }
 
+        // Corner cluster: health, then stamina (only with the always-visible setting; otherwise stamina is
+        // the arc over the hero in combat), then one flask icon per charge.
         private void UpdateVitals()
         {
+            bool always = HudSettings.AlwaysShowVitals;
             var health = player.Health;
-            float healthRatio = health != null && health.MaxHealth > 0 ? (float)health.Health / health.MaxHealth : 0f;
-            float staminaRatio = stamina != null ? stamina.Normalized : 1f;
+            int maxHealth = health != null ? Mathf.Max(1, health.MaxHealth) : 1;
+            float healthRatio = health != null ? (float)health.Health / maxHealth : 0f;
             // Very low but nonzero health never renders as an empty (dead-looking) bar.
-            healthFill.style.width = Length.Percent(health != null && health.Health > 0 ? Mathf.Max(4f, healthRatio * 100f) : 0f);
-            staminaFill.style.width = Length.Percent(staminaRatio * 100f);
-            staminaFill.EnableInClassList("low", staminaRatio < 0.25f);
-            bool rejected = stamina != null && stamina.WasSpendRejected;
-            staminaBar.EnableInClassList("rejected", rejected);
-            staminaBar.EnableInClassList("exhausted", stamina != null && stamina.IsExhausted);
-            SetVisible(flaskRow, flask != null && flask.MaxCharges > 0);
-            if (flask != null)
+            SetBar(healthBar, healthFill, maxHealth, healthRatio, health != null && health.Health > 0);
+            SetVisible(staminaRow, always && stamina != null);
+            if (always && stamina != null)
             {
-                flaskCount.text = "x" + flask.Charges;
-                flaskRow.EnableInClassList("empty", flask.Charges == 0);
-                if (flask.IsDrinking) Reveal();
+                int track = SetBar(staminaBar, staminaFill, stamina.Maximum, stamina.Normalized, false);
+                staminaDebt.style.width = Mathf.Round(Debt() * track) * HudPixel;
+                staminaBar.EnableInClassList("rejected", stamina.WasSpendRejected);
+                staminaBar.EnableInClassList("exhausted", stamina.IsExhausted);
             }
-            SetVisible(staminaWarning, rejected);
-            if (healthRatio < 0.999f || staminaRatio < 0.999f || EncounterState.InCombat || !player.IsAlive || statusOpen) Reveal();
-            SetVisible(vitals, Time.time < vitalsUntil);
+            UpdateFlasks();
+            if (healthRatio < 0.999f || EncounterState.InCombat || !player.IsAlive || statusOpen) Reveal();
+            SetVisible(vitals, always || Time.time < vitalsUntil);
+        }
+
+        // Sizes a framed bar to its maximum and fills it in whole art pixels; returns the track length.
+        private int SetBar(VisualElement bar, VisualElement fill, float maximum, float ratio, bool keepSliver)
+        {
+            int track = Mathf.Max(4, Mathf.RoundToInt(maximum * barPixelsPerPoint));
+            bar.style.width = (track + 2) * HudPixel;
+            int filled = Mathf.RoundToInt(Mathf.Clamp01(ratio) * track);
+            if (keepSliver && ratio > 0f) filled = Mathf.Max(1, filled);
+            fill.style.width = filled * HudPixel;
+            return track;
+        }
+
+        private float Debt() => stamina != null && stamina.IsExhausted ? -stamina.Current / Mathf.Max(1f, stamina.DeficitLimit) : 0f;
+
+        private void UpdateFlasks()
+        {
+            int max = flask != null ? flask.MaxCharges : 0;
+            SetVisible(flaskRow, max > 0);
+            if (max == 0) return;
+            if (flaskIcons.Count != max)
+            {
+                flaskRow.Clear(); flaskIcons.Clear();
+                for (int i = 0; i < max; i++)
+                {
+                    var icon = new VisualElement { pickingMode = PickingMode.Ignore };
+                    icon.AddToClassList("hud-icon"); icon.AddToClassList("flask-icon");
+                    flaskRow.Add(icon); flaskIcons.Add(icon);
+                }
+            }
+            for (int i = 0; i < max; i++) flaskIcons[i].EnableInClassList("empty", i >= flask.Charges);
+            if (flask.IsDrinking) Reveal();
+        }
+
+        // Spatial stamina: an arc over the hero, only while in combat; red while in deficit, and its
+        // outline flashes when an action is refused. Fades in and out (real time, so hit-stop and pause
+        // don't freeze it) and keeps tracking the hero while it fades.
+        private void UpdateStaminaArc(bool allowed)
+        {
+            if (stamina == null || arc == null) return;
+            bool wanted = allowed && EncounterState.InCombat;
+            float fade = wanted ? arcFade.x : arcFade.y;
+            arcAlpha = Mathf.MoveTowards(arcAlpha, wanted ? 1f : 0f, Time.unscaledDeltaTime / Mathf.Max(.01f, fade));
+            staminaArc.Show(arcAlpha > 0f);
+            if (arcAlpha <= 0f) return;
+            staminaArc.Root.style.opacity = arcAlpha;
+            staminaArc.Place(transform.position + Vector3.up * arcBottomHeight);
+            arc.SetValue(stamina.Normalized, Debt(), stamina.WasSpendRejected);
         }
 
         // A soft red frame behind the HUD: a flash on damage and a heartbeat pulse at low health.
@@ -237,9 +331,8 @@ namespace TheLostShrine.UI
             bool away = allowed && weapon != null && weapon.IsAway;
             SetVisible(weaponAway, away);
             if (!away) return;
-            string state = weapon.State == AxeState.Returning ? "Axe returning" : "Axe away";
-            weaponAwayText.text = weapon.State == AxeState.Returning ? state
-                : combat.CanRecall ? state + " · " + ControlLabels.Format("{recall} Recall") : state + " · walk over it";
+            weaponAwayText.text = weapon.State == AxeState.Returning ? "Returning"
+                : combat.CanRecall ? ControlLabels.Format("{recall} Recall") : "Axe away";
         }
 
         private void UpdatePrompt(bool allowed)
@@ -249,21 +342,24 @@ namespace TheLostShrine.UI
             if (allowed && interaction != null && !string.IsNullOrEmpty(interaction.Prompt))
             {
                 if (interaction.NearbyPickup != null) { target = interaction.NearbyPickup.transform; verb = interaction.NearbyPickup.Prompt; }
-                else if (interaction.Nearby != null) { target = interaction.Nearby.transform; verb = "Rest at " + interaction.Nearby.DisplayName; }
+                else if (interaction.Nearby != null) { target = interaction.Nearby.transform; verb = "Rest"; }
             }
-            if (target == null || !Anchor(prompt, target.position + Vector3.up * promptHeight, true)) { SetVisible(prompt, false); return; }
+            promptVisible = target != null;
+            if (target == null) { prompt.Show(false); return; }
+            prompt.Place(target.position + Vector3.up * promptHeight);
             promptText.text = ControlLabels.Format("{interact} ") + verb;
-            SetVisible(prompt, true);
+            prompt.Show(true);
         }
 
         private void UpdateCharge(bool allowed)
         {
             var weapon = combat != null ? combat.Weapon : null;
             bool charging = allowed && weapon != null && weapon.State == AxeState.Charging;
-            if (!charging || !Anchor(charge, transform.position + Vector3.up * chargeOffset, false)) { SetVisible(charge, false); return; }
+            if (!charging) { charge.Show(false); return; }
+            charge.Place(transform.position + Vector3.up * chargeOffset);
             chargeFill.style.width = Length.Percent(weapon.Charge01 * 100f);
             chargeFill.EnableInClassList("ready", weapon.Charge01 >= 1f);
-            SetVisible(charge, true);
+            charge.Show(true);
         }
 
         private void UpdateReceipts()
@@ -282,13 +378,27 @@ namespace TheLostShrine.UI
 
         private void UpdateHint(bool allowed)
         {
-            bool show = allowed && !string.IsNullOrEmpty(HudNotifications.Hint);
-            SetVisible(hint, show);
-            if (!show || hintVersion == HudNotifications.HintVersion) return;
-            hintVersion = HudNotifications.HintVersion;
+            bool show = allowed && !promptVisible && !string.IsNullOrEmpty(HudNotifications.Hint);
+            var anchor = HudNotifications.HintWorldPosition;
+            bool spatial = show && anchor.HasValue;
+            // Keep the whole chip on screen; distant destinations use the single screen hint instead.
+            if (spatial && Camera.main != null)
+            {
+                Vector3 viewport = Camera.main.WorldToViewportPoint(anchor.Value);
+                spatial = viewport.z > 0 && viewport.x > .2f && viewport.x < .8f && viewport.y > .15f && viewport.y < .86f;
+            }
+            tutorialCue.Show(spatial);
+            SetVisible(hint, show && !spatial);
+            if (!show) return;
+            if (spatial)
+            {
+                tutorialCue.Place(anchor.Value);
+                tutorialText.text = HudNotifications.Hint;
+                tutorialText.style.color = HudNotifications.HintCompleted ? new Color(.91f, .72f, .36f) : new Color(.95f, .9f, .76f);
+            }
             hint.EnableInClassList("completed", HudNotifications.HintCompleted);
-            // Plain-text marker: the default font may lack a check glyph; the gold styling carries it.
-            hintText.text = HudNotifications.HintCompleted ? "Done: " + HudNotifications.Hint : HudNotifications.Hint;
+            hintText.text = HudNotifications.Hint;
+
         }
 
         private void UpdateStatus()
@@ -322,24 +432,6 @@ namespace TheLostShrine.UI
                 if (!any) text.Append("Upgrades  none yet");
             }
             statusText.text = text.ToString();
-        }
-
-        // Places a world-anchored element; returns false when the point is off screen.
-        private bool Anchor(VisualElement element, Vector3 world, bool above)
-        {
-            var camera = Camera.main;
-            if (camera == null || element.panel == null) return false;
-            Vector3 viewport = camera.WorldToViewportPoint(world);
-            if (viewport.z < 0f || viewport.x < 0f || viewport.x > 1f || viewport.y < 0f || viewport.y > 1f) return false;
-            Vector2 point = RuntimePanelUtils.CameraTransformWorldToPanel(element.panel, world, camera);
-            float width = float.IsNaN(element.resolvedStyle.width) ? 0f : element.resolvedStyle.width;
-            float height = float.IsNaN(element.resolvedStyle.height) ? 0f : element.resolvedStyle.height;
-            // Keep prompts inside the viewport.
-            var bounds = root.layout;
-            float left = Mathf.Clamp(point.x - width * 0.5f, 4f, Mathf.Max(4f, bounds.width - width - 4f));
-            float top = Mathf.Clamp(above ? point.y - height : point.y, 4f, Mathf.Max(4f, bounds.height - height - 4f));
-            element.style.left = left; element.style.top = top;
-            return true;
         }
 
         private static void SetVisible(VisualElement element, bool visible)

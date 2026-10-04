@@ -34,6 +34,7 @@ namespace TheLostShrine.Player
         public int MaxCharges => maxCharges;
         public bool IsDrinking { get; private set; }
         public float MoveScale => moveScale;
+        public float HealAt => healAt;
         public float Progress => IsDrinking ? Mathf.Clamp01(elapsed / drinkDuration) : 0f;
         public event Action Healed;
         public event Action DrinkRefused;

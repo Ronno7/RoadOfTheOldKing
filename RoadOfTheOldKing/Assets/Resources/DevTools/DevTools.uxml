@@ -1,0 +1,30 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="DevTools.uss" />
+    <ui:VisualElement name="dev-root" picking-mode="Ignore">
+        <ui:Label name="effects" picking-mode="Ignore" />
+        <ui:VisualElement name="overlay">
+            <ui:VisualElement name="panel">
+                <ui:VisualElement class="row header">
+                    <ui:Label text="DEVELOPER TOOLS" class="title" />
+                    <ui:Label name="mode" text="PAUSED" />
+                    <ui:Button name="close" text="Close [F4]" />
+                </ui:VisualElement>
+                <ui:Label text="RUNTIME WORKBENCH" class="eyebrow" />
+                <ui:Label name="summary" />
+                <ui:VisualElement class="row toolbar">
+                    <ui:Toggle name="pause" label="Pause while open" />
+                    <ui:Button name="reset" text="Reset overrides" />
+                </ui:VisualElement>
+                <ui:Label name="active" />
+                <ui:VisualElement name="tabs" class="row" />
+                <ui:ScrollView name="scroll" horizontal-scroller-visibility="Hidden">
+                    <ui:VisualElement name="player-page" />
+                    <ui:VisualElement name="world-page" />
+                    <ui:VisualElement name="travel-page" />
+                </ui:ScrollView>
+                <ui:Label name="result" text="Ready" />
+                <ui:Label text="F4 / Esc close · Tab focus · Enter activate" class="footer" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="WorldUI.uss" />
+    <ui:VisualElement name="charge" class="world-root" picking-mode="Ignore">
+        <ui:VisualElement name="charge-fill" picking-mode="Ignore" />
+    </ui:VisualElement>
+</ui:UXML>

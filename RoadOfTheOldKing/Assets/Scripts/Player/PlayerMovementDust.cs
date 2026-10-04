@@ -41,8 +41,14 @@ namespace TheLostShrine.Player
         private PlayerHealth health;
         private PlayerMovementInput input;
         private Rigidbody2D rb;
-        // Top-down depth: dust moving south (toward the camera) draws in front of the body, the rest behind.
+        // Top-down depth: dust south of the feet line draws in front of the body, dust north of it behind.
+        // Re-sorted every frame from each speck's position, because a running body overtakes its own
+        // dust (a cloud thrown ahead of the feet ends up behind them a moment later).
         private ParticleSystem specksBack, specksFront, puffsBack, puffsFront;
+        private readonly ParticleSystem.Particle[] sortSource = new ParticleSystem.Particle[MaxParticles];
+        private readonly ParticleSystem.Particle[] sortMoving = new ParticleSystem.Particle[MaxParticles];
+        private readonly ParticleSystem.Particle[] sortTarget = new ParticleSystem.Particle[MaxParticles];
+        private const int MaxParticles = 48;
         private ParticleSystem[] systems;
         private ParticleSystemRenderer[] backRenderers, frontRenderers;
         private Vector2 lastVelocity, lastPosition;
@@ -60,10 +66,10 @@ namespace TheLostShrine.Player
             if (body == null) body = GetComponentInChildren<SpriteRenderer>();
             // 2px specks step to 1px halfway; 3px puffs step 3 -> 2 -> 1 in thirds.
             // Puffs drag less than specks so a cloud drifts apart instead of stacking on one spot.
-            specksBack = CreateSystem("Movement dust (specks, back)", 48, 5f, 1f, 0.5f);
-            specksFront = CreateSystem("Movement dust (specks, front)", 48, 5f, 1f, 0.5f);
-            puffsBack = CreateSystem("Movement dust (puffs, back)", 48, 3f, 1f, 2f / 3f, 1f / 3f);
-            puffsFront = CreateSystem("Movement dust (puffs, front)", 48, 3f, 1f, 2f / 3f, 1f / 3f);
+            specksBack = CreateSystem("Movement dust (specks, back)", MaxParticles, 5f, 1f, 0.5f);
+            specksFront = CreateSystem("Movement dust (specks, front)", MaxParticles, 5f, 1f, 0.5f);
+            puffsBack = CreateSystem("Movement dust (puffs, back)", MaxParticles, 3f, 1f, 2f / 3f, 1f / 3f);
+            puffsFront = CreateSystem("Movement dust (puffs, front)", MaxParticles, 3f, 1f, 2f / 3f, 1f / 3f);
             systems = new[] { specksBack, specksFront, puffsBack, puffsFront };
             backRenderers = new[] { specksBack.GetComponent<ParticleSystemRenderer>(), puffsBack.GetComponent<ParticleSystemRenderer>() };
             frontRenderers = new[] { specksFront.GetComponent<ParticleSystemRenderer>(), puffsFront.GetComponent<ParticleSystemRenderer>() };
@@ -169,6 +175,40 @@ namespace TheLostShrine.Player
             lastVelocity = velocity; lastPosition = position;
         }
 
+        private void LateUpdate()
+        {
+            if (systems == null) return;
+            float ground = transform.position.y + footOffset.y;
+            Resort(specksFront, specksBack, ground);
+            Resort(puffsFront, puffsBack, ground);
+        }
+
+        private void Resort(ParticleSystem front, ParticleSystem back, float ground)
+        {
+            Move(front, back, ground, true);
+            Move(back, front, ground, false);
+        }
+
+        // Moves the particles on the wrong side of the feet line into the other system, keeping their state.
+        private void Move(ParticleSystem from, ParticleSystem to, float ground, bool toBehind)
+        {
+            if (from.particleCount == 0) return;
+            int count = from.GetParticles(sortSource);
+            int kept = 0, moving = 0;
+            for (int i = 0; i < count; i++)
+            {
+                if (sortSource[i].position.y > ground == toBehind) sortMoving[moving++] = sortSource[i];
+                else sortSource[kept++] = sortSource[i];
+            }
+            if (moving == 0) return;
+            from.SetParticles(sortSource, kept);
+            int existing = to.GetParticles(sortTarget);
+            int added = Mathf.Min(moving, sortTarget.Length - existing);
+            System.Array.Copy(sortMoving, 0, sortTarget, existing, added);
+            if (!to.isPlaying) to.Play();
+            to.SetParticles(sortTarget, existing + added);
+        }
+
         private void SyncSorting()
         {
             if (body == null) return;
@@ -213,7 +253,7 @@ namespace TheLostShrine.Player
 
         private void Emit(bool big, Vector2 origin, Vector2 velocity, float lifetime, Color color)
         {
-            bool front = velocity.y < 0f;
+            bool front = origin.y <= rb.position.y + footOffset.y;
             var system = big ? (front ? puffsFront : puffsBack) : (front ? specksFront : specksBack);
             int pixels = big ? 3 : 2;
             if (!system.isPlaying) system.Play();

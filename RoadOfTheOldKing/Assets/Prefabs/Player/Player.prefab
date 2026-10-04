@@ -449,6 +449,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.UI.GameHud
   layout: {fileID: 9197481963319205126, guid: b3a1d266480df244f82049975a84cfc6, type: 3}
   panelSettings: {fileID: 11400000, guid: 23023f83a02a11e498eeeed8417348a0, type: 2}
+  worldPanel: {fileID: 11400000, guid: 18015c3b74002454fab6d92829abd2aa, type: 2}
+  promptLayout: {fileID: 9197481963319205126, guid: bd9236310363b0040ac5e02217cdfe83, type: 3}
+  chargeLayout: {fileID: 9197481963319205126, guid: df53e1e105402a2448027aab205fe465, type: 3}
+  staminaArcLayout: {fileID: 9197481963319205126, guid: 2eb1c6f6152c267458d47d4463b847d3, type: 3}
+  arcBottomHeight: 2.75
+  arcFade: {x: 0.15, y: 0.4}
+  barPixelsPerPoint: 0.5
   vitalsHold: 3
   promptHeight: 1.25
   chargeOffset: -0.35

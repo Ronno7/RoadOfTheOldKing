@@ -17,7 +17,7 @@ namespace TheLostShrine.Tutorial
         [SerializeField] private MonoBehaviour target;
         [SerializeField] private Kinds countedKinds = Kinds.LightChop | Kinds.ChargedCleave;
         [SerializeField, Min(1)] private int requiredHits = 3;
-        [SerializeField, TextArea] private string completionNotice = "Good. Chain {attack} for a three-hit combo; hold {cleave} to charge a spinning cleave.";
+        [SerializeField, TextArea] private string completionNotice = "Combo {attack} {attack} {attack} · Cleave: hold {cleave}";
         private IHitEventSource source;
         private int hits;
 

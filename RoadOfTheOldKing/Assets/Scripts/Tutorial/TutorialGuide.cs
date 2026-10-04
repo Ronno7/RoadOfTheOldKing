@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using TheLostShrine.Combat;
+using TheLostShrine.Cameras;
+using TheLostShrine.Weapons;
 using TheLostShrine.Player;
 using TheLostShrine.Progression;
 using TheLostShrine.UI;
@@ -19,7 +21,8 @@ namespace TheLostShrine.Tutorial
         Rested,         // has rested at any bonfire (a checkpoint exists)
         Milestone,      // progress contains `milestone` (lessons, rewards, exits...)
         ReachArea,      // came within `radius` of `area`
-        DrankFlask,     // started `amount` flask drinks (at least once)
+        DrankFlask,     // recovered safely after the first wolf
+        Looked,         // held Alt to look around
     }
 
     [Serializable]
@@ -30,10 +33,15 @@ namespace TheLostShrine.Tutorial
         [TextArea(2, 4), Tooltip("Hint text. {tokens} become key names, e.g. {interact}, {throw}, {recall}.")]
         public string hint;
         public TutorialCondition condition;
-        [Tooltip("Units for Moved/Sprinted, count for Dodged/DrankFlask.")] public float amount = 1f;
+        [Tooltip("Units for Moved/Sprinted, count for Dodged.")] public float amount = 1f;
         [Tooltip("Progress id for Milestone.")] public string milestone;
         [Tooltip("World position for ReachArea (layout anchors are editor-only, so positions are stored).")] public Vector2 area;
         [Min(0.5f)] public float radius = 4f;
+
+        [Tooltip("Optional world-space teaching cue; leave empty for a screen hint.")]
+        public Transform cueTarget;
+        public bool cueAtPlayer;
+        public Vector2 cueOffset = new Vector2(0, 2.5f);
 
         public TutorialStep() { }
         public TutorialStep(string id, string hint, TutorialCondition condition) { this.id = id; this.hint = hint; this.condition = condition; }
@@ -61,9 +69,12 @@ namespace TheLostShrine.Tutorial
         private PlayerBonfireInteraction interaction;
         private UI.PauseMenuController pauseMenu;
         private Vector2 lastPosition;
-        private float moved, sprinted;
+        private float moved, sprinted, moveHintSeconds;
         private int dashes, drinks;
-        private bool wasDrinking;
+        private bool looked;
+        private float safeSince = -1f;
+        private RecallAwakeningStone stone;
+        private Vector3? completedPosition;
         private uint lastDashSequence;
         private bool restored;
         private float showAfter;
@@ -96,6 +107,8 @@ namespace TheLostShrine.Tutorial
             combat = player.GetComponent<PlayerCombatController>();
             dash = player.GetComponent<PlayerDash>();
             flask = player.GetComponent<PlayerFlask>();
+            if (flask != null) flask.Healed += OnHealed;
+            stone = FindFirstObjectByType<RecallAwakeningStone>();
             interaction = player.GetComponent<PlayerBonfireInteraction>();
             pauseMenu = player.GetComponent<UI.PauseMenuController>();
             lastPosition = player.transform.position;
@@ -128,9 +141,16 @@ namespace TheLostShrine.Tutorial
                 lastDashSequence = dash.Sequence;
                 if (dash.IsDashing) dashes++;
             }
-            bool drinking = flask != null && flask.IsDrinking;
-            if (drinking && !wasDrinking) drinks++;
-            wasDrinking = drinking;
+            var look = Camera.main != null ? Camera.main.GetComponent<CameraFreelook2D>() : null;
+            if (look != null && look.IsLooking) looked = true;
+            if (EncounterState.InCombat) safeSince = -1f;
+            else if (safeSince < 0f) safeSince = Time.time;
+        }
+
+        private void OnHealed()
+        {
+            var progress = CheckpointSession.Instance?.Progress;
+            if (progress != null && progress.Has("tutorial/enemy/first-wolf")) drinks++;
         }
 
         private bool IsMet(TutorialStep step)
@@ -138,14 +158,19 @@ namespace TheLostShrine.Tutorial
             var progress = CheckpointSession.Instance != null ? CheckpointSession.Instance.Progress : null;
             switch (step.condition)
             {
-                case TutorialCondition.Moved: return moved >= step.amount;
+                case TutorialCondition.Moved: return moved >= step.amount && moveHintSeconds >= 6f;
                 case TutorialCondition.Sprinted: return sprinted >= step.amount;
                 case TutorialCondition.Dodged: return dashes >= Mathf.Max(1f, step.amount);
                 case TutorialCondition.HasAxe: return combat != null && combat.Weapon != null;
                 case TutorialCondition.RecallUnlocked: return combat != null && combat.CanRecall;
                 case TutorialCondition.Rested: return CheckpointSession.Instance != null && CheckpointSession.Instance.HasCheckpoint;
                 case TutorialCondition.Milestone: return progress != null && progress.Has(step.milestone);
-                case TutorialCondition.DrankFlask: return drinks >= Mathf.Max(1f, step.amount);
+                case TutorialCondition.DrankFlask:
+                    return progress != null && progress.Has("tutorial/enemy/first-wolf") &&
+                        !EncounterState.InCombat && safeSince >= 0f && Time.time - safeSince >= .5f &&
+                        flask != null && !flask.IsDrinking &&
+                        (drinks >= 1 || player.Health.Health >= player.Health.MaxHealth || flask.Charges == 0);
+                case TutorialCondition.Looked: return looked || (progress != null && progress.Has(StepPrefix + "road"));
                 case TutorialCondition.ReachArea: return player.IsAlive && ((Vector2)player.transform.position - step.area).sqrMagnitude <= step.radius * step.radius;
                 default: return false;
             }
@@ -160,8 +185,9 @@ namespace TheLostShrine.Tutorial
             // No ✓ flash for steps a loaded save already satisfies.
             if (wasCurrent && restored && Time.time >= showAfter)
             {
-                completedHint = step.hint;
-                completedUntil = Time.time + completedHold;
+                completedHint = step.id == "stone" ? "Recall awakened\nThrow, then Recall {recall}" : null;
+                completedPosition = player.transform.position + Vector3.up * 2.5f;
+                completedUntil = Time.time + (step.id == "stone" ? 4f : step.id == "flask" ? 0f : completedHold);
             }
             StepCompleted?.Invoke(step);
         }
@@ -171,18 +197,38 @@ namespace TheLostShrine.Tutorial
             bool blocked = !player.IsAlive || UI.MenuStack.IsAnyOpen || (interaction != null && interaction.IsOpen) ||
                 (pauseMenu != null && pauseMenu.BlocksGameplay) || Time.time < showAfter ||
                 // Defer teaching text while fighting; prompts and receipts still show.
-                EncounterState.InCombat;
+                EncounterState.InCombat || (stone != null && stone.IsAwakening) || (flask != null && flask.IsDrinking);
             if (blocked) { HudNotifications.ClearHint(); return; }
             if (Time.time < completedUntil && completedHint != null)
             {
-                HudNotifications.SetHint(ControlLabels.Format(completedHint), true);
+                HudNotifications.SetHint(ControlLabels.Format(completedHint), true, completedPosition);
                 return;
             }
             int index = CurrentIndex;
-            HudNotifications.SetHint(index >= 0 ? ControlLabels.Format(steps[index].hint) : null);
+            // Local stone teaching takes precedence over skipped optional lessons in the courtyard.
+            if (stone != null && stone.IsReady && !stone.IsAwakened &&
+                Vector2.Distance(player.transform.position, stone.transform.position) < 12f)
+                index = steps.FindIndex(s => s.id == "stone");
+            if (index < 0 || Time.time < completedUntil || (steps[index].id == "flask" && Time.time - safeSince < .5f))
+            { HudNotifications.ClearHint(); return; }
+            var current = steps[index];
+            // The bonfire already owns a proximity-sensitive [F] Rest prompt.
+            if (current.id == "rest") { HudNotifications.ClearHint(); return; }
+            if (current.id == "move") moveHintSeconds += Time.deltaTime;
+            Vector3? position = current.cueAtPlayer ? player.transform.position + (Vector3)current.cueOffset :
+                current.cueTarget != null ? current.cueTarget.position + (Vector3)current.cueOffset : (Vector3?)null;
+            string teaching = current.hint;
+            if (current.id == "throw" && combat.Weapon != null && combat.Weapon.IsAway)
+            {
+                if (combat.Weapon.State != AxeState.Stuck) { HudNotifications.ClearHint(); return; }
+                teaching = "Walk to your axe";
+                position = combat.Weapon.transform.position + Vector3.up;
+            }
+            HudNotifications.SetHint(ControlLabels.Format(teaching), false, position);
         }
 
         private void OnDisable() => HudNotifications.ClearHint();
+        private void OnDestroy() { if (flask != null) flask.Healed -= OnHealed; }
 
         public void CaptureProgress(ProgressState state) { foreach (var id in done) state.Complete(StepPrefix + id); }
 
@@ -194,21 +240,23 @@ namespace TheLostShrine.Tutorial
         }
 
         // Default route for Tutorial.unity. Tune text and order in the Inspector; ids are save data.
+        // Hints stay short: a few words plus the key (user, 3 Oct).
         public static List<TutorialStep> DefaultSteps() => new List<TutorialStep>
         {
-            new TutorialStep("move", "Move with {move}. Head into the village.", TutorialCondition.Moved) { amount = 3f },
-            new TutorialStep("take-axe", "Find your axe: it rests in the stump by the woodpile. Walk up to it and press {interact}.", TutorialCondition.HasAxe),
-            new TutorialStep("throw", "Throw at a practice target: tap {throw}, or hold {throw} to aim. Walk over the axe to pick it back up.", TutorialCondition.Milestone) { milestone = "tutorial/lesson/throw-retrieve" },
-            new TutorialStep("melee", "Strike the practice dummy with {attack}.", TutorialCondition.Milestone) { milestone = "tutorial/lesson/melee" },
-            new TutorialStep("dodge", "Press {dash} to dodge. A well-timed dodge slips through attacks.", TutorialCondition.Dodged),
-            new TutorialStep("sprint", "Hold {sprint} to run. Running and dodging spend stamina.", TutorialCondition.Sprinted) { amount = 4f },
-            new TutorialStep("road", "Follow the forest road south to the old bridge.", TutorialCondition.ReachArea) { area = new Vector2(72f, 27.5f), radius = 5f },
-            new TutorialStep("stone", "A carved stone stands in the ruins past the bridge. Throw your axe at it.", TutorialCondition.RecallUnlocked),
-            new TutorialStep("recall-drill", "In the clearing north of the stone: throw into the far post, then move so the near post is between you and the axe, and press {recall}.", TutorialCondition.Milestone) { milestone = "tutorial/lesson/recall-drill" },
-            new TutorialStep("first-shard", "Something prowls the clearing to the north. Defeat it, then press {interact} to take the Sun Shard.", TutorialCondition.Milestone) { milestone = "shard/collected/tutorial/first-enemy" },
-            new TutorialStep("flask", "Hurt? Press {heal} to drink a flask and recover health. Resting at a bonfire refills your flasks.", TutorialCondition.DrankFlask),
-            new TutorialStep("rest", "Rest at the roadside bonfire with {interact}. Resting heals you and saves.", TutorialCondition.Rested),
-            new TutorialStep("exit", "The old road leads northeast, out to the Green Lowlands.", TutorialCondition.Milestone) { milestone = "tutorial/complete" },
+            new TutorialStep("move", "Head into the village {move}", TutorialCondition.Moved) { amount = 3f },
+            new TutorialStep("take-axe", "Take your axe from the stump {interact}", TutorialCondition.HasAxe),
+            new TutorialStep("throw", "Throw at a target {throw}, then pick it up", TutorialCondition.Milestone) { milestone = "tutorial/lesson/throw-retrieve" },
+            new TutorialStep("melee", "Strike the dummy {attack}", TutorialCondition.Milestone) { milestone = "tutorial/lesson/melee" },
+            new TutorialStep("dodge", "Dodge {dash}", TutorialCondition.Dodged),
+            new TutorialStep("sprint", "Sprint {sprint}", TutorialCondition.Sprinted) { amount = 4f },
+            new TutorialStep("look", "Hold {look} to look around", TutorialCondition.Looked) { cueAtPlayer = true },
+            new TutorialStep("road", "Follow the road south to the bridge", TutorialCondition.ReachArea) { area = new Vector2(72f, 27.5f), radius = 5f },
+            new TutorialStep("first-wolf", "A wolf guards the ruins. Dodge its lunge {dash}", TutorialCondition.Milestone) { milestone = "tutorial/enemy/first-wolf" },
+            new TutorialStep("flask", "Drink a flask {heal}", TutorialCondition.DrankFlask),
+            new TutorialStep("stone", "The stone seals the way\nThrow {throw}", TutorialCondition.RecallUnlocked),
+            new TutorialStep("first-shard", "Follow the trail north", TutorialCondition.Milestone) { milestone = "shard/collected/tutorial/first-enemy" },
+            new TutorialStep("rest", "", TutorialCondition.Rested),
+            new TutorialStep("exit", "Take the road northeast", TutorialCondition.Milestone) { milestone = "tutorial/complete" },
         };
     }
 }

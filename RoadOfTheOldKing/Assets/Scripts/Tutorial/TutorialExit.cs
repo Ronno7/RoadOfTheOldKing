@@ -11,7 +11,7 @@ namespace TheLostShrine.Tutorial
     public sealed class TutorialExit : MonoBehaviour, IProgressParticipant
     {
         [SerializeField] private string progressId = "tutorial/complete";
-        [SerializeField, TextArea] private string arrivalNotice = "The old road leads on to the Green Lowlands. End of the tutorial for now.";
+        [SerializeField, TextArea] private string arrivalNotice = "End of the tutorial. The road goes on.";
         public bool IsComplete { get; private set; }
         public event Action Completed;
 

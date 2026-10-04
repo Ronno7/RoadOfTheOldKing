@@ -27,7 +27,16 @@ namespace TheLostShrine.Combat
         {
             if (!IsAlive || hit.Damage <= 0 || (protection != null && protection.Blocks(hit)))
                 return false;
+            return ApplyHit(hit);
+        }
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+        // Explicit testing command: bypass protection but preserve all real hit/defeat listeners.
+        public bool DebugReceiveHit(CombatHit hit) => IsAlive && hit.Damage > 0 && ApplyHit(hit);
+#endif
+
+        private bool ApplyHit(CombatHit hit)
+        {
             Health = Mathf.Max(0, Health - hit.Damage);
             HitReceived?.Invoke(hit);
             if (!IsAlive)

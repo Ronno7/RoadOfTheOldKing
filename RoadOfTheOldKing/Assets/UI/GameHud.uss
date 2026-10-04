@@ -1,64 +1,72 @@
-/* Placeholder HUD in the pause menu's palette: charcoal panels, warm ivory text, gold accents,
-   restrained red health, muted green stamina. Pixel-art assets replace these blocks later. */
+/* HUD in the game's pixel style: the RotOK Pixel font (Tools/Art/UI/pixel_font.py) at sizes in steps of 10
+   (one font pixel = size/10 reference px, so text stays on whole pixels) and the notched 9-slice Panel frame
+   (Tools/Art/UI/hud_icons.py, 3 reference px per pixel). Warm ivory text, sun-gold keys. Keep text short. */
 #hud-root {
     position: absolute; left: 0; right: 0; top: 0; bottom: 0;
-    color: rgb(242, 229, 193);
+    color: rgb(242, 229, 193); -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKPixel.asset"); font-size: 20px;
 }
-.panel {
-    background-color: rgba(28, 31, 27, 0.88);
-    border-width: 2px; border-color: rgb(82, 83, 65); border-radius: 0;
-}
-.chip { flex-direction: row; align-items: center; padding: 3px 8px; }
-.world { position: absolute; }
+.panel { background-image: url("project://database/Assets/Art/Sprites/UI/Panel.png"); -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2; }
+.chip { flex-direction: row; align-items: center; padding: 6px 12px; }
+Label { margin: 0; padding: 0; -unity-font-style: normal; }
 
 /* Vitals and weapon-away, upper left */
 #top-left { position: absolute; left: 10px; top: 10px; flex-direction: row; align-items: flex-start; }
-#vitals { padding: 6px 8px; }
-.meter-row { flex-direction: row; align-items: center; margin-bottom: 3px; }
-.meter-icon { width: 8px; height: 8px; margin-right: 6px; border-width: 1px; border-color: rgb(20, 20, 18); }
-.health-icon { background-color: rgb(178, 72, 64); }
-/* Healing flask: warm amber charge count; dims when empty. */
-.flask-icon { background-color: rgb(214, 150, 64); }
-#flask-count { font-size: 10px; color: rgb(242, 228, 196); margin: 0; padding: 0; -unity-text-align: middle-left; }
-#flask-row.empty .flask-icon { background-color: rgb(70, 62, 54); }
-#flask-row.empty #flask-count { color: rgb(150, 138, 120); }
-.stamina-icon { background-color: rgb(118, 160, 112); }
-.bar { width: 132px; height: 10px; background-color: rgb(52, 50, 45); border-width: 1px; border-color: rgb(20, 20, 18); }
-.bar.thin { width: 110px; height: 6px; }
-.fill { height: 100%; width: 100%; }
-.health-fill { background-color: rgb(178, 72, 64); border-top-width: 2px; border-top-color: rgb(214, 112, 96); }
-.stamina-fill { background-color: rgb(118, 160, 112); }
-.stamina-fill.low { background-color: rgb(196, 164, 84); }
-#stamina-bar.rejected { border-color: rgb(231, 184, 92); }
-/* Stamina below zero (Souls-style deficit): the empty bar reads dark red until it recovers. */
-#stamina-bar.exhausted { background-color: rgb(92, 34, 30); }
-#stamina-warning { font-size: 10px; color: rgb(231, 184, 92); -unity-text-align: middle-left; margin: 0; padding: 0; }
-#weapon-away { margin-left: 8px; }
+/* Corner vitals: pixel art drawn at 3 px per art pixel (the world's density at camera size 5.5), so every
+   size below is a multiple of 3. Icons and the notched 9-slice frame come from Tools/Art/UI/hud_icons.py.
+   Code sets each bar's width from its maximum (bars grow with max health and stamina). No backing panel:
+   the charcoal outlines carry the contrast. */
+#vitals { flex-direction: column; align-items: flex-start; }
+.vital-row { flex-direction: row; align-items: center; margin-bottom: 3px; }
+.hud-icon { -unity-background-scale-mode: stretch-to-fill; flex-shrink: 0; }
+.heart-icon { width: 27px; height: 24px; margin-right: 3px; background-image: url("project://database/Assets/Art/Sprites/UI/Heart.png"); }
+.stamina-icon { width: 21px; height: 21px; margin-left: 3px; margin-right: 6px; background-image: url("project://database/Assets/Art/Sprites/UI/Stamina.png"); }
+.pixel-bar {
+    height: 21px; padding: 3px; flex-shrink: 0;
+    background-image: url("project://database/Assets/Art/Sprites/UI/BarFrame.png");
+    /* 9-slice from the sprite's 2 px border; the sprite imports at 33.33 PPU so 1 px = 3 reference px. */
+    -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2;
+}
+.pixel-bar.thin { height: 15px; }
+.bar-track { flex-grow: 1; flex-direction: row; overflow: hidden; }
+.bar-fill { height: 100%; flex-shrink: 0; }
+/* Two-tone fills: a light top row and a dark bottom row around the base colour. */
+.health-track { background-color: rgb(58, 37, 38); }
+.health-fill { background-color: rgb(178, 72, 64); border-top-width: 3px; border-top-color: rgb(214, 112, 96); border-bottom-width: 3px; border-bottom-color: rgb(126, 43, 43); }
+/* Stamina: ochre-gold (user, 2 Oct), matching the arc over the hero. */
+.stamina-track { background-color: rgb(59, 51, 38); }
+.stamina-fill { background-color: rgb(207, 149, 53); border-top-width: 3px; border-top-color: rgb(235, 195, 95); border-bottom-width: 3px; border-bottom-color: rgb(147, 97, 31); }
+/* Below zero (Souls-style deficit): the track turns dark red and the debt drains from the left. */
+#stamina-bar.exhausted .stamina-track { background-color: rgb(92, 34, 30); }
+.stamina-debt { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background-color: rgb(168, 58, 46); }
+/* A refused action: the frame flashes ivory. */
+#stamina-bar.rejected { -unity-background-image-tint-color: rgb(246, 230, 181); }
+#flask-row { flex-direction: row; align-items: flex-end; margin-left: 3px; margin-top: 3px; }
+.flask-icon { width: 27px; height: 33px; margin-right: 3px; background-image: url("project://database/Assets/Art/Sprites/UI/Flask.png"); }
+.flask-icon.empty { background-image: url("project://database/Assets/Art/Sprites/UI/FlaskEmpty.png"); }
+#weapon-away { margin-left: 9px; }
 .axe-icon { width: 7px; height: 12px; margin-right: 6px; background-color: rgb(186, 140, 72); border-width: 1px; border-color: rgb(20, 20, 18); }
-#weapon-away-text { font-size: 11px; margin: 0; padding: 0; }
+#weapon-away-text { font-size: 20px; }
 
-/* Interaction prompt and charge bar, anchored to the world by code */
-#prompt-text { font-size: 12px; -unity-font-style: bold; margin: 0; padding: 0; }
-#charge { width: 34px; height: 5px; background-color: rgb(52, 50, 45); border-width: 1px; border-color: rgb(20, 20, 18); }
-#charge-fill { height: 100%; width: 0; background-color: rgb(140, 170, 190); }
-#charge-fill.ready { background-color: rgb(231, 184, 92); }
+/* The interaction prompt and charge bar are world-space documents: WorldUI.uss */
 
 /* Reward receipts, lower left */
 #receipts { position: absolute; left: 10px; bottom: 12px; flex-direction: column-reverse; align-items: flex-start; }
-.receipt {
-    font-size: 12px; margin-top: 4px; padding: 4px 8px; white-space: normal; max-width: 300px;
-    background-color: rgba(28, 31, 27, 0.88); border-width: 2px; border-color: rgb(82, 83, 65);
-    border-left-color: rgb(231, 184, 92); border-left-width: 3px;
-}
+.receipt { font-size: 20px; margin-top: 3px; padding: 6px 12px; white-space: nowrap; background-image: url("project://database/Assets/Art/Sprites/UI/Panel.png"); -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2; }
 
 /* One teaching hint, lower centre */
-#hint { position: absolute; bottom: 14px; left: 30%; right: 30%; padding: 6px 12px; border-color: rgb(103, 93, 68); }
-#hint.completed { border-color: rgb(231, 184, 92); }
-#hint-text { font-size: 13px; white-space: normal; -unity-text-align: middle-center; margin: 0; padding: 0; }
+#hint {
+    position: absolute; bottom: 15px; left: 0; right: 0; align-items: center;
+    background-image: none;
+}
+#hint-text {
+    /* One line: the label sizes to its measured text and then wrapped the last word (UI Toolkit rounding). Keep hints short. */
+    font-size: 20px; white-space: nowrap; -unity-text-align: middle-center;
+    padding: 9px 15px; background-image: url("project://database/Assets/Art/Sprites/UI/Panel.png"); -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2;
+}
 #hint.completed #hint-text { color: rgb(231, 184, 92); }
 
 /* Status, toggled with Tab; readable without stopping play */
-#status { position: absolute; right: 12px; top: 60px; width: 220px; padding: 10px 12px; border-color: rgb(103, 93, 68); }
-#status-heading { font-size: 14px; -unity-font-style: bold; letter-spacing: 2px; margin: 0; padding: 0; }
-.divider { height: 2px; background-color: rgb(176, 144, 81); margin-top: 6px; margin-bottom: 8px; }
-#status-text { font-size: 12px; white-space: normal; margin: 0; padding: 0; }
+#status { position: absolute; right: 12px; top: 60px; width: 240px; padding: 12px 15px; }
+#status-heading { font-size: 20px; color: rgb(231, 184, 92); }
+.divider { height: 3px; background-color: rgb(82, 83, 65); margin-top: 6px; margin-bottom: 9px; }
+#status-text { font-size: 20px; white-space: normal; }

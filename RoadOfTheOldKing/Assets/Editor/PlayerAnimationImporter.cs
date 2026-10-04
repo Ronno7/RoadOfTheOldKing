@@ -24,12 +24,15 @@ namespace TheLostShrine.EditorTools
                 { "catch", "catching" }, { "sprint", "run" }, { "throw", "throwrelease" }, { "dodge", "dash" },
                 { "walking", "walk" }, { "running", "run" }
             },
+            // The throw's lunge steps toward the camera, below the standing feet.
+            GroundFromRotationsSlots = new HashSet<string> { "throwRelease" },
             Defaults = new Dictionary<string, (float, bool)>
             {
                 { "rotations", (1f, true) }, { "idle", (6f, true) }, { "combatIdle", (8f, true) },
                 { "walk", (10f, true) }, { "run", (12f, true) }, { "dash", (12f, false) },
                 { "charge", (8f, true) }, { "throwAim", (8f, true) }, { "rest", (6f, true) },
-                { "hurt", (10f, false) }, { "death", (8f, false) }, { "getUp", (8f, false) }
+                { "hurt", (10f, false) }, { "death", (8f, false) }, { "getUp", (8f, false) },
+                { "drink", (8f, false) }
             }
         };
 

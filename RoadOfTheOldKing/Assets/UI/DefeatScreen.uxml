@@ -3,12 +3,9 @@
     <ui:Style src="DefeatScreen.uss" />
     <ui:VisualElement name="defeat-overlay" class="menu-overlay">
         <ui:VisualElement name="defeat-panel" class="menu-panel">
-            <ui:Label text="YOU WERE DEFEATED" name="heading" class="menu-heading" />
+            <ui:Label text="DEFEATED" name="heading" class="menu-heading" />
             <ui:VisualElement class="menu-divider" />
-            <ui:Label name="message" class="menu-text" />
             <ui:VisualElement name="actions" />
-            <ui:Label name="description" class="menu-description" />
-            <ui:Label text="R  Return     ENTER  Confirm" class="menu-hint" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

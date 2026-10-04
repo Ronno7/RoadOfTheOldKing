@@ -59,14 +59,16 @@ namespace TheLostShrine.Player
             if (!isActiveAndEnabled || model == null || weaponSprite == null || body.sprite == null)
                 return false;
             var hold = holds[animator.Octant];
-            Vector2 pixels = hold.grip + new Vector2Int(0, animator.Lift);
+            // At a fire the axe stays upright beside the seated hero; no floating grip fold or bob.
+            bool resting = animator.State == "Rest";
+            Vector2 pixels = hold.grip + new Vector2Int(0, resting ? 0 : animator.Lift);
             Vector3 grip = body.transform.TransformPoint(pixels / PixelsPerUnit);
             model.SetPositionAndRotation(grip, body.transform.rotation);
             weaponSprite.flipX = hold.flipX;
             weaponSprite.sortingLayerID = body.sortingLayerID;
             weaponSprite.sortingOrder = body.sortingOrder + (hold.inFront ? 1 : -1);
 
-            bool folded = hold.inFront && hold.coverGrip && gripFold != null;
+            bool folded = !resting && hold.inFront && hold.coverGrip && gripFold != null;
             fold.enabled = folded;
             if (folded)
             {

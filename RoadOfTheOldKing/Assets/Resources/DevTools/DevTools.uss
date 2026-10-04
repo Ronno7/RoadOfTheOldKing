@@ -1,0 +1,67 @@
+#dev-root { position: absolute; left: 0; right: 0; top: 0; bottom: 0; color: rgb(232, 233, 222); font-size: 20px; -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKPixel.asset"); }
+#effects { display: none; max-width: 70%; white-space: normal; padding-top: 6px; padding-bottom: 6px; position: absolute; right: 16px; top: 12px; padding-left: 14px; padding-right: 14px; color: rgb(235, 192, 100); background-color: rgba(23, 28, 27, 0.94); }
+#overlay { position: absolute; left: 0; right: 0; top: 0; bottom: 0; background-color: rgba(8, 12, 13, 0.16); }
+#panel { position: absolute; right: 16px; top: 16px; bottom: 16px; width: 560px; max-width: 95%; padding: 18px; background-color: rgb(25, 31, 32); border-width: 1px; border-color: rgb(85, 100, 99); border-radius: 0; }
+.row { flex-direction: row; align-items: center; }
+.row > Button { flex-grow: 1; flex-basis: 0; }
+.header { margin-bottom: 2px; }
+.title { font-size: 20px; -unity-font-style: normal; flex-grow: 1; color: rgb(247, 240, 219); }
+.eyebrow { font-size: 10px; letter-spacing: 2px; color: rgb(140, 158, 157); margin-bottom: 12px; }
+#mode { font-size: 10px; -unity-font-style: normal; color: rgb(229, 191, 109); padding: 4px 7px; background-color: rgb(66, 57, 35); border-radius: 0; margin-right: 7px; }
+#mode.live { color: rgb(141, 220, 178); background-color: rgb(31, 65, 49); }
+#close { white-space: nowrap; flex-grow: 0; flex-basis: auto; font-size: 20px; }
+#summary { padding: 10px; background-color: rgb(18, 24, 25); border-radius: 0; font-size: 20px; white-space: normal; }
+.toolbar { margin-top: 8px; }
+#pause { flex-grow: 1; }
+#reset { flex-grow: 0; flex-basis: auto; font-size: 20px; }
+#active { font-size: 10px; color: rgb(229, 191, 109); white-space: normal; margin: 7px 0 10px 0; }
+#tabs { border-bottom-width: 1px; border-bottom-color: rgb(69, 84, 86); padding-bottom: 6px; }
+.tab { background-color: rgb(32, 40, 42); }
+.tab.selected { color: rgb(245, 220, 160); background-color: rgb(69, 61, 40); border-color: rgb(180, 145, 72); }
+#scroll { flex-grow: 1; margin-top: 4px; margin-bottom: 8px; }
+#scroll .unity-scroll-view__content-container { padding-right: 9px; padding-bottom: 12px; }
+.section-title { margin-top: 16px; margin-bottom: 5px; font-size: 20px; -unity-font-style: normal; letter-spacing: 1px; color: rgb(226, 199, 141); }
+.hint { font-size: 20px; color: rgb(162, 179, 178); white-space: normal; margin: 3px 0 8px 0; }
+.caution { color: rgb(215, 169, 116); }
+Button { min-height: 30px; padding: 5px 9px; margin: 3px 3px 3px 0; border-width: 1px; border-color: rgb(76, 92, 94); border-radius: 0; background-color: rgb(41, 53, 55); color: rgb(235, 237, 227); font-size: 20px; }
+Button:hover { background-color: rgb(57, 74, 76); border-color: rgb(141, 170, 169); }
+Button:focus { border-color: rgb(241, 203, 121); border-width: 2px; }
+Button:active { background-color: rgb(76, 87, 77); }
+Button.danger { color: rgb(241, 178, 161); background-color: rgb(66, 39, 38); border-color: rgb(128, 78, 68); }
+Button.danger:hover { background-color: rgb(96, 48, 43); }
+Button:disabled { opacity: 0.4; }
+Toggle { margin: 5px 0; min-height: 24px; }
+.unity-toggle__label { min-width: 175px; }
+.unity-toggle__input { flex-grow: 0; min-width: 24px; min-height: 20px; }
+.unity-toggle__checkmark { width: 18px; height: 18px; background-color: rgb(16, 23, 25); border-width: 1px; border-color: rgb(110, 130, 128); border-radius: 0; }
+.unity-toggle:checked > .unity-toggle__input > .unity-toggle__checkmark { background-color: rgb(220, 183, 105); -unity-background-image-tint-color: rgb(25, 31, 32); }
+.unity-toggle:focus > .unity-toggle__input > .unity-toggle__checkmark { border-color: rgb(255, 225, 153); border-width: 2px; }
+#scroll .unity-scroller--vertical { width: 10px; }
+#scroll .unity-scroller__low-button, #scroll .unity-scroller__high-button { display: none; }
+#scroll .unity-base-slider__tracker { background-color: rgb(18, 24, 25); border-width: 0; }
+#scroll .unity-base-slider__dragger { background-color: rgb(85, 108, 108); border-width: 0; border-radius: 0; }
+Slider { margin: 8px 0; min-height: 28px; }
+.unity-base-field__label { min-width: 145px; color: rgb(213, 222, 214); }
+.unity-base-field__input { background-color: rgb(16, 23, 25); color: rgb(242, 232, 203); border-radius: 0; }
+.unity-base-text-field__input { padding: 5px; }
+.row > FloatField { flex-grow: 1; flex-basis: 0; min-width: 0; }
+.row > FloatField > .unity-base-field__label { min-width: 15px; }
+.amount { width: 170px; }
+.amount > .unity-base-field__label { min-width: 75px; }
+#result { min-height: 44px; padding: 9px 10px; background-color: rgb(32, 48, 43); color: rgb(188, 221, 196); border-radius: 0; white-space: normal; font-size: 20px; }
+#result.error { background-color: rgb(62, 38, 33); color: rgb(242, 183, 147); }
+.footer { font-size: 10px; color: rgb(138, 156, 156); margin-top: 8px; }
+
+/* Use the same notched pixel frames as the HUD and gameplay menus. */
+#panel, #effects, Button {
+    background-image: url("project://database/Assets/Art/Sprites/UI/Panel.png");
+    -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2;
+    background-color: rgba(0, 0, 0, 0); border-width: 0;
+}
+#panel { padding: 21px; }
+Button:hover, Button:focus, Button:active, .tab.selected {
+    background-image: url("project://database/Assets/Art/Sprites/UI/PanelSelected.png");
+    background-color: rgba(0, 0, 0, 0); border-width: 0;
+}
+Button.danger, Button.danger:hover { background-color: rgba(0, 0, 0, 0); }
+#summary { background-color: rgba(12, 15, 13, 0.5); }

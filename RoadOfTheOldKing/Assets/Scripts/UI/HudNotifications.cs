@@ -20,12 +20,13 @@ namespace TheLostShrine.UI
         public static IReadOnlyList<Receipt> Receipts => receipts;
         public static int Version { get; private set; }
 
+        public static Vector3? HintWorldPosition { get; private set; }
         public static string Hint { get; private set; }
         public static bool HintCompleted { get; private set; }
         public static int HintVersion { get; private set; }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void Reset() { receipts.Clear(); Hint = null; HintCompleted = false; Version++; HintVersion++; }
+        private static void Reset() { receipts.Clear(); HintWorldPosition = null; Hint = null; HintCompleted = false; Version++; HintVersion++; }
 
         public static void Post(string text, float seconds = 3.5f)
         {
@@ -45,8 +46,9 @@ namespace TheLostShrine.UI
             return removed > 0;
         }
 
-        public static void SetHint(string text, bool completed = false)
+        public static void SetHint(string text, bool completed = false, Vector3? worldPosition = null)
         {
+            HintWorldPosition = worldPosition;
             if (Hint == text && HintCompleted == completed) return;
             Hint = text; HintCompleted = completed; HintVersion++;
         }

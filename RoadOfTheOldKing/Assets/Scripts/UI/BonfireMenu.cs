@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TheLostShrine.Cameras;
 using TheLostShrine.Player;
 using TheLostShrine.Progression;
 using TheLostShrine.Weapons;
@@ -9,16 +10,20 @@ using UnityEngine.UIElements;
 namespace TheLostShrine.UI
 {
     // The bonfire's menu (UI Toolkit). Presentation only: it follows PlayerBonfireInteraction's
-    // open/close events and calls CheckpointSession for resting, travel, upgrades and a new run; the
-    // session validates everything. Pages: main, upgrade choices, purchase confirmation, new-run
-    // confirmation. Escape steps back a page and closes from the main page.
+    // open/close events and calls CheckpointSession for resting, travel and upgrades; the
+    // session validates everything. Pages: main, upgrade choices and purchase confirmation. Escape steps back a page and closes from the main page.
     [DisallowMultipleComponent, RequireComponent(typeof(PlayerBonfireInteraction))]
     public sealed class BonfireMenu : MonoBehaviour, IModalMenu
     {
-        private enum Page { Main, Upgrades, Confirm, NewRun }
+        private enum Page { Main, Upgrades, Confirm }
 
         [SerializeField] private VisualTreeAsset layout;
         [SerializeField] private PanelSettings panelSettings;
+        [Header("Camera close-up")]
+        [Tooltip("Camera size (half the visible height) while the menu is open.")]
+        [SerializeField, Min(.5f)] private float closeUpSize = 3.5f;
+        [Tooltip("Where the hero sits on screen while the menu is open (viewport 0..1): the left third, menu on the right.")]
+        [SerializeField] private Vector2 heroOnScreen = new Vector2(1f / 3f, .45f);
 
         private PlayerBonfireInteraction interaction;
         private UIDocument document;
@@ -67,12 +72,33 @@ namespace TheLostShrine.UI
             fire = opened;
             overlay.style.display = DisplayStyle.Flex;
             MenuStack.Push(this);
+            FrameCamera(true);
             Show(Page.Main);
+        }
+
+        // The camera zooms in and puts the resting hero on the left third, leaving the right for the panel.
+        private void FrameCamera(bool frame)
+        {
+            var view = Camera.main;
+            if (view == null) return;
+            var follow = view.GetComponent<CameraFollow2D>();
+            var zoom = view.GetComponent<CameraZoom2D>();
+            if (frame)
+            {
+                if (follow != null) follow.SetFraming(this, heroOnScreen);
+                if (zoom != null) zoom.SetOverride(this, closeUpSize);
+            }
+            else
+            {
+                if (follow != null) follow.ClearFraming(this);
+                if (zoom != null) zoom.ClearOverride(this);
+            }
         }
 
         private void Hide()
         {
             MenuStack.Remove(this);
+            FrameCamera(false);
             if (overlay != null) overlay.style.display = DisplayStyle.None;
             pending = null;
             fire = null;
@@ -96,73 +122,66 @@ namespace TheLostShrine.UI
             var session = CheckpointSession.Instance;
             if (session == null || fire == null) { interaction.Close(); return; }
             page = next;
-            shards.text = "Sun Shards  " + session.Progress.sunShards;
+            shards.text = "Sun Shards " + session.Progress.sunShards;
             var items = new List<PauseMenuAction>();
             switch (next)
             {
                 case Page.Main:
                     heading.text = fire.DisplayName.ToUpperInvariant();
                     status.text = session.Status;
-                    items.Add(new PauseMenuAction("Rest", "Restore health, stamina and flasks, reset enemies and save.", () => { session.Rest(fire); Show(Page.Main); }));
-                    if (fire.AllowsUpgrades)
-                        items.Add(new PauseMenuAction("Axe upgrades", "Spend Sun Shards on one of three upgrades.", () => Show(Page.Upgrades)));
+                    items.Add(new PauseMenuAction("Rest", "Heal, refill flasks, save.", () => { session.Rest(fire); Show(Page.Main); }));
+                    items.Add(new PauseMenuAction("Upgrades", "View the next choices.", () => Show(Page.Upgrades)));
                     bool travel = false;
                     foreach (var destination in session.Fires)
                     {
                         if (destination == null || destination == fire || !destination.IsDiscovered) continue;
                         travel = true;
                         var target = destination;
-                        items.Add(new PauseMenuAction("Travel to " + target.DisplayName, "Rest and travel to this fire.",
+                        items.Add(new PauseMenuAction(target.DisplayName, "Travel here.",
                             () => { if (session.Travel(target, fire)) interaction.Close(); }));
                     }
-                    if (!travel) items.Add(new PauseMenuAction("Travel", "Light another fire to unlock travel.", null, false));
-                    items.Add(new PauseMenuAction("New run...", "Start over from the beginning. You will be asked first.", () => Show(Page.NewRun)));
+                    if (!travel) items.Add(new PauseMenuAction("Travel", "Light another fire first.", null, false));
                     items.Add(new PauseMenuAction("Leave", "Back to the road.", interaction.Close));
                     break;
 
                 case Page.Upgrades:
-                    heading.text = "AXE UPGRADE";
+                    heading.text = "UPGRADES";
                     var tier = session.Upgrades.NextTier;
                     if (tier == null)
                     {
-                        status.text = "All available upgrades chosen.";
+                        status.text = "All chosen.";
                         foreach (var chosen in session.Upgrades.Selected)
                             items.Add(new PauseMenuAction(chosen.displayName, chosen.description, null, false));
                     }
                     else
                     {
-                        bool affordable = session.Progress.sunShards >= tier.shardCost;
-                        status.text = "Choose one for " + tier.shardCost + " Sun Shards. The other two are gone for this run.";
+                        status.text = "Choose one for " + tier.shardCost + " shards.";
                         foreach (var choice in tier.choices)
                         {
                             if (choice == null) continue;
                             var picked = choice;
-                            items.Add(new PauseMenuAction(choice.displayName + (affordable ? "" : "  (need " + tier.shardCost + ")"),
-                                choice.description, () => { pending = picked; Show(Page.Confirm); }, affordable));
+                            items.Add(new PauseMenuAction(choice.displayName,
+                                choice.description, () => { pending = picked; Show(Page.Confirm); }));
                         }
                     }
-                    items.Add(new PauseMenuAction("Back", "Return to the fire.", () => Show(Page.Main)));
+                    items.Add(new PauseMenuAction("Back", "", () => Show(Page.Main)));
                     break;
 
                 case Page.Confirm:
                     var current = session.Upgrades.NextTier;
-                    heading.text = pending != null ? pending.displayName.ToUpperInvariant() : "AXE UPGRADE";
+                    heading.text = pending != null ? pending.displayName.ToUpperInvariant() : "UPGRADES";
                     status.text = current == null || pending == null ? "" :
-                        "Spend " + current.shardCost + " Sun Shards on " + pending.displayName + "? The other two choices are lost for this run.";
+                        (!fire.AllowsUpgrades ? "Purchase at an upgrade bonfire." :
+                        session.Progress.sunShards < current.shardCost ? "Need " + current.shardCost + " shards." :
+                        "Spend " + current.shardCost + " shards? The others are lost.");
                     // The safe choice comes first so Enter never buys by accident.
-                    items.Add(new PauseMenuAction("Back to choices", "Keep your shards for now.", () => Show(Page.Upgrades)));
+                    items.Add(new PauseMenuAction("Back", "Keep your shards.", () => Show(Page.Upgrades)));
                     if (current != null && pending != null)
-                        items.Add(new PauseMenuAction("Spend " + current.shardCost + " shards", pending.description,
+                        items.Add(new PauseMenuAction("Buy (" + current.shardCost + ")", pending.description,
                             () => { session.TryPurchaseUpgrade(fire, pending); pending = null; Show(Page.Upgrades); status.text = session.Status; },
-                            session.Progress.sunShards >= current.shardCost));
+                            fire.AllowsUpgrades && session.Progress.sunShards >= current.shardCost));
                     break;
 
-                case Page.NewRun:
-                    heading.text = "NEW RUN";
-                    status.text = "Start over? This clears this journey's saved progress.";
-                    items.Add(new PauseMenuAction("Keep playing", "Return to the fire.", () => Show(Page.Main)));
-                    items.Add(new PauseMenuAction("Start new run", "Erase this save and begin again.", session.StartNewRun));
-                    break;
             }
             list.Show(items);
         }

@@ -7,8 +7,8 @@ using UnityEngine.UIElements;
 
 namespace TheLostShrine.UI
 {
-    // Defeat screen (UI Toolkit). Appears shortly after death so the fall reads first, says that
-    // progress is kept, and returns to the last bonfire (or the start) through CheckpointSession.
+    // Defeat screen (UI Toolkit). Appears shortly after death so the fall reads first
+    // and returns to the last bonfire (or the start) through CheckpointSession.
     // R or the button confirms; duplicate reloads are blocked.
     [DisallowMultipleComponent, RequireComponent(typeof(PlayerHealth))]
     public sealed class DefeatScreen : MonoBehaviour, IModalMenu
@@ -21,7 +21,6 @@ namespace TheLostShrine.UI
         private Damageable health;
         private UIDocument document;
         private VisualElement overlay;
-        private Label message;
         private MenuList list;
         private float showAt = -1f;
         private bool shown, restarting;
@@ -43,6 +42,9 @@ namespace TheLostShrine.UI
         private void Update()
         {
             if (!shown && showAt >= 0f && Time.unscaledTime >= showAt) Show();
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+            if (DevToolsPanel.CapturesInput) return;
+#endif
             var keyboard = Keyboard.current;
             if (shown && keyboard != null && keyboard.rKey.wasPressedThisFrame) Return();
         }
@@ -56,18 +58,15 @@ namespace TheLostShrine.UI
                 document = child.AddComponent<UIDocument>(); document.panelSettings = panelSettings; document.visualTreeAsset = layout;
                 child.SetActive(true);
                 overlay = document.rootVisualElement.Q("defeat-overlay");
-                message = overlay.Q<Label>("message");
-                list = new MenuList(overlay.Q("actions"), overlay.Q<Label>("description"), action => action.Execute());
+                list = new MenuList(overlay.Q("actions"), null, action => action.Execute());
             }
             shown = true;
             bool checkpoint = CheckpointSession.Instance != null && CheckpointSession.Instance.HasCheckpoint;
-            message.text = checkpoint ? "You will wake at your last bonfire. Everything you earned is kept."
-                : "You will start again from the beginning. Everything you earned is kept.";
             overlay.style.display = DisplayStyle.Flex;
             MenuStack.Push(this);
             list.Show(new[]
             {
-                new PauseMenuAction(checkpoint ? "Return to bonfire" : "Retry", checkpoint ? "Rest at your last fire." : "Back to the start.", Return)
+                new PauseMenuAction(checkpoint ? "Return to bonfire [R]" : "Retry [R]", null, Return)
             });
         }
 

@@ -4,6 +4,7 @@ using TheLostShrine.Combat;
 using TheLostShrine.Input;
 using TheLostShrine.Player;
 using TheLostShrine.Progression;
+using TheLostShrine.UI;
 using UnityEngine;
 
 namespace TheLostShrine.Tutorial
@@ -34,12 +35,23 @@ namespace TheLostShrine.Tutorial
         [Header("Hit body")]
         [Tooltip("Catches throws aimed at the carving; the player walks behind it (collision ignored for the player only).")]
         [SerializeField] private Collider2D hitBody;
-        [SerializeField, TextArea] private string awakenedNotice = "Recall awakened. While your axe is away, press {recall} to call it back.";
+        [Header("Waking condition")]
+        [Tooltip("Progress milestone the stone waits for (e.g. the first wolf's defeat). Until then it doesn't " +
+            "glint and a throw only shows silentNotice. Empty: ready from the start.")]
+        [SerializeField] private string requiredMilestone;
+        [SerializeField, TextArea] private string silentNotice = "The stone is cold.";
+        [SerializeField, TextArea] private string awakenedNotice = "Recall awakened {recall}";
+        [SerializeField] private string recoveryMilestone;
         private PlayerControlLocks locks;
         private PlayerHealth lockedHealth;
         private Coroutine sequence;
+        private float silentNoticeAt = -10f;
 
         public bool IsAwakened { get; private set; }
+        public bool IsReady => (string.IsNullOrEmpty(requiredMilestone) ||
+            (CheckpointSession.Instance != null && CheckpointSession.Instance.Progress.Has(requiredMilestone))) &&
+            (string.IsNullOrEmpty(recoveryMilestone) || (CheckpointSession.Instance != null &&
+            CheckpointSession.Instance.Progress.Has(recoveryMilestone) && !EncounterState.InCombat));
         public bool IsAwakening => sequence != null;
         public Look CurrentLook { get; private set; }
         public event Action Awakened;
@@ -60,6 +72,15 @@ namespace TheLostShrine.Tutorial
             var player = hit.Source.GetComponent<PlayerCombatController>();
             if (player == null || player.CanRecall || player.Weapon == null)
                 return false;
+            if (!IsReady)
+            {
+                if (!string.IsNullOrEmpty(silentNotice) && Time.time - silentNoticeAt > 4f)
+                {
+                    silentNoticeAt = Time.time;
+                    HudNotifications.Post(silentNotice);
+                }
+                return false;
+            }
             sequence = StartCoroutine(Awaken(player));
             return true;
         }
@@ -100,7 +121,7 @@ namespace TheLostShrine.Tutorial
         {
             if (sequence != null) return;
             if (IsAwakened) Show(Look.Awakened);
-            else Show(Mathf.Repeat(Time.time, glintInterval) < glintSeconds ? Look.Glint : Look.Dormant);
+            else Show(IsReady && Mathf.Repeat(Time.time, glintInterval) < glintSeconds ? Look.Glint : Look.Dormant);
         }
 
         private void Show(Look look)

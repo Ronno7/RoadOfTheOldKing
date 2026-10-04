@@ -25,6 +25,15 @@ namespace TheLostShrine.Player
         public float Normalized => Mathf.Clamp01(Current / maximum);
         public bool IsExhausted => Current < 0f;
         public bool WasSpendRejected => Time.unscaledTime < rejectedUntil;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+        public bool DebugInfinite { get; set; }
+        public void DebugSetCurrent(float value)
+        {
+            if (float.IsNaN(value) || float.IsInfinity(value)) return;
+            Current = Mathf.Clamp(value, -deficitLimit, maximum);
+            DelayRecovery();
+        }
+#endif
 
         private void Awake()
         {
@@ -49,6 +58,9 @@ namespace TheLostShrine.Player
         public bool TrySpend(float amount)
         {
             if (!CanAct(amount)) return false;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+            if (DebugInfinite) { Restore(); return true; }
+#endif
             // Any positive stamina is enough to act; continuous sprinting leaves tiny float remainders.
             if (Current <= 0.001f)
             {
@@ -65,7 +77,11 @@ namespace TheLostShrine.Player
 
         public bool TryDrain(float amount)
         {
-            if (!CanAct(amount) || Current <= 0.001f) return false;
+            if (!CanAct(amount)) return false;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+            if (DebugInfinite) { Restore(); return true; }
+#endif
+            if (Current <= 0.001f) return false;
             if (amount > 0f)
             {
                 Current = Mathf.Max(0f, Current - amount);

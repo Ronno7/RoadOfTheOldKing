@@ -4,7 +4,7 @@
 
 This guide explains how Road of the Old King works at runtime: its major systems, which component owns what, and how they communicate. It describes the production game in `Tutorial.unity`, the only scene in the build. `PrototypeLoop.unity` is a retired mechanics sandbox kept for reference, and `MovementPlayground.unity` is a small movement test scene.
 
-**Status:** the Tutorial is playable end to end: movement, axe pickup, throwing, melee, the Recall awakening, a Recall drill, the first enemy, a Sun Shard and a bonfire. The route ends at the exit trail; the first overworld region (Green Lowlands) and the transition into it are in development. HUD and menu visuals are placeholders.
+**Status:** the Tutorial is playable end to end: movement, axe pickup, throwing, melee, the first wolf, healing, the Recall awakening, a wolf pack, a Sun Shard and a bonfire. The route ends at the exit trail; the first overworld region (Green Lowlands) and the transition into it are in development. HUD and menus use the shared pixel font and frames.
 
 [Architecture](#architecture) · [Player](#player) · [Combat](#combat) · [Enemies](#enemies) · [Progression and saving](#progression-and-saving) · [World and interaction](#world-and-interaction) · [Tutorial](#tutorial) · [Camera](#camera) · [Presentation and UI](#presentation-and-ui) · [Tools](#tools-and-verification) · [Limitations](#current-limitations) · [Key files](#key-files)
 
@@ -63,7 +63,7 @@ flowchart LR
 | `Progression` | Checkpoint session, save format and store, upgrades, heart fragments |
 | `World` | Pickups, bonfires, rewards, puzzle pieces |
 | `Tutorial` | Lessons, Recall awakening, guide, exit |
-| `UI` | HUD, notification channel, pause menu, time control, F3 dev panel |
+| `UI` | HUD, notifications, menus, time control, F3 Debug Panel and F4 Developer Tools |
 | `Prototype` | Code for the retired PrototypeLoop (its guide, legend and placeholder views) |
 
 Namespaces still use the project's former name (`TheLostShrine.*`) for compatibility. Rendering uses the Universal Render Pipeline with its 2D Renderer; sprites currently use unlit materials, so 2D lighting is available for a later atmosphere pass.
@@ -96,9 +96,10 @@ Keyboard and mouse only.
 | Q | Drink a healing flask |
 | F | Pick up, rest at a bonfire |
 | Tab | Status panel |
-| Left Alt (hold) | Look toward the cursor |
+| Alt (hold) | Look toward the cursor |
 | Mouse wheel | Zoom |
 | Esc | Pause |
+| F3 / F4 | Debug Panel / Developer Tools (Editor, development and browser builds) |
 
 ### Movement
 
@@ -226,7 +227,7 @@ stateDiagram-v2
   Recover --> Reposition: punish window ends
   Reposition --> Stalk
   note right of Stalk
-    A weapon hit staggers it from any state, then it repositions
+    Breaking poise outside armored attacks staggers it, then it repositions
     or counter-snaps. Leaving the leash or losing sight returns it home.
   end note
 ```
@@ -276,10 +277,10 @@ sequenceDiagram
 | Rest at a bonfire | Set to that fire | Yes | Yes | No |
 | Permanent gain (axe, Recall, shard, fragment, lesson, puzzle) | Unchanged | No | Yes | No |
 | Death or Restart | Unchanged | Through the reload | Yes | Yes, at the checkpoint or the start |
-| New run (bonfire menu, confirmed) | Cleared | Through the reload | Save deleted | Yes |
+| New Game (pause menu, confirmed) | Cleared | Through the reload | Save deleted | Yes |
 
 **Rewards and upgrades**
-- **Sun Shards** (`SunShardReward`): a pickup that an event can unlock, such as an enemy's `Defeated` or a puzzle's `Solved`, or that is simply placed. Collecting it records `shard/collected/<id>` and adds to the balance, so each reward is one-time even though enemies come back.
+- **Sun Shards** (`SunShardReward`): a pickup that an event can unlock, such as an enemy's `Defeated` (or a whole pack's, with `alsoDefeat`) or a puzzle's `Solved`, or that is simply placed. Collecting it records `shard/collected/<id>` and adds to the balance, so each reward is one-time even though enemies come back.
 - **Upgrades** (`WeaponUpgradeProgression`): tiers of three mutually exclusive choices, defined as `AxeUpgradeTier` and `AxeUpgrade` assets. Buying one for 3 shards at a bonfire that offers upgrades removes the other two for the run. Tier one:
   - **Quick Hands:** light attacks 20% faster.
   - **Sweeping Edge:** sweeps widen to 180° / 135°.
@@ -289,7 +290,7 @@ sequenceDiagram
 ## World and interaction
 
 - **Tilemaps.** Visual layers are separate from an invisible Collision map, and canopies and roofs draw on an Above Player layer. Elevation is visual only; everything shares one physics plane. See [World and tilemaps](World.md).
-- **Gameplay objects** are prefab instances under `Tutorial Zone/Interactive Objects`, never baked into tiles.
+- **Gameplay objects** live under `Tutorial Zone/Interactive Objects`, usually as prefab instances. The Recall seal combines scene-authored tilemaps with a gameplay component and collision.
 - **Interaction (F).** `PlayerBonfireInteraction` is the single interaction selector.
   - It picks one nearby `WorldPickup` (axe, shard, heart fragment) first, otherwise a nearby bonfire. One press commits one thing.
   - The HUD prompt reads the same selection, so it always matches what F will do.
@@ -303,30 +304,31 @@ The route teaches one verb per space, and each lesson completes from a real outc
 
 | Beat | Teaches | Completed by |
 | --- | --- | --- |
-| Home | Movement | Distance walked |
+| Village well | Movement | Distance walked and six seconds of guidance |
 | Axe stump | Pickup | Owning the axe |
 | Throw stands | Throwing, retrieving on foot | `ThrowRetrieveLesson`: one thrown hit on a stand, then the axe back in hand |
 | Practice dummy | Light combo, dodge | `HitCountLesson`: three melee hits; any dash |
 | Forest road and bridge | Sprint, travel | Distance sprinted, reaching the road |
-| Ancient stone | Recall unlock | `RecallAwakeningStone`: a thrown hit |
-| Recall drill | Throw, then Recall | `ThrowRecallPuzzle` with a far and a near post |
-| Wolf clearing | First fight, first Sun Shard | The wolf's defeat unlocks a shard; collecting it |
+| Ruins past the bridge | First fight | A lone wolf; `DefeatMilestone` records `tutorial/enemy/first-wolf` |
+| Courtyard recovery | Healing | An actual flask heal after the wolf; full health or no charges bypasses the reminder |
+| Ancient stone | Recall unlock | `RecallAwakeningStone`: a thrown hit after the wolf and safe recovery |
+| Meadow | Wolf pack, first Sun Shard | Two wolves (they take turns attacking); the shard unlocks when both are down, where the last fell; collecting it |
 | Roadside bonfire | Rest and checkpoint | First rest |
 | Exit trail | (end of route) | `TutorialExit` records `tutorial/complete` |
 
 **Recall awakening.** A thrown hit on the stone locks controls and plays a 1.4 s awakening. The stone then unlocks Recall and returns the axe automatically, restores controls and saves once. Death mid-sequence aborts cleanly, and a save with Recall unlocked loads the stone already awakened.
 
-**Guide.** `TutorialGuide` holds an ordered list of steps authored in the Inspector. Each step has a stable ID, hint text with key tokens such as `{throw}`, and a condition: Moved, Sprinted, Dodged, HasAxe, RecallUnlocked, Rested, Milestone, ReachArea or DrankFlask.
+**Guide.** `TutorialGuide` holds an ordered list of steps authored in the Inspector. Each step has a stable ID, hint text with key tokens such as `{throw}`, and a condition: Moved, Sprinted, Dodged, HasAxe, RecallUnlocked, Rested, Milestone, ReachArea, DrankFlask or Looked. Teaching can anchor to a world object or the hero; nearby interactions take priority, with a screen fallback for off-screen destinations. Combat, drinking and the awakening hide teaching. The stone waits for the first wolf and safe recovery; full health or empty flasks bypass the healing reminder. The target Recall drill is removed. `RecallSealGate` blocks the courtyard's northern exit until the stone awakens; it opens immediately for saved Recall progress. WASD guidance stays for at least six visible seconds, retrieval guidance waits for the axe to land, and the Alt hint tracks the camera's actual freelook state.
 
 ```mermaid
 flowchart LR
   E["Lessons and world events"] --> G[TutorialGuide]
-  G -->|"first incomplete step"| N[HudNotifications]
+  G -->|"current contextual step"| N[HudNotifications]
   N --> H[GameHud hint]
   G -->|"tutorial/step/id"| S[CheckpointSession]
 ```
 
-- **Non-gating:** every condition is tracked from scene start, so doing things early or out of order still counts. The hint shown is always the first incomplete step, and the guide never blocks the route.
+- **Progress-aware:** conditions are tracked from scene start, so early actions count. Usually the first incomplete step supplies the hint; the ready stone takes priority nearby. The guide itself places no barriers, but the stone waits for the recovery milestone and the seal physically gates the northern route.
 - **Out of the way:** hints hide during combat, menus, pause and death.
 - **Extensible:** lessons are independent components that only record milestones, so a new lesson needs no guide code; a Milestone step can watch any progress ID.
 
@@ -336,7 +338,7 @@ Every scene uses `FollowCamera.prefab`:
 
 - **Follow** (`CameraFollow2D`): smooth follow, and the only writer of camera position.
 - **Zoom** (`CameraZoom2D`): mouse-wheel zoom between orthographic sizes 3 and 8 (the Tutorial allows 10), starting at 5.5.
-- **Freelook** (`CameraFreelook2D`, `CameraLookInput`): hold Left Alt to look toward the cursor, up to three tiles. The view returns smoothly on release and resets on pause, focus loss and respawn.
+- **Freelook** (`CameraFreelook2D`, `CameraLookInput`): hold Alt to look toward the cursor, up to three tiles. The view returns smoothly on release and resets on pause, focus loss and respawn.
 
 ## Presentation and UI
 
@@ -352,32 +354,39 @@ Presentation components read gameplay state and never change it, so art can be r
 | `WolfView`, enemy indicators | Enemy poses, the "!" awareness cue, health bars |
 
 **HUD.** `GameHud` (UI Toolkit, `UI/GameHud.uxml` and `.uss`) is contextual: quiet exploration shows almost nothing.
-- **Vitals:** health and stamina appear on damage, spending or combat, and hide 3 s after both are full and no threat remains.
+- **Vitals:** pixel-art health bar and one flask icon per charge in the corner, shown on damage, healing or combat and hidden 3 s after health is full and no threat remains. Bars grow with their maximum. The pause menu's *Vitals* option keeps them always visible and adds a stamina bar (`HudSettings`).
+- **Stamina arc:** in combat, stamina is a pixel arc over the hero (`PixelArc`, a world-space document) that fades in and out and sits just above the carried halberd: ochre-gold, red while in deficit, and its outline flashes when an action is refused.
 - **Prompt:** one `[F] <verb>` prompt above whatever the interaction selector chose.
 - **Contextual pieces:** a weapon-away chip, the cleave charge bar, up to three reward receipts and the single guide hint.
 - **Status:** Tab toggles a panel with health, stamina, flasks, shards, fragments, axe, Recall and upgrades.
-- **Flasks:** a small amber flask count sits under the health and stamina bars.
 
 Gameplay posts text through `HudNotifications` (receipts and the hint), and the HUD never writes gameplay state.
 
-**Menus.** The pause menu, bonfire menu (rest, upgrades with a confirmation step, travel, new run) and defeat screen are UI Toolkit documents on the Player prefab, sharing one theme stylesheet (`MenuTheme.uss`) and one button-list helper (`MenuList`). `MenuStack` owns open menus: Escape, the arrow keys and Enter go to the top menu (Escape steps back a page or closes it), and pause opens only when nothing else is open. While a menu or sequence needs the player still, it takes a lease on `PlayerControlLocks`, so overlapping locks (a bonfire, the Recall awakening, pause) never release each other.
+**Camera requests.** `CameraFollow2D.SetFraming(owner, viewportPoint)` places the target at a point on screen and `CameraZoom2D.SetOverride(owner, size)` sets the zoom; both ease in and out and are released by the same owner. The bonfire menu uses them for its close-up (hero on the left third, menu on the right).
+
+**Pixel style.** Text uses the hand-built RotOK Pixel font (sizes in steps of 10 keep it on whole pixels); panels and buttons use a notched 9-slice pixel frame. World-space meters (`PixelArc`, `PixelBar`) draw whole art pixels in code.
+
+**World-space UI.** Pieces that belong to something in the world are small world-space UI Toolkit documents rather than screen elements: the `[F]` prompt, the charge bar under the player, and each enemy's health bar and "!". `WorldUIDocument` creates one from a UXML tree (`UI/WorldPrompt.uxml`, `ChargeBar.uxml`, `EnemyHealthBar.uxml`, `AwarenessMark.uxml`, styled in `WorldUI.uss`) on the shared `UI/WorldPanel.asset` (32 panel pixels per unit, so 2 px is one art pixel). It sorts like a sprite on the `Player` sorting layer, because a world panel left on `Default` draws beneath the ground. It also hides with `visibility` rather than `display: none`, because an empty layout loses the document's world transform for a frame. Enemy indicators anchor at a fixed `anchorHeight` above the enemy's pivot, since sprite canvases change size between animations.
+
+**Menus.** Escape offers Restart, a vitals toggle that stays open, New Game with a safe-default reset confirmation, and Quit. Upgrade choices are browsable at every bonfire before affordability; purchasing still requires an upgrade-enabled fire and enough shards. The pause menu, bonfire menu (rest, upgrade browsing with a purchase confirmation, travel) and defeat screen are UI Toolkit documents on the Player prefab, sharing one theme stylesheet (`MenuTheme.uss`) and one button-list helper (`MenuList`). `MenuStack` owns open menus: Escape, the arrow keys and Enter go to the top menu (Escape steps back a page or closes it), and pause opens only when nothing else is open. While a menu or sequence needs the player still, it takes a lease on `PlayerControlLocks`, so overlapping locks (a bonfire, the Recall awakening, pause) never release each other.
 
 **Getting hit.** `PlayerHitFeedback` makes damage unmistakable: a red sprite flash, a tiny global hit-stop, a capped camera kick along the blow and a blink for the rest of the post-hit invulnerability, while the animator plays the flinch and the HUD flashes a red screen-edge vignette (which pulses like a heartbeat at low health). `FeedbackSettings` scales every flash and kick for players who prefer less.
 
-**Pause and time.** `SimulationPause` hands out leases. The pause menu, hit stop and the combat preview tool each hold one, and time resumes only when the last lease ends, so overlapping freezes can't restart the game early. The Esc menu offers Restart (reload at the checkpoint, progress kept) and Quit; its input, controller, commands and view are separate classes.
+**Pause and time.** `SimulationPause` hands out leases. The pause menu, Developer Tools, hit stop and the combat preview tool can each hold one, and time resumes only when the last lease ends, so overlapping freezes can't restart the game early. Restart reloads at the checkpoint while retaining permanent progress. Pause input, controller, commands and view are separate classes.
 
 ## Tools and verification
 
 - **Combat Effects Preview** (**Road of the Old King > Combat > Combat Effects Preview**): replays the combo, cleave and throw/Recall against a target and an optional wall, with slow motion, pause and frame stepping. Readouts show phase, reach, arc and confirmed hits. It runs in its own scene without a save session.
-- **F3 dev panel:** performance, player, world and save readouts in the Editor and development builds.
+- **F3 Debug Panel:** read-only UI Toolkit performance, player, world and save readouts in the Editor, development builds and WebGL builds, using the game's pixel font.
+- **F4 Developer Tools:** a UI Toolkit runtime workbench in the Editor, development builds and WebGL builds. Player, World and Travel tabs offer damage/healing, resource refills, god mode, infinite stamina, movement/collision overrides, simulation speed, enemy defeat/reset, bonfire/coordinate teleporting and a temporary return marker. F4 opens it; it uses the game's pixel font, pauses by default, shares the existing pause/input leases and shows a non-clickable active-overrides readout while closed. Overrides reset on scene reload; enemy defeat commands run normal reward and save events. `DevRuntimeCommands.Instance` exposes the same commands for editor automation.
 - **Art pipeline:** Python generators and Editor builders produce tiles, sprites and prefabs as ordinary assets; nothing is generated at runtime. Player sprites import through **Road of the Old King > Art > Import Player Animations**.
-- **Verification:** focused Play Mode and Editor checks, grouped by Gameplay and World, live in [Tools/Verification](../Tools/Verification). They are integration fixtures run in the Editor with isolated save keys, not an automated CI suite.
+- **Verification:** focused Play Mode and Editor checks, grouped by Gameplay and World, live in [Tools/Verification](../Tools/Verification). They are integration fixtures run in the Editor with isolated save keys, not an automated CI suite. Some older fixtures target superseded behavior; inspect their assumptions before reuse.
 
 ## Current limitations
 
 - No overworld yet: the Tutorial exit records completion and shows a message where the scene transition will go.
-- HUD, menus and several effects use placeholder art. There is no title screen or settings menu yet.
-- Attack, throw, hurt and death animations fall back to standing and locomotion poses.
+- There is no title screen or full settings menu; the pause menu currently exposes the vitals preference.
+- Dedicated melee, cleave, catch, death and pickup body animations are still pending; their slots fall back to standing or locomotion. Throw, hurt, drink and seated rest have dedicated art.
 - Key names in hints come from a fixed table; rebinding isn't supported.
 - Melee footprints draw across walls even though walls block the damage.
 
@@ -395,4 +404,5 @@ Gameplay posts text through `HudNotifications` (receipts and the hint), and the 
 | Save format and participant interfaces | [ProgressState](../RoadOfTheOldKing/Assets/Scripts/Progression/ProgressState.cs) |
 | Tutorial steps and hints | [TutorialGuide](../RoadOfTheOldKing/Assets/Scripts/Tutorial/TutorialGuide.cs) |
 | Contextual HUD | [GameHud](../RoadOfTheOldKing/Assets/Scripts/UI/GameHud.cs) |
+| World-space UI documents | [WorldUIDocument](../RoadOfTheOldKing/Assets/Scripts/UI/WorldUIDocument.cs) |
 | Player sprite presentation | [PlayerSpriteAnimator](../RoadOfTheOldKing/Assets/Scripts/Player/PlayerSpriteAnimator.cs) |

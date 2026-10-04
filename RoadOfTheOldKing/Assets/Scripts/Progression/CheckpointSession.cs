@@ -115,7 +115,7 @@ namespace TheLostShrine.Progression
             Progress.scenePath = SceneManager.GetActiveScene().path;
             Capture();
             RestoreCombatArea();
-            Save("Rested at " + fire.DisplayName + ". HP and stamina restored; enemies reset; progress saved.");
+            Save("Rested. Saved.");
             Rested?.Invoke(fire);
             return true;
         }
@@ -131,7 +131,7 @@ namespace TheLostShrine.Progression
             Progress.scenePath = SceneManager.GetActiveScene().path;
             RestoreCombatArea();
             MoveTo(destination);
-            Save("Travelled to " + destination.DisplayName + ". Progress saved.");
+            Save("Travelled. Saved.");
             return true;
         }
 
@@ -174,7 +174,7 @@ namespace TheLostShrine.Progression
             Progress.Complete("shard/collected/" + rewardId);
             Progress.sunShards++;
             Capture();
-            Save("Sun Shard collected. " + Progress.sunShards + " available.");
+            Save("Sun Shard +1");
             ShardCollected?.Invoke(Progress.sunShards);
             return true;
         }

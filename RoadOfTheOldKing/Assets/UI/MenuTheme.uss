@@ -1,30 +1,26 @@
-/* Shared look for every modal menu (pause, bonfire, defeat). Placeholder art direction from the UI
-   proposal: charcoal panels, warm ivory text, gold accents, square corners. Pixel-art assets (font,
-   panel frame, keycaps) replace these blocks later without touching layouts or code. */
+/* Shared look for every modal menu (pause, bonfire, defeat), in the game's pixel style: the RotOK Pixel
+   font at sizes in steps of 10 (one font pixel = size/10 reference px) and the notched 9-slice Panel frame
+   (3 reference px per pixel); the selected button swaps to the sun-gold PanelSelected frame. Warm ivory text,
+   gold accents, few words. Sizes are multiples of 3 where they meet the frame's pixels. */
 .menu-overlay {
     position: absolute; left: 0; right: 0; top: 0; bottom: 0;
     align-items: center; justify-content: center;
-    color: rgb(242, 229, 193);
+    color: rgb(242, 229, 193); -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKPixel.asset"); font-size: 20px;
 }
-.menu-panel {
-    width: 380px; max-width: 92%; padding: 24px;
-    background-color: rgb(37, 40, 35);
-    border-width: 3px; border-color: rgb(103, 93, 68);
-}
-.menu-heading { font-size: 25px; -unity-font-style: bold; -unity-text-align: middle-center; letter-spacing: 3px; white-space: normal; }
-.menu-divider { height: 2px; background-color: rgb(176, 144, 81); margin-top: 14px; margin-bottom: 16px; }
-.menu-text { font-size: 14px; white-space: normal; -unity-text-align: upper-center; margin: 0 0 6px 0; }
-.menu-meta { font-size: 13px; color: rgb(231, 184, 92); -unity-text-align: upper-center; margin: 0 0 12px 0; }
+.menu-overlay Label { margin: 0; padding: 0; -unity-font-style: normal; }
+.menu-panel { width: 381px; max-width: 92%; padding: 21px; background-image: url("project://database/Assets/Art/Sprites/UI/Panel.png"); -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2; }
+.menu-heading { font-size: 30px; -unity-text-align: middle-center; white-space: normal; color: rgb(231, 184, 92); }
+.menu-divider { height: 3px; background-color: rgb(82, 83, 65); margin-top: 12px; margin-bottom: 12px; }
+.menu-text { font-size: 20px; white-space: normal; -unity-text-align: upper-center; margin: 0 0 6px 0; }
+.menu-meta { font-size: 20px; color: rgb(231, 184, 92); -unity-text-align: upper-center; margin: 0 0 12px 0; }
 .menu-button {
-    height: 46px; margin: 0 0 10px 0;
-    background-color: rgb(54, 58, 48); color: rgb(242, 229, 193);
-    border-width: 2px; border-color: rgb(82, 83, 65); border-radius: 0;
-    font-size: 19px; -unity-font-style: bold;
+    height: 36px; margin: 0 0 6px 0; padding: 0;
+    background-image: url("project://database/Assets/Art/Sprites/UI/Panel.png"); -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2;
+    background-color: rgba(0, 0, 0, 0); border-width: 0; border-radius: 0;
+    color: rgb(242, 229, 193); font-size: 20px; -unity-font-style: normal; -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKPixel.asset");
 }
-.menu-button.selected, .menu-button:hover, .menu-button:focus {
-    background-color: rgb(74, 73, 52); border-color: rgb(208, 173, 100);
-}
-.menu-button:active { background-color: rgb(94, 83, 52); }
+.menu-button.selected, .menu-button:hover, .menu-button:focus { background-image: url("project://database/Assets/Art/Sprites/UI/PanelSelected.png"); -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2; color: rgb(246, 230, 181); }
+.menu-button:active { -unity-background-image-tint-color: rgb(220, 200, 150); }
 .menu-button:disabled { opacity: 0.45; }
-.menu-description { min-height: 46px; margin-top: 4px; white-space: normal; font-size: 13px; -unity-text-align: upper-center; }
-.menu-hint { margin-top: 14px; font-size: 11px; color: rgb(185, 183, 160); -unity-text-align: middle-center; white-space: normal; }
+.menu-description { min-height: 21px; margin-top: 3px; white-space: normal; font-size: 20px; color: rgb(185, 183, 160); -unity-text-align: upper-center; }
+.menu-hint { margin-top: 9px; font-size: 10px; color: rgb(185, 183, 160); -unity-text-align: middle-center; white-space: normal; }

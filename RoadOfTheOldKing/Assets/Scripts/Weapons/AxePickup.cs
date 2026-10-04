@@ -9,7 +9,7 @@ namespace TheLostShrine.Weapons
     public sealed class AxePickup : WorldPickup
     {
         private AxeWeapon weapon;
-        public override string Prompt => "Pick up axe";
+        public override string Prompt => "Take axe";
         protected override float PickupDistance => 1.6f;
         private void Awake() => weapon = GetComponent<AxeWeapon>();
 
