@@ -47,8 +47,13 @@ namespace TheLostShrine.Player
         private PlayerDash dash;
         private PlayerFlask flask;
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+        public float DebugSpeedMultiplier { get; set; } = 1f;
+        public float MoveSpeed => moveSpeed * DebugSpeedMultiplier;
+#else
         public float MoveSpeed => moveSpeed;
-        public float SprintSpeed => moveSpeed * sprintMultiplier;
+#endif
+        public float SprintSpeed => MoveSpeed * sprintMultiplier;
         public bool IsSprinting { get; private set; }
         public Vector2 FacingDirection { get; private set; } = Vector2.down;
 
@@ -128,7 +133,7 @@ namespace TheLostShrine.Player
             {
                 IsSprinting = false;
                 FacingDirection = combat.ActionFacing;
-                body.linearVelocity = direction * moveSpeed * combat.ActionMovementScale + actionDisplacement / Time.fixedDeltaTime;
+                body.linearVelocity = direction * MoveSpeed * combat.ActionMovementScale + actionDisplacement / Time.fixedDeltaTime;
                 return;
             }
 
@@ -144,7 +149,7 @@ namespace TheLostShrine.Player
 
             // Velocity is units per second. Unity applies the physics time step.
             // Moving the Rigidbody, instead of the Transform, preserves collisions.
-            Vector2 target = direction * (IsSprinting ? SprintSpeed : moveSpeed) * (drinking ? flask.MoveScale : 1f);
+            Vector2 target = direction * (IsSprinting ? SprintSpeed : MoveSpeed) * (drinking ? flask.MoveScale : 1f);
             if (bounceRemaining > 0f)
             {
                 // Let the rebound play out under friction before input steers again.
@@ -178,7 +183,7 @@ namespace TheLostShrine.Player
             if (leavingAction)
             {
                 leavingAction = false;
-                current = Vector2.ClampMagnitude(current, moveSpeed);
+                current = Vector2.ClampMagnitude(current, MoveSpeed);
             }
             float rate = target.sqrMagnitude < 0.0001f ? deceleration
                 : Vector2.Dot(current, target) < 0f ? turnAcceleration : acceleration;

@@ -12,7 +12,7 @@ namespace TheLostShrine.World
         public string RewardId => rewardId;
         public bool IsCollected { get; private set; }
 
-        public override string Prompt => "Pick up heart fragment";
+        public override string Prompt => "Take fragment";
         public override bool CanCollect(PlayerHealth player) => base.CanCollect(player) &&
             !IsCollected && !string.IsNullOrEmpty(rewardId) && CheckpointSession.Instance != null;
 

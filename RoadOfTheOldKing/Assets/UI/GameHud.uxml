@@ -2,35 +2,30 @@
     <ui:Style src="GameHud.uss" />
     <ui:VisualElement name="hud-root" picking-mode="Ignore">
         <ui:VisualElement name="top-left" picking-mode="Ignore">
-            <ui:VisualElement name="vitals" class="panel" picking-mode="Ignore">
-                <ui:VisualElement class="meter-row" picking-mode="Ignore">
-                    <ui:VisualElement class="meter-icon health-icon" picking-mode="Ignore" />
-                    <ui:VisualElement name="health-bar" class="bar" picking-mode="Ignore">
-                        <ui:VisualElement name="health-fill" class="fill health-fill" picking-mode="Ignore" />
+            <ui:VisualElement name="vitals" picking-mode="Ignore">
+                <ui:VisualElement name="health-row" class="vital-row" picking-mode="Ignore">
+                    <ui:VisualElement class="hud-icon heart-icon" picking-mode="Ignore" />
+                    <ui:VisualElement name="health-bar" class="pixel-bar" picking-mode="Ignore">
+                        <ui:VisualElement class="bar-track health-track" picking-mode="Ignore">
+                            <ui:VisualElement name="health-fill" class="bar-fill health-fill" picking-mode="Ignore" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:VisualElement class="meter-row" picking-mode="Ignore">
-                    <ui:VisualElement class="meter-icon stamina-icon" picking-mode="Ignore" />
-                    <ui:VisualElement name="stamina-bar" class="bar thin" picking-mode="Ignore">
-                        <ui:VisualElement name="stamina-fill" class="fill stamina-fill" picking-mode="Ignore" />
+                <ui:VisualElement name="stamina-row" class="vital-row" picking-mode="Ignore">
+                    <ui:VisualElement class="hud-icon stamina-icon" picking-mode="Ignore" />
+                    <ui:VisualElement name="stamina-bar" class="pixel-bar thin" picking-mode="Ignore">
+                        <ui:VisualElement class="bar-track stamina-track" picking-mode="Ignore">
+                            <ui:VisualElement name="stamina-fill" class="bar-fill stamina-fill" picking-mode="Ignore" />
+                            <ui:VisualElement name="stamina-debt" class="stamina-debt" picking-mode="Ignore" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:VisualElement name="flask-row" class="meter-row" picking-mode="Ignore">
-                    <ui:VisualElement class="meter-icon flask-icon" picking-mode="Ignore" />
-                    <ui:Label name="flask-count" picking-mode="Ignore" />
-                </ui:VisualElement>
-                <ui:Label name="stamina-warning" text="Not enough stamina" picking-mode="Ignore" />
+                <ui:VisualElement name="flask-row" picking-mode="Ignore" />
             </ui:VisualElement>
             <ui:VisualElement name="weapon-away" class="panel chip" picking-mode="Ignore">
                 <ui:VisualElement class="axe-icon" picking-mode="Ignore" />
                 <ui:Label name="weapon-away-text" picking-mode="Ignore" />
             </ui:VisualElement>
-        </ui:VisualElement>
-        <ui:VisualElement name="prompt" class="panel chip world" picking-mode="Ignore">
-            <ui:Label name="prompt-text" picking-mode="Ignore" />
-        </ui:VisualElement>
-        <ui:VisualElement name="charge" class="world" picking-mode="Ignore">
-            <ui:VisualElement name="charge-fill" picking-mode="Ignore" />
         </ui:VisualElement>
         <ui:VisualElement name="receipts" picking-mode="Ignore" />
         <ui:VisualElement name="hint" class="panel" picking-mode="Ignore">

@@ -2,24 +2,31 @@
 
 ## Unreleased
 
+## 0.4 — Vertical slice
+
+### 0.4.7 — 2026-10-03 · Combat and Tutorial overhaul
+
 **Added**
-- Smarter wolves: they circle, lunge along a telegraphed lane that locks just before the leap, snap when you get close, feint, dodge your swings, punish missed attacks and leave a short opening after each attack. Packs take turns attacking.
-- Enemy poise: tougher enemies shrug off light hits until enough damage breaks their stance.
-- Healing flasks: three charges refilled at bonfires. Press Q to drink; it heals near the end of the drink and can be interrupted, and wolves punish careless drinking. The Tutorial guide teaches it after the first wolf.
-- Clear hit feedback for the hero: a flinch animation, red flash, brief impact freeze, camera kick, invulnerability blink, and a red screen-edge flash that pulses at low health.
+- Healing flasks, refilled at bonfires; drinking takes time and can be interrupted.
+- Enemy poise and clearer player hit feedback, including a low-health warning.
+- Drinking, throwing and seated bonfire animations.
+- F4 Developer Tools for resources, god mode, movement, collision, game speed, enemies and teleporting. Both F3 Debug Panel and F4 are available in the browser build.
 
 **Changed**
-- Souls-style stamina: any action can start while you have stamina left and may push you into a deficit, which slows recovery and makes that attack weaker and slower. Stamina recovers faster between actions.
-- The dodge is now a longer roll with more invincibility and no cooldown; stamina is the only limit.
-- You can keep moving while making light attacks, and the charged cleave can't be interrupted once committed.
-- Rebuilt the bonfire, upgrade and defeat screens with Unity's UI Toolkit: consistent menus, keyboard and mouse, with Escape stepping back through pages.
-- Throw and Recall rebalanced: Recall now costs stamina, catching the axe leaves a brief opening, a recalled axe no longer hits the enemy it is pulled out of, thrown hits barely affect an enemy's guard, and wolves sidestep throws and rush you while your axe is away.
-- Light attacks have shorter reach and cost more stamina.
-- The wolf is redrawn as a larger eight-direction animal with walk, run, bite and death animations; the bite is timed to its attack.
-- Rewrote the [systems overview](Docs/SystemsOverview.md) as a guide to the game's architecture, with diagrams.
-- Moved rendering to Unity's Universal Render Pipeline (2D Renderer), opening the way for 2D lighting, shader-based effects and post-processing. The game looks the same.
+- Wolves circle, feint and punish openings, with readable lunges and coordinated pack attacks; new eight-direction art.
+- Reworked stamina, dodging and combat: stamina debt, moving light attacks, committed cleaves and less spammable throw/Recall.
+- Tutorial now flows from the lone wolf through recovery and Recall to a wolf pack. Spatial hints guide attention; awakening Recall opens the sealed courtyard gate.
+- Pixel font and framed menus, world-space prompts and enemy bars, and an overhead stamina arc with an always-visible vitals option.
+- Smaller bonfire menu with a camera close-up and upgrade previews before affordability. New Game moved to pause; defeat text simplified.
+- Rendering now uses URP's 2D Renderer.
 
-## 0.4 — Vertical slice
+**Fixed**
+- Changing vitals keeps the pause menu open; button descriptions no longer resize it.
+- Tutorial hints linger long enough to read, wait for the axe to land, and clear after freelook with either Alt key.
+- Corrected wolf health-bar height, axe swing/ground alignment and dust sorting.
+
+**Removed**
+- The Tutorial's target Recall puzzle and duplicate bonfire teaching prompt.
 
 ### 0.4.6 — 2026-09-29 · Tutorial guide and movement feel
 

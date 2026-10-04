@@ -1,0 +1,4 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:hud="TheLostShrine.UI">
+    <ui:Style src="WorldUI.uss" />
+    <hud:PixelBar name="enemy-health" class="world-root" length="16" thickness="2" pixel-size="2" />
+</ui:UXML>

@@ -37,7 +37,16 @@ namespace TheLostShrine.Player
             health.Defeated -= OnDefeated;
         }
 
-        public bool Blocks(CombatHit hit) => IsInvulnerable;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+        public bool DebugGodMode { get; set; }
+#endif
+        public bool Blocks(CombatHit hit)
+        {
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+            if (DebugGodMode) return true;
+#endif
+            return IsInvulnerable;
+        }
         public void CaptureProgress(ProgressState state) { }
         public void RestoreProgress(ProgressState state) => health.SetMaxHealthBonus(HeartFragmentProgression.BonusHealth(state));
         private void OnHit(CombatHit hit) => invulnerableUntil = Time.time + invulnerabilityDuration;

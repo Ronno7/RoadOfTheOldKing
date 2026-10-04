@@ -41,6 +41,9 @@ namespace TheLostShrine.Player
                 return;
             }
             // Escape is routed to the bonfire menu through MenuStack; F toggles here.
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+            if (TheLostShrine.UI.DevToolsPanel.CapturesInput) return;
+#endif
             var keyboard = Keyboard.current;
             if (IsOpen && Nearby != ActiveFire)
                 Close();

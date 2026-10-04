@@ -16,7 +16,7 @@ namespace TheLostShrine.UI
         private Action<PauseMenuAction> invoke;
         public bool IsVisible => overlay != null && overlay.style.display.value != DisplayStyle.None;
 
-        public bool Show(IReadOnlyList<PauseMenuAction> commands, Action<PauseMenuAction> onAction)
+        public bool Show(IReadOnlyList<PauseMenuAction> commands, Action<PauseMenuAction> onAction, int selected = 0, string title = "PAUSED")
         {
             if (commands == null || commands.Count == 0) return false;
             if (layout == null || panelSettings == null) { Debug.LogError("Pause menu needs its layout and panel settings.", this); return false; }
@@ -30,7 +30,9 @@ namespace TheLostShrine.UI
             }
             invoke = onAction;
             overlay.style.display = DisplayStyle.Flex;
-            list.Show(commands);
+            overlay.Q<Label>("heading").text = title;
+            overlay.Q<Label>("hint").text = title == "PAUSED" ? "Esc Resume" : "Esc Back";
+            list.Show(commands, selected);
             return true;
         }
 

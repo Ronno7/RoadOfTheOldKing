@@ -12,7 +12,12 @@ namespace TheLostShrine.Input
         private bool paused;
         private bool requireRelease;
 
-        private void Awake() => look = new InputAction("Freelook", InputActionType.Button, "<Keyboard>/leftAlt");
+        private void Awake()
+        {
+            look = new InputAction("Freelook", InputActionType.Button, "<Keyboard>/leftAlt");
+            look.AddBinding("<Keyboard>/rightAlt");
+        }
+        public bool IsLooking { get; private set; }
         private void OnEnable() => look.Enable();
         private void OnDisable() { look?.Disable(); requireRelease = true; }
         private void OnDestroy() => look?.Dispose();
@@ -21,6 +26,10 @@ namespace TheLostShrine.Input
 
         public CameraLookInputFrame Read()
         {
+            IsLooking = false;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+            if (TheLostShrine.UI.DevToolsPanel.CapturesInput) { requireRelease = true; return default; }
+#endif
             if (!isActiveAndEnabled || !focused || paused || Time.timeScale <= 0f || Mouse.current == null)
             {
                 requireRelease = true;
@@ -32,6 +41,7 @@ namespace TheLostShrine.Input
                 if (!held) requireRelease = false;
                 return default;
             }
+            IsLooking = held;
             return new CameraLookInputFrame { Held = held, PointerPosition = Mouse.current.position.ReadValue() };
         }
     }

@@ -8,12 +8,13 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Profiling;
 using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 
 namespace TheLostShrine.UI
 {
     // F3 developer overlay: performance, player, world and save state. Installs itself in the
-    // Editor and development builds only; it never exists in a release build and reads, never writes, gameplay.
-    public sealed class DevStatsPanel : MonoBehaviour
+    // Editor, development builds and WebGL; reads, never writes, gameplay.
+    public sealed class DebugPanel : MonoBehaviour
     {
         private const Key ToggleKey = Key.F3;
         private const string VisiblePref = "RoadOfTheOldKing.Dev.StatsPanel";
@@ -22,14 +23,14 @@ namespace TheLostShrine.UI
 
         private readonly float[] frameTimes = new float[FrameWindow];
         private readonly StringBuilder text = new StringBuilder(1024);
-        private readonly GUIContent content = new GUIContent();
-        private float contentHeight = -1f;
+        private UIDocument document;
+        private PanelSettings settings;
+        private Label readout;
         private int frameIndex, frameCount;
         private float refreshIn;
         private float enemyRefreshIn;
         private int enemiesAlive, enemiesTotal;
         private bool visible;
-        private GUIStyle style;
         private ProfilerRecorder mainThread, batches, setPass, triangles, gcAllocInFrame;
         private PlayerHealth player;
         private PlayerMovement movement;
@@ -40,15 +41,24 @@ namespace TheLostShrine.UI
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Install()
         {
-            if (!Application.isEditor && !Debug.isDebugBuild) return;
-            var host = new GameObject("Dev Stats Panel (F3)");
+            if (!Application.isEditor && !Debug.isDebugBuild && Application.platform != RuntimePlatform.WebGLPlayer) return;
+            var host = new GameObject("Debug Panel (F3)");
             DontDestroyOnLoad(host);
-            host.AddComponent<DevStatsPanel>();
+            host.AddComponent<DebugPanel>();
         }
 
         private void OnEnable()
         {
             try { visible = PlayerPrefs.GetInt(VisiblePref, 0) == 1; } catch { visible = false; }
+            var source = Resources.Load<PanelSettings>("DevTools/DevToolsPanel");
+            var layout = Resources.Load<VisualTreeAsset>("DevTools/DebugPanel");
+            settings = Instantiate(source);
+            settings.sortingOrder = 9999;
+            document = gameObject.AddComponent<UIDocument>();
+            document.panelSettings = settings;
+            document.visualTreeAsset = layout;
+            document.rootVisualElement.pickingMode = PickingMode.Ignore;
+            readout = document.rootVisualElement.Q<Label>("debug-readout");
             mainThread = ProfilerRecorder.StartNew(ProfilerCategory.Internal, "Main Thread", 15);
             batches = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Batches Count");
             setPass = ProfilerRecorder.StartNew(ProfilerCategory.Render, "SetPass Calls Count");
@@ -60,6 +70,8 @@ namespace TheLostShrine.UI
         private void OnDisable()
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
+            if (document != null) Destroy(document);
+            if (settings != null) Destroy(settings);
             mainThread.Dispose(); batches.Dispose(); setPass.Dispose(); triangles.Dispose(); gcAllocInFrame.Dispose();
         }
 
@@ -79,6 +91,12 @@ namespace TheLostShrine.UI
                 try { PlayerPrefs.SetInt(VisiblePref, visible ? 1 : 0); } catch { }
                 refreshIn = 0f;
             }
+            bool show = visible;
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+            show &= DevToolsPanel.Instance == null || !DevToolsPanel.Instance.IsOpen;
+#endif
+            readout.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
+            settings.scale = Mathf.Clamp(Mathf.Min(Screen.width / 1280f, Screen.height / 720f), .65f, 1.5f);
             if (!visible) return;
             refreshIn -= Time.unscaledDeltaTime;
             enemyRefreshIn -= Time.unscaledDeltaTime;
@@ -103,6 +121,7 @@ namespace TheLostShrine.UI
         private void Rebuild()
         {
             text.Length = 0;
+            text.Append("DEBUG PANEL [F3]\n\n");
             // Performance
             float sum = 0f, worst = 0f;
             for (int i = 0; i < frameCount; i++) { sum += frameTimes[i]; worst = Mathf.Max(worst, frameTimes[i]); }
@@ -165,8 +184,7 @@ namespace TheLostShrine.UI
                     .Append("   checkpoint ").Append(string.IsNullOrEmpty(progress.checkpointId) ? "none" : progress.checkpointId).Append('\n');
             }
             text.Append("F3 hide");
-            content.text = text.ToString();
-            contentHeight = -1f;
+            readout.text = text.ToString();
         }
 
         private static string Ms(ProfilerRecorder recorder)
@@ -181,25 +199,5 @@ namespace TheLostShrine.UI
         private static string Bytes(ProfilerRecorder recorder) => !recorder.Valid ? "-" :
             recorder.LastValue >= 1024 ? (recorder.LastValue / 1024f).ToString("F1") + " KB" : recorder.LastValue + " B";
 
-        private void OnGUI()
-        {
-            if (!visible) return;
-            if (style == null)
-                style = new GUIStyle(GUI.skin.label) { fontSize = 13, richText = false, normal = { textColor = new Color(0.95f, 0.93f, 0.85f) } };
-            float scale = Mathf.Clamp(Screen.width / 960f, 0.6f, 1.25f);
-            var previous = GUI.matrix;
-            GUI.matrix = Matrix4x4.Scale(Vector3.one * scale);
-            const float width = 380f;
-            if (contentHeight < 0f) contentHeight = style.CalcHeight(content, width - 16f) + 12f;
-            float height = contentHeight;
-            // Bottom-right: clear of the vitals (top-left), Status (top-right), hint (bottom-centre) and receipts (bottom-left).
-            var box = new Rect(Screen.width / scale - width - 12f, Screen.height / scale - height - 12f, width, height);
-            var color = GUI.color;
-            GUI.color = new Color(0.06f, 0.07f, 0.08f, 0.82f);
-            GUI.DrawTexture(box, Texture2D.whiteTexture);
-            GUI.color = color;
-            GUI.Label(new Rect(box.x + 8f, box.y + 6f, width - 16f, height), content, style);
-            GUI.matrix = previous;
-        }
     }
 }

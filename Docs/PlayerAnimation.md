@@ -2,13 +2,13 @@
 
 [Systems overview](SystemsOverview.md) · [World and tilemaps](World.md)
 
-The hero is a small, arm-less wanderer wrapped in a blue hooded cloak, drawn as 16-bit-style pixel art in eight directions. Sprites are generated with [PixelLab](https://www.pixellab.ai/): standing views on a 32 x 32 canvas and animations on a padded 40 x 40 canvas at the same figure scale, imported at 16 pixels per unit, the density of the world tiles, so character and terrain pixels match.
+The hero is a small, arm-less wanderer wrapped in a blue hooded cloak, drawn as 16-bit-style pixel art in eight directions. Sprites are generated with [PixelLab](https://www.pixellab.ai/): standing views on a 32 x 32 canvas and animations on padded 40 x 40 or 48 x 48 canvases at the same figure scale, imported at 16 pixels per unit, the density of the world tiles, so character and terrain pixels match.
 
 ![Hero standing views](Art/Player/Hero-Rotations.png)
 
 ![Walk cycle, east and south](Art/Player/Hero-Walk.png)
 
-Currently implemented: the standing views, an eight-frame walk and run, a four-frame dash and a six-frame hurt flinch in all directions. Light attacks, the finisher, the charged cleave, throw, catch, hurt, death, resting and pickup animations are still to come; until then those states fall back as described below.
+Currently implemented: the standing views, an eight-frame walk and run, a four-frame dash, a six-frame hurt flinch, a seven-frame throw, a six-frame flask drink and an eight-frame seated bonfire loop in all directions. Light attacks, the finisher, the charged cleave, catch, death and pickup animations are still to come; until then those states fall back as described below.
 
 ## Presentation
 
@@ -25,8 +25,10 @@ Currently implemented: the standing views, an eight-frame walk and run, a four-f
 | Throw aim / Throw | Holding and releasing a throw | Time while aiming; release aligned with the physical launch |
 | Catching | Recall catch | Time, after confirmed arrival |
 | Hurt / Death | Stagger / defeat | Time, holding the last frame |
+| Drink | Drinking a flask | Drink progress; the contact frame (the swig) lands with the heal |
+| Rest | Bonfire menu open, facing the fire | Time, looping at 6 fps; returns immediately to normal presentation when closed |
 
-Empty slots fall back rather than blocking: run uses walk, dash uses run or walk, actions and reactions use locomotion facing their action direction, and everything ends at the standing rotations. Slots for a combat stance, Recall gesture, getting up, pickup and resting exist but are not presented until those interactions ship.
+Empty slots fall back rather than blocking: run uses walk, dash uses run or walk, actions and reactions use locomotion facing their action direction, and everything ends at the standing rotations. Slots for a combat stance, Recall gesture, getting up and pickup exist but are not presented until those interactions ship. Rest samples the existing bonfire interaction without adding a control lock or delaying exit; there are no sit-down/get-up transitions yet. The axe stays upright beside the seated hero, without a grip fold or breathing bob.
 
 Facing uses eight 45-degree sectors. Movement sets it while walking; attacks and throws face their committed direction. When two diagonal keys are released a moment apart (0.1 seconds by default), the hero keeps the diagonal instead of snapping to whichever key was released last.
 
@@ -39,6 +41,7 @@ Each slot has a folder under `Assets/Art/Sprites/Player/<Slot>/`, containing eit
 - imports every frame as a single point-filtered, uncompressed sprite at 16 pixels per unit;
 - measures the lowest opaque row across each direction's frames and pins the pivot there, so feet stay on the ground line while bobbing or jumping frames keep their motion;
 - creates or updates the slot's animation under `Assets/Animations/Player` and assigns it in `PlayerAnimationSet.asset`.
+- anchors the throw to the standing views' ground row instead of its lowest pixel, because its lunging foot steps below the standing feet (other slots measure their lowest pixel).
 
 Playback rate, looping and contact frames are edited on the animation asset and survive re-imports.
 

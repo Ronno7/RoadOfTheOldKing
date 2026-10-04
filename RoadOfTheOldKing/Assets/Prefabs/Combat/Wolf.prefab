@@ -367,12 +367,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.EnemyHealthIndicator
   body: {fileID: 7297936848709932806}
-  width: 1.05
-  height: 0.16
+  panel: {fileID: 11400000, guid: 18015c3b74002454fab6d92829abd2aa, type: 2}
+  layout: {fileID: 9197481963319205126, guid: 35880d76326709e48badbada47d6848c, type: 3}
   gap: 0.12
-  upperColor: {r: 0.86, g: 0.22, b: 0.23, a: 1}
-  lowerColor: {r: 0.58, g: 0.09, b: 0.14, a: 1}
-  emptyColor: {r: 0.19, g: 0.07, b: 0.09, a: 1}
+  anchorHeight: 2.9
 --- !u!114 &3247261679874770712
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -407,8 +405,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.EnemyAwarenessIndicator
   body: {fileID: 7297936848709932806}
+  panel: {fileID: 11400000, guid: 18015c3b74002454fab6d92829abd2aa, type: 2}
+  layout: {fileID: 9197481963319205126, guid: 79df98bc4ec28d04db859ed7128cbf0f, type: 3}
   duration: 0.75
   gap: 0.375
+  anchorHeight: 2.9
 --- !u!114 &1047016559863015029
 MonoBehaviour:
   m_ObjectHideFlags: 0

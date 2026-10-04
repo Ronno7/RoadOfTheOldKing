@@ -1,0 +1,86 @@
+// Run in Tutorial Play Mode with a unique TheLostShrine.Verification.* save key.
+// Mutates the test player's resources/position and defeats/resets real enemies. Never use a normal slot.
+// Covers the shared commands and panel lifecycle. Reload and real input checks run separately.
+if (!Application.isPlaying) throw new System.Exception("Enter Play Mode with an isolated save first.");
+var session = TheLostShrine.Progression.CheckpointSession.Instance;
+if (session == null || !new SerializedObject(session).FindProperty("saveKey").stringValue.StartsWith("TheLostShrine.Verification."))
+    throw new System.Exception("Use a verification save key.");
+var c = TheLostShrine.UI.DevRuntimeCommands.Instance;
+var panel = TheLostShrine.UI.DevToolsPanel.Instance;
+var results = new System.Collections.Generic.List<string>();
+System.Action<bool,string> check = (ok,label) => results.Add((ok ? "PASS " : "FAIL ") + label);
+var player = c.Player;
+var originalPosition = (Vector2)player.transform.position;
+var locks = player.GetComponent<TheLostShrine.Player.PlayerControlLocks>();
+float authoredSpeed = c.Movement.MoveSpeed;
+panel.Open();
+check(panel.IsOpen && Time.timeScale == 0 && locks.IsLocked, "panel opens paused with input lock");
+check(TheLostShrine.UI.MenuStack.Top == panel, "panel owns modal input");
+c.SetGodMode(true);
+check(!c.DamagePlayer(10, false) && player.Health.Health == player.Health.MaxHealth, "god mode blocks ordinary hits");
+check(c.DamagePlayer(25) && player.Health.Health == player.Health.MaxHealth - 25, "debug damage bypasses god and invokes real damage");
+check(player.IsRecoveringFromHit, "debug hit raises normal hit feedback state");
+check(c.HealPlayer() && player.Health.Health == player.Health.MaxHealth, "full heal");
+c.SetStamina(-c.Stamina.DeficitLimit);
+check(c.Stamina.IsExhausted && c.Stamina.Current == -c.Stamina.DeficitLimit, "stamina deficit");
+c.SetInfiniteStamina(true);
+check(c.Stamina.TrySpend(1000) && c.Stamina.Current == c.Stamina.Maximum, "infinite stamina prevents action debt");
+check(c.Stamina.TryDrain(1000) && c.Stamina.Current == c.Stamina.Maximum, "infinite stamina prevents sprint drain");
+c.SetInfiniteStamina(false); c.SetStamina(0);
+check(!c.Stamina.TrySpend(1), "ordinary stamina rules return when disabled");
+check(!c.SetStamina(float.NaN) && c.Stamina.Current == 0, "reject invalid stamina");
+c.RestorePlayer();
+check(c.Stamina.Current == c.Stamina.Maximum && c.Flask.Charges == c.Flask.MaxCharges, "restore fills resources");
+c.SetSpeed(2);
+check(Mathf.Approximately(c.Movement.MoveSpeed, authoredSpeed * 2), "runtime walking speed multiplier");
+check(!c.SetSpeed(float.NaN) && c.SpeedMultiplier == 2, "reject invalid movement speed");
+c.SetSpeed(100); check(c.SpeedMultiplier == 4, "movement speed clamp"); c.SetSpeed(1);
+c.SetGameSpeed(.5f);
+check(Time.timeScale == 0 && TheLostShrine.UI.SimulationPause.UnpausedTimeScale == .5f, "game speed changes pause resume speed");
+using (var otherPause = TheLostShrine.UI.SimulationPause.Acquire(true)) {
+    panel.SetPauseWhileOpen(false);
+    check(Time.timeScale == 0 && AudioListener.pause, "another pause owner survives live mode");
+}
+check(Time.timeScale == .5f, "other pause release resumes selected game speed");
+panel.SetPauseWhileOpen(true);
+check(Time.timeScale == 0, "pause while open can be restored");
+check(!c.SetGameSpeed(float.PositiveInfinity), "reject invalid game speed");
+var footprint = player.GetComponent<Collider2D>(); bool wasTrigger = footprint.isTrigger;
+c.SetCollision(false);
+check(c.NoCollision && footprint.isTrigger, "collision off retains a trigger for target queries");
+c.SetCollision(true);
+check(!c.NoCollision && footprint.isTrigger == wasTrigger, "collision on restores original solid collider");
+// Move inside a temporary obstacle while ghosted: restoring collision returns to the entry position.
+var block = new GameObject("Dev tools check obstacle"); var blockCollider = block.AddComponent<BoxCollider2D>();
+block.transform.position = originalPosition + Vector2.right * 10; blockCollider.size = Vector2.one * 4;
+c.SetCollision(false); c.Teleport(block.transform.position); c.SetCollision(true);
+check(Vector2.Distance(player.transform.position, originalPosition) < .01f && !footprint.isTrigger, "collision restore escapes obstructed position");
+UnityEngine.Object.Destroy(block);
+string checkpoint = session.Progress.checkpointId; int discovered = session.Progress.discoveredFires.Count;
+c.SetMarker(); var marker = c.Marker.Value;
+var fire = c.GetBonfires()[0]; c.TeleportToBonfire(fire);
+check(Vector2.Distance(player.transform.position, fire.SpawnPosition) < .01f, "bonfire teleport uses spawn point");
+check(session.Progress.checkpointId == checkpoint && session.Progress.discoveredFires.Count == discovered, "teleport does not rest/discover/change checkpoint");
+c.TeleportToMarker(); check(Vector2.Distance(player.transform.position, marker) < .01f, "return marker");
+check(!c.Teleport(new Vector2(float.NaN, 0)), "reject invalid teleport");
+// Missing weapon should be a useful failure, not an exception.
+if (c.Combat.Weapon == null) check(!c.RetrieveAxe(), "missing owned axe reports failure");
+var enemies = new System.Collections.Generic.List<TheLostShrine.Combat.IEnemy>(TheLostShrine.Combat.EnemyRegistry.Active);
+var enemy = enemies[0] as Component;
+c.Teleport((Vector2)enemy.transform.position + Vector2.right);
+int before = c.NearbyCount(5);
+check(before > 0 && c.KillNearby(5) && c.NearbyCount(5) == 0, "kill nearby uses radius and real defeat");
+check(session.Progress.Has("tutorial/enemy/first-wolf") || session.Progress.completedIds.Count > 0, "real progression listeners run on enemy defeat");
+c.ResetEnemies();
+check(c.NearbyCount(100) == enemies.Count, "reset enemies restores all registered enemies");
+c.Teleport(originalPosition); c.ResetOverrides();
+check(!c.GodMode && !c.InfiniteStamina && !c.NoCollision && c.SpeedMultiplier == 1, "reset all player overrides");
+check(TheLostShrine.UI.SimulationPause.UnpausedTimeScale == 1 && Time.timeScale == 0, "reset time respects panel pause");
+// Explicit kill is intentional even in god mode and keeps the ordinary defeat path.
+c.SetGodMode(true); check(c.KillPlayer() && !c.Alive, "kill bypasses god mode");
+check(!c.Movement.enabled && !player.GetComponent<Rigidbody2D>().simulated, "normal death disables player motor");
+check(!c.HealPlayer() && !c.TeleportToBonfire(fire), "dead player cannot be half-revived or teleported");
+panel.Close();
+check(!panel.IsOpen && !TheLostShrine.UI.MenuStack.Contains(panel), "close removes only dev modal");
+check(Time.timeScale > 0, "close releases panel pause");
+return string.Join("\n", results);

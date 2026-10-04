@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <Style src="DebugPanel.uss" />
+    <ui:VisualElement name="debug-root" picking-mode="Ignore">
+        <ui:Label name="debug-readout" picking-mode="Ignore" />
+    </ui:VisualElement>
+</ui:UXML>

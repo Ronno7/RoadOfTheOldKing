@@ -1,0 +1,4 @@
+#debug-root { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
+#debug-readout { display: none; position: absolute; right: 16px; bottom: 16px; max-width: 95%; padding: 12px; margin: 0; color: rgb(242, 229, 193); background-color: rgba(15, 18, 20, 0.9); -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKPixel.asset"); font-size: 20px; -unity-font-style: normal; white-space: normal; }
+
+#debug-readout { background-color: rgba(0, 0, 0, 0); background-image: url("project://database/Assets/Art/Sprites/UI/Panel.png"); -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2; }

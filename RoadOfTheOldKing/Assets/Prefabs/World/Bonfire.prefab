@@ -644,11 +644,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f92a9811717eb34db63bfac7e90429f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.World.Bonfire
-  id: 
-  displayName: Bonfire
+  id: tutorial/roadside-fire
+  displayName: Roadside Bonfire
   displayOrder: 0
+  allowsUpgrades: 0
   spawnPoint: {fileID: 4829341851063174414}
-  interactionRadius: 1.7
+  interactionRadius: 3.3
 --- !u!114 &3098477906544289042
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -566,6 +566,10 @@ MonoBehaviour:
   maxKnockbackImpulse: 0
   replaceMovementOnHit: 1
   lethalKnockbackMultiplier: 1.6
+  poise: 0
+  poiseResetDelay: 2.5
+  unstaggeredKnockback: 0.2
+  rangedPoiseMultiplier: 0.5
 --- !u!114 &9009435604842691915
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -619,12 +623,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.EnemyHealthIndicator
   body: {fileID: 4995579727582212372}
-  width: 1.05
-  height: 0.16
+  panel: {fileID: 11400000, guid: 18015c3b74002454fab6d92829abd2aa, type: 2}
+  layout: {fileID: 9197481963319205126, guid: 35880d76326709e48badbada47d6848c, type: 3}
   gap: 0.12
-  upperColor: {r: 0.86, g: 0.22, b: 0.23, a: 1}
-  lowerColor: {r: 0.58, g: 0.09, b: 0.14, a: 1}
-  emptyColor: {r: 0.19, g: 0.07, b: 0.09, a: 1}
 --- !u!114 &8022252305268609625
 MonoBehaviour:
   m_ObjectHideFlags: 0

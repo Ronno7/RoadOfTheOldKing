@@ -36,8 +36,14 @@ namespace TheLostShrine.Player
         [Tooltip("Reserved for returning to control after respawn; not presented yet.")]
         public DirectionalSpriteAnimation getUp;
 
-        [Header("Interaction (reserved; not presented yet)")]
+        [Header("Items")]
+        [Tooltip("Drinking a flask: sampled by the drink's progress, contact frame = the swig, where the heal lands.")]
+        public DirectionalSpriteAnimation drink;
+
+        [Header("Interaction")]
+        [Tooltip("Reserved for item pickup; not presented yet.")]
         public DirectionalSpriteAnimation pickUp;
+        [Tooltip("Seated loop while the bonfire menu is open, facing the fire.")]
         public DirectionalSpriteAnimation rest;
     }
 }

@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace TheLostShrine.Weapons
 {
+    // On the ground (before the first pickup) the model keeps the pose authored in the scene: root and
+    // model transforms, e.g. planted in the stump. Every other pose is set in world space, so a root
+    // rotated to place the pickup never tilts swings, thrusts or the cleave.
     [DisallowMultipleComponent, RequireComponent(typeof(AxeWeapon))]
     [DefaultExecutionOrder(200)]
     public sealed class AxeView : MonoBehaviour
@@ -16,13 +19,14 @@ namespace TheLostShrine.Weapons
         [Tooltip("While held out of combat, let the owner's PlayerWeaponCarry hold it at the hero's side.")]
         [SerializeField] private bool carryOnPlayer;
         [SerializeField] private float spriteAngleOffset;
-        [SerializeField] private Vector3 groundVisualOffset;
-        [SerializeField] private float groundAngle = 35f;
+        [Tooltip("Bob and ring the model while it lies on the ground (prototype pickups).")]
         [SerializeField] private bool bobOnGround = true;
         [Header("Detached presentation")]
         [SerializeField, Min(0.01f)] private float detachedScale = 1.15f;
         [SerializeField, Min(0.1f)] private float rotationsPerSecond = 7f;
         private Vector3 originalBladePosition;
+        private Vector3 groundModelPosition;
+        private Quaternion groundModelRotation;
         private AxeWeapon weapon;
         private Color originalBlade;
         private Sprite originalSprite;
@@ -33,11 +37,17 @@ namespace TheLostShrine.Weapons
         private int originalSortingOrder;
         private TheLostShrine.Player.PlayerCombatController carryOwner;
         private TheLostShrine.Player.PlayerWeaponCarry carry;
+        private Vector3 offset; // world-space model offset from the root for the current pose
         private readonly AnimationCurve ringWidth = AnimationCurve.Linear(0f, 1f, 1f, 1f);
 
         private void Awake()
         {
             weapon = GetComponent<AxeWeapon>();
+            if (model != null)
+            {
+                groundModelPosition = model.localPosition;
+                groundModelRotation = model.localRotation;
+            }
             if (blade != null)
             {
                 originalBlade = blade.color;
@@ -108,25 +118,30 @@ namespace TheLostShrine.Weapons
                     return;
             }
 
+            if (weapon.State == AxeState.OnGround)
+            {
+                // The authored pose, relative to the (possibly rotated) root.
+                model.localPosition = groundModelPosition;
+                model.localRotation = groundModelRotation;
+                if (bobOnGround)
+                {
+                    model.position += Vector3.up * (0.06f + Mathf.Sin(Time.time * 3f) * 0.04f);
+                    DrawArc(transform.position, 0.55f, 0f, 360f, new Color(1f, 0.8f, 0.3f, 0.55f));
+                }
+                return;
+            }
+
+            // Held and attack poses: offset and angle in world space around the root.
             float angle = Mathf.Atan2(weapon.AimDirection.y, weapon.AimDirection.x) * Mathf.Rad2Deg;
-            model.localPosition = Vector3.zero;
+            offset = Vector3.zero;
             if (weapon.Owner != null && !weapon.IsAway)
             {
                 transform.position = weapon.Owner.transform.position;
-                model.localPosition = (Vector3)weapon.AimDirection * 0.5f;
+                offset = (Vector3)weapon.AimDirection * 0.5f;
             }
 
             switch (weapon.State)
             {
-                case AxeState.OnGround:
-                    angle = groundAngle;
-                    model.localPosition = groundVisualOffset;
-                    if (bobOnGround)
-                    {
-                        model.localPosition += Vector3.up * (0.06f + Mathf.Sin(Time.time * 3f) * 0.04f);
-                        DrawArc(transform.position, 0.55f, 0f, 360f, new Color(1f, 0.8f, 0.3f, 0.55f));
-                    }
-                    break;
                 case AxeState.LightChop:
                     angle = DrawLightSlash();
                     break;
@@ -137,7 +152,7 @@ namespace TheLostShrine.Weapons
                     break;
                 case AxeState.Cleaving:
                     angle += 360f * weapon.AttackProgress;
-                    model.localPosition = new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad)) * 1.1f;
+                    offset = new Vector3(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad)) * 1.1f;
                     DrawArc(transform.position, weapon.CleaveRadius, angle - 300f, 300f,
                         new Color(1f, 0.75f, 0.2f, 0.85f));
                     break;
@@ -149,7 +164,7 @@ namespace TheLostShrine.Weapons
                     angle = Mathf.Atan2(weapon.AttackDirection.y, weapon.AttackDirection.x) * Mathf.Rad2Deg - 25f;
                     break;
             }
-            model.localRotation = Quaternion.Euler(0f, 0f, angle + spriteAngleOffset);
+            model.SetPositionAndRotation(transform.position + offset, Quaternion.Euler(0f, 0f, angle + spriteAngleOffset));
         }
 
         private void DrawDetached()
@@ -184,7 +199,7 @@ namespace TheLostShrine.Weapons
                     : weapon.LightPhase == MeleePhase.Active ? Mathf.Lerp(0.15f, extension, slashTime)
                     : Mathf.Lerp(extension, 0.5f, Mathf.SmoothStep(0f, 1f,
                         Mathf.InverseLerp(weapon.LightSwingEndFraction, 1f, progress)));
-                model.localPosition = (Vector3)weapon.AttackDirection * radius;
+                offset = (Vector3)weapon.AttackDirection * radius;
                 return aimAngle;
             }
             float sweepProgress = 1f - Mathf.Pow(1f - slashTime, 3f);
@@ -208,7 +223,7 @@ namespace TheLostShrine.Weapons
                 poseAngle = Mathf.Lerp(sweepAngle, aimAngle, recovery);
                 poseRadius = Mathf.Lerp(reach, 0.5f, recovery);
             }
-            model.localPosition = new Vector3(Mathf.Cos(poseAngle * Mathf.Deg2Rad), Mathf.Sin(poseAngle * Mathf.Deg2Rad)) * poseRadius;
+            offset = new Vector3(Mathf.Cos(poseAngle * Mathf.Deg2Rad), Mathf.Sin(poseAngle * Mathf.Deg2Rad)) * poseRadius;
 
             return poseAngle;
         }

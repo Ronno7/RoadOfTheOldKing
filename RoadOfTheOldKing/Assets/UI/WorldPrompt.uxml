@@ -1,0 +1,6 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="WorldUI.uss" />
+    <ui:VisualElement name="prompt" class="world-root world-chip" picking-mode="Ignore">
+        <ui:Label name="prompt-text" picking-mode="Ignore" />
+    </ui:VisualElement>
+</ui:UXML>

@@ -26,6 +26,9 @@ namespace TheLostShrine.EditorTools
             // each clip's lowest pixel. PixelLab draws a character at one canvas position across its clips, so
             // attacks that reach below the feet (a bite toward the camera) don't shift the whole body.
             public bool GroundFromRotations;
+            // The same, for single slots of a target that otherwise measures each clip's lowest pixel
+            // (e.g. a throw whose lunging foot steps below the standing feet).
+            public HashSet<string> GroundFromRotationsSlots = new HashSet<string>();
             public Dictionary<string, string> Aliases = new Dictionary<string, string>();
             // Defaults for newly created animations; later edits to the asset are preserved.
             public Dictionary<string, (float fps, bool loop)> Defaults = new Dictionary<string, (float, bool)>();
@@ -60,7 +63,7 @@ namespace TheLostShrine.EditorTools
             var anchors = new (int ground, int height)?[DirectionalSpriteAnimation.DirectionCount];
             string rotationsFolder = AssetDatabase.GetSubFolders(target.ArtRoot)
                 .FirstOrDefault(f => Normalize(Path.GetFileName(f)) == "rotations");
-            if (target.GroundFromRotations && rotationsFolder != null)
+            if ((target.GroundFromRotations || target.GroundFromRotationsSlots.Count > 0) && rotationsFolder != null)
             {
                 var rotationFrames = CollectFrames(rotationsFolder);
                 for (int octant = 0; octant < anchors.Length; octant++)
@@ -107,7 +110,7 @@ namespace TheLostShrine.EditorTools
                     }
                     // Feet stay on the ground line: the lowest opaque row across the direction's frames.
                     int ground = MeasureGround(paths, out int height, out string warning, out int[] heights);
-                    if (anchors[octant].HasValue)
+                    if (anchors[octant].HasValue && (target.GroundFromRotations || target.GroundFromRotationsSlots.Contains(slot.Name)))
                     {
                         var anchor = anchors[octant].Value;
                         int anchored = anchor.ground + (height - anchor.height) / 2;

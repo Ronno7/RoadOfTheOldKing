@@ -5,8 +5,8 @@ using UnityEngine;
 namespace TheLostShrine.Player
 {
     // The only writer of the body sprite. It samples gameplay state and never drives it:
-    // walk/run follow distance travelled, attacks follow the weapon's action clock, the dash
-    // follows its own progress. An empty slot falls back: run -> walk, dash -> run/walk,
+    // walk/run follow distance travelled, attacks follow the weapon's action clock, the dash and
+    // the flask drink follow their own progress. An empty slot falls back: run -> walk, dash -> run/walk,
     // actions and reactions -> locomotion, idle -> rotations.
     [DisallowMultipleComponent, RequireComponent(typeof(PlayerMovement))]
     [DefaultExecutionOrder(100)]
@@ -24,6 +24,8 @@ namespace TheLostShrine.Player
 
         private PlayerMovement movement;
         private PlayerDash dash;
+        private PlayerFlask flask;
+        private PlayerBonfireInteraction bonfire;
         private PlayerCombatController combat;
         private HitReaction reaction;
         private Damageable health;
@@ -59,6 +61,8 @@ namespace TheLostShrine.Player
         {
             movement = GetComponent<PlayerMovement>();
             dash = GetComponent<PlayerDash>();
+            flask = GetComponent<PlayerFlask>();
+            bonfire = GetComponent<PlayerBonfireInteraction>();
             combat = GetComponent<PlayerCombatController>();
             reaction = GetComponent<HitReaction>();
             health = GetComponent<Damageable>();
@@ -134,6 +138,22 @@ namespace TheLostShrine.Player
             bool flinching = Time.time < hurtUntil && !walking && (dash == null || !dash.IsDashing) &&
                 (weapon == null || !weapon.IsAttacking);
             if ((staggered || flinching) && PlayTimed("Hurt", animations.hurt, facing)) return;
+            // Rest is presentation of the existing menu/lock, never a new gameplay commitment.
+            // Face the fire without changing movement facing or replaying the loop on menu pages.
+            if (bonfire != null && bonfire.IsOpen && health != null && health.IsAlive && !staggered)
+            {
+                Vector2 toFire = bonfire.ActiveFire.transform.position - transform.position;
+                int restFacing = toFire.sqrMagnitude > 0.0001f ? DirectionalSpriteAnimation.Octant(toFire) : facing;
+                if (PlayTimed("Rest", animations.rest, restFacing))
+                {
+                    wasWalking = false;
+                    catchRemaining = 0f;
+                    return;
+                }
+            }
+            // The swig (contact frame) lands with the heal; drinking blocks attacks and dodges.
+            if (flask != null && flask.IsDrinking &&
+                Play("Drink", animations.drink, facing, flask.Progress, true, flask.HealAt)) return;
             if (dash != null && dash.IsDashing)
             {
                 int octant = DirectionalSpriteAnimation.Octant(dash.Direction);

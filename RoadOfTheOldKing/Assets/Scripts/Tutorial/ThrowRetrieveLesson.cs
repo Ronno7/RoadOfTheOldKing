@@ -12,7 +12,7 @@ namespace TheLostShrine.Tutorial
     {
         [SerializeField] private string progressId = "tutorial/lesson/throw-retrieve";
         [SerializeField] private ThrowPracticeStand[] stands = Array.Empty<ThrowPracticeStand>();
-        [SerializeField, TextArea] private string completionNotice = "Good throw. A thrown axe waits where it lands until you walk over to it.";
+        [SerializeField, TextArea] private string completionNotice = "Walk over the axe to take it back.";
         private PlayerCombatController player;
         private PlayerHealth playerHealth;
         private bool armed;
