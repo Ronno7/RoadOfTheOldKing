@@ -1,27 +1,27 @@
 // Run once per phase in Tutorial Play Mode, using a save key prefixed
-// TheLostShrine.Verification. Phase 0/1/3 reload the scene; wait between calls.
+// RoadOfTheOldKing.Verification. Phase 0/1/3 reload the scene; wait between calls.
 // After phase 2, leave and re-enter Play Mode with the same isolated key for phase 3.
 if (!EditorApplication.isPlaying) throw new System.Exception("Play Mode required.");
 var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
-var session = TheLostShrine.Progression.CheckpointSession.Instance;
+var session = RoadOfTheOldKing.Progression.GameSession.Instance;
 if (session == null) throw new System.Exception("Tutorial session missing.");
 string key = (string)session.GetType().GetField("saveKey", flags).GetValue(session);
-if (!key.StartsWith("TheLostShrine.Verification.")) throw new System.Exception("Isolated save required.");
+if (!key.StartsWith("RoadOfTheOldKing.Verification.")) throw new System.Exception("Isolated save required.");
 var results = new System.Collections.Generic.List<string>();
 System.Action<bool, string> check = (ok, name) => {
     if (!ok) throw new System.Exception("FAIL: " + name);
     results.Add("PASS: " + name);
 };
-var player = UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Player.PlayerHealth>();
-var combat = player.GetComponent<TheLostShrine.Player.PlayerCombatController>();
+var player = UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
+var combat = player.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();
 var body = player.GetComponent<Rigidbody2D>();
-var stamina = player.GetComponent<TheLostShrine.Player.PlayerStamina>();
-var interaction = player.GetComponent<TheLostShrine.Player.PlayerBonfireInteraction>();
-var enemy = UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Combat.SimpleMeleeEnemy>();
-var enemyHealth = enemy.GetComponent<TheLostShrine.Combat.Damageable>();
-var reward = UnityEngine.Object.FindFirstObjectByType<TheLostShrine.World.SunShardReward>();
-var fire = session.Fires.Single();
-var store = new TheLostShrine.Progression.PlayerPrefsProgressStore(key);
+var stamina = player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>();
+var interaction = player.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>();
+var enemy = UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>();
+var enemyHealth = enemy.GetComponent<RoadOfTheOldKing.Combat.Damageable>();
+var reward = UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SunShardReward>();
+var fire = session.Checkpoints.Fires.Single();
+var store = new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(key);
 var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
 check(scene.path == "Assets/Scenes/Tutorial.unity" && scene.buildIndex >= 0, "Tutorial supports scene reload");
 check(reward.RewardId == "tutorial/first-enemy" && fire.Id == "tutorial/roadside-fire", "Stable Tutorial reward/checkpoint IDs");
@@ -30,19 +30,19 @@ System.Action<Vector2> move = p => {
     body.position = p; body.linearVelocity = Vector2.zero;
     player.transform.position = p; Physics2D.SyncTransforms();
 };
-var killingHit = new TheLostShrine.Combat.CombatHit(player.gameObject,
-    TheLostShrine.Combat.AttackKind.ChargedCleave, 1000, Vector2.up, 0, 0, true);
+var killingHit = new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,
+    RoadOfTheOldKing.Combat.AttackKind.ChargedCleave, 1000, Vector2.up, 0, 0, true);
 System.Action die = () => {
-    player.Health.ReceiveHit(new TheLostShrine.Combat.CombatHit(enemy.gameObject,
-        TheLostShrine.Combat.AttackKind.EnemyMelee, 1000, Vector2.down, 0, 0));
+    player.Health.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(enemy.gameObject,
+        RoadOfTheOldKing.Combat.AttackKind.EnemyMelee, 1000, Vector2.down, 0, 0));
     check(!player.IsAlive, "Player defeat");
-    session.Respawn();
+    session.Checkpoints.Respawn();
 };
 if (phase == 0) {
-    check(!session.HasCheckpoint && session.Progress.sunShards == 0 && !reward.IsAvailable, "Fresh run has no checkpoint or reward");
+    check(!session.Checkpoints.HasCheckpoint && session.Progress.sunShards == 0 && !reward.IsAvailable, "Fresh run has no checkpoint or reward");
     check(Vector2.Distance(player.transform.position, new Vector2(15, 13)) < .1f && !combat.CanRecall, "Home start; Recall locked");
-    check(!session.Rest(fire) && !reward.TryCollect(player), "Remote rest and locked pickup rejected");
-    var weapon = UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Weapons.AxeWeapon>();
+    check(!session.Checkpoints.Rest(fire) && !reward.TryCollect(player), "Remote rest and locked pickup rejected");
+    var weapon = UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Weapons.AxeWeapon>();
     check(combat.TryEquip(weapon), "Existing axe equips");
     enemyHealth.ReceiveHit(killingHit);
     check(reward.IsAvailable && !reward.IsCollected && session.Progress.sunShards == 0, "Defeat unlocks a physical shard");
@@ -50,24 +50,24 @@ if (phase == 0) {
     SessionState.SetInt("Tutorial.LoopCheckPhase", 1);
     die();
 } else if (phase == 1) {
-    check(player.IsAlive && !session.HasCheckpoint && Vector2.Distance(player.transform.position, new Vector2(15,13)) < .1f, "Death before rest returns home");
+    check(player.IsAlive && !session.Checkpoints.HasCheckpoint && Vector2.Distance(player.transform.position, new Vector2(15,13)) < .1f, "Death before rest returns home");
     check(combat.Weapon != null && !combat.CanRecall, "Axe ownership restored without unlocking Recall");
     check(reward.IsAvailable && !reward.IsCollected && enemyHealth.IsAlive, "Uncollected shard survives reload and enemy respawn");
     move(reward.transform.position);
     check(reward.TryCollect(player) && session.Progress.sunShards == 1, "Pickup credits exactly one shard");
     check(!reward.TryCollect(player) && store.Load().sunShards == 1, "Duplicate pickup rejected and balance saved");
     move(fire.SpawnPosition);
-    player.Health.ReceiveHit(new TheLostShrine.Combat.CombatHit(enemy.gameObject,
-        TheLostShrine.Combat.AttackKind.EnemyMelee, 10, Vector2.up, 0, 0));
+    player.Health.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(enemy.gameObject,
+        RoadOfTheOldKing.Combat.AttackKind.EnemyMelee, 10, Vector2.up, 0, 0));
     stamina.TrySpend(50);
     check(interaction.Open(fire), "Nearby fire opens and rests");
     check(player.Health.Health == player.Health.MaxHealth && stamina.Current == stamina.Maximum, "Rest restores health and stamina");
-    check(session.HasCheckpoint && fire.IsDiscovered && enemyHealth.IsAlive, "Rest saves checkpoint and resets enemy");
-    check(!player.GetComponent<TheLostShrine.Input.PlayerMovementInput>().enabled &&
-          !player.GetComponent<TheLostShrine.Input.PlayerCombatInput>().enabled, "Fire menu suspends action input");
+    check(session.Checkpoints.HasCheckpoint && fire.IsDiscovered && enemyHealth.IsAlive, "Rest saves checkpoint and resets enemy");
+    check(!player.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>().enabled &&
+          !player.GetComponent<RoadOfTheOldKing.Input.PlayerCombatInput>().enabled, "Fire menu suspends action input");
     interaction.Close();
-    check(player.GetComponent<TheLostShrine.Input.PlayerMovementInput>().enabled &&
-          player.GetComponent<TheLostShrine.Input.PlayerCombatInput>().enabled, "Closing fire restores input");
+    check(player.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>().enabled &&
+          player.GetComponent<RoadOfTheOldKing.Input.PlayerCombatInput>().enabled, "Closing fire restores input");
     SessionState.SetInt("Tutorial.LoopCheckPhase", 2);
     die();
 } else if (phase == 2 || phase == 3) {
@@ -77,11 +77,11 @@ if (phase == 0) {
     move(reward.transform.position);
     check(!reward.TryCollect(player) && session.Progress.sunShards == 1, "Respawned enemy cannot farm shards");
     move(fire.SpawnPosition);
-    check(session.Rest(fire) && enemyHealth.IsAlive && session.Progress.sunShards == 1, "Repeated rest retains progression");
+    check(session.Checkpoints.Rest(fire) && enemyHealth.IsAlive && session.Progress.sunShards == 1, "Repeated rest retains progression");
     SessionState.SetInt("Tutorial.LoopCheckPhase", phase + 1);
     if (phase == 3) session.StartNewRun();
 } else if (phase == 4) {
-    check(!session.HasCheckpoint && session.Progress.sunShards == 0 && !reward.IsAvailable && !combat.CanRecall, "New run clears only test progression");
+    check(!session.Checkpoints.HasCheckpoint && session.Progress.sunShards == 0 && !reward.IsAvailable && !combat.CanRecall, "New run clears only test progression");
     check(Vector2.Distance(player.transform.position, new Vector2(15,13)) < .1f, "New run starts at home");
     SessionState.SetInt("Tutorial.LoopCheckPhase", 5);
 } else throw new System.Exception("All phases already completed.");

@@ -1,15 +1,16 @@
-using TheLostShrine.Combat;
-using TheLostShrine.Player;
-using TheLostShrine.Progression;
+using RoadOfTheOldKing.Combat;
+using RoadOfTheOldKing.Player;
+using RoadOfTheOldKing.Progression;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
-namespace TheLostShrine.UI
+namespace RoadOfTheOldKing.UI
 {
     // Defeat screen (UI Toolkit). Appears shortly after death so the fall reads first
-    // and returns to the last bonfire (or the start) through CheckpointSession.
-    // R or the button confirms; duplicate reloads are blocked.
+    // and returns to the last bonfire (or the start) through GameSession.
+    // R or the button confirms; duplicate reloads are blocked. Key labels belong only in spatial UI, never on
+    // buttons (user rule, 4 Oct), so the button does not show [R].
     [DisallowMultipleComponent, RequireComponent(typeof(PlayerHealth))]
     public sealed class DefeatScreen : MonoBehaviour, IModalMenu
     {
@@ -61,12 +62,12 @@ namespace TheLostShrine.UI
                 list = new MenuList(overlay.Q("actions"), null, action => action.Execute());
             }
             shown = true;
-            bool checkpoint = CheckpointSession.Instance != null && CheckpointSession.Instance.HasCheckpoint;
+            bool checkpoint = GameSession.Instance != null && GameSession.Instance.Checkpoints.HasCheckpoint;
             overlay.style.display = DisplayStyle.Flex;
             MenuStack.Push(this);
             list.Show(new[]
             {
-                new PauseMenuAction(checkpoint ? "Return to bonfire [R]" : "Retry [R]", null, Return)
+                new PauseMenuAction(checkpoint ? "Return to bonfire" : "Retry", null, Return)
             });
         }
 
@@ -74,8 +75,8 @@ namespace TheLostShrine.UI
         {
             if (restarting) return;
             restarting = true;
-            if (CheckpointSession.Instance != null) CheckpointSession.Instance.Respawn();
-            else SceneReload.Active();
+            if (GameSession.Instance != null) GameSession.Instance.Checkpoints.Respawn();
+            else SceneLoader.ReloadActive();
         }
 
         // Escape does nothing here; there is nowhere else to go.

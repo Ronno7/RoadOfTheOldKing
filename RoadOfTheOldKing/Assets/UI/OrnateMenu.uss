@@ -1,0 +1,45 @@
+/* Ornate menu styles (adopted 3 Oct). PixelLab-sourced frames, bronze buttons and sun-wheel ornaments drawn at
+   1 art pixel = 1 reference px, the same density as 10 px RotOK Pixel text, so these menus are deliberately
+   finer than the HUD. Art: Assets/Art/Sprites/UI/Menus, rebuilt by Tools/Art/UI/pixellab_ui_cleanup.py.
+   A panel takes .ornate-panel plus one frame: .hearth-frame (bonfire: oak beams, rope lashings, bronze lining;
+   34 px tiled slices so grain and nails repeat) or .bronze-frame (title: notched bronze, 16 px slices). */
+.ornate-panel { overflow: visible; }
+.hearth-frame {
+    background-image: url("project://database/Assets/Art/Sprites/UI/Menus/HearthFrame.png");
+    -unity-slice-left: 34; -unity-slice-right: 34; -unity-slice-top: 34; -unity-slice-bottom: 34;
+    -unity-slice-scale: 1px; -unity-slice-type: tiled;
+    padding: 36px 36px 38px 36px;
+}
+.bronze-frame {
+    background-image: url("project://database/Assets/Art/Sprites/UI/Menus/BronzeFrame.png");
+    -unity-slice-left: 16; -unity-slice-right: 16; -unity-slice-top: 16; -unity-slice-bottom: 16; -unity-slice-scale: 1px;
+    padding: 34px 30px 22px 30px;
+}
+/* Crest on the top edge: the flame for the hearth, the sun-wheel emblem for bronze. */
+.menu-crest { position: absolute; left: 50%; translate: -50% 0; }
+.hearth-frame > .menu-crest { width: 35px; height: 34px; top: -12px; background-image: url("project://database/Assets/Art/Sprites/UI/Menus/HearthFlame.png"); }
+.bronze-frame > .menu-crest { width: 49px; height: 50px; top: -26px; background-image: url("project://database/Assets/Art/Sprites/UI/Menus/SunWheelEmblem.png"); }
+.ornate-panel .menu-divider {
+    height: 9px; margin-top: 8px; margin-bottom: 8px; overflow: visible; background-color: rgba(0, 0, 0, 0);
+    background-image: url("project://database/Assets/Art/Sprites/UI/Menus/DividerBar.png");
+    -unity-slice-left: 6; -unity-slice-right: 6; -unity-slice-top: 0; -unity-slice-bottom: 0; -unity-slice-scale: 1px;
+}
+.menu-medallion {
+    position: absolute; width: 20px; height: 20px; top: -6px; left: 50%; translate: -50% 0;
+    background-image: url("project://database/Assets/Art/Sprites/UI/Menus/DividerMedallion.png");
+}
+.ornate-panel .menu-button {
+    height: 26px; margin: 0 22px 4px 22px; font-size: 10px; overflow: visible;
+    background-image: url("project://database/Assets/Art/Sprites/UI/Menus/MenuButton.png");
+    -unity-slice-left: 10; -unity-slice-right: 10; -unity-slice-top: 10; -unity-slice-bottom: 10; -unity-slice-scale: 1px;
+}
+.ornate-panel .menu-button.selected, .ornate-panel .menu-button:hover, .ornate-panel .menu-button:focus {
+    background-image: url("project://database/Assets/Art/Sprites/UI/Menus/MenuButtonSelected.png");
+    -unity-slice-left: 8; -unity-slice-right: 8; -unity-slice-top: 8; -unity-slice-bottom: 8; -unity-slice-scale: 1px;
+}
+/* MenuList puts a cursor in every button; ornate panels show it beside the selected one. */
+.ornate-panel .menu-cursor {
+    position: absolute; width: 23px; height: 27px; left: -25px; top: 50%; translate: 0 -50%;
+    background-image: url("project://database/Assets/Art/Sprites/UI/Menus/MenuCursor.png");
+}
+.ornate-panel .menu-button.selected > .menu-cursor { display: flex; }

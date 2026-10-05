@@ -1,3 +1,10 @@
-/* Defeat: a dark red veil over the world; no penalties to show, progress is kept. */
+/* Defeat: a dark red veil over the world; no penalties to show, progress is kept. Bronze frame (OrnateMenu.uss)
+   without a crest; the heading in RotOK Title 32 at 32 px (one font pixel = one reference px) and the button in
+   RotOK Pixel at its original 20 px (user, 4 Oct). */
 #defeat-overlay { background-color: rgba(38, 8, 6, 0.55); }
-#defeat-panel #heading { color: rgb(214, 106, 92); }
+#defeat-panel { width: 340px; padding-top: 22px; }
+#defeat-panel #heading {
+    color: rgb(214, 106, 92); font-size: 48px; margin-top: 2px;
+    -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKTitle32.asset");
+}
+#defeat-panel .menu-button { height: 36px; font-size: 20px; }

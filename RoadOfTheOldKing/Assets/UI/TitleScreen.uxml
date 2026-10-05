@@ -1,0 +1,18 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="MenuTheme.uss" />
+    <ui:Style src="OrnateMenu.uss" />
+    <ui:Style src="TitleScreen.uss" />
+    <ui:VisualElement name="title-root" class="menu-overlay">
+        <ui:VisualElement name="title-panel" class="menu-panel ornate-panel bronze-frame">
+            <ui:VisualElement class="menu-crest" picking-mode="Ignore" />
+            <ui:Label name="title" text="ROAD OF THE&#10;OLD KING" class="menu-heading" />
+            <ui:VisualElement class="menu-divider">
+                <ui:VisualElement class="menu-medallion" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:VisualElement name="actions" />
+            <ui:Label name="description" class="menu-description" />
+            <ui:Label text="↑↓ Choose · Enter Select" class="menu-hint" />
+        </ui:VisualElement>
+        <ui:Label name="version" class="title-version" />
+    </ui:VisualElement>
+</ui:UXML>

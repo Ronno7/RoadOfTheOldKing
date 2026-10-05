@@ -1,7 +1,7 @@
-using TheLostShrine.Combat;
+using RoadOfTheOldKing.Combat;
 using UnityEngine;
 
-namespace TheLostShrine.Prototype
+namespace RoadOfTheOldKing.Prototype
 {
     // Placeholder presentation reads the enemy; it does not determine damage.
     [RequireComponent(typeof(SimpleMeleeEnemy), typeof(Damageable))]

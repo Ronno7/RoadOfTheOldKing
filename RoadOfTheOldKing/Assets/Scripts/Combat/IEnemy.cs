@@ -1,4 +1,4 @@
-namespace TheLostShrine.Combat
+namespace RoadOfTheOldKing.Combat
 {
     // What shared systems (encounter signal, awareness cue, impact feedback, dev panel) need from any
     // enemy AI. Enemies register themselves with EnemyRegistry while enabled.

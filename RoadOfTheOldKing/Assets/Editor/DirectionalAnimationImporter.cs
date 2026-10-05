@@ -5,11 +5,11 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using TheLostShrine.Player;
+using RoadOfTheOldKing.Player;
 using UnityEditor;
 using UnityEngine;
 
-namespace TheLostShrine.EditorTools
+namespace RoadOfTheOldKing.EditorTools
 {
     // Turns PixelLab exports into DirectionalSpriteAnimation slots of an animation-set asset.
     // Each folder under ArtRoot is one slot (matched by field name, ignoring case, spaces, hyphens

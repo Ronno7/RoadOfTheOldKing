@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TheLostShrine.Combat
+namespace RoadOfTheOldKing.Combat
 {
     [DisallowMultipleComponent]
     public sealed class Breakable : MonoBehaviour, IHitReceiver

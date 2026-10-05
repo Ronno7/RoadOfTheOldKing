@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using TheLostShrine.Combat;
-using TheLostShrine.Player;
+using RoadOfTheOldKing.Combat;
+using RoadOfTheOldKing.Player;
 using UnityEditor;
 using UnityEngine;
 
-namespace TheLostShrine.EditorTools
+namespace RoadOfTheOldKing.EditorTools
 {
     // Import targets for PixelLab characters. The shared importer does the work; each target names
     // its art folder, animation folder and set asset. Add an enemy by adding a target and a menu item.

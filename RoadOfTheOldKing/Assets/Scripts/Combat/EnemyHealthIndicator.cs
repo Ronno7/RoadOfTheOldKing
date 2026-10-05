@@ -1,8 +1,8 @@
-using TheLostShrine.UI;
+using RoadOfTheOldKing.UI;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace TheLostShrine.Combat
+namespace RoadOfTheOldKing.Combat
 {
     // Reads the same health used by combat, including restoration and capacity changes.
     // World-space pixel bar (UI/EnemyHealthBar.uxml: a PixelBar in the corner vitals' style) above the body.

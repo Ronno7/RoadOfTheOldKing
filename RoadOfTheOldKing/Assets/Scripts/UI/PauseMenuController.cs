@@ -1,11 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using TheLostShrine.Player;
-using TheLostShrine.Progression;
+using RoadOfTheOldKing.Player;
+using RoadOfTheOldKing.Progression;
 using UnityEngine;
 
-namespace TheLostShrine.UI
+namespace RoadOfTheOldKing.UI
 {
     // Owns the pause modal and routes menu input. Escape steps back in whichever menu is on top of the
     // MenuStack (bonfire, defeat...) and opens pause only when none is open.
@@ -20,7 +20,7 @@ namespace TheLostShrine.UI
         private IDisposable pause;
         private IReadOnlyList<PauseMenuAction> actions;
         private Coroutine restoring;
-        private bool customActions, confirmingNewGame;
+        private bool customActions, inSettings;
         public bool IsOpen => pause != null;
         public bool BlocksGameplay => IsOpen || restoring != null;
 
@@ -29,7 +29,7 @@ namespace TheLostShrine.UI
             input = GetComponent<PauseMenuInput>(); view = GetComponent<PauseMenuView>();
             health = GetComponent<PlayerHealth>(); locks = GetComponent<PlayerControlLocks>();
             dash = GetComponent<PlayerDash>();
-            actions = PauseMenuCommands.CreateDefault(ShowNewGame);
+            actions = PauseMenuCommands.CreateDefault(() => ShowSettings(0));
         }
 
         private void OnEnable()
@@ -61,13 +61,15 @@ namespace TheLostShrine.UI
         {
             if (!isActiveAndEnabled || BlocksGameplay || health == null || !health.IsAlive || MenuStack.IsAnyOpen) return false;
             // Rebuilt per open so setting toggles show their current state.
-            if (!customActions) actions = PauseMenuCommands.CreateDefault(ShowNewGame);
-            confirmingNewGame = false;
+            if (!customActions) actions = PauseMenuCommands.CreateDefault(() => ShowSettings(0));
+            inSettings = false;
             if (!view.Show(actions, Execute)) return false;
             if (locks != null) locks.Lock(this);
             if (dash != null) dash.Cancel();
             pause = SimulationPause.Acquire(true);
             MenuStack.Push(this);
+            // Pausing is a likely moment to leave (or close the browser tab): remember the exact spot.
+            GameSession.Instance?.RecordResume();
             return true;
         }
 
@@ -84,30 +86,26 @@ namespace TheLostShrine.UI
 
         public void Back()
         {
-            if (confirmingNewGame) ShowMain(2);
+            if (inSettings) ShowMain(SettingsRow);
             else Close();
         }
 
+        // Settings is the second entry of the default list; Back from its page returns there.
+        private const int SettingsRow = 1;
+
         private void ShowMain(int selected)
         {
-            confirmingNewGame = false;
-            if (!customActions) actions = PauseMenuCommands.CreateDefault(ShowNewGame);
+            inSettings = false;
+            if (!customActions) actions = PauseMenuCommands.CreateDefault(() => ShowSettings(0));
             view.Show(actions, Execute, selected);
         }
 
-        private void ShowNewGame()
+        // Rebuilt per show so toggles name their current state.
+        private void ShowSettings(int selected)
         {
-            confirmingNewGame = true;
-            actions = new[]
-            {
-                new PauseMenuAction("Keep playing", "This erases your save.", () => ShowMain(2), closeOnExecute: false),
-                new PauseMenuAction("Start new game", "Erase your save and start over.", () =>
-                {
-                    if (CheckpointSession.Instance != null) CheckpointSession.Instance.StartNewRun();
-                    else SceneReload.Active();
-                })
-            };
-            view.Show(actions, Execute, 0, "NEW GAME?");
+            inSettings = true;
+            actions = SettingsCommands.Create(() => ShowMain(SettingsRow));
+            view.Show(actions, Execute, selected, "SETTINGS");
         }
         public void Navigate(int direction) => view.Navigate(direction);
         public void Submit() => view.Submit();
@@ -121,7 +119,9 @@ namespace TheLostShrine.UI
             for (int i = 0; i < actions.Count; i++) if (ReferenceEquals(actions[i], action)) { selected = i; break; }
             action.Execute();
             // A setting stays on its row; a command that opened another page already rebuilt the view.
-            if (IsOpen && ReferenceEquals(previous, actions)) ShowMain(selected);
+            if (!IsOpen || !ReferenceEquals(previous, actions)) return;
+            if (inSettings) ShowSettings(selected);
+            else ShowMain(selected);
         }
 
         private void OnDisable()

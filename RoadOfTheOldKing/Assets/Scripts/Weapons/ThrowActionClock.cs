@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace TheLostShrine.Weapons
+namespace RoadOfTheOldKing.Weapons
 {
     public enum ThrowPhase { Inactive, Preparation, Aim, Release }
 

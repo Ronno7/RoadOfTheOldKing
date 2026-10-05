@@ -1,7 +1,7 @@
-using TheLostShrine.Progression;
+using RoadOfTheOldKing.Progression;
 using UnityEngine;
 
-namespace TheLostShrine.World
+namespace RoadOfTheOldKing.World
 {
     [DisallowMultipleComponent]
     public sealed class Bonfire : MonoBehaviour
@@ -17,8 +17,7 @@ namespace TheLostShrine.World
         public string DisplayName => displayName;
         public int DisplayOrder => displayOrder;
         public Vector2 SpawnPosition => spawnPoint != null ? (Vector2)spawnPoint.position : (Vector2)transform.position;
-        public bool IsDiscovered => CheckpointSession.Instance != null &&
-            CheckpointSession.Instance.Progress.discoveredFires.Contains(id);
+        public bool IsDiscovered => GameSession.Instance != null && GameSession.Instance.Progress.HasFire(id);
         public bool CanUse(Transform player) => !string.IsNullOrEmpty(id) && player != null &&
             Vector2.Distance(player.position, transform.position) <= interactionRadius;
     }

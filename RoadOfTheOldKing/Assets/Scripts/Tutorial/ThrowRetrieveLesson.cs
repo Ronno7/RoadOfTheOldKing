@@ -1,10 +1,10 @@
 using System;
-using TheLostShrine.Combat;
-using TheLostShrine.Player;
-using TheLostShrine.Progression;
+using RoadOfTheOldKing.Combat;
+using RoadOfTheOldKing.Player;
+using RoadOfTheOldKing.Progression;
 using UnityEngine;
 
-namespace TheLostShrine.Tutorial
+namespace RoadOfTheOldKing.Tutorial
 {
     // Completes after a thrown hit on any stand followed by getting the axe back in hand.
     [DisallowMultipleComponent]
@@ -52,7 +52,7 @@ namespace TheLostShrine.Tutorial
                 return;
             armed = false;
             IsComplete = true;
-            CheckpointSession.Instance?.SaveProgress();
+            GameSession.Instance?.SaveProgress();
             if (!string.IsNullOrEmpty(completionNotice))
                 TutorialNotice.Show(completionNotice);
             Completed?.Invoke();

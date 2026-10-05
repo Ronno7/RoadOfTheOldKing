@@ -1,23 +1,23 @@
-// Empty Play Mode scene without a CheckpointSession (for example, set the play-mode start scene to
+// Empty Play Mode scene without a GameSession (for example, set the play-mode start scene to
 // Assets/Scenes/CombatEffectsPreview.unity without starting the preview). Drives the real Player
 // prefab with script-stepped physics and checks PlayerSpriteAnimator plus the weapon-owned hit pause.
 // A temporary in-memory walk clip exercises distance-driven cycling; no assets are modified.
-if (!Application.isPlaying || UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Progression.CheckpointSession>() != null)
+if (!Application.isPlaying || UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Progression.GameSession>() != null)
     throw new System.Exception("Use an empty Play Mode scene without a checkpoint session.");
 if (Time.deltaTime <= 0f) throw new System.Exception("Unpause Play Mode first; presentation skips zero-length frames.");
 var results = new System.Collections.Generic.List<string>();
 System.Action<bool,string> check = (ok,label) => results.Add((ok ? "PASS " : "FAIL ") + label);
 var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
-var names = TheLostShrine.Player.DirectionalSpriteAnimation.DirectionNames;
+var names = RoadOfTheOldKing.Player.DirectionalSpriteAnimation.DirectionNames;
 var created = new System.Collections.Generic.List<UnityEngine.Object>();
 var previousSimulation = Physics2D.simulationMode;
 try {
     Physics2D.simulationMode = SimulationMode2D.Script;
     var player = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Player/Player.prefab"), Vector3.zero, Quaternion.identity);
     created.Add(player);
-    var animator = player.GetComponent<TheLostShrine.Player.PlayerSpriteAnimator>();
-    var movement = player.GetComponent<TheLostShrine.Player.PlayerMovement>();
-    var input = player.GetComponent<TheLostShrine.Input.PlayerMovementInput>();
+    var animator = player.GetComponent<RoadOfTheOldKing.Player.PlayerSpriteAnimator>();
+    var movement = player.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>();
+    var input = player.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();
     var body = player.transform.Find("Body").GetComponent<SpriteRenderer>();
     var motor = player.GetComponent<Rigidbody2D>();
     motor.interpolation = RigidbodyInterpolation2D.None;
@@ -60,7 +60,7 @@ try {
     }
 
     // Temporary walk: four distinct frames per direction, in memory only.
-    var walk = ScriptableObject.CreateInstance<TheLostShrine.Player.DirectionalSpriteAnimation>(); created.Add(walk);
+    var walk = ScriptableObject.CreateInstance<RoadOfTheOldKing.Player.DirectionalSpriteAnimation>(); created.Add(walk);
     for (int o = 0; o < 8; o++) {
         var frames = new Sprite[4];
         for (int f = 0; f < 4; f++) frames[f] = set.rotations.Frame((o + f * 2) % 8, 0);
@@ -108,19 +108,19 @@ try {
     input.GetType().GetField("dashQueuedUntil",flags).SetValue(input, Time.time + 1f);
     steps(dirs[4], false, 1);
     if (testSet.dash != null && !testSet.dash.IsEmpty) {
-        var dash = player.GetComponent<TheLostShrine.Player.PlayerDash>();
+        var dash = player.GetComponent<RoadOfTheOldKing.Player.PlayerDash>();
         bool dashed = dash.IsDashing && animator.State == "Dash" && animator.Octant == 4 && body.sprite == testSet.dash.Frame(4, animator.Frame);
         int firstFrame = animator.Frame;
         int guard = 0; while (dash.IsDashing && guard++ < 100) steps(dirs[4], false, 1);
         check(dashed && firstFrame == 0, "Imported dash plays in its direction from its first frame");
     } else
-        check(player.GetComponent<TheLostShrine.Player.PlayerDash>().IsDashing && animator.State == "Walk" && animator.Octant == 4,
+        check(player.GetComponent<RoadOfTheOldKing.Player.PlayerDash>().IsDashing && animator.State == "Walk" && animator.Octant == 4,
             "Dash without its own animation falls back to the walk cycle in its direction");
     steps(Vector2.zero, false, 40);
 
     var axe = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Weapons/Axe.prefab")); created.Add(axe);
-    var weapon = axe.GetComponent<TheLostShrine.Weapons.AxeWeapon>();
-    var combat = player.GetComponent<TheLostShrine.Player.PlayerCombatController>();
+    var weapon = axe.GetComponent<RoadOfTheOldKing.Weapons.AxeWeapon>();
+    var combat = player.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();
     check(combat.TryEquip(weapon), "Standard player equips the axe");
     // Out-of-combat carry at his right side (PlayerWeaponCarry via AxeView).
     var view = axe.GetComponent("AxeView"); var viewStep = view.GetType().GetMethod("LateUpdate",flags);
@@ -152,13 +152,13 @@ try {
         "Facing north: held in front of him, behind his head, butt off the ground");
     var target = new GameObject("Animation check target"); created.Add(target);
     target.AddComponent<CircleCollider2D>().radius = .25f;
-    var targetHealth = target.AddComponent<TheLostShrine.Combat.Damageable>();
+    var targetHealth = target.AddComponent<RoadOfTheOldKing.Combat.Damageable>();
     target.transform.position = (Vector2)player.transform.position + dirs[3] * 1.2f; targetHealth.RestoreHealth(); Physics2D.SyncTransforms();
     check(weapon.TryLightChop(dirs[3]), "Light chop starts toward north-west");
     steps(Vector2.zero, false, 1);
     check(animator.State == "Idle" && animator.Octant == 3, "An attack without its own animation faces the attack direction");
     var simulate = weapon.GetType().GetMethod("Simulate",flags);
-    for (int i = 0; i < 60 && !weapon.IsImpactPaused && weapon.State == TheLostShrine.Weapons.AxeState.LightChop; i++)
+    for (int i = 0; i < 60 && !weapon.IsImpactPaused && weapon.State == RoadOfTheOldKing.Weapons.AxeState.LightChop; i++)
         simulate.Invoke(weapon, new object[]{ .005f });
     float pause = (float)weapon.GetType().GetField("impactPauseRemaining",flags).GetValue(weapon);
     float progress = weapon.AttackProgress;
@@ -166,9 +166,9 @@ try {
     check(weapon.IsImpactPaused && pause > .03f && pause <= .045f && weapon.AttackProgress == progress && targetHealth.Health < targetHealth.MaxHealth,
         "Confirmed light hit pauses only the swing clock (" + pause.ToString("0.000") + " s), now owned by the weapon");
 
-    player.GetComponent<TheLostShrine.Combat.Damageable>().ReceiveHit(new TheLostShrine.Combat.CombatHit(target, TheLostShrine.Combat.AttackKind.EnemyMelee, 1000, Vector2.right, 0f, 0f));
+    player.GetComponent<RoadOfTheOldKing.Combat.Damageable>().ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(target, RoadOfTheOldKing.Combat.AttackKind.EnemyMelee, 1000, Vector2.right, 0f, 0f));
     present.Invoke(animator,null);
-    check(!player.GetComponent<TheLostShrine.Combat.Damageable>().IsAlive && animator.State == "Idle", "Defeat without a death animation holds the idle view");
+    check(!player.GetComponent<RoadOfTheOldKing.Combat.Damageable>().IsAlive && animator.State == "Idle", "Defeat without a death animation holds the idle view");
 } finally {
     Physics2D.simulationMode = previousSimulation;
     foreach (var o in created) if (o != null) UnityEngine.Object.DestroyImmediate(o);

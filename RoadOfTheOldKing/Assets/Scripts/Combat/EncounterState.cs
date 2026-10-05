@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TheLostShrine.Combat
+namespace RoadOfTheOldKing.Combat
 {
     // Shared "in combat" signal for presentation (HUD now; camera and player posture later).
     // In combat while any living registered enemy is aware of the player, plus a grace period after

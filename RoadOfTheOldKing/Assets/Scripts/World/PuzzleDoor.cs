@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TheLostShrine.World
+namespace RoadOfTheOldKing.World
 {
     public sealed class PuzzleDoor : MonoBehaviour
     {

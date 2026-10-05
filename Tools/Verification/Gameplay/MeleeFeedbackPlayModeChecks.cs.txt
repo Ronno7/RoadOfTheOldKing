@@ -1,6 +1,6 @@
-// Empty unsaved Play Mode scene, no CheckpointSession. Uses real player/weapon assets.
+// Empty unsaved Play Mode scene, no GameSession. Uses real player/weapon assets.
 // Checks full-sector feedback independently of terrain-blocked actual damage.
-if (!Application.isPlaying || UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Progression.CheckpointSession>() != null)
+if (!Application.isPlaying || UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Progression.GameSession>() != null)
     throw new Exception("Use an empty Play Mode scene without a checkpoint session.");
 var results = new System.Collections.Generic.List<string>();
 System.Action<bool,string> check = (ok,label) => results.Add((ok ? "PASS " : "FAIL ") + label);
@@ -8,17 +8,17 @@ var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingF
 var created = new System.Collections.Generic.List<GameObject>();
 System.Func<string,GameObject> spawn = path => { var go = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(path)); created.Add(go); return go; };
 var previousSimulation = Physics2D.simulationMode;
-var upgrade = ScriptableObject.CreateInstance<TheLostShrine.Weapons.AxeUpgrade>();
-TheLostShrine.Weapons.AxeSettings isolated = null;
+var upgrade = ScriptableObject.CreateInstance<RoadOfTheOldKing.Weapons.AxeUpgrade>();
+RoadOfTheOldKing.Weapons.AxeSettings isolated = null;
 try {
     Physics2D.simulationMode = SimulationMode2D.Script;
     var root = spawn("Assets/Prefabs/Player/Player.prefab");
-    var player = root.GetComponent<TheLostShrine.Player.PlayerCombatController>();
-    var weapon = spawn("Assets/Prefabs/Weapons/Axe.prefab").GetComponent<TheLostShrine.Weapons.AxeWeapon>();
-    var feedback = weapon.GetComponent<TheLostShrine.Weapons.AxeMeleeFeedback>();
+    var player = root.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();
+    var weapon = spawn("Assets/Prefabs/Weapons/Axe.prefab").GetComponent<RoadOfTheOldKing.Weapons.AxeWeapon>();
+    var feedback = weapon.GetComponent<RoadOfTheOldKing.Weapons.AxeMeleeFeedback>();
     var surface = (MeshRenderer)feedback.GetType().GetField("surface",flags).GetValue(feedback);
     var mesh = (Mesh)feedback.GetType().GetField("mesh",flags).GetValue(feedback);
-    var stamina = root.GetComponent<TheLostShrine.Player.PlayerStamina>();
+    var stamina = root.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>();
     // Isolate window/geometry tests from hit pause with a private settings copy; the shared asset is untouched.
     isolated = UnityEngine.Object.Instantiate(weapon.Settings); isolated.lightHitPause = 0f;
     weapon.GetType().GetField("settings",flags).SetValue(weapon,isolated);
@@ -27,16 +27,16 @@ try {
     System.Action reset = () => { weapon.CancelAction(); stamina.Restore(); };
     var target = new GameObject("Melee target"); created.Add(target);
     target.AddComponent<CircleCollider2D>().radius = .025f;
-    var health = target.AddComponent<TheLostShrine.Combat.Damageable>();
+    var health = target.AddComponent<RoadOfTheOldKing.Combat.Damageable>();
     System.Action<Vector2> place = position => { target.transform.position = position; health.RestoreHealth(); Physics2D.SyncTransforms(); };
     check(player.TryEquip(weapon),"Standard player equips feedback-enabled weapon");
     render(); check(!surface.enabled,"Idle has no attack footprint");
     float start = weapon.LightDuration * weapon.Settings.lightWindupFraction;
     float end = weapon.LightDuration * weapon.Settings.lightSwingEndFraction;
     place(Vector2.right); weapon.TryLightChop(Vector2.right); tick(start * .5f); render();
-    check(weapon.LightPhase == TheLostShrine.Weapons.MeleePhase.Windup && surface.enabled && health.Health == 100,"Windup outlines intent without damage");
+    check(weapon.LightPhase == RoadOfTheOldKing.Weapons.MeleePhase.Windup && surface.enabled && health.Health == 100,"Windup outlines intent without damage");
     tick(start * .5f + .001f); render();
-    check(weapon.LightPhase == TheLostShrine.Weapons.MeleePhase.Active && surface.enabled && health.Health == 90,"Active footprint starts with actual damage");
+    check(weapon.LightPhase == RoadOfTheOldKing.Weapons.MeleePhase.Active && surface.enabled && health.Health == 90,"Active footprint starts with actual damage");
     tick(.001f); check(health.Health == 90,"Footprint does not cause repeat hits");
     weapon.PauseOnImpact(.04f); float progress = weapon.LightSwingProgress;
     tick(.02f); render(); check(weapon.LightSwingProgress == progress && surface.enabled,"Hit pause holds the active swish clock");
@@ -72,13 +72,13 @@ try {
     wall.transform.position=new Vector3(.7f,0,0);
     wallCollider.isTrigger=true; reset(); Physics2D.SyncTransforms(); weapon.TryLightChop(Vector2.right); tick(start+.002f); render();
     check(health.Health<100,"Triggers do not block melee");
-    wallCollider.isTrigger=false; wall.AddComponent<TheLostShrine.Combat.Damageable>(); reset();health.RestoreHealth();Physics2D.SyncTransforms();weapon.TryLightChop(Vector2.right);tick(start+.002f);
+    wallCollider.isTrigger=false; wall.AddComponent<RoadOfTheOldKing.Combat.Damageable>(); reset();health.RestoreHealth();Physics2D.SyncTransforms();weapon.TryLightChop(Vector2.right);tick(start+.002f);
     check(health.Health<100,"Damage receivers do not occlude targets behind them");
     wall.SetActive(false);target.SetActive(false);
 
     reset(); upgrade.addedLightArc=40f; upgrade.lightSpeedMultiplier=1.2f; weapon.ApplyUpgrades(new[]{upgrade});
     weapon.TryLightChop(Vector2.right); tick(weapon.LightDuration*weapon.Settings.lightWindupFraction+.001f); render();
-    check(Mathf.Abs(weapon.LightArc-180f)<.001f && Mathf.Abs(weapon.LightDuration-.25f)<.001f && weapon.LightPhase==TheLostShrine.Weapons.MeleePhase.Active,"Wider/faster upgrade changes shared geometry and timing");
+    check(Mathf.Abs(weapon.LightArc-180f)<.001f && Mathf.Abs(weapon.LightDuration-.25f)<.001f && weapon.LightPhase==RoadOfTheOldKing.Weapons.MeleePhase.Active,"Wider/faster upgrade changes shared geometry and timing");
     check(Vector2.Angle(Vector2.right,mesh.vertices[1])>70f,"Mesh expands to the upgraded arc");
     tick(.3f); stamina.Restore();weapon.TryLightChop(Vector2.right);tick(.1f);render();
     check(weapon.ComboIndex==1 && surface.enabled && weapon.LightArc < 180f,"Backhand stays narrower after widening");
@@ -93,7 +93,7 @@ try {
     stamina.TrySpend(stamina.Current);check(!weapon.TryLightChop(Vector2.right),"Exhausted click cannot start a swing");render();check(!surface.enabled,"Rejected click has no swipe");
     stamina.Restore();weapon.TryLightChop(Vector2.right);tick(.6f);render();check(!surface.enabled,"Long physics step cannot leave stale active feedback");
     // Combo contract and thrust lane, including all octants and terrain protection.
-    weapon.ApplyUpgrades(new TheLostShrine.Weapons.AxeUpgrade[0]);
+    weapon.ApplyUpgrades(new RoadOfTheOldKing.Weapons.AxeUpgrade[0]);
     System.Action<Vector2> thrust = aim => {
         reset(); target.SetActive(false);
         weapon.TryLightChop(aim); tick(weapon.LightDuration+.001f);
@@ -108,13 +108,13 @@ try {
     tick(weapon.LightDuration+.001f);stamina.Restore();weapon.TryLightChop(Vector2.right);
     check(weapon.IsLightThrust && weapon.LightDamage==25 && weapon.LightDuration*weapon.LightWindupFraction>openerWindup,"Thrust is stronger with the longest tell");
     tick(weapon.LightDuration*weapon.LightSwingEndFraction);
-    var view=weapon.GetComponent<TheLostShrine.Weapons.AxeView>();
+    var view=weapon.GetComponent<RoadOfTheOldKing.Weapons.AxeView>();
     view.GetType().GetMethod("LateUpdate",flags).Invoke(view,null);
     var blade=(SpriteRenderer)view.GetType().GetField("blade",flags).GetValue(view);
     check(Mathf.Abs(blade.bounds.max.x-root.transform.position.x-weapon.LightReach)<.01f,"Thrust sprite tip reaches the lane end without overshooting");
     upgrade.finisherDamageMultiplier=1.4f;upgrade.addedLightArc=40f;weapon.ApplyUpgrades(new[]{upgrade});
     check(weapon.LightDamage==35 && weapon.LightArc==28f,"Finisher bonus strengthens the poke without widening it");
-    weapon.ApplyUpgrades(new TheLostShrine.Weapons.AxeUpgrade[0]);
+    weapon.ApplyUpgrades(new RoadOfTheOldKing.Weapons.AxeUpgrade[0]);
     for(int d=0;d<8;d++) {
         Vector2 aim=new Vector2(Mathf.Cos(d*Mathf.PI/4),Mathf.Sin(d*Mathf.PI/4));
         Vector2 side=new Vector2(-aim.y,aim.x);
@@ -135,7 +135,7 @@ try {
     }
     thrust(Vector2.right);target.SetActive(true);place(Vector2.right*2);
     wall.SetActive(true);wall.transform.position=Vector2.right;
-    UnityEngine.Object.DestroyImmediate(wall.GetComponent<TheLostShrine.Combat.Damageable>());
+    UnityEngine.Object.DestroyImmediate(wall.GetComponent<RoadOfTheOldKing.Combat.Damageable>());
     Physics2D.SyncTransforms();tick(weapon.LightDuration*.45f);
     check(health.Health==100,"Thrust cannot damage through a wall");wall.SetActive(false);
     thrust(Vector2.right);target.SetActive(true);place(Vector2.right*2);
@@ -147,11 +147,11 @@ try {
     stamina.Restore();weapon.TryLightChop(Vector2.right);
     check(weapon.ComboIndex==0,"Expired combo restarts at opener");
     thrust(Vector2.right);tick(weapon.LightDuration*.2f);weapon.CancelLightCombo();tick(.5f);
-    check(weapon.State==TheLostShrine.Weapons.AxeState.Held&&weapon.ConsumeActionDisplacement()==Vector2.zero,"Interrupted tell cannot lunge later");
+    check(weapon.State==RoadOfTheOldKing.Weapons.AxeState.Held&&weapon.ConsumeActionDisplacement()==Vector2.zero,"Interrupted tell cannot lunge later");
     // Run the actual motor/physics so the lunge cannot bypass solid collision.
-    var motor=root.GetComponent<TheLostShrine.Player.PlayerMovement>();
+    var motor=root.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>();
     var body=root.GetComponent<Rigidbody2D>();body.interpolation=RigidbodyInterpolation2D.None;
-    var input=root.GetComponent<TheLostShrine.Input.PlayerMovementInput>();
+    var input=root.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();
     input.GetType().GetField("hasFocus",flags).SetValue(input,true);
     input.GetType().GetProperty("MoveDirection").SetValue(input,Vector2.zero,null);
     System.Action moveStep=()=>{motor.GetType().GetMethod("FixedUpdate",flags).Invoke(motor,null);Physics2D.Simulate(Time.fixedDeltaTime);};
@@ -167,11 +167,11 @@ try {
     tick(.02f);check(weapon.ConsumeActionDisplacement()==Vector2.zero,"Hit pause freezes lunge as well as weapon clock");
     weapon.CancelLightCombo();check(weapon.ComboTimeRemaining==0,"Interruption clears combo continuation");
     thrust(Vector2.right);player.GetType().GetMethod("OnApplicationFocus",flags).Invoke(player,new object[]{false});
-    check(weapon.State==TheLostShrine.Weapons.AxeState.Held&&weapon.ComboTimeRemaining==0,"Focus loss cancels the live combo");
+    check(weapon.State==RoadOfTheOldKing.Weapons.AxeState.Held&&weapon.ComboTimeRemaining==0,"Focus loss cancels the live combo");
     player.GetType().GetField("controlsActive",flags).SetValue(player,true);
     reset();weapon.TryLightChop(Vector2.right);tick(.1f);
-    root.GetComponent<TheLostShrine.Combat.Damageable>().ReceiveHit(new TheLostShrine.Combat.CombatHit(target,TheLostShrine.Combat.AttackKind.EnemyMelee,1000,Vector2.right,0f,0f));
-    render();check(!surface.enabled && weapon.LightPhase==TheLostShrine.Weapons.MeleePhase.None,"Defeat cancels damage and its feedback");
+    root.GetComponent<RoadOfTheOldKing.Combat.Damageable>().ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(target,RoadOfTheOldKing.Combat.AttackKind.EnemyMelee,1000,Vector2.right,0f,0f));
+    render();check(!surface.enabled && weapon.LightPhase==RoadOfTheOldKing.Weapons.MeleePhase.None,"Defeat cancels damage and its feedback");
 } finally {
     Time.timeScale=1f;Physics2D.simulationMode=previousSimulation;
     foreach(var go in created) if(go!=null) UnityEngine.Object.DestroyImmediate(go);

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TheLostShrine.Player
+namespace RoadOfTheOldKing.Player
 {
     // One slot per gameplay state. The editor importer fills a slot from the art folder of the
     // same name; any empty slot falls back as described on PlayerSpriteAnimator.

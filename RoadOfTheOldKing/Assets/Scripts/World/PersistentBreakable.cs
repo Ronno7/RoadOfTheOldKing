@@ -1,8 +1,8 @@
-using TheLostShrine.Combat;
-using TheLostShrine.Progression;
+using RoadOfTheOldKing.Combat;
+using RoadOfTheOldKing.Progression;
 using UnityEngine;
 
-namespace TheLostShrine.World
+namespace RoadOfTheOldKing.World
 {
     // Only route obstacles receive this adapter; future loot props can reset on rest.
     [RequireComponent(typeof(Breakable))]

@@ -1,9 +1,9 @@
 using System;
-using TheLostShrine.Combat;
-using TheLostShrine.Input;
+using RoadOfTheOldKing.Combat;
+using RoadOfTheOldKing.Input;
 using UnityEngine;
 
-namespace TheLostShrine.Player
+namespace RoadOfTheOldKing.Player
 {
     // Estus-style healing flask. A drink is a commitment: the charge is spent at once, the player walks
     // slowly and cannot attack or dodge, and the heal lands late in the drink. A stagger before then
@@ -101,6 +101,13 @@ namespace TheLostShrine.Player
         {
             Stop();
             Charges = maxCharges;
+        }
+
+        // Carries charges across a scene change.
+        public void SetCharges(int charges)
+        {
+            Stop();
+            Charges = Mathf.Clamp(charges, 0, maxCharges);
         }
 
         private void OnDisable() => Stop();

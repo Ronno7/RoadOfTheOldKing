@@ -1,8 +1,8 @@
-using TheLostShrine.Combat;
-using TheLostShrine.Weapons;
+using RoadOfTheOldKing.Combat;
+using RoadOfTheOldKing.Weapons;
 using UnityEngine;
 
-namespace TheLostShrine.Player
+namespace RoadOfTheOldKing.Player
 {
     // The only writer of the body sprite. It samples gameplay state and never drives it:
     // walk/run follow distance travelled, attacks follow the weapon's action clock, the dash and

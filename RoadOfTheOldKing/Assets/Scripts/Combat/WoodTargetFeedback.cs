@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TheLostShrine.Combat
+namespace RoadOfTheOldKing.Combat
 {
     // Reacts to any IHitEventSource: a Damageable dummy or an indestructible practice stand.
     [DisallowMultipleComponent]

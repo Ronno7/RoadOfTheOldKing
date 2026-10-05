@@ -1,7 +1,7 @@
-using TheLostShrine.Player;
+using RoadOfTheOldKing.Player;
 using UnityEngine;
 
-namespace TheLostShrine.Combat
+namespace RoadOfTheOldKing.Combat
 {
     // Eight-direction PixelLab wolf. Slots are filled by Road of the Old King > Art > Import Wolf Animations
     // from Assets/Art/Sprites/Enemies/Wolf/<Slot>/<direction>/frame_###.png.

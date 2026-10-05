@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace TheLostShrine.UI
+namespace RoadOfTheOldKing.UI
 {
     // A small world-space UI Toolkit document: one UXML tree placed in the scene and sorted like a
     // sprite by the 2D Renderer. It needs an explicit sorting layer: on Default it draws beneath the

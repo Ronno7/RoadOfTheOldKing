@@ -3,10 +3,10 @@
 if(!Application.isPlaying)throw new Exception("Enter Tutorial Play Mode first.");
 var player=GameObject.Find("Player");
 var body=player.GetComponent<Rigidbody2D>();
-var movement=player.GetComponent<TheLostShrine.Player.PlayerMovement>();
-var input=player.GetComponent<TheLostShrine.Input.PlayerMovementInput>();
-var animation=player.GetComponent<TheLostShrine.Player.PlayerSpriteAnimator>();
-var follow=Camera.main.GetComponent<TheLostShrine.Cameras.CameraFollow2D>();
+var movement=player.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>();
+var input=player.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();
+var animation=player.GetComponent<RoadOfTheOldKing.Player.PlayerSpriteAnimator>();
+var follow=Camera.main.GetComponent<RoadOfTheOldKing.Cameras.CameraFollow2D>();
 var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
 var motorStep=movement.GetType().GetMethod("FixedUpdate",flags);
 var visualStep=animation.GetType().GetMethod("LateUpdate",flags);

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TheLostShrine.Weapons
+namespace RoadOfTheOldKing.Weapons
 {
     // On the ground (before the first pickup) the model keeps the pose authored in the scene: root and
     // model transforms, e.g. planted in the stump. Every other pose is set in world space, so a root
@@ -35,8 +35,8 @@ namespace TheLostShrine.Weapons
         private bool wasFlying;
         private int originalSortingLayer;
         private int originalSortingOrder;
-        private TheLostShrine.Player.PlayerCombatController carryOwner;
-        private TheLostShrine.Player.PlayerWeaponCarry carry;
+        private RoadOfTheOldKing.Player.PlayerCombatController carryOwner;
+        private RoadOfTheOldKing.Player.PlayerWeaponCarry carry;
         private Vector3 offset; // world-space model offset from the root for the current pose
         private readonly AnimationCurve ringWidth = AnimationCurve.Linear(0f, 1f, 1f, 1f);
 
@@ -112,7 +112,7 @@ namespace TheLostShrine.Weapons
                 if (carryOwner != weapon.Owner)
                 {
                     carryOwner = weapon.Owner;
-                    carry = carryOwner.GetComponent<TheLostShrine.Player.PlayerWeaponCarry>();
+                    carry = carryOwner.GetComponent<RoadOfTheOldKing.Player.PlayerWeaponCarry>();
                 }
                 if (carry != null && carry.TryApply(model, blade))
                     return;

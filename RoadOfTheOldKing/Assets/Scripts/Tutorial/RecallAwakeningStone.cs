@@ -1,13 +1,13 @@
 using System;
 using System.Collections;
-using TheLostShrine.Combat;
-using TheLostShrine.Input;
-using TheLostShrine.Player;
-using TheLostShrine.Progression;
-using TheLostShrine.UI;
+using RoadOfTheOldKing.Combat;
+using RoadOfTheOldKing.Input;
+using RoadOfTheOldKing.Player;
+using RoadOfTheOldKing.Progression;
+using RoadOfTheOldKing.UI;
 using UnityEngine;
 
-namespace TheLostShrine.Tutorial
+namespace RoadOfTheOldKing.Tutorial
 {
     // A thrown axe that strikes the stone awakens Recall: brief control lock, the stone
     // wakes, the axe returns to hand on its own, then controls return and progress saves once.
@@ -49,9 +49,9 @@ namespace TheLostShrine.Tutorial
 
         public bool IsAwakened { get; private set; }
         public bool IsReady => (string.IsNullOrEmpty(requiredMilestone) ||
-            (CheckpointSession.Instance != null && CheckpointSession.Instance.Progress.Has(requiredMilestone))) &&
-            (string.IsNullOrEmpty(recoveryMilestone) || (CheckpointSession.Instance != null &&
-            CheckpointSession.Instance.Progress.Has(recoveryMilestone) && !EncounterState.InCombat));
+            (GameSession.Instance != null && GameSession.Instance.Progress.Has(requiredMilestone))) &&
+            (string.IsNullOrEmpty(recoveryMilestone) || (GameSession.Instance != null &&
+            GameSession.Instance.Progress.Has(recoveryMilestone) && !EncounterState.InCombat));
         public bool IsAwakening => sequence != null;
         public Look CurrentLook { get; private set; }
         public event Action Awakened;
@@ -111,7 +111,7 @@ namespace TheLostShrine.Tutorial
             sequence = null;
             if (!PlayerAlive())
                 yield break;
-            CheckpointSession.Instance?.SaveProgress();
+            GameSession.Instance?.SaveProgress();
             if (!string.IsNullOrEmpty(awakenedNotice))
                 TutorialNotice.Show(awakenedNotice, 7f);
             Awakened?.Invoke();

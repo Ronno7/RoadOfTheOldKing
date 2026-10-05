@@ -1,8 +1,8 @@
 using System;
-using TheLostShrine.Combat;
+using RoadOfTheOldKing.Combat;
 using UnityEngine;
 
-namespace TheLostShrine.World
+namespace RoadOfTheOldKing.World
 {
     // Any weapon using IHitReceiver can drive this adapter without knowing door logic.
     // Accepted hits are also published (IHitEventSource) so presentation such as WoodTargetFeedback

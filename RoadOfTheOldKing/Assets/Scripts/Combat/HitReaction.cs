@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace TheLostShrine.Combat
+namespace RoadOfTheOldKing.Combat
 {
     [DisallowMultipleComponent, RequireComponent(typeof(Damageable))]
     public sealed class HitReaction : MonoBehaviour

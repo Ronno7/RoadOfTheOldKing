@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TheLostShrine.Input
+namespace RoadOfTheOldKing.Input
 {
     public struct CameraLookInputFrame
     {

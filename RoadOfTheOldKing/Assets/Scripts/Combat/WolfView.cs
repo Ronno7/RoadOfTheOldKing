@@ -1,7 +1,7 @@
-using TheLostShrine.Player;
+using RoadOfTheOldKing.Player;
 using UnityEngine;
 
-namespace TheLostShrine.Combat
+namespace RoadOfTheOldKing.Combat
 {
     // Presentation only. WolfAI owns movement, attack commitment, damage and reset; this samples its
     // state: locomotion follows distance travelled (stalk while circling, walk to reposition, run to

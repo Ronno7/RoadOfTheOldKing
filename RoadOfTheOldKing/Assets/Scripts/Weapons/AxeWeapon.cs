@@ -1,8 +1,8 @@
-using TheLostShrine.Combat;
-using TheLostShrine.Player;
+using RoadOfTheOldKing.Combat;
+using RoadOfTheOldKing.Player;
 using UnityEngine;
 
-namespace TheLostShrine.Weapons
+namespace RoadOfTheOldKing.Weapons
 {
     public enum AxeState { OnGround, Held, LightChop, Charging, Cleaving, Flying, Stuck, Returning }
     public enum MeleePhase { None, Windup, Active, Recovery }

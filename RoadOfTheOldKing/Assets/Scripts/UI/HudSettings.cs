@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TheLostShrine.UI
+namespace RoadOfTheOldKing.UI
 {
     // Player HUD preferences, kept in PlayerPrefs apart from the save slot (a new run keeps them).
     // AlwaysShowVitals: health, stamina and flask meters stay in the corner instead of appearing

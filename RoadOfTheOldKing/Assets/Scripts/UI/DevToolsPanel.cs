@@ -1,12 +1,12 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
 using System;
 using System.Collections.Generic;
-using TheLostShrine.Player;
+using RoadOfTheOldKing.Player;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
-namespace TheLostShrine.UI
+namespace RoadOfTheOldKing.UI
 {
     // F4 runtime workbench. Commands are independently callable through DevRuntimeCommands.Instance.
     [DefaultExecutionOrder(-300)]

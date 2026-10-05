@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace TheLostShrine.Combat
+namespace RoadOfTheOldKing.Combat
 {
     [DisallowMultipleComponent]
     public sealed class ShieldProtection : MonoBehaviour, IHitProtection

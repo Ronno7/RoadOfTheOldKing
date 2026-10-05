@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace TheLostShrine.UI
+namespace RoadOfTheOldKing.UI
 {
     // Leases compose transient freezes and menus without restoring time over another owner.
     public static class SimulationPause

@@ -1,7 +1,7 @@
-using TheLostShrine.Combat;
+using RoadOfTheOldKing.Combat;
 using UnityEngine;
 
-namespace TheLostShrine.Player
+namespace RoadOfTheOldKing.Player
 {
     // Owns dash timing and cost; PlayerMovement remains the only movement motor.
     [DisallowMultipleComponent, RequireComponent(typeof(PlayerStamina))]

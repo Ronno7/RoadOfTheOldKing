@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace TheLostShrine.Input
+namespace RoadOfTheOldKing.Input
 {
     // Input adapter only: camera policy and movement live in the camera components.
     [DisallowMultipleComponent]
@@ -28,7 +28,7 @@ namespace TheLostShrine.Input
         {
             IsLooking = false;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
-            if (TheLostShrine.UI.DevToolsPanel.CapturesInput) { requireRelease = true; return default; }
+            if (RoadOfTheOldKing.UI.DevToolsPanel.CapturesInput) { requireRelease = true; return default; }
 #endif
             if (!isActiveAndEnabled || !focused || paused || Time.timeScale <= 0f || Mouse.current == null)
             {

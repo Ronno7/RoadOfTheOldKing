@@ -1,9 +1,9 @@
 using System.Collections;
-using TheLostShrine.Progression;
+using RoadOfTheOldKing.Progression;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-namespace TheLostShrine.Tutorial
+namespace RoadOfTheOldKing.Tutorial
 {
     // The courtyard's north seal is derived from the existing Recall unlock; no second save flag.
     public sealed class RecallSealGate : MonoBehaviour, IProgressParticipant
@@ -20,7 +20,7 @@ namespace TheLostShrine.Tutorial
         private void OnEnable() { if (stone != null) stone.Awakened += Open; }
         private void Start()
         {
-            if (CheckpointSession.Instance != null && CheckpointSession.Instance.Progress.recallUnlocked)
+            if (GameSession.Instance != null && GameSession.Instance.Progress.recallUnlocked)
                 SetOpen();
         }
         private void OnDisable()

@@ -1,8 +1,8 @@
-using TheLostShrine.Player;
-using TheLostShrine.Progression;
+using RoadOfTheOldKing.Player;
+using RoadOfTheOldKing.Progression;
 using UnityEngine;
 
-namespace TheLostShrine.World
+namespace RoadOfTheOldKing.World
 {
     [DisallowMultipleComponent, RequireComponent(typeof(Collider2D))]
     public sealed class HeartFragmentPickup : WorldPickup, IProgressParticipant
@@ -14,11 +14,11 @@ namespace TheLostShrine.World
 
         public override string Prompt => "Take fragment";
         public override bool CanCollect(PlayerHealth player) => base.CanCollect(player) &&
-            !IsCollected && !string.IsNullOrEmpty(rewardId) && CheckpointSession.Instance != null;
+            !IsCollected && !string.IsNullOrEmpty(rewardId) && GameSession.Instance != null;
 
         public override bool TryCollect(PlayerHealth player)
         {
-            if (!CanCollect(player) || !CheckpointSession.Instance.TryCollectHeartFragment(rewardId))
+            if (!CanCollect(player) || !GameSession.Instance.Rewards.TryCollectHeartFragment(rewardId))
                 return false;
             IsCollected = true;
             Refresh();

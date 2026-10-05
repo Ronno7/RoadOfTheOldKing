@@ -22,5 +22,6 @@
 .menu-button.selected, .menu-button:hover, .menu-button:focus { background-image: url("project://database/Assets/Art/Sprites/UI/PanelSelected.png"); -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2; color: rgb(246, 230, 181); }
 .menu-button:active { -unity-background-image-tint-color: rgb(220, 200, 150); }
 .menu-button:disabled { opacity: 0.45; }
+.menu-cursor { display: none; }
 .menu-description { min-height: 21px; margin-top: 3px; white-space: normal; font-size: 20px; color: rgb(185, 183, 160); -unity-text-align: upper-center; }
 .menu-hint { margin-top: 9px; font-size: 10px; color: rgb(185, 183, 160); -unity-text-align: middle-center; white-space: normal; }

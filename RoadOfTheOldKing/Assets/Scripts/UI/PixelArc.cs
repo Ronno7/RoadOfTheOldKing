@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace TheLostShrine.UI
+namespace RoadOfTheOldKing.UI
 {
     // A meter drawn as an arc of whole art pixels (no anti-aliasing), centred on straight up, for
     // world-space documents. The fill runs from the left end; a debt (stamina below zero) runs red from

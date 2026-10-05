@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TheLostShrine.Input
+namespace RoadOfTheOldKing.Input
 {
     // Input sources supply intent; they never move the player themselves.
     public interface IMovementInput

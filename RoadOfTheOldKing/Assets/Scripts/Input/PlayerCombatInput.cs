@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace TheLostShrine.Input
+namespace RoadOfTheOldKing.Input
 {
     [DisallowMultipleComponent]
     public sealed class PlayerCombatInput : MonoBehaviour, ICombatInput
@@ -12,12 +12,12 @@ namespace TheLostShrine.Input
         private InputAction throwWeapon;
         private InputAction heal;
         private bool focused = true;
-        private TheLostShrine.Player.PlayerControlLocks locks;
+        private RoadOfTheOldKing.Player.PlayerControlLocks locks;
         private bool paused;
 
         private void Awake()
         {
-            locks = GetComponent<TheLostShrine.Player.PlayerControlLocks>();
+            locks = GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>();
             actions = new InputActionMap("Player Combat");
             lightChop = actions.AddAction("Light Chop", InputActionType.Button, "<Mouse>/leftButton");
             charge = actions.AddAction("Charged Cleave", InputActionType.Button, "<Mouse>/rightButton");

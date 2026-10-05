@@ -10,7 +10,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.Tilemaps;
 using Object = UnityEngine.Object;
 
-namespace TheLostShrine.EditorTools
+namespace RoadOfTheOldKing.EditorTools
 {
     // Shared Editor-only import/asset operations for native tile kits.
     internal static class TileKitAssets

@@ -31,7 +31,7 @@ flowchart LR
     HUD[GameHud]
   end
   subgraph Persistence
-    CS[CheckpointSession]
+    CS[GameSession]
     ST[("PlayerPrefs JSON")]
   end
   MI -->|IMovementInput| PM
@@ -66,7 +66,7 @@ flowchart LR
 | `UI` | HUD, notifications, menus, time control, F3 Debug Panel and F4 Developer Tools |
 | `Prototype` | Code for the retired PrototypeLoop (its guide, legend and placeholder views) |
 
-Namespaces still use the project's former name (`TheLostShrine.*`) for compatibility. Rendering uses the Universal Render Pipeline with its 2D Renderer; sprites currently use unlit materials, so 2D lighting is available for a later atmosphere pass.
+Code lives under `RoadOfTheOldKing.*` namespaces. Rendering uses the Universal Render Pipeline with its 2D Renderer; sprites currently use unlit materials, so 2D lighting is available for a later atmosphere pass.
 
 ## Player
 
@@ -83,7 +83,7 @@ Namespaces still use the project's former name (`TheLostShrine.*`) for compatibi
 
 ### Controls
 
-Keyboard and mouse only.
+Keyboard and mouse today; Xbox controller support is planned and not yet implemented.
 
 | Input | Action |
 | --- | --- |
@@ -245,11 +245,18 @@ The prototype `SimpleMeleeEnemy` (approach, windup, single strike, recovery) rem
 
 ## Progression and saving
 
-`CheckpointSession` sits at the scene root and survives reloads through `DontDestroyOnLoad`. It owns the player's permanent progress and writes it through `IProgressStore` as one versioned JSON record in PlayerPrefs, which also works in the browser build. Each scene configures its own save key.
+`GameSession` is one game-level session for every scene. Each playable scene contains the `GameSession` prefab so it can be played directly; the first instance survives scene loads through `DontDestroyOnLoad`, and later copies remove themselves, so the save key and upgrade tiers always come from the prefab. It owns the player's permanent progress and writes it through `IProgressStore` as one versioned JSON record in PlayerPrefs, which also works in the browser build. Two services hang off it: `CheckpointService` (rest, travel, scene exits, respawn and placing the player on load) and `RewardService` (Sun Shards, heart fragments and upgrade purchases).
+
+- **Versions.** `ProgressMigrations` reads any known save version and upgrades it step by step. Version 2 (0.4.8) replaced the per-scene Tutorial save; on first launch the old record is migrated into the game-wide key and kept as a backup until New Game.
+- **Scene changes.** `SceneTransitions`, on the session, fades out with the world frozen and input locked, loads the scene and fades back in. The session places the arriving player at a named `SceneSpawnPoint` (or a fire, for travel), otherwise at the checkpoint fire if it is in that scene.
+- **Exits.** `SceneExit` is a trigger with a target scene and spawn id. It saves, carries current health and flask charges across, and can record a milestone on first use. With no target it only shows its notice; the Tutorial exit works this way until Green Lowlands exists.
+- **Resume point.** `ResumePoint` (scene, position, health, flasks) is a small record beside the save. It is written when the player pauses, leaves to the title, quits or the window loses focus, and by a throttled autosave (every 5 s, only when alive, out of combat and moved). Death, resting, travel, Return to bonfire, scene exits and New Game clear it.
+- **Title.** The game starts in the `Title` scene. Continue resumes at the resume point if there is one, otherwise at the checkpoint's fire (or the new-game scene's start without a checkpoint); New Game clears the save, confirming first when one exists; the pause menu's Main Menu saves and returns there.
+- **The axe.** Taking the axe from the Tutorial stump is a one-time pickup. Once the save owns it, `PlayerCombatController` spawns the player's own copy from its `ownedAxePrefab` on every scene load, and an unowned world axe with `AxePickup` hides itself.
 
 **What's saved (`ProgressState`):**
 - axe ownership and the Recall unlock;
-- the last checkpoint and its scene, plus discovered fires;
+- the last checkpoint and its scene, plus discovered fires with their scenes (so travel can list fires in other scenes);
 - the Sun Shard balance and chosen upgrades;
 - a list of completed string IDs.
 
@@ -259,13 +266,13 @@ The ID list holds most progress: lessons, collected rewards, guide steps and sol
 
 ```mermaid
 sequenceDiagram
-  participant S as CheckpointSession
+  participant S as GameSession
   participant P as Scene participants
   participant St as PlayerPrefs store
   Note over S: session starts
   S->>St: Load
   Note over S: each scene load
-  S->>S: place player at checkpoint, re-equip axe, unlock Recall
+  S->>S: place player at arrival or checkpoint, re-equip axe, unlock Recall
   S->>P: RestoreProgress(state)
   Note over S: rest, reward, lesson, unlock...
   S->>P: CaptureProgress(state)
@@ -276,8 +283,10 @@ sequenceDiagram
 | --- | --- | --- | --- | --- |
 | Rest at a bonfire | Set to that fire | Yes | Yes | No |
 | Permanent gain (axe, Recall, shard, fragment, lesson, puzzle) | Unchanged | No | Yes | No |
-| Death or Restart | Unchanged | Through the reload | Yes | Yes, at the checkpoint or the start |
-| New Game (pause menu, confirmed) | Cleared | Through the reload | Save deleted | Yes |
+| Quit, Main Menu, pause, or the window losing focus | Unchanged | No | Resume point only | No (Continue later loads the exact spot) |
+| Leave through a scene exit | Unchanged | No (health and flasks carry over) | Yes | Loads the target scene at its spawn point |
+| Death or Return to bonfire | Unchanged | Through the reload | Yes | Yes: the checkpoint's scene at its fire, or this scene's arrival point without a checkpoint |
+| New Game (title screen, confirmed over a save) | Cleared | Through the reload | Save deleted | Yes, the new-game scene |
 
 **Rewards and upgrades**
 - **Sun Shards** (`SunShardReward`): a pickup that an event can unlock, such as an enemy's `Defeated` (or a whole pack's, with `alsoDefeat`) or a puzzle's `Solved`, or that is simply placed. Collecting it records `shard/collected/<id>` and adds to the balance, so each reward is one-time even though enemies come back.
@@ -295,7 +304,7 @@ sequenceDiagram
   - It picks one nearby `WorldPickup` (axe, shard, heart fragment) first, otherwise a nearby bonfire. One press commits one thing.
   - The HUD prompt reads the same selection, so it always matches what F will do.
   - Proximity alone never collects, with one exception: an axe the player already owns is retrieved by walking over it.
-- **Bonfires.** `Bonfire` holds a stable ID, a display name and a spawn point. Resting heals, refills stamina, returns the axe, resets enemies, sets the respawn point and saves. Discovered fires in the same scene offer travel between them.
+- **Bonfires.** `Bonfire` holds a stable ID, a display name and a spawn point. Resting heals, refills stamina, returns the axe, resets enemies, sets the respawn point and saves. Discovered fires offer travel between them, including fires in other scenes; travel saves and respawns at the destination.
 - **Puzzle pieces.** `AxePuzzleTarget` turns hits into puzzle input. `ThrowRecallPuzzle` requires an outbound throw into its anchor, then a Recall through its switch, and can open a `PuzzleDoor`.
 
 ## Tutorial
@@ -314,7 +323,7 @@ The route teaches one verb per space, and each lesson completes from a real outc
 | Ancient stone | Recall unlock | `RecallAwakeningStone`: a thrown hit after the wolf and safe recovery |
 | Meadow | Wolf pack, first Sun Shard | Two wolves (they take turns attacking); the shard unlocks when both are down, where the last fell; collecting it |
 | Roadside bonfire | Rest and checkpoint | First rest |
-| Exit trail | (end of route) | `TutorialExit` records `tutorial/complete` |
+| Exit trail | (end of route) | `SceneExit` records `tutorial/complete` |
 
 **Recall awakening.** A thrown hit on the stone locks controls and plays a 1.4 s awakening. The stone then unlocks Recall and returns the axe automatically, restores controls and saves once. Death mid-sequence aborts cleanly, and a save with Recall unlocked loads the stone already awakened.
 
@@ -325,7 +334,7 @@ flowchart LR
   E["Lessons and world events"] --> G[TutorialGuide]
   G -->|"current contextual step"| N[HudNotifications]
   N --> H[GameHud hint]
-  G -->|"tutorial/step/id"| S[CheckpointSession]
+  G -->|"tutorial/step/id"| S[GameSession]
 ```
 
 - **Progress-aware:** conditions are tracked from scene start, so early actions count. Usually the first incomplete step supplies the hint; the ready stone takes priority nearby. The guide itself places no barriers, but the stone waits for the recovery milestone and the seal physically gates the northern route.
@@ -354,7 +363,7 @@ Presentation components read gameplay state and never change it, so art can be r
 | `WolfView`, enemy indicators | Enemy poses, the "!" awareness cue, health bars |
 
 **HUD.** `GameHud` (UI Toolkit, `UI/GameHud.uxml` and `.uss`) is contextual: quiet exploration shows almost nothing.
-- **Vitals:** pixel-art health bar and one flask icon per charge in the corner, shown on damage, healing or combat and hidden 3 s after health is full and no threat remains. Bars grow with their maximum. The pause menu's *Vitals* option keeps them always visible and adds a stamina bar (`HudSettings`).
+- **Vitals:** pixel-art health bar and one flask icon per charge in the corner, shown on damage, healing or combat and hidden 3 s after health is full and no threat remains. Bars grow with their maximum. The *Vitals* option on the Settings page keeps them always visible and adds a stamina bar (`HudSettings`).
 - **Stamina arc:** in combat, stamina is a pixel arc over the hero (`PixelArc`, a world-space document) that fades in and out and sits just above the carried halberd: ochre-gold, red while in deficit, and its outline flashes when an action is refused.
 - **Prompt:** one `[F] <verb>` prompt above whatever the interaction selector chose.
 - **Contextual pieces:** a weapon-away chip, the cleave charge bar, up to three reward receipts and the single guide hint.
@@ -368,11 +377,11 @@ Gameplay posts text through `HudNotifications` (receipts and the hint), and the 
 
 **World-space UI.** Pieces that belong to something in the world are small world-space UI Toolkit documents rather than screen elements: the `[F]` prompt, the charge bar under the player, and each enemy's health bar and "!". `WorldUIDocument` creates one from a UXML tree (`UI/WorldPrompt.uxml`, `ChargeBar.uxml`, `EnemyHealthBar.uxml`, `AwarenessMark.uxml`, styled in `WorldUI.uss`) on the shared `UI/WorldPanel.asset` (32 panel pixels per unit, so 2 px is one art pixel). It sorts like a sprite on the `Player` sorting layer, because a world panel left on `Default` draws beneath the ground. It also hides with `visibility` rather than `display: none`, because an empty layout loses the document's world transform for a frame. Enemy indicators anchor at a fixed `anchorHeight` above the enemy's pivot, since sprite canvases change size between animations.
 
-**Menus.** Escape offers Restart, a vitals toggle that stays open, New Game with a safe-default reset confirmation, and Quit. Upgrade choices are browsable at every bonfire before affordability; purchasing still requires an upgrade-enabled fire and enough shards. The pause menu, bonfire menu (rest, upgrade browsing with a purchase confirmation, travel) and defeat screen are UI Toolkit documents on the Player prefab, sharing one theme stylesheet (`MenuTheme.uss`) and one button-list helper (`MenuList`). `MenuStack` owns open menus: Escape, the arrow keys and Enter go to the top menu (Escape steps back a page or closes it), and pause opens only when nothing else is open. While a menu or sequence needs the player still, it takes a lease on `PlayerControlLocks`, so overlapping locks (a bonfire, the Recall awakening, pause) never release each other.
+**Menus.** Escape offers Return to bonfire (Return to start before the first rest), Settings, Main Menu and Quit; New Game is on the title only, with a safe-default confirmation. Settings is one page shared by the pause menu and the title (`SettingsCommands`), currently the vitals toggle. The bonfire and title menus use ornate PixelLab-sourced frames (`OrnateMenu.uss`): an oak-and-rope Hearth frame with a bronze lining at the bonfire and a notched Bronze frame on the title and defeat screen (their headings use the carved RotOK Title 32 font; menu buttons never show input keys, which appear only in spatial prompts), with bronze buttons, sun-wheel ornaments and a cursor beside the selected entry. They are drawn at one art pixel per reference pixel (finer than the HUD, matching 10 px text). Upgrade choices are browsable at every bonfire before affordability; purchasing still requires an upgrade-enabled fire and enough shards. The pause menu, bonfire menu (rest, upgrade browsing with a purchase confirmation, travel) and defeat screen are UI Toolkit documents on the Player prefab, sharing one theme stylesheet (`MenuTheme.uss`) and one button-list helper (`MenuList`). `MenuStack` owns open menus: Escape, the arrow keys and Enter go to the top menu (Escape steps back a page or closes it), and pause opens only when nothing else is open. While a menu or sequence needs the player still, it takes a lease on `PlayerControlLocks`, so overlapping locks (a bonfire, the Recall awakening, pause) never release each other.
 
 **Getting hit.** `PlayerHitFeedback` makes damage unmistakable: a red sprite flash, a tiny global hit-stop, a capped camera kick along the blow and a blink for the rest of the post-hit invulnerability, while the animator plays the flinch and the HUD flashes a red screen-edge vignette (which pulses like a heartbeat at low health). `FeedbackSettings` scales every flash and kick for players who prefer less.
 
-**Pause and time.** `SimulationPause` hands out leases. The pause menu, Developer Tools, hit stop and the combat preview tool can each hold one, and time resumes only when the last lease ends, so overlapping freezes can't restart the game early. Restart reloads at the checkpoint while retaining permanent progress. Pause input, controller, commands and view are separate classes.
+**Pause and time.** `SimulationPause` hands out leases. The pause menu, Developer Tools, hit stop and the combat preview tool can each hold one, and time resumes only when the last lease ends, so overlapping freezes can't restart the game early. Return to bonfire reloads at the checkpoint while retaining permanent progress. Pause input, controller, commands and view are separate classes.
 
 ## Tools and verification
 
@@ -400,9 +409,15 @@ Gameplay posts text through `HudNotifications` (receipts and the hint), and the 
 | Hit geometry, line of sight and deduplication | [AxeHitDetector](../RoadOfTheOldKing/Assets/Scripts/Weapons/AxeHitDetector.cs) |
 | Hit data and receiver interfaces | [CombatHit](../RoadOfTheOldKing/Assets/Scripts/Combat/CombatHit.cs) |
 | Wolf AI and the shared enemy interface | [WolfAI](../RoadOfTheOldKing/Assets/Scripts/Combat/WolfAI.cs), [IEnemy](../RoadOfTheOldKing/Assets/Scripts/Combat/IEnemy.cs) |
-| Checkpoints, saving and permanent progress | [CheckpointSession](../RoadOfTheOldKing/Assets/Scripts/Progression/CheckpointSession.cs) |
+| Session, saving and the resume point | [GameSession](../RoadOfTheOldKing/Assets/Scripts/Progression/GameSession.cs) |
+| Rest, travel, exits, respawn and placement | [CheckpointService](../RoadOfTheOldKing/Assets/Scripts/Progression/CheckpointService.cs) |
+| Sun Shards, heart fragments and upgrade purchases | [RewardService](../RoadOfTheOldKing/Assets/Scripts/Progression/RewardService.cs) |
+| Save versions and migration | [ProgressMigrations](../RoadOfTheOldKing/Assets/Scripts/Progression/ProgressMigrations.cs) |
+| Scene loading, fades and exits | [SceneTransitions](../RoadOfTheOldKing/Assets/Scripts/Progression/SceneTransitions.cs), [SceneExit](../RoadOfTheOldKing/Assets/Scripts/World/SceneExit.cs) |
 | Save format and participant interfaces | [ProgressState](../RoadOfTheOldKing/Assets/Scripts/Progression/ProgressState.cs) |
 | Tutorial steps and hints | [TutorialGuide](../RoadOfTheOldKing/Assets/Scripts/Tutorial/TutorialGuide.cs) |
 | Contextual HUD | [GameHud](../RoadOfTheOldKing/Assets/Scripts/UI/GameHud.cs) |
+| Title screen | [TitleScreen](../RoadOfTheOldKing/Assets/Scripts/UI/TitleScreen.cs) |
+| Pause and settings commands | [PauseMenuAction](../RoadOfTheOldKing/Assets/Scripts/UI/PauseMenuAction.cs) |
 | World-space UI documents | [WorldUIDocument](../RoadOfTheOldKing/Assets/Scripts/UI/WorldUIDocument.cs) |
 | Player sprite presentation | [PlayerSpriteAnimator](../RoadOfTheOldKing/Assets/Scripts/Player/PlayerSpriteAnimator.cs) |

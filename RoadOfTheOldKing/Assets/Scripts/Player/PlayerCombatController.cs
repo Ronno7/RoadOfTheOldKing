@@ -1,10 +1,10 @@
 using System;
-using TheLostShrine.Combat;
-using TheLostShrine.Input;
-using TheLostShrine.Weapons;
+using RoadOfTheOldKing.Combat;
+using RoadOfTheOldKing.Input;
+using RoadOfTheOldKing.Weapons;
 using UnityEngine;
 
-namespace TheLostShrine.Player
+namespace RoadOfTheOldKing.Player
 {
     [DisallowMultipleComponent, RequireComponent(typeof(PlayerStamina))]
     public sealed class PlayerCombatController : MonoBehaviour
@@ -12,6 +12,8 @@ namespace TheLostShrine.Player
         [SerializeField] private MonoBehaviour inputSource;
         [SerializeField] private Camera aimCamera;
         [SerializeField] private bool recallUnlocked;
+        [Tooltip("The axe this player carries once owned. Taking the axe is a one-time pickup; after that each scene's player spawns its own copy on load.")]
+        [SerializeField] private AxeWeapon ownedAxePrefab;
         [SerializeField, Min(0f)] private float lightInputBuffer = 0.25f;
         [Tooltip("Charge share after which the charged cleave has hyper-armor (hits still hurt but cannot stagger), through the spin.")]
         [SerializeField, Range(0f, 1f)] private float heavyArmorCharge = 0.5f;
@@ -166,6 +168,18 @@ namespace TheLostShrine.Player
             Weapon.SetAim(AimDirection);
             WeaponEquipped?.Invoke();
             return true;
+        }
+
+        // Spawns and equips the player's own axe (owned saves, scene arrivals). No-op when already armed.
+        public bool EquipOwnedAxe()
+        {
+            if (Weapon != null) return true;
+            if (ownedAxePrefab == null) return false;
+            var axe = Instantiate(ownedAxePrefab, transform.position, Quaternion.identity);
+            axe.name = ownedAxePrefab.name;
+            if (TryEquip(axe)) return true;
+            Destroy(axe.gameObject);
+            return false;
         }
 
         public void UnlockRecall()

@@ -1,8 +1,8 @@
-using TheLostShrine.UI;
+using RoadOfTheOldKing.UI;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace TheLostShrine.Combat
+namespace RoadOfTheOldKing.Combat
 {
     // World-space pixel "!" (UI/AwarenessMark.uxml, sprite Art/Sprites/UI/AwarenessMark.png).
     // Detection belongs to the enemy; this only presents its transition.

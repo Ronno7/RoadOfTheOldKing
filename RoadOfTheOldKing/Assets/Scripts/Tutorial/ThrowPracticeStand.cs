@@ -1,8 +1,8 @@
 using System;
-using TheLostShrine.Combat;
+using RoadOfTheOldKing.Combat;
 using UnityEngine;
 
-namespace TheLostShrine.Tutorial
+namespace RoadOfTheOldKing.Tutorial
 {
     // Indestructible practice stand: accepts the player's weapon hits for feedback and lessons.
     [DisallowMultipleComponent, RequireComponent(typeof(Collider2D))]

@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace TheLostShrine.UI
+namespace RoadOfTheOldKing.UI
 {
     // A meter drawn as whole art pixels for world-space documents, in the corner vitals' style: a
     // notched charcoal outline, a dark track and a fill with a light top row. Length and thickness are

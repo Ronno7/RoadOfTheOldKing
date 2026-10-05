@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TheLostShrine.Player
+namespace RoadOfTheOldKing.Player
 {
     // Displays input aim only; attack commitment and hit detection stay with the weapon.
     [DisallowMultipleComponent, RequireComponent(typeof(PlayerCombatController))]

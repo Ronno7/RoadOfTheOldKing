@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TheLostShrine.Combat
+namespace RoadOfTheOldKing.Combat
 {
     // Damageable publishes accepted hits only: misses, guards and dead targets stay silent.
     [DisallowMultipleComponent, RequireComponent(typeof(Damageable))]

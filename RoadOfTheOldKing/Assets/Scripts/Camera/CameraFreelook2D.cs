@@ -1,8 +1,8 @@
-using TheLostShrine.Input;
-using TheLostShrine.Player;
+using RoadOfTheOldKing.Input;
+using RoadOfTheOldKing.Player;
 using UnityEngine;
 
-namespace TheLostShrine.Cameras
+namespace RoadOfTheOldKing.Cameras
 {
     // Supplies a bounded offset; CameraFollow2D remains the sole position writer.
     [DisallowMultipleComponent, RequireComponent(typeof(Camera), typeof(CameraLookInput))]

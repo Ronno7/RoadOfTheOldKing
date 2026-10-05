@@ -1,9 +1,9 @@
-using TheLostShrine.Cameras;
-using TheLostShrine.Combat;
-using TheLostShrine.UI;
+using RoadOfTheOldKing.Cameras;
+using RoadOfTheOldKing.Combat;
+using RoadOfTheOldKing.UI;
 using UnityEngine;
 
-namespace TheLostShrine.Player
+namespace RoadOfTheOldKing.Player
 {
     // Presentation only: makes taking a hit unmistakable. A red flash on the sprite, a tiny global
     // hit-stop, a capped camera kick along the blow, then the classic 16-bit blink for the rest of the

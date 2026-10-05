@@ -1,15 +1,15 @@
 // Edit or Play Mode. Pure action timing: no scene, input, assets or saves are mutated.
 var results = new System.Collections.Generic.List<string>();
 System.Action<bool,string> check = (ok,name) => results.Add((ok ? "PASS " : "FAIL ") + name);
-var timing = new TheLostShrine.Weapons.ThrowActionTiming();
-var clock = new TheLostShrine.Weapons.ThrowActionClock();
+var timing = new RoadOfTheOldKing.Weapons.ThrowActionTiming();
+var clock = new RoadOfTheOldKing.Weapons.ThrowActionClock();
 float flight;
 check(clock.Begin(timing) && clock.Commit(), "Quick tap commits during preparation");
 check(!clock.Advance(.119f, out flight) && clock.CelIndex == 4, "No physical axe before 120 ms");
 check(clock.Advance(.001f, out flight) && clock.CelIndex == 5 && flight < .00001f, "Launch at 120 ms, on cel 6");
 check(!clock.Advance(.5f, out flight) && !clock.IsActive && clock.HasLaunched, "Release marker fires once through recovery");
 clock.Begin(timing); clock.Advance(.08f, out flight);
-check(clock.Phase == TheLostShrine.Weapons.ThrowPhase.Aim && clock.CelIndex == 2, "80 ms preparation enters two-cel aim loop");
+check(clock.Phase == RoadOfTheOldKing.Weapons.ThrowPhase.Aim && clock.CelIndex == 2, "80 ms preparation enters two-cel aim loop");
 check(!clock.Advance(600f, out flight) && clock.CanCancelAim && !clock.HasLaunched, "Held aim never launches itself");
 clock.Commit();
 check(!clock.Advance(.039f, out flight) && clock.Advance(.001f, out flight), "Held throw launches 40 ms after key-up");
@@ -34,10 +34,10 @@ clock.Cancel(); clock.Begin(timing);
 check(!clock.Advance(float.NaN, out flight) && !clock.Advance(float.PositiveInfinity, out flight) &&
     !clock.Advance(-1f, out flight) && clock.CelIndex == 0, "Invalid time cannot corrupt the action");
 clock.Cancel();
-check(!clock.Begin(new TheLostShrine.Weapons.ThrowActionTiming { preparation = new float[0] }) &&
-    !clock.Begin(new TheLostShrine.Weapons.ThrowActionTiming { launchCel = 4 }), "Invalid exposure/marker data rejected");
+check(!clock.Begin(new RoadOfTheOldKing.Weapons.ThrowActionTiming { preparation = new float[0] }) &&
+    !clock.Begin(new RoadOfTheOldKing.Weapons.ThrowActionTiming { launchCel = 4 }), "Invalid exposure/marker data rejected");
 foreach (string path in new[]{"Assets/Settings/Weapons/PrototypeAxeSettings.asset", "Assets/Settings/Weapons/AxeSettings.asset"}) {
-    var settings = AssetDatabase.LoadAssetAtPath<TheLostShrine.Weapons.AxeSettings>(path);
+    var settings = AssetDatabase.LoadAssetAtPath<RoadOfTheOldKing.Weapons.AxeSettings>(path);
     check(clock.Begin(settings.throwAction), "Serialized timing loads: " + settings.name); clock.Cancel();
 }
 return string.Join("\n", results.ToArray());
