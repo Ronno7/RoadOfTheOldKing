@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using TheLostShrine.Combat;
-using TheLostShrine.Player;
-using TheLostShrine.Progression;
+using RoadOfTheOldKing.Combat;
+using RoadOfTheOldKing.Player;
+using RoadOfTheOldKing.Progression;
 using UnityEngine;
 
-namespace TheLostShrine.World
+namespace RoadOfTheOldKing.World
 {
     // Optional event sources unlock a reward. Without a source it is an exploration pickup. A defeat
     // source can bring a pack (alsoDefeat): the reward unlocks once all of them are down, where the last fell.
@@ -23,8 +23,8 @@ namespace TheLostShrine.World
         public bool IsAvailable { get; private set; }
         private readonly List<(Damageable source, Action handler)> defeatHandlers = new List<(Damageable, Action)>();
         private Damageable lastFallen;
-        public bool IsCollected => CheckpointSession.Instance != null &&
-            CheckpointSession.Instance.Progress.Has("shard/collected/" + rewardId);
+        public bool IsCollected => GameSession.Instance != null &&
+            GameSession.Instance.Progress.Has("shard/collected/" + rewardId);
 
         protected override void OnEnable()
         {
@@ -67,19 +67,19 @@ namespace TheLostShrine.World
             if (lastFallen != null) transform.position = lastFallen.transform.position;
             RefreshVisual();
             if (awardImmediately) Collect();
-            else CheckpointSession.Instance?.SaveProgress();
+            else GameSession.Instance?.SaveProgress();
         }
 
         public override string Prompt => "Take Sun Shard";
         public override bool CanCollect(PlayerHealth player) => base.CanCollect(player) &&
             IsAvailable && !IsCollected && !awardImmediately && !string.IsNullOrEmpty(rewardId) &&
-            CheckpointSession.Instance != null;
+            GameSession.Instance != null;
         public override bool TryCollect(PlayerHealth player) => CanCollect(player) && Collect();
 
         private bool Collect()
         {
             if (!IsAvailable || IsCollected || string.IsNullOrEmpty(rewardId) ||
-                CheckpointSession.Instance == null || !CheckpointSession.Instance.TryCollectShard(rewardId))
+                GameSession.Instance == null || !GameSession.Instance.Rewards.TryCollectShard(rewardId))
                 return false;
             RefreshVisual();
             return true;

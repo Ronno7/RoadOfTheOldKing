@@ -2,16 +2,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TheLostShrine.Cameras;
-using TheLostShrine.Combat;
-using TheLostShrine.Player;
-using TheLostShrine.Progression;
-using TheLostShrine.Weapons;
-using TheLostShrine.World;
+using RoadOfTheOldKing.Cameras;
+using RoadOfTheOldKing.Combat;
+using RoadOfTheOldKing.Player;
+using RoadOfTheOldKing.Progression;
+using RoadOfTheOldKing.Weapons;
+using RoadOfTheOldKing.World;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace TheLostShrine.UI
+namespace RoadOfTheOldKing.UI
 {
     // Shared by the F4 panel and editor automation. Never edits prefabs/settings assets.
     // Commands use real gameplay events; enemy defeats can therefore award/save milestones.
@@ -253,10 +253,10 @@ namespace TheLostShrine.UI
         }
         public bool Respawn()
         {
-            if (CheckpointSession.Instance == null) return Report(false, "No checkpoint session in this scene.");
+            if (GameSession.Instance == null) return Report(false, "No checkpoint session in this scene.");
             DevToolsPanel.Instance?.Close();
             RestoreOverrides();
-            CheckpointSession.Instance.RestartFromCheckpoint();
+            GameSession.Instance.Checkpoints.RestartFromCheckpoint();
             return Report(true, "Reloading at checkpoint; permanent progress kept.");
         }
         public bool ResetOverrides()

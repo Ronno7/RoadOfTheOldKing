@@ -1,22 +1,22 @@
-// Run in fresh PrototypeLoop Play Mode with an empty TheLostShrine.Verification.*
+// Run in fresh PrototypeLoop Play Mode with an empty RoadOfTheOldKing.Verification.*
 // checkpoint saveKey. Exercises real input, physics, damage and bonfire components.
 // Stop Play Mode afterward; the final assertion defeats the player.
 var results=new System.Collections.Generic.List<string>();
 System.Action<bool,string> check=(ok,name)=>results.Add((ok?"PASS ":"FAIL ")+name);
 System.Func<float,float,bool> near=(a,b)=>Mathf.Abs(a-b)<.03f;
 var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
-var session=TheLostShrine.Progression.CheckpointSession.Instance;
-if(!((string)session.GetType().GetField("saveKey",flags).GetValue(session)).StartsWith("TheLostShrine.Verification."))throw new System.Exception("Use an isolated save slot.");
-var player=GameObject.Find("Player").GetComponent<TheLostShrine.Player.PlayerCombatController>();
-var movement=player.GetComponent<TheLostShrine.Player.PlayerMovement>();
-var dash=player.GetComponent<TheLostShrine.Player.PlayerDash>();
-var stamina=player.GetComponent<TheLostShrine.Player.PlayerStamina>();
-var life=player.GetComponent<TheLostShrine.Player.PlayerHealth>();
-var reaction=player.GetComponent<TheLostShrine.Combat.HitReaction>();
+var session=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(!((string)session.GetType().GetField("saveKey",flags).GetValue(session)).StartsWith("RoadOfTheOldKing.Verification."))throw new System.Exception("Use an isolated save slot.");
+var player=GameObject.Find("Player").GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();
+var movement=player.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>();
+var dash=player.GetComponent<RoadOfTheOldKing.Player.PlayerDash>();
+var stamina=player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>();
+var life=player.GetComponent<RoadOfTheOldKing.Player.PlayerHealth>();
+var reaction=player.GetComponent<RoadOfTheOldKing.Combat.HitReaction>();
 var body=player.GetComponent<Rigidbody2D>();
-var input=player.GetComponent<TheLostShrine.Input.PlayerMovementInput>();
-var weapon=UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Weapons.AxeWeapon>();
-var source=UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Combat.SimpleMeleeEnemy>().gameObject;
+var input=player.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();
+var weapon=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Weapons.AxeWeapon>();
+var source=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>().gameObject;
 var inputUpdate=input.GetType().GetMethod("Update",flags);
 var moveUpdate=movement.GetType().GetMethod("FixedUpdate",flags);
 var weaponSim=weapon.GetType().GetMethod("Simulate",flags);
@@ -37,7 +37,7 @@ System.Action step=()=>{moveUpdate.Invoke(movement,null);Physics2D.Simulate(Time
 System.Action<float> advance=seconds=>{for(int i=0;i<Mathf.CeilToInt(seconds/Time.fixedDeltaTime);i++)step();};
 System.Action<Vector2> move=p=>{body.position=p;player.transform.position=p;body.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();};
 System.Action reset=()=>{weapon.CancelAction();life.HealAtRest();keys(new UnityEngine.InputSystem.Key[0]);move(origin);moveUpdate.Invoke(movement,null);};
-System.Func<bool> hit=()=>life.Health.ReceiveHit(new TheLostShrine.Combat.CombatHit(source,TheLostShrine.Combat.AttackKind.EnemyMelee,20,Vector2.left,2,.2f));
+System.Func<bool> hit=()=>life.Health.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(source,RoadOfTheOldKing.Combat.AttackKind.EnemyMelee,20,Vector2.left,2,.2f));
 try {
     Physics2D.simulationMode=SimulationMode2D.Script;input.GetType().GetField("hasFocus",flags).SetValue(input,true);
     input.GetType().GetField("paused",flags).SetValue(input,false);move(origin);
@@ -114,13 +114,13 @@ try {
     input.GetType().GetMethod("OnApplicationFocus",flags).Invoke(input,new object[]{true});
     reset();dash.TryStart(Vector2.right);input.enabled=false;moveUpdate.Invoke(movement,null);
     check(!dash.IsDashing && !dash.HasDodgeProtection,"Disabling controls cancels dash");input.enabled=true;
-    reset();var camp=session.Fires[0];move(camp.SpawnPosition);dash.TryStart(Vector2.up);
-    var interaction=player.GetComponent<TheLostShrine.Player.PlayerBonfireInteraction>();
+    reset();var camp=session.Checkpoints.Fires[0];move(camp.SpawnPosition);dash.TryStart(Vector2.up);
+    var interaction=player.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>();
     check(interaction.Open(camp) && !dash.IsDashing && dash.CooldownRemaining==0 && stamina.Current==100,"Bonfire rest cancels dash, resets cooldown and restores stamina");
     keys(new[]{UnityEngine.InputSystem.Key.Space});moveUpdate.Invoke(movement,null);
     check(!dash.IsDashing && stamina.Current==100,"Space cannot dash while the bonfire menu locks input");interaction.Close();
     reset();dash.TryStart(Vector2.right);dash.Tick(.12f);
-    life.Health.ReceiveHit(new TheLostShrine.Combat.CombatHit(source,TheLostShrine.Combat.AttackKind.EnemyMelee,1000,Vector2.down,0,0));
+    life.Health.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(source,RoadOfTheOldKing.Combat.AttackKind.EnemyMelee,1000,Vector2.down,0,0));
     check(!life.IsAlive && !movement.enabled && !dash.IsDashing && !dash.HasDodgeProtection,"Defeat immediately ends dash and dodge protection");
     check(!dash.TryStart(Vector2.right),"A defeated player cannot start another dash");
 } finally {

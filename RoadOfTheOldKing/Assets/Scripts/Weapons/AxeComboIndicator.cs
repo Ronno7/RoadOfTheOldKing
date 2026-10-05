@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TheLostShrine.Weapons
+namespace RoadOfTheOldKing.Weapons
 {
     // A view of combo state; it does not control attack timing or progression.
     [DisallowMultipleComponent, RequireComponent(typeof(AxeWeapon))]

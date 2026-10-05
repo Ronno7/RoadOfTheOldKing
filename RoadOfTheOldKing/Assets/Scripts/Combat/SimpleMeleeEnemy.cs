@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using TheLostShrine.Player;
-using TheLostShrine.Progression;
+using RoadOfTheOldKing.Player;
+using RoadOfTheOldKing.Progression;
 using UnityEngine;
 
-namespace TheLostShrine.Combat
+namespace RoadOfTheOldKing.Combat
 {
     public enum MeleeEnemyState { Idle, Pursuing, Windup, Striking, Recovering, Returning, Defeated }
 

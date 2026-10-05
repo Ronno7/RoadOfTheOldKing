@@ -1,9 +1,9 @@
-using TheLostShrine.Combat;
-using TheLostShrine.Input;
-using TheLostShrine.Progression;
+using RoadOfTheOldKing.Combat;
+using RoadOfTheOldKing.Input;
+using RoadOfTheOldKing.Progression;
 using UnityEngine;
 
-namespace TheLostShrine.Player
+namespace RoadOfTheOldKing.Player
 {
     // Player-specific damage protection and death response reuse the shared health model.
     [DisallowMultipleComponent, RequireComponent(typeof(Damageable), typeof(HitReaction))]

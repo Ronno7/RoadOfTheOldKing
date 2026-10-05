@@ -179,7 +179,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6b451e47c64e54741ae1b9809145b43d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Input.PlayerCombatInput
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Input.PlayerCombatInput
 --- !u!114 &3612271848531798894
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -191,10 +191,11 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 511025610d771e048af5bfdc734b16fe, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerCombatController
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Player.PlayerCombatController
   inputSource: {fileID: 9215421230755382488}
   aimCamera: {fileID: 0}
   recallUnlocked: 0
+  ownedAxePrefab: {fileID: 7539517240057443122, guid: 96841da30eeab44438912f0f4f453d59, type: 3}
   lightInputBuffer: 0.25
   heavyArmorCharge: 0.5
 --- !u!114 &4217139744019354931
@@ -208,7 +209,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Damageable
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.Damageable
   maxHealth: 100
   protectionSource: {fileID: 7425349288622817033}
 --- !u!114 &4535813709327544358
@@ -222,7 +223,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0a3d61830c75a1945a2ae1374af9f9a1, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.HitReaction
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.HitReaction
   knockbackMultiplier: 1
   maxKnockbackImpulse: 0
   replaceMovementOnHit: 0
@@ -242,7 +243,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 77ed5e44f82138e47a2ffd319bf6a318, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerHealth
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Player.PlayerHealth
   invulnerabilityDuration: 0.8
 --- !u!114 &405733286098808294
 MonoBehaviour:
@@ -255,7 +256,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d592fa17525fa6d448b81267a9c0bdc8, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerBonfireInteraction
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Player.PlayerBonfireInteraction
 --- !u!114 &5496248981985283440
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -267,7 +268,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3306b6c8e8fa83747924e875fba4ea34, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerStamina
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Player.PlayerStamina
   maximum: 100
   recoveryPerSecond: 40
   recoveryDelay: 0.6
@@ -283,7 +284,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9bc50151568b4c840869471f5dd327e7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerDash
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Player.PlayerDash
   distance: 3.2
   duration: 0.36
   staminaCost: 18
@@ -300,7 +301,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2f454cae501b4ae4863e023da48c277e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerAimIndicator
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Player.PlayerAimIndicator
   body: {fileID: 1009}
   centerOffset: {x: 0, y: 0.75}
   orbitRadius: 1.2
@@ -319,7 +320,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e94254d6cd3f4cc4085f0d506cde1836, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerSpriteAnimator
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Player.PlayerSpriteAnimator
   body: {fileID: 1009}
   animations: {fileID: 11400000, guid: 1ec4469e34c15a04fbd61c720b2d4940, type: 2}
   walkCycleLength: 2
@@ -336,7 +337,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7cdde0e09131fdd49b81d7811f10da8d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerWeaponCarry
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Player.PlayerWeaponCarry
   body: {fileID: 1009}
   gripFold: {fileID: 21300000, guid: 620ae29e22a384141b3035c1e72a6165, type: 3}
   holds:
@@ -383,7 +384,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6079b8eb467835d488b5c1fa6ef9ab30, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.UI.PauseMenuView
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.UI.PauseMenuView
   layout: {fileID: 9197481963319205126, guid: 3d1562305ff0ef84d9e1e137deb92e09, type: 3}
   panelSettings: {fileID: 11400000, guid: e8d13b02f4a53d441b064a4b1cf6e2bf, type: 2}
 --- !u!114 &1582186952523396501
@@ -397,7 +398,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a9f11206f951a4846ba78628444fab4c, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.UI.PauseMenuInput
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.UI.PauseMenuInput
 --- !u!114 &9180351796924429262
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -409,7 +410,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5d504a6ce1ec4744fa55ad446f758603, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.UI.PauseMenuController
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.UI.PauseMenuController
 --- !u!114 &8033240405425768703
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -421,7 +422,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2aa7a6b12df333d48aad5bbf5af71772, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerSprintDust
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Player.PlayerSprintDust
   body: {fileID: 1009}
   colors:
   - {r: 0.8745098, g: 0.7607843, b: 0.5686275, a: 1}
@@ -446,7 +447,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4dde2f1ab77bb5449cdeebb72c42ce8, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.UI.GameHud
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.UI.GameHud
   layout: {fileID: 9197481963319205126, guid: b3a1d266480df244f82049975a84cfc6, type: 3}
   panelSettings: {fileID: 11400000, guid: 23023f83a02a11e498eeeed8417348a0, type: 2}
   worldPanel: {fileID: 11400000, guid: 18015c3b74002454fab6d92829abd2aa, type: 2}
@@ -475,7 +476,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7b987282df7b79247b57f6d8f9501030, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerHitFeedback
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Player.PlayerHitFeedback
   body: {fileID: 1009}
   flashColor: {r: 1, g: 0.32, b: 0.26, a: 1}
   healFlashColor: {r: 1, g: 0.84, b: 0.45, a: 1}
@@ -496,7 +497,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d911b09e4c130014fac645b7cd537e1f, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerFlask
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Player.PlayerFlask
   maxCharges: 3
   healAmount: 40
   drinkDuration: 0.9
@@ -514,7 +515,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4b6f37d7ec8bebd4d93568a0a547659d, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerControlLocks
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Player.PlayerControlLocks
 --- !u!114 &637550051732109431
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -526,9 +527,11 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 15cd829526ac15148ab847dd67288963, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.UI.BonfireMenu
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.UI.BonfireMenu
   layout: {fileID: 9197481963319205126, guid: 60a04a45aad05b74485a2e26af5268f1, type: 3}
   panelSettings: {fileID: 11400000, guid: e8d13b02f4a53d441b064a4b1cf6e2bf, type: 2}
+  closeUpSize: 3.5
+  heroOnScreen: {x: 0.33333334, y: 0.45}
 --- !u!114 &8525511693263056149
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -540,7 +543,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 240e170ea1c88d04bae314ea779dda85, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.UI.DefeatScreen
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.UI.DefeatScreen
   layout: {fileID: 9197481963319205126, guid: 21187f149d5dcc74fb103cca1e6ea226, type: 3}
   panelSettings: {fileID: 11400000, guid: e8d13b02f4a53d441b064a4b1cf6e2bf, type: 2}
   showDelay: 0.9

@@ -1,16 +1,17 @@
 using System.Collections.Generic;
-using TheLostShrine.Cameras;
-using TheLostShrine.Player;
-using TheLostShrine.Progression;
-using TheLostShrine.Weapons;
-using TheLostShrine.World;
+using System.Linq;
+using RoadOfTheOldKing.Cameras;
+using RoadOfTheOldKing.Player;
+using RoadOfTheOldKing.Progression;
+using RoadOfTheOldKing.Weapons;
+using RoadOfTheOldKing.World;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace TheLostShrine.UI
+namespace RoadOfTheOldKing.UI
 {
     // The bonfire's menu (UI Toolkit). Presentation only: it follows PlayerBonfireInteraction's
-    // open/close events and calls CheckpointSession for resting, travel and upgrades; the
+    // open/close events and calls GameSession for resting, travel and upgrades; the
     // session validates everything. Pages: main, upgrade choices and purchase confirmation. Escape steps back a page and closes from the main page.
     [DisallowMultipleComponent, RequireComponent(typeof(PlayerBonfireInteraction))]
     public sealed class BonfireMenu : MonoBehaviour, IModalMenu
@@ -119,7 +120,7 @@ namespace TheLostShrine.UI
 
         private void Show(Page next)
         {
-            var session = CheckpointSession.Instance;
+            var session = GameSession.Instance;
             if (session == null || fire == null) { interaction.Close(); return; }
             page = next;
             shards.text = "Sun Shards " + session.Progress.sunShards;
@@ -129,16 +130,19 @@ namespace TheLostShrine.UI
                 case Page.Main:
                     heading.text = fire.DisplayName.ToUpperInvariant();
                     status.text = session.Status;
-                    items.Add(new PauseMenuAction("Rest", "Heal, refill flasks, save.", () => { session.Rest(fire); Show(Page.Main); }));
+                    items.Add(new PauseMenuAction("Rest", "Heal, refill flasks, save.", () => { session.Checkpoints.Rest(fire); Show(Page.Main); }));
                     items.Add(new PauseMenuAction("Upgrades", "View the next choices.", () => Show(Page.Upgrades)));
                     bool travel = false;
-                    foreach (var destination in session.Fires)
+                    // Every discovered fire, including those in other scenes; names refresh when rested at.
+                    foreach (var destination in session.Progress.fires.OrderBy(f => f.displayOrder))
                     {
-                        if (destination == null || destination == fire || !destination.IsDiscovered) continue;
+                        if (destination.id == fire.Id) continue;
                         travel = true;
                         var target = destination;
-                        items.Add(new PauseMenuAction(target.DisplayName, "Travel here.",
-                            () => { if (session.Travel(target, fire)) interaction.Close(); }));
+                        string name = !string.IsNullOrEmpty(target.displayName) ? target.displayName :
+                            session.Checkpoints.Fires.FirstOrDefault(f => f.Id == target.id)?.DisplayName ?? target.id;
+                        items.Add(new PauseMenuAction(name, "Travel here.",
+                            () => { if (session.Checkpoints.Travel(target, fire)) interaction.Close(); }));
                     }
                     if (!travel) items.Add(new PauseMenuAction("Travel", "Light another fire first.", null, false));
                     items.Add(new PauseMenuAction("Leave", "Back to the road.", interaction.Close));
@@ -146,11 +150,11 @@ namespace TheLostShrine.UI
 
                 case Page.Upgrades:
                     heading.text = "UPGRADES";
-                    var tier = session.Upgrades.NextTier;
+                    var tier = session.Rewards.Upgrades.NextTier;
                     if (tier == null)
                     {
                         status.text = "All chosen.";
-                        foreach (var chosen in session.Upgrades.Selected)
+                        foreach (var chosen in session.Rewards.Upgrades.Selected)
                             items.Add(new PauseMenuAction(chosen.displayName, chosen.description, null, false));
                     }
                     else
@@ -168,7 +172,7 @@ namespace TheLostShrine.UI
                     break;
 
                 case Page.Confirm:
-                    var current = session.Upgrades.NextTier;
+                    var current = session.Rewards.Upgrades.NextTier;
                     heading.text = pending != null ? pending.displayName.ToUpperInvariant() : "UPGRADES";
                     status.text = current == null || pending == null ? "" :
                         (!fire.AllowsUpgrades ? "Purchase at an upgrade bonfire." :
@@ -178,7 +182,7 @@ namespace TheLostShrine.UI
                     items.Add(new PauseMenuAction("Back", "Keep your shards.", () => Show(Page.Upgrades)));
                     if (current != null && pending != null)
                         items.Add(new PauseMenuAction("Buy (" + current.shardCost + ")", pending.description,
-                            () => { session.TryPurchaseUpgrade(fire, pending); pending = null; Show(Page.Upgrades); status.text = session.Status; },
+                            () => { session.Rewards.TryPurchaseUpgrade(fire, pending); pending = null; Show(Page.Upgrades); status.text = session.Status; },
                             fire.AllowsUpgrades && session.Progress.sunShards >= current.shardCost));
                     break;
 

@@ -1,5 +1,5 @@
-// Empty Play Mode scene, no CheckpointSession. Runs actual enemy simulation and wolf presenter.
-if (!Application.isPlaying || UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Progression.CheckpointSession>() != null)
+// Empty Play Mode scene, no GameSession. Runs actual enemy simulation and wolf presenter.
+if (!Application.isPlaying || UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Progression.GameSession>() != null)
     throw new Exception("Use an isolated Play Mode scene without a checkpoint session.");
 var results=new System.Collections.Generic.List<string>();
 Action<bool,string> check=(ok,label)=>results.Add((ok?"PASS ":"FAIL ")+label);
@@ -11,19 +11,19 @@ try {
     Time.timeScale=1;Physics2D.simulationMode=SimulationMode2D.Script;
     var player=spawn("Assets/Prefabs/Player/Player.prefab");
     var root=spawn("Assets/Prefabs/Combat/Wolf.prefab");
-    var enemy=root.GetComponent<TheLostShrine.Combat.SimpleMeleeEnemy>();
-    var health=root.GetComponent<TheLostShrine.Combat.Damageable>();
-    var view=root.GetComponent<TheLostShrine.Combat.WolfView>();
+    var enemy=root.GetComponent<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>();
+    var health=root.GetComponent<RoadOfTheOldKing.Combat.Damageable>();
+    var view=root.GetComponent<RoadOfTheOldKing.Combat.WolfView>();
     var data=new SerializedObject(view);
     var body=(SpriteRenderer)data.FindProperty("bodyVisual").objectReferenceValue;
     var line=(LineRenderer)data.FindProperty("attackOutline").objectReferenceValue;
-    var animations=(TheLostShrine.Combat.WolfAnimationSet)data.FindProperty("animations").objectReferenceValue;
-    enemy.GetType().GetField("target",flags).SetValue(enemy,player.GetComponent<TheLostShrine.Player.PlayerHealth>());
+    var animations=(RoadOfTheOldKing.Combat.WolfAnimationSet)data.FindProperty("animations").objectReferenceValue;
+    enemy.GetType().GetField("target",flags).SetValue(enemy,player.GetComponent<RoadOfTheOldKing.Player.PlayerHealth>());
     Action<float> tick=dt=>enemy.GetType().GetMethod("Tick",flags).Invoke(enemy,new object[]{dt});
     Action render=()=>view.GetType().GetMethod("LateUpdate",flags).Invoke(view,null);
     Action<Vector2> placeTarget=p=>{player.transform.position=p;player.GetComponent<Rigidbody2D>().position=p;Physics2D.SyncTransforms();};
     var sprites=AssetDatabase.LoadAllAssetsAtPath("Assets/Art/Sprites/Enemies/Wolf.png").OfType<Sprite>().ToArray();
-    var cue=root.GetComponent<TheLostShrine.Combat.EnemyAwarenessIndicator>();
+    var cue=root.GetComponent<RoadOfTheOldKing.Combat.EnemyAwarenessIndicator>();
     var display=(MeshRenderer)cue.GetType().GetField("display",flags).GetValue(cue);
     Action<float> present=dt=>cue.GetType().GetMethod("Present",flags).Invoke(cue,new object[]{dt});
     int detections=0;enemy.PlayerDetected+=()=>detections++;
@@ -50,11 +50,11 @@ try {
     check(display.enabled&&detections==3,"Reacquisition shows fresh cue");
     cue.enabled=false;check(!display.enabled,"Disable clears cue");cue.enabled=true;
     enemy.ResetOnRest();present(0);check(!display.enabled,"Rest clears cue");
-    player.GetComponent<TheLostShrine.Combat.Damageable>().RestoreHealth();
+    player.GetComponent<RoadOfTheOldKing.Combat.Damageable>().RestoreHealth();
     check(sprites.Length==20,"Exactly twenty production sprites");
     check(sprites.All(s=>s.rect.size==new Vector2(48,48)&&s.pivot==new Vector2(24,7.5f)&&s.pixelsPerUnit==24),"Shared native cell, pivot and scale");
     check(animations.side.move.Length==4&&animations.south.move.Length==2&&animations.north.move.Length==2,"Bounded directional gait budget");
-    check(root.GetComponent<TheLostShrine.Prototype.MeleeEnemyView>()==null,"Only the wolf presenter owns presentation");
+    check(root.GetComponent<RoadOfTheOldKing.Prototype.MeleeEnemyView>()==null,"Only the wolf presenter owns presentation");
     var native=new Texture2D(2,2);ImageConversion.LoadImage(native,System.IO.File.ReadAllBytes("Assets/Art/Sprites/Enemies/Wolf.png"));
     var pixels=native.GetPixels32();
     check(pixels.All(p=>p.a==0||p.a==255),"Native sheet has hard transparent edges");
@@ -68,7 +68,7 @@ try {
     var names=new[]{"side","side","north","south"};
     for(int i=0;i<4;i++) {
         enemy.ResetOnRest();placeTarget(directions[i]*3);tick(.02f);render();
-        check(enemy.State==TheLostShrine.Combat.MeleeEnemyState.Pursuing,"Pursuit direction "+i);
+        check(enemy.State==RoadOfTheOldKing.Combat.MeleeEnemyState.Pursuing,"Pursuit direction "+i);
         check(body.sprite.name.StartsWith(names[i])&&body.flipX==(i==1),"Directional selection/mirroring "+i);
         root.transform.position=(Vector3)(directions[i]*.5f);root.GetComponent<Rigidbody2D>().position=root.transform.position;render();
         float gait=(float)view.GetType().GetField("gait",flags).GetValue(view);
@@ -76,29 +76,29 @@ try {
         render();check((float)view.GetType().GetField("gait",flags).GetValue(view)==gait,"Stationary frames do not slide feet "+i);
     }
     enemy.ResetOnRest();placeTarget(new Vector2(1,0));tick(.02f);render();
-    check(enemy.State==TheLostShrine.Combat.MeleeEnemyState.Windup&&body.sprite==animations.side.crouch&&line.enabled,"Windup uses crouch and warning");
+    check(enemy.State==RoadOfTheOldKing.Combat.MeleeEnemyState.Windup&&body.sprite==animations.side.crouch&&line.enabled,"Windup uses crouch and warning");
     var committed=enemy.FacingDirection;placeTarget(new Vector2(0,1));tick(.1f);render();
     check(enemy.FacingDirection==committed&&body.sprite==animations.side.crouch,"Attack direction remains committed");
     placeTarget(new Vector2(1,0));tick(.6f);render();
-    check(enemy.State==TheLostShrine.Combat.MeleeEnemyState.Striking&&body.sprite==animations.side.bite,"Strike uses bite pose");
-    int hp=player.GetComponent<TheLostShrine.Combat.Damageable>().Health;tick(.02f);
-    int afterHit=player.GetComponent<TheLostShrine.Combat.Damageable>().Health;
+    check(enemy.State==RoadOfTheOldKing.Combat.MeleeEnemyState.Striking&&body.sprite==animations.side.bite,"Strike uses bite pose");
+    int hp=player.GetComponent<RoadOfTheOldKing.Combat.Damageable>().Health;tick(.02f);
+    int afterHit=player.GetComponent<RoadOfTheOldKing.Combat.Damageable>().Health;
     check(afterHit<hp,"Actual bite deals damage");tick(.02f);
-    check(player.GetComponent<TheLostShrine.Combat.Damageable>().Health==afterHit,"Bite does not repeatedly damage");
-    tick(.2f);render();check(enemy.State==TheLostShrine.Combat.MeleeEnemyState.Recovering&&!line.enabled,"Recovery removes warning");
+    check(player.GetComponent<RoadOfTheOldKing.Combat.Damageable>().Health==afterHit,"Bite does not repeatedly damage");
+    tick(.2f);render();check(enemy.State==RoadOfTheOldKing.Combat.MeleeEnemyState.Recovering&&!line.enabled,"Recovery removes warning");
     tick(.4f);render();check(body.sprite==animations.side.idle,"Recovery settles to idle from gameplay clock");
     enemy.ResetOnRest();placeTarget(new Vector2(1,0));tick(.02f);
-    health.ReceiveHit(new TheLostShrine.Combat.CombatHit(player,TheLostShrine.Combat.AttackKind.LightChop,1,Vector2.right,1f,.2f));render();
-    check(enemy.State==TheLostShrine.Combat.MeleeEnemyState.Recovering&&body.sprite==animations.side.crouch&&!line.enabled,"Stagger interrupts tell and holds reaction pose");
+    health.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.right,1f,.2f));render();
+    check(enemy.State==RoadOfTheOldKing.Combat.MeleeEnemyState.Recovering&&body.sprite==animations.side.crouch&&!line.enabled,"Stagger interrupts tell and holds reaction pose");
     int defeated=0;health.Defeated+=()=>defeated++;
     var rewardObject=new GameObject("Wolf test reward");created.Add(rewardObject);rewardObject.SetActive(false);
-    var reward=rewardObject.AddComponent<TheLostShrine.World.SunShardReward>();var rewardData=new SerializedObject(reward);
+    var reward=rewardObject.AddComponent<RoadOfTheOldKing.World.SunShardReward>();var rewardData=new SerializedObject(reward);
     rewardData.FindProperty("defeatSource").objectReferenceValue=health;rewardData.ApplyModifiedPropertiesWithoutUndo();rewardObject.SetActive(true);
-    health.ReceiveHit(new TheLostShrine.Combat.CombatHit(player,TheLostShrine.Combat.AttackKind.LightChop,999,Vector2.right,0,0));render();
-    check(enemy.State==TheLostShrine.Combat.MeleeEnemyState.Defeated&&!root.GetComponent<Collider2D>().enabled&&!line.enabled,"Defeat immediately disables combat/collision");
+    health.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.right,0,0));render();
+    check(enemy.State==RoadOfTheOldKing.Combat.MeleeEnemyState.Defeated&&!root.GetComponent<Collider2D>().enabled&&!line.enabled,"Defeat immediately disables combat/collision");
     present(0);check(!enemy.IsAware&&!display.enabled,"Defeat clears awareness cue");
     check(reward.IsAvailable,"Existing defeat reward unlocks");
-    health.ReceiveHit(new TheLostShrine.Combat.CombatHit(player,TheLostShrine.Combat.AttackKind.LightChop,999,Vector2.right,0,0));
+    health.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.right,0,0));
     check(defeated==1,"Corpse cannot repeat defeat/reward event");
     view.GetType().GetField("deathElapsed",flags).SetValue(view,.3f);render();
     check(body.sprite==animations.side.dead,"Side death settles to corpse");
@@ -107,15 +107,15 @@ try {
     check((float)view.GetType().GetField("gait",flags).GetValue(view)==0,"Rest resets gait");
     for(int i=2;i<4;i++) {
         enemy.ResetOnRest();placeTarget(directions[i]*3);tick(.02f);render();
-        health.ReceiveHit(new TheLostShrine.Combat.CombatHit(player,TheLostShrine.Combat.AttackKind.LightChop,999,Vector2.right,0,0));render();
+        health.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.right,0,0));render();
         view.GetType().GetField("deathElapsed",flags).SetValue(view,.3f);render();
         check(body.sprite.name==names[i]+"_dead","Directional corpse "+names[i]);
     }
     enemy.ResetOnRest();Time.timeScale=1;placeTarget(new Vector2(-3,0));
     var rb=root.GetComponent<Rigidbody2D>();Vector2 start=rb.position;
-    health.ReceiveHit(new TheLostShrine.Combat.CombatHit(player,TheLostShrine.Combat.AttackKind.LightChop,999,Vector2.right,5.5f,.2f));
+    health.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.right,5.5f,.2f));
     for(int s=0;s<60;s++)tick(.02f);
-    check(rb.position.x-start.x>.8f&&enemy.State==TheLostShrine.Combat.MeleeEnemyState.Defeated,"Killing blow slides the corpse");
+    check(rb.position.x-start.x>.8f&&enemy.State==RoadOfTheOldKing.Combat.MeleeEnemyState.Defeated,"Killing blow slides the corpse");
 } finally {
     foreach(var go in created)if(go!=null)UnityEngine.Object.DestroyImmediate(go);
     Physics2D.simulationMode=previousSimulation;Time.timeScale=previousSpeed;

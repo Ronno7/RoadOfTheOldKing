@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TheLostShrine.Weapons
+namespace RoadOfTheOldKing.Weapons
 {
     [CreateAssetMenu(menuName = "Road of the Old King/Axe Upgrade")]
     public sealed class AxeUpgrade : ScriptableObject

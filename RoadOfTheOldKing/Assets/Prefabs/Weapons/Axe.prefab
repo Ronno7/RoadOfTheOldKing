@@ -122,7 +122,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cca03e61f1093d142bcc6905d1856b26, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Weapons.AxeWeapon
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Weapons.AxeWeapon
   settings: {fileID: 11400000, guid: e5e4377f351124647966aab57d9d9b58, type: 2}
   pickupCollider: {fileID: 9091847844486145164}
 --- !u!114 &18138162029900521
@@ -136,7 +136,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dc6c9ed0157a8b74484c7933269873ae, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Weapons.AxePickup
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Weapons.AxePickup
 --- !u!114 &6429593735296070591
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -148,7 +148,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a8d7524cc7a271b42975cf8f5a55dafb, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Weapons.AxeView
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Weapons.AxeView
   model: {fileID: 6405656442662338582}
   blade: {fileID: 3705090958771876816}
   arc: {fileID: 6366107954269318426}
@@ -170,7 +170,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 03272256b90ab394e846a57019958880, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Weapons.AxeComboIndicator
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Weapons.AxeComboIndicator
   pips:
   - {fileID: 564658534227956463}
   - {fileID: 4286134910635360744}
@@ -186,7 +186,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 869e1b60d7334c3693b7e604038bcf31, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Weapons.AxeMeleeFeedback
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Weapons.AxeMeleeFeedback
   material: {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
   tint: {r: 0.99371064, g: 0.37810987, b: 0.4007425, a: 1}
   windupOpacity: 0.8

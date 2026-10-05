@@ -385,7 +385,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bf11d1c95d47ac24ca9980ca8aa1d435, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Breakable
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.Breakable
 --- !u!1 &42567375
 GameObject:
   m_ObjectHideFlags: 0
@@ -8901,7 +8901,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2f92a9811717eb34db63bfac7e90429f, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.World.Bonfire
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.Bonfire
 --- !u!1 &147882691
 GameObject:
   m_ObjectHideFlags: 0
@@ -10181,7 +10181,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Damageable
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.Damageable
 --- !u!1 &319886297
 GameObject:
   m_ObjectHideFlags: 0
@@ -10768,7 +10768,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bf11d1c95d47ac24ca9980ca8aa1d435, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Breakable
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.Breakable
 --- !u!1 &416996822
 GameObject:
   m_ObjectHideFlags: 0
@@ -12659,7 +12659,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Damageable
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.Damageable
 --- !u!1 &708060280
 GameObject:
   m_ObjectHideFlags: 0
@@ -13144,7 +13144,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5c82955aa2daeaa458d074d7380cbce1, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.World.PersistentBreakable
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.PersistentBreakable
   progressId: prototype/obstacle/0
 --- !u!1001 &764899843
 PrefabInstance:
@@ -53290,7 +53290,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 906b59732e7d04c4f9cdba70a9557718, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Prototype.TutorialCombatHUD
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Prototype.TutorialCombatHUD
   player: {fileID: 1569544559}
   playerHealth: {fileID: 1569544560}
   guide: {fileID: 874150797}
@@ -53322,7 +53322,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3105ed96251a08e42bdc42e8fc234be6, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Prototype.PrototypeLoopGuide
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Prototype.PrototypeLoopGuide
   player: {fileID: 1569544559}
   dummies:
   - {fileID: 315061562}
@@ -53574,7 +53574,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Damageable
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.Damageable
 --- !u!1 &941052598
 GameObject:
   m_ObjectHideFlags: 0
@@ -54673,8 +54673,11 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c1e2e35f10ff2084b82dc32b822bdeaa, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Progression.CheckpointSession
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Progression.GameSession
   saveKey: TheLostShrine.PrototypeLoop.Save.v1
+  legacySaveKeys: []
+  newGameScene: 
+  resumeCheckpointSceneOnLaunch: 1
   upgradeTiers:
   - {fileID: 11400000, guid: 4ff5f7aa093c4394d826b17ca248bd36, type: 2}
 --- !u!4 &1114514078
@@ -55987,7 +55990,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bf11d1c95d47ac24ca9980ca8aa1d435, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Breakable
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.Breakable
 --- !u!114 &1348817734
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -55999,7 +56002,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5c82955aa2daeaa458d074d7380cbce1, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.World.PersistentBreakable
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.PersistentBreakable
   progressId: prototype/obstacle/2
 --- !u!1 &1350438320
 GameObject:
@@ -56477,7 +56480,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Damageable
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.Damageable
 --- !u!1 &1408003176
 GameObject:
   m_ObjectHideFlags: 0
@@ -57845,6 +57848,10 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: 0.24
       objectReference: {fileID: 0}
+    - target: {fileID: 3612271848531798894, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
+      propertyPath: ownedAxePrefab
+      value: 
+      objectReference: {fileID: 7130423721946959012, guid: d89fc2af1e9a8d94092f45d808c39e6e, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -57865,7 +57872,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 511025610d771e048af5bfdc734b16fe, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerCombatController
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Player.PlayerCombatController
 --- !u!114 &1569544560 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7425349288622817033, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
@@ -57876,7 +57883,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 77ed5e44f82138e47a2ffd319bf6a318, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerHealth
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Player.PlayerHealth
 --- !u!1 &1592669054
 GameObject:
   m_ObjectHideFlags: 0
@@ -58690,7 +58697,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2f92a9811717eb34db63bfac7e90429f, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.World.Bonfire
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.Bonfire
 --- !u!1 &1737098346
 GameObject:
   m_ObjectHideFlags: 0
@@ -59322,7 +59329,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Damageable
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.Damageable
 --- !u!1 &1861377532
 GameObject:
   m_ObjectHideFlags: 0
@@ -60366,7 +60373,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ba8cab5154454574e91820b4f43a3d3e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.World.ThrowRecallPuzzle
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.ThrowRecallPuzzle
 --- !u!1 &1974887440
 GameObject:
   m_ObjectHideFlags: 0
@@ -61505,7 +61512,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5c82955aa2daeaa458d074d7380cbce1, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.World.PersistentBreakable
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.PersistentBreakable
   progressId: prototype/obstacle/1
 --- !u!1 &2106410340
 GameObject:

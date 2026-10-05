@@ -1,7 +1,7 @@
-using TheLostShrine.Input;
+using RoadOfTheOldKing.Input;
 using UnityEngine;
 
-namespace TheLostShrine.Player
+namespace RoadOfTheOldKing.Player
 {
     // Presentation only; reads the body's real (post-physics) velocity every physics step.
     //  Trail: specks behind the feet that grow with speed (nothing at a stroll, thick at a sprint).

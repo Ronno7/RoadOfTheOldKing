@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace TheLostShrine.Cameras
+namespace RoadOfTheOldKing.Cameras
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Camera))]
@@ -53,7 +53,7 @@ namespace TheLostShrine.Cameras
         private void Update()
         {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
-            if (TheLostShrine.UI.DevToolsPanel.CapturesInput) return;
+            if (RoadOfTheOldKing.UI.DevToolsPanel.CapturesInput) return;
 #endif
             if (!viewCamera.orthographic || !Application.isFocused || Time.deltaTime <= 0f)
                 return;

@@ -1,6 +1,6 @@
 using System;
 
-namespace TheLostShrine.Progression
+namespace RoadOfTheOldKing.Progression
 {
     // Derive health from unique reward IDs: no second saved counter can drift out of sync.
     public static class HeartFragmentProgression

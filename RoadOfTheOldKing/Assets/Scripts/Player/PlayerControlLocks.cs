@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace TheLostShrine.Player
+namespace RoadOfTheOldKing.Player
 {
     // Lease-style gameplay input lock: menus, sequences and transitions lock by owner and unlock only
     // their own lease; input reads as inactive while any owner holds one. Owners never toggle input

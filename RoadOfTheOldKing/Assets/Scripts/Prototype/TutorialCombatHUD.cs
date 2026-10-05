@@ -1,7 +1,7 @@
-using TheLostShrine.Player;
+using RoadOfTheOldKing.Player;
 using UnityEngine;
 
-namespace TheLostShrine.Prototype
+namespace RoadOfTheOldKing.Prototype
 {
     // Legacy placeholder kept for the retired PrototypeLoop: its heading, guide instruction and controls
     // legend (IMGUI). Vitals, prompts and receipts belong to GameHud; the bonfire and defeat screens are
@@ -19,7 +19,7 @@ namespace TheLostShrine.Prototype
 
         private void OnGUI()
         {
-            if (compact || player == null || Time.timeScale <= 0f || TheLostShrine.UI.MenuStack.IsAnyOpen)
+            if (compact || player == null || Time.timeScale <= 0f || RoadOfTheOldKing.UI.MenuStack.IsAnyOpen)
                 return;
             if (title == null)
             {

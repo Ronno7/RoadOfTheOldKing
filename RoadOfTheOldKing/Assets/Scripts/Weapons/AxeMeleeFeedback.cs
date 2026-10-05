@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace TheLostShrine.Weapons
+namespace RoadOfTheOldKing.Weapons
 {
     // Ground-plane combat UI, independent of the body/held-weapon animation.
     // The entire sector is live at once; the moving crescent is a motion accent.
@@ -25,7 +25,7 @@ namespace TheLostShrine.Weapons
         private Mesh mesh;
         private MeshRenderer surface;
         private Transform visual;
-        private TheLostShrine.Player.PlayerCombatController lastOwner;
+        private RoadOfTheOldKing.Player.PlayerCombatController lastOwner;
         private SpriteRenderer body;
 
         private void Awake()

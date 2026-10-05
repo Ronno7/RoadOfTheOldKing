@@ -1,8 +1,8 @@
 using System.Text;
-using TheLostShrine.Combat;
-using TheLostShrine.Player;
-using TheLostShrine.Progression;
-using TheLostShrine.Weapons;
+using RoadOfTheOldKing.Combat;
+using RoadOfTheOldKing.Player;
+using RoadOfTheOldKing.Progression;
+using RoadOfTheOldKing.Weapons;
 using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -10,7 +10,7 @@ using UnityEngine.Profiling;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
-namespace TheLostShrine.UI
+namespace RoadOfTheOldKing.UI
 {
     // F3 developer overlay: performance, player, world and save state. Installs itself in the
     // Editor, development builds and WebGL; reads, never writes, gameplay.
@@ -176,7 +176,7 @@ namespace TheLostShrine.UI
             }
 
             // Save
-            var session = CheckpointSession.Instance;
+            var session = GameSession.Instance;
             if (session != null)
             {
                 var progress = session.Progress;

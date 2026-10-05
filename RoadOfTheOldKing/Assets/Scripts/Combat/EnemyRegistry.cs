@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace TheLostShrine.Combat
+namespace RoadOfTheOldKing.Combat
 {
     // Enabled enemies, maintained by the enemies themselves, so shared systems never search the scene.
     public static class EnemyRegistry

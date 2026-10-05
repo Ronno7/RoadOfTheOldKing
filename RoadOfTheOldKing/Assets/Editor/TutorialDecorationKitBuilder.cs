@@ -9,7 +9,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.Tilemaps;
 using Object = UnityEngine.Object;
 
-namespace TheLostShrine.EditorTools
+namespace RoadOfTheOldKing.EditorTools
 {
     // Compact twelve-design kit. Approved sample pixels are copied unchanged.
     internal static class TutorialDecorationKitBuilder

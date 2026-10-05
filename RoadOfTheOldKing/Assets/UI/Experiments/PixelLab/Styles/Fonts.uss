@@ -1,0 +1,9 @@
+/* EXPERIMENT: PixelLab heading fonts (07), each at the size where one font pixel = one reference px.
+   RotOK Heading 16 (16 px/em) on the bonfire heading; RotOK Title 32 (32 px/em, adopted for the defeat and title headings) on the
+   pause heading. Body text stays RotOK Pixel (these fonts lack arrows and the middle dot). */
+#bonfire-panel .menu-heading {
+    -unity-font-definition: url("project://database/Assets/UI/Experiments/PixelLab/07%20Fonts/RotOKHeading16.asset"); font-size: 16px;
+}
+#pause-panel .menu-heading {
+    -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKTitle32.asset"); font-size: 32px;
+}

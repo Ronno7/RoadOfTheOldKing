@@ -1,5 +1,5 @@
 // Empty Play Mode start scene; no progression session. Virtual input devices are removed afterward.
-if (!Application.isPlaying || UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Progression.CheckpointSession>() != null)
+if (!Application.isPlaying || UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Progression.GameSession>() != null)
     throw new Exception("Use an empty Play Mode scene without a checkpoint session.");
 var results=new System.Collections.Generic.List<string>();
 Action<bool,string> check=(ok,label)=>results.Add((ok?"PASS ":"FAIL ")+label);
@@ -14,11 +14,11 @@ try {
     Time.timeScale=1;
     var player=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Player/Player.prefab"));created.Add(player);
     var cameraObject=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Cameras/FollowCamera.prefab"));created.Add(cameraObject);
-    var follow=cameraObject.GetComponent<TheLostShrine.Cameras.CameraFollow2D>();
-    var look=cameraObject.GetComponent<TheLostShrine.Cameras.CameraFreelook2D>();
-    var adapter=cameraObject.GetComponent<TheLostShrine.Input.CameraLookInput>();
+    var follow=cameraObject.GetComponent<RoadOfTheOldKing.Cameras.CameraFollow2D>();
+    var look=cameraObject.GetComponent<RoadOfTheOldKing.Cameras.CameraFreelook2D>();
+    var adapter=cameraObject.GetComponent<RoadOfTheOldKing.Input.CameraLookInput>();
     var camera=cameraObject.GetComponent<Camera>();
-    var movement=player.GetComponent<TheLostShrine.Input.PlayerMovementInput>();
+    var movement=player.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();
     movement.GetType().GetField("hasFocus",flags).SetValue(movement,true);
     follow.SetTarget(player.transform);
     Vector2 center=camera.pixelRect.center;
@@ -59,13 +59,13 @@ try {
     look.enabled=false;tick();check(!look.IsLooking&&look.LookOffset==Vector2.zero,"Disabling freelook clears its offset");look.enabled=true;
     for(int i=0;i<4;i++) {
         float size=i%2==0?3:8;float aspect=i<2?4f/3f:21f/9f;
-        var delta=TheLostShrine.Cameras.CameraFreelook2D.PointerOffset(new Vector2(5000,5000),new Rect(100,50,1200,800),size,aspect,3);
+        var delta=RoadOfTheOldKing.Cameras.CameraFreelook2D.PointerOffset(new Vector2(5000,5000),new Rect(100,50,1200,800),size,aspect,3);
         check(Mathf.Abs(delta.magnitude-3)<.001f,"Zoom/aspect combination "+i+" obeys world-space limit");
     }
-    check(TheLostShrine.Cameras.CameraFreelook2D.PointerOffset(new Vector2(700,450),new Rect(100,50,1200,800),5,1.5f,3)==Vector2.zero,"Offset viewport center maps to zero");
-    check(TheLostShrine.Cameras.CameraFreelook2D.PointerOffset(Vector2.one,new Rect(),5,1,3)==Vector2.zero,"Empty viewport is safe");
-    var standalone=new GameObject("Legacy standalone camera");created.Add(standalone);standalone.AddComponent<Camera>();standalone.AddComponent<TheLostShrine.Cameras.CameraFollow2D>();
-    check(standalone.GetComponent<TheLostShrine.Cameras.CameraFreelook2D>()!=null&&standalone.GetComponent<TheLostShrine.Input.CameraLookInput>()!=null,"Legacy scene cameras compose the feature automatically");
+    check(RoadOfTheOldKing.Cameras.CameraFreelook2D.PointerOffset(new Vector2(700,450),new Rect(100,50,1200,800),5,1.5f,3)==Vector2.zero,"Offset viewport center maps to zero");
+    check(RoadOfTheOldKing.Cameras.CameraFreelook2D.PointerOffset(Vector2.one,new Rect(),5,1,3)==Vector2.zero,"Empty viewport is safe");
+    var standalone=new GameObject("Legacy standalone camera");created.Add(standalone);standalone.AddComponent<Camera>();standalone.AddComponent<RoadOfTheOldKing.Cameras.CameraFollow2D>();
+    check(standalone.GetComponent<RoadOfTheOldKing.Cameras.CameraFreelook2D>()!=null&&standalone.GetComponent<RoadOfTheOldKing.Input.CameraLookInput>()!=null,"Legacy scene cameras compose the feature automatically");
     // Right Alt is deliberately not bound.
     input(false,center);tick();UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.RightAlt));UnityEngine.InputSystem.InputSystem.Update();tick();
     check(!look.IsLooking,"Right Alt does not activate freelook");

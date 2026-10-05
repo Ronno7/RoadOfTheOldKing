@@ -1,8 +1,8 @@
-using TheLostShrine.Input;
-using TheLostShrine.Combat;
+using RoadOfTheOldKing.Input;
+using RoadOfTheOldKing.Combat;
 using UnityEngine;
 
-namespace TheLostShrine.Player
+namespace RoadOfTheOldKing.Player
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D))]

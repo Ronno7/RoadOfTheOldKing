@@ -1,21 +1,21 @@
-// Run in Tutorial Play Mode with a unique TheLostShrine.Verification.* save key.
+// Run in Tutorial Play Mode with a unique RoadOfTheOldKing.Verification.* save key.
 // Mutates the test player's resources/position and defeats/resets real enemies. Never use a normal slot.
 // Covers the shared commands and panel lifecycle. Reload and real input checks run separately.
 if (!Application.isPlaying) throw new System.Exception("Enter Play Mode with an isolated save first.");
-var session = TheLostShrine.Progression.CheckpointSession.Instance;
-if (session == null || !new SerializedObject(session).FindProperty("saveKey").stringValue.StartsWith("TheLostShrine.Verification."))
+var session = RoadOfTheOldKing.Progression.GameSession.Instance;
+if (session == null || !new SerializedObject(session).FindProperty("saveKey").stringValue.StartsWith("RoadOfTheOldKing.Verification."))
     throw new System.Exception("Use a verification save key.");
-var c = TheLostShrine.UI.DevRuntimeCommands.Instance;
-var panel = TheLostShrine.UI.DevToolsPanel.Instance;
+var c = RoadOfTheOldKing.UI.DevRuntimeCommands.Instance;
+var panel = RoadOfTheOldKing.UI.DevToolsPanel.Instance;
 var results = new System.Collections.Generic.List<string>();
 System.Action<bool,string> check = (ok,label) => results.Add((ok ? "PASS " : "FAIL ") + label);
 var player = c.Player;
 var originalPosition = (Vector2)player.transform.position;
-var locks = player.GetComponent<TheLostShrine.Player.PlayerControlLocks>();
+var locks = player.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>();
 float authoredSpeed = c.Movement.MoveSpeed;
 panel.Open();
 check(panel.IsOpen && Time.timeScale == 0 && locks.IsLocked, "panel opens paused with input lock");
-check(TheLostShrine.UI.MenuStack.Top == panel, "panel owns modal input");
+check(RoadOfTheOldKing.UI.MenuStack.Top == panel, "panel owns modal input");
 c.SetGodMode(true);
 check(!c.DamagePlayer(10, false) && player.Health.Health == player.Health.MaxHealth, "god mode blocks ordinary hits");
 check(c.DamagePlayer(25) && player.Health.Health == player.Health.MaxHealth - 25, "debug damage bypasses god and invokes real damage");
@@ -36,8 +36,8 @@ check(Mathf.Approximately(c.Movement.MoveSpeed, authoredSpeed * 2), "runtime wal
 check(!c.SetSpeed(float.NaN) && c.SpeedMultiplier == 2, "reject invalid movement speed");
 c.SetSpeed(100); check(c.SpeedMultiplier == 4, "movement speed clamp"); c.SetSpeed(1);
 c.SetGameSpeed(.5f);
-check(Time.timeScale == 0 && TheLostShrine.UI.SimulationPause.UnpausedTimeScale == .5f, "game speed changes pause resume speed");
-using (var otherPause = TheLostShrine.UI.SimulationPause.Acquire(true)) {
+check(Time.timeScale == 0 && RoadOfTheOldKing.UI.SimulationPause.UnpausedTimeScale == .5f, "game speed changes pause resume speed");
+using (var otherPause = RoadOfTheOldKing.UI.SimulationPause.Acquire(true)) {
     panel.SetPauseWhileOpen(false);
     check(Time.timeScale == 0 && AudioListener.pause, "another pause owner survives live mode");
 }
@@ -56,16 +56,16 @@ block.transform.position = originalPosition + Vector2.right * 10; blockCollider.
 c.SetCollision(false); c.Teleport(block.transform.position); c.SetCollision(true);
 check(Vector2.Distance(player.transform.position, originalPosition) < .01f && !footprint.isTrigger, "collision restore escapes obstructed position");
 UnityEngine.Object.Destroy(block);
-string checkpoint = session.Progress.checkpointId; int discovered = session.Progress.discoveredFires.Count;
+string checkpoint = session.Progress.checkpointId; int discovered = session.Progress.fires.Count;
 c.SetMarker(); var marker = c.Marker.Value;
 var fire = c.GetBonfires()[0]; c.TeleportToBonfire(fire);
 check(Vector2.Distance(player.transform.position, fire.SpawnPosition) < .01f, "bonfire teleport uses spawn point");
-check(session.Progress.checkpointId == checkpoint && session.Progress.discoveredFires.Count == discovered, "teleport does not rest/discover/change checkpoint");
+check(session.Progress.checkpointId == checkpoint && session.Progress.fires.Count == discovered, "teleport does not rest/discover/change checkpoint");
 c.TeleportToMarker(); check(Vector2.Distance(player.transform.position, marker) < .01f, "return marker");
 check(!c.Teleport(new Vector2(float.NaN, 0)), "reject invalid teleport");
 // Missing weapon should be a useful failure, not an exception.
 if (c.Combat.Weapon == null) check(!c.RetrieveAxe(), "missing owned axe reports failure");
-var enemies = new System.Collections.Generic.List<TheLostShrine.Combat.IEnemy>(TheLostShrine.Combat.EnemyRegistry.Active);
+var enemies = new System.Collections.Generic.List<RoadOfTheOldKing.Combat.IEnemy>(RoadOfTheOldKing.Combat.EnemyRegistry.Active);
 var enemy = enemies[0] as Component;
 c.Teleport((Vector2)enemy.transform.position + Vector2.right);
 int before = c.NearbyCount(5);
@@ -75,12 +75,12 @@ c.ResetEnemies();
 check(c.NearbyCount(100) == enemies.Count, "reset enemies restores all registered enemies");
 c.Teleport(originalPosition); c.ResetOverrides();
 check(!c.GodMode && !c.InfiniteStamina && !c.NoCollision && c.SpeedMultiplier == 1, "reset all player overrides");
-check(TheLostShrine.UI.SimulationPause.UnpausedTimeScale == 1 && Time.timeScale == 0, "reset time respects panel pause");
+check(RoadOfTheOldKing.UI.SimulationPause.UnpausedTimeScale == 1 && Time.timeScale == 0, "reset time respects panel pause");
 // Explicit kill is intentional even in god mode and keeps the ordinary defeat path.
 c.SetGodMode(true); check(c.KillPlayer() && !c.Alive, "kill bypasses god mode");
 check(!c.Movement.enabled && !player.GetComponent<Rigidbody2D>().simulated, "normal death disables player motor");
 check(!c.HealPlayer() && !c.TeleportToBonfire(fire), "dead player cannot be half-revived or teleported");
 panel.Close();
-check(!panel.IsOpen && !TheLostShrine.UI.MenuStack.Contains(panel), "close removes only dev modal");
+check(!panel.IsOpen && !RoadOfTheOldKing.UI.MenuStack.Contains(panel), "close removes only dev modal");
 check(Time.timeScale > 0, "close releases panel pause");
 return string.Join("\n", results);

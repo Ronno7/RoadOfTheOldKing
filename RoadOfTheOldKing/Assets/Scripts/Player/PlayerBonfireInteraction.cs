@@ -1,11 +1,11 @@
 using System.Linq;
-using TheLostShrine.Input;
-using TheLostShrine.Progression;
-using TheLostShrine.World;
+using RoadOfTheOldKing.Input;
+using RoadOfTheOldKing.Progression;
+using RoadOfTheOldKing.World;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace TheLostShrine.Player
+namespace RoadOfTheOldKing.Player
 {
     [DisallowMultipleComponent, RequireComponent(typeof(PlayerHealth))]
     public sealed class PlayerBonfireInteraction : MonoBehaviour
@@ -42,7 +42,7 @@ namespace TheLostShrine.Player
             }
             // Escape is routed to the bonfire menu through MenuStack; F toggles here.
 #if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
-            if (TheLostShrine.UI.DevToolsPanel.CapturesInput) return;
+            if (RoadOfTheOldKing.UI.DevToolsPanel.CapturesInput) return;
 #endif
             var keyboard = Keyboard.current;
             if (IsOpen && Nearby != ActiveFire)
@@ -56,9 +56,9 @@ namespace TheLostShrine.Player
             Nearby = null;
             NearbyPickup = null;
             if (health == null || !health.IsAlive) return;
-            var session = CheckpointSession.Instance;
+            var session = GameSession.Instance;
             if (session != null)
-                Nearby = session.Fires.Where(f => f != null && f.CanUse(transform))
+                Nearby = session.Checkpoints.Fires.Where(f => f != null && f.CanUse(transform))
                     .OrderBy(f => Vector2.SqrMagnitude(f.transform.position - transform.position)).FirstOrDefault();
             if (IsOpen || !CanInteract) return;
             float nearest = float.PositiveInfinity;
@@ -93,8 +93,8 @@ namespace TheLostShrine.Player
 
         public bool Open(Bonfire fire)
         {
-            var session = CheckpointSession.Instance;
-            if (session == null || !session.Rest(fire))
+            var session = GameSession.Instance;
+            if (session == null || !session.Checkpoints.Rest(fire))
                 return false;
             ActiveFire = fire;
             if (locks != null) locks.Lock(this);

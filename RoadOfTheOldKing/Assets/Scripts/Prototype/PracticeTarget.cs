@@ -1,8 +1,8 @@
-using TheLostShrine.Combat;
-using TheLostShrine.Progression;
+using RoadOfTheOldKing.Combat;
+using RoadOfTheOldKing.Progression;
 using UnityEngine;
 
-namespace TheLostShrine.Prototype
+namespace RoadOfTheOldKing.Prototype
 {
     // Tutorial-only feedback and reset behavior; enemy logic can use Damageable independently.
     [DisallowMultipleComponent, RequireComponent(typeof(Damageable))]

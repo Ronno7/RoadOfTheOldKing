@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
-using TheLostShrine.Player;
-using TheLostShrine.Progression;
-using TheLostShrine.Weapons;
+using RoadOfTheOldKing.Player;
+using RoadOfTheOldKing.Progression;
+using RoadOfTheOldKing.Weapons;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace TheLostShrine.Combat
+namespace RoadOfTheOldKing.Combat
 {
     public enum WolfState { Idle, Alert, Chase, Stalk, Windup, Lunge, Snap, Recover, Reposition, Evade, Staggered, Return, Defeated }
 

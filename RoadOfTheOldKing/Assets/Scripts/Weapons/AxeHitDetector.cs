@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using TheLostShrine.Combat;
+using RoadOfTheOldKing.Combat;
 using UnityEngine;
 
-namespace TheLostShrine.Weapons
+namespace RoadOfTheOldKing.Weapons
 {
     // Physics queries and hit deduplication are independent of weapon state and visuals.
     public sealed class AxeHitDetector

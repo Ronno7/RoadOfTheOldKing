@@ -1,5 +1,5 @@
-// Empty Play Mode scene, no CheckpointSession. Commands are injected; no save/reload/quit is performed.
-if (!Application.isPlaying || TheLostShrine.Progression.CheckpointSession.Instance != null)
+// Empty Play Mode scene, no GameSession. Commands are injected; no save/reload/quit is performed.
+if (!Application.isPlaying || RoadOfTheOldKing.Progression.GameSession.Instance != null)
     throw new Exception("Use an empty Play Mode scene without a checkpoint session.");
 var results=new System.Collections.Generic.List<string>();
 Action<bool,string> check=(ok,label)=>results.Add((ok?"PASS ":"FAIL ")+label);
@@ -9,14 +9,14 @@ GameObject root=null, weaponRoot=null;
 try {
     Time.timeScale=1;AudioListener.pause=false;
     root=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Player/Player.prefab"));
-    var menu=root.GetComponent<TheLostShrine.UI.PauseMenuController>();
-    var view=root.GetComponent<TheLostShrine.UI.PauseMenuView>();
-    var combat=root.GetComponent<TheLostShrine.Player.PlayerCombatController>();
-    var input=root.GetComponent<TheLostShrine.Input.PlayerCombatInput>();
-    var move=root.GetComponent<TheLostShrine.Input.PlayerMovementInput>();
-    var fire=root.GetComponent<TheLostShrine.Player.PlayerBonfireInteraction>();
+    var menu=root.GetComponent<RoadOfTheOldKing.UI.PauseMenuController>();
+    var view=root.GetComponent<RoadOfTheOldKing.UI.PauseMenuView>();
+    var combat=root.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();
+    var input=root.GetComponent<RoadOfTheOldKing.Input.PlayerCombatInput>();
+    var move=root.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();
+    var fire=root.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>();
     int restarts=0,quits=0;
-    var actions=new[]{new TheLostShrine.UI.PauseMenuAction("Restart","Keep progress",()=>restarts++),new TheLostShrine.UI.PauseMenuAction("Quit","Leave",()=>quits++)};
+    var actions=new[]{new RoadOfTheOldKing.UI.PauseMenuAction("Restart","Keep progress",()=>restarts++),new RoadOfTheOldKing.UI.PauseMenuAction("Quit","Leave",()=>quits++)};
     menu.ConfigureActions(actions);
     Action finishClose=()=>{
         var coroutine=(Coroutine)menu.GetType().GetField("restoring",flags).GetValue(menu);
@@ -37,38 +37,38 @@ try {
     check(!move.enabled,"Already-disabled input stays disabled");move.enabled=true;
     Time.timeScale=.25f;AudioListener.pause=true;menu.Open();menu.Close();finishClose();
     check(Time.timeScale==.25f&&AudioListener.pause,"Preserves prior slow motion and audio mute");Time.timeScale=1;AudioListener.pause=false;
-    var freeze=TheLostShrine.UI.SimulationPause.Acquire();menu.Open();freeze.Dispose();
+    var freeze=RoadOfTheOldKing.UI.SimulationPause.Acquire();menu.Open();freeze.Dispose();
     check(Time.timeScale==0,"Ending overlapping freeze cannot unpause menu");menu.Close();finishClose();
     check(Time.timeScale==1,"Last pause owner restores original clock");
-    menu.Open();freeze=TheLostShrine.UI.SimulationPause.Acquire();menu.Close();finishClose();
+    menu.Open();freeze=RoadOfTheOldKing.UI.SimulationPause.Acquire();menu.Close();finishClose();
     check(Time.timeScale==0,"Menu close respects another pause owner");freeze.Dispose();freeze.Dispose();
     check(Time.timeScale==1,"Pause lease disposal is idempotent");
-    menu.Open();TheLostShrine.UI.SimulationPause.SetTimeScale(.5f);TheLostShrine.UI.SimulationPause.SetAudioPaused(true);
+    menu.Open();RoadOfTheOldKing.UI.SimulationPause.SetTimeScale(.5f);RoadOfTheOldKing.UI.SimulationPause.SetAudioPaused(true);
     check(Time.timeScale==0&&AudioListener.pause,"Preview speed controls cannot override open menu");menu.Close();finishClose();
     check(Time.timeScale==.5f&&AudioListener.pause,"Latest requested preview speed/mute restored");Time.timeScale=1;AudioListener.pause=false;
     weaponRoot=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Weapons/Axe.prefab"));
-    var weapon=weaponRoot.GetComponent<TheLostShrine.Weapons.AxeWeapon>();combat.TryEquip(weapon);
+    var weapon=weaponRoot.GetComponent<RoadOfTheOldKing.Weapons.AxeWeapon>();combat.TryEquip(weapon);
     combat.GetType().GetField("controlsActive",flags).SetValue(combat,true);
     check(weapon.TryBeginThrow(Vector2.right),"Throw setup begins");menu.Open();
     check(!weapon.IsThrowing,"Opening menu cancels pending throw");menu.Close();finishClose();
     combat.GetType().GetField("controlsActive",flags).SetValue(combat,true);
     check(weapon.TryBeginCharge(),"Charge setup begins");menu.Open();
-    check(weapon.State==TheLostShrine.Weapons.AxeState.Held,"Opening menu cancels charge");menu.Close();finishClose();
+    check(weapon.State==RoadOfTheOldKing.Weapons.AxeState.Held,"Opening menu cancels charge");menu.Close();finishClose();
     combat.GetType().GetField("controlsActive",flags).SetValue(combat,true);
     check(weapon.TryLightChop(Vector2.right),"Combo setup begins");menu.Open();
-    check(weapon.State==TheLostShrine.Weapons.AxeState.Held&&weapon.ComboTimeRemaining==0,"Opening menu cancels combo");menu.Close();finishClose();
+    check(weapon.State==RoadOfTheOldKing.Weapons.AxeState.Held&&weapon.ComboTimeRemaining==0,"Opening menu cancels combo");menu.Close();finishClose();
     menu.Toggle();check(menu.IsOpen,"Escape toggle opens menu");menu.Toggle();check(!menu.IsOpen,"Escape toggle closes menu");finishClose();
     menu.Open();view.Submit();view.Submit();
     check(restarts==1&&quits==0,"Restart command dispatches once");finishClose();
     menu.Open();view.Navigate(1);view.Submit();check(quits==1,"Keyboard navigation dispatches Quit command");finishClose();
-    menu.ConfigureActions(new[]{new TheLostShrine.UI.PauseMenuAction("Unavailable","Disabled",()=>quits++,false)});
+    menu.ConfigureActions(new[]{new RoadOfTheOldKing.UI.PauseMenuAction("Unavailable","Disabled",()=>quits++,false)});
     menu.Open();view.Submit();check(menu.IsOpen&&quits==1,"Disabled platform action cannot execute");menu.Close();finishClose();
     menu.ConfigureActions(actions);menu.Open();menu.enabled=false;
     check(!menu.IsOpen&&!view.IsVisible&&Time.timeScale==1&&input.enabled,"Disable releases pause and restores inputs");menu.enabled=true;
-    var defaults=TheLostShrine.UI.PauseMenuCommands.CreateDefault();
+    var defaults=RoadOfTheOldKing.UI.PauseMenuCommands.CreateDefault();
     check(defaults.Length==2&&defaults[0].Label=="Restart"&&defaults[1].Label=="Quit","Default menu has only Restart and Quit");
     check(defaults[0].Description.Contains("Permanent progress is kept"),"Restart describes non-destructive checkpoint behavior");
-    var menuInput=root.GetComponent<TheLostShrine.UI.PauseMenuInput>();
+    var menuInput=root.GetComponent<RoadOfTheOldKing.UI.PauseMenuInput>();
     var oldKeyboard=UnityEngine.InputSystem.Keyboard.current;
     var keyboard=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
     try {

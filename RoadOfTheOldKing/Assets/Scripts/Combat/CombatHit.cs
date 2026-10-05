@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TheLostShrine.Combat
+namespace RoadOfTheOldKing.Combat
 {
     public enum AttackKind { LightChop, ChargedCleave, Throw, Recall, EnemyMelee }
 

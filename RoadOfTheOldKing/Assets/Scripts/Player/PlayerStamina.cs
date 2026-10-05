@@ -1,7 +1,7 @@
-using TheLostShrine.Combat;
+using RoadOfTheOldKing.Combat;
 using UnityEngine;
 
-namespace TheLostShrine.Player
+namespace RoadOfTheOldKing.Player
 {
     // Souls-style stamina: any action can start while stamina is above zero, and its cost may push
     // stamina into a deficit (which lengthens the wait and weakens that attack). Recovery begins after

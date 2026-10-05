@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace TheLostShrine.Combat
+namespace RoadOfTheOldKing.Combat
 {
     [DisallowMultipleComponent]
     public sealed class Damageable : MonoBehaviour, IHitReceiver, IHitEventSource
@@ -54,6 +54,9 @@ namespace TheLostShrine.Combat
         }
 
         public void RestoreHealth() => Health = MaxHealth;
+
+        // Carries health across a scene change; never revives or empties.
+        public void SetHealth(int value) { if (IsAlive) Health = Mathf.Clamp(value, 1, MaxHealth); }
 
         // Healing never revives: a defeated target stays defeated.
         public void Heal(int amount) { if (IsAlive && amount > 0) Health = Mathf.Min(MaxHealth, Health + amount); }

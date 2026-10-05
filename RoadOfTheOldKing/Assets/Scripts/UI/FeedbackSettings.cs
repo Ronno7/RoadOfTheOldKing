@@ -1,4 +1,4 @@
-namespace TheLostShrine.UI
+namespace RoadOfTheOldKing.UI
 {
     // Accessibility scales for screen effects: 1 = full, 0 = off. A future settings menu drives these
     // (the UI proposal's reduced flash/shake option); every flash, vignette and camera kick reads them.

@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
-using TheLostShrine.Combat;
-using TheLostShrine.Cameras;
-using TheLostShrine.Weapons;
-using TheLostShrine.Player;
-using TheLostShrine.Progression;
-using TheLostShrine.UI;
-using TheLostShrine.World;
+using RoadOfTheOldKing.Combat;
+using RoadOfTheOldKing.Cameras;
+using RoadOfTheOldKing.Weapons;
+using RoadOfTheOldKing.Player;
+using RoadOfTheOldKing.Progression;
+using RoadOfTheOldKing.UI;
+using RoadOfTheOldKing.World;
 using UnityEngine;
 
-namespace TheLostShrine.Tutorial
+namespace RoadOfTheOldKing.Tutorial
 {
     public enum TutorialCondition
     {
@@ -149,13 +149,13 @@ namespace TheLostShrine.Tutorial
 
         private void OnHealed()
         {
-            var progress = CheckpointSession.Instance?.Progress;
+            var progress = GameSession.Instance?.Progress;
             if (progress != null && progress.Has("tutorial/enemy/first-wolf")) drinks++;
         }
 
         private bool IsMet(TutorialStep step)
         {
-            var progress = CheckpointSession.Instance != null ? CheckpointSession.Instance.Progress : null;
+            var progress = GameSession.Instance != null ? GameSession.Instance.Progress : null;
             switch (step.condition)
             {
                 case TutorialCondition.Moved: return moved >= step.amount && moveHintSeconds >= 6f;
@@ -163,7 +163,7 @@ namespace TheLostShrine.Tutorial
                 case TutorialCondition.Dodged: return dashes >= Mathf.Max(1f, step.amount);
                 case TutorialCondition.HasAxe: return combat != null && combat.Weapon != null;
                 case TutorialCondition.RecallUnlocked: return combat != null && combat.CanRecall;
-                case TutorialCondition.Rested: return CheckpointSession.Instance != null && CheckpointSession.Instance.HasCheckpoint;
+                case TutorialCondition.Rested: return GameSession.Instance != null && GameSession.Instance.Checkpoints.HasCheckpoint;
                 case TutorialCondition.Milestone: return progress != null && progress.Has(step.milestone);
                 case TutorialCondition.DrankFlask:
                     return progress != null && progress.Has("tutorial/enemy/first-wolf") &&
@@ -180,7 +180,7 @@ namespace TheLostShrine.Tutorial
         {
             bool wasCurrent = CurrentIndex >= 0 && steps[CurrentIndex] == step;
             done.Add(step.id);
-            CheckpointSession.Instance?.Progress.Complete(StepPrefix + step.id);
+            GameSession.Instance?.Progress.Complete(StepPrefix + step.id);
             // Persist quietly with the next save; lessons and rewards already save their own milestones.
             // No ✓ flash for steps a loaded save already satisfies.
             if (wasCurrent && restored && Time.time >= showAfter)

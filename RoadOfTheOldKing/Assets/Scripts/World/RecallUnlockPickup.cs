@@ -1,8 +1,8 @@
-using TheLostShrine.Player;
-using TheLostShrine.Progression;
+using RoadOfTheOldKing.Player;
+using RoadOfTheOldKing.Progression;
 using UnityEngine;
 
-namespace TheLostShrine.World
+namespace RoadOfTheOldKing.World
 {
     [DisallowMultipleComponent, RequireComponent(typeof(Collider2D))]
     public sealed class RecallUnlockPickup : WorldPickup, IProgressParticipant
@@ -21,7 +21,7 @@ namespace TheLostShrine.World
             if (!CanCollect(player)) return false;
             player.GetComponent<PlayerCombatController>().UnlockRecall();
             ShowActivated();
-            CheckpointSession.Instance?.SaveProgress();
+            GameSession.Instance?.SaveProgress();
             return true;
         }
 

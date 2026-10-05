@@ -21762,7 +21762,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 72a380a73a199cb4492874d86b51c7a9, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Progression.DefeatMilestone
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Progression.DefeatMilestone
   source: {fileID: 94945422}
   milestone: tutorial/enemy/first-wolf
 --- !u!114 &94945422 stripped
@@ -21775,7 +21775,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Damageable
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.Damageable
 --- !u!1001 &101975174
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -82584,7 +82584,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1d62f82952053eb4fbe14cbd74a2175e, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Tutorial.ThrowRetrieveLesson
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Tutorial.ThrowRetrieveLesson
   progressId: tutorial/lesson/throw-retrieve
   stands: []
   completionNotice: 
@@ -195060,7 +195060,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 33327fe2ed5832146904f96e74a2bafb, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Tutorial.RecallAwakeningStone
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Tutorial.RecallAwakeningStone
 --- !u!1001 &1018363336
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -251852,7 +251852,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d1c5e544dcbe59b4ba23b72d6686cb42, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Tutorial.RecallSealGate
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Tutorial.RecallSealGate
   stone: {fileID: 1014733869}
   barrier: {fileID: 219672997}
   stonework: {fileID: 219673000}
@@ -251879,7 +251879,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Damageable
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.Damageable
 --- !u!4 &1420275034 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3403522340180570971, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
@@ -264093,7 +264093,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5660a71fca29aa34cb123c8a958aaaf2, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Tutorial.HitCountLesson
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Tutorial.HitCountLesson
   progressId: tutorial/lesson/melee
   target: {fileID: 1624362206}
   countedKinds: 3
@@ -275562,7 +275562,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Damageable
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.Damageable
 --- !u!1001 &1625810970
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -288493,7 +288493,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4e6b26e67c73a741a2717d47efc7454, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Tutorial.TutorialGuide
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Tutorial.TutorialGuide
   steps:
   - id: move
     hint: Head into the village {move}
@@ -320517,8 +320517,10 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aec875c28fec6c243b60ec7999961ab5, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Tutorial.TutorialExit
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SceneExit
   progressId: tutorial/complete
+  targetScene: 
+  targetSpawnId: 
   arrivalNotice: End of the tutorial. The road goes on.
 --- !u!61 &1899408427
 BoxCollider2D:
@@ -357832,7 +357834,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 511025610d771e048af5bfdc734b16fe, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerCombatController
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Player.PlayerCombatController
 --- !u!114 &9001000002 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7425349288622817033, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
@@ -357843,7 +357845,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 77ed5e44f82138e47a2ffd319bf6a318, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Player.PlayerHealth
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Player.PlayerHealth
 --- !u!1001 &9001000005
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -357952,7 +357954,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Damageable
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.Damageable
 --- !u!1001 &9001000008
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -358130,53 +358132,63 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &9001000015
-MonoBehaviour:
+--- !u!1001 &6017789580001941
+PrefabInstance:
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9001000016}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c1e2e35f10ff2084b82dc32b822bdeaa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  saveKey: RoadOfTheOldKing.Tutorial.Save.v1
-  upgradeTiers:
-  - {fileID: 11400000, guid: 4ff5f7aa093c4394d826b17ca248bd36, type: 2}
---- !u!1 &9001000016
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 9001000017}
-  - component: {fileID: 9001000015}
-  m_Layer: 0
-  m_Name: Tutorial Session
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &9001000017
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9001000016}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2991283843019077633, guid: 6815b6a5a800f3e4abc316294502815f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2991283843019077633, guid: 6815b6a5a800f3e4abc316294502815f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2991283843019077633, guid: 6815b6a5a800f3e4abc316294502815f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2991283843019077633, guid: 6815b6a5a800f3e4abc316294502815f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2991283843019077633, guid: 6815b6a5a800f3e4abc316294502815f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2991283843019077633, guid: 6815b6a5a800f3e4abc316294502815f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2991283843019077633, guid: 6815b6a5a800f3e4abc316294502815f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2991283843019077633, guid: 6815b6a5a800f3e4abc316294502815f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2991283843019077633, guid: 6815b6a5a800f3e4abc316294502815f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2991283843019077633, guid: 6815b6a5a800f3e4abc316294502815f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8096330302264470004, guid: 6815b6a5a800f3e4abc316294502815f, type: 3}
+      propertyPath: m_Name
+      value: Game Session
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6815b6a5a800f3e4abc316294502815f, type: 3}
 --- !u!1839735485 &140403919657787182
 Tilemap:
   m_ObjectHideFlags: 0
@@ -650754,7 +650766,7 @@ Tilemap:
       - {fileID: 1990853355, guid: 0c8ce66f5d13841438cbe9a1304bc3c5, type: 3}
       - {fileID: -1477547607, guid: 0c8ce66f5d13841438cbe9a1304bc3c5, type: 3}
       - {fileID: 1609360619, guid: 0c8ce66f5d13841438cbe9a1304bc3c5, type: 3}
-      m_AnimationSpeed: 1.25
+      m_AnimationSpeed: 1.2500001
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: 64, y: 86, z: 0}
@@ -650919,7 +650931,7 @@ SceneRoots:
   m_Roots:
   - {fileID: 305578408}
   - {fileID: 1607463906426744502}
-  - {fileID: 9001000017}
+  - {fileID: 6017789580001941}
   - {fileID: 9001000014}
   - {fileID: 1705023482}
   - {fileID: 8351447465323684189}

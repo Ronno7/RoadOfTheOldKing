@@ -1,5 +1,5 @@
 // Run in the isolated combat preview with its original roots disabled, no save session.
-if (!Application.isPlaying || UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Progression.CheckpointSession>() != null) throw new Exception("Use save-free Play Mode.");
+if (!Application.isPlaying || UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Progression.GameSession>() != null) throw new Exception("Use save-free Play Mode.");
 var results=new System.Collections.Generic.List<string>();
 Action<bool,string> check=(ok,label)=>results.Add((ok?"PASS ":"FAIL ")+label);
 var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
@@ -7,10 +7,10 @@ var created=new System.Collections.Generic.List<GameObject>();
 Func<string,GameObject> spawn=path=>{var go=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(path));created.Add(go);return go;};
 try {
  var player=spawn("Assets/Prefabs/Player/Player.prefab");
- var weapon=spawn("Assets/Prefabs/Weapons/Axe.prefab").GetComponent<TheLostShrine.Weapons.AxeWeapon>();
- player.GetComponent<TheLostShrine.Player.PlayerCombatController>().TryEquip(weapon);
+ var weapon=spawn("Assets/Prefabs/Weapons/Axe.prefab").GetComponent<RoadOfTheOldKing.Weapons.AxeWeapon>();
+ player.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>().TryEquip(weapon);
  var wolf=spawn("Assets/Prefabs/Combat/Wolf.prefab");wolf.transform.position=new Vector3(1.5f,0,0);wolf.GetComponent<Rigidbody2D>().position=wolf.transform.position;
- var health=wolf.GetComponent<TheLostShrine.Combat.Damageable>();var feedback=wolf.GetComponent<TheLostShrine.Combat.EnemyImpactFeedback>();
+ var health=wolf.GetComponent<RoadOfTheOldKing.Combat.Damageable>();var feedback=wolf.GetComponent<RoadOfTheOldKing.Combat.EnemyImpactFeedback>();
  var ps=wolf.GetComponentInChildren<ParticleSystem>();var sound=wolf.GetComponentInChildren<AudioSource>();
  Action update=()=>feedback.GetType().GetMethod("LateUpdate",flags).Invoke(feedback,null);
  Physics2D.SyncTransforms();
@@ -21,9 +21,9 @@ try {
  check(ps.particleCount>0,"Accepted weapon hit emits particles");
  check(sound.isPlaying,"Accepted weapon hit plays impact clip");
  check(weapon.IsImpactPaused,"Existing light-chop action pause activates");
- check(wolf.GetComponent<TheLostShrine.Combat.HitReaction>().IsStaggered,"Existing stagger activates");
+ check(wolf.GetComponent<RoadOfTheOldKing.Combat.HitReaction>().IsStaggered,"Existing stagger activates");
  check(wolf.GetComponent<Rigidbody2D>().linearVelocity.x>0,"Existing knockback impulse activates");
- var view=wolf.GetComponent<TheLostShrine.Combat.WolfView>();view.GetType().GetMethod("LateUpdate",flags).Invoke(view,null);
+ var view=wolf.GetComponent<RoadOfTheOldKing.Combat.WolfView>();view.GetType().GetMethod("LateUpdate",flags).Invoke(view,null);
  var body=(SpriteRenderer)new SerializedObject(view).FindProperty("bodyVisual").objectReferenceValue;
  var flash=new MaterialPropertyBlock();body.GetPropertyBlock(flash);
  check(flash.GetFloat("_FlashAmount")==1f,"Wolf ivory flash activates");
@@ -32,20 +32,20 @@ try {
  check(particles.Take(count).All(p=>p.position.x<1.5f&&p.position.y>.3f),"Burst uses collider contact plus visual height");
  check(particles.Take(count).All(p=>p.startSize>=2f/16f-.001f),"Flecks are at least two world pixels");
  weapon.GetType().GetMethod("Simulate",flags).Invoke(weapon,new object[]{.01f});check(ps.particleCount==count,"Same swing cannot repeat impact burst");
- wolf.GetComponent<TheLostShrine.Combat.SimpleMeleeEnemy>().ResetOnRest();update();
+ wolf.GetComponent<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>().ResetOnRest();update();
  check(ps.particleCount==0&&!sound.isPlaying,"Rest clears transient feedback");
- health.ReceiveHit(new TheLostShrine.Combat.CombatHit(player,TheLostShrine.Combat.AttackKind.Recall,999,Vector2.left,0,0,false,wolf.transform.position));
+ health.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player,RoadOfTheOldKing.Combat.AttackKind.Recall,999,Vector2.left,0,0,false,wolf.transform.position));
  check(ps.particleCount>0&&sound.isPlaying,"Lethal hit still produces feedback");
  check(ps.particleCount>count*1.5f&&Time.timeScale==0f,"Killing blow throws a bigger burst and freezes the frame");
  Time.timeScale=1f;
- count=ps.particleCount;health.ReceiveHit(new TheLostShrine.Combat.CombatHit(player,TheLostShrine.Combat.AttackKind.LightChop,1,Vector2.right,0,0));
+ count=ps.particleCount;health.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.right,0,0));
  check(ps.particleCount==count,"Dead target cannot repeat feedback");
  feedback.enabled=false;check(ps.particleCount==0&&!sound.isPlaying,"Disable clears sound and particles");
  var shield=spawn("Assets/Prefabs/Combat/ShieldPracticeDummy.prefab");
- bool accepted=shield.GetComponent<TheLostShrine.Combat.Damageable>().ReceiveHit(new TheLostShrine.Combat.CombatHit(player,TheLostShrine.Combat.AttackKind.LightChop,10,Vector2.up,0,0));
+ bool accepted=shield.GetComponent<RoadOfTheOldKing.Combat.Damageable>().ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player,RoadOfTheOldKing.Combat.AttackKind.LightChop,10,Vector2.up,0,0));
  check(!accepted&&shield.GetComponentInChildren<ParticleSystem>().particleCount==0&&!shield.GetComponentInChildren<AudioSource>().isPlaying,"Blocked hit has no flesh impact feedback");
  foreach(var path in new[]{"Wolf","MeleeSentinel","PracticeDummy","TutorialPracticeDummy","ShieldPracticeDummy"}) {
-  var prefab=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Combat/"+path+".prefab");var data=new SerializedObject(prefab.GetComponent<TheLostShrine.Combat.EnemyImpactFeedback>());
+  var prefab=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Combat/"+path+".prefab");var data=new SerializedObject(prefab.GetComponent<RoadOfTheOldKing.Combat.EnemyImpactFeedback>());
   check(data.FindProperty("body").objectReferenceValue!=null&&data.FindProperty("impactSound").objectReferenceValue!=null,"Bound feedback "+path);
  }
 } finally {foreach(var go in created)if(go!=null)UnityEngine.Object.DestroyImmediate(go);Time.timeScale=1f;}

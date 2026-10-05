@@ -1,11 +1,11 @@
-using TheLostShrine.Combat;
-using TheLostShrine.Player;
-using TheLostShrine.Progression;
-using TheLostShrine.World;
-using TheLostShrine.Weapons;
+using RoadOfTheOldKing.Combat;
+using RoadOfTheOldKing.Player;
+using RoadOfTheOldKing.Progression;
+using RoadOfTheOldKing.World;
+using RoadOfTheOldKing.Weapons;
 using UnityEngine;
 
-namespace TheLostShrine.Prototype
+namespace RoadOfTheOldKing.Prototype
 {
     public enum PrototypeStep { Pickup, Chop, Throw, Retrieve, Bushes, Stone, UnlockRecall, RecallPractice, Enemy, Bonfire, Puzzle, ExitBonfire, Complete }
 
@@ -47,7 +47,7 @@ namespace TheLostShrine.Prototype
                         ? "Move down to the blue floor mark. Press E to recall through the blue target and open the door."
                         : "Stand on the gold floor mark. Hold E, aim at the gold target to the right, then release.";
                     case PrototypeStep.ExitBonfire: return "Puzzle solved: one Sun Shard earned. Explore the side path beyond the door, then F at the second fire to upgrade.";
-                    default: return CheckpointSession.Instance != null && CheckpointSession.Instance.Upgrades.NextTier != null
+                    default: return GameSession.Instance != null && GameSession.Instance.Rewards.Upgrades.NextTier != null
                         ? "Find all 3 Sun Shards: sentinel, puzzle, and the side path beyond the door. Spend them at the second fire for one axe upgrade."
                         : "Upgrade chosen. Travel back to try it on the dummies or sentinel. Resting never replenishes Sun Shards.";
                 }

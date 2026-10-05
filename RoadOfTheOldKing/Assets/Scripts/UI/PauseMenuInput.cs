@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace TheLostShrine.UI
+namespace RoadOfTheOldKing.UI
 {
     [DisallowMultipleComponent, DefaultExecutionOrder(-210)]
     public sealed class PauseMenuInput : MonoBehaviour

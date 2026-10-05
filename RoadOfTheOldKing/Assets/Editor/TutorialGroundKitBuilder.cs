@@ -9,9 +9,9 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Tilemaps;
 using Object = UnityEngine.Object;
-using static TheLostShrine.EditorTools.TileKitAssets;
+using static RoadOfTheOldKing.EditorTools.TileKitAssets;
 
-namespace TheLostShrine.EditorTools
+namespace RoadOfTheOldKing.EditorTools
 {
     // Editor-only assembly of authored pixels and stock Unity Tile / RuleTile assets.
     // No custom tile behavior or generation work is needed in a player build.

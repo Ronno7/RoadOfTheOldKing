@@ -1,10 +1,13 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <ui:Style src="MenuTheme.uss" />
+    <ui:Style src="OrnateMenu.uss" />
     <ui:Style src="DefeatScreen.uss" />
     <ui:VisualElement name="defeat-overlay" class="menu-overlay">
-        <ui:VisualElement name="defeat-panel" class="menu-panel">
+        <ui:VisualElement name="defeat-panel" class="menu-panel ornate-panel bronze-frame">
             <ui:Label text="DEFEATED" name="heading" class="menu-heading" />
-            <ui:VisualElement class="menu-divider" />
+            <ui:VisualElement class="menu-divider">
+                <ui:VisualElement class="menu-medallion" picking-mode="Ignore" />
+            </ui:VisualElement>
             <ui:VisualElement name="actions" />
         </ui:VisualElement>
     </ui:VisualElement>

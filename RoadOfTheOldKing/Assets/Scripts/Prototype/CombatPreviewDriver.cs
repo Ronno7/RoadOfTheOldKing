@@ -1,12 +1,12 @@
 #if UNITY_EDITOR
-using TheLostShrine.Input;
-using TheLostShrine.Player;
-using TheLostShrine.Prototype;
-using TheLostShrine.Weapons;
+using RoadOfTheOldKing.Input;
+using RoadOfTheOldKing.Player;
+using RoadOfTheOldKing.Prototype;
+using RoadOfTheOldKing.Weapons;
 using UnityEditor;
 using UnityEngine;
 
-namespace TheLostShrine.Editor
+namespace RoadOfTheOldKing.Editor
 {
     // Editor-only input source. The actual player, physics, weapon and effects do the work.
     [DefaultExecutionOrder(-300)]
@@ -38,7 +38,7 @@ namespace TheLostShrine.Editor
             ResetPreview();
         }
 
-        private void OnHit(TheLostShrine.Combat.CombatHit hit) => Hits++;
+        private void OnHit(RoadOfTheOldKing.Combat.CombatHit hit) => Hits++;
         private void OnDestroy() { if (Weapon != null) Weapon.HitConfirmed -= OnHit; }
 
         public void ResetPreview()

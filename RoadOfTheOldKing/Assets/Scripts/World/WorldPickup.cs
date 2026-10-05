@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using TheLostShrine.Player;
+using RoadOfTheOldKing.Player;
 using UnityEngine;
 
-namespace TheLostShrine.World
+namespace RoadOfTheOldKing.World
 {
     // Discovery is separate from collection so a future pickup animation can commit
     // through TryCollect at its contact marker, rechecking availability and distance.

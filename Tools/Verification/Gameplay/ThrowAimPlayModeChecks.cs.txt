@@ -1,6 +1,6 @@
 // Run in Play Mode in an empty, unsaved scene. Uses the standard Player and Tutorial weapon prefabs, no save session.
 // All fixtures and synthetic input devices are removed in finally. Stop Play Mode afterward.
-if (!Application.isPlaying || UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Progression.CheckpointSession>() != null)
+if (!Application.isPlaying || UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Progression.GameSession>() != null)
     throw new Exception("Use an empty Play Mode scene without a checkpoint session.");
 var results = new System.Collections.Generic.List<string>();
 System.Action<bool,string> check = (ok,name) => results.Add((ok ? "PASS " : "FAIL ") + name);
@@ -11,20 +11,20 @@ System.Func<string,GameObject> spawn = path => {
     var go = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(path)); created.Add(go); return go;
 };
 var goPlayer = spawn("Assets/Prefabs/Player/Player.prefab");
-var player = goPlayer.GetComponent<TheLostShrine.Player.PlayerCombatController>();
-var weapon = spawn("Assets/Prefabs/Weapons/Axe.prefab").GetComponent<TheLostShrine.Weapons.AxeWeapon>();
-var stamina = player.GetComponent<TheLostShrine.Player.PlayerStamina>();
-var dash = player.GetComponent<TheLostShrine.Player.PlayerDash>();
-var reaction = player.GetComponent<TheLostShrine.Combat.HitReaction>();
+var player = goPlayer.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();
+var weapon = spawn("Assets/Prefabs/Weapons/Axe.prefab").GetComponent<RoadOfTheOldKing.Weapons.AxeWeapon>();
+var stamina = player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>();
+var dash = player.GetComponent<RoadOfTheOldKing.Player.PlayerDash>();
+var reaction = player.GetComponent<RoadOfTheOldKing.Combat.HitReaction>();
 var body = player.GetComponent<Rigidbody2D>();
-var combatInput = player.GetComponent<TheLostShrine.Input.PlayerCombatInput>();
-var moveInput = player.GetComponent<TheLostShrine.Input.PlayerMovementInput>();
-var movement = player.GetComponent<TheLostShrine.Player.PlayerMovement>();
+var combatInput = player.GetComponent<RoadOfTheOldKing.Input.PlayerCombatInput>();
+var moveInput = player.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();
+var movement = player.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>();
 var sim = weapon.GetType().GetMethod("Simulate",flags);
 var process = player.GetType().GetMethod("ProcessInput",flags);
 var moveTick = movement.GetType().GetMethod("FixedUpdate",flags);
 var moveRead = moveInput.GetType().GetMethod("Update",flags);
-var view = weapon.GetComponent<TheLostShrine.Weapons.AxeView>();
+var view = weapon.GetComponent<RoadOfTheOldKing.Weapons.AxeView>();
 var viewTick = view.GetType().GetMethod("LateUpdate",flags);
 var recover = stamina.GetType().GetMethod("Tick",flags);
 var combatMap = (UnityEngine.InputSystem.InputActionMap)combatInput.GetType().GetField("actions",flags).GetValue(combatInput);
@@ -34,10 +34,10 @@ var mouse = UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSyste
 var oldRouting = UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode;
 var oldSimulation = Physics2D.simulationMode;
 System.Action<float> tick = seconds => sim.Invoke(weapon,new object[]{seconds});
-System.Action<TheLostShrine.Input.CombatInputFrame> send = frame => process.Invoke(player,new object[]{frame});
-System.Action neutral = () => send(new TheLostShrine.Input.CombatInputFrame { Active = true });
-System.Action press = () => send(new TheLostShrine.Input.CombatInputFrame { Active = true, ThrowPressed = true, ThrowHeld = true });
-System.Action release = () => send(new TheLostShrine.Input.CombatInputFrame { Active = true, ThrowReleased = true });
+System.Action<RoadOfTheOldKing.Input.CombatInputFrame> send = frame => process.Invoke(player,new object[]{frame});
+System.Action neutral = () => send(new RoadOfTheOldKing.Input.CombatInputFrame { Active = true });
+System.Action press = () => send(new RoadOfTheOldKing.Input.CombatInputFrame { Active = true, ThrowPressed = true, ThrowHeld = true });
+System.Action release = () => send(new RoadOfTheOldKing.Input.CombatInputFrame { Active = true, ThrowReleased = true });
 System.Action<Vector2> move = position => { body.position = position; player.transform.position = position; body.linearVelocity = Vector2.zero; Physics2D.SyncTransforms(); };
 System.Action reset = () => {
     weapon.CancelAction(); stamina.Restore(); dash.ResetAtRest(); reaction.Clear(); neutral();
@@ -63,9 +63,9 @@ try {
     release(); tick(.039f);
     check(!weapon.IsAway && near(stamina.Current,paid), "Duplicate key-up cannot spend again or launch early");
     tick(.001f);
-    check(weapon.State == TheLostShrine.Weapons.AxeState.Flying && weapon.ThrowCelIndex == 5, "Physical launch shares cel-6 marker");
+    check(weapon.State == RoadOfTheOldKing.Weapons.AxeState.Flying && weapon.ThrowCelIndex == 5, "Physical launch shares cel-6 marker");
 
-    reset(); send(new TheLostShrine.Input.CombatInputFrame { Active=true, ThrowPressed=true, ThrowReleased=true });
+    reset(); send(new RoadOfTheOldKing.Input.CombatInputFrame { Active=true, ThrowPressed=true, ThrowReleased=true });
     tick(.119f); check(!weapon.IsAway && near(stamina.Current,75), "Same-sample down/up preserves quick tap wind-up");
     tick(.001f); check(weapon.IsAway, "Same-sample tap launches at 120 ms");
     reset(); weapon.TryThrow(Vector2.right); tick(.5f);
@@ -80,9 +80,9 @@ try {
     check(!weapon.IsThrowing && !weapon.IsAway && near(stamina.Current,10), "Unaffordable release returns to ready without launch");
 
     reset(); press(); tick(.08f);
-    send(new TheLostShrine.Input.CombatInputFrame { Active=true, ThrowHeld=true, ChargePressed=true, ChargeHeld=true });
-    send(new TheLostShrine.Input.CombatInputFrame { Active=true, ThrowReleased=true, ChargeReleased=true }); tick(.5f);
-    check(!weapon.IsThrowing && weapon.State == TheLostShrine.Weapons.AxeState.Held && near(stamina.Current,100),
+    send(new RoadOfTheOldKing.Input.CombatInputFrame { Active=true, ThrowHeld=true, ChargePressed=true, ChargeHeld=true });
+    send(new RoadOfTheOldKing.Input.CombatInputFrame { Active=true, ThrowReleased=true, ChargeReleased=true }); tick(.5f);
+    check(!weapon.IsThrowing && weapon.State == RoadOfTheOldKing.Weapons.AxeState.Held && near(stamina.Current,100),
         "RMB cancels aim and consumes both stale release edges without cleave cost");
     reset(); press(); stamina.TrySpend(80);
     check(!dash.TryStart(Vector2.left) && weapon.CanCancelThrowAim, "Unaffordable dash leaves aim intact");
@@ -94,12 +94,12 @@ try {
     reset(); weapon.TryLightChop(Vector2.right); press(); tick(1f); release(); tick(.5f);
     check(!weapon.IsAway && !weapon.IsThrowing && near(stamina.Current,82), "Rejected E during swing cannot become a queued throw");
     reset(); weapon.TryBeginCharge(); tick(.3f);
-    send(new TheLostShrine.Input.CombatInputFrame { Active=true, ThrowPressed=true, ThrowHeld=true, ChargeReleased=true });
-    check(weapon.State == TheLostShrine.Weapons.AxeState.Cleaving, "Rejected E does not swallow ongoing cleave release");
+    send(new RoadOfTheOldKing.Input.CombatInputFrame { Active=true, ThrowPressed=true, ThrowHeld=true, ChargeReleased=true });
+    check(weapon.State == RoadOfTheOldKing.Weapons.AxeState.Cleaving, "Rejected E does not swallow ongoing cleave release");
 
-    reset(); press(); tick(.08f); send(default(TheLostShrine.Input.CombatInputFrame)); release(); tick(.5f);
+    reset(); press(); tick(.08f); send(default(RoadOfTheOldKing.Input.CombatInputFrame)); release(); tick(.5f);
     check(!weapon.IsAway && !weapon.IsThrowing && near(stamina.Current,100), "Control loss cancels held aim and ignores stale release");
-    reset(); press(); release(); send(default(TheLostShrine.Input.CombatInputFrame)); tick(.5f);
+    reset(); press(); release(); send(default(RoadOfTheOldKing.Input.CombatInputFrame)); tick(.5f);
     check(!weapon.IsAway && near(stamina.Current,75), "Interrupted committed throw retains cost but never spawns");
     reset(); press(); release(); reaction.GetType().GetField("staggerUntil",flags).SetValue(reaction,Time.time+1f); tick(.5f);
     check(!weapon.IsAway && !weapon.IsThrowing && near(stamina.Current,75), "Stagger before marker prevents launch even without an Update");
@@ -113,7 +113,7 @@ try {
     check(!weapon.IsAway && !weapon.IsThrowing, "Pause cannot launch a pending throw");
 
     reset(); player.UnlockRecall(); weapon.TryThrow(Vector2.right); tick(.22f); press(); tick(.2f);
-    check(weapon.State == TheLostShrine.Weapons.AxeState.Held, "E press recalls an away weapon during throw recovery");
+    check(weapon.State == RoadOfTheOldKing.Weapons.AxeState.Held, "E press recalls an away weapon during throw recovery");
     release(); tick(.5f);
     check(!weapon.IsThrowing && !weapon.IsAway && near(stamina.Current,75), "Holding Recall through catch then key-up never rethrows");
 
@@ -139,24 +139,24 @@ try {
     check(weapon.AimDistance>.35f && weapon.AimDistance<.40f && arc.enabled && arc.positionCount==2 &&
         near(Vector3.Distance(arc.GetPosition(0),arc.GetPosition(1)),weapon.AimDistance), "Aim guide uses flight radius and stops before nearby wall");
     release(); tick(.5f);
-    check(weapon.State==TheLostShrine.Weapons.AxeState.Stuck && weapon.transform.position.x<100.6f, "Delayed launch cannot skip a wall next to the player");
+    check(weapon.State==RoadOfTheOldKing.Weapons.AxeState.Stuck && weapon.transform.position.x<100.6f, "Delayed launch cannot skip a wall next to the player");
     wall.SetActive(false); reset();
     var target=spawn("Assets/Prefabs/Combat/PracticeDummy.prefab"); target.transform.position=new Vector3(103,100,0); target.GetComponent<Rigidbody2D>().position=target.transform.position;
     var extra=new GameObject("Duplicate collider"); extra.transform.SetParent(target.transform,false); extra.AddComponent<CircleCollider2D>().radius=.2f;
-    var targetHealth=target.GetComponent<TheLostShrine.Combat.Damageable>(); Physics2D.SyncTransforms(); int before=targetHealth.Health;
+    var targetHealth=target.GetComponent<RoadOfTheOldKing.Combat.Damageable>(); Physics2D.SyncTransforms(); int before=targetHealth.Health;
     press(); tick(.5f); viewTick.Invoke(view,null);
     check(targetHealth.Health==before, "Aim preview never damages a target");
     release(); tick(.5f); tick(.2f);
-    check(targetHealth.Health==before-weapon.Settings.throwDamage && weapon.State==TheLostShrine.Weapons.AxeState.Stuck,
+    check(targetHealth.Health==before-weapon.Settings.throwDamage && weapon.State==RoadOfTheOldKing.Weapons.AxeState.Stuck,
         "Throw still hits once with multiple colliders and sticks to its target");
     move(weapon.transform.position); tick(.02f);
-    check(weapon.State==TheLostShrine.Weapons.AxeState.Held, "Walk-over retrieval works before Recall unlock");
+    check(weapon.State==RoadOfTheOldKing.Weapons.AxeState.Held, "Walk-over retrieval works before Recall unlock");
     target.SetActive(false); reset(); player.UnlockRecall(); weapon.TryThrow(Vector2.right); tick(.8f); move(new Vector2(90,100)); tick(.02f);
-    check(weapon.State==TheLostShrine.Weapons.AxeState.Returning, "Distance-based automatic Recall still starts");
-    tick(2f); check(weapon.State==TheLostShrine.Weapons.AxeState.Held, "Automatic Recall still reaches its owner");
+    check(weapon.State==RoadOfTheOldKing.Weapons.AxeState.Returning, "Distance-based automatic Recall still starts");
+    tick(2f); check(weapon.State==RoadOfTheOldKing.Weapons.AxeState.Held, "Automatic Recall still reaches its owner");
     reset(); press(); release();
-    player.GetComponent<TheLostShrine.Combat.Damageable>().ReceiveHit(new TheLostShrine.Combat.CombatHit(target,TheLostShrine.Combat.AttackKind.EnemyMelee,1000,Vector2.right,0f,.1f)); tick(.5f);
-    check(!player.enabled && !weapon.IsThrowing && weapon.State==TheLostShrine.Weapons.AxeState.Held, "Defeat cancels pending launch and restores safe weapon state");
+    player.GetComponent<RoadOfTheOldKing.Combat.Damageable>().ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(target,RoadOfTheOldKing.Combat.AttackKind.EnemyMelee,1000,Vector2.right,0f,.1f)); tick(.5f);
+    check(!player.enabled && !weapon.IsThrowing && weapon.State==RoadOfTheOldKing.Weapons.AxeState.Held, "Defeat cancels pending launch and restores safe weapon state");
 } finally {
     Time.timeScale=1f; Physics2D.simulationMode=oldSimulation;
     foreach(var go in created) if(go!=null) UnityEngine.Object.DestroyImmediate(go);

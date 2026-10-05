@@ -1,15 +1,15 @@
 using System.Collections.Generic;
 using System.Text;
-using TheLostShrine.Combat;
-using TheLostShrine.Player;
-using TheLostShrine.Progression;
-using TheLostShrine.Weapons;
-using TheLostShrine.World;
+using RoadOfTheOldKing.Combat;
+using RoadOfTheOldKing.Player;
+using RoadOfTheOldKing.Progression;
+using RoadOfTheOldKing.Weapons;
+using RoadOfTheOldKing.World;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
-namespace TheLostShrine.UI
+namespace RoadOfTheOldKing.UI
 {
     // Contextual HUD (placeholder art, production structure). Lives on the Player prefab and only
     // presents: it reads gameplay components and events and never edits gameplay or save state.
@@ -72,7 +72,7 @@ namespace TheLostShrine.UI
         private PlayerCombatController combat;
         private PlayerBonfireInteraction interaction;
         private PauseMenuController pauseMenu;
-        private CheckpointSession session;
+        private GameSession session;
         private float vitalsUntil, hurtAmount;
         private Texture2D vignetteTexture;
         private int receiptsVersion = -1;
@@ -161,17 +161,17 @@ namespace TheLostShrine.UI
 
         private void Subscribe()
         {
-            if (session != null || CheckpointSession.Instance == null) return;
-            session = CheckpointSession.Instance;
-            session.ShardCollected += OnShard;
-            session.HeartFragmentCollected += OnFragment;
+            if (session != null || GameSession.Instance == null) return;
+            session = GameSession.Instance;
+            session.Rewards.ShardCollected += OnShard;
+            session.Rewards.HeartFragmentCollected += OnFragment;
         }
 
         private void Unsubscribe()
         {
             if (session == null) return;
-            session.ShardCollected -= OnShard;
-            session.HeartFragmentCollected -= OnFragment;
+            session.Rewards.ShardCollected -= OnShard;
+            session.Rewards.HeartFragmentCollected -= OnFragment;
             session = null;
         }
 
@@ -407,7 +407,7 @@ namespace TheLostShrine.UI
             var health = player.Health;
             if (health != null) text.Append("Health  ").Append(health.Health).Append(" / ").Append(health.MaxHealth).Append('\n');
             if (stamina != null) text.Append("Stamina  ").Append(Mathf.FloorToInt(stamina.Current)).Append(" / ").Append(Mathf.RoundToInt(stamina.Maximum)).Append('\n');
-            var progress = CheckpointSession.Instance != null ? CheckpointSession.Instance.Progress : null;
+            var progress = GameSession.Instance != null ? GameSession.Instance.Progress : null;
             if (progress != null)
             {
                 text.Append("Sun Shards  ").Append(progress.sunShards).Append('\n');
@@ -421,10 +421,10 @@ namespace TheLostShrine.UI
             text.Append("Axe  ").Append(weapon == null ? "not yet found" : weapon.IsAway ? "away" : "in hand").Append('\n');
             text.Append("Recall  ").Append(combat != null && combat.CanRecall ? "awakened" : "dormant").Append('\n');
             if (flask != null) text.Append("Flasks  ").Append(flask.Charges).Append(" / ").Append(flask.MaxCharges).Append("  (").Append(ControlLabels.Get("heal")).Append(" to drink)\n");
-            if (CheckpointSession.Instance != null)
+            if (GameSession.Instance != null)
             {
                 bool any = false;
-                foreach (var upgrade in CheckpointSession.Instance.Upgrades.Selected)
+                foreach (var upgrade in GameSession.Instance.Rewards.Upgrades.Selected)
                 {
                     text.Append(any ? ", " : "Upgrades  ").Append(upgrade.displayName);
                     any = true;

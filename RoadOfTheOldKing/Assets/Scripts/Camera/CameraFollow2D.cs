@@ -1,7 +1,7 @@
-using TheLostShrine.UI;
+using RoadOfTheOldKing.UI;
 using UnityEngine;
 
-namespace TheLostShrine.Cameras
+namespace RoadOfTheOldKing.Cameras
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Camera))]

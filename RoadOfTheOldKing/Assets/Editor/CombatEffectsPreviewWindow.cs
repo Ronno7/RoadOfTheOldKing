@@ -1,13 +1,13 @@
-using TheLostShrine.Input;
-using TheLostShrine.Player;
-using TheLostShrine.Prototype;
-using TheLostShrine.Weapons;
+using RoadOfTheOldKing.Input;
+using RoadOfTheOldKing.Player;
+using RoadOfTheOldKing.Prototype;
+using RoadOfTheOldKing.Weapons;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace TheLostShrine.Editor
+namespace RoadOfTheOldKing.Editor
 {
     public sealed class CombatEffectsPreviewWindow : EditorWindow
     {
@@ -53,7 +53,7 @@ namespace TheLostShrine.Editor
         private void Refresh()
         {
             if (ownsTime && EditorApplication.isPlaying)
-                TheLostShrine.UI.SimulationPause.SetAudioPaused(mute || EditorApplication.isPaused);
+                RoadOfTheOldKing.UI.SimulationPause.SetAudioPaused(mute || EditorApplication.isPaused);
             if (EditorApplication.isPlaying && player == null)
                 player = FindFirstObjectByType<PlayerCombatController>();
             driver = player != null ? player.GetComponent<CombatPreviewDriver>() : null;
@@ -70,8 +70,8 @@ namespace TheLostShrine.Editor
         private void OwnTime()
         {
             if (ownsTime || !EditorApplication.isPlaying) return;
-            previousSpeed = TheLostShrine.UI.SimulationPause.UnpausedTimeScale; previousPause = EditorApplication.isPaused;
-            previousAudioPause = TheLostShrine.UI.SimulationPause.UnpausedAudio; previousBackground = Application.runInBackground;
+            previousSpeed = RoadOfTheOldKing.UI.SimulationPause.UnpausedTimeScale; previousPause = EditorApplication.isPaused;
+            previousAudioPause = RoadOfTheOldKing.UI.SimulationPause.UnpausedAudio; previousBackground = Application.runInBackground;
             Application.runInBackground = true;
             ownsTime = true;
         }
@@ -79,15 +79,15 @@ namespace TheLostShrine.Editor
         private void ApplyTime()
         {
             OwnTime();
-            TheLostShrine.UI.SimulationPause.SetTimeScale(speed);
-            TheLostShrine.UI.SimulationPause.SetAudioPaused(mute || EditorApplication.isPaused);
+            RoadOfTheOldKing.UI.SimulationPause.SetTimeScale(speed);
+            RoadOfTheOldKing.UI.SimulationPause.SetAudioPaused(mute || EditorApplication.isPaused);
         }
 
         private void RestoreTime()
         {
             if (!ownsTime) return;
-            TheLostShrine.UI.SimulationPause.SetTimeScale(previousSpeed);
-            TheLostShrine.UI.SimulationPause.SetAudioPaused(previousAudioPause);
+            RoadOfTheOldKing.UI.SimulationPause.SetTimeScale(previousSpeed);
+            RoadOfTheOldKing.UI.SimulationPause.SetAudioPaused(previousAudioPause);
             Application.runInBackground = previousBackground;
             if (EditorApplication.isPlaying) EditorApplication.isPaused = previousPause;
             ownsTime = false;

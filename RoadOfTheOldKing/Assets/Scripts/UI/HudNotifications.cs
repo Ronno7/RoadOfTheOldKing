@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace TheLostShrine.UI
+namespace RoadOfTheOldKing.UI
 {
     // Event-driven text channels for the HUD. Gameplay posts; the HUD presents. Nothing here
     // reads or writes gameplay state.

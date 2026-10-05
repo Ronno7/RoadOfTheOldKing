@@ -7,9 +7,9 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Tilemaps;
 using Object = UnityEngine.Object;
-using static TheLostShrine.EditorTools.TileKitAssets;
+using static RoadOfTheOldKing.EditorTools.TileKitAssets;
 
-namespace TheLostShrine.EditorTools
+namespace RoadOfTheOldKing.EditorTools
 {
     public static class TutorialPathsKitBuilder
     {

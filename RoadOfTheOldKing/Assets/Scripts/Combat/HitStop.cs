@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-namespace TheLostShrine.Combat
+namespace RoadOfTheOldKing.Combat
 {
     // Brief global freeze-frame for the heaviest impacts (killing blows). Ordinary hits pause only the
     // swing's own clock. Runs only from normal speed, so pause menus and slow-motion previews are never
@@ -29,7 +29,7 @@ namespace TheLostShrine.Combat
         private IEnumerator Run(float seconds)
         {
             active = true;
-            pause = TheLostShrine.UI.SimulationPause.Acquire();
+            pause = RoadOfTheOldKing.UI.SimulationPause.Acquire();
             yield return new WaitForSecondsRealtime(seconds);
             Restore();
         }

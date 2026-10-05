@@ -1,7 +1,7 @@
-using TheLostShrine.Combat;
+using RoadOfTheOldKing.Combat;
 using UnityEngine;
 
-namespace TheLostShrine.Progression
+namespace RoadOfTheOldKing.Progression
 {
     // Records a progress milestone (and saves) the first time an enemy is defeated, so later beats can
     // depend on the fight without a reward attached (e.g. the Tutorial's lone wolf wakes the Recall stone).
@@ -24,7 +24,7 @@ namespace TheLostShrine.Progression
 
         private void OnDefeated()
         {
-            var session = CheckpointSession.Instance;
+            var session = GameSession.Instance;
             if (session == null || string.IsNullOrEmpty(milestone) || session.Progress.Has(milestone)) return;
             session.Progress.Complete(milestone);
             session.SaveProgress();

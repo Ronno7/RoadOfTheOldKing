@@ -1,10 +1,14 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements">
     <ui:Style src="MenuTheme.uss" />
+    <ui:Style src="OrnateMenu.uss" />
     <ui:Style src="BonfireMenu.uss" />
     <ui:VisualElement name="bonfire-overlay" class="menu-overlay">
-        <ui:VisualElement name="bonfire-panel" class="menu-panel">
+        <ui:VisualElement name="bonfire-panel" class="menu-panel ornate-panel hearth-frame">
+            <ui:VisualElement class="menu-crest" picking-mode="Ignore" />
             <ui:Label name="heading" class="menu-heading" />
-            <ui:VisualElement class="menu-divider" />
+            <ui:VisualElement class="menu-divider">
+                <ui:VisualElement class="menu-medallion" picking-mode="Ignore" />
+            </ui:VisualElement>
             <ui:Label name="status" class="menu-text" />
             <ui:Label name="shards" class="menu-meta" />
             <ui:VisualElement name="actions" />

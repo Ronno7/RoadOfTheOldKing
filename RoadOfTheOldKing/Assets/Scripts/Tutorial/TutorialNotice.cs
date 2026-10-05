@@ -1,6 +1,6 @@
-using TheLostShrine.UI;
+using RoadOfTheOldKing.UI;
 
-namespace TheLostShrine.Tutorial
+namespace RoadOfTheOldKing.Tutorial
 {
     // Lesson/unlock messages. Kept as the Tutorial-facing entry point; presentation is the HUD's
     // receipt channel (HudNotifications), so callers never depend on a particular UI.

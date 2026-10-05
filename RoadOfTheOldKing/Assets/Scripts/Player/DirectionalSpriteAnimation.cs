@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace TheLostShrine.Player
+namespace RoadOfTheOldKing.Player
 {
     // One animation drawn in up to eight directions, matching a PixelLab export folder.
     // Octants run counterclockwise from east: E, NE, N, NW, W, SW, S, SE.

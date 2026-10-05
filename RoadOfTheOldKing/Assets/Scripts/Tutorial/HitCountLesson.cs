@@ -1,9 +1,9 @@
 using System;
-using TheLostShrine.Combat;
-using TheLostShrine.Progression;
+using RoadOfTheOldKing.Combat;
+using RoadOfTheOldKing.Progression;
 using UnityEngine;
 
-namespace TheLostShrine.Tutorial
+namespace RoadOfTheOldKing.Tutorial
 {
     // Completes after a number of accepted player hits of the chosen kinds on one target
     // (for example three melee strikes on the practice dummy), then saves a milestone.
@@ -34,7 +34,7 @@ namespace TheLostShrine.Tutorial
             if (IsComplete || hit.Source == null || hit.Source.GetComponent<Player.PlayerCombatController>() == null) return;
             if (!Counts(hit.Kind) || ++hits < requiredHits) return;
             IsComplete = true;
-            CheckpointSession.Instance?.SaveProgress();
+            GameSession.Instance?.SaveProgress();
             if (!string.IsNullOrEmpty(completionNotice)) TutorialNotice.Show(completionNotice, 6f);
             Completed?.Invoke();
         }

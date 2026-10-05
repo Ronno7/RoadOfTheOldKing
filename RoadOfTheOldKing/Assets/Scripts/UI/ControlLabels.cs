@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TheLostShrine.UI
+namespace RoadOfTheOldKing.UI
 {
     // One place for the key names shown in prompts and hints. Text uses {tokens} such as
     // "Press {interact}". The labels mirror the current fixed bindings (PlayerMovementInput,

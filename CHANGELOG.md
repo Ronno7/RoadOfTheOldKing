@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+**Added**
+- A title screen with Continue, New Game, Settings and Quit, and a Main Menu option in the pause menu.
+- A Settings page, reachable from the pause menu and the title, holding the vitals option.
+- Continue resumes exactly where you left off, with the health and flasks you had; dying still returns you to the bonfire.
+
+**Changed**
+- The bonfire menu has a new hearth look (oak beams, rope lashings and bronze trim) and is larger; the defeat screen has a bronze frame and carved heading.
+- The pause menu's Restart is now Return to bonfire; New Game moved to the title screen.
+- One save now covers the whole game instead of a single area; existing saves carry over automatically.
+- Respawning, restarting and starting a new game fade the screen out and back in.
+
 ## 0.4 — Vertical slice
 
 ### 0.4.7 — 2026-10-03 · Combat and Tutorial overhaul

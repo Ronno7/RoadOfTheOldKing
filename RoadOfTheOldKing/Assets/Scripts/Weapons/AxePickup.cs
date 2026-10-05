@@ -1,12 +1,14 @@
-using TheLostShrine.Player;
-using TheLostShrine.World;
-using TheLostShrine.Progression;
+using RoadOfTheOldKing.Player;
+using RoadOfTheOldKing.World;
+using RoadOfTheOldKing.Progression;
 using UnityEngine;
 
-namespace TheLostShrine.Weapons
+namespace RoadOfTheOldKing.Weapons
 {
+    // The one-time axe pickup (the Tutorial stump). Once a save owns the axe, the player spawns its
+    // own copy on load, so an unowned world axe with this pickup hides itself instead of duplicating it.
     [DisallowMultipleComponent, RequireComponent(typeof(AxeWeapon), typeof(Collider2D))]
-    public sealed class AxePickup : WorldPickup
+    public sealed class AxePickup : WorldPickup, IProgressParticipant
     {
         private AxeWeapon weapon;
         public override string Prompt => "Take axe";
@@ -25,8 +27,14 @@ namespace TheLostShrine.Weapons
             if (!CanCollect(player)) return false;
             var combat = player.GetComponent<PlayerCombatController>();
             bool collected = combat.TryEquip(weapon);
-            if (collected) CheckpointSession.Instance?.SaveProgress();
+            if (collected) GameSession.Instance?.SaveProgress();
             return collected;
+        }
+
+        public void CaptureProgress(ProgressState state) { }
+        public void RestoreProgress(ProgressState state)
+        {
+            if (state.hasAxe && weapon != null && weapon.Owner == null) gameObject.SetActive(false);
         }
     }
 }

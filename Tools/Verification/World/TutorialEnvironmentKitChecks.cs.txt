@@ -1,7 +1,7 @@
 // Run in Edit Mode through Unity MCP execute_code. Does not modify gameplay or saves.
 if(EditorApplication.isPlaying)throw new System.Exception("Edit Mode required.");
-string root=TheLostShrine.EditorTools.TutorialEnvironmentKitBuilder.Root;
-var props=TheLostShrine.EditorTools.TutorialEnvironmentKitBuilder.ReadCatalog();
+string root=RoadOfTheOldKing.EditorTools.TutorialEnvironmentKitBuilder.Root;
+var props=RoadOfTheOldKing.EditorTools.TutorialEnvironmentKitBuilder.ReadCatalog();
 var failures=new System.Collections.Generic.List<string>();int count=0;
 System.Action<bool,string> check=(ok,label)=>{count++;if(!ok)failures.Add(label);};
 var sprites=AssetDatabase.LoadAllAssetsAtPath(root+"/TutorialEnvironment16.png").OfType<Sprite>().ToDictionary(s=>s.name);
@@ -25,7 +25,7 @@ UnityEngine.Object.DestroyImmediate(atlas);UnityEngine.Object.DestroyImmediate(a
 foreach(var prop in props)
 {
     check(sprites.ContainsKey(prop.name)&&sprites[prop.name].rect.width==prop.width&&sprites[prop.name].rect.height==prop.height,"Whole sprite "+prop.name);
-    string path=(prop.interactiveArt?TheLostShrine.EditorTools.TutorialEnvironmentKitBuilder.VisualRoot:TheLostShrine.EditorTools.TutorialEnvironmentKitBuilder.PrefabRoot)+"/"+prop.name+(prop.interactiveArt?"_Visual":"")+".prefab";
+    string path=(prop.interactiveArt?RoadOfTheOldKing.EditorTools.TutorialEnvironmentKitBuilder.VisualRoot:RoadOfTheOldKing.EditorTools.TutorialEnvironmentKitBuilder.PrefabRoot)+"/"+prop.name+(prop.interactiveArt?"_Visual":"")+".prefab";
     var prefab=AssetDatabase.LoadAssetAtPath<GameObject>(path);
     check(prefab!=null,"Prefab "+prop.name);if(!prefab)continue;
     check(prefab.GetComponentsInChildren<MonoBehaviour>(true).Length==0,"Art-only prefab "+prop.name);
@@ -67,6 +67,6 @@ check(AssetDatabase.LoadAllAssetsAtPath(palette).OfType<GridPalette>().Any(),"Re
 check(AssetDatabase.FindAssets("t:Prefab",new[]{"Assets/Art/Tiles/Tutorial/Templates"}).Length==1,"One shared template");
 check(AssetDatabase.FindAssets("t:Scene",new[]{root}).Length==0,"No extra demonstration scenes");
 var player=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Player/Player.prefab").GetComponentsInChildren<SpriteRenderer>().First(r=>r.name=="Body");
-var oak=AssetDatabase.LoadAssetAtPath<GameObject>(TheLostShrine.EditorTools.TutorialEnvironmentKitBuilder.PrefabRoot+"/Oak.prefab").transform.Find("Above Player").GetComponent<UnityEngine.Tilemaps.TilemapRenderer>();
+var oak=AssetDatabase.LoadAssetAtPath<GameObject>(RoadOfTheOldKing.EditorTools.TutorialEnvironmentKitBuilder.PrefabRoot+"/Oak.prefab").transform.Find("Above Player").GetComponent<UnityEngine.Tilemaps.TilemapRenderer>();
 check(oak.sortingLayerID==player.sortingLayerID&&oak.sortingOrder>player.sortingOrder,"Canopy draws over actual player renderer");
 return (failures.Count==0?"PASS ":"FAILED ")+count+" Environment assertions; "+props.Length+" objects, "+expectedTiles+" tile pieces\n"+string.Join("\n",failures.ToArray());

@@ -1,9 +1,9 @@
-using TheLostShrine.Combat;
-using TheLostShrine.Player;
-using TheLostShrine.Progression;
+using RoadOfTheOldKing.Combat;
+using RoadOfTheOldKing.Player;
+using RoadOfTheOldKing.Progression;
 using UnityEngine;
 
-namespace TheLostShrine.World
+namespace RoadOfTheOldKing.World
 {
     public sealed class ThrowRecallPuzzle : MonoBehaviour, IProgressParticipant, IResetOnRest
     {
@@ -31,7 +31,7 @@ namespace TheLostShrine.World
                 if (door != null)
                     door.SetOpen(true);
                 Solved?.Invoke();
-                CheckpointSession.Instance?.SaveProgress();
+                GameSession.Instance?.SaveProgress();
                 return true;
             }
             return false;

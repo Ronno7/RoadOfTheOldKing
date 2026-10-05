@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using TheLostShrine.Weapons;
+using RoadOfTheOldKing.Weapons;
 
-namespace TheLostShrine.Progression
+namespace RoadOfTheOldKing.Progression
 {
     [Serializable]
     public sealed class UpgradeSelection

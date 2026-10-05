@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace TheLostShrine.Player
+namespace RoadOfTheOldKing.Player
 {
     // Out-of-combat carry: the weapon rests upright at the hero's right side, butt down, on the edge
     // of his silhouette, mirrored per facing and drawn in front of or behind the body. On the camera

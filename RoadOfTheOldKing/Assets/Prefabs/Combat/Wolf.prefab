@@ -315,7 +315,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.Damageable
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.Damageable
   maxHealth: 100
   protectionSource: {fileID: 0}
 --- !u!114 &5467780097179905967
@@ -329,7 +329,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0a3d61830c75a1945a2ae1374af9f9a1, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.HitReaction
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.HitReaction
   knockbackMultiplier: 1
   maxKnockbackImpulse: 0
   replaceMovementOnHit: 1
@@ -349,7 +349,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ac9d1f244ded82f4c9efa81c8450afb8, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.WolfView
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.WolfView
   animations: {fileID: 11400000, guid: 7d326a6e6fc09e746850cfce4ccef82c, type: 2}
   bodyVisual: {fileID: 7297936848709932806}
   attackOutline: {fileID: 1312492780506765286}
@@ -365,7 +365,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 66dead76a9dc0794392b1c7c8c51e277, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.EnemyHealthIndicator
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.EnemyHealthIndicator
   body: {fileID: 7297936848709932806}
   panel: {fileID: 11400000, guid: 18015c3b74002454fab6d92829abd2aa, type: 2}
   layout: {fileID: 9197481963319205126, guid: 35880d76326709e48badbada47d6848c, type: 3}
@@ -382,7 +382,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dc8908e9a5554aa489e50ba0a13435b7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.EnemyImpactFeedback
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.EnemyImpactFeedback
   body: {fileID: 7297936848709932806}
   impactSound: {fileID: 8300000, guid: c1c5b78e1cffb774d821e48418e46675, type: 3}
   volume: 0.48
@@ -403,7 +403,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ded85ff939c67a34cbdaf660090669c6, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.EnemyAwarenessIndicator
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.EnemyAwarenessIndicator
   body: {fileID: 7297936848709932806}
   panel: {fileID: 11400000, guid: 18015c3b74002454fab6d92829abd2aa, type: 2}
   layout: {fileID: 9197481963319205126, guid: 79df98bc4ec28d04db859ed7128cbf0f, type: 3}
@@ -421,7 +421,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d2ac9be31ec5cf44f89b146f402fd48f, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TheLostShrine.Combat.WolfAI
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.WolfAI
   target: {fileID: 0}
   noticeRadius: 10
   leashRadius: 20

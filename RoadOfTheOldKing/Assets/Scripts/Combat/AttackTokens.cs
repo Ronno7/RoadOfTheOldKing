@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace TheLostShrine.Combat
+namespace RoadOfTheOldKing.Combat
 {
     // Limits how many enemies commit to an attack on the player at once, so a pack takes turns
     // instead of striking together. Holders release on recovery, stagger, defeat, reset or disable.

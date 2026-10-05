@@ -1,21 +1,21 @@
 // Run through Unity MCP execute_code in a fresh PrototypeLoop Play Mode session
-// with an empty TheLostShrine.Verification.* saveKey. Stop Play Mode afterward.
+// with an empty RoadOfTheOldKing.Verification.* saveKey. Stop Play Mode afterward.
 // Uses the real input actions, movement, weapon, stamina and bonfire components.
 var results = new System.Collections.Generic.List<string>();
 System.Action<bool,string> check = (ok,name) => results.Add((ok ? "PASS " : "FAIL ") + name);
 System.Func<float,float,bool> near = (a,b) => Mathf.Abs(a-b) < .02f;
 var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
-var session = TheLostShrine.Progression.CheckpointSession.Instance;
-if (!((string)session.GetType().GetField("saveKey",flags).GetValue(session)).StartsWith("TheLostShrine.Verification."))
+var session = RoadOfTheOldKing.Progression.GameSession.Instance;
+if (!((string)session.GetType().GetField("saveKey",flags).GetValue(session)).StartsWith("RoadOfTheOldKing.Verification."))
     throw new System.Exception("Use an isolated verification save slot.");
-var player = GameObject.Find("Player").GetComponent<TheLostShrine.Player.PlayerCombatController>();
-var stamina = player.GetComponent<TheLostShrine.Player.PlayerStamina>();
-var life = player.GetComponent<TheLostShrine.Player.PlayerHealth>();
-var movement = player.GetComponent<TheLostShrine.Player.PlayerMovement>();
-var input = player.GetComponent<TheLostShrine.Input.PlayerMovementInput>();
+var player = GameObject.Find("Player").GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();
+var stamina = player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>();
+var life = player.GetComponent<RoadOfTheOldKing.Player.PlayerHealth>();
+var movement = player.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>();
+var input = player.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();
 var body = player.GetComponent<Rigidbody2D>();
-var reaction = player.GetComponent<TheLostShrine.Combat.HitReaction>();
-var weapon = UnityEngine.Object.FindFirstObjectByType<TheLostShrine.Weapons.AxeWeapon>();
+var reaction = player.GetComponent<RoadOfTheOldKing.Combat.HitReaction>();
+var weapon = UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Weapons.AxeWeapon>();
 var sim = weapon.GetType().GetMethod("Simulate",flags);
 var recover = stamina.GetType().GetMethod("Tick",flags);
 var moveUpdate = movement.GetType().GetMethod("FixedUpdate",flags);
@@ -74,7 +74,7 @@ try {
     target=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Combat/MeleeSentinel.prefab"));
     target.name="Stamina Verification Sentinel";target.transform.position=body.position+Vector2.right*1.1f;
     target.GetComponent<Rigidbody2D>().position=target.transform.position;Physics2D.SyncTransforms();
-    var enemyHealth=target.GetComponent<TheLostShrine.Combat.Damageable>();
+    var enemyHealth=target.GetComponent<RoadOfTheOldKing.Combat.Damageable>();
     check(enemyHealth.MaxHealth==100,"Sentinel uses the expanded 100 HP pool");
     check(weapon.TryLightChop(Vector2.right) && near(stamina.Current,82),"First slash costs 18 immediately");
     check(!weapon.TryThrow(Vector2.right) && !weapon.TryBeginCharge() && near(stamina.Current,82),"Busy actions reject without charging extra stamina");
@@ -96,7 +96,7 @@ try {
     check(weapon.TryReleaseCharge(Vector2.right) && near(stamina.Current,65),"Cleave release does not charge twice");moveTick();
     check(!movement.IsSprinting,"Cleave animation also prevents sprint");tick(.46f);
     stamina.Restore();weapon.TryBeginCharge();weapon.CancelCharge();
-    check(near(stamina.Current,65) && weapon.State==TheLostShrine.Weapons.AxeState.Held,"Cancelling a charge does not refund its commitment cost");
+    check(near(stamina.Current,65) && weapon.State==RoadOfTheOldKing.Weapons.AxeState.Held,"Cancelling a charge does not refund its commitment cost");
     stamina.Restore();weapon.TryBeginCharge();tick(.1f);
     check(!weapon.TryReleaseCharge(Vector2.right) && near(stamina.Current,65),"An early charge release cannot create a free attack");
     keys(new UnityEngine.InputSystem.Key[0]);moveTick();weapon.CancelAction();stamina.Restore();
@@ -104,9 +104,9 @@ try {
     check(!weapon.TryThrow(Vector2.right) && near(stamina.Current,75),"Repeated E while away cannot charge another throw");
     stamina.TrySpend(75);check(!weapon.TryRecall(),"Zero stamina does not bypass the Recall unlock requirement");
     player.UnlockRecall();check(weapon.TryRecall() && near(stamina.Current,0),"Unlocked Recall remains available at zero stamina");tick(.2f);
-    check(weapon.State==TheLostShrine.Weapons.AxeState.Held,"Free Recall retrieves the weapon at exhaustion");
+    check(weapon.State==RoadOfTheOldKing.Weapons.AxeState.Held,"Free Recall retrieves the weapon at exhaustion");
     check(!weapon.TryLightChop(Vector2.right) && !weapon.TryBeginCharge() && !weapon.TryThrow(Vector2.right),"Empty stamina blocks both attacks and new throws");
-    check(weapon.State==TheLostShrine.Weapons.AxeState.Held && near(stamina.Current,0),"Rejected actions leave the weapon usable and stamina unchanged");
+    check(weapon.State==RoadOfTheOldKing.Weapons.AxeState.Held && near(stamina.Current,0),"Rejected actions leave the weapon usable and stamina unchanged");
     stamina.Restore();weapon.CancelAction();
     for(int i=0;i<4;i++){weapon.TryThrow(Vector2.right);tick(.12f);weapon.TryRecall();tick(.2f);}
     check(near(stamina.Current,0) && !weapon.TryThrow(Vector2.right),"Rapid throw/Recall spam stops after four throws");
@@ -116,18 +116,18 @@ try {
     check(!stamina.TrySpend(-10) && !stamina.TrySpend(float.NaN) && near(stamina.Current,100),"Invalid costs cannot grant or corrupt stamina");
 
     keys(new[]{UnityEngine.InputSystem.Key.W,UnityEngine.InputSystem.Key.LeftShift});stamina.Restore();moveTick();
-    life.Health.ReceiveHit(new TheLostShrine.Combat.CombatHit(target,TheLostShrine.Combat.AttackKind.EnemyMelee,20,Vector2.left,2,.2f));
+    life.Health.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(target,RoadOfTheOldKing.Combat.AttackKind.EnemyMelee,20,Vector2.left,2,.2f));
     float beforeHitTick=stamina.Current;var impulse=body.linearVelocity;moveTick();
     check(!movement.IsSprinting && near(stamina.Current,beforeHitTick) && body.linearVelocity==impulse,"Stagger interrupts sprint without overriding knockback or draining more stamina");
     check(life.Health.Health==80,"An enemy hit removes 20 of the player's 100 HP");reaction.Clear();
-    var camp=session.Fires[0];move(camp.SpawnPosition);stamina.TrySpend(40);
-    var interaction=player.GetComponent<TheLostShrine.Player.PlayerBonfireInteraction>();
+    var camp=session.Checkpoints.Fires[0];move(camp.SpawnPosition);stamina.TrySpend(40);
+    var interaction=player.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>();
     check(interaction.Open(camp) && near(stamina.Current,100) && life.Health.Health==100,"Bonfire rest restores HP and stamina");moveTick();
     check(!movement.IsSprinting && !input.SprintHeld,"Bonfire menu cancels held sprint");interaction.Close();
-    stamina.TrySpend(60);var exit=session.Fires[1];move(exit.SpawnPosition);session.Rest(exit);stamina.TrySpend(40);
-    check(session.Travel(camp,exit) && near(stamina.Current,100),"Bonfire travel restores stamina");
+    stamina.TrySpend(60);var exit=session.Checkpoints.Fires[1];move(exit.SpawnPosition);session.Checkpoints.Rest(exit);stamina.TrySpend(40);
+    check(session.Checkpoints.Travel(camp,exit) && near(stamina.Current,100),"Bonfire travel restores stamina");
     stamina.TrySpend(50);life.GetType().GetField("invulnerableUntil",flags).SetValue(life,0f);
-    life.Health.ReceiveHit(new TheLostShrine.Combat.CombatHit(target,TheLostShrine.Combat.AttackKind.EnemyMelee,100,Vector2.down,0,0));
+    life.Health.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(target,RoadOfTheOldKing.Combat.AttackKind.EnemyMelee,100,Vector2.down,0,0));
     float deadStamina=stamina.Current;recover.Invoke(stamina,new object[]{10f});
     check(!life.IsAlive && !movement.enabled && !movement.IsSprinting && near(stamina.Current,deadStamina),"Death stops sprint and stamina regeneration");
     check(!weapon.TryThrow(Vector2.right) && !stamina.TrySpend(1),"Dead player cannot spend stamina or launch attacks");

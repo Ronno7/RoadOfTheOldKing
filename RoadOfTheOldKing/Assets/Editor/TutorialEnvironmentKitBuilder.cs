@@ -8,9 +8,9 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Tilemaps;
 using Object = UnityEngine.Object;
-using static TheLostShrine.EditorTools.TileKitAssets;
+using static RoadOfTheOldKing.EditorTools.TileKitAssets;
 
-namespace TheLostShrine.EditorTools
+namespace RoadOfTheOldKing.EditorTools
 {
     /// <summary>Imports generated artwork into native pixels and stock Unity assets. No runtime generator.</summary>
     public static class TutorialEnvironmentKitBuilder

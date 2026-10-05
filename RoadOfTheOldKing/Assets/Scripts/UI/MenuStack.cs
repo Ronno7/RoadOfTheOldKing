@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace TheLostShrine.UI
+namespace RoadOfTheOldKing.UI
 {
     // A modal menu that receives menu input while it is on top of the stack.
     public interface IModalMenu

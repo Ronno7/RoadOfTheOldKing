@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine.UIElements;
 
-namespace TheLostShrine.UI
+namespace RoadOfTheOldKing.UI
 {
     // A vertical list of menu buttons built from PauseMenuAction commands: mouse hover/click and
     // keyboard selection share one highlighted entry, and the selected entry's description shows in a
@@ -34,6 +34,10 @@ namespace TheLostShrine.UI
                 int index = i;
                 var button = new Button(() => invoke(actions[index])) { text = actions[i].Label };
                 button.AddToClassList("menu-button");
+                // Hidden by default (MenuTheme.uss); styles such as Hearth show it beside the selected entry.
+                var cursor = new VisualElement { pickingMode = PickingMode.Ignore };
+                cursor.AddToClassList("menu-cursor");
+                button.Add(cursor);
                 button.SetEnabled(actions[i].Enabled);
                 button.RegisterCallback<FocusInEvent>(_ => Select(index));
                 button.RegisterCallback<PointerEnterEvent>(_ => Select(index));
