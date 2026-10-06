@@ -1,0 +1,118 @@
+// Edit Mode scene geometry checks. Uses the real player collider dimensions,
+// but does not run its motor, enter Play Mode, save a scene or access saves.
+// Queries are filtered to GreenLowlands because Tutorial can be open additively.
+if(EditorApplication.isPlaying)throw new System.Exception("Edit Mode required.");
+var scene=UnityEngine.SceneManagement.SceneManager.GetSceneByName("GreenLowlands");
+if(!scene.IsValid()||!scene.isLoaded)throw new System.Exception("Open Assets/Scenes/GreenLowlands.unity additively first.");
+var world=scene.GetRootGameObjects().Single(g=>g.name=="Green Lowlands Zone");
+var objects=world.transform.Find("Environment Objects");
+var decoration=world.transform.Find("Decoration Objects");
+var anchors=world.transform.Find("Layout Anchors (editor only)").Cast<Transform>().ToArray();
+var collision=world.transform.Find("Collision").GetComponent<UnityEngine.Tilemaps.Tilemap>();
+var player=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Player/Player.prefab");
+var box=player.GetComponent<BoxCollider2D>();
+var body=player.GetComponentsInChildren<SpriteRenderer>(true).Single(r=>r.name=="Body");
+var scale=box.transform.lossyScale;
+var size=Vector2.Scale(box.size,new Vector2(Mathf.Abs(scale.x),Mathf.Abs(scale.y)));
+var offset=(Vector2)player.transform.InverseTransformPoint(box.transform.TransformPoint(box.offset));
+var failures=new System.Collections.Generic.List<string>();int count=0,castCount=0;
+System.Action<bool,string> check=(ok,label)=>{count++;if(!ok)failures.Add(label);};
+check(box.enabled&&!box.isTrigger&&box.transform==player.transform&&player.transform.lossyScale==Vector3.one,"Actual player has a root, unit-scale solid box");
+check(world.transform.position==Vector3.zero&&world.transform.localScale==Vector3.one,"Native zone origin and scale");
+check(world.GetComponent<Grid>()!=null&&world.GetComponent<Grid>().cellSize==Vector3.one,"One-unit / 16-pixel grid");
+check(collision.GetComponent<UnityEngine.Tilemaps.TilemapCollider2D>()!=null&&!collision.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().enabled,"Hidden regional Collision map has physical tiles");
+foreach(var map in world.GetComponentsInChildren<UnityEngine.Tilemaps.TilemapCollider2D>(true))map.ProcessTilemapChanges();
+Physics2D.SyncTransforms();
+System.Func<Collider2D,bool> belongs=c=>c!=null&&c.enabled&&c.gameObject.activeInHierarchy&&!c.isTrigger&&c.gameObject.scene==scene&&c.GetComponentInParent<RoadOfTheOldKing.Player.PlayerHealth>()==null;
+System.Func<Vector2,bool> clear=p=>!Physics2D.OverlapBoxAll(p+offset,size,0).Any(c=>belongs(c));
+System.Func<Vector2,Vector2,bool> clearSegment=(from,to)=>{
+    castCount++;var delta=to-from;
+    return clear(from)&&clear(to)&&!Physics2D.BoxCastAll(from+offset,size,0,delta.normalized,delta.magnitude).Any(h=>belongs(h.collider));
+};
+System.Func<Transform,string> source=t=>PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(t.gameObject);
+var placed=objects.Cast<Transform>().ToArray();
+check(placed.Length>0,"Placed Environment prefab instances exist");
+foreach(var prop in placed){
+    string label=prop.name;var path=source(prop);
+    check(!string.IsNullOrEmpty(path)&&path.StartsWith("Assets/Prefabs/Environment/"),"Linked complete prefab "+label);
+    check(prop.GetComponentsInChildren<Transform>(true).All(t=>t.localScale==Vector3.one&&t.localRotation==Quaternion.identity),"Unit-scale, unrotated art "+label);
+    var maps=prop.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>(true).ToDictionary(m=>m.name);
+    check(maps.ContainsKey("Environment")&&maps.ContainsKey("Above Player")&&maps.ContainsKey("Collision"),"Three separate maps "+label);
+    if(!maps.ContainsKey("Environment")||!maps.ContainsKey("Above Player")||!maps.ContainsKey("Collision"))continue;
+    var lower=maps["Environment"];var upper=maps["Above Player"];var solid=maps["Collision"];
+    var baseRenderer=lower.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>();
+    var upperRenderer=upper.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>();
+    check(!lower.GetComponent<Collider2D>()&&upper.GetComponentsInChildren<Collider2D>(true).Length==0,"Visual art has no collider "+label);
+    check(solid.GetComponent<UnityEngine.Tilemaps.TilemapCollider2D>()!=null&&!solid.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().enabled&&solid.gameObject.layer==LayerMask.NameToLayer("Environment"),"Independent hidden footprint "+label);
+    check(SortingLayer.GetLayerValueFromID(baseRenderer.sortingLayerID)<SortingLayer.GetLayerValueFromID(body.sortingLayerID),"Base art below actual player Body "+label);
+    check(upperRenderer.sortingLayerID==body.sortingLayerID&&upperRenderer.sortingOrder>body.sortingOrder&&upperRenderer.sortingOrder==500-Mathf.RoundToInt(4*prop.position.y),"Placed overhead order "+label);
+    foreach(var map in new[]{lower,upper})foreach(var cell in map.cellBounds.allPositionsWithin){
+        var tile=map.GetTile<UnityEngine.Tilemaps.Tile>(cell);if(tile==null)continue;
+        check(tile.colliderType==UnityEngine.Tilemaps.Tile.ColliderType.None&&tile.sprite!=null&&tile.sprite.pixelsPerUnit==16,"Native noncolliding visual tile "+label+" "+map.name+" "+cell);
+        check(!(lower.HasTile(cell)&&upper.HasTile(cell)),"Base / overhead never duplicate a cell "+label+" "+cell);
+    }
+}
+var required=new[]{"Arrival","Bridge West","Bridge East","Farmhouse Approach","Mill Approach","Barn Approach"};
+foreach(string name in required)check(anchors.Count(a=>a.name==name)==1,"Unique route anchor "+name);
+var arrival=anchors.Single(a=>a.name=="Arrival");
+// Nodes are player foot positions, spaced half a unit. Every traversed edge is
+// swept, so two free endpoints cannot hide a narrow wall between them.
+var freeCache=new int[81,41];
+System.Func<Vector2Int,Vector2> point=n=>new Vector2(n.x*.5f,n.y*.5f);
+System.Func<Vector2Int,bool> free=n=>{
+    if(n.x<1||n.x>79||n.y<1||n.y>39)return false;
+    if(freeCache[n.x,n.y]==0)freeCache[n.x,n.y]=clear(point(n))?1:-1;
+    return freeCache[n.x,n.y]==1;
+};
+var origin=new Vector2Int(Mathf.RoundToInt(arrival.position.x*2),Mathf.RoundToInt(arrival.position.y*2));
+check(free(origin),"Arrival has the actual player's full clearance");
+var reached=new System.Collections.Generic.HashSet<Vector2Int>();
+var queue=new System.Collections.Generic.Queue<Vector2Int>();
+if(free(origin)){reached.Add(origin);queue.Enqueue(origin);}
+var directions=new[]{Vector2Int.up,Vector2Int.right,Vector2Int.down,Vector2Int.left};
+while(queue.Count>0){
+    var p=queue.Dequeue();foreach(var d in directions){
+        var q=p+d;if(reached.Contains(q)||!free(q)||!clearSegment(point(p),point(q)))continue;
+        reached.Add(q);queue.Enqueue(q);
+    }
+}
+foreach(var anchor in anchors){
+    var node=new Vector2Int(Mathf.RoundToInt(anchor.position.x*2),Mathf.RoundToInt(anchor.position.y*2));
+    check(Vector2.Distance(point(node),anchor.position)<.001f,"Anchor on half-cell route grid "+anchor.name);
+    check(clear(anchor.position)&&reached.Contains(node),"Swept player-sized route reaches "+anchor.name);
+}
+var bridge=placed.Single(t=>source(t).EndsWith("/Plank_Bridge.prefab"));
+check(bridge.position==new Vector3(19,6,0),"Bridge aligns with the regional river opening");
+foreach(float y in new[]{7.5f,8.5f})check(clearSegment(new Vector2(18.5f,y),new Vector2(25.5f,y)),"Both bridge deck rows allow complete bank-to-bank crossing at y="+y);
+foreach(var p in new[]{new Vector2(21.5f,6.5f),new Vector2(21.5f,9.5f)})check(!clear(p),"Bridge rail blocks the player at "+p);
+check(!clearSegment(new Vector2(21.5f,7.5f),new Vector2(21.5f,5.5f))&&!clearSegment(new Vector2(21.5f,8.5f),new Vector2(21.5f,10.5f)),"Bridge prevents north/south departure through its rails");
+for(int x=19;x<=24;x++)foreach(int y in new[]{7,8})check(!collision.HasTile(new Vector3Int(x,y,0)),"Regional collision is cleared beneath the bridge deck "+x+","+y);
+foreach(var p in new[]{new Vector2(21.5f,12.5f),new Vector2(22.5f,2.5f)})check(collision.HasTile(collision.WorldToCell(p))&&!clear(p),"River remains solid away from the bridge at "+p);
+foreach(var p in new[]{new Vector2(-.25f,8),new Vector2(40.25f,8),new Vector2(10,-.25f),new Vector2(10,20.25f)})check(!clear(p),"Outer bounds prevent leaving the authored area at "+p);
+var grasses=decoration.Cast<Transform>().Where(t=>source(t).EndsWith("/Grass_Fan_Visual.prefab")||source(t).EndsWith("/Grass_Swept_Visual.prefab")||source(t).EndsWith("/Grass_Dry_Visual.prefab")).ToArray();
+check(grasses.Length>0,"Physical grass artwork is placed separately from ground");
+foreach(var grass in grasses)check(grass.GetComponentsInChildren<Collider2D>(true).Length==0&&grass.GetComponentsInChildren<Rigidbody2D>(true).Length==0,"Grass is visual and does not block movement "+grass.name);
+check(grasses.Any(g=>{var p=(Vector2)g.GetComponentInChildren<SpriteRenderer>().bounds.center;var n=new Vector2Int(Mathf.RoundToInt(p.x*2),Mathf.RoundToInt(p.y*2));return clear(p)&&reached.Contains(n);}),"A placed grass clump is traversable from the arrival route");
+var trees=placed.Where(t=>source(t).EndsWith("/Oak.prefab")||source(t).EndsWith("/Birch.prefab")||source(t).EndsWith("/Apple_Tree.prefab")).ToArray();
+check(trees.Length>0,"Retained trees provide a walk-behind case");
+int reachableCanopyCells=0;
+var images=new System.Collections.Generic.Dictionary<string,Texture2D>();
+try{
+    foreach(var tree in trees){
+        var trunk=tree.Find("Collision").GetComponent<UnityEngine.Tilemaps.Tilemap>();
+        var crown=tree.Find("Above Player").GetComponent<UnityEngine.Tilemaps.Tilemap>();
+        var trunkCells=new System.Collections.Generic.List<Vector3Int>();
+        foreach(var cell in trunk.cellBounds.allPositionsWithin)if(trunk.HasTile(cell))trunkCells.Add(cell);
+        check(trunkCells.Count>0&&trunkCells.All(p=>!clear(trunk.GetCellCenterWorld(p))),"Tree trunk remains solid "+tree.name);
+        foreach(var cell in crown.cellBounds.allPositionsWithin){
+            var sprite=crown.GetSprite(cell);if(sprite==null)continue;
+            var p=(Vector2)crown.GetCellCenterWorld(cell);var n=new Vector2Int(Mathf.RoundToInt(p.x*2),Mathf.RoundToInt(p.y*2));
+            if(!clear(p)||!reached.Contains(n))continue;
+            string path=AssetDatabase.GetAssetPath(sprite.texture);Texture2D image;
+            if(!images.TryGetValue(path,out image)){image=new Texture2D(2,2);image.LoadImage(System.IO.File.ReadAllBytes(path));images.Add(path,image);}
+            var r=sprite.rect;if(image.GetPixel((int)r.x+(int)r.width/2,(int)r.y+(int)r.height/2).a>.5f)reachableCanopyCells++;
+        }
+    }
+}finally{foreach(var image in images.Values)UnityEngine.Object.DestroyImmediate(image);}
+check(reachableCanopyCells>0,"Player can reach a clear position beneath opaque tree canopy pixels");
+return (failures.Count==0?"PASS ":"FAILED ")+count+" Green Lowlands scene assertions; "+reached.Count+" reachable half-cell nodes, "+castCount+" swept query segments, "+reachableCanopyCells+" reachable opaque-canopy cells; player box "+size+", offset "+offset+". Edit Mode geometry queries, not a motor/playtest.\n"+string.Join("\n",failures.ToArray());

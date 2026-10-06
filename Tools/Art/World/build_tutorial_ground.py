@@ -59,7 +59,8 @@ def coverage(mask):
     return image
 
 
-def texture(material, variant=0):
+def texture(material, variant=0, palette=None):
+    P = palette or globals()['P']
     im = Image.new('RGBA', (16,16), P[BASE[material]])
     draw = ImageDraw.Draw(im)
     rng = random.Random(9000 + (['Grass']+MATERIALS).index(material)*71 + variant*13)
@@ -96,8 +97,9 @@ def texture(material, variant=0):
     return im
 
 
-def tile(material, mask=255, variant=0):
-    im = texture(material,variant)
+def tile(material, mask=255, variant=0, palette=None):
+    P = palette or globals()['P']
+    im = texture(material,variant,P)
     if mask == 255: return im
     alpha = coverage(mask)
     im.putalpha(alpha)
@@ -124,7 +126,7 @@ def shape_name(mask):
     return labels.get(mask,'Junction') + f'_{mask:03d}'
 
 
-def validate_edges():
+def validate_edges(coverage_fn=coverage):
     # Exhaust all local arrangements around two touching occupied tiles, both axes.
     checks = 0
     for vertical in (False,True):
@@ -135,23 +137,27 @@ def validate_edges():
             occupied=set(centers)|{p for i,p in enumerate(optional) if bits & (1<<i)}
             def mask_at(p):
                 return normalize(sum(1<<i for i,(x,y) in enumerate(OFFSETS) if (p[0]+x,p[1]+y) in occupied))
-            a,b=[coverage(mask_at(p)) for p in centers]
+            a,b=[coverage_fn(mask_at(p)) for p in centers]
             for n in range(16):
                 assert a.getpixel((n,15) if vertical else (15,n)) == b.getpixel((n,0) if vertical else (0,n))
             checks += 1
     return checks
 
 
-def main():
+def main(output=OUT, preview=DOC, atlas_name='TutorialGround16',
+         preview_name='tutorial-ground-production-atlas', palette=None,
+         render_tile=None, seam_validator=validate_edges):
+    OUT, DOC, P = output, preview, palette or globals()['P']
+    render = render_tile or (lambda m, mask, v, p: texture(m,v,p) if m == 'Grass' else tile(m,mask,v,p))
     OUT.mkdir(parents=True,exist_ok=True); DOC.mkdir(parents=True,exist_ok=True)
     entries=[]; images=[]
     def add(name,material,mask,variant,image):
         entries.append(dict(name=name,material=material,mask=mask,variant=variant))
         images.append(image)
-    for i in range(8): add(f'Grass_Fill_{i:02}', 'Grass',255,i,texture('Grass',i))
+    for i in range(8): add(f'Grass_Fill_{i:02}', 'Grass',255,i,render('Grass',255,i,P))
     for material in MATERIALS:
-        for mask in MASKS: add(f'{material}_{shape_name(mask)}', material,mask,0,tile(material,mask))
-        for i in range(1,4): add(f'{material}_Center_Variant_{i:02}',material,255,i,tile(material,255,i))
+        for mask in MASKS: add(f'{material}_{shape_name(mask)}', material,mask,0,render(material,mask,0,P))
+        for i in range(1,4): add(f'{material}_Center_Variant_{i:02}',material,255,i,render(material,255,i,P))
     pitch=SIZE+2*PAD; rows=(len(entries)+COLS-1)//COLS
     atlas=Image.new('RGBA',(COLS*pitch,rows*pitch),(0,0,0,0))
     for index,(entry,im) in enumerate(zip(entries,images)):
@@ -163,21 +169,25 @@ def main():
             for ox in range(-PAD,SIZE+PAD):
                 if 0<=ox<SIZE and 0<=oy<SIZE: continue
                 atlas.putpixel((x+ox,top+oy),im.getpixel((max(0,min(15,ox)),max(0,min(15,oy)))))
-    atlas.save(OUT/'TutorialGround16.png')
+    atlas.save(OUT/(atlas_name+'.png'))
     (OUT/'TileManifest.json').write_text(json.dumps(dict(tileSize=16,columns=COLS,padding=PAD,entries=entries),indent=2)+'\n')
     with (OUT/'TileIndex.csv').open('w',newline='') as f:
         writer=csv.DictWriter(f,fieldnames=list(entries[0]));writer.writeheader();writer.writerows(entries)
     # Inspection sheet shows transparent rims over the normal meadow substrate.
     sheet=Image.new('RGB',(16*COLS,16*rows),P['grass'][:3])
     for i,im in enumerate(images): sheet.paste(im,((i%COLS)*16,(i//COLS)*16),im)
-    sheet.resize((sheet.width*4,sheet.height*4),Image.Resampling.NEAREST).save(DOC/'tutorial-ground-production-atlas.png')
+    sheet.resize((sheet.width*4,sheet.height*4),Image.Resampling.NEAREST).save(DOC/(preview_name+'.png'))
     assert len(entries)==308 and len({e['name'] for e in entries})==308
     pixels = list(atlas.get_flattened_data())
     assert set(pixels) <= set(P.values())|{(0,0,0,0)}|{c[:3]+(0,) for c in P.values()}
-    seam_checks=validate_edges()
+    seam_checks=seam_validator()
+    colors_by_material = {m: len({c[:3] for e, im in zip(entries, images) if e['material'] == m
+                                 for c in im.get_flattened_data() if c[3]}) for m in ['Grass']+MATERIALS}
+    assert max(colors_by_material.values()) <= 5
     report=dict(tiles=len(entries),rule_materials=7,overlay_shapes=47,materials=6,
                 seam_neighborhoods_checked=seam_checks,atlas_size=list(atlas.size),tile_size=16,
-                unique_opaque_colors=len({c for c in pixels if c[3]}))
+                unique_opaque_colors=len({c for c in pixels if c[3]}),
+                colors_by_material=colors_by_material)
     (OUT/'GenerationReport.json').write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps(report))
 

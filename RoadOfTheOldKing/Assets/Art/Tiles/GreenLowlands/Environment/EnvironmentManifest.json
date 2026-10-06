@@ -1,0 +1,344 @@
+{
+  "entries": [
+    {
+      "name": "Watermill",
+      "source": "Watermill_Weathered",
+      "kind": "building",
+      "sourceRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1536,
+        "height": 1024
+      },
+      "width": 144,
+      "height": 96,
+      "overheadRow": 2,
+      "swatches": [
+        1,
+        2,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 7,
+          "height": 2
+        },
+        {
+          "x": 7,
+          "y": 0,
+          "width": 2,
+          "height": 3
+        }
+      ],
+      "stretch": false,
+      "hueAware": false
+    },
+    {
+      "name": "Farm_Cart",
+      "source": "Farm_Cart_Weathered",
+      "kind": "prop",
+      "sourceRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1448,
+        "height": 1086
+      },
+      "width": 64,
+      "height": 48,
+      "overheadRow": 1,
+      "swatches": [
+        1,
+        2,
+        4,
+        5,
+        6,
+        8
+      ],
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 4,
+          "height": 2
+        }
+      ],
+      "stretch": false,
+      "hueAware": false
+    },
+    {
+      "name": "Plank_Bridge",
+      "source": "Plank_Bridge_Weathered",
+      "kind": "bridge",
+      "sourceRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1774,
+        "height": 887
+      },
+      "width": 96,
+      "height": 64,
+      "overheadRow": 99,
+      "swatches": [
+        1,
+        2,
+        4,
+        5,
+        6,
+        7
+      ],
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 6,
+          "height": 1
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "width": 6,
+          "height": 1
+        }
+      ],
+      "stretch": true,
+      "hueAware": false
+    },
+    {
+      "name": "Reused_Stone_Post",
+      "source": "Reused_Stone_Post",
+      "kind": "prop",
+      "sourceRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 1536
+      },
+      "width": 32,
+      "height": 32,
+      "overheadRow": 1,
+      "swatches": [
+        1,
+        5,
+        6,
+        8,
+        9,
+        10
+      ],
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "stretch": false,
+      "hueAware": false
+    },
+    {
+      "name": "Farmhouse_Weathered",
+      "source": "Farmhouse_Lowlands",
+      "kind": "static",
+      "width": 128,
+      "height": 96,
+      "overheadRow": 2,
+      "swatches": [
+        1,
+        2,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 8,
+          "height": 2
+        }
+      ],
+      "stretch": true,
+      "hueAware": false,
+      "sourceRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1448,
+        "height": 1086
+      }
+    },
+    {
+      "name": "Workshop_Weathered",
+      "source": "Threshing_Barn",
+      "kind": "static",
+      "width": 96,
+      "height": 80,
+      "overheadRow": 2,
+      "swatches": [
+        1,
+        2,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 6,
+          "height": 2
+        }
+      ],
+      "stretch": true,
+      "hueAware": false,
+      "sourceRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1374,
+        "height": 1145
+      }
+    },
+    {
+      "name": "Woodshed_Weathered",
+      "source": "Drying_Shed",
+      "kind": "static",
+      "width": 64,
+      "height": 48,
+      "overheadRow": 1,
+      "swatches": [
+        1,
+        2,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 4,
+          "height": 1
+        }
+      ],
+      "stretch": true,
+      "hueAware": false,
+      "sourceRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1448,
+        "height": 1086
+      }
+    },
+    {
+      "name": "Well_Disused",
+      "source": "Windlass_Well",
+      "kind": "static",
+      "width": 32,
+      "height": 48,
+      "overheadRow": 1,
+      "swatches": [
+        1,
+        2,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 2,
+          "height": 1
+        }
+      ],
+      "stretch": true,
+      "hueAware": false,
+      "sourceRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 1536
+      }
+    },
+    {
+      "name": "Fence_Weathered",
+      "source": "Fence_Weathered",
+      "kind": "static",
+      "width": 48,
+      "height": 32,
+      "overheadRow": 1,
+      "swatches": [
+        1,
+        2,
+        4,
+        5,
+        6,
+        7
+      ],
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 3,
+          "height": 1
+        }
+      ],
+      "stretch": false,
+      "hueAware": false,
+      "sourceRect": {
+        "x": 0,
+        "y": 0,
+        "width": 1536,
+        "height": 1024
+      }
+    }
+  ],
+  "reusedPrefabs": [
+    "Oak",
+    "Birch",
+    "Apple_Tree",
+    "Hedgerow",
+    "Fallen_Log",
+    "Boulder",
+    "Boulder_Cluster",
+    "Small_Stones",
+    "Fence_Vertical",
+    "Fence_NE",
+    "Fence_NW",
+    "Fence_SE",
+    "Fence_SW",
+    "Fence_Repaired",
+    "Fence_Post",
+    "Gate_Open",
+    "Gate_Closed",
+    "Axe_Stump",
+    "Firewood_Rack"
+  ]
+}

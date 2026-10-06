@@ -2,9 +2,9 @@
 
 [Player animation](PlayerAnimation.md) · [World and tilemaps](World.md) · [Changelog](../CHANGELOG.md)
 
-This guide explains how Road of the Old King works at runtime: its major systems, which component owns what, and how they communicate. It describes the production game in `Tutorial.unity`, the only scene in the build. `PrototypeLoop.unity` is a retired mechanics sandbox kept for reference, and `MovementPlayground.unity` is a small movement test scene.
+This guide explains how Road of the Old King works at runtime: its major systems, which component owns what, and how they communicate. The enabled build scenes are `Title`, `Tutorial` and `GreenLowlands`, in that order. `PrototypeLoop.unity` is a retired mechanics sandbox kept for reference, and `MovementPlayground.unity` is a small movement test scene.
 
-**Status:** the Tutorial is playable end to end: movement, axe pickup, throwing, melee, the first wolf, healing, the Recall awakening, a wolf pack, a Sun Shard and a bonfire. The route ends at the exit trail; the first overworld region (Green Lowlands) and the transition into it are in development. HUD and menus use the shared pixel font and frames.
+**Status:** the Tutorial is playable end to end: movement, axe pickup, throwing, melee, the first wolf, healing, the Recall awakening, a wolf pack, a Sun Shard and a bonfire. Its exit now leads to the Green Lowlands arrival pocket, with a return route, regional bonfire, cross-scene travel, respawn and Continue. The broader overworld, Puzzle 1, enemies and first upgrade are not yet placed. HUD and menus use the shared pixel font and frames.
 
 [Architecture](#architecture) · [Player](#player) · [Combat](#combat) · [Enemies](#enemies) · [Progression and saving](#progression-and-saving) · [World and interaction](#world-and-interaction) · [Tutorial](#tutorial) · [Camera](#camera) · [Presentation and UI](#presentation-and-ui) · [Tools](#tools-and-verification) · [Limitations](#current-limitations) · [Key files](#key-files)
 
@@ -239,7 +239,7 @@ stateDiagram-v2
 - **Reading the player:** it sidesteps an axe thrown straight at it, runs at a player whose axe is away, hops back from swings, attacks at once when the player whiffs or throws the axe away, presses a tired player, and bites back when a hit fails to break its poise. Lunges are armored, and windups vary in length while the lock always comes a fixed beat before the leap.
 - **Packs:** `AttackTokens` lets one enemy attack at a time while the others keep circling, spaced apart.
 
-`WolfView` samples the AI: circling, repositioning and chasing use stalk, walk and run animations driven by distance travelled; the bite's frames follow the windup clock so the jaws open on the leap; death plays once and holds as the corpse. The wolf also carries `EnemyHealthIndicator`, `EnemyAwarenessIndicator` and `EnemyImpactFeedback`. `EncounterState` is the shared "in combat" signal: true while any registered enemy is aware of the player or the player was just hit, plus 3 s of grace.
+`WolfView` samples the AI: circling, repositioning and chasing use stalk, walk and run animations driven by distance travelled; the bite's frames follow the windup clock so the jaws open on the leap; death plays once and holds as the corpse. The wolf also carries `EnemyHealthIndicator`, `EnemyAwarenessIndicator` and `EnemyImpactFeedback`. `EnemyCorpseSorting` on both enemy prefabs moves defeated sprites below the player and restores each original sorting layer/order when rest revives them. `EncounterState` is the shared "in combat" signal: true while any registered enemy is aware of the player or the player was just hit, plus 3 s of grace.
 
 The prototype `SimpleMeleeEnemy` (approach, windup, single strike, recovery) remains for the retired PrototypeLoop sentinel.
 
@@ -249,7 +249,7 @@ The prototype `SimpleMeleeEnemy` (approach, windup, single strike, recovery) rem
 
 - **Versions.** `ProgressMigrations` reads any known save version and upgrades it step by step. Version 2 (0.4.8) replaced the per-scene Tutorial save; on first launch the old record is migrated into the game-wide key and kept as a backup until New Game.
 - **Scene changes.** `SceneTransitions`, on the session, fades out with the world frozen and input locked, loads the scene and fades back in. The session places the arriving player at a named `SceneSpawnPoint` (or a fire, for travel), otherwise at the checkpoint fire if it is in that scene.
-- **Exits.** `SceneExit` is a trigger with a target scene and spawn id. It saves, carries current health and flask charges across, and can record a milestone on first use. With no target it only shows its notice; the Tutorial exit works this way until Green Lowlands exists.
+- **Exits.** `SceneExit` is a trigger with a target scene and spawn id. It saves, carries current health and flask charges across, and can record a milestone on first use. Tutorial and Green Lowlands now have reciprocal exits and named arrival points; the Tutorial exit records `tutorial/complete`. An unconfigured exit only shows its notice.
 - **Resume point.** `ResumePoint` (scene, position, health, flasks) is a small record beside the save. It is written when the player pauses, leaves to the title, quits or the window loses focus, and by a throttled autosave (every 5 s, only when alive, out of combat and moved). Death, resting, travel, Return to bonfire, scene exits and New Game clear it.
 - **Title.** The game starts in the `Title` scene. Continue resumes at the resume point if there is one, otherwise at the checkpoint's fire (or the new-game scene's start without a checkpoint); New Game clears the save, confirming first when one exists; the pause menu's Main Menu saves and returns there.
 - **The axe.** Taking the axe from the Tutorial stump is a one-time pickup. Once the save owns it, `PlayerCombatController` spawns the player's own copy from its `ownedAxePrefab` on every scene load, and an unowned world axe with `AxePickup` hides itself.
@@ -299,13 +299,14 @@ sequenceDiagram
 ## World and interaction
 
 - **Tilemaps.** Visual layers are separate from an invisible Collision map, and canopies and roofs draw on an Above Player layer. Elevation is visual only; everything shares one physics plane. See [World and tilemaps](World.md).
-- **Gameplay objects** live under `Tutorial Zone/Interactive Objects`, usually as prefab instances. The Recall seal combines scene-authored tilemaps with a gameplay component and collision.
+- **Gameplay objects** live under each zone's `Interactive Objects`, usually as prefab instances; the persistent session, player and follow camera remain scene roots. The Recall seal combines scene-authored tilemaps with a gameplay component and collision.
 - **Interaction (F).** `PlayerBonfireInteraction` is the single interaction selector.
   - It picks one nearby `WorldPickup` (axe, shard, heart fragment) first, otherwise a nearby bonfire. One press commits one thing.
   - The HUD prompt reads the same selection, so it always matches what F will do.
   - Proximity alone never collects, with one exception: an axe the player already owns is retrieved by walking over it.
-- **Bonfires.** `Bonfire` holds a stable ID, a display name and a spawn point. Resting heals, refills stamina, returns the axe, resets enemies, sets the respawn point and saves. Discovered fires offer travel between them, including fires in other scenes; travel saves and respawns at the destination.
+- **Bonfires.** `Bonfire` holds a stable ID, a display name and a spawn point. Resting heals, refills stamina, returns the axe, resets enemies, sets the respawn point and saves. Discovered fires offer travel between them, including fires in other scenes; travel saves and respawns at the destination. The Lowlands Bonfire (`green-lowlands/arrival-fire`) supports rest/travel and upgrade previews, with purchases disabled. All bonfires inherit the same flame from the shared prefab; regional bases may vary. `BonfireSpriteView` samples discovery state and animates four native flame frames at 6 fps; the flame stays hidden before discovery and changes no gameplay state.
 - **Puzzle pieces.** `AxePuzzleTarget` turns hits into puzzle input. `ThrowRecallPuzzle` requires an outbound throw into its anchor, then a Recall through its switch, and can open a `PuzzleDoor`.
+- **Vegetation.** `InteractiveVegetation` renders a baked `VegetationLayout` in small spatial mesh groups sharing one atlas. Grass pairs two intact leaf sprites with independent phases; flowers and reeds use one sprite each. Continuous GPU rotation around bottom pivots combines wind with a bounded player trail, preserving UVs and source pixels while deliberately allowing smooth rotated pixel art. Nearby roots sort against the player's stable feet line through ground/foreground draws sharing the same mesh; distant foreground draws stay disabled. `WeaponSweep` reports actual axe damage intervals and traveled flight segments independently of hit receivers; nearby plants are cut without hit pause, collision or rewards. `IResetOnRest` restores the field; cut state is not saved. Tutorial is the first placement, with density excluding paths and interaction clearings.
 
 ## Tutorial
 

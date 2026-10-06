@@ -1,0 +1,2975 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 17eaa39b64de89d46bffdf8a6a0704a2, type: 3}
+  m_Name: TutorialVegetation
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.VegetationLayout
+  density: {fileID: 2800000, guid: 1cbb6d16fa7b7dc44a2366f5179e0498, type: 3}
+  origin: {x: 0, y: 0}
+  seed: 1703
+  species:
+  - leaves:
+    - sprite: {fileID: -921467465, guid: 4ff43933dd5b9694e957fa4bab439cd3, type: 3}
+      offset: {x: -0.03125, y: 0}
+      restAngle: 12
+      phaseOffset: 0
+      flipX: 0
+    - sprite: {fileID: 2001097858, guid: 4ff43933dd5b9694e957fa4bab439cd3, type: 3}
+      offset: {x: 0.03125, y: 0}
+      restAngle: -16
+      phaseOffset: 0.7
+      flipX: 0
+    flexibility: 1
+    debrisColor: {r: 0.54509807, g: 0.60784316, b: 0.36862746, a: 1}
+  - leaves:
+    - sprite: {fileID: 1511132739, guid: 4ff43933dd5b9694e957fa4bab439cd3, type: 3}
+      offset: {x: -0.03125, y: 0}
+      restAngle: 10
+      phaseOffset: 0.2
+      flipX: 0
+    - sprite: {fileID: -536228506, guid: 4ff43933dd5b9694e957fa4bab439cd3, type: 3}
+      offset: {x: 0.03125, y: 0}
+      restAngle: -13
+      phaseOffset: 1
+      flipX: 0
+    flexibility: 1
+    debrisColor: {r: 0.54509807, g: 0.60784316, b: 0.36862746, a: 1}
+  - leaves:
+    - sprite: {fileID: 1826342390, guid: 4ff43933dd5b9694e957fa4bab439cd3, type: 3}
+      offset: {x: 0, y: 0}
+      restAngle: 0
+      phaseOffset: 0
+      flipX: 0
+    flexibility: 0.4
+    debrisColor: {r: 0.3764706, g: 0.44705883, b: 0.3019608, a: 1}
+  - leaves:
+    - sprite: {fileID: -921467465, guid: 4ff43933dd5b9694e957fa4bab439cd3, type: 3}
+      offset: {x: -0.0625, y: 0}
+      restAngle: 20
+      phaseOffset: 0.4
+      flipX: 0
+    - sprite: {fileID: -536228506, guid: 4ff43933dd5b9694e957fa4bab439cd3, type: 3}
+      offset: {x: 0.0625, y: 0}
+      restAngle: -25
+      phaseOffset: 1.3
+      flipX: 0
+    flexibility: 1
+    debrisColor: {r: 0.54509807, g: 0.60784316, b: 0.36862746, a: 1}
+  - leaves:
+    - sprite: {fileID: 168462884, guid: 4ff43933dd5b9694e957fa4bab439cd3, type: 3}
+      offset: {x: 0, y: 0}
+      restAngle: 0
+      phaseOffset: 0.3
+      flipX: 0
+    flexibility: 0.65
+    debrisColor: {r: 0.30980393, g: 0.4392157, b: 0.3137255, a: 1}
+  plants:
+  - position: {x: 17.625, y: 4.875}
+    species: 1
+    phase: 1.3839248
+  - position: {x: 18.8125, y: 4.6875}
+    species: 0
+    phase: 1.5864283
+  - position: {x: 19.375, y: 4.625}
+    species: 1
+    phase: 0.39729542
+  - position: {x: 19.75, y: 4.625}
+    species: 0
+    phase: 1.1112946
+  - position: {x: 13.375, y: 5.75}
+    species: 1
+    phase: 6.141901
+  - position: {x: 13.75, y: 5.75}
+    species: 1
+    phase: 3.8518806
+  - position: {x: 14.1875, y: 5.6875}
+    species: 2
+    phase: 5.177874
+  - position: {x: 14.625, y: 5.625}
+    species: 1
+    phase: 3.2680979
+  - position: {x: 16.875, y: 5.75}
+    species: 0
+    phase: 2.3528993
+  - position: {x: 17.75, y: 5.375}
+    species: 1
+    phase: 2.3386834
+  - position: {x: 17.375, y: 5.625}
+    species: 2
+    phase: 0.30485398
+  - position: {x: 18.875, y: 5.25}
+    species: 0
+    phase: 2.2087264
+  - position: {x: 18.125, y: 5.75}
+    species: 0
+    phase: 4.3507214
+  - position: {x: 19.3125, y: 5.3125}
+    species: 0
+    phase: 5.2865767
+  - position: {x: 19.6875, y: 5.25}
+    species: 0
+    phase: 1.7311629
+  - position: {x: 19.75, y: 5.625}
+    species: 0
+    phase: 0.09320582
+  - position: {x: 12.6875, y: 6.8125}
+    species: 0
+    phase: 3.9042983
+  - position: {x: 13.1875, y: 6.3125}
+    species: 0
+    phase: 0.16103053
+  - position: {x: 13.875, y: 6.1875}
+    species: 0
+    phase: 6.2382827
+  - position: {x: 13.375, y: 6.875}
+    species: 0
+    phase: 1.7477521
+  - position: {x: 13.875, y: 6.6875}
+    species: 0
+    phase: 0.17948437
+  - position: {x: 14.25, y: 6.25}
+    species: 1
+    phase: 5.6606245
+  - position: {x: 14.1875, y: 6.625}
+    species: 2
+    phase: 2.3122296
+  - position: {x: 15.875, y: 6.875}
+    species: 0
+    phase: 5.33859
+  - position: {x: 16.125, y: 6.6875}
+    species: 0
+    phase: 3.2811449
+  - position: {x: 16.875, y: 6.75}
+    species: 0
+    phase: 1.2522466
+  - position: {x: 17.625, y: 6.125}
+    species: 1
+    phase: 0.35357845
+  - position: {x: 17.1875, y: 6.625}
+    species: 1
+    phase: 2.6836264
+  - position: {x: 18.375, y: 6.25}
+    species: 1
+    phase: 5.4608774
+  - position: {x: 19.3125, y: 6.1875}
+    species: 0
+    phase: 3.752392
+  - position: {x: 19.875, y: 6.1875}
+    species: 0
+    phase: 5.7876678
+  - position: {x: 19.375, y: 6.75}
+    species: 1
+    phase: 5.73385
+  - position: {x: 20.375, y: 6.875}
+    species: 0
+    phase: 4.771334
+  - position: {x: 21.125, y: 6.8125}
+    species: 0
+    phase: 4.248395
+  - position: {x: 21.875, y: 6.625}
+    species: 3
+    phase: 0.89464223
+  - position: {x: 12.25, y: 7.75}
+    species: 0
+    phase: 1.4386343
+  - position: {x: 13.3125, y: 7.3125}
+    species: 0
+    phase: 3.6317742
+  - position: {x: 13.625, y: 7.125}
+    species: 0
+    phase: 2.6331267
+  - position: {x: 13.625, y: 7.75}
+    species: 1
+    phase: 4.455767
+  - position: {x: 14.1875, y: 7.375}
+    species: 0
+    phase: 1.0099905
+  - position: {x: 14.875, y: 7.25}
+    species: 0
+    phase: 1.8973373
+  - position: {x: 15.875, y: 7.3125}
+    species: 0
+    phase: 4.862142
+  - position: {x: 15.3125, y: 7.8125}
+    species: 0
+    phase: 5.6856327
+  - position: {x: 15.8125, y: 7.625}
+    species: 0
+    phase: 4.279494
+  - position: {x: 16.25, y: 7.375}
+    species: 1
+    phase: 0.9620198
+  - position: {x: 16.875, y: 7.625}
+    species: 0
+    phase: 1.094325
+  - position: {x: 17.375, y: 7.3125}
+    species: 0
+    phase: 5.7884974
+  - position: {x: 17.875, y: 7.125}
+    species: 0
+    phase: 5.5087023
+  - position: {x: 17.3125, y: 7.625}
+    species: 1
+    phase: 4.656969
+  - position: {x: 18.625, y: 7.25}
+    species: 0
+    phase: 1.5719016
+  - position: {x: 18.375, y: 7.625}
+    species: 0
+    phase: 5.3629723
+  - position: {x: 19.25, y: 7.3125}
+    species: 0
+    phase: 0.6371765
+  - position: {x: 21.6875, y: 7.8125}
+    species: 0
+    phase: 4.2304673
+  - position: {x: 11.75, y: 8.125}
+    species: 0
+    phase: 3.2053478
+  - position: {x: 12.625, y: 8.25}
+    species: 0
+    phase: 0.30336905
+  - position: {x: 13.125, y: 8.125}
+    species: 1
+    phase: 5.9874377
+  - position: {x: 13.75, y: 8.1875}
+    species: 0
+    phase: 0.5909987
+  - position: {x: 13.25, y: 8.625}
+    species: 0
+    phase: 4.836501
+  - position: {x: 15.375, y: 8.25}
+    species: 1
+    phase: 5.1668816
+  - position: {x: 16.25, y: 8.125}
+    species: 0
+    phase: 0.64561903
+  - position: {x: 16.3125, y: 8.625}
+    species: 0
+    phase: 5.812577
+  - position: {x: 17.75, y: 8.125}
+    species: 1
+    phase: 4.331557
+  - position: {x: 20.375, y: 8.625}
+    species: 1
+    phase: 0.16136834
+  - position: {x: 15.3125, y: 9.375}
+    species: 0
+    phase: 1.9911288
+  - position: {x: 15.3125, y: 9.6875}
+    species: 0
+    phase: 0.32139108
+  - position: {x: 18.75, y: 10.375}
+    species: 1
+    phase: 0.54660577
+  - position: {x: 19.8125, y: 10.125}
+    species: 0
+    phase: 6.0360155
+  - position: {x: 20.3125, y: 10.375}
+    species: 0
+    phase: 5.5255375
+  - position: {x: 5.375, y: 13.6875}
+    species: 0
+    phase: 4.797467
+  - position: {x: 4.625, y: 14.625}
+    species: 0
+    phase: 0.87929046
+  - position: {x: 5.25, y: 14.625}
+    species: 3
+    phase: 0.7158021
+  - position: {x: 5.875, y: 14.75}
+    species: 0
+    phase: 5.1349916
+  - position: {x: 27.75, y: 14.3125}
+    species: 1
+    phase: 0.0509764
+  - position: {x: 30.3125, y: 14.6875}
+    species: 1
+    phase: 2.9812012
+  - position: {x: 4.75, y: 15.8125}
+    species: 0
+    phase: 5.746281
+  - position: {x: 5.25, y: 15.25}
+    species: 1
+    phase: 1.1968623
+  - position: {x: 5.625, y: 15.25}
+    species: 0
+    phase: 1.7015903
+  - position: {x: 5.1875, y: 15.625}
+    species: 0
+    phase: 4.9600024
+  - position: {x: 5.75, y: 15.8125}
+    species: 0
+    phase: 0.070465
+  - position: {x: 29.6875, y: 15.25}
+    species: 1
+    phase: 2.4815843
+  - position: {x: 30.6875, y: 15.3125}
+    species: 3
+    phase: 3.8994653
+  - position: {x: 31.1875, y: 15.8125}
+    species: 1
+    phase: 0.9452936
+  - position: {x: 5.3125, y: 16.1875}
+    species: 1
+    phase: 5.8610687
+  - position: {x: 6.3125, y: 16.25}
+    species: 0
+    phase: 4.5460258
+  - position: {x: 6.3125, y: 16.625}
+    species: 0
+    phase: 0.6511374
+  - position: {x: 31.25, y: 16.625}
+    species: 0
+    phase: 4.6611714
+  - position: {x: 32.375, y: 16.8125}
+    species: 1
+    phase: 2.4831786
+  - position: {x: 32.625, y: 16.625}
+    species: 0
+    phase: 2.775427
+  - position: {x: 33.125, y: 16.75}
+    species: 1
+    phase: 1.5040008
+  - position: {x: 32.6875, y: 17.375}
+    species: 0
+    phase: 3.7661169
+  - position: {x: 33.625, y: 17.6875}
+    species: 0
+    phase: 3.6716576
+  - position: {x: 76.3125, y: 17.6875}
+    species: 1
+    phase: 3.9753985
+  - position: {x: 78.75, y: 17.375}
+    species: 0
+    phase: 5.48966
+  - position: {x: 78.125, y: 17.6875}
+    species: 0
+    phase: 3.7527044
+  - position: {x: 78.875, y: 17.75}
+    species: 3
+    phase: 0.19991897
+  - position: {x: 79.8125, y: 17.375}
+    species: 0
+    phase: 0.44320437
+  - position: {x: 79.25, y: 17.875}
+    species: 1
+    phase: 3.4198136
+  - position: {x: 79.75, y: 17.8125}
+    species: 1
+    phase: 0.7191554
+  - position: {x: 80.25, y: 17.6875}
+    species: 0
+    phase: 3.4514284
+  - position: {x: 80.75, y: 17.6875}
+    species: 0
+    phase: 6.0109124
+  - position: {x: 81.1875, y: 17.875}
+    species: 1
+    phase: 3.8366973
+  - position: {x: 81.875, y: 17.8125}
+    species: 1
+    phase: 3.4411223
+  - position: {x: 82.3125, y: 17.875}
+    species: 1
+    phase: 1.4964975
+  - position: {x: 82.875, y: 17.6875}
+    species: 1
+    phase: 4.307105
+  - position: {x: 83.3125, y: 17.75}
+    species: 0
+    phase: 2.3097844
+  - position: {x: 83.8125, y: 17.75}
+    species: 0
+    phase: 1.8335261
+  - position: {x: 84.75, y: 17.375}
+    species: 1
+    phase: 5.1310015
+  - position: {x: 84.25, y: 17.75}
+    species: 0
+    phase: 5.5350075
+  - position: {x: 84.6875, y: 17.6875}
+    species: 0
+    phase: 2.0464022
+  - position: {x: 85.625, y: 17.375}
+    species: 0
+    phase: 3.6389844
+  - position: {x: 85.625, y: 17.6875}
+    species: 1
+    phase: 3.8627267
+  - position: {x: 86.25, y: 17.625}
+    species: 0
+    phase: 0.9838588
+  - position: {x: 86.625, y: 17.8125}
+    species: 2
+    phase: 4.9087257
+  - position: {x: 33.875, y: 18.3125}
+    species: 0
+    phase: 0.89915955
+  - position: {x: 34.3125, y: 18.25}
+    species: 0
+    phase: 5.1863103
+  - position: {x: 34.625, y: 18.3125}
+    species: 0
+    phase: 0.5433644
+  - position: {x: 71.375, y: 18.625}
+    species: 0
+    phase: 3.2559934
+  - position: {x: 72.1875, y: 18.6875}
+    species: 1
+    phase: 5.164428
+  - position: {x: 73.1875, y: 18.6875}
+    species: 1
+    phase: 6.1510997
+  - position: {x: 74.375, y: 18.625}
+    species: 1
+    phase: 4.7888446
+  - position: {x: 75.6875, y: 18.375}
+    species: 0
+    phase: 1.9656324
+  - position: {x: 75.25, y: 18.75}
+    species: 0
+    phase: 3.411109
+  - position: {x: 75.8125, y: 18.8125}
+    species: 0
+    phase: 4.665263
+  - position: {x: 76.25, y: 18.25}
+    species: 0
+    phase: 5.519827
+  - position: {x: 76.25, y: 18.8125}
+    species: 1
+    phase: 0.16420636
+  - position: {x: 77.3125, y: 18.125}
+    species: 1
+    phase: 6.1554956
+  - position: {x: 77.375, y: 18.625}
+    species: 0
+    phase: 3.7756479
+  - position: {x: 77.6875, y: 18.625}
+    species: 1
+    phase: 4.525622
+  - position: {x: 78.25, y: 18.125}
+    species: 0
+    phase: 0.056439333
+  - position: {x: 78.625, y: 18.25}
+    species: 0
+    phase: 3.3595626
+  - position: {x: 78.3125, y: 18.75}
+    species: 0
+    phase: 0.20595004
+  - position: {x: 79.125, y: 18.375}
+    species: 0
+    phase: 5.869035
+  - position: {x: 80.8125, y: 18.25}
+    species: 0
+    phase: 1.7363764
+  - position: {x: 80.3125, y: 18.75}
+    species: 1
+    phase: 3.508324
+  - position: {x: 80.625, y: 18.75}
+    species: 3
+    phase: 6.1316257
+  - position: {x: 81.25, y: 18.1875}
+    species: 0
+    phase: 3.9835043
+  - position: {x: 81.6875, y: 18.375}
+    species: 0
+    phase: 1.6416786
+  - position: {x: 81.375, y: 18.6875}
+    species: 0
+    phase: 3.096244
+  - position: {x: 81.75, y: 18.75}
+    species: 0
+    phase: 2.831508
+  - position: {x: 82.25, y: 18.1875}
+    species: 0
+    phase: 4.0747275
+  - position: {x: 82.75, y: 18.6875}
+    species: 0
+    phase: 0.7487377
+  - position: {x: 83.125, y: 18.1875}
+    species: 1
+    phase: 3.9663672
+  - position: {x: 83.875, y: 18.1875}
+    species: 1
+    phase: 2.071856
+  - position: {x: 83.1875, y: 18.75}
+    species: 0
+    phase: 5.3515763
+  - position: {x: 83.625, y: 18.8125}
+    species: 0
+    phase: 5.048863
+  - position: {x: 84.625, y: 18.1875}
+    species: 0
+    phase: 1.9761051
+  - position: {x: 84.3125, y: 18.6875}
+    species: 1
+    phase: 6.1454453
+  - position: {x: 85.25, y: 18.25}
+    species: 0
+    phase: 1.5186238
+  - position: {x: 85.625, y: 18.375}
+    species: 0
+    phase: 2.9037657
+  - position: {x: 85.1875, y: 18.6875}
+    species: 0
+    phase: 5.6348042
+  - position: {x: 86.3125, y: 18.3125}
+    species: 1
+    phase: 0.31646782
+  - position: {x: 86.75, y: 18.75}
+    species: 0
+    phase: 5.242411
+  - position: {x: 87.3125, y: 18.75}
+    species: 0
+    phase: 2.5107083
+  - position: {x: 87.625, y: 18.8125}
+    species: 1
+    phase: 2.634005
+  - position: {x: 5.875, y: 19.375}
+    species: 1
+    phase: 5.908365
+  - position: {x: 5.8125, y: 19.6875}
+    species: 0
+    phase: 6.2688155
+  - position: {x: 11.8125, y: 19.375}
+    species: 0
+    phase: 1.8397021
+  - position: {x: 11.625, y: 19.8125}
+    species: 1
+    phase: 2.1760795
+  - position: {x: 12.3125, y: 19.3125}
+    species: 1
+    phase: 0.9256189
+  - position: {x: 12.25, y: 19.75}
+    species: 0
+    phase: 0.38853383
+  - position: {x: 12.875, y: 19.625}
+    species: 2
+    phase: 4.1663046
+  - position: {x: 13.375, y: 19.375}
+    species: 0
+    phase: 3.1332345
+  - position: {x: 13.6875, y: 19.3125}
+    species: 0
+    phase: 2.518547
+  - position: {x: 13.8125, y: 19.75}
+    species: 1
+    phase: 4.878161
+  - position: {x: 17.625, y: 19.8125}
+    species: 0
+    phase: 5.9334526
+  - position: {x: 70.375, y: 19.8125}
+    species: 4
+    phase: 2.569836
+  - position: {x: 71.8125, y: 19.3125}
+    species: 0
+    phase: 1.428908
+  - position: {x: 72.25, y: 19.3125}
+    species: 0
+    phase: 1.6973566
+  - position: {x: 72.1875, y: 19.75}
+    species: 0
+    phase: 5.5747676
+  - position: {x: 73.875, y: 19.3125}
+    species: 0
+    phase: 0.6610701
+  - position: {x: 73.1875, y: 19.625}
+    species: 0
+    phase: 0.8354945
+  - position: {x: 73.75, y: 19.6875}
+    species: 0
+    phase: 0.8232848
+  - position: {x: 74.75, y: 19.6875}
+    species: 0
+    phase: 2.6144686
+  - position: {x: 75.125, y: 19.1875}
+    species: 1
+    phase: 0.3220521
+  - position: {x: 75.3125, y: 19.8125}
+    species: 1
+    phase: 2.6841047
+  - position: {x: 76.8125, y: 19.25}
+    species: 1
+    phase: 2.1847441
+  - position: {x: 77.375, y: 19.75}
+    species: 1
+    phase: 1.4931307
+  - position: {x: 77.8125, y: 19.75}
+    species: 0
+    phase: 1.5866911
+  - position: {x: 78.75, y: 19.1875}
+    species: 2
+    phase: 0.90053064
+  - position: {x: 78.375, y: 19.625}
+    species: 0
+    phase: 0.8022214
+  - position: {x: 78.6875, y: 19.625}
+    species: 0
+    phase: 6.2412286
+  - position: {x: 79.6875, y: 19.3125}
+    species: 0
+    phase: 4.3586254
+  - position: {x: 79.375, y: 19.875}
+    species: 0
+    phase: 2.680225
+  - position: {x: 79.625, y: 19.625}
+    species: 0
+    phase: 5.5184774
+  - position: {x: 80.1875, y: 19.25}
+    species: 1
+    phase: 1.4249892
+  - position: {x: 80.25, y: 19.875}
+    species: 0
+    phase: 2.0799794
+  - position: {x: 81.375, y: 19.1875}
+    species: 1
+    phase: 4.7541423
+  - position: {x: 81.125, y: 19.625}
+    species: 0
+    phase: 3.3567302
+  - position: {x: 81.75, y: 19.625}
+    species: 0
+    phase: 0.50406474
+  - position: {x: 82.25, y: 19.125}
+    species: 0
+    phase: 3.3352008
+  - position: {x: 82.375, y: 19.875}
+    species: 1
+    phase: 1.6773051
+  - position: {x: 82.875, y: 19.625}
+    species: 2
+    phase: 4.004396
+  - position: {x: 83.875, y: 19.1875}
+    species: 0
+    phase: 0.0438162
+  - position: {x: 83.8125, y: 19.625}
+    species: 1
+    phase: 4.529896
+  - position: {x: 84.625, y: 19.625}
+    species: 0
+    phase: 1.6399214
+  - position: {x: 85.6875, y: 19.375}
+    species: 1
+    phase: 3.9761345
+  - position: {x: 85.875, y: 19.625}
+    species: 0
+    phase: 3.4039335
+  - position: {x: 86.125, y: 19.1875}
+    species: 0
+    phase: 1.9542208
+  - position: {x: 86.6875, y: 19.375}
+    species: 0
+    phase: 5.160278
+  - position: {x: 86.25, y: 19.75}
+    species: 0
+    phase: 6.1374764
+  - position: {x: 5.375, y: 20.1875}
+    species: 1
+    phase: 2.3845456
+  - position: {x: 6.375, y: 20.3125}
+    species: 0
+    phase: 2.4981656
+  - position: {x: 7.3125, y: 20.625}
+    species: 0
+    phase: 3.2952466
+  - position: {x: 11.625, y: 20.25}
+    species: 0
+    phase: 1.1648595
+  - position: {x: 11.6875, y: 20.875}
+    species: 1
+    phase: 1.9704733
+  - position: {x: 12.625, y: 20.1875}
+    species: 0
+    phase: 5.3005424
+  - position: {x: 12.375, y: 20.8125}
+    species: 0
+    phase: 4.155522
+  - position: {x: 13.25, y: 20.1875}
+    species: 0
+    phase: 0.7232278
+  - position: {x: 13.8125, y: 20.125}
+    species: 2
+    phase: 3.590874
+  - position: {x: 13.375, y: 20.6875}
+    species: 0
+    phase: 1.4090872
+  - position: {x: 13.6875, y: 20.6875}
+    species: 0
+    phase: 1.7098482
+  - position: {x: 14.3125, y: 20.1875}
+    species: 0
+    phase: 1.385615
+  - position: {x: 14.25, y: 20.8125}
+    species: 1
+    phase: 5.80233
+  - position: {x: 19.6875, y: 20.8125}
+    species: 2
+    phase: 6.132586
+  - position: {x: 21.875, y: 20.6875}
+    species: 0
+    phase: 5.2129087
+  - position: {x: 22.625, y: 20.75}
+    species: 0
+    phase: 2.7863476
+  - position: {x: 35.375, y: 20.375}
+    species: 0
+    phase: 2.5675187
+  - position: {x: 70.875, y: 20.3125}
+    species: 4
+    phase: 4.8587327
+  - position: {x: 70.875, y: 20.75}
+    species: 4
+    phase: 2.705482
+  - position: {x: 71.375, y: 20.875}
+    species: 0
+    phase: 1.434405
+  - position: {x: 72.625, y: 20.375}
+    species: 3
+    phase: 2.9340727
+  - position: {x: 73.1875, y: 20.1875}
+    species: 0
+    phase: 1.7301165
+  - position: {x: 73.8125, y: 20.375}
+    species: 0
+    phase: 3.9667137
+  - position: {x: 73.3125, y: 20.8125}
+    species: 0
+    phase: 2.0124764
+  - position: {x: 77.375, y: 20.625}
+    species: 0
+    phase: 3.1226823
+  - position: {x: 80.25, y: 20.375}
+    species: 1
+    phase: 4.3315954
+  - position: {x: 80.8125, y: 20.8125}
+    species: 0
+    phase: 4.603662
+  - position: {x: 81.1875, y: 20.125}
+    species: 0
+    phase: 1.7798694
+  - position: {x: 81.3125, y: 20.875}
+    species: 0
+    phase: 2.2641172
+  - position: {x: 82.3125, y: 20.1875}
+    species: 3
+    phase: 1.3696085
+  - position: {x: 82.25, y: 20.75}
+    species: 0
+    phase: 6.042177
+  - position: {x: 84.6875, y: 20.125}
+    species: 1
+    phase: 1.4593453
+  - position: {x: 85.1875, y: 20.25}
+    species: 2
+    phase: 4.7663226
+  - position: {x: 85.625, y: 20.25}
+    species: 0
+    phase: 2.3043575
+  - position: {x: 8.6875, y: 21.875}
+    species: 1
+    phase: 2.4560554
+  - position: {x: 11.375, y: 21.25}
+    species: 0
+    phase: 4.8298826
+  - position: {x: 12.875, y: 21.3125}
+    species: 0
+    phase: 3.6267948
+  - position: {x: 13.375, y: 21.25}
+    species: 0
+    phase: 5.5148153
+  - position: {x: 14.25, y: 21.3125}
+    species: 0
+    phase: 1.000945
+  - position: {x: 17.875, y: 21.1875}
+    species: 0
+    phase: 4.591388
+  - position: {x: 17.375, y: 21.625}
+    species: 1
+    phase: 5.726128
+  - position: {x: 17.625, y: 21.875}
+    species: 1
+    phase: 2.9686313
+  - position: {x: 18.25, y: 21.3125}
+    species: 1
+    phase: 4.128585
+  - position: {x: 21.125, y: 21.125}
+    species: 0
+    phase: 3.4332254
+  - position: {x: 30.375, y: 21.125}
+    species: 1
+    phase: 0.24122897
+  - position: {x: 30.625, y: 21.6875}
+    species: 0
+    phase: 6.161633
+  - position: {x: 31.1875, y: 21.375}
+    species: 0
+    phase: 3.6424327
+  - position: {x: 31.3125, y: 21.875}
+    species: 0
+    phase: 4.2452073
+  - position: {x: 46.1875, y: 21.375}
+    species: 3
+    phase: 1.8188338
+  - position: {x: 72.6875, y: 21.25}
+    species: 0
+    phase: 1.5806774
+  - position: {x: 72.375, y: 21.6875}
+    species: 0
+    phase: 4.1513925
+  - position: {x: 74.875, y: 21.1875}
+    species: 1
+    phase: 5.9024825
+  - position: {x: 80.625, y: 21.1875}
+    species: 3
+    phase: 2.3601356
+  - position: {x: 80.375, y: 21.625}
+    species: 1
+    phase: 1.9574786
+  - position: {x: 81.125, y: 21.25}
+    species: 0
+    phase: 4.2146583
+  - position: {x: 81.625, y: 21.3125}
+    species: 0
+    phase: 4.2493005
+  - position: {x: 81.1875, y: 21.625}
+    species: 0
+    phase: 5.214941
+  - position: {x: 81.6875, y: 21.75}
+    species: 0
+    phase: 1.5109453
+  - position: {x: 82.375, y: 21.25}
+    species: 0
+    phase: 3.1978655
+  - position: {x: 82.3125, y: 21.625}
+    species: 1
+    phase: 1.878294
+  - position: {x: 82.75, y: 21.6875}
+    species: 1
+    phase: 6.2502246
+  - position: {x: 8.75, y: 22.3125}
+    species: 1
+    phase: 5.7765617
+  - position: {x: 9.1875, y: 22.375}
+    species: 0
+    phase: 5.4061775
+  - position: {x: 9.8125, y: 22.6875}
+    species: 0
+    phase: 1.9700403
+  - position: {x: 20.375, y: 22.8125}
+    species: 0
+    phase: 5.8530664
+  - position: {x: 24.625, y: 22.625}
+    species: 0
+    phase: 3.2096531
+  - position: {x: 29.875, y: 22.625}
+    species: 0
+    phase: 2.4339714
+  - position: {x: 30.6875, y: 22.1875}
+    species: 0
+    phase: 3.5103426
+  - position: {x: 30.625, y: 22.8125}
+    species: 0
+    phase: 1.8221374
+  - position: {x: 31.125, y: 22.25}
+    species: 0
+    phase: 5.5152593
+  - position: {x: 46.375, y: 22.625}
+    species: 0
+    phase: 6.1281757
+  - position: {x: 70.75, y: 22.375}
+    species: 0
+    phase: 6.004974
+  - position: {x: 71.75, y: 22.1875}
+    species: 0
+    phase: 1.8744429
+  - position: {x: 71.25, y: 22.875}
+    species: 4
+    phase: 2.3499515
+  - position: {x: 72.3125, y: 22.375}
+    species: 0
+    phase: 3.9583986
+  - position: {x: 81.8125, y: 22.1875}
+    species: 0
+    phase: 1.961169
+  - position: {x: 29.8125, y: 23.25}
+    species: 1
+    phase: 0.29180726
+  - position: {x: 29.8125, y: 23.8125}
+    species: 0
+    phase: 3.7652836
+  - position: {x: 30.3125, y: 23.1875}
+    species: 0
+    phase: 3.243895
+  - position: {x: 30.75, y: 23.1875}
+    species: 1
+    phase: 5.0360184
+  - position: {x: 31.25, y: 23.375}
+    species: 1
+    phase: 4.3479075
+  - position: {x: 31.125, y: 23.75}
+    species: 0
+    phase: 2.0219166
+  - position: {x: 38.3125, y: 23.375}
+    species: 0
+    phase: 5.1326513
+  - position: {x: 45.75, y: 23.3125}
+    species: 0
+    phase: 1.7682362
+  - position: {x: 71.625, y: 23.25}
+    species: 1
+    phase: 0.22352265
+  - position: {x: 29.8125, y: 24.3125}
+    species: 1
+    phase: 4.999691
+  - position: {x: 30.375, y: 24.25}
+    species: 0
+    phase: 5.518608
+  - position: {x: 30.75, y: 24.875}
+    species: 0
+    phase: 5.41602
+  - position: {x: 31.375, y: 24.3125}
+    species: 1
+    phase: 4.204166
+  - position: {x: 31.3125, y: 24.875}
+    species: 2
+    phase: 4.2782626
+  - position: {x: 31.75, y: 24.8125}
+    species: 0
+    phase: 4.59256
+  - position: {x: 32.125, y: 24.375}
+    species: 0
+    phase: 3.091471
+  - position: {x: 32.6875, y: 24.375}
+    species: 1
+    phase: 1.4822674
+  - position: {x: 32.125, y: 24.6875}
+    species: 0
+    phase: 5.416677
+  - position: {x: 32.875, y: 24.8125}
+    species: 0
+    phase: 2.25356
+  - position: {x: 33.6875, y: 24.8125}
+    species: 1
+    phase: 0.44511247
+  - position: {x: 30.875, y: 25.375}
+    species: 1
+    phase: 4.5922174
+  - position: {x: 30.625, y: 25.75}
+    species: 0
+    phase: 3.1210976
+  - position: {x: 31.375, y: 25.375}
+    species: 0
+    phase: 1.803976
+  - position: {x: 31.875, y: 25.3125}
+    species: 0
+    phase: 1.6418508
+  - position: {x: 32.8125, y: 25.125}
+    species: 0
+    phase: 5.6071544
+  - position: {x: 32.25, y: 25.6875}
+    species: 0
+    phase: 1.3852007
+  - position: {x: 32.6875, y: 25.6875}
+    species: 0
+    phase: 1.5633515
+  - position: {x: 33.375, y: 25.25}
+    species: 0
+    phase: 0.30850318
+  - position: {x: 34.1875, y: 25.1875}
+    species: 0
+    phase: 2.725023
+  - position: {x: 59.6875, y: 25.375}
+    species: 0
+    phase: 4.5059304
+  - position: {x: 13.75, y: 26.6875}
+    species: 0
+    phase: 1.2939848
+  - position: {x: 14.875, y: 26.75}
+    species: 0
+    phase: 1.5850887
+  - position: {x: 15.1875, y: 26.75}
+    species: 1
+    phase: 2.3203442
+  - position: {x: 30.6875, y: 26.25}
+    species: 0
+    phase: 5.217786
+  - position: {x: 30.625, y: 26.625}
+    species: 1
+    phase: 6.013983
+  - position: {x: 31.8125, y: 26.25}
+    species: 0
+    phase: 4.4448085
+  - position: {x: 31.3125, y: 26.8125}
+    species: 1
+    phase: 5.977747
+  - position: {x: 31.75, y: 26.8125}
+    species: 0
+    phase: 3.6718085
+  - position: {x: 32.375, y: 26.375}
+    species: 0
+    phase: 4.243668
+  - position: {x: 32.875, y: 26.875}
+    species: 1
+    phase: 0.6866133
+  - position: {x: 59.375, y: 26.1875}
+    species: 3
+    phase: 3.8246326
+  - position: {x: 13.8125, y: 27.3125}
+    species: 0
+    phase: 2.1271505
+  - position: {x: 13.75, y: 27.8125}
+    species: 0
+    phase: 4.269837
+  - position: {x: 14.8125, y: 27.125}
+    species: 0
+    phase: 0.425916
+  - position: {x: 14.1875, y: 27.75}
+    species: 3
+    phase: 3.889996
+  - position: {x: 30.75, y: 27.625}
+    species: 0
+    phase: 4.7704363
+  - position: {x: 31.625, y: 27.25}
+    species: 0
+    phase: 2.5300856
+  - position: {x: 32.375, y: 27.125}
+    species: 0
+    phase: 1.3725792
+  - position: {x: 32.75, y: 27.8125}
+    species: 1
+    phase: 3.637703
+  - position: {x: 33.125, y: 27.6875}
+    species: 0
+    phase: 6.108011
+  - position: {x: 33.625, y: 27.6875}
+    species: 0
+    phase: 0.45642334
+  - position: {x: 46.25, y: 27.1875}
+    species: 1
+    phase: 1.8803171
+  - position: {x: 46.1875, y: 27.6875}
+    species: 0
+    phase: 3.7512727
+  - position: {x: 12.6875, y: 28.8125}
+    species: 1
+    phase: 2.486362
+  - position: {x: 13.875, y: 28.125}
+    species: 0
+    phase: 1.952982
+  - position: {x: 13.375, y: 28.6875}
+    species: 1
+    phase: 4.1108904
+  - position: {x: 30.375, y: 28.125}
+    species: 2
+    phase: 0.005156213
+  - position: {x: 32.375, y: 28.125}
+    species: 1
+    phase: 2.6942055
+  - position: {x: 32.8125, y: 28.625}
+    species: 0
+    phase: 5.5447435
+  - position: {x: 54.75, y: 28.375}
+    species: 1
+    phase: 3.8733091
+  - position: {x: 54.6875, y: 28.8125}
+    species: 0
+    phase: 0.3360388
+  - position: {x: 55.25, y: 28.6875}
+    species: 1
+    phase: 1.2458707
+  - position: {x: 55.75, y: 28.6875}
+    species: 0
+    phase: 0.06842656
+  - position: {x: 90.375, y: 28.6875}
+    species: 1
+    phase: 4.183773
+  - position: {x: 12.8125, y: 29.8125}
+    species: 0
+    phase: 2.2710605
+  - position: {x: 13.375, y: 29.375}
+    species: 0
+    phase: 3.1845765
+  - position: {x: 13.375, y: 29.8125}
+    species: 0
+    phase: 5.600633
+  - position: {x: 30.375, y: 29.25}
+    species: 1
+    phase: 1.0340712
+  - position: {x: 54.375, y: 29.6875}
+    species: 1
+    phase: 5.972954
+  - position: {x: 55.25, y: 29.1875}
+    species: 1
+    phase: 0.07791057
+  - position: {x: 55.8125, y: 29.3125}
+    species: 0
+    phase: 1.5524238
+  - position: {x: 55.25, y: 29.625}
+    species: 1
+    phase: 2.8398285
+  - position: {x: 55.875, y: 29.625}
+    species: 0
+    phase: 3.7411976
+  - position: {x: 89.1875, y: 29.375}
+    species: 1
+    phase: 4.0380435
+  - position: {x: 11.8125, y: 30.375}
+    species: 0
+    phase: 1.2859403
+  - position: {x: 11.8125, y: 30.8125}
+    species: 1
+    phase: 3.4497263
+  - position: {x: 12.8125, y: 30.375}
+    species: 0
+    phase: 3.8123374
+  - position: {x: 12.625, y: 30.8125}
+    species: 1
+    phase: 2.4937572
+  - position: {x: 13.3125, y: 30.875}
+    species: 0
+    phase: 5.222108
+  - position: {x: 34.625, y: 30.875}
+    species: 0
+    phase: 5.4290967
+  - position: {x: 44.25, y: 30.3125}
+    species: 1
+    phase: 5.1935425
+  - position: {x: 54.8125, y: 30.1875}
+    species: 1
+    phase: 4.1101017
+  - position: {x: 54.875, y: 30.875}
+    species: 0
+    phase: 0.016149493
+  - position: {x: 55.3125, y: 30.3125}
+    species: 0
+    phase: 5.866914
+  - position: {x: 55.6875, y: 30.1875}
+    species: 0
+    phase: 1.0992467
+  - position: {x: 55.3125, y: 30.875}
+    species: 0
+    phase: 5.336447
+  - position: {x: 55.8125, y: 30.75}
+    species: 0
+    phase: 3.7277014
+  - position: {x: 56.25, y: 30.875}
+    species: 0
+    phase: 4.4827304
+  - position: {x: 56.625, y: 30.625}
+    species: 0
+    phase: 0.24954003
+  - position: {x: 69.3125, y: 30.75}
+    species: 0
+    phase: 1.2902958
+  - position: {x: 89.375, y: 30.3125}
+    species: 1
+    phase: 3.524635
+  - position: {x: 90.375, y: 30.3125}
+    species: 0
+    phase: 2.6274586
+  - position: {x: 11.75, y: 31.125}
+    species: 0
+    phase: 3.1394327
+  - position: {x: 11.375, y: 31.8125}
+    species: 1
+    phase: 5.802897
+  - position: {x: 12.3125, y: 31.3125}
+    species: 0
+    phase: 5.3297844
+  - position: {x: 12.875, y: 31.3125}
+    species: 1
+    phase: 2.0478067
+  - position: {x: 13.25, y: 31.875}
+    species: 0
+    phase: 2.9329107
+  - position: {x: 13.625, y: 31.875}
+    species: 0
+    phase: 3.372412
+  - position: {x: 31.8125, y: 31.875}
+    species: 1
+    phase: 3.689761
+  - position: {x: 32.6875, y: 31.375}
+    species: 0
+    phase: 2.9307942
+  - position: {x: 32.6875, y: 31.8125}
+    species: 0
+    phase: 1.3735495
+  - position: {x: 33.625, y: 31.6875}
+    species: 0
+    phase: 4.733399
+  - position: {x: 34.1875, y: 31.6875}
+    species: 0
+    phase: 2.7569609
+  - position: {x: 34.625, y: 31.875}
+    species: 0
+    phase: 0.92875576
+  - position: {x: 36.125, y: 31.375}
+    species: 0
+    phase: 3.4277327
+  - position: {x: 54.6875, y: 31.1875}
+    species: 0
+    phase: 4.726629
+  - position: {x: 54.375, y: 31.625}
+    species: 1
+    phase: 0.12273719
+  - position: {x: 54.6875, y: 31.6875}
+    species: 1
+    phase: 0.2856871
+  - position: {x: 55.8125, y: 31.125}
+    species: 0
+    phase: 4.795388
+  - position: {x: 56.25, y: 31.3125}
+    species: 0
+    phase: 0.9340951
+  - position: {x: 56.3125, y: 31.625}
+    species: 0
+    phase: 0.84719974
+  - position: {x: 68.8125, y: 31.375}
+    species: 1
+    phase: 6.144131
+  - position: {x: 69.25, y: 31.3125}
+    species: 0
+    phase: 1.0463356
+  - position: {x: 69.6875, y: 31.25}
+    species: 0
+    phase: 1.340046
+  - position: {x: 69.3125, y: 31.625}
+    species: 1
+    phase: 1.3820766
+  - position: {x: 8.625, y: 32.875}
+    species: 0
+    phase: 4.6774497
+  - position: {x: 9.8125, y: 32.375}
+    species: 1
+    phase: 4.5042477
+  - position: {x: 9.625, y: 32.75}
+    species: 1
+    phase: 3.765597
+  - position: {x: 10.375, y: 32.375}
+    species: 0
+    phase: 0.51758856
+  - position: {x: 10.875, y: 32.375}
+    species: 1
+    phase: 0.7394046
+  - position: {x: 10.375, y: 32.75}
+    species: 0
+    phase: 2.6784163
+  - position: {x: 11.3125, y: 32.1875}
+    species: 0
+    phase: 3.4992852
+  - position: {x: 11.75, y: 32.3125}
+    species: 1
+    phase: 3.6320958
+  - position: {x: 12.375, y: 32.375}
+    species: 0
+    phase: 2.9094725
+  - position: {x: 12.75, y: 32.1875}
+    species: 0
+    phase: 0.33174357
+  - position: {x: 19.875, y: 32.625}
+    species: 0
+    phase: 3.1476305
+  - position: {x: 20.8125, y: 32.625}
+    species: 0
+    phase: 5.377273
+  - position: {x: 31.875, y: 32.25}
+    species: 0
+    phase: 4.219267
+  - position: {x: 31.625, y: 32.625}
+    species: 0
+    phase: 1.494594
+  - position: {x: 32.1875, y: 32.125}
+    species: 1
+    phase: 3.9353337
+  - position: {x: 32.875, y: 32.25}
+    species: 0
+    phase: 2.4511518
+  - position: {x: 32.375, y: 32.6875}
+    species: 1
+    phase: 1.1533798
+  - position: {x: 32.8125, y: 32.625}
+    species: 1
+    phase: 3.5718129
+  - position: {x: 33.3125, y: 32.3125}
+    species: 2
+    phase: 5.6718206
+  - position: {x: 33.625, y: 32.25}
+    species: 0
+    phase: 5.80464
+  - position: {x: 33.1875, y: 32.6875}
+    species: 1
+    phase: 4.2997656
+  - position: {x: 34.3125, y: 32.25}
+    species: 2
+    phase: 1.7227529
+  - position: {x: 34.25, y: 32.75}
+    species: 0
+    phase: 1.8594068
+  - position: {x: 8.625, y: 33.25}
+    species: 0
+    phase: 0.2265292
+  - position: {x: 8.6875, y: 33.8125}
+    species: 1
+    phase: 5.204486
+  - position: {x: 9.1875, y: 33.125}
+    species: 1
+    phase: 5.7843757
+  - position: {x: 9.625, y: 33.25}
+    species: 1
+    phase: 5.9232717
+  - position: {x: 9.25, y: 33.625}
+    species: 1
+    phase: 0.8182634
+  - position: {x: 9.8125, y: 33.8125}
+    species: 0
+    phase: 0.26708907
+  - position: {x: 10.25, y: 33.3125}
+    species: 0
+    phase: 2.8472714
+  - position: {x: 10.6875, y: 33.3125}
+    species: 0
+    phase: 4.17683
+  - position: {x: 10.3125, y: 33.625}
+    species: 0
+    phase: 5.8563824
+  - position: {x: 10.8125, y: 33.75}
+    species: 2
+    phase: 6.0617366
+  - position: {x: 11.1875, y: 33.75}
+    species: 0
+    phase: 3.5055113
+  - position: {x: 15.8125, y: 33.375}
+    species: 0
+    phase: 1.7454863
+  - position: {x: 15.375, y: 33.8125}
+    species: 0
+    phase: 1.0448911
+  - position: {x: 19.125, y: 33.3125}
+    species: 0
+    phase: 1.8329104
+  - position: {x: 21.1875, y: 33.25}
+    species: 0
+    phase: 2.5634847
+  - position: {x: 21.125, y: 33.625}
+    species: 0
+    phase: 5.8241982
+  - position: {x: 32.375, y: 33.125}
+    species: 0
+    phase: 0.7674904
+  - position: {x: 33.125, y: 33.3125}
+    species: 1
+    phase: 0.46230122
+  - position: {x: 33.875, y: 33.3125}
+    species: 0
+    phase: 4.311708
+  - position: {x: 34.25, y: 33.375}
+    species: 0
+    phase: 2.1207337
+  - position: {x: 35.375, y: 33.8125}
+    species: 0
+    phase: 2.3663328
+  - position: {x: 35.6875, y: 33.8125}
+    species: 1
+    phase: 3.2264621
+  - position: {x: 37.75, y: 33.25}
+    species: 0
+    phase: 2.5032005
+  - position: {x: 37.375, y: 33.625}
+    species: 0
+    phase: 1.637134
+  - position: {x: 37.75, y: 33.625}
+    species: 0
+    phase: 5.577252
+  - position: {x: 38.3125, y: 33.3125}
+    species: 1
+    phase: 4.4565725
+  - position: {x: 42.625, y: 33.375}
+    species: 0
+    phase: 5.2511053
+  - position: {x: 88.125, y: 33.8125}
+    species: 0
+    phase: 2.6217752
+  - position: {x: 7.6875, y: 34.375}
+    species: 0
+    phase: 3.1203458
+  - position: {x: 7.6875, y: 34.6875}
+    species: 2
+    phase: 4.6179724
+  - position: {x: 8.875, y: 34.375}
+    species: 2
+    phase: 3.5663862
+  - position: {x: 8.125, y: 34.625}
+    species: 0
+    phase: 2.6390626
+  - position: {x: 9.1875, y: 34.3125}
+    species: 1
+    phase: 2.6728656
+  - position: {x: 9.1875, y: 34.8125}
+    species: 0
+    phase: 3.5591118
+  - position: {x: 10.1875, y: 34.25}
+    species: 1
+    phase: 1.4864963
+  - position: {x: 10.75, y: 34.1875}
+    species: 0
+    phase: 4.350406
+  - position: {x: 12.25, y: 34.75}
+    species: 0
+    phase: 1.5210925
+  - position: {x: 15.375, y: 34.1875}
+    species: 0
+    phase: 4.63324
+  - position: {x: 22.1875, y: 34.6875}
+    species: 0
+    phase: 1.5312787
+  - position: {x: 23.125, y: 34.375}
+    species: 0
+    phase: 5.988761
+  - position: {x: 35.375, y: 34.375}
+    species: 0
+    phase: 0.47642276
+  - position: {x: 35.8125, y: 34.125}
+    species: 1
+    phase: 3.8964314
+  - position: {x: 36.125, y: 34.375}
+    species: 0
+    phase: 0.8320614
+  - position: {x: 36.6875, y: 34.1875}
+    species: 1
+    phase: 2.9701767
+  - position: {x: 37.125, y: 34.1875}
+    species: 2
+    phase: 6.048167
+  - position: {x: 37.625, y: 34.1875}
+    species: 0
+    phase: 1.3157343
+  - position: {x: 37.3125, y: 34.6875}
+    species: 2
+    phase: 0.48172018
+  - position: {x: 59.375, y: 34.625}
+    species: 0
+    phase: 0.90508276
+  - position: {x: 6.75, y: 35.6875}
+    species: 1
+    phase: 2.7282002
+  - position: {x: 7.125, y: 35.375}
+    species: 1
+    phase: 5.2316117
+  - position: {x: 7.125, y: 35.75}
+    species: 0
+    phase: 1.2327783
+  - position: {x: 7.75, y: 35.625}
+    species: 0
+    phase: 6.2529173
+  - position: {x: 8.625, y: 35.1875}
+    species: 2
+    phase: 6.095408
+  - position: {x: 8.3125, y: 35.75}
+    species: 0
+    phase: 0.29033658
+  - position: {x: 8.6875, y: 35.8125}
+    species: 1
+    phase: 6.0415645
+  - position: {x: 9.1875, y: 35.375}
+    species: 0
+    phase: 0.86221784
+  - position: {x: 9.625, y: 35.625}
+    species: 2
+    phase: 4.791958
+  - position: {x: 21.875, y: 35.375}
+    species: 0
+    phase: 6.219672
+  - position: {x: 22.25, y: 35.1875}
+    species: 0
+    phase: 6.166727
+  - position: {x: 22.8125, y: 35.3125}
+    species: 0
+    phase: 1.6679559
+  - position: {x: 6.875, y: 36.3125}
+    species: 1
+    phase: 3.1334016
+  - position: {x: 6.6875, y: 36.8125}
+    species: 1
+    phase: 2.1046681
+  - position: {x: 7.6875, y: 36.3125}
+    species: 0
+    phase: 0.12509322
+  - position: {x: 7.25, y: 36.875}
+    species: 1
+    phase: 1.6517644
+  - position: {x: 7.6875, y: 36.6875}
+    species: 0
+    phase: 3.0524683
+  - position: {x: 8.125, y: 36.1875}
+    species: 1
+    phase: 1.0895882
+  - position: {x: 8.25, y: 36.625}
+    species: 1
+    phase: 1.390417
+  - position: {x: 8.625, y: 36.875}
+    species: 0
+    phase: 1.3496107
+  - position: {x: 9.3125, y: 36.625}
+    species: 0
+    phase: 2.1623063
+  - position: {x: 16.375, y: 36.625}
+    species: 0
+    phase: 3.8067582
+  - position: {x: 37.75, y: 36.3125}
+    species: 0
+    phase: 1.6389717
+  - position: {x: 38.1875, y: 36.375}
+    species: 1
+    phase: 3.7208562
+  - position: {x: 38.25, y: 36.875}
+    species: 0
+    phase: 0.12463594
+  - position: {x: 57.375, y: 36.375}
+    species: 1
+    phase: 2.8412497
+  - position: {x: 77.875, y: 36.375}
+    species: 0
+    phase: 2.2914925
+  - position: {x: 80.75, y: 36.375}
+    species: 0
+    phase: 3.5299263
+  - position: {x: 81.25, y: 36.6875}
+    species: 1
+    phase: 1.566928
+  - position: {x: 81.875, y: 36.75}
+    species: 0
+    phase: 2.3354008
+  - position: {x: 82.375, y: 36.875}
+    species: 0
+    phase: 1.6641823
+  - position: {x: 86.375, y: 36.875}
+    species: 0
+    phase: 0.6490731
+  - position: {x: 5.75, y: 37.375}
+    species: 1
+    phase: 3.2056348
+  - position: {x: 5.75, y: 37.875}
+    species: 0
+    phase: 2.0942721
+  - position: {x: 6.6875, y: 37.25}
+    species: 0
+    phase: 5.567264
+  - position: {x: 6.1875, y: 37.875}
+    species: 0
+    phase: 2.1382966
+  - position: {x: 6.6875, y: 37.6875}
+    species: 1
+    phase: 3.8515425
+  - position: {x: 7.1875, y: 37.3125}
+    species: 1
+    phase: 4.545548
+  - position: {x: 7.6875, y: 37.25}
+    species: 0
+    phase: 5.4455385
+  - position: {x: 7.25, y: 37.8125}
+    species: 0
+    phase: 1.0583947
+  - position: {x: 8.125, y: 37.1875}
+    species: 1
+    phase: 2.364294
+  - position: {x: 8.375, y: 37.6875}
+    species: 1
+    phase: 2.33516
+  - position: {x: 17.1875, y: 37.375}
+    species: 0
+    phase: 4.838483
+  - position: {x: 37.375, y: 37.375}
+    species: 0
+    phase: 0.84405833
+  - position: {x: 37.6875, y: 37.1875}
+    species: 1
+    phase: 5.3548822
+  - position: {x: 37.75, y: 37.875}
+    species: 0
+    phase: 3.4639096
+  - position: {x: 38.1875, y: 37.3125}
+    species: 3
+    phase: 3.9640882
+  - position: {x: 73.75, y: 37.75}
+    species: 0
+    phase: 5.454369
+  - position: {x: 74.8125, y: 37.625}
+    species: 3
+    phase: 1.5218366
+  - position: {x: 75.125, y: 37.625}
+    species: 0
+    phase: 1.5587391
+  - position: {x: 75.625, y: 37.6875}
+    species: 1
+    phase: 3.9661064
+  - position: {x: 80.625, y: 37.125}
+    species: 0
+    phase: 0.34011045
+  - position: {x: 81.1875, y: 37.375}
+    species: 0
+    phase: 4.9516435
+  - position: {x: 81.625, y: 37.375}
+    species: 1
+    phase: 0.069999486
+  - position: {x: 86.625, y: 37.625}
+    species: 0
+    phase: 0.1203351
+  - position: {x: 5.875, y: 38.3125}
+    species: 0
+    phase: 0.83487093
+  - position: {x: 5.8125, y: 38.625}
+    species: 0
+    phase: 0.66960996
+  - position: {x: 6.375, y: 38.125}
+    species: 0
+    phase: 5.998548
+  - position: {x: 6.6875, y: 38.1875}
+    species: 1
+    phase: 0.29763085
+  - position: {x: 6.125, y: 38.875}
+    species: 1
+    phase: 0.5134353
+  - position: {x: 7.375, y: 38.375}
+    species: 0
+    phase: 1.4690443
+  - position: {x: 7.8125, y: 38.3125}
+    species: 0
+    phase: 4.189525
+  - position: {x: 8.375, y: 38.25}
+    species: 0
+    phase: 5.732228
+  - position: {x: 8.25, y: 38.6875}
+    species: 1
+    phase: 1.0678908
+  - position: {x: 8.625, y: 38.875}
+    species: 0
+    phase: 1.0400312
+  - position: {x: 21.3125, y: 38.375}
+    species: 3
+    phase: 2.781485
+  - position: {x: 37.75, y: 38.3125}
+    species: 1
+    phase: 1.3679416
+  - position: {x: 37.875, y: 38.6875}
+    species: 0
+    phase: 1.3893462
+  - position: {x: 38.1875, y: 38.6875}
+    species: 0
+    phase: 0.7772901
+  - position: {x: 73.875, y: 38.1875}
+    species: 2
+    phase: 0.45227605
+  - position: {x: 74.75, y: 38.375}
+    species: 0
+    phase: 3.942659
+  - position: {x: 74.3125, y: 38.8125}
+    species: 0
+    phase: 1.2764541
+  - position: {x: 74.625, y: 38.875}
+    species: 3
+    phase: 5.3857775
+  - position: {x: 75.1875, y: 38.125}
+    species: 1
+    phase: 1.859375
+  - position: {x: 75.75, y: 38.1875}
+    species: 0
+    phase: 4.3919463
+  - position: {x: 75.25, y: 38.875}
+    species: 1
+    phase: 2.3290935
+  - position: {x: 76.3125, y: 38.3125}
+    species: 1
+    phase: 1.4563751
+  - position: {x: 76.25, y: 38.6875}
+    species: 0
+    phase: 5.3149433
+  - position: {x: 76.75, y: 38.625}
+    species: 0
+    phase: 0.84973514
+  - position: {x: 87.625, y: 38.625}
+    species: 1
+    phase: 2.9489331
+  - position: {x: 88.3125, y: 38.6875}
+    species: 1
+    phase: 0.7999414
+  - position: {x: 88.625, y: 38.6875}
+    species: 0
+    phase: 3.473912
+  - position: {x: 6.3125, y: 39.25}
+    species: 1
+    phase: 6.2196913
+  - position: {x: 37.875, y: 39.3125}
+    species: 0
+    phase: 1.7052481
+  - position: {x: 38.3125, y: 39.8125}
+    species: 0
+    phase: 4.936946
+  - position: {x: 73.6875, y: 39.25}
+    species: 1
+    phase: 1.6089092
+  - position: {x: 73.375, y: 39.75}
+    species: 0
+    phase: 2.075582
+  - position: {x: 74.625, y: 39.25}
+    species: 1
+    phase: 4.4712934
+  - position: {x: 74.6875, y: 39.6875}
+    species: 0
+    phase: 2.8240912
+  - position: {x: 76.375, y: 39.125}
+    species: 1
+    phase: 4.884066
+  - position: {x: 76.8125, y: 39.125}
+    species: 1
+    phase: 3.2758965
+  - position: {x: 76.75, y: 39.875}
+    species: 0
+    phase: 1.4122949
+  - position: {x: 77.625, y: 39.3125}
+    species: 0
+    phase: 1.9705216
+  - position: {x: 77.375, y: 39.625}
+    species: 1
+    phase: 4.739943
+  - position: {x: 77.75, y: 39.6875}
+    species: 0
+    phase: 2.603031
+  - position: {x: 78.3125, y: 39.625}
+    species: 0
+    phase: 0.92319167
+  - position: {x: 87.75, y: 39.1875}
+    species: 1
+    phase: 2.8534245
+  - position: {x: 88.1875, y: 39.1875}
+    species: 3
+    phase: 5.380804
+  - position: {x: 89.25, y: 39.1875}
+    species: 0
+    phase: 0.16664964
+  - position: {x: 7.375, y: 40.75}
+    species: 1
+    phase: 1.7565975
+  - position: {x: 7.6875, y: 40.875}
+    species: 1
+    phase: 5.5898314
+  - position: {x: 8.75, y: 40.875}
+    species: 0
+    phase: 4.057855
+  - position: {x: 9.125, y: 40.375}
+    species: 0
+    phase: 0.8616823
+  - position: {x: 9.625, y: 40.875}
+    species: 0
+    phase: 4.206452
+  - position: {x: 10.8125, y: 40.25}
+    species: 0
+    phase: 1.0468513
+  - position: {x: 10.75, y: 40.625}
+    species: 3
+    phase: 5.1489472
+  - position: {x: 11.375, y: 40.8125}
+    species: 3
+    phase: 2.0664823
+  - position: {x: 20.3125, y: 40.625}
+    species: 1
+    phase: 5.1219535
+  - position: {x: 20.6875, y: 40.75}
+    species: 0
+    phase: 3.461706
+  - position: {x: 21.1875, y: 40.8125}
+    species: 0
+    phase: 0.08264509
+  - position: {x: 59.25, y: 40.375}
+    species: 0
+    phase: 0.38999403
+  - position: {x: 78.125, y: 40.25}
+    species: 1
+    phase: 2.1124687
+  - position: {x: 78.625, y: 40.3125}
+    species: 0
+    phase: 4.2480354
+  - position: {x: 7.1875, y: 41.1875}
+    species: 0
+    phase: 3.2253258
+  - position: {x: 7.6875, y: 41.1875}
+    species: 3
+    phase: 1.4764869
+  - position: {x: 7.1875, y: 41.625}
+    species: 1
+    phase: 2.0796418
+  - position: {x: 7.625, y: 41.8125}
+    species: 0
+    phase: 0.05718011
+  - position: {x: 8.3125, y: 41.3125}
+    species: 0
+    phase: 1.7233223
+  - position: {x: 8.75, y: 41.375}
+    species: 0
+    phase: 0.051094744
+  - position: {x: 8.25, y: 41.8125}
+    species: 1
+    phase: 4.7452264
+  - position: {x: 8.75, y: 41.875}
+    species: 0
+    phase: 5.4834194
+  - position: {x: 9.375, y: 41.375}
+    species: 1
+    phase: 3.3598187
+  - position: {x: 9.6875, y: 41.375}
+    species: 0
+    phase: 4.7921214
+  - position: {x: 9.25, y: 41.6875}
+    species: 0
+    phase: 1.0800345
+  - position: {x: 9.6875, y: 41.8125}
+    species: 1
+    phase: 4.981615
+  - position: {x: 10.25, y: 41.375}
+    species: 2
+    phase: 0.34952405
+  - position: {x: 11.3125, y: 41.375}
+    species: 0
+    phase: 0.3641242
+  - position: {x: 18.75, y: 41.375}
+    species: 0
+    phase: 2.4469795
+  - position: {x: 19.625, y: 41.1875}
+    species: 1
+    phase: 1.0719451
+  - position: {x: 20.75, y: 41.375}
+    species: 1
+    phase: 0.3832735
+  - position: {x: 58.8125, y: 41.1875}
+    species: 0
+    phase: 1.8360548
+  - position: {x: 59.25, y: 41.125}
+    species: 4
+    phase: 1.639524
+  - position: {x: 75.25, y: 41.75}
+    species: 0
+    phase: 3.30014
+  - position: {x: 75.8125, y: 41.6875}
+    species: 0
+    phase: 2.6540816
+  - position: {x: 6.375, y: 42.3125}
+    species: 1
+    phase: 0.022742689
+  - position: {x: 7.375, y: 42.1875}
+    species: 0
+    phase: 0.922964
+  - position: {x: 7.75, y: 42.125}
+    species: 0
+    phase: 6.121984
+  - position: {x: 8.375, y: 42.3125}
+    species: 0
+    phase: 3.9362035
+  - position: {x: 8.375, y: 42.875}
+    species: 1
+    phase: 4.0822268
+  - position: {x: 8.625, y: 42.6875}
+    species: 0
+    phase: 4.141169
+  - position: {x: 9.125, y: 42.3125}
+    species: 1
+    phase: 1.5992923
+  - position: {x: 9.875, y: 42.25}
+    species: 0
+    phase: 0.9305672
+  - position: {x: 9.6875, y: 42.625}
+    species: 2
+    phase: 4.129718
+  - position: {x: 16.625, y: 42.6875}
+    species: 0
+    phase: 1.9591541
+  - position: {x: 17.1875, y: 42.875}
+    species: 0
+    phase: 6.2214065
+  - position: {x: 75.875, y: 42.25}
+    species: 0
+    phase: 1.9022273
+  - position: {x: 77.25, y: 42.25}
+    species: 1
+    phase: 1.9960315
+  - position: {x: 88.3125, y: 42.875}
+    species: 0
+    phase: 2.6976585
+  - position: {x: 7.6875, y: 43.3125}
+    species: 0
+    phase: 1.3335603
+  - position: {x: 7.625, y: 43.625}
+    species: 0
+    phase: 2.4395947
+  - position: {x: 8.1875, y: 43.25}
+    species: 0
+    phase: 3.2799356
+  - position: {x: 8.375, y: 43.8125}
+    species: 0
+    phase: 2.2671258
+  - position: {x: 13.375, y: 43.1875}
+    species: 0
+    phase: 4.9568806
+  - position: {x: 87.75, y: 43.375}
+    species: 0
+    phase: 0.8945621
+  - position: {x: 88.1875, y: 43.25}
+    species: 2
+    phase: 1.7081914
+  - position: {x: 8.75, y: 44.75}
+    species: 0
+    phase: 3.7578852
+  - position: {x: 9.6875, y: 44.375}
+    species: 0
+    phase: 6.19863
+  - position: {x: 9.25, y: 44.875}
+    species: 0
+    phase: 5.781468
+  - position: {x: 10.125, y: 44.75}
+    species: 1
+    phase: 3.9549367
+  - position: {x: 74.3125, y: 44.6875}
+    species: 0
+    phase: 0.7219552
+  - position: {x: 87.625, y: 44.375}
+    species: 0
+    phase: 5.945428
+  - position: {x: 8.75, y: 45.25}
+    species: 0
+    phase: 4.4543962
+  - position: {x: 9.3125, y: 45.375}
+    species: 0
+    phase: 0.3256365
+  - position: {x: 9.8125, y: 45.25}
+    species: 0
+    phase: 4.176545
+  - position: {x: 10.625, y: 45.3125}
+    species: 3
+    phase: 5.5731454
+  - position: {x: 11.3125, y: 45.8125}
+    species: 0
+    phase: 6.1281834
+  - position: {x: 13.625, y: 45.6875}
+    species: 0
+    phase: 3.0392313
+  - position: {x: 14.1875, y: 45.375}
+    species: 1
+    phase: 2.9671984
+  - position: {x: 14.125, y: 45.75}
+    species: 0
+    phase: 4.5006266
+  - position: {x: 15.25, y: 45.875}
+    species: 1
+    phase: 1.3671972
+  - position: {x: 15.8125, y: 45.625}
+    species: 0
+    phase: 5.553331
+  - position: {x: 16.375, y: 45.75}
+    species: 2
+    phase: 0.49646825
+  - position: {x: 55.375, y: 45.375}
+    species: 0
+    phase: 0.73550034
+  - position: {x: 14.1875, y: 46.375}
+    species: 3
+    phase: 3.923032
+  - position: {x: 16.125, y: 46.625}
+    species: 1
+    phase: 0.43897656
+  - position: {x: 60.375, y: 46.8125}
+    species: 1
+    phase: 4.285265
+  - position: {x: 75.375, y: 47.125}
+    species: 0
+    phase: 4.529204
+  - position: {x: 76.6875, y: 47.75}
+    species: 1
+    phase: 0.5312334
+  - position: {x: 77.3125, y: 47.75}
+    species: 1
+    phase: 5.0538363
+  - position: {x: 77.6875, y: 47.8125}
+    species: 0
+    phase: 0.89882773
+  - position: {x: 78.3125, y: 47.375}
+    species: 0
+    phase: 2.2205458
+  - position: {x: 78.3125, y: 47.6875}
+    species: 0
+    phase: 3.3068
+  - position: {x: 78.875, y: 47.875}
+    species: 0
+    phase: 5.902353
+  - position: {x: 79.1875, y: 47.375}
+    species: 1
+    phase: 4.3483076
+  - position: {x: 80.8125, y: 47.375}
+    species: 0
+    phase: 4.2161517
+  - position: {x: 80.125, y: 47.75}
+    species: 1
+    phase: 2.7918687
+  - position: {x: 80.8125, y: 47.6875}
+    species: 2
+    phase: 0.6685823
+  - position: {x: 81.3125, y: 47.6875}
+    species: 0
+    phase: 1.4460267
+  - position: {x: 81.625, y: 47.8125}
+    species: 1
+    phase: 3.5891
+  - position: {x: 75.375, y: 48.3125}
+    species: 2
+    phase: 5.218732
+  - position: {x: 75.875, y: 48.1875}
+    species: 1
+    phase: 4.6991835
+  - position: {x: 76.25, y: 48.25}
+    species: 0
+    phase: 2.2995615
+  - position: {x: 76.8125, y: 48.1875}
+    species: 0
+    phase: 1.5555154
+  - position: {x: 76.1875, y: 48.6875}
+    species: 0
+    phase: 4.0256405
+  - position: {x: 77.3125, y: 48.25}
+    species: 0
+    phase: 2.490851
+  - position: {x: 77.1875, y: 48.8125}
+    species: 1
+    phase: 3.0219228
+  - position: {x: 78.25, y: 48.3125}
+    species: 0
+    phase: 5.3886642
+  - position: {x: 78.8125, y: 48.375}
+    species: 0
+    phase: 3.2253344
+  - position: {x: 79.25, y: 48.125}
+    species: 0
+    phase: 4.222536
+  - position: {x: 79.6875, y: 48.3125}
+    species: 1
+    phase: 4.3391404
+  - position: {x: 80.1875, y: 48.3125}
+    species: 0
+    phase: 0.3939458
+  - position: {x: 59.875, y: 49.625}
+    species: 0
+    phase: 1.6654047
+  - position: {x: 76.6875, y: 49.375}
+    species: 0
+    phase: 5.3421307
+  - position: {x: 77.375, y: 49.375}
+    species: 1
+    phase: 6.1494603
+  - position: {x: 77.1875, y: 49.6875}
+    species: 0
+    phase: 0.7982801
+  - position: {x: 60.25, y: 50.3125}
+    species: 0
+    phase: 4.0423894
+  - position: {x: 61.375, y: 50.375}
+    species: 0
+    phase: 1.4499017
+  - position: {x: 61.3125, y: 50.75}
+    species: 0
+    phase: 4.574367
+  - position: {x: 77.375, y: 50.1875}
+    species: 0
+    phase: 5.1684127
+  - position: {x: 79.875, y: 50.6875}
+    species: 0
+    phase: 0.59129494
+  - position: {x: 80.25, y: 50.8125}
+    species: 0
+    phase: 2.4080613
+  - position: {x: 80.75, y: 50.75}
+    species: 0
+    phase: 1.752821
+  - position: {x: 81.375, y: 50.375}
+    species: 1
+    phase: 1.6441009
+  - position: {x: 81.3125, y: 50.75}
+    species: 1
+    phase: 2.7351594
+  - position: {x: 60.8125, y: 51.25}
+    species: 0
+    phase: 5.4811335
+  - position: {x: 79.625, y: 51.3125}
+    species: 0
+    phase: 4.8474226
+  - position: {x: 79.8125, y: 51.875}
+    species: 1
+    phase: 4.9391565
+  - position: {x: 80.25, y: 51.1875}
+    species: 0
+    phase: 0.01754865
+  - position: {x: 80.75, y: 51.3125}
+    species: 2
+    phase: 1.858796
+  - position: {x: 80.1875, y: 51.875}
+    species: 1
+    phase: 5.2399783
+  - position: {x: 80.6875, y: 51.6875}
+    species: 2
+    phase: 0.507942
+  - position: {x: 81.3125, y: 51.25}
+    species: 1
+    phase: 3.128654
+  - position: {x: 61.6875, y: 52.75}
+    species: 0
+    phase: 0.31998405
+  - position: {x: 62.375, y: 52.75}
+    species: 4
+    phase: 4.7317467
+  - position: {x: 79.6875, y: 52.3125}
+    species: 0
+    phase: 5.085121
+  - position: {x: 79.8125, y: 52.75}
+    species: 0
+    phase: 3.4111989
+  - position: {x: 80.3125, y: 52.375}
+    species: 0
+    phase: 2.0570004
+  - position: {x: 80.625, y: 52.3125}
+    species: 1
+    phase: 3.5298307
+  - position: {x: 80.25, y: 52.75}
+    species: 0
+    phase: 1.517316
+  - position: {x: 80.625, y: 52.8125}
+    species: 1
+    phase: 0.3391296
+  - position: {x: 62.1875, y: 53.25}
+    species: 0
+    phase: 2.434405
+  - position: {x: 79.625, y: 53.1875}
+    species: 0
+    phase: 2.9306023
+  - position: {x: 84.375, y: 55.125}
+    species: 0
+    phase: 6.1353765
+  - position: {x: 87.125, y: 55.375}
+    species: 0
+    phase: 4.468564
+  - position: {x: 89.8125, y: 55.75}
+    species: 0
+    phase: 5.2342386
+  - position: {x: 90.375, y: 55.625}
+    species: 0
+    phase: 1.0165012
+  - position: {x: 59.375, y: 56.125}
+    species: 0
+    phase: 0.12375772
+  - position: {x: 74.375, y: 56.375}
+    species: 2
+    phase: 2.254111
+  - position: {x: 75.875, y: 56.8125}
+    species: 1
+    phase: 1.9087036
+  - position: {x: 77.25, y: 56.375}
+    species: 0
+    phase: 2.0378861
+  - position: {x: 78.3125, y: 56.375}
+    species: 0
+    phase: 1.4717168
+  - position: {x: 78.75, y: 56.75}
+    species: 3
+    phase: 6.068761
+  - position: {x: 79.3125, y: 56.6875}
+    species: 0
+    phase: 0.20623541
+  - position: {x: 88.1875, y: 56.25}
+    species: 1
+    phase: 4.6859117
+  - position: {x: 88.8125, y: 56.125}
+    species: 1
+    phase: 3.249192
+  - position: {x: 88.625, y: 56.8125}
+    species: 1
+    phase: 4.755533
+  - position: {x: 89.3125, y: 56.25}
+    species: 2
+    phase: 3.8454263
+  - position: {x: 91.25, y: 56.75}
+    species: 1
+    phase: 3.7243755
+  - position: {x: 93.625, y: 56.6875}
+    species: 0
+    phase: 4.3465066
+  - position: {x: 62.375, y: 57.875}
+    species: 0
+    phase: 2.0665283
+  - position: {x: 76.25, y: 57.25}
+    species: 1
+    phase: 4.670531
+  - position: {x: 76.625, y: 57.125}
+    species: 1
+    phase: 0.9062254
+  - position: {x: 76.6875, y: 57.625}
+    species: 2
+    phase: 3.6095164
+  - position: {x: 77.8125, y: 57.1875}
+    species: 0
+    phase: 2.6537344
+  - position: {x: 78.3125, y: 57.375}
+    species: 1
+    phase: 5.087541
+  - position: {x: 78.6875, y: 57.125}
+    species: 0
+    phase: 0.82529926
+  - position: {x: 78.3125, y: 57.8125}
+    species: 0
+    phase: 3.1647475
+  - position: {x: 78.6875, y: 57.75}
+    species: 1
+    phase: 5.5444226
+  - position: {x: 79.25, y: 57.3125}
+    species: 1
+    phase: 4.3580256
+  - position: {x: 85.8125, y: 57.625}
+    species: 1
+    phase: 1.1042513
+  - position: {x: 86.25, y: 57.8125}
+    species: 1
+    phase: 4.9768662
+  - position: {x: 91.875, y: 57.125}
+    species: 0
+    phase: 4.6836233
+  - position: {x: 91.125, y: 57.625}
+    species: 1
+    phase: 1.1822064
+  - position: {x: 93.625, y: 57.8125}
+    species: 0
+    phase: 3.3749583
+  - position: {x: 62.625, y: 58.1875}
+    species: 0
+    phase: 0.40858418
+  - position: {x: 75.6875, y: 58.3125}
+    species: 0
+    phase: 5.6010275
+  - position: {x: 76.1875, y: 58.125}
+    species: 1
+    phase: 5.9046245
+  - position: {x: 79.125, y: 58.375}
+    species: 0
+    phase: 2.7195494
+  - position: {x: 79.3125, y: 58.625}
+    species: 0
+    phase: 4.287138
+  - position: {x: 85.6875, y: 58.375}
+    species: 0
+    phase: 1.3549069
+  - position: {x: 85.6875, y: 58.6875}
+    species: 0
+    phase: 1.4898714
+  - position: {x: 86.125, y: 58.375}
+    species: 0
+    phase: 5.814868
+  - position: {x: 88.25, y: 58.375}
+    species: 1
+    phase: 5.8380713
+  - position: {x: 93.6875, y: 58.25}
+    species: 0
+    phase: 4.677041
+  - position: {x: 62.8125, y: 59.75}
+    species: 4
+    phase: 3.304146
+  - position: {x: 63.3125, y: 59.375}
+    species: 0
+    phase: 3.6639237
+  - position: {x: 63.1875, y: 59.8125}
+    species: 0
+    phase: 3.3870451
+  - position: {x: 76.625, y: 59.125}
+    species: 1
+    phase: 4.7400017
+  - position: {x: 86.875, y: 59.125}
+    species: 1
+    phase: 1.1762502
+  - position: {x: 92.875, y: 59.625}
+    species: 0
+    phase: 2.5386038
+  - position: {x: 93.1875, y: 59.625}
+    species: 1
+    phase: 5.0117016
+  - position: {x: 94.3125, y: 59.125}
+    species: 0
+    phase: 5.032066
+  - position: {x: 86.25, y: 60.375}
+    species: 1
+    phase: 1.6320941
+  - position: {x: 62.875, y: 61.625}
+    species: 0
+    phase: 0.32791573
+  - position: {x: 58.875, y: 62.75}
+    species: 3
+    phase: 5.3585787
+  - position: {x: 59.625, y: 62.25}
+    species: 3
+    phase: 1.0508487
+  - position: {x: 62.875, y: 62.1875}
+    species: 0
+    phase: 2.9297647
+  - position: {x: 63.625, y: 62.6875}
+    species: 4
+    phase: 3.1418421
+  - position: {x: 76.625, y: 62.375}
+    species: 0
+    phase: 4.6916285
+  - position: {x: 76.8125, y: 62.625}
+    species: 2
+    phase: 0.075541064
+  - position: {x: 77.25, y: 62.875}
+    species: 0
+    phase: 5.122247
+  - position: {x: 77.6875, y: 62.875}
+    species: 0
+    phase: 0.37247795
+  - position: {x: 78.3125, y: 62.1875}
+    species: 0
+    phase: 0.72215706
+  - position: {x: 78.125, y: 62.75}
+    species: 1
+    phase: 4.520078
+  - position: {x: 78.6875, y: 62.625}
+    species: 0
+    phase: 0.48930317
+  - position: {x: 79.1875, y: 62.625}
+    species: 0
+    phase: 3.4650328
+  - position: {x: 80.6875, y: 62.875}
+    species: 0
+    phase: 0.42330906
+  - position: {x: 58.125, y: 63.375}
+    species: 0
+    phase: 3.3242795
+  - position: {x: 58.625, y: 63.625}
+    species: 2
+    phase: 3.3906362
+  - position: {x: 59.3125, y: 63.25}
+    species: 0
+    phase: 3.4327843
+  - position: {x: 62.6875, y: 63.375}
+    species: 0
+    phase: 4.547409
+  - position: {x: 62.375, y: 63.8125}
+    species: 0
+    phase: 5.134287
+  - position: {x: 63.1875, y: 63.125}
+    species: 1
+    phase: 3.092102
+  - position: {x: 63.6875, y: 63.875}
+    species: 1
+    phase: 5.339732
+  - position: {x: 64.1875, y: 63.625}
+    species: 1
+    phase: 0.79955417
+  - position: {x: 77.6875, y: 63.375}
+    species: 0
+    phase: 3.2579937
+  - position: {x: 80.375, y: 63.375}
+    species: 0
+    phase: 0.9913905
+  - position: {x: 80.75, y: 63.3125}
+    species: 0
+    phase: 5.4523783
+  - position: {x: 80.6875, y: 63.6875}
+    species: 0
+    phase: 2.8212001
+  - position: {x: 81.75, y: 63.3125}
+    species: 0
+    phase: 1.5147918
+  - position: {x: 90.875, y: 63.625}
+    species: 0
+    phase: 4.5618024
+  - position: {x: 91.75, y: 63.625}
+    species: 1
+    phase: 1.4120275
+  - position: {x: 57.625, y: 64.875}
+    species: 0
+    phase: 6.0793962
+  - position: {x: 58.125, y: 64.25}
+    species: 0
+    phase: 3.179257
+  - position: {x: 58.625, y: 64.875}
+    species: 0
+    phase: 2.989761
+  - position: {x: 63.125, y: 64.3125}
+    species: 4
+    phase: 1.4744222
+  - position: {x: 63.6875, y: 64.3125}
+    species: 0
+    phase: 0.1883085
+  - position: {x: 64.1875, y: 64.125}
+    species: 0
+    phase: 1.2220325
+  - position: {x: 76.75, y: 64.1875}
+    species: 0
+    phase: 6.041299
+  - position: {x: 77.375, y: 64.3125}
+    species: 0
+    phase: 4.5757923
+  - position: {x: 90.25, y: 64.1875}
+    species: 3
+    phase: 5.937968
+  - position: {x: 92.375, y: 64.8125}
+    species: 0
+    phase: 4.5178037
+  - position: {x: 57.6875, y: 65.1875}
+    species: 0
+    phase: 0.9527931
+  - position: {x: 76.6875, y: 65.125}
+    species: 0
+    phase: 3.0131361
+  - position: {x: 62.3125, y: 66.75}
+    species: 0
+    phase: 4.383932
+  - position: {x: 64.3125, y: 66.6875}
+    species: 0
+    phase: 2.8159401
+  - position: {x: 88.625, y: 66.6875}
+    species: 0
+    phase: 0.09957168
+  - position: {x: 89.75, y: 66.8125}
+    species: 0
+    phase: 5.1379275
+  - position: {x: 90.25, y: 66.875}
+    species: 1
+    phase: 3.8678687
+  - position: {x: 90.625, y: 66.6875}
+    species: 1
+    phase: 3.869286
+  - position: {x: 61.625, y: 67.125}
+    species: 1
+    phase: 4.5038157
+  - position: {x: 62.625, y: 67.6875}
+    species: 0
+    phase: 0.029192824
+  - position: {x: 63.6875, y: 67.375}
+    species: 1
+    phase: 3.7529407
+  - position: {x: 64.375, y: 67.8125}
+    species: 0
+    phase: 5.272527
+  - position: {x: 88.75, y: 67.375}
+    species: 0
+    phase: 3.1259253
+  - position: {x: 89.6875, y: 67.625}
+    species: 0
+    phase: 1.3466011
+  - position: {x: 92.125, y: 67.125}
+    species: 0
+    phase: 3.5602193
+  - position: {x: 92.1875, y: 67.625}
+    species: 0
+    phase: 2.4109168
+  - position: {x: 62.875, y: 68.25}
+    species: 0
+    phase: 3.9883502
+  - position: {x: 63.1875, y: 68.375}
+    species: 0
+    phase: 4.508258
+  - position: {x: 63.6875, y: 68.25}
+    species: 1
+    phase: 5.680492
+  - position: {x: 78.75, y: 68.3125}
+    species: 1
+    phase: 0.66054094
+  - position: {x: 78.875, y: 68.8125}
+    species: 0
+    phase: 2.9441497
+  - position: {x: 88.125, y: 68.1875}
+    species: 0
+    phase: 5.430008
+  - position: {x: 88.875, y: 68.1875}
+    species: 0
+    phase: 1.2579433
+  - position: {x: 88.375, y: 68.8125}
+    species: 0
+    phase: 4.1645045
+  - position: {x: 89.6875, y: 68.125}
+    species: 1
+    phase: 0.9241373
+  - position: {x: 56.625, y: 69.375}
+    species: 1
+    phase: 0.9981317
+  - position: {x: 62.75, y: 69.375}
+    species: 0
+    phase: 4.7134004
+  - position: {x: 62.375, y: 69.875}
+    species: 1
+    phase: 4.763392
+  - position: {x: 62.6875, y: 69.8125}
+    species: 1
+    phase: 1.0187397
+  - position: {x: 63.1875, y: 69.375}
+    species: 0
+    phase: 3.2372684
+  - position: {x: 63.25, y: 69.8125}
+    species: 4
+    phase: 2.209248
+  - position: {x: 77.375, y: 69.625}
+    species: 1
+    phase: 5.521935
+  - position: {x: 79.1875, y: 69.1875}
+    species: 0
+    phase: 5.861661
+  - position: {x: 81.75, y: 69.375}
+    species: 0
+    phase: 3.3342218
+  - position: {x: 87.8125, y: 69.1875}
+    species: 0
+    phase: 3.3049464
+  - position: {x: 91.625, y: 69.375}
+    species: 0
+    phase: 1.7527372
+  - position: {x: 56.625, y: 70.125}
+    species: 0
+    phase: 1.9975797
+  - position: {x: 60.3125, y: 70.6875}
+    species: 0
+    phase: 0.27799883
+  - position: {x: 60.8125, y: 70.6875}
+    species: 0
+    phase: 2.966889
+  - position: {x: 61.125, y: 70.625}
+    species: 0
+    phase: 5.7986817
+  - position: {x: 61.75, y: 70.6875}
+    species: 0
+    phase: 3.2732255
+  - position: {x: 62.3125, y: 70.3125}
+    species: 1
+    phase: 1.6152683
+  - position: {x: 62.75, y: 70.375}
+    species: 0
+    phase: 0.00025429027
+  - position: {x: 63.75, y: 70.125}
+    species: 0
+    phase: 0.74178386
+  - position: {x: 79.875, y: 70.8125}
+    species: 0
+    phase: 0.44333357
+  - position: {x: 82.625, y: 70.375}
+    species: 1
+    phase: 1.0122164
+  - position: {x: 86.75, y: 70.8125}
+    species: 1
+    phase: 1.8670502
+  - position: {x: 61.375, y: 71.3125}
+    species: 0
+    phase: 4.785979
+  - position: {x: 79.375, y: 71.25}
+    species: 0
+    phase: 5.5369024
+  - position: {x: 80.25, y: 71.375}
+    species: 0
+    phase: 3.5250733
+  - position: {x: 86.875, y: 71.375}
+    species: 1
+    phase: 2.5327861
+  - position: {x: 56.375, y: 72.25}
+    species: 0
+    phase: 5.6413493
+  - position: {x: 78.875, y: 72.375}
+    species: 1
+    phase: 5.412123
+  - position: {x: 80.1875, y: 72.375}
+    species: 0
+    phase: 2.12913
+  - position: {x: 78.6875, y: 73.8125}
+    species: 1
+    phase: 4.1713753
+  - position: {x: 79.25, y: 73.6875}
+    species: 0
+    phase: 2.117944
+  - position: {x: 79.625, y: 73.6875}
+    species: 0
+    phase: 4.7176156
+  - position: {x: 78.375, y: 74.625}
+    species: 0
+    phase: 5.4433746
+  - position: {x: 79.6875, y: 74.875}
+    species: 0
+    phase: 1.1548543
+  - position: {x: 79.375, y: 75.125}
+    species: 3
+    phase: 2.8231812
+  - position: {x: 79.6875, y: 75.3125}
+    species: 0
+    phase: 1.2205383
+  - position: {x: 86.3125, y: 75.75}
+    species: 1
+    phase: 5.062088
+  - position: {x: 86.6875, y: 75.875}
+    species: 0
+    phase: 5.639584
+  - position: {x: 90.125, y: 75.625}
+    species: 0
+    phase: 0.026155947
+  - position: {x: 91.625, y: 75.375}
+    species: 0
+    phase: 1.4028075
+  - position: {x: 91.8125, y: 75.75}
+    species: 0
+    phase: 3.07711
+  - position: {x: 79.6875, y: 76.375}
+    species: 0
+    phase: 6.084247
+  - position: {x: 79.875, y: 76.8125}
+    species: 0
+    phase: 1.8338834
+  - position: {x: 80.3125, y: 76.125}
+    species: 2
+    phase: 4.37446
+  - position: {x: 80.8125, y: 76.8125}
+    species: 0
+    phase: 5.4872575
+  - position: {x: 81.1875, y: 76.8125}
+    species: 0
+    phase: 4.7983823
+  - position: {x: 85.375, y: 76.3125}
+    species: 1
+    phase: 2.576088
+  - position: {x: 85.6875, y: 76.375}
+    species: 0
+    phase: 1.5146383
+  - position: {x: 86.375, y: 76.125}
+    species: 0
+    phase: 0.35290396
+  - position: {x: 86.375, y: 76.625}
+    species: 0
+    phase: 4.9291215
+  - position: {x: 87.25, y: 76.25}
+    species: 2
+    phase: 2.734288
+  - position: {x: 87.25, y: 76.625}
+    species: 2
+    phase: 5.12028
+  - position: {x: 90.8125, y: 76.1875}
+    species: 1
+    phase: 2.7795477
+  - position: {x: 91.6875, y: 76.1875}
+    species: 0
+    phase: 4.811191
+  - position: {x: 91.8125, y: 76.8125}
+    species: 1
+    phase: 3.7562494
+  - position: {x: 93.25, y: 76.375}
+    species: 0
+    phase: 2.4197316
+  - position: {x: 93.1875, y: 76.6875}
+    species: 0
+    phase: 4.727521
+  - position: {x: 78.6875, y: 77.875}
+    species: 1
+    phase: 5.001462
+  - position: {x: 79.25, y: 77.375}
+    species: 0
+    phase: 3.9913986
+  - position: {x: 79.75, y: 77.25}
+    species: 0
+    phase: 2.3300521
+  - position: {x: 79.75, y: 77.875}
+    species: 0
+    phase: 0.63328993
+  - position: {x: 80.3125, y: 77.1875}
+    species: 1
+    phase: 5.601119
+  - position: {x: 80.875, y: 77.3125}
+    species: 1
+    phase: 4.4238257
+  - position: {x: 80.25, y: 77.8125}
+    species: 0
+    phase: 3.9492345
+  - position: {x: 86.6875, y: 77.625}
+    species: 0
+    phase: 3.3339846
+  - position: {x: 87.875, y: 77.625}
+    species: 2
+    phase: 3.711057
+  - position: {x: 91.3125, y: 77.8125}
+    species: 1
+    phase: 4.7448316
+  - position: {x: 92.3125, y: 77.625}
+    species: 0
+    phase: 5.2484074
+  - position: {x: 93.8125, y: 77.75}
+    species: 1
+    phase: 3.2566993
+  - position: {x: 94.375, y: 77.75}
+    species: 0
+    phase: 5.48581
+  - position: {x: 94.75, y: 77.625}
+    species: 2
+    phase: 4.671836
+  - position: {x: 95.25, y: 77.6875}
+    species: 0
+    phase: 5.4125648
+  - position: {x: 78.75, y: 78.625}
+    species: 0
+    phase: 4.8356843
+  - position: {x: 79.8125, y: 78.1875}
+    species: 0
+    phase: 2.1861122
+  - position: {x: 80.1875, y: 78.875}
+    species: 1
+    phase: 1.6762561
+  - position: {x: 87.1875, y: 78.1875}
+    species: 0
+    phase: 2.34266
+  - position: {x: 88.3125, y: 78.1875}
+    species: 0
+    phase: 0.16930377
+  - position: {x: 88.8125, y: 78.25}
+    species: 1
+    phase: 6.16064
+  - position: {x: 90.75, y: 78.375}
+    species: 0
+    phase: 6.1251497
+  - position: {x: 91.1875, y: 78.3125}
+    species: 0
+    phase: 1.7630998
+  - position: {x: 91.75, y: 78.75}
+    species: 2
+    phase: 5.9967446
+  - position: {x: 93.3125, y: 78.3125}
+    species: 3
+    phase: 3.2650588
+  - position: {x: 93.875, y: 78.8125}
+    species: 0
+    phase: 1.7823726
+  - position: {x: 95.125, y: 78.25}
+    species: 0
+    phase: 3.3965795
+  - position: {x: 95.125, y: 78.6875}
+    species: 0
+    phase: 0.15646192
+  - position: {x: 78.6875, y: 79.8125}
+    species: 0
+    phase: 1.6474475
+  - position: {x: 79.3125, y: 79.375}
+    species: 0
+    phase: 6.16822
+  - position: {x: 79.25, y: 79.6875}
+    species: 0
+    phase: 3.9056804
+  - position: {x: 80.1875, y: 79.3125}
+    species: 0
+    phase: 4.3617854
+  - position: {x: 80.8125, y: 79.375}
+    species: 0
+    phase: 5.8648243
+  - position: {x: 80.375, y: 79.8125}
+    species: 0
+    phase: 3.0238705
+  - position: {x: 81.25, y: 79.8125}
+    species: 0
+    phase: 0.7257879
+  - position: {x: 82.3125, y: 79.375}
+    species: 0
+    phase: 4.0175385
+  - position: {x: 82.125, y: 79.6875}
+    species: 2
+    phase: 2.7683115
+  - position: {x: 89.875, y: 79.625}
+    species: 2
+    phase: 4.37181
+  - position: {x: 91.25, y: 79.1875}
+    species: 0
+    phase: 3.5587187
+  - position: {x: 91.625, y: 79.375}
+    species: 1
+    phase: 5.4964304
+  - position: {x: 78.6875, y: 80.625}
+    species: 1
+    phase: 1.9501637
+  - position: {x: 80.1875, y: 80.25}
+    species: 0
+    phase: 4.1572394
+  - position: {x: 80.8125, y: 80.375}
+    species: 0
+    phase: 2.9244015
+  - position: {x: 81.375, y: 80.1875}
+    species: 0
+    phase: 2.8796535
+  - position: {x: 81.75, y: 80.375}
+    species: 0
+    phase: 0.33645675
+  - position: {x: 82.375, y: 80.375}
+    species: 1
+    phase: 3.3690467
+  - position: {x: 81.625, y: 81.3125}
+    species: 0
+    phase: 4.430487
+  - position: {x: 81.875, y: 81.8125}
+    species: 0
+    phase: 1.6593684
+  - position: {x: 82.3125, y: 81.375}
+    species: 0
+    phase: 5.1513577
+  - position: {x: 82.8125, y: 81.75}
+    species: 0
+    phase: 3.73081
+  - position: {x: 78.25, y: 82.3125}
+    species: 1
+    phase: 5.06547
+  - position: {x: 80.3125, y: 82.375}
+    species: 0
+    phase: 4.0580425
+  - position: {x: 80.125, y: 82.625}
+    species: 0
+    phase: 0.43061268
+  - position: {x: 81.375, y: 82.3125}
+    species: 1
+    phase: 5.132622
+  - position: {x: 81.6875, y: 82.25}
+    species: 0
+    phase: 1.6617255
+  - position: {x: 82.6875, y: 82.125}
+    species: 0
+    phase: 0.6987747
+  - position: {x: 83.25, y: 82.25}
+    species: 1
+    phase: 6.0070605
+  - position: {x: 83.25, y: 82.875}
+    species: 1
+    phase: 0.92984927
+  - position: {x: 94.375, y: 82.625}
+    species: 0
+    phase: 2.7772322
+  - position: {x: 78.875, y: 83.125}
+    species: 2
+    phase: 3.1815119
+  - position: {x: 78.3125, y: 83.875}
+    species: 0
+    phase: 1.6426309
+  - position: {x: 78.875, y: 83.6875}
+    species: 1
+    phase: 3.9727194
+  - position: {x: 79.3125, y: 83.6875}
+    species: 0
+    phase: 6.0381556
+  - position: {x: 78.1875, y: 84.375}
+    species: 0
+    phase: 3.55268
+  - position: {x: 78.625, y: 84.625}
+    species: 0
+    phase: 1.3442638
+  - position: {x: 79.1875, y: 84.125}
+    species: 0
+    phase: 1.7837238
+  - position: {x: 80.6875, y: 84.375}
+    species: 1
+    phase: 2.9030328
+  - position: {x: 80.75, y: 84.8125}
+    species: 0
+    phase: 5.611219
+  - position: {x: 81.625, y: 84.125}
+    species: 0
+    phase: 1.5521115
+  - position: {x: 81.1875, y: 84.875}
+    species: 0
+    phase: 2.4416583
+  - position: {x: 80.625, y: 85.375}
+    species: 1
+    phase: 0.28047132
+  - position: {x: 81.25, y: 85.3125}
+    species: 0
+    phase: 1.6735574
+  - position: {x: 81.625, y: 85.125}
+    species: 0
+    phase: 1.9378833
+  - position: {x: 81.8125, y: 85.6875}
+    species: 1
+    phase: 0.5381741
+  - position: {x: 82.25, y: 85.125}
+    species: 1
+    phase: 2.2255604
+  - position: {x: 82.3125, y: 85.625}
+    species: 0
+    phase: 4.42092
+  - position: {x: 83.25, y: 85.3125}
+    species: 1
+    phase: 4.039451
+  - position: {x: 83.625, y: 85.25}
+    species: 0
+    phase: 5.2699823
+  - position: {x: 83.3125, y: 85.75}
+    species: 1
+    phase: 1.8098536
+  - position: {x: 83.875, y: 85.6875}
+    species: 0
+    phase: 0.26539704
+  - position: {x: 84.25, y: 85.3125}
+    species: 0
+    phase: 5.9999776
+  - position: {x: 84.375, y: 85.75}
+    species: 0
+    phase: 1.2241066
+  - position: {x: 92.1875, y: 85.625}
+    species: 1
+    phase: 2.5257962
+  - position: {x: 81.8125, y: 86.3125}
+    species: 0
+    phase: 1.0518094
+  - position: {x: 81.875, y: 86.625}
+    species: 1
+    phase: 0.9526324
+  - position: {x: 82.1875, y: 86.3125}
+    species: 0
+    phase: 3.6014433
+  - position: {x: 82.1875, y: 86.625}
+    species: 0
+    phase: 1.16553
+  - position: {x: 83.375, y: 86.1875}
+    species: 0
+    phase: 1.8866874
+  - position: {x: 83.8125, y: 86.25}
+    species: 1
+    phase: 2.907452
+  - position: {x: 83.75, y: 86.875}
+    species: 1
+    phase: 5.6320224
+  - position: {x: 84.375, y: 86.375}
+    species: 1
+    phase: 3.790801
+  - position: {x: 84.1875, y: 86.6875}
+    species: 1
+    phase: 2.3705854
+  - position: {x: 90.75, y: 86.8125}
+    species: 0
+    phase: 5.890425
+  - position: {x: 91.3125, y: 86.6875}
+    species: 2
+    phase: 1.621651
+  - position: {x: 83.75, y: 87.3125}
+    species: 2
+    phase: 0.35751528
+  - position: {x: 84.375, y: 87.25}
+    species: 1
+    phase: 2.6944509
+  - position: {x: 85.75, y: 87.375}
+    species: 0
+    phase: 0.6136189
+  - position: {x: 91.1875, y: 87.125}
+    species: 0
+    phase: 1.5035342
+  - position: {x: 91.6875, y: 87.625}
+    species: 1
+    phase: 1.5368189
+  - position: {x: 92.3125, y: 87.375}
+    species: 0
+    phase: 1.7409394
+  - position: {x: 91.625, y: 88.375}
+    species: 2
+    phase: 3.126421

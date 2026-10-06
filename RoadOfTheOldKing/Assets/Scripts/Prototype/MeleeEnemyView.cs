@@ -4,7 +4,7 @@ using UnityEngine;
 namespace RoadOfTheOldKing.Prototype
 {
     // Placeholder presentation reads the enemy; it does not determine damage.
-    [RequireComponent(typeof(SimpleMeleeEnemy), typeof(Damageable))]
+    [RequireComponent(typeof(SimpleMeleeEnemy), typeof(Damageable), typeof(EnemyCorpseSorting))]
     public sealed class MeleeEnemyView : MonoBehaviour
     {
         [SerializeField] private SpriteRenderer bodyVisual;

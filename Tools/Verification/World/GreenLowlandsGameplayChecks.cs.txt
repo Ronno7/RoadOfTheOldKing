@@ -1,0 +1,206 @@
+// Execute this C#6 method body through the Editor bridge with an isolated save.
+// First call (Edit Mode): snapshots normal/legacy/resume entries and clean editor setup,
+// then creates an UNSAVED bootstrap with an isolated GameSession configured before Awake.
+// Enter Play Mode and call repeatedly, allowing real frames between transition phases.
+// After phase 7, stop/re-enter Play Mode in that same bootstrap for a cold-store check.
+// Finally stop Play Mode, set SessionState "GreenLowlands.Gameplay.Command" to "cleanup",
+// and execute again. Cleanup also works after a failed phase; do not save the bootstrap.
+// Setup requires saved, clean scenes. It never saves or modifies authored scene files.
+// This checks actual trigger/load/death/menu lifecycles with teleported setup positions;
+// it is not a keyboard, player-motor, complete Tutorial loop or browser test.
+string prefix="GreenLowlands.Gameplay.";
+string command=SessionState.GetString(prefix+"Command",SessionState.GetBool(prefix+"Active",false)?"advance":"setup");
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var type=typeof(RoadOfTheOldKing.Progression.GameSession);
+string tutorialPath="Assets/Scenes/Tutorial.unity",regionPath="Assets/Scenes/GreenLowlands.unity",titlePath="Assets/Scenes/Title.unity";
+if(command=="setup"){
+    if(EditorApplication.isPlayingOrWillChangePlaymode)throw new System.Exception("Setup requires settled Edit Mode.");
+    if(SessionState.GetBool(prefix+"Active",false))throw new System.Exception("Clean up the previous isolated run first.");
+    var setup=UnityEditor.SceneManagement.EditorSceneManager.GetSceneManagerSetup();
+    foreach(var item in setup)if(item.isLoaded&&(string.IsNullOrEmpty(item.path)||UnityEngine.SceneManagement.SceneManager.GetSceneByPath(item.path).isDirty))throw new System.Exception("Preserve and save existing scene work before this fixture; it only switches away from saved, clean scenes.");
+    foreach(string path in new[]{tutorialPath,regionPath,titlePath})if(UnityEngine.SceneManagement.SceneUtility.GetBuildIndexByScenePath(path)<0)throw new System.Exception("Required enabled Build Settings scene: "+path);
+    var prefab=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Progression/GameSession.prefab");
+    if(prefab==null)throw new System.Exception("GameSession prefab missing.");
+    var configured=prefab.GetComponent<RoadOfTheOldKing.Progression.GameSession>();
+    var protectedKeys=new System.Collections.Generic.HashSet<string>{"RoadOfTheOldKing.Save","RoadOfTheOldKing.Tutorial.Save.v1"};
+    var authored=Resources.FindObjectsOfTypeAll<RoadOfTheOldKing.Progression.GameSession>().Where(s=>s.gameObject.scene.IsValid()).Concat(new[]{configured});
+    foreach(var s in authored){
+        protectedKeys.Add((string)type.GetField("saveKey",flags).GetValue(s));
+        foreach(string legacy in (string[])type.GetField("legacySaveKeys",flags).GetValue(s))if(!string.IsNullOrEmpty(legacy))protectedKeys.Add(legacy);
+    }
+    foreach(string key in protectedKeys.ToArray())protectedKeys.Add(key+".Resume");
+    int i=0;foreach(string key in protectedKeys){
+        SessionState.SetString(prefix+"Protected."+i,key);
+        SessionState.SetBool(prefix+"Exists."+i,PlayerPrefs.HasKey(key));
+        SessionState.SetString(prefix+"Value."+i,PlayerPrefs.GetString(key,""));i++;
+    }
+    SessionState.SetInt(prefix+"ProtectedCount",i);
+    SessionState.SetInt(prefix+"SceneCount",setup.Length);
+    for(i=0;i<setup.Length;i++){
+        SessionState.SetString(prefix+"Scene."+i,setup[i].path);
+        SessionState.SetBool(prefix+"SceneLoaded."+i,setup[i].isLoaded);
+        SessionState.SetBool(prefix+"SceneActive."+i,setup[i].isActive);
+    }
+    SessionState.SetString(prefix+"PlayStart",AssetDatabase.GetAssetPath(UnityEditor.SceneManagement.EditorSceneManager.playModeStartScene));
+    SessionState.SetBool(prefix+"RunInBackground",Application.runInBackground);
+    string isolated="RoadOfTheOldKing.Verification.GreenLowlands."+System.Guid.NewGuid().ToString("N");
+    SessionState.SetString(prefix+"Key",isolated);SessionState.SetInt(prefix+"Phase",0);SessionState.SetInt(prefix+"Passed",0);
+    SessionState.SetBool(prefix+"Active",true);SessionState.SetString(prefix+"Command","advance");
+    UnityEditor.SceneManagement.EditorSceneManager.playModeStartScene=null;
+    UnityEditor.SceneManagement.EditorSceneManager.NewScene(UnityEditor.SceneManagement.NewSceneSetup.EmptyScene,UnityEditor.SceneManagement.NewSceneMode.Single);
+    var boot=(GameObject)PrefabUtility.InstantiatePrefab(prefab);
+    var serialized=new SerializedObject(boot.GetComponent<RoadOfTheOldKing.Progression.GameSession>());
+    serialized.FindProperty("saveKey").stringValue=isolated;
+    serialized.FindProperty("legacySaveKeys").arraySize=0;
+    serialized.ApplyModifiedPropertiesWithoutUndo();
+    var seed=new RoadOfTheOldKing.Progression.ProgressState{hasAxe=true,recallUnlocked=true};
+    seed.Complete("verification/green-lowlands");
+    new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(isolated).Save(seed);
+    return "SETUP: isolated key and empty legacy list applied before Awake. Enter Play Mode in the unsaved bootstrap, then execute again. Never save this bootstrap.";
+}
+if(command=="cleanup"){
+    if(EditorApplication.isPlayingOrWillChangePlaymode)throw new System.Exception("Stop Play Mode before cleanup; OnApplicationQuit must finish before deleting the test resume.");
+    if(!SessionState.GetBool(prefix+"Active",false))throw new System.Exception("No active isolated run.");
+    var changed=new System.Collections.Generic.List<string>();
+    int protectedCount=SessionState.GetInt(prefix+"ProtectedCount",0);
+    for(int i=0;i<protectedCount;i++){
+        string key=SessionState.GetString(prefix+"Protected."+i,"");bool existed=SessionState.GetBool(prefix+"Exists."+i,false);string value=SessionState.GetString(prefix+"Value."+i,"");
+        if(PlayerPrefs.HasKey(key)!=existed||(existed&&PlayerPrefs.GetString(key)!=value)){
+            changed.Add(key);if(existed)PlayerPrefs.SetString(key,value);else PlayerPrefs.DeleteKey(key);
+        }
+    }
+    string isolated=SessionState.GetString(prefix+"Key","");
+    if(!isolated.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new System.Exception("Refusing to delete an unrecognized test key.");
+    PlayerPrefs.DeleteKey(isolated);PlayerPrefs.DeleteKey(isolated+".Resume");PlayerPrefs.Save();
+    var setup=new UnityEditor.SceneManagement.SceneSetup[SessionState.GetInt(prefix+"SceneCount",0)];
+    for(int i=0;i<setup.Length;i++)setup[i]=new UnityEditor.SceneManagement.SceneSetup{path=SessionState.GetString(prefix+"Scene."+i,""),isLoaded=SessionState.GetBool(prefix+"SceneLoaded."+i,false),isActive=SessionState.GetBool(prefix+"SceneActive."+i,false)};
+    // Refuse to discard unrelated work if the operator changed editor scenes.
+    var bootScene=UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+    var bootRoots=bootScene.GetRootGameObjects();
+    if(UnityEngine.SceneManagement.SceneManager.sceneCount!=1||!string.IsNullOrEmpty(bootScene.path)||bootRoots.Length!=1||bootRoots[0].GetComponent<RoadOfTheOldKing.Progression.GameSession>()==null||(string)type.GetField("saveKey",flags).GetValue(bootRoots[0].GetComponent<RoadOfTheOldKing.Progression.GameSession>())!=isolated)throw new System.Exception("Protected saves restored and test entries deleted. Editor no longer contains only the fixture-owned bootstrap; restore editor setup manually without discarding other work.");
+    UnityEditor.SceneManagement.EditorSceneManager.RestoreSceneManagerSetup(setup);
+    string start=SessionState.GetString(prefix+"PlayStart","");
+    UnityEditor.SceneManagement.EditorSceneManager.playModeStartScene=string.IsNullOrEmpty(start)?null:AssetDatabase.LoadAssetAtPath<SceneAsset>(start);
+    Application.runInBackground=SessionState.GetBool(prefix+"RunInBackground",false);
+    SessionState.SetBool(prefix+"Active",false);SessionState.EraseString(prefix+"Command");
+    return (changed.Count==0?"PASS: protected save entries unchanged; ":"FAIL: protected entries changed during run and were restored: "+string.Join(", ",changed.ToArray())+"; ")+"isolated main/resume deleted, editor setup restored. Completed assertions: "+SessionState.GetInt(prefix+"Passed",0);
+}
+if(command!="advance"||!SessionState.GetBool(prefix+"Active",false))throw new System.Exception("Run setup first.");
+if(!EditorApplication.isPlaying)throw new System.Exception("Enter Play Mode in the existing unsaved bootstrap, or set Command=cleanup to restore the editor.");
+Application.runInBackground=true;EditorApplication.QueuePlayerLoopUpdate();
+var session=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(session==null)throw new System.Exception("Isolated bootstrap session missing.");
+string testKey=SessionState.GetString(prefix+"Key","");
+if((string)type.GetField("saveKey",flags).GetValue(session)!=testKey||!testKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new System.Exception("Refusing to use a normal or unexpected save key.");
+var store=type.GetField("store",flags).GetValue(session);
+if((string)store.GetType().GetField("key",flags).GetValue(store)!=testKey||((string[])type.GetField("legacySaveKeys",flags).GetValue(session)).Length!=0)throw new System.Exception("Store or legacy isolation is invalid.");
+if(session.IsLoading)return "WAIT: load/fade still active; allow real frames, then execute this phase again.";
+int phase=SessionState.GetInt(prefix+"Phase",0);
+var results=new System.Collections.Generic.List<string>();
+System.Action<bool,string> check=(ok,label)=>{
+    if(!ok)throw new System.Exception("FAIL phase "+phase+": "+label+". Stop Play and run cleanup if aborting.");
+    results.Add(label);SessionState.SetInt(prefix+"Passed",SessionState.GetInt(prefix+"Passed",0)+1);
+};
+var active=UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+var saved=new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(testKey);
+check(UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Progression.GameSession>(FindObjectsSortMode.None).Length==1,"One persistent isolated session; scene copies removed");
+for(int i=0;i<SessionState.GetInt(prefix+"ProtectedCount",0);i++){
+    string key=SessionState.GetString(prefix+"Protected."+i,"");bool existed=SessionState.GetBool(prefix+"Exists."+i,false);
+    check(PlayerPrefs.HasKey(key)==existed&&(!existed||PlayerPrefs.GetString(key)==SessionState.GetString(prefix+"Value."+i,"")),"Protected entry unchanged: "+key);
+}
+if(phase==0||phase==8){
+    check(string.IsNullOrEmpty(active.path),"Unsaved isolated bootstrap is active");
+    check(session.HasSave&&session.Progress.hasAxe&&session.Progress.recallUnlocked,"Seeded permanent ownership loaded from isolated store");
+    if(phase==8)check(session.HasResumePoint&&saved.LoadResume()!=null&&saved.LoadResume().scenePath==regionPath,"Cold session loaded the regional resume from storage");
+    check(session.Continue(),phase==0?"Load real Tutorial from bootstrap":"Cold Continue starts regional load");
+    SessionState.SetInt(prefix+"Phase",phase+1);
+    return new{phase,checks=results,next="Wait for the transition to finish, then execute again."};
+}
+var player=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
+if(phase!=6)check(player!=null&&player.gameObject.scene==active,"Active scene owns its player");
+System.Action<Vector2> move=p=>{
+    var rigidbody=player.GetComponent<Rigidbody2D>();rigidbody.position=p;rigidbody.linearVelocity=Vector2.zero;player.transform.position=p;Physics2D.SyncTransforms();
+};
+System.Action<string> atFire=id=>{
+    var fire=session.Checkpoints.Fires.Single(f=>f.Id==id);
+    check(Vector2.Distance(player.transform.position,fire.SpawnPosition)<.05f,"Arrived at checkpoint "+id);
+    check(player.IsAlive&&player.Health.Health==player.Health.MaxHealth&&player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().Charges==player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().MaxCharges,"Checkpoint arrival restores full vitals");
+};
+if(phase==1){
+    check(active.path==tutorialPath,"Real Tutorial loaded");
+    var combat=player.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();
+    check(combat.Weapon!=null&&combat.CanRecall,"Owned axe and Recall restored in Tutorial");
+    var fire=session.Checkpoints.Fires.Single(f=>f.Id=="tutorial/roadside-fire");
+    move(fire.SpawnPosition);check(session.Checkpoints.Rest(fire),"Tutorial fire discovered for cross-scene travel");
+    player.Health.SetHealth(42);player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().SetCharges(1);session.RecordResume();
+    var exit=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SceneExit>(FindObjectsSortMode.None).Single(e=>(string)e.GetType().GetField("targetScene",flags).GetValue(e)==regionPath);
+    string arrival=(string)exit.GetType().GetField("targetSpawnId",flags).GetValue(exit);
+    check(!string.IsNullOrEmpty(arrival)&&exit.GetComponent<Collider2D>().isTrigger,"Authored Tutorial exit targets a named regional arrival");
+    SessionState.SetString(prefix+"Arrival",arrival);
+    SessionState.SetString(prefix+"ExitMilestone",(string)exit.GetType().GetField("progressId",flags).GetValue(exit));
+    move(exit.GetComponent<Collider2D>().bounds.center);
+    SessionState.SetInt(prefix+"Phase",2);
+    return new{phase,checks=results,next="Allow fixed frames: the real exit trigger must load GreenLowlands. Then execute again."};
+}
+if(phase==2){
+    check(active.path==regionPath,"Actual Tutorial trigger loaded Green Lowlands");
+    var spawn=RoadOfTheOldKing.World.SceneSpawnPoint.Find(SessionState.GetString(prefix+"Arrival",""));
+    check(spawn!=null&&Vector2.Distance(player.transform.position,spawn.Position)<.05f,"Named arrival placed the player");
+    check(player.Health.Health==42&&player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().Charges==1,"Exit carries health and flask charges");
+    check(player.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>().Weapon!=null&&player.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>().CanRecall,"Owned equipment survives region without an axe pickup");
+    string milestone=SessionState.GetString(prefix+"ExitMilestone","");
+    check(string.IsNullOrEmpty(milestone)||saved.Load().Has(milestone),"Exit milestone persisted");
+    check(saved.Load().scenePath==tutorialPath,"Arrival alone does not change the last rest checkpoint");
+    var fire=session.Checkpoints.Fires.Single();SessionState.SetString(prefix+"RegionalFire",fire.Id);
+    move(fire.SpawnPosition);
+    var interaction=player.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>();
+    var locks=player.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>();
+    check(interaction.Open(fire)&&interaction.IsOpen&&locks.IsLocked,"Regional fire opens the real rest interaction");
+    check(player.GetComponent<RoadOfTheOldKing.UI.BonfireMenu>().IsOpen,"Bonfire menu builds and opens");
+    check(player.Health.Health==player.Health.MaxHealth&&player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().Charges==player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().MaxCharges,"Regional rest replenishes carried vitals");
+    var progress=saved.Load();
+    check(progress.scenePath==regionPath&&progress.checkpointId==fire.Id&&progress.HasFire(fire.Id)&&progress.HasFire("tutorial/roadside-fire"),"Both fires and regional checkpoint are saved");
+    check(!session.HasResumePoint&&!PlayerPrefs.HasKey(testKey+".Resume"),"Rest clears the stale resume immediately");
+    interaction.Close();check(!interaction.IsOpen&&!locks.IsLocked,"Closing fire releases its input lock");
+    check(session.Checkpoints.Travel(progress.FindFire("tutorial/roadside-fire"),fire),"Travel starts from Lowlands to Tutorial");
+}
+else if(phase==3){
+    check(active.path==tutorialPath,"Cross-scene travel loaded Tutorial");atFire("tutorial/roadside-fire");
+    var fire=session.Checkpoints.Fires.Single(f=>f.Id=="tutorial/roadside-fire");
+    check(session.Checkpoints.Travel(session.Progress.FindFire(SessionState.GetString(prefix+"RegionalFire","")),fire),"Return travel starts from Tutorial to Lowlands");
+}
+else if(phase==4){
+    check(active.path==regionPath,"Return travel loaded Lowlands");atFire(SessionState.GetString(prefix+"RegionalFire",""));
+    session.RecordResume();check(session.HasResumePoint,"Death precondition has a resume to clear");
+    player.Health.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.EnemyMelee,10000,Vector2.down,0,0));
+    check(!player.IsAlive&&!session.HasResumePoint&&!PlayerPrefs.HasKey(testKey+".Resume"),"Real defeat listeners clear the resume immediately");
+    session.Checkpoints.Respawn();check(session.IsLoading,"Defeat recovery starts checkpoint reload");
+}
+else if(phase==5){
+    check(active.path==regionPath,"Death reload remains in regional checkpoint scene");atFire(SessionState.GetString(prefix+"RegionalFire",""));
+    var anchor=active.GetRootGameObjects().Single(g=>g.name=="Green Lowlands Zone").transform.Find("Layout Anchors (editor only)/Farmhouse Approach");
+    move(anchor.position);player.Health.SetHealth(55);player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().SetCharges(2);
+    SessionState.SetFloat(prefix+"ResumeX",anchor.position.x);SessionState.SetFloat(prefix+"ResumeY",anchor.position.y);
+    check(session.ReturnToTitle(),"Main Menu service records exact resume and starts Title load");
+    var resume=saved.LoadResume();
+    check(resume!=null&&resume.scenePath==regionPath&&resume.health==55&&resume.flasks==2,"Main Menu persisted regional position and vitals");
+}
+else if(phase==6){
+    check(active.path==titlePath&&player==null,"Actual Title scene loaded without a player");
+    check(session.HasSave&&session.HasResumePoint,"Title can continue the regional run");
+    var title=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.UI.TitleScreen>();
+    check(title!=null,"Title presenter exists");title.Submit();
+    check(session.IsLoading,"Title's initially selected Continue action starts the load");
+}
+else if(phase==7||phase==9){
+    check(active.path==regionPath,"Continue loaded Green Lowlands");
+    var expected=new Vector2(SessionState.GetFloat(prefix+"ResumeX",0),SessionState.GetFloat(prefix+"ResumeY",0));
+    check(Vector2.Distance(player.transform.position,expected)<.05f&&player.Health.Health==55&&player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().Charges==2,"Continue restores exact regional position and carried vitals");
+    check(player.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>().Weapon!=null&&session.Progress.HasFire("tutorial/roadside-fire")&&session.Progress.HasFire(SessionState.GetString(prefix+"RegionalFire","")),"Ownership and both travel destinations survive Continue");
+    check(!player.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>().IsLocked&&Time.timeScale>0,"Fade releases gameplay input and simulation");
+    SessionState.SetInt(prefix+"Phase",phase+1);
+    return new{phase,checks=results,next=phase==7?"Stop Play Mode, then re-enter the SAME unsaved bootstrap. Execute again for cold-store Continue.":"Live phases passed. Stop Play Mode; set Command=cleanup and execute again to verify/restore normal saves and editor setup."};
+}
+else throw new System.Exception("All live phases finished; stop Play Mode and run cleanup.");
+SessionState.SetInt(prefix+"Phase",phase+1);
+return new{phase,checks=results,next="Wait for the transition to finish, then execute again."};

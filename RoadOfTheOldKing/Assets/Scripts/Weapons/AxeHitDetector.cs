@@ -15,12 +15,15 @@ namespace RoadOfTheOldKing.Weapons
         private readonly List<RaycastHit2D> sight = new List<RaycastHit2D>(8);
         private readonly HashSet<IHitReceiver> hitTargets = new HashSet<IHitReceiver>();
         private readonly System.Action<CombatHit> confirmedHit;
+        private readonly System.Func<Vector2, bool> canReach;
+        private Vector2 meleeOrigin;
 
         public AxeHitDetector(Transform owner, Transform weapon, System.Action<CombatHit> confirmedHit = null)
         {
             this.owner = owner;
             this.weapon = weapon;
             this.confirmedHit = confirmedHit;
+            canReach = CanReachMeleePoint;
         }
 
         public void BeginAttack() => hitTargets.Clear();
@@ -43,6 +46,14 @@ namespace RoadOfTheOldKing.Weapons
         private bool BlocksMelee(Collider2D collider) => IsCandidate(collider) &&
             collider.GetComponentInParent<IHitReceiver>() == null;
 
+        private bool CanReachMeleePoint(Vector2 point)
+        {
+            Physics2D.Linecast(meleeOrigin, point, filter, sight);
+            foreach (var blocker in sight)
+                if (BlocksMelee(blocker.collider)) return false;
+            return true;
+        }
+
         private void Apply(Collider2D collider, CombatHit hit, Vector2 impactPoint)
         {
             var receiver = collider.GetComponentInParent<IHitReceiver>();
@@ -56,6 +67,9 @@ namespace RoadOfTheOldKing.Weapons
 
         public void Melee(Vector2 center, Vector2 aim, float radius, float arc, CombatHit hit, float laneWidth = 0f)
         {
+            meleeOrigin = center;
+            WeaponSweep.Raise(new WeaponSweep(hit.Source, center, center, aim,
+                radius, arc, laneWidth, true, canReach));
             if (laneWidth > 0f)
                 Physics2D.OverlapBox(center + aim * (radius * 0.5f), new Vector2(radius, laneWidth),
                     Mathf.Atan2(aim.y, aim.x) * Mathf.Rad2Deg, filter, overlaps);
@@ -100,9 +114,14 @@ namespace RoadOfTheOldKing.Weapons
                 if (stopAtImpact)
                 {
                     impact = cast;
+                    WeaponSweep.Raise(new WeaponSweep(hit.Source, origin,
+                        origin + delta.normalized * cast.distance, delta.normalized,
+                        radius, 0f, 0f, false, null));
                     return true;
                 }
             }
+            WeaponSweep.Raise(new WeaponSweep(hit.Source, origin, destination,
+                delta.normalized, radius, 0f, 0f, false, null));
             return false;
         }
     }

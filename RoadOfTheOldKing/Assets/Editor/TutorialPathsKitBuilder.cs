@@ -18,25 +18,34 @@ namespace RoadOfTheOldKing.EditorTools
         [MenuItem("Tools/Road of the Old King/Build Tutorial Paths Kit")]
         public static void Build()
         {
+            BuildKit(Root, "TutorialPaths", TutorialGroundKitBuilder.Root, updateTemplate: true);
+        }
+
+        internal static void BuildKit(string assetRoot, string prefix, string groundRoot,
+            bool includeWornStone = false, bool updateTemplate = false)
+        {
             if(EditorApplication.isPlaying)throw new InvalidOperationException("Use Edit Mode.");
+            var paving=AssetDatabase.LoadAssetAtPath<RuleTile>(groundRoot+"/Rules/Paint_Cobbles.asset");
+            var oldRoad=includeWornStone?AssetDatabase.LoadAssetAtPath<RuleTile>(groundRoot+"/Rules/Paint_WornStone.asset"):null;
+            if(paving==null || (includeWornStone && oldRoad==null))throw new InvalidOperationException("Build regional Ground before Paths.");
             var previous=SceneManager.GetActiveScene();
             var scratch=EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Additive);
             try
             {
                 SceneManager.SetActiveScene(scratch);
-                foreach(var folder in new[]{"Tiles","Rules","Palettes"})Directory.CreateDirectory(Root+"/"+folder);
+                foreach(var folder in new[]{"Tiles","Rules","Palettes"})Directory.CreateDirectory(assetRoot+"/"+folder);
                 AssetDatabase.Refresh();
-                var entries=JsonUtility.FromJson<Manifest>(File.ReadAllText(Root+"/TileManifest.json")).entries;
-                var sprites=ImportSprites(Root+"/TutorialPaths16.png",entries);
+                var entries=JsonUtility.FromJson<Manifest>(File.ReadAllText(assetRoot+"/TileManifest.json")).entries;
+                var sprites=ImportSprites(assetRoot+"/"+prefix+"16.png",entries);
                 foreach(var e in entries)
                 {
-                    var tile=GetOrCreate<Tile>(Root+"/Tiles/"+e.name+".asset");
+                    var tile=GetOrCreate<Tile>(assetRoot+"/Tiles/"+e.name+".asset");
                     tile.sprite=sprites[e.name];tile.colliderType=Tile.ColliderType.None;
                     tile.color=Color.white;tile.transform=Matrix4x4.identity;EditorUtility.SetDirty(tile);
                 }
                 foreach(var material in new[]{"DirtLane","Footpath"})
                 {
-                    var tile=GetOrCreate<RuleTile>(Root+"/Rules/Paint_"+material+".asset");
+                    var tile=GetOrCreate<RuleTile>(assetRoot+"/Rules/Paint_"+material+".asset");
                     tile.m_TilingRules.Clear();tile.m_DefaultColliderType=Tile.ColliderType.None;
                     var fills=entries.Where(e=>e.material==material&&e.mask==255).Select(e=>sprites[e.name]).ToArray();
                     tile.m_DefaultSprite=fills[0];
@@ -54,17 +63,20 @@ namespace RoadOfTheOldKing.EditorTools
                     tile.UpdateNeighborPositions();EditorUtility.SetDirty(tile);
                 }
                 // One palette: everyday brushes above, optional manual shapes below.
-                var palette=new GameObject("Tutorial Paths",typeof(Grid));var map=AddMap(palette.transform,"Village paths",0);
-                map.SetTile(Vector3Int.zero,AssetDatabase.LoadAssetAtPath<RuleTile>(Root+"/Rules/Paint_DirtLane.asset"));
-                map.SetTile(new Vector3Int(2,0,0),AssetDatabase.LoadAssetAtPath<RuleTile>(Root+"/Rules/Paint_Footpath.asset"));
-                var paving=AssetDatabase.LoadAssetAtPath<RuleTile>(TutorialGroundKitBuilder.Root+"/Rules/Paint_Cobbles.asset");
-                if(paving==null)throw new InvalidOperationException("Build Ground before Paths.");
+                var palette=new GameObject(prefix,typeof(Grid));var map=AddMap(palette.transform,"Paths",0);
+                map.SetTile(Vector3Int.zero,AssetDatabase.LoadAssetAtPath<RuleTile>(assetRoot+"/Rules/Paint_DirtLane.asset"));
+                map.SetTile(new Vector3Int(2,0,0),AssetDatabase.LoadAssetAtPath<RuleTile>(assetRoot+"/Rules/Paint_Footpath.asset"));
                 map.SetTile(new Vector3Int(4,0,0),paving);
-                for(int i=0;i<entries.Length;i++)map.SetTile(new Vector3Int(i%10,-3-i/10-(i>=50?1:0),0),AssetDatabase.LoadAssetAtPath<Tile>(Root+"/Tiles/"+entries[i].name+".asset"));
-                SavePalette(palette,Root+"/Palettes/TutorialPaths.prefab");
-                var template=TutorialTerrainKitBuilder.CreateTemplate();
-                PrefabUtility.SaveAsPrefabAsset(template,TutorialTerrainKitBuilder.TemplatePath);Object.DestroyImmediate(template);
+                if(includeWornStone)map.SetTile(new Vector3Int(6,0,0),oldRoad);
+                for(int i=0;i<entries.Length;i++)map.SetTile(new Vector3Int(i%10,-3-i/10-(i>=50?1:0),0),AssetDatabase.LoadAssetAtPath<Tile>(assetRoot+"/Tiles/"+entries[i].name+".asset"));
+                SavePalette(palette,assetRoot+"/Palettes/"+prefix+".prefab");
+                if(updateTemplate)
+                {
+                    var template=TutorialTerrainKitBuilder.CreateTemplate();
+                    PrefabUtility.SaveAsPrefabAsset(template,TutorialTerrainKitBuilder.TemplatePath);Object.DestroyImmediate(template);
+                }
                 AssetDatabase.SaveAssets();
+                Debug.Log(prefix+" kit: 100 tiles, 2 RuleTiles, 1 palette with reused ground paving.");
             }
             finally{SceneManager.SetActiveScene(previous);EditorSceneManager.CloseScene(scratch,true);}
         }

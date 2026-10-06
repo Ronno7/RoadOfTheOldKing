@@ -23,6 +23,11 @@ namespace RoadOfTheOldKing.EditorTools
         [MenuItem("Tools/Road of the Old King/Build Tutorial Terrain Kit")]
         public static void Build()
         {
+            BuildKit(Root, "TutorialTerrain", updateTemplate: true);
+        }
+
+        internal static void BuildKit(string assetRoot, string prefix, bool updateTemplate = false)
+        {
             if (EditorApplication.isPlaying) throw new InvalidOperationException("Use Edit Mode.");
             if (!AssetDatabase.LoadAssetAtPath<Tile>(TutorialGroundKitBuilder.CollisionPath))
                 throw new InvalidOperationException("Build the Tutorial Ground kit first.");
@@ -31,28 +36,31 @@ namespace RoadOfTheOldKing.EditorTools
             try
             {
                 SceneManager.SetActiveScene(scratch);
-                var entries = JsonUtility.FromJson<Manifest>(File.ReadAllText(Root + "/TileManifest.json")).entries;
-                foreach (string folder in new[] { "Tiles", "Rules", "Animations", "Palettes" }) Directory.CreateDirectory(Root + "/" + folder);
+                var entries = JsonUtility.FromJson<Manifest>(File.ReadAllText(assetRoot + "/TileManifest.json")).entries;
+                foreach (string folder in new[] { "Tiles", "Rules", "Animations", "Palettes" }) Directory.CreateDirectory(assetRoot + "/" + folder);
                 AssetDatabase.Refresh();
-                var sprites = ImportSprites(Root + "/TutorialTerrain16.png", entries);
+                var sprites = ImportSprites(assetRoot + "/" + prefix + "16.png", entries);
                 var tiles = new Dictionary<string, Tile>();
                 foreach (var entry in entries)
                 {
-                    var tile = GetOrCreate<Tile>(Root + "/Tiles/" + entry.name + ".asset");
+                    var tile = GetOrCreate<Tile>(assetRoot + "/Tiles/" + entry.name + ".asset");
                     tile.sprite = sprites[entry.name];
                     tile.colliderType = Tile.ColliderType.None;
                     tile.color = Color.white; tile.transform = Matrix4x4.identity;
                     EditorUtility.SetDirty(tile); tiles.Add(entry.name, tile);
                 }
-                var rules = CreateRules(entries, sprites);
-                var animations = CreateAnimations(entries, sprites);
+                var rules = CreateRules(assetRoot, entries, sprites);
+                var animations = CreateAnimations(assetRoot, entries, sprites);
                 var collision = AssetDatabase.LoadAssetAtPath<Tile>(TutorialGroundKitBuilder.CollisionPath);
-                CreatePalettes(entries, tiles, rules, animations, collision);
-                var template = CreateTemplate();
-                PrefabUtility.SaveAsPrefabAsset(template, TemplatePath);
-                Object.DestroyImmediate(template);
+                CreatePalettes(assetRoot, prefix, entries, tiles, rules, animations, collision);
+                if (updateTemplate)
+                {
+                    var template = CreateTemplate();
+                    PrefabUtility.SaveAsPrefabAsset(template, TemplatePath);
+                    Object.DestroyImmediate(template);
+                }
                 AssetDatabase.SaveAssets();
-                Debug.Log("Tutorial Terrain kit: 315 visual tiles, 6 RuleTiles, 3 AnimatedTiles, 3 palettes, shared zone template.");
+                Debug.Log(prefix + " kit: 315 visual tiles, 6 RuleTiles, 3 AnimatedTiles, 3 palettes.");
             }
             finally
             {
@@ -61,12 +69,12 @@ namespace RoadOfTheOldKing.EditorTools
             }
         }
 
-        private static Dictionary<string, RuleTile> CreateRules(Entry[] entries, Dictionary<string, Sprite> sprites)
+        private static Dictionary<string, RuleTile> CreateRules(string assetRoot, Entry[] entries, Dictionary<string, Sprite> sprites)
         {
             var result = new Dictionary<string, RuleTile>();
             foreach (string material in Materials)
             {
-                var tile = GetOrCreate<RuleTile>(Root + "/Rules/Paint_" + material + ".asset");
+                var tile = GetOrCreate<RuleTile>(assetRoot + "/Rules/Paint_" + material + ".asset");
                 tile.m_TilingRules.Clear();
                 var pieces = entries.Where(e => e.material == material && e.variant == 0).ToArray();
                 tile.m_DefaultSprite = sprites[pieces[0].name];
@@ -94,12 +102,12 @@ namespace RoadOfTheOldKing.EditorTools
             return result;
         }
 
-        private static Dictionary<string, AnimatedTile> CreateAnimations(Entry[] entries, Dictionary<string, Sprite> sprites)
+        private static Dictionary<string, AnimatedTile> CreateAnimations(string assetRoot, Entry[] entries, Dictionary<string, Sprite> sprites)
         {
             var result = new Dictionary<string, AnimatedTile>();
             foreach (string material in new[] { "Ripple", "FallBody", "FallFoam" })
             {
-                var tile = GetOrCreate<AnimatedTile>(Root + "/Animations/Animated_" + material + ".asset");
+                var tile = GetOrCreate<AnimatedTile>(assetRoot + "/Animations/Animated_" + material + ".asset");
                 tile.m_AnimatedSprites = entries.Where(e => e.material == material).OrderBy(e => e.variant).Select(e => sprites[e.name]).ToArray();
                 tile.m_MinSpeed = tile.m_MaxSpeed = material == "Ripple" ? 1f : 1.25f;
                 tile.m_AnimationStartTime = 0; tile.m_AnimationStartFrame = 0;
@@ -109,9 +117,9 @@ namespace RoadOfTheOldKing.EditorTools
             return result;
         }
 
-        private static void CreatePalettes(Entry[] entries, Dictionary<string, Tile> tiles, Dictionary<string, RuleTile> rules, Dictionary<string, AnimatedTile> animations, Tile collision)
+        private static void CreatePalettes(string assetRoot, string prefix, Entry[] entries, Dictionary<string, Tile> tiles, Dictionary<string, RuleTile> rules, Dictionary<string, AnimatedTile> animations, Tile collision)
         {
-            var root = new GameObject("Tutorial Terrain - Paint", typeof(Grid));
+            var root = new GameObject(prefix + " - Paint", typeof(Grid));
             var map = AddMap(root.transform, "Automatic brushes", 0);
             for (int i = 0; i < Materials.Length; i++) map.SetTile(new Vector3Int(i * 2, 0, 0), rules[Materials[i]]);
             int x = 0;
@@ -119,9 +127,9 @@ namespace RoadOfTheOldKing.EditorTools
             map.SetTile(new Vector3Int(6, -3, 0), tiles["FallLip_00"]);
             map.SetTile(new Vector3Int(0, -6, 0), collision);
             map.animationFrameRate = 4;
-            SavePalette(root, Root + "/Palettes/TutorialTerrain_Paint.prefab");
+            SavePalette(root, assetRoot + "/Palettes/" + prefix + "_Paint.prefab");
 
-            root = new GameObject("Tutorial Terrain - Structures", typeof(Grid));
+            root = new GameObject(prefix + " - Structures", typeof(Grid));
             map = AddMap(root.transform, "Cliffs stairs ramps and walls", 0);
             var structures = new[] { "EarthCliff", "StoneCliff", "StoneStairs", "EarthRamp" };
             var rows = new[] { "Top", "Middle", "Foot" }; var columns = new[] { "Left", "Center", "Right" };
@@ -133,9 +141,9 @@ namespace RoadOfTheOldKing.EditorTools
             map.SetTile(new Vector3Int(11, -6, 0), animations["FallBody"]);
             map.SetTile(new Vector3Int(11, -7, 0), animations["FallFoam"]);
             map.animationFrameRate = 4;
-            SavePalette(root, Root + "/Palettes/TutorialTerrain_Structures.prefab");
+            SavePalette(root, assetRoot + "/Palettes/" + prefix + "_Structures.prefab");
 
-            root = new GameObject("Tutorial Terrain - Individual Pieces", typeof(Grid));
+            root = new GameObject(prefix + " - Individual Pieces", typeof(Grid));
             map = AddMap(root.transform, "All individual pieces", 0);
             int row = 0;
             foreach (string material in entries.Select(e => e.material).Distinct())
@@ -144,7 +152,7 @@ namespace RoadOfTheOldKing.EditorTools
                 for (int i = 0; i < pieces.Length; i++) map.SetTile(new Vector3Int(i % 12, -row - i / 12, 0), tiles[pieces[i].name]);
                 row += (pieces.Length + 11) / 12 + 1;
             }
-            SavePalette(root, Root + "/Palettes/TutorialTerrain_IndividualPieces.prefab");
+            SavePalette(root, assetRoot + "/Palettes/" + prefix + "_IndividualPieces.prefab");
         }
 
         internal static GameObject CreateTemplate()

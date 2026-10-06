@@ -3,15 +3,21 @@
 ## Unreleased
 
 **Added**
+- Tutorial grass, flowers and reeds sway, react to footsteps, draw in front of or behind the player, and can be cut by the axe; resting restores them.
 - A title screen with Continue, New Game, Settings and Quit, and a Main Menu option in the pause menu.
 - A Settings page, reachable from the pause menu and the title, holding the vitals option.
 - Continue resumes exactly where you left off, with the health and flasks you had; dying still returns you to the bonfire.
+- The Tutorial road now reaches a Green Lowlands arrival area, with an abandoned farmstead, river crossing and a bonfire for resting, saving and travel between regions.
 
 **Changed**
+- All bonfires share the new animated flame; regional bonfire bases can vary.
 - The bonfire menu has a new hearth look (oak beams, rope lashings and bronze trim) and is larger; the defeat screen has a bronze frame and carved heading.
 - The pause menu's Restart is now Return to bonfire; New Game moved to the title screen.
 - One save now covers the whole game instead of a single area; existing saves carry over automatically.
 - Respawning, restarting and starting a new game fade the screen out and back in.
+
+**Fixed**
+- The player now renders in front of defeated enemies and bonfire flames; revived enemies recover their original sorting.
 
 ## 0.4 — Vertical slice
 

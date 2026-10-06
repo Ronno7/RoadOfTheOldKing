@@ -23,15 +23,20 @@ namespace RoadOfTheOldKing.EditorTools
         [MenuItem("Tools/Road of the Old King/Build Tutorial Ground Kit")]
         public static void Build()
         {
+            BuildKit(Root, "TutorialGround");
+        }
+
+        internal static void BuildKit(string root, string prefix, int quietGrassWeight = 12)
+        {
             if (EditorApplication.isPlaying) throw new InvalidOperationException("Use Edit Mode.");
-            var entries = JsonUtility.FromJson<Manifest>(File.ReadAllText(Root + "/TileManifest.json")).entries;
-            foreach (string folder in new[] { "Tiles", "Rules", "Palettes" }) Directory.CreateDirectory(Root + "/" + folder);
+            var entries = JsonUtility.FromJson<Manifest>(File.ReadAllText(root + "/TileManifest.json")).entries;
+            foreach (string folder in new[] { "Tiles", "Rules", "Palettes" }) Directory.CreateDirectory(root + "/" + folder);
             AssetDatabase.Refresh();
-            var sprites = ImportSprites(Root + "/TutorialGround16.png", entries);
+            var sprites = ImportSprites(root + "/" + prefix + "16.png", entries);
             var tiles = new Dictionary<string, Tile>();
             foreach (var entry in entries)
             {
-                var tile = GetOrCreate<Tile>(Root + "/Tiles/" + entry.name + ".asset");
+                var tile = GetOrCreate<Tile>(root + "/Tiles/" + entry.name + ".asset");
                 tile.sprite = sprites[entry.name];
                 tile.colliderType = Tile.ColliderType.None;
                 tile.color = Color.white;
@@ -39,23 +44,28 @@ namespace RoadOfTheOldKing.EditorTools
                 EditorUtility.SetDirty(tile);
                 tiles.Add(entry.name, tile);
             }
-            var rules = CreateRules(entries, sprites);
-            var collision = GetOrCreate<Tile>(CollisionPath);
-            collision.sprite = sprites["Grass_Fill_00"];
-            collision.color = new Color(1f, .15f, .2f, .7f);
-            collision.colliderType = Tile.ColliderType.Grid;
-            EditorUtility.SetDirty(collision);
-            CreatePalettes(entries, tiles, rules, collision);
+            var rules = CreateRules(root, entries, sprites, quietGrassWeight);
+            var collision = AssetDatabase.LoadAssetAtPath<Tile>(CollisionPath);
+            if (root == Root)
+            {
+                collision = GetOrCreate<Tile>(CollisionPath);
+                collision.sprite = sprites["Grass_Fill_00"];
+                collision.color = new Color(1f, .15f, .2f, .7f);
+                collision.colliderType = Tile.ColliderType.Grid;
+                EditorUtility.SetDirty(collision);
+            }
+            if (collision == null) throw new InvalidOperationException("Build Tutorial Ground first for the shared collision brush.");
+            CreatePalettes(root, prefix, entries, tiles, rules, collision);
             AssetDatabase.SaveAssets();
-            Debug.Log("Tutorial Ground kit: 308 visual tiles, 7 RuleTiles, 2 palettes and shared collision brush.");
+            Debug.Log(prefix + " kit: 308 visual tiles, 7 RuleTiles, 2 palettes and shared collision brush.");
         }
 
-        private static Dictionary<string, RuleTile> CreateRules(Entry[] entries, Dictionary<string, Sprite> sprites)
+        private static Dictionary<string, RuleTile> CreateRules(string root, Entry[] entries, Dictionary<string, Sprite> sprites, int quietGrassWeight)
         {
             var result = new Dictionary<string, RuleTile>();
             foreach (string material in Materials)
             {
-                var tile = GetOrCreate<RuleTile>(Root + "/Rules/Paint_" + material + ".asset");
+                var tile = GetOrCreate<RuleTile>(root + "/Rules/Paint_" + material + ".asset");
                 tile.m_TilingRules.Clear();
                 var fills = entries.Where(e => e.material == material && e.mask == 255).Select(e => sprites[e.name]).ToArray();
                 tile.m_DefaultSprite = fills[0];
@@ -63,7 +73,7 @@ namespace RoadOfTheOldKing.EditorTools
                 if (material == "Grass")
                 {
                     // Bias the base toward quiet cells; occasional marks prevent wallpaper noise.
-                    fills = Enumerable.Repeat(fills[0], 12).Concat(fills.Skip(1)).ToArray();
+                    fills = Enumerable.Repeat(fills[0], quietGrassWeight).Concat(fills.Skip(1)).ToArray();
                     tile.m_TilingRules.Add(MakeRule(fills));
                 }
                 else foreach (var entry in entries.Where(e => e.material == material && e.variant == 0))
@@ -90,15 +100,15 @@ namespace RoadOfTheOldKing.EditorTools
             return result;
         }
 
-        private static void CreatePalettes(Entry[] entries, Dictionary<string,Tile> tiles, Dictionary<string,RuleTile> rules, Tile collision)
+        private static void CreatePalettes(string root, string prefix, Entry[] entries, Dictionary<string,Tile> tiles, Dictionary<string,RuleTile> rules, Tile collision)
         {
-            var automatic = new GameObject("Tutorial Ground - Paint");
+            var automatic = new GameObject(prefix + " - Paint");
             automatic.AddComponent<Grid>();
             var map = AddMap(automatic.transform,"Paint brushes",0);
             for (int i = 0; i < Materials.Length; i++) map.SetTile(new Vector3Int(i*2,0,0),rules[Materials[i]]);
             map.SetTile(new Vector3Int(0,-3,0),collision);
-            SavePalette(automatic,Root + "/Palettes/TutorialGround_Paint.prefab");
-            var manual = new GameObject("Tutorial Ground - Individual Pieces");
+            SavePalette(automatic,root + "/Palettes/" + prefix + "_Paint.prefab");
+            var manual = new GameObject(prefix + " - Individual Pieces");
             manual.AddComponent<Grid>();
             map = AddMap(manual.transform,"Individual pieces",0);
             for (int m=0;m<Materials.Length;m++)
@@ -106,7 +116,7 @@ namespace RoadOfTheOldKing.EditorTools
                 var pieces = entries.Where(e=>e.material==Materials[m]).ToArray();
                 for (int i=0;i<pieces.Length;i++) map.SetTile(new Vector3Int(i%12,-m*6-i/12,0),tiles[pieces[i].name]);
             }
-            SavePalette(manual,Root + "/Palettes/TutorialGround_IndividualPieces.prefab");
+            SavePalette(manual,root + "/Palettes/" + prefix + "_IndividualPieces.prefab");
         }
 
         internal static GameObject CreateTemplate()
