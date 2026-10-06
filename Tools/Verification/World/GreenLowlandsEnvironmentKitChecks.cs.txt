@@ -1,0 +1,64 @@
+// Edit Mode asset integration checks. No scene mutations or save access.
+if(EditorApplication.isPlaying)throw new System.Exception("Edit Mode required.");
+string root=RoadOfTheOldKing.EditorTools.GreenLowlandsEnvironmentKitBuilder.Root;
+var catalog=RoadOfTheOldKing.EditorTools.GreenLowlandsEnvironmentKitBuilder.ReadCatalog();
+var failures=new System.Collections.Generic.List<string>();int count=0;
+System.Action<bool,string> check=(ok,label)=>{count++;if(!ok)failures.Add(label);};
+var sprites=AssetDatabase.LoadAllAssetsAtPath(root+"/GreenLowlandsEnvironment16.png").OfType<Sprite>().ToDictionary(s=>s.name);
+var importer=(TextureImporter)AssetImporter.GetAtPath(root+"/GreenLowlandsEnvironment16.png");
+check(importer.filterMode==FilterMode.Point&&!importer.mipmapEnabled&&importer.textureCompression==TextureImporterCompression.Uncompressed&&importer.spritePixelsPerUnit==16,"Native crisp import");
+check(catalog.entries.Length==9&&catalog.reusedPrefabs.Length==19,"Nine regional / 19 reused objects");
+check(AssetDatabase.FindAssets("t:Tile",new[]{root+"/Tiles"}).Length==196&&sprites.Count==205,"196 native pieces plus nine whole sprites");
+var colors=System.IO.File.ReadAllLines("../Docs/Art/Palettes/green-lowlands-field-and-old-road-v1.gpl").Select(l=>l.Split((char[])null,System.StringSplitOptions.RemoveEmptyEntries)).Where(p=>p.Length>=3&&char.IsDigit(p[0][0])).Select(p=>new Color32(byte.Parse(p[0]),byte.Parse(p[1]),byte.Parse(p[2]),255)).ToArray();
+check(colors.Length==16&&catalog.entries.All(p=>p.swatches.Length<=15),"Original regional palette and restrained per-object budgets");
+var atlas=new Texture2D(2,2);atlas.LoadImage(System.IO.File.ReadAllBytes(root+"/GreenLowlandsEnvironment16.png"));
+try{
+check(atlas.GetPixels32().All(p=>p.a==0||(p.a==255&&colors.Contains(p))),"Exact regional palette / binary alpha");
+foreach(var prop in catalog.entries){
+var r=sprites[prop.name].rect;
+var objectColors=atlas.GetPixels((int)r.x,(int)r.y,prop.width,prop.height).Where(p=>p.a>0).Select(p=>(Color32)p).Distinct().ToArray();
+check(objectColors.Length<=prop.swatches.Length&&objectColors.All(p=>prop.swatches.Any(i=>colors[i].Equals(p))),"Per-object material budget "+prop.name);
+}
+}finally{UnityEngine.Object.DestroyImmediate(atlas);}
+string palettePath=root+"/Palettes/GreenLowlandsEnvironment.prefab";
+check(AssetDatabase.LoadAllAssetsAtPath(palettePath).OfType<GridPalette>().Any(),"Registered palette");
+var paletteMap=AssetDatabase.LoadAssetAtPath<GameObject>(palettePath).GetComponentInChildren<UnityEngine.Tilemaps.Tilemap>();
+var body=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Player/Player.prefab").GetComponentsInChildren<SpriteRenderer>().First(r=>r.name=="Body");
+int index=0;
+foreach(var prop in catalog.entries){
+var prefab=AssetDatabase.LoadAssetAtPath<GameObject>(RoadOfTheOldKing.EditorTools.GreenLowlandsEnvironmentKitBuilder.PrefabRoot+"/"+prop.name+".prefab");
+check(prefab!=null&&prefab.transform.localScale==Vector3.one,"Native prefab "+prop.name);if(!prefab)continue;
+var maps=prefab.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>().ToDictionary(m=>m.name);
+var bases=maps["Environment"];var upper=maps["Above Player"];var collision=maps["Collision"];
+check(!bases.GetComponent<Collider2D>()&&!upper.GetComponent<Collider2D>(),"Visual maps have no collision "+prop.name);
+check(!collision.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().enabled&&collision.GetComponent<UnityEngine.Tilemaps.TilemapCollider2D>()!=null&&collision.gameObject.layer==LayerMask.NameToLayer("Environment"),"Separate physical footprint "+prop.name);
+var render=upper.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>();
+check(render.sortingLayerID==body.sortingLayerID&&render.sortingOrder>body.sortingOrder,"Overhead above actual player renderer "+prop.name);
+check(prefab.GetComponentsInChildren<MonoBehaviour>(true).Length==0,"Art-only, no gameplay attached "+prop.name);
+var origin=new Vector3Int(index%4*12,-index/4*9,0);
+for(int y=0;y<prop.height/16;y++)for(int x=0;x<prop.width/16;x++){
+var p=new Vector3Int(x,y,0);var tile=(UnityEngine.Tilemaps.Tile)(bases.GetTile(p)??upper.GetTile(p));
+check(bases.HasTile(p)!=upper.HasTile(p),"No missing/duplicate visual cell "+prop.name+p);
+check(tile!=null&&tile.sprite!=null&&tile.sprite.rect.width==16&&tile.sprite.rect.height==16&&tile.colliderType==UnityEngine.Tilemaps.Tile.ColliderType.None&&paletteMap.GetTile(origin+p)==tile,"Palette/prefab piece agrees "+prop.name+p);
+bool blocked=prop.collision.Any(a=>x>=a.x&&x<a.x+a.width&&y>=a.y&&y<a.y+a.height);
+check(collision.HasTile(p)==blocked,"Footprint "+prop.name+p);
+}
+if(prop.name=="Plank_Bridge"){
+for(int x=0;x<6;x++)foreach(int y in new[]{1,2})check(!collision.HasTile(new Vector3Int(x,y,0)),"Two-cell deck and open ends");
+check(bases.HasTile(new Vector3Int(2,3,0))&&upper.HasTile(new Vector3Int(2,0,0)),"Far rail below / near rail above player");
+}
+index++;
+}
+foreach(string name in catalog.reusedPrefabs){
+var prefab=AssetDatabase.LoadAssetAtPath<GameObject>(RoadOfTheOldKing.EditorTools.TutorialEnvironmentKitBuilder.PrefabRoot+"/"+name+".prefab");
+check(prefab!=null,"Retained prefab "+name);
+var origin=new Vector3Int(index%4*12,-index/4*9,0);
+foreach(string mapName in new[]{"Environment","Above Player"}){
+var map=prefab.transform.Find(mapName).GetComponent<UnityEngine.Tilemaps.Tilemap>();
+foreach(var p in map.cellBounds.allPositionsWithin)if(map.HasTile(p))check(paletteMap.GetTile(origin+p)==map.GetTile(p),"Reused original tile reference "+name+p);
+}
+index++;
+}
+check(AssetDatabase.FindAssets("t:Prefab",new[]{RoadOfTheOldKing.EditorTools.GreenLowlandsEnvironmentKitBuilder.PrefabRoot}).Length==9,"Only nine regional prefabs; direct reuse is not duplicated");
+check(AssetDatabase.FindAssets("t:Scene",new[]{root}).Length==0,"No per-layer demo scene");
+return (failures.Count==0?"PASS ":"FAILED ")+count+" Environment assertions; 9 regional / 19 reused objects, 196 tile pieces\n"+string.Join("\n",failures.ToArray());

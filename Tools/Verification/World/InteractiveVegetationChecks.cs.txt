@@ -1,0 +1,317 @@
+// C#6 execute_code method body. First use GreenLowlandsGameplayChecks setup, enter
+// Play, and load Tutorial through its isolated GameSession. Run after the load settles.
+// This creates an identity field at remote coordinates and exercises the equipped
+// axe on a known Tutorial meadow patch. It restores player position/control/stamina,
+// regrows the authored field, never edits layout assets or calls CheckpointService.Rest/save,
+// and disposes its objects even after an assertion fails. It is not a browser benchmark.
+if(!Application.isPlaying)throw new System.Exception("Run in isolated Play Mode.");
+string prefix="GreenLowlands.Gameplay.";
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var session=RoadOfTheOldKing.Progression.GameSession.Instance;
+string expectedKey=SessionState.GetString(prefix+"Key","");
+if(!SessionState.GetBool(prefix+"Active",false)||session==null||
+    !expectedKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands.")||
+    (string)session.GetType().GetField("saveKey",flags).GetValue(session)!=expectedKey||session.IsLoading)
+    throw new System.Exception("Requires the settled GreenLowlandsGameplayChecks isolated session.");
+if(UnityEngine.SceneManagement.SceneManager.GetActiveScene().path!="Assets/Scenes/Tutorial.unity")
+    throw new System.Exception("Load Tutorial in the isolated session first.");
+var authored=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.InteractiveVegetation>(FindObjectsSortMode.None)
+    .FirstOrDefault(f=>f.gameObject.scene.path=="Assets/Scenes/Tutorial.unity"&&f.layout!=null&&f.vegetationShader!=null);
+if(authored==null)throw new System.Exception("Tutorial needs an authored vegetation field.");
+var species=authored.layout.species.FirstOrDefault(s=>s!=null&&s.leaves!=null&&
+    s.leaves.Count(l=>l!=null&&l.sprite!=null)>=2);
+if(species==null)throw new System.Exception("No usable vegetation species.");
+string authoredData=EditorJsonUtility.ToJson(authored.layout);
+var results=new System.Collections.Generic.List<string>();
+System.Action<bool,string> check=(ok,label)=>results.Add((ok?"PASS ":"FAIL ")+label);
+var protectedKeys=new System.Collections.Generic.Dictionary<string,string>();
+int protectedCount=SessionState.GetInt(prefix+"ProtectedCount",0);
+for(int i=0;i<protectedCount;i++){
+    string key=SessionState.GetString(prefix+"Protected."+i,"");
+    protectedKeys[key]=PlayerPrefs.HasKey(key)?"exists:"+PlayerPrefs.GetString(key):"missing";
+}
+var created=new System.Collections.Generic.List<GameObject>();
+RoadOfTheOldKing.World.VegetationLayout layout=null;
+RoadOfTheOldKing.World.InteractiveVegetation field=null;
+RoadOfTheOldKing.Weapons.WeaponSweep last=default(RoadOfTheOldKing.Weapons.WeaponSweep);
+int signals=0;
+GameObject source=null;
+System.Action<RoadOfTheOldKing.Weapons.WeaponSweep> observe=sweep=>{
+    if(sweep.Source==source){last=sweep;signals++;}
+};
+RoadOfTheOldKing.Weapons.WeaponSweep.Raised+=observe;
+try{
+    Vector2 origin=new Vector2(1000,1000);
+    source=new GameObject("Vegetation verification source");created.Add(source);source.transform.position=origin;
+    source.AddComponent<CircleCollider2D>().radius=.15f;
+    var weapon=new GameObject("Vegetation verification weapon");created.Add(weapon);weapon.transform.position=origin;
+    weapon.AddComponent<CircleCollider2D>().radius=.1f;
+    var root=new GameObject("Vegetation verification field");created.Add(root);
+    field=root.AddComponent<RoadOfTheOldKing.World.InteractiveVegetation>();
+    layout=ScriptableObject.CreateInstance<RoadOfTheOldKing.World.VegetationLayout>();
+    layout.name="Vegetation verification layout (temporary)";
+    layout.species=new[]{species};
+    var points=new[]{new Vector2(1,0),new Vector2(-1,0),new Vector2(1,1.25f),
+        new Vector2(2.5f,0),new Vector2(1,.45f),new Vector2(1,.7f),new Vector2(4,0),
+        new Vector2(80,80),new Vector2(1,-.45f),new Vector2(0,2),new Vector2(2.7f,0),new Vector2(.25f,0)};
+    layout.plants=new RoadOfTheOldKing.World.VegetationLayout.Plant[points.Length];
+    for(int i=0;i<points.Length;i++)layout.plants[i]=new RoadOfTheOldKing.World.VegetationLayout.Plant{
+        position=origin+points[i],species=0,phase=i*.71f};
+    field.layout=layout;field.vegetationShader=authored.vegetationShader;field.interactor=source.transform;field.Rebuild();
+    System.Action flush=()=>field.GetType().GetMethod("LateUpdate",flags).Invoke(field,null);
+    System.Action reset=()=>{((RoadOfTheOldKing.Progression.IResetOnRest)field).ResetOnRest();flush();};
+    System.Func<int> indexCount=()=>{
+        int count=0;
+        foreach(var mesh in root.GetComponentsInChildren<MeshFilter>().Select(mf=>mf.sharedMesh).Distinct())
+            if(mesh!=null&&mesh.name=="Vegetation chunk")count+=(int)mesh.GetIndexCount(0);
+        return count;
+    };
+    var detector=new RoadOfTheOldKing.Weapons.AxeHitDetector(source.transform,weapon.transform);
+    var hit=new RoadOfTheOldKing.Combat.CombatHit(source,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.right,0,0);
+    Physics2D.SyncTransforms();
+    check(field.PlantCount==12&&field.ChunkCount>1,"Known plants build across spatial chunks");
+    check(root.GetComponentsInChildren<Collider2D>().Length==0,"Dense plants require no individual colliders");
+    check(root.GetComponentsInChildren<Transform>().Length<field.PlantCount,"Field has chunk objects, not one GameObject per plant");
+    int initialIndices=indexCount();
+    check(initialIndices>0,"Generated plant geometry is present");
+    int leaves=species.leaves.Count(l=>l!=null&&l.sprite!=null);
+    int vertexCount=0;
+    bool completeSprites=true,rootPivots=true,directUV=true,rigidMotion=true,rotationBounds=true;
+    foreach(var mesh in root.GetComponentsInChildren<MeshFilter>().Select(mf=>mf.sharedMesh).Distinct()){
+        if(mesh==null||mesh.name!="Vegetation chunk")continue;
+        var vertices=mesh.vertices;var uv=mesh.uv;
+        var plantData=new System.Collections.Generic.List<Vector4>();
+        var motionData=new System.Collections.Generic.List<Vector2>();
+        mesh.GetUVs(1,plantData);mesh.GetUVs(2,motionData);
+        vertexCount+=vertices.Length;
+        if(plantData.Count!=vertices.Length||motionData.Count!=vertices.Length||uv.Length!=vertices.Length){
+            completeSprites=rootPivots=directUV=rigidMotion=rotationBounds=false;continue;
+        }
+        for(int v=0;v<vertices.Length;v+=4){
+            var data=plantData[v];
+            int matchPlant=-1,matchLeaf=-1;
+            for(int p=0;p<layout.plants.Length&&matchPlant<0;p++)for(int l=0;l<species.leaves.Length;l++){
+                var leaf=species.leaves[l];if(leaf==null||leaf.sprite==null)continue;
+                Vector2 pivot=layout.plants[p].position+leaf.offset;
+                if((pivot-new Vector2(data.x,data.y)).sqrMagnitude<.000001f&&
+                    Mathf.Abs(data.z-layout.plants[p].phase-leaf.phaseOffset)<.00001f){matchPlant=p;matchLeaf=l;break;}
+            }
+            if(matchPlant<0){rootPivots=false;continue;}
+            var part=species.leaves[matchLeaf];var sprite=part.sprite;
+            var rect=sprite.rect;var textureRect=sprite.textureRect;
+            Vector2 rootPoint=layout.plants[matchPlant].position+part.offset;
+            rootPivots&=sprite.pivot.y<=1f&&data.w==species.flexibility;
+            var corners=new[]{Vector2.zero,new Vector2(rect.width,0),rect.size,new Vector2(0,rect.height)};
+            for(int k=0;k<4;k++){
+                Vector2 corner=(corners[k]-sprite.pivot)/sprite.pixelsPerUnit;
+                if(part.flipX)corner.x=-corner.x;
+                completeSprites&=((Vector2)vertices[v+k]-(rootPoint+corner)).sqrMagnitude<.000001f;
+                Vector2 expectedUV=new Vector2((textureRect.x+(k==1||k==2?textureRect.width:0))/sprite.texture.width,
+                    (textureRect.y+(k>=2?textureRect.height:0))/sprite.texture.height);
+                directUV&=(uv[v+k]-expectedUV).sqrMagnitude<.00000001f;
+                rigidMotion&=plantData[v+k]==data&&motionData[v+k]==motionData[v];
+                for(int degrees=-70;degrees<=70;degrees+=10){
+                    float angle=degrees*Mathf.Deg2Rad;
+                    Vector3 rotated=rootPoint+new Vector2(corner.x*Mathf.Cos(angle)-corner.y*Mathf.Sin(angle),
+                        corner.x*Mathf.Sin(angle)+corner.y*Mathf.Cos(angle));
+                    rotationBounds&=mesh.bounds.Contains(rotated);
+                }
+            }
+        }
+    }
+    check(vertexCount==layout.plants.Length*leaves*4&&initialIndices==layout.plants.Length*leaves*6,
+        "Each complete leaf uses exactly one quad, without row strips or subdivisions");
+    check(completeSprites,"Leaf geometry retains its full sprite dimensions at imported pixels per unit");
+    check(rootPivots,"Every leaf carries its authored bottom root and independent phase");
+    check(directUV,"Every quad maps the full original sprite rectangle directly");
+    check(rigidMotion,"All four leaf corners share one rigid pivot and angular motion");
+    check(rotationBounds,"Chunk bounds contain every leaf through the full allowed rotation");
+    var firstLeaves=species.leaves.Where(l=>l!=null&&l.sprite!=null).Take(2).ToArray();
+    check(firstLeaves[0].restAngle*firstLeaves[1].restAngle<0&&
+        Mathf.Abs(firstLeaves[0].phaseOffset-firstLeaves[1].phaseOffset)>.1f,
+        "Grass leaves spread in opposite directions with staggered timing");
+    check(root.GetComponentsInChildren<MeshFilter>().Count(mf=>mf.sharedMesh.name=="Vegetation chunk")==field.ChunkCount*2&&
+        root.GetComponentsInChildren<MeshFilter>().Select(mf=>mf.sharedMesh).Where(m=>m.name=="Vegetation chunk").Distinct().Count()==field.ChunkCount,
+        "Foreground and ground draws share one mesh and cut-index buffer per chunk");
+    var fronts=root.GetComponentsInChildren<MeshRenderer>().Where(r=>r.name=="Vegetation foreground").ToArray();
+    check(fronts.Any(r=>r.enabled)&&fronts.Any(r=>!r.enabled),"Foreground rendering activates only nearby chunks");
+    int[] movingIndices=root.GetComponentsInChildren<MeshFilter>().Select(mf=>mf.sharedMesh).Distinct().Select(m=>m.vertexCount).ToArray();
+    source.transform.position=origin+new Vector2(80,80);flush();
+    check(fronts.Where(r=>r.enabled).All(r=>r.bounds.center.x>origin.x+50)&&
+        movingIndices.SequenceEqual(root.GetComponentsInChildren<MeshFilter>().Select(mf=>mf.sharedMesh).Distinct().Select(m=>m.vertexCount)),
+        "Teleport moves the foreground window without rebuilding plant geometry");
+    source.SetActive(false);flush();check(fronts.All(r=>!r.enabled),"Inactive player disables every foreground draw");
+    source.SetActive(true);source.transform.position=origin;reset();
+    detector.PreviewFlightDistance(origin,Vector2.right,5,.12f);
+    check(signals==0&&field.CutCount==0,"Aim preview produces no sweep or cut");
+
+    detector.Melee(origin,Vector2.right,2.6f,60,hit);
+    check(signals==1&&last.IsMelee&&last.Source==source&&last.Origin==origin&&last.CanReach!=null,"Actual melee call publishes its source and reachability");
+    check(field.CutCount==5&&field.IsCut(0)&&field.IsCut(3)&&field.IsCut(4)&&field.IsCut(8)&&field.IsCut(11),"Sector cuts only roots inside real range and angle");
+    check(!field.IsCut(1)&&!field.IsCut(2)&&!field.IsCut(5)&&!field.IsCut(10),"Rear, side and out-of-reach roots remain");
+    check(field.LastCandidates<field.PlantCount&&!field.IsCut(7),"Spatial query skips remote chunks");
+    flush();
+    check(initialIndices-indexCount()==field.CutCount*leaves*6,"Cut plants remove all their leaves from rendered triangle indices");
+    detector.Melee(origin,Vector2.right,2.6f,60,hit);
+    check(field.CutCount==5&&field.LastCutCount==0,"Repeated active samples do not cut the same plant twice");
+    reset();
+    check(field.CutCount==0&&indexCount()==initialIndices&&!field.IsCut(0),"Rest contract restores every plant and its geometry");
+
+    detector.Melee(origin,Vector2.right,2.6f,15,hit,1f);
+    check(field.IsCut(4)&&field.IsCut(8)&&!field.IsCut(5)&&!field.IsCut(1)&&!field.IsCut(10),"Thrust lane obeys side, rear and reach boundaries");
+    check(last.LaneWidth==1f&&last.Radius==2.6f,"Finisher geometry survives the weapon signal unchanged");
+    reset();detector.Melee(origin,Vector2.right,1.4f,360,hit);
+    check(field.IsCut(1)&&field.IsCut(0)&&!field.IsCut(3),"Cleave includes roots behind the player within its radius");
+
+    var wall=new GameObject("Vegetation verification wall");created.Add(wall);wall.transform.position=origin+Vector2.right*.65f;
+    var wallCollider=wall.AddComponent<BoxCollider2D>();wallCollider.size=new Vector2(.1f,5);
+    Physics2D.SyncTransforms();reset();
+    detector.Melee(origin,Vector2.right,2.6f,60,hit);
+    check(field.CutCount==1&&field.IsCut(11)&&!field.IsCut(0)&&!field.IsCut(3),"Solid terrain protects plants behind it");
+    wallCollider.isTrigger=true;Physics2D.SyncTransforms();reset();
+    detector.Melee(origin,Vector2.right,2.6f,60,hit);
+    check(field.CutCount==5,"Trigger volumes do not obstruct melee cuts");
+    wallCollider.isTrigger=false;Physics2D.SyncTransforms();reset();
+    RaycastHit2D impact;
+    var thrown=new RoadOfTheOldKing.Combat.CombatHit(source,RoadOfTheOldKing.Combat.AttackKind.Throw,1,Vector2.right,0,0);
+    bool stopped=detector.Flight(origin,origin+Vector2.right*4.5f,.12f,thrown,true,out impact);
+    check(stopped&&impact.collider==wallCollider&&!last.IsMelee&&last.CanReach==null,"Outbound sweep reports the actual terrain impact");
+    check(Mathf.Abs(Vector2.Distance(origin,last.End)-impact.distance)<.0001f&&last.End.x<origin.x+.6f,"Outbound endpoint truncates to swept-cast travel distance");
+    check(field.CutCount==1&&field.IsCut(11)&&!field.IsCut(0)&&!field.IsCut(6),"Throw cuts its travelled segment without passing through a wall");
+    var returning=new RoadOfTheOldKing.Combat.CombatHit(source,RoadOfTheOldKing.Combat.AttackKind.Recall,1,Vector2.left,0,0);
+    bool recallStopped=detector.Flight(origin+Vector2.right*4.5f,origin,.12f,returning,false,out impact);
+    check(!recallStopped&&last.End==origin&&field.IsCut(0)&&field.IsCut(3)&&field.IsCut(6)&&field.IsCut(10),"Recall cuts the full return path through terrain");
+    check(!field.IsCut(4)&&!field.IsCut(8),"Flight capsule retains its narrow radius");
+    wall.SetActive(false);Physics2D.SyncTransforms();reset();
+
+    // Check containment in all octants using sweeps captured from the real detector;
+    // the event's internal constructor is deliberately not exposed to the fixture.
+    for(int d=0;d<8;d++){
+        float angle=d*Mathf.PI/4;Vector2 aim=new Vector2(Mathf.Cos(angle),Mathf.Sin(angle));
+        Vector2 side=new Vector2(-aim.y,aim.x);
+        detector.Melee(origin,aim,2.6f,120,hit);
+        bool sector=RoadOfTheOldKing.World.InteractiveVegetation.Contains(last,origin+aim*2.5f)&&
+            !RoadOfTheOldKing.World.InteractiveVegetation.Contains(last,origin+aim*2.7f)&&
+            !RoadOfTheOldKing.World.InteractiveVegetation.Contains(last,origin-aim)&&
+            !RoadOfTheOldKing.World.InteractiveVegetation.Contains(last,origin+side);
+        check(sector,"Sector containment octant "+d);
+        detector.Melee(origin,aim,3.38f,15,hit,1f);
+        bool lane=RoadOfTheOldKing.World.InteractiveVegetation.Contains(last,origin+aim*3.2f+side*.45f)&&
+            !RoadOfTheOldKing.World.InteractiveVegetation.Contains(last,origin+aim*3.5f)&&
+            !RoadOfTheOldKing.World.InteractiveVegetation.Contains(last,origin+aim+side*.6f)&&
+            !RoadOfTheOldKing.World.InteractiveVegetation.Contains(last,origin-aim*.2f);
+        check(lane,"Thrust containment octant "+d);
+    }
+
+    reset();var stranger=new GameObject("Vegetation verification other source");created.Add(stranger);stranger.transform.position=origin;
+    var other=new RoadOfTheOldKing.Weapons.AxeHitDetector(stranger.transform,weapon.transform);
+    other.Melee(origin,Vector2.right,2.6f,360,new RoadOfTheOldKing.Combat.CombatHit(stranger,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.right,0,0));
+    check(field.CutCount==0,"An unrelated source cannot cut the player's field");
+    field.interactor=null;detector.Melee(origin,Vector2.right,2.6f,360,hit);
+    check(field.CutCount==0,"An unbound field does not accept arbitrary attacks");
+    field.interactor=source.transform;
+    field.enabled=false;
+    detector.Melee(origin,Vector2.right,2.6f,360,hit);
+    check(field.ChunkCount==0&&field.CutCount==0,"Disabling releases field geometry and unsubscribes from sweeps");
+    field.enabled=true;
+    check(field.PlantCount==12&&field.CutCount==0&&field.ChunkCount>1,"Re-enabling creates a fresh complete field");
+    detector.Melee(origin,Vector2.right,2.6f,60,hit);
+    check(field.CutCount==5,"Re-enabled field receives real attacks once again");
+
+    // Exercise the actual weapon state machine: polling LightPhase in a later
+    // Update would miss an active window crossed by one long physics interval.
+    var player=authored.interactor!=null?authored.interactor.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>():null;
+    if(player==null||player.Weapon==null)throw new System.Exception("The isolated Tutorial player must have the equipped axe.");
+    var equipped=player.Weapon;
+    var stamina=player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>();
+    var motorBody=player.GetComponent<Rigidbody2D>();
+    int targetIndex=System.Array.FindIndex(authored.layout.plants,p=>p.position.x>=10&&p.position.x<=15&&p.position.y>=38&&p.position.y<=42);
+    if(targetIndex<0||stamina==null||motorBody==null)throw new System.Exception("Expected player components and meadow patch are missing.");
+    Vector3 savedPosition=player.transform.position;
+    Vector2 savedBodyPosition=motorBody.position,savedVelocity=motorBody.linearVelocity,savedAim=equipped.AimDirection;
+    var controlsField=player.GetType().GetField("controlsActive",flags);
+    var recoveryField=stamina.GetType().GetField("recoveryRemaining",flags);
+    var rejectedField=stamina.GetType().GetField("rejectedUntil",flags);
+    bool savedControls=(bool)controlsField.GetValue(player),savedInfinite=stamina.DebugInfinite;
+    float savedStamina=stamina.Current,savedRecovery=(float)recoveryField.GetValue(stamina),savedRejected=(float)rejectedField.GetValue(stamina);
+    var simulateMethod=equipped.GetType().GetMethod("Simulate",flags);
+    var tick=(System.Action<float>)System.Delegate.CreateDelegate(typeof(System.Action<float>),equipped,simulateMethod);
+    try{
+        controlsField.SetValue(player,true);stamina.DebugInfinite=false;stamina.Restore();equipped.CancelAction();
+        if(!player.CanStartAttack)throw new System.Exception("The isolated player must be alive, unpaused, and outside a dash/drink/stagger to test actual attacks.");
+        Vector2 attackOrigin=authored.layout.plants[targetIndex].position-Vector2.right*.75f;
+        player.transform.position=attackOrigin;motorBody.position=attackOrigin;motorBody.linearVelocity=Vector2.zero;
+        Physics2D.SyncTransforms();authored.ResetOnRest();
+        check(equipped.TryLightChop(Vector2.right),"Equipped axe accepts a real light attack on the meadow");
+        float damageStart=(float)equipped.GetType().GetProperty("LightDamageStart",flags).GetValue(equipped,null);
+        float damageEnd=(float)equipped.GetType().GetProperty("LightDamageEnd",flags).GetValue(equipped,null);
+        tick(damageStart*.5f);
+        check(equipped.LightPhase==RoadOfTheOldKing.Weapons.MeleePhase.Windup&&authored.CutCount==0,"Actual axe windup leaves plants intact");
+        tick(damageEnd-damageStart*.5f+.001f);
+        check(equipped.LightPhase==RoadOfTheOldKing.Weapons.MeleePhase.Recovery&&authored.CutCount>0&&authored.IsCut(targetIndex),"One interval crossing the entire active window still cuts the reached plant");
+        authored.ResetOnRest();tick(equipped.LightDuration*2);
+        check(authored.CutCount==0,"Actual axe recovery cannot cut newly restored plants");
+        equipped.CancelAction();stamina.Restore();
+        check(equipped.TryLightChop(Vector2.right),"A second real attack can begin after recovery");
+        tick(damageStart*.5f);equipped.CancelAction();tick(equipped.LightDuration*2);
+        check(authored.CutCount==0&&equipped.State==RoadOfTheOldKing.Weapons.AxeState.Held,"Cancellation before active prevents every cut");
+        stamina.DebugSetCurrent(0);
+        check(!equipped.TryLightChop(Vector2.right),"Empty stamina rejects the real attack request");
+        tick(equipped.LightDuration*2);
+        check(authored.CutCount==0,"A rejected attack request cannot cut grass");
+    }finally{
+        player.transform.position=savedPosition;motorBody.position=savedBodyPosition;motorBody.linearVelocity=savedVelocity;
+        equipped.CancelAction();equipped.SetAim(savedAim);controlsField.SetValue(player,savedControls);
+        stamina.DebugSetCurrent(savedStamina);stamina.DebugInfinite=savedInfinite;
+        recoveryField.SetValue(stamina,savedRecovery);rejectedField.SetValue(stamina,savedRejected);
+        authored.ResetOnRest();authored.GetType().GetMethod("LateUpdate",flags).Invoke(authored,null);
+        Physics2D.SyncTransforms();
+    }
+    // Actual GPU overlap check against an opaque actor on the player's rendering layer.
+    // Compare both sides of the same roots, including equal-height ties and every plant family.
+    var visual=new GameObject("Vegetation depth actor");created.Add(visual);visual.transform.SetParent(source.transform,false);
+    visual.transform.localPosition=new Vector3(0,-.25f,0);visual.transform.localScale=new Vector3(2,2,1);
+    var square=Sprite.Create(Texture2D.whiteTexture,new Rect(0,0,Texture2D.whiteTexture.width,Texture2D.whiteTexture.height),
+        new Vector2(.5f,0),Texture2D.whiteTexture.width);
+    var actorRenderer=visual.AddComponent<SpriteRenderer>();actorRenderer.sprite=square;actorRenderer.color=Color.magenta;
+    var playerSprite=authored.interactor.GetComponentInChildren<SpriteRenderer>();
+    actorRenderer.sharedMaterial=playerSprite.sharedMaterial;actorRenderer.sortingLayerID=playerSprite.sortingLayerID;actorRenderer.sortingOrder=playerSprite.sortingOrder;
+    var cameraObject=new GameObject("Vegetation depth camera");created.Add(cameraObject);
+    var camera=cameraObject.AddComponent<Camera>();camera.enabled=false;camera.orthographic=true;camera.orthographicSize=1.3f;
+    camera.backgroundColor=Color.black;camera.clearFlags=CameraClearFlags.SolidColor;
+    Vector2 probe=new Vector2(2000,2000);camera.transform.position=new Vector3(probe.x,probe.y+.65f,-10);
+    var rt=new RenderTexture(256,256,24);var image=new Texture2D(256,256,TextureFormat.RGB24,false);var previousRT=RenderTexture.active;
+    try{
+        camera.targetTexture=rt;layout.species=authored.layout.species;
+        foreach(int kind in new[]{0,2,4}){
+            layout.plants=new[]{new RoadOfTheOldKing.World.VegetationLayout.Plant{position=probe,species=kind}};
+            field.Rebuild();var counts=new int[3];
+            for(int side=0;side<3;side++){
+                source.transform.position=probe+Vector2.up*(side==0?-.2f:side==1?.2f:-.0625f);flush();
+                foreach(var material in root.GetComponentsInChildren<MeshRenderer>().Select(r=>r.sharedMaterial).Distinct()){
+                    material.SetFloat("_PlantClock",0);material.SetVectorArray("_PlantTouch",new Vector4[8]);
+                }
+                camera.Render();RenderTexture.active=rt;image.ReadPixels(new Rect(0,0,256,256),0,0);image.Apply();
+                counts[side]=image.GetPixels32().Count(c=>c.g>c.r&&c.g>c.b);
+            }
+            check(counts[0]==0&&counts[1]>50,"Rendered species "+kind+" passes behind the actor south of its roots and in front north of them");
+            check(counts[2]==0,"Rendered species "+kind+" gives the player a stable foreground tie at equal root depth");
+        }
+        detector.Melee(probe,Vector2.up,2,360,hit);flush();
+        check(field.CutCount==1&&root.GetComponentsInChildren<MeshRenderer>().Where(r=>r.sharedMaterial.shader==field.vegetationShader).All(r=>!r.enabled),"Cut removes geometry from both depth draws");
+        reset();check(root.GetComponentsInChildren<MeshRenderer>().Any(r=>r.name=="Vegetation foreground"&&r.enabled),"Regrowth restores foreground geometry without rebuilding it");
+    }finally{
+        RenderTexture.active=previousRT;camera.targetTexture=null;
+        UnityEngine.Object.DestroyImmediate(rt);UnityEngine.Object.DestroyImmediate(image);UnityEngine.Object.DestroyImmediate(square);
+    }
+    check(authoredData==EditorJsonUtility.ToJson(authored.layout),"Runtime motion, cutting and regrowth preserve the authored density and all placement data");
+    foreach(var pair in protectedKeys)
+        check(pair.Value==(PlayerPrefs.HasKey(pair.Key)?"exists:"+PlayerPrefs.GetString(pair.Key):"missing"),"Protected save unchanged: "+pair.Key);
+}finally{
+    RoadOfTheOldKing.Weapons.WeaponSweep.Raised-=observe;
+    if(field!=null)field.enabled=false;
+    for(int i=created.Count-1;i>=0;i--)if(created[i]!=null)UnityEngine.Object.DestroyImmediate(created[i]);
+    if(layout!=null)UnityEngine.Object.DestroyImmediate(layout);
+    Physics2D.SyncTransforms();
+}
+return string.Join("\n",results.ToArray())+"\n"+results.Count(r=>r.StartsWith("PASS "))+" passed, "+results.Count(r=>r.StartsWith("FAIL "))+" failed; player restored, authored plants regrown, temporary field disposed.";

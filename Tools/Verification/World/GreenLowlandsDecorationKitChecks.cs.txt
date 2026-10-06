@@ -1,0 +1,96 @@
+// Edit Mode asset checks only: no scene mutations, Play Mode or save access.
+if(EditorApplication.isPlaying)throw new System.Exception("Edit Mode required.");
+string root=RoadOfTheOldKing.EditorTools.GreenLowlandsDecorationKitBuilder.Root;
+string visuals=RoadOfTheOldKing.EditorTools.GreenLowlandsDecorationKitBuilder.VisualRoot;
+string tutorial="Assets/Art/Tiles/Tutorial/DetailDecoration";
+var catalog=RoadOfTheOldKing.EditorTools.GreenLowlandsDecorationKitBuilder.ReadCatalog();
+var failures=new System.Collections.Generic.List<string>();int count=0;
+System.Action<bool,string> check=(ok,label)=>{count++;if(!ok)failures.Add(label);};
+var sprites=AssetDatabase.LoadAllAssetsAtPath(root+"/GreenLowlandsDecoration16.png").OfType<Sprite>().ToDictionary(s=>s.name);
+var importer=(TextureImporter)AssetImporter.GetAtPath(root+"/GreenLowlandsDecoration16.png");
+check(importer.textureType==TextureImporterType.Sprite&&importer.spriteImportMode==SpriteImportMode.Multiple&&importer.spritePixelsPerUnit==16,"16 PPU sprite atlas");
+check(importer.filterMode==FilterMode.Point&&!importer.mipmapEnabled&&importer.textureCompression==TextureImporterCompression.Uncompressed&&!importer.crunchedCompression,"Crisp uncompressed import");
+check(importer.npotScale==TextureImporterNPOTScale.None&&importer.wrapMode==TextureWrapMode.Clamp&&importer.alphaIsTransparency,"No scaling and transparent edges");
+var settings=new TextureImporterSettings();importer.ReadTextureSettings(settings);
+check(settings.spriteMeshType==SpriteMeshType.FullRect&&!settings.spriteGenerateFallbackPhysicsShape,"Full rectangle and no generated physics");
+check(catalog.items.Length==6&&catalog.reusedStamps.Length==6&&catalog.reusedVisuals.SequenceEqual(new[]{"WoodenBucket"}),"Six regional designs, six retained stamps, one retained visual");
+check(AssetDatabase.FindAssets("t:Tile",new[]{root+"/Tiles"}).Length==8&&sprites.Count==14,"Eight pieces plus six whole sprites");
+check(AssetDatabase.FindAssets("t:Prefab",new[]{visuals}).Length==6,"Six regional visual prefabs; retained props are not duplicated");
+var expectedSizes=new System.Collections.Generic.Dictionary<string,Vector2Int>{
+{"Grass_Fan",new Vector2Int(16,16)},{"Grass_Swept",new Vector2Int(16,16)},{"Grass_Dry",new Vector2Int(16,16)},
+{"Meadow_Reeds",new Vector2Int(16,32)},{"Field_Weeds",new Vector2Int(16,16)},{"Collapsed_Crate",new Vector2Int(32,16)}};
+var colors=System.IO.File.ReadAllLines("../Docs/Art/Palettes/green-lowlands-field-and-old-road-v1.gpl").Select(l=>l.Split((char[])null,System.StringSplitOptions.RemoveEmptyEntries)).Where(p=>p.Length>=3&&char.IsDigit(p[0][0])).Select(p=>new Color32(byte.Parse(p[0]),byte.Parse(p[1]),byte.Parse(p[2]),255)).ToArray();
+check(colors.Length==16&&catalog.items.All(p=>p.swatches.Length<=6&&p.swatches.Distinct().Count()==p.swatches.Length),"Regional palette and per-piece color budgets");
+var atlas=new Texture2D(2,2);atlas.LoadImage(System.IO.File.ReadAllBytes(root+"/GreenLowlandsDecoration16.png"));
+try{
+check(atlas.width==256&&atlas.height==128,"Compact native atlas");
+check(atlas.GetPixels32().All(p=>p.a==0||(p.a==255&&colors.Contains(p))),"Binary alpha and exact regional colors");
+foreach(var item in catalog.items){
+check(expectedSizes.ContainsKey(item.name)&&new Vector2Int(item.width,item.height)==expectedSizes[item.name],"Native canvas "+item.name);
+var sprite=sprites[item.name];var rect=sprite.rect;
+check(rect.width==item.width&&rect.height==item.height&&sprite.pixelsPerUnit==16,"Whole native sprite "+item.name);
+var pixels=atlas.GetPixels((int)rect.x,(int)rect.y,item.width,item.height).Select(p=>(Color32)p).ToArray();
+var opaque=pixels.Where(p=>p.a>0).Distinct().ToArray();
+check(opaque.Length>0&&opaque.Length<=item.swatches.Length&&opaque.All(p=>item.swatches.Any(i=>colors[i].Equals(p))),"Nonempty restricted-color art "+item.name);
+var positions=Enumerable.Range(0,pixels.Length).Where(i=>pixels[i].a>0).ToArray();
+int minX=positions.Min(i=>i%item.width),maxX=positions.Max(i=>i%item.width),minY=positions.Min(i=>i/item.width),maxY=positions.Max(i=>i/item.width);
+check(maxX-minX+1<=item.drawWidth&&maxY-minY+1<=item.drawHeight,"Drawing remains within native limits "+item.name);
+check(minX>=0&&maxX<item.width&&minY>=0&&maxY<item.height,"No out-of-canvas drawing "+item.name);
+}
+}finally{UnityEngine.Object.DestroyImmediate(atlas);}
+string palettePath=root+"/GreenLowlandsDecoration.prefab";
+var palette=AssetDatabase.LoadAssetAtPath<GameObject>(palettePath);
+check(palette!=null&&AssetDatabase.LoadAllAssetsAtPath(palettePath).OfType<GridPalette>().Any(p=>p.cellSizing==GridPalette.CellSizing.Manual),"Registered manual-cell palette");
+var grid=palette.GetComponent<Grid>();var map=palette.GetComponentInChildren<UnityEngine.Tilemaps.Tilemap>();
+check(grid!=null&&grid.cellSize==Vector3.one&&palette.transform.localScale==Vector3.one,"Native palette grid");
+var paletteRenderer=map.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>();
+check(paletteRenderer.sortingLayerName=="Ground"&&paletteRenderer.sortingOrder==30,"Ground stamp authoring layer");
+check(palette.GetComponentsInChildren<Collider2D>(true).Length==0&&palette.GetComponentsInChildren<MonoBehaviour>(true).Length==0,"Palette has no collision or behaviour");
+int index=0,painted=0;
+foreach(var item in catalog.items){
+var whole=sprites[item.name];var origin=new Vector3Int(index%4*4,-index/4*4,0);
+check(whole.pivot==new Vector2(item.width/2f,item.height/2f),"Centered sprite registration "+item.name);
+for(int y=0;y<item.height/16;y++)for(int x=0;x<item.width/16;x++){
+var tile=AssetDatabase.LoadAssetAtPath<UnityEngine.Tilemaps.Tile>(RoadOfTheOldKing.EditorTools.GreenLowlandsDecorationKitBuilder.TilePath(item.name,x,y));
+var piece=sprites[item.name+"_"+x+"_"+y];
+check(tile!=null&&tile.sprite==piece&&map.GetTile(origin+new Vector3Int(x,y,0))==tile,"Complete palette stamp "+item.name+" "+x+","+y);
+check(tile.colliderType==UnityEngine.Tilemaps.Tile.ColliderType.None&&tile.color==Color.white&&tile.transform==Matrix4x4.identity,"Noncolliding unscaled tile "+item.name+" "+x+","+y);
+check(piece.rect==new Rect(whole.rect.x+x*16,whole.rect.y+y*16,16,16)&&piece.pixelsPerUnit==16,"Tile matches whole-sprite pixels "+item.name+" "+x+","+y);
+painted++;
+}
+if(!item.ground){
+var prefab=AssetDatabase.LoadAssetAtPath<GameObject>(visuals+"/"+item.name+"_Visual.prefab");
+check(prefab!=null,"Visual prefab "+item.name);if(!prefab){index++;continue;}
+check(prefab.GetComponentsInChildren<Transform>(true).All(t=>t.localScale==Vector3.one&&t.localRotation==Quaternion.identity),"Native prop transforms "+item.name);
+check(prefab.GetComponentsInChildren<Collider2D>(true).Length==0&&prefab.GetComponentsInChildren<Collider>(true).Length==0&&prefab.GetComponentsInChildren<MonoBehaviour>(true).Length==0,"Visual-only, no collider or gameplay "+item.name);
+var renderers=prefab.GetComponentsInChildren<SpriteRenderer>(true);
+check(renderers.Length==1&&renderers[0].sprite==whole,"Whole artwork assigned "+item.name);
+var renderer=renderers[0];
+check(renderer.sortingLayerName=="World"&&renderer.sortingOrder==1&&renderer.color==Color.white,"World sorting and untinted pixels "+item.name);
+check(renderer.transform.localPosition==new Vector3(0,item.height/32f,0)&&prefab.transform.localPosition==Vector3.zero,"Canvas feet at root origin "+item.name);
+check(prefab.GetComponentsInChildren<Rigidbody2D>(true).Length==0&&prefab.GetComponentsInChildren<Animator>(true).Length==0,"Static art without new mechanics "+item.name);
+}
+index++;
+}
+var retainedWidths=new System.Collections.Generic.Dictionary<string,int>{{"MeadowFlowers",1},{"GrassTuft",1},{"FallenLeaves",2},{"WoodChips",2},{"SplitLogs",2},{"CarvedStone",1}};
+foreach(string name in catalog.reusedStamps){
+check(retainedWidths.ContainsKey(name),"Selected retained stamp "+name);
+var origin=new Vector3Int(index%4*4,-index/4*4,0);
+for(int x=0;x<retainedWidths[name];x++){
+var tile=AssetDatabase.LoadAssetAtPath<UnityEngine.Tilemaps.Tile>(tutorial+"/Tiles/"+name+"_"+x+".asset");
+check(tile!=null&&map.GetTile(origin+new Vector3Int(x,0,0))==tile,"Original Tutorial tile reference "+name+" "+x);
+check(tile.colliderType==UnityEngine.Tilemaps.Tile.ColliderType.None&&tile.sprite.pixelsPerUnit==16,"Retained native visual tile "+name+" "+x);
+painted++;
+}
+index++;
+}
+int occupied=0;foreach(var cell in map.cellBounds.allPositionsWithin)if(map.HasTile(cell))occupied++;
+check(painted==17&&occupied==17,"Seventeen tile cells across twelve complete stamps");
+foreach(string name in catalog.reusedVisuals){
+var prefab=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/WorldArt/Tutorial/"+name+"_Visual.prefab");
+check(prefab!=null&&!AssetDatabase.LoadAssetAtPath<GameObject>(visuals+"/"+name+"_Visual.prefab"),"Direct visual reuse without copy "+name);
+check(prefab.GetComponentsInChildren<Collider2D>(true).Length==0&&prefab.GetComponentsInChildren<MonoBehaviour>(true).Length==0,"Retained visual has no gameplay "+name);
+check(prefab.GetComponentInChildren<SpriteRenderer>().sprite.pixelsPerUnit==16,"Retained visual pixel density "+name);
+}
+check(AssetDatabase.FindAssets("t:Scene",new[]{root}).Length==0,"No per-layer scene");
+return (failures.Count==0?"PASS ":"FAILED ")+count+" Decoration assertions; six regional designs, six retained stamps, one retained visual, eight new tiles\n"+string.Join("\n",failures.ToArray());

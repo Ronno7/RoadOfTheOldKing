@@ -127,7 +127,7 @@ namespace RoadOfTheOldKing.EditorTools
             }
         }
 
-        private static Color32[] PrepareSprite(Texture2D source,Prop prop,Color32[] palette)
+        internal static Color32[] PrepareSprite(Texture2D source,Prop prop,Color32[] palette)
         {
             var a=prop.sourceRect;int left=a.x,right=a.x+a.width-1,top=a.y,bottom=a.y+a.height-1;
             if(left<0||top<0||right>=source.width||bottom>=source.height)throw new InvalidDataException("Crop outside source: "+prop.name);

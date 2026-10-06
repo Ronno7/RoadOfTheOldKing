@@ -7,7 +7,7 @@ namespace RoadOfTheOldKing.Combat
     // state: locomotion follows distance travelled (stalk while circling, walk to reposition, run to
     // chase), the bite follows the windup clock so the jaws open on the leap or snap, death plays once
     // and holds as the corpse. Draws the attack telegraph: a lane for the lunge, an arc for the snap.
-    [DisallowMultipleComponent, RequireComponent(typeof(WolfAI), typeof(Damageable))]
+    [DisallowMultipleComponent, RequireComponent(typeof(WolfAI), typeof(Damageable), typeof(EnemyCorpseSorting))]
     public sealed class WolfView : MonoBehaviour
     {
         [SerializeField] private WolfAnimationSet animations;

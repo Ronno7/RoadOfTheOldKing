@@ -45,7 +45,8 @@ def distance(field, x, y, limit):
     return limit + 1
 
 
-def blob(material, mask, variant=0):
+def blob(material, mask, variant=0, palette=None):
+    P = palette or globals()['P']
     image = Image.new('RGBA', (16, 16))
     field = extended(mask, material in ('GrassLedge', 'StoneLedge'))
     for y in range(16):
@@ -85,12 +86,13 @@ def blob(material, mask, variant=0):
             draw.line((8 - variant, 11, 10 - variant, 11), fill=color)
         else:
             # Reuse the quiet ground material, without a telltale identical mark in each cell.
-            image = ground.texture('WornStone' if material == 'StoneLedge' else 'Grass', variant)
+            image = ground.texture('WornStone' if material == 'StoneLedge' else 'Grass', variant, P)
     return image
 
 
-def wall(mask):
+def wall(mask, palette=None):
     """All 16 cardinal connections. Narrow masonry, with a lower face and cap."""
+    P = palette or globals()['P']
     shape = Image.new('L', (16, 16)); d = ImageDraw.Draw(shape)
     d.rectangle((4, 3, 11, 12), fill=255)
     if mask & 1: d.rectangle((4, 0, 11, 8), fill=255)
@@ -111,7 +113,8 @@ def wall(mask):
     return result
 
 
-def face(material, row, column, variant=0):
+def face(material, row, column, variant=0, palette=None):
+    P = palette or globals()['P']
     stone = material == 'StoneCliff'
     im = Image.new('RGBA', (16,16), P['stoneshade' if stone else 'earth'])
     d = ImageDraw.Draw(im)
@@ -141,7 +144,8 @@ def face(material, row, column, variant=0):
     return im
 
 
-def stairs(material, row, column):
+def stairs(material, row, column, palette=None):
+    P = palette or globals()['P']
     im = Image.new('RGBA',(16,16),P['earth' if material == 'EarthRamp' else 'stoneshade'])
     d=ImageDraw.Draw(im)
     if material == 'EarthRamp':
@@ -156,7 +160,8 @@ def stairs(material, row, column):
     return im
 
 
-def water_detail(kind, frame):
+def water_detail(kind, frame, palette=None):
+    P = palette or globals()['P']
     im=Image.new('RGBA',(16,16));d=ImageDraw.Draw(im)
     if kind=='Ripple':
         x=3+frame
@@ -193,7 +198,8 @@ def water_detail(kind, frame):
     return im
 
 
-def verify(images, entries):
+def verify(images, entries, palette=None):
+    P = palette or globals()['P']
     # Alpha geometry exhausts every adjacent neighborhood. Color sampling additionally
     # checks continuous straight bank and cliff runs, in both orientations.
     checks=ground.validate_edges()
@@ -242,23 +248,28 @@ def verify(images, entries):
     return checks,color_checks
 
 
-def main():
+def main(output=OUT, preview=DOC, atlas_name='TutorialTerrain16',
+         preview_name='tutorial-terrain-production-atlas', palette=None,
+         title='TUTORIAL TERRAIN / 16px / HEARTH & MEADOW',
+         render_blob=blob, render_wall=wall, render_face=face,
+         render_stairs=stairs, render_water=water_detail):
+    OUT, DOC, P = output, preview, palette or globals()['P']
     OUT.mkdir(parents=True,exist_ok=True);DOC.mkdir(parents=True,exist_ok=True)
     entries=[];images=[]
     def add(name,material,mask,variant,image):
         entries.append(dict(name=name,material=material,mask=mask,variant=variant));images.append(image)
     for material in BLOBS:
-        for mask in ground.MASKS:add(f'{material}_{ground.shape_name(mask)}',material,mask,0,blob(material,mask))
-        for v in range(1,4):add(f'{material}_Center_Variant_{v:02}',material,255,v,blob(material,255,v))
+        for mask in ground.MASKS:add(f'{material}_{ground.shape_name(mask)}',material,mask,0,render_blob(material,mask,palette=P))
+        for v in range(1,4):add(f'{material}_Center_Variant_{v:02}',material,255,v,render_blob(material,255,v,palette=P))
     labels={0:'Post',1:'End_N',2:'End_E',4:'End_S',8:'End_W',5:'Straight_NS',10:'Straight_EW',3:'Corner_NE',6:'Corner_SE',12:'Corner_SW',9:'Corner_NW',7:'T_NES',11:'T_NEW',13:'T_NSW',14:'T_ESW',15:'Cross'}
-    for mask in range(16):add(f'StoneWall_{labels[mask]}_{mask:03}', 'StoneWall',mask,0,wall(mask))
+    for mask in range(16):add(f'StoneWall_{labels[mask]}_{mask:03}', 'StoneWall',mask,0,render_wall(mask,palette=P))
     for material in ('EarthCliff','StoneCliff','StoneStairs','EarthRamp'):
         for row in ('Top','Middle','Foot'):
             for column in ('Left','Center','Right'):
-                im=face(material,row,column) if 'Cliff' in material else stairs(material,row,column)
+                im=render_face(material,row,column,palette=P) if 'Cliff' in material else render_stairs(material,row,column,palette=P)
                 add(f'{material}_{row}_{column}',material,-1,0,im)
     for kind in ('Ripple','FallLip','FallBody','FallFoam'):
-        for frame in range(1 if kind=='FallLip' else 4):add(f'{kind}_{frame:02}',kind,-1,frame,water_detail(kind,frame))
+        for frame in range(1 if kind=='FallLip' else 4):add(f'{kind}_{frame:02}',kind,-1,frame,render_water(kind,frame,palette=P))
     count=len(entries);cols=16;pad=2;pitch=20;rows=(count+cols-1)//cols
     atlas=Image.new('RGBA',(cols*pitch,rows*pitch))
     for i,(e,im) in enumerate(zip(entries,images)):
@@ -269,25 +280,28 @@ def main():
                 if 0<=ox<16 and 0<=oy<16:continue
                 atlas.putpixel((x+ox,y+oy),im.getpixel((max(0,min(15,ox)),max(0,min(15,oy)))))
         e.update(index=i,x=x,y=atlas.height-y-16,width=16,height=16)
-    atlas.save(OUT/'TutorialTerrain16.png')
+    atlas.save(OUT/(atlas_name+'.png'))
     (OUT/'TileManifest.json').write_text(json.dumps(dict(tileSize=16,columns=cols,padding=pad,entries=entries),indent=2)+'\n')
     with (OUT/'TileIndex.csv').open('w',newline='') as f:
         w=csv.DictWriter(f,fieldnames=list(entries[0]));w.writeheader();w.writerows(entries)
     # Grouped/labeled contact sheet; labels are documentation, never sprite pixels.
     materials=list(dict.fromkeys(e['material'] for e in entries));w=832;y=30
     sheet=Image.new('RGB',(w,2400),(35,44,38));draw=ImageDraw.Draw(sheet)
-    draw.text((16,10),'TUTORIAL TERRAIN / 16px / HEARTH & MEADOW',fill='#F1DEB0')
+    draw.text((16,10),title,fill='#F1DEB0')
     for material in materials:
         draw.text((16,y),material,fill='#DFC291');y+=20
         for i,(e,im) in enumerate((e,im) for e,im in zip(entries,images) if e['material']==material):
             thumb=Image.new('RGBA',(16,16),P['water' if material in ('DeepWater','Ripple','FallFoam') else 'grass'])
             thumb.alpha_composite(im);sheet.paste(thumb.resize((48,48),Image.Resampling.NEAREST),(16+(i%16)*50,y+(i//16)*50))
         y+=((i+16)//16)*50+14
-    sheet.crop((0,0,w,y)).save(DOC/'tutorial-terrain-production-atlas.png')
-    seam_checks,color_checks=verify(images,entries)
+    sheet.crop((0,0,w,y)).save(DOC/(preview_name+'.png'))
+    seam_checks,color_checks=verify(images,entries,P)
+    colors_by_material = {m: len({c[:3] for e,im in zip(entries,images) if e['material']==m
+                                 for c in im.get_flattened_data() if c[3]}) for m in materials}
+    assert max(colors_by_material.values()) <= 10
     report=dict(visual_tiles=count,blob_families=5,blob_shapes=47,wall_shapes=16,automatic_brushes=6,
                 animated_tiles=3,seam_neighborhoods_checked=seam_checks,edge_samples_checked=color_checks,
-                atlas_size=list(atlas.size),tile_size=16,palette_colors=len({p for im in images for p in im.get_flattened_data() if p[3]}))
+                colors_by_material=colors_by_material,atlas_size=list(atlas.size),tile_size=16,palette_colors=len({p for im in images for p in im.get_flattened_data() if p[3]}))
     (OUT/'GenerationReport.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report))
 
 

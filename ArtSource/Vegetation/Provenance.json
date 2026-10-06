@@ -1,0 +1,16 @@
+{
+  "source": "GrassLeaves_Source.png",
+  "editInput": "GrassLeaves_Initial.png",
+  "prompts": ["GrassLeaves.prompt.txt", "GrassLeaves.edit.prompt.txt"],
+  "tool": "built-in image_gen.imagegen",
+  "generated": "2026-10-05",
+  "useCase": "stylized-concept",
+  "transparentBackground": true,
+  "purpose": "Two intact grass leaves for independently phased continuous rotation around bottom roots.",
+  "runtimeAtlas": "../../RoadOfTheOldKing/Assets/Art/Vegetation/GrassLeaves16.png",
+  "importBuilder": "TutorialVegetationBuilder.BuildLeafArt",
+  "importPreparation": "Each source half is cropped to alpha bounds, nearest sampled at 18px and 14px height with an eight-pixel minimum width to retain the narrow stem, and mapped to four accepted Tutorial greens with binary alpha. Bottom pivots are centered on the lowest opaque sampled row. Existing MeadowFlowers and Meadow_Reeds are copied pixel-for-pixel from their original atlases into this atlas with bottom pivots.",
+  "grassPalette": ["#384B3C", "#60724D", "#8B9B5E", "#BECA82"],
+  "pixelsPerUnit": 16,
+  "motion": "Rigid continuous quad rotation; no UV deformation, row displacement, pixel snapping or stepped time. Source art remains pixel art."
+}

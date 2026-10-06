@@ -1,0 +1,65 @@
+// Run after the gameplay fixture reaches GreenLowlands, with its isolated session.
+// Virtual keyboard -> actual input actions -> PlayerMovement -> Physics2D.
+// Fixed steps are driven explicitly; this is not a human keyboard playthrough.
+if(!EditorApplication.isPlaying||UnityEngine.SceneManagement.SceneManager.GetActiveScene().name!="GreenLowlands")throw new System.Exception("Run in GreenLowlands Play Mode.");
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var session=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(session==null||session.IsLoading||!((string)session.GetType().GetField("saveKey",flags).GetValue(session)).StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new System.Exception("Settled isolated regional session required.");
+var player=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
+var body=player.GetComponent<Rigidbody2D>();
+var motor=player.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>();
+var input=player.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();
+var actions=(UnityEngine.InputSystem.InputActionMap)input.GetType().GetField("actions",flags).GetValue(input);
+var oldDevices=actions.devices;
+var oldRouting=UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode;
+var oldFocus=(bool)input.GetType().GetField("hasFocus",flags).GetValue(input);
+var oldPaused=(bool)input.GetType().GetField("paused",flags).GetValue(input);
+var oldSimulation=Physics2D.simulationMode;
+var original=body.position;var oldVelocity=body.linearVelocity;
+var oldFree=(Vector2)motor.GetType().GetField("freeVelocity",flags).GetValue(motor);
+var keyboard=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
+var results=new System.Collections.Generic.List<string>();
+System.Action<bool,string> check=(ok,label)=>{if(!ok)throw new System.Exception("FAIL: "+label+" at "+body.position);results.Add("PASS "+label);};
+System.Action<UnityEngine.InputSystem.Key[]> keys=held=>{
+ UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState(held));
+ UnityEngine.InputSystem.InputSystem.Update();input.GetType().GetField("hasFocus",flags).SetValue(input,true);
+ input.GetType().GetMethod("Update",flags).Invoke(input,null);
+};
+System.Action<Vector2> move=p=>{body.position=p;player.transform.position=p;body.linearVelocity=Vector2.zero;motor.GetType().GetField("freeVelocity",flags).SetValue(motor,Vector2.zero);Physics2D.SyncTransforms();};
+System.Action<Vector2,UnityEngine.InputSystem.Key,float> walk=(start,key,seconds)=>{
+ move(start);keys(new[]{key});
+ check(input.IsActive&&input.MoveDirection.sqrMagnitude>.9f,"Virtual direction reaches real movement input");
+ for(int i=0;i<Mathf.CeilToInt(seconds/Time.fixedDeltaTime);i++){
+  motor.GetType().GetMethod("FixedUpdate",flags).Invoke(motor,null);Physics2D.Simulate(Time.fixedDeltaTime);
+ }
+ keys(new UnityEngine.InputSystem.Key[0]);
+};
+try{
+ check(player.IsAlive&&!player.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>().IsLocked,"Player is alive and unlocked");
+ UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=UnityEngine.InputSystem.InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+ actions.devices=new UnityEngine.InputSystem.InputDevice[]{keyboard};
+ input.GetType().GetField("paused",flags).SetValue(input,false);Physics2D.simulationMode=SimulationMode2D.Script;
+ walk(new Vector2(18.5f,7.5f),UnityEngine.InputSystem.Key.D,1.9f);
+ check(body.position.x>25.5f&&Mathf.Abs(body.position.y-7.5f)<.05f,"Motor crosses near bridge lane west to east");
+ walk(new Vector2(25.5f,8.5f),UnityEngine.InputSystem.Key.A,1.9f);
+ check(body.position.x<18.5f&&Mathf.Abs(body.position.y-8.5f)<.05f,"Motor crosses far bridge lane east to west");
+ walk(new Vector2(21.5f,8),UnityEngine.InputSystem.Key.W,.8f);
+ check(body.position.y<=8.64f&&body.position.y>=8.5f,"Far bridge rail stops the motor");
+ walk(new Vector2(21.5f,8),UnityEngine.InputSystem.Key.S,.8f);
+ check(body.position.y>=7.36f&&body.position.y<=7.5f,"Near bridge rail stops the motor");
+ walk(new Vector2(19,12),UnityEngine.InputSystem.Key.D,.8f);
+ check(body.position.x<=19.64f&&body.position.x>=19.5f,"River blocks walking away from the bridge");
+ walk(new Vector2(35.9375f,.75f),UnityEngine.InputSystem.Key.W,.8f);
+ check(body.position.y<=1.33f&&body.position.y>=1.2f,"Oak trunk stops the motor");
+ walk(new Vector2(34.75f,2.25f),UnityEngine.InputSystem.Key.W,.75f);
+ check(body.position.y>5,"Motor passes beneath the oak canopy beside its trunk");
+ walk(new Vector2(16.5f,11),UnityEngine.InputSystem.Key.W,.8f);
+ check(body.position.y<=12.64f&&body.position.y>=12.5f,"Mill approach remains clear up to the solid base");
+}finally{
+ keys(new UnityEngine.InputSystem.Key[0]);actions.devices=oldDevices;
+ UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard);
+ UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=oldRouting;
+ input.GetType().GetField("hasFocus",flags).SetValue(input,oldFocus);input.GetType().GetField("paused",flags).SetValue(input,oldPaused);
+ move(original);body.linearVelocity=oldVelocity;motor.GetType().GetField("freeVelocity",flags).SetValue(motor,oldFree);Physics2D.simulationMode=oldSimulation;
+}
+return string.Join("\n",results.ToArray());

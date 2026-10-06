@@ -56688,6 +56688,51 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1888843099793186448, guid: edda0a2f302c4a3428e2386dd1b95a75, type: 3}
   m_PrefabInstance: {fileID: 256444788}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &257731885
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 257731886}
+  - component: {fileID: 257731887}
+  m_Layer: 0
+  m_Name: Arrival from Green Lowlands
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &257731886
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 257731885}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 87.5, y: 94.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 851077626368712921}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &257731887
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 257731885}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7d80823303368845aa3ddb9e4903f12, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SceneSpawnPoint
+  id: from-green-lowlands
 --- !u!1 &258880400
 GameObject:
   m_ObjectHideFlags: 0
@@ -120527,6 +120572,53 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6019429099848158447, guid: ceb0b526712b62941be1c01421895a51, type: 3}
   m_PrefabInstance: {fileID: 533771635}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &537712923
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 537712924}
+  - component: {fileID: 537712925}
+  m_Layer: 0
+  m_Name: Interactive Vegetation
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &537712924
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 537712923}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 851077626368712921}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &537712925
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 537712923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25f2b835aaaa83f469b131b32dc13be2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.InteractiveVegetation
+  layout: {fileID: 11400000, guid: 810a762d9cd6f7b4192c436aa5cc3f9b, type: 2}
+  vegetationShader: {fileID: 4800000, guid: 99859955a658d564280fa94eb6032061, type: 3}
+  interactor: {fileID: 1607463906426744503}
 --- !u!1001 &539061202
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -320519,9 +320611,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SceneExit
   progressId: tutorial/complete
-  targetScene: 
-  targetSpawnId: 
-  arrivalNotice: End of the tutorial. The road goes on.
+  targetScene: Assets/Scenes/GreenLowlands.unity
+  targetSpawnId: from-tutorial
+  arrivalNotice:
 --- !u!61 &1899408427
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -358065,6 +358157,14 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2712772487470844132, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.3125
+      objectReference: {fileID: 0}
+    - target: {fileID: 5274022206545519419, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7300992784925826037, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -366269,6 +366369,8 @@ Transform:
   - {fileID: 1517696220}
   - {fileID: 1899408425}
   - {fileID: 1417432703}
+  - {fileID: 257731886}
+  - {fileID: 537712924}
   m_Father: {fileID: 8351447465323684189}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1839735485 &863629669903626541
