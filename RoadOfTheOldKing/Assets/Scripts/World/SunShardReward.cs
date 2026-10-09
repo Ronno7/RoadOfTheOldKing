@@ -13,6 +13,8 @@ namespace RoadOfTheOldKing.World
     public sealed class SunShardReward : WorldPickup, IProgressParticipant
     {
         [SerializeField] private string rewardId;
+        [SerializeField] private bool requireClearAccess;
+        [SerializeField] private string requiredMilestone;
         [SerializeField] private Damageable defeatSource;
         [Tooltip("With a defeat source: these must be defeated too (a pack); the shard appears where the last one fell.")]
         [SerializeField] private Damageable[] alsoDefeat = Array.Empty<Damageable>();
@@ -73,7 +75,9 @@ namespace RoadOfTheOldKing.World
         public override string Prompt => "Take Sun Shard";
         public override bool CanCollect(PlayerHealth player) => base.CanCollect(player) &&
             IsAvailable && !IsCollected && !awardImmediately && !string.IsNullOrEmpty(rewardId) &&
-            GameSession.Instance != null;
+            GameSession.Instance != null && !GameSession.Instance.IsLoading &&
+            (!requireClearAccess || HasClearAccess(player)) &&
+            (string.IsNullOrEmpty(requiredMilestone) || GameSession.Instance.Progress.Has(requiredMilestone));
         public override bool TryCollect(PlayerHealth player) => CanCollect(player) && Collect();
 
         private bool Collect()

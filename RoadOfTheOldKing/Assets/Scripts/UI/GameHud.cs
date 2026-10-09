@@ -164,6 +164,8 @@ namespace RoadOfTheOldKing.UI
             if (session != null || GameSession.Instance == null) return;
             session = GameSession.Instance;
             session.Rewards.ShardCollected += OnShard;
+            session.Rewards.CoinsCollected += OnCoins;
+            session.Rewards.ToolCollected += OnTool;
             session.Rewards.HeartFragmentCollected += OnFragment;
         }
 
@@ -171,11 +173,15 @@ namespace RoadOfTheOldKing.UI
         {
             if (session == null) return;
             session.Rewards.ShardCollected -= OnShard;
+            session.Rewards.CoinsCollected -= OnCoins;
+            session.Rewards.ToolCollected -= OnTool;
             session.Rewards.HeartFragmentCollected -= OnFragment;
             session = null;
         }
 
         private void OnPlayerHit(CombatHit hit) { EncounterState.ReportThreat(); Reveal(); if (hit.Damage > 0) hurtAmount = 1f; }
+        private void OnCoins(int amount, int total) => HudNotifications.Post("Bronze Coins +" + amount + " · " + total);
+        private void OnTool(WorldTool tool) => HudNotifications.Post(WorldToolNames.Display(tool) + " acquired", 4.5f);
         private void OnShard(int total) => HudNotifications.Post("Sun Shard +1 · " + total);
         private void OnFragment(int total, bool completedHeart) => HudNotifications.Post(completedHeart
             ? "Max health " + player.Health.MaxHealth
@@ -410,17 +416,19 @@ namespace RoadOfTheOldKing.UI
             var progress = GameSession.Instance != null ? GameSession.Instance.Progress : null;
             if (progress != null)
             {
+                text.Append("Bronze Coins  ").Append(progress.bronzeCoins).Append('\n');
+                foreach (var tool in progress.ownedTools) text.Append(WorldToolNames.Display(tool)).Append('\n');
                 text.Append("Sun Shards  ").Append(progress.sunShards).Append('\n');
                 int fragments = HeartFragmentProgression.Count(progress);
-                text.Append("Heart fragments  ").Append(fragments % HeartFragmentProgression.FragmentsPerHeart).Append(" / ").Append(HeartFragmentProgression.FragmentsPerHeart);
+                text.Append("Fragments  ").Append(fragments % HeartFragmentProgression.FragmentsPerHeart).Append("/").Append(HeartFragmentProgression.FragmentsPerHeart);
                 int bonus = HeartFragmentProgression.BonusHealth(progress);
-                if (bonus > 0) text.Append("  (+").Append(bonus).Append(" max)");
+                if (bonus > 0) text.Append("  (+").Append(bonus).Append(" HP)");
                 text.Append('\n');
             }
             var weapon = combat != null ? combat.Weapon : null;
             text.Append("Axe  ").Append(weapon == null ? "not yet found" : weapon.IsAway ? "away" : "in hand").Append('\n');
             text.Append("Recall  ").Append(combat != null && combat.CanRecall ? "awakened" : "dormant").Append('\n');
-            if (flask != null) text.Append("Flasks  ").Append(flask.Charges).Append(" / ").Append(flask.MaxCharges).Append("  (").Append(ControlLabels.Get("heal")).Append(" to drink)\n");
+            if (flask != null) text.Append("Flasks  ").Append(flask.Charges).Append("/").Append(flask.MaxCharges).Append("  [").Append(ControlLabels.Get("heal")).Append("]\n");
             if (GameSession.Instance != null)
             {
                 bool any = false;

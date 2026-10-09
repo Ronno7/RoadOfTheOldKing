@@ -146,7 +146,7 @@ namespace RoadOfTheOldKing.World
                 chunk.plants.Add(i);
             }
             foreach(var chunk in chunks)BuildMesh(chunk);
-            if(Application.IsPlaying(gameObject))debris=new VegetationDebris(transform);
+            if(Application.IsPlaying(gameObject))debris=new VegetationDebris(transform,layout,vegetationShader);
             SyncDepth();
             UploadMotion();
         }
@@ -293,6 +293,7 @@ namespace RoadOfTheOldKing.World
             var window=new Vector4(1,1,0,0); // inverted rectangle disables foreground selection
             int layer=depthBody!=null?depthBody.sortingLayerID:SortingLayer.NameToID("Player");
             int order=depthBody!=null?depthBody.sortingOrder+3:3; // over body, carried axe and grip fold
+            debris?.SetSorting(layer,order-3,active?interactor.position.y+.0625f:float.NegativeInfinity);
             if(active)
             {
                 float feet=interactor.position.y+.0625f;

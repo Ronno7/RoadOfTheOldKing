@@ -1,0 +1,196 @@
+// Run this C#6 method body through execute_code. Edit Mode call sets up a unique
+// save on an UNSAVED instance of the proof scene. Enter Play and call for phase 0.
+// After phase 0 stop/re-enter Play, call for phase 1 (cold persistence).
+// Stop, set SessionState "Sluice.Check.Command" to "cleanup", call once more.
+// Cleanup preserves authored scenes and main, legacy, prototype and resume saves.
+// Real weapon sweeps with deterministic ticks/teleported setup; not keyboard QA.
+string p="Sluice.Check.", path="Assets/Scenes/LowlandsSluiceProof.unity";
+string command=SessionState.GetString(p+"Command",SessionState.GetBool(p+"Active",false)?"advance":"setup");
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+if(command=="setup"){
+    if(EditorApplication.isPlayingOrWillChangePlaymode)throw new System.Exception("Stop Play Mode first.");
+    var setup=UnityEditor.SceneManagement.EditorSceneManager.GetSceneManagerSetup();
+    foreach(var s in setup)if(s.isLoaded&&(string.IsNullOrEmpty(s.path)||UnityEngine.SceneManagement.SceneManager.GetSceneByPath(s.path).isDirty))throw new System.Exception("Existing scenes must be saved/clean.");
+    SessionState.SetInt(p+"Scenes",setup.Length);
+    for(int i=0;i<setup.Length;i++){SessionState.SetString(p+"Scene"+i,setup[i].path);SessionState.SetBool(p+"Loaded"+i,setup[i].isLoaded);SessionState.SetBool(p+"Selected"+i,setup[i].isActive);}
+    string[] keys={"RoadOfTheOldKing.Save","RoadOfTheOldKing.Tutorial.Save.v1","RoadOfTheOldKing.Prototype.LowlandsSluice"};
+    int n=0;foreach(string key in keys.SelectMany(k=>new[]{k,k+".Resume"})){
+        SessionState.SetString(p+"Protected"+n,key);SessionState.SetBool(p+"Exists"+n,PlayerPrefs.HasKey(key));SessionState.SetString(p+"Value"+n,PlayerPrefs.GetString(key,""));n++;
+    }
+    SessionState.SetInt(p+"ProtectedCount",n);
+    SessionState.SetString(p+"PlayStart",AssetDatabase.GetAssetPath(UnityEditor.SceneManagement.EditorSceneManager.playModeStartScene));
+    SessionState.SetBool(p+"Background",Application.runInBackground);
+    foreach(string scene in new[]{"Tutorial","GreenLowlands","LowlandsSluiceProof"})
+        SessionState.SetString(p+"Bytes"+scene,Convert.ToBase64String(System.Security.Cryptography.SHA256.Create().ComputeHash(System.IO.File.ReadAllBytes("Assets/Scenes/"+scene+".unity"))));
+    string keyName="RoadOfTheOldKing.Verification.Sluice."+System.Guid.NewGuid().ToString("N");
+    SessionState.SetString(p+"Key",keyName);SessionState.SetInt(p+"Phase",0);SessionState.SetBool(p+"Active",true);SessionState.SetString(p+"Command","advance");
+    UnityEditor.SceneManagement.EditorSceneManager.playModeStartScene=null;
+    Application.runInBackground=true;
+    UnityEditor.SceneManagement.EditorSceneManager.OpenScene(path,UnityEditor.SceneManagement.OpenSceneMode.Single);
+    var session=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Progression.GameSession>();
+    var so=new SerializedObject(session);so.FindProperty("saveKey").stringValue=keyName;so.FindProperty("legacySaveKeys").arraySize=0;so.ApplyModifiedPropertiesWithoutUndo();
+    return "SETUP: enter Play without saving this verification override.";
+}
+if(command=="cleanup"){
+    if(EditorApplication.isPlayingOrWillChangePlaymode)throw new System.Exception("Stop before cleanup.");
+    if(!SessionState.GetBool(p+"Active",false))throw new System.Exception("No active fixture.");
+    string key=SessionState.GetString(p+"Key","");
+    var scene=UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+    var session=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Progression.GameSession>();
+    if(scene.path!=path||session==null||session.StorageKey!=key||!key.StartsWith("RoadOfTheOldKing.Verification.Sluice."))throw new System.Exception("Refusing unrelated scene/key cleanup.");
+    var changed=new System.Collections.Generic.List<string>();
+    for(int i=0;i<SessionState.GetInt(p+"ProtectedCount",0);i++){
+        string saved=SessionState.GetString(p+"Protected"+i,"");bool exists=SessionState.GetBool(p+"Exists"+i,false);string value=SessionState.GetString(p+"Value"+i,"");
+        if(PlayerPrefs.HasKey(saved)!=exists||(exists&&PlayerPrefs.GetString(saved)!=value)){changed.Add(saved);if(exists)PlayerPrefs.SetString(saved,value);else PlayerPrefs.DeleteKey(saved);}
+    }
+    PlayerPrefs.DeleteKey(key);PlayerPrefs.DeleteKey(key+".Resume");PlayerPrefs.Save();
+    foreach(string name in new[]{"Tutorial","GreenLowlands","LowlandsSluiceProof"})
+        if(SessionState.GetString(p+"Bytes"+name,"")!=Convert.ToBase64String(System.Security.Cryptography.SHA256.Create().ComputeHash(System.IO.File.ReadAllBytes("Assets/Scenes/"+name+".unity"))))changed.Add("SCENE "+name);
+    var setup=new UnityEditor.SceneManagement.SceneSetup[SessionState.GetInt(p+"Scenes",0)];
+    for(int i=0;i<setup.Length;i++)setup[i]=new UnityEditor.SceneManagement.SceneSetup{path=SessionState.GetString(p+"Scene"+i,""),isLoaded=SessionState.GetBool(p+"Loaded"+i,false),isActive=SessionState.GetBool(p+"Selected"+i,false)};
+    UnityEditor.SceneManagement.EditorSceneManager.RestoreSceneManagerSetup(setup);
+    UnityEditor.SceneManagement.EditorSceneManager.playModeStartScene=AssetDatabase.LoadAssetAtPath<SceneAsset>(SessionState.GetString(p+"PlayStart",""));
+    Application.runInBackground=SessionState.GetBool(p+"Background",false);
+    SessionState.SetBool(p+"Active",false);SessionState.EraseString(p+"Command");
+    return new{passed=SessionState.GetInt(p+"Passed",0),protectedEntriesChanged=changed.ToArray(),testKeysRemoved=!PlayerPrefs.HasKey(key)&&!PlayerPrefs.HasKey(key+".Resume"),restored=UnityEngine.SceneManagement.SceneManager.GetActiveScene().path};
+}
+if(!EditorApplication.isPlaying)throw new System.Exception("Enter Play for live checks.");
+var game=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(game==null||game.StorageKey!=SessionState.GetString(p+"Key",""))throw new System.Exception("Wrong save. Refusing live checks.");
+if(game.IsLoading)return "Wait for the scene fade to finish.";
+var sluice=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RecallSluice>();
+var player=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
+var combat=player.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();
+var axe=combat.Weapon;
+var chest=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RewardChest>();
+var interaction=player.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>();
+var body=player.GetComponent<Rigidbody2D>();
+var stamina=player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>();
+var axeTick=axe.GetType().GetMethod("Simulate",flags);
+var sluiceTick=sluice.GetType().GetMethod("FixedUpdate",flags);
+var log=new System.Collections.Generic.List<string>();
+System.Action<bool,string> check=(ok,name)=>{if(!ok)throw new System.Exception("FAILED: "+name+" | "+string.Join("; ",log.ToArray()));log.Add(name);SessionState.SetInt(p+"Passed",SessionState.GetInt(p+"Passed",0)+1);};
+System.Action<Vector2> pose=pos=>{player.transform.position=pos;body.position=pos;body.linearVelocity=Vector2.zero;combat.GetType().GetField("controlsActive",flags).SetValue(combat,true);Physics2D.SyncTransforms();};
+System.Action<int> tick=count=>{for(int i=0;i<count;i++){sluiceTick.Invoke(sluice,null);Physics2D.SyncTransforms();axeTick.Invoke(axe,new object[]{.02f});}};
+System.Action<Vector2,Vector2> throwAxe=(from,direction)=>{axe.CancelAction();stamina.Restore();pose(from);check(axe.TryThrow(direction),"throw accepted");tick(90);check(axe.State==RoadOfTheOldKing.Weapons.AxeState.Stuck,"outbound sweep lodges");};
+System.Action<Vector2> recall=pos=>{pose(pos);stamina.Restore();check(axe.TryPlayerRecall(),"Recall accepted");tick(80);check(axe.State==RoadOfTheOldKing.Weapons.AxeState.Held,"Recall catches");};
+System.Action<Vector2> interact=pos=>{pose(pos);check(interaction.TryInteract(),"contextual F interaction accepted");};
+var targets=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SluiceTarget>(FindObjectsSortMode.None);
+var fork=targets.First(t=>t.Part==RoadOfTheOldKing.World.SluicePart.MainFork);
+int phase=SessionState.GetInt(p+"Phase",0);
+if(phase==0){
+    SessionState.SetInt(p+"Passed",0);
+    game.Progress.completedIds.RemoveAll(id=>id.StartsWith("prototype/sluice/")||id=="shard/collected/prototype/sluice/cache");game.Progress.sunShards=0;
+    sluice.RestoreProgress(game.Progress);chest.RestoreProgress(game.Progress);
+    check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.High,"fresh high water");
+    check(!chest.CanCollect(player),"unavailable chest rejected");
+    var walls=Physics2D.BoxCastAll(new Vector2(-3,0),new Vector2(.75f,.75f),0,Vector2.right,4);
+    check(walls.Any(h=>h.collider.name.StartsWith("Distributor facade")),"player body cannot fit throwing slot");
+    foreach(float y in new[]{-.08f,0f,.08f}){
+        throwAxe(new Vector2(-3,y),new Vector2(5,-y));
+        check(axe.transform.position.x>1.5f,"forgiving slot aim reaches fork");
+        recall(new Vector2(-3,y));
+        check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.High,"immediate Recall misses distributor vane");
+    }
+    throwAxe(new Vector2(-3,0),Vector2.right);
+    throwAxe(new Vector2(1,3.6f),Vector2.right); // Unrelated wall after a cancelled fork attempt.
+    recall(new Vector2(-3,.2f));
+    check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.High,"old fork cannot arm a later wall throw");
+    throwAxe(new Vector2(-3,0),Vector2.right);
+    recall(new Vector2(-2,4));
+    check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.DistributorReleased,"repositioned return releases distributor");
+    check(GameObject.Find("Service water and collision")!=null,"service still flooded before cranking");
+    interact(new Vector2(-2,2));
+    check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.ServiceDiverted,"crank diverts service water");
+    check(GameObject.Find("Service water and collision")==null,"service collision removed with water");
+    check(game.Progress.Has("prototype/sluice/service"),"service milestone saved");
+    interact(new Vector2(-3.5f,-10));tick(60);
+    check(sluice.IsDrawing,"empty carriage reaches Drawing detent");
+    throwAxe(new Vector2(-3,-12),Vector2.right);
+    check(axe.transform.position.x>2.8f,"empty loading lane ends at wall instead of fork");
+    recall(new Vector2(-3.5f,-8));
+    check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.ServiceDiverted,"moving empty first cannot solve");
+    interact(new Vector2(-3.5f,-10));tick(60);
+    throwAxe(new Vector2(-3,-12),Vector2.right);
+    recall(new Vector2(-3.5f,-8));
+    check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.ServiceDiverted,"loaded but unmoved return misses both vanes");
+    throwAxe(new Vector2(-3,-12),Vector2.right);
+    uint sequence=axe.FlightSequence;float before=axe.transform.position.y;
+    interact(new Vector2(-3.5f,-10));tick(60);
+    check(Mathf.Abs(axe.transform.position.y-before-4)<.01f&&axe.FlightSequence==sequence,"carriage transports genuinely embedded axe within same flight");
+    pose(new Vector2(-3.5f,-6));stamina.Restore();check(axe.TryPlayerRecall(),"partial return accepted");
+    bool lifted=false;for(int i=0;i<80;i++){tick(1);lifted|=sluice.BrakeLifted;}
+    check(lifted,"partial return strikes brake");
+    check(!sluice.BrakeLifted&&sluice.Stage==RoadOfTheOldKing.World.SluiceStage.ServiceDiverted,"single vane cannot persist across catch");
+    sluice.ResetOnRest();
+    check(!sluice.IsDrawing&&Mathf.Abs(fork.transform.position.y+12)<.01f,"rest resets unsolved carriage to Loading");
+    check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.ServiceDiverted,"rest retains completed first stage");
+    throwAxe(new Vector2(-3,-12),Vector2.right);
+    interact(new Vector2(-3.5f,-10));tick(60);
+    pose(new Vector2(-3.5f,-12));stamina.Restore();check(axe.TryPlayerRecall(),"curved return accepted");
+    tick(7);pose(new Vector2(-3.5f,-4.3f));tick(6);
+    check(sluice.Feedback.Contains("strains")&&!sluice.BrakeLifted,"catch struck first remains blocked");
+    pose(new Vector2(3,-8));tick(80);
+    check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.ServiceDiverted&&!sluice.BrakeLifted,"wrong-order moving return cannot accumulate a solution");
+    sluice.ResetOnRest();
+    throwAxe(new Vector2(-3,-12),Vector2.right);
+    interact(new Vector2(-3.5f,-10));tick(60);
+    recall(new Vector2(-3.5f,-8));
+    check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.PondLow,"same return crosses brake then catch and drains pond");
+    check(GameObject.Find("Pond water and road collision")==null&&GameObject.Find("Exposed basin")!=null,"water collision and basin agree");
+    check(game.Progress.Has(sluice.LowWaterId),"permanent low-water milestone saved");
+    pose(new Vector2(-1,-20));
+    var obstruction=new GameObject("Temporary access test wall");obstruction.transform.position=new Vector3(-.5f,-20);obstruction.AddComponent<BoxCollider2D>().size=new Vector2(.2f,1);Physics2D.SyncTransforms();
+    check(!chest.CanCollect(player),"chest cannot open through a solid wall");
+    UnityEngine.Object.DestroyImmediate(obstruction);Physics2D.SyncTransforms();
+    interact(new Vector2(-1,-20));
+    check(chest.IsOpen&&game.Progress.sunShards==1,"chest opens and grants exactly one shard");
+    check(!chest.TryCollect(player)&&game.Progress.sunShards==1,"repeat opening cannot duplicate reward");
+    pose(new Vector2(-3,3));
+    var fire=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.Bonfire>();
+    check(game.Checkpoints.Rest(fire),"real checkpoint rest succeeds");
+    check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.PondLow&&chest.IsOpen,"low water and open chest survive rest");
+    var saved=new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(game.StorageKey).Load();
+    check(saved.Has(sluice.LowWaterId)&&saved.sunShards==1,"actual stored record contains outcome and reward");
+    SessionState.SetInt(p+"Phase",1);
+    return new{checks=log.ToArray(),next="Stop, re-enter Play in this unsaved verification scene, then run phase 1."};
+}
+if(phase==1){
+    check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.PondLow,"cold session restores low water");
+    check(chest.IsOpen&&game.Progress.sunShards==1,"cold session restores open chest without duplicate");
+    check(GameObject.Find("Pond water and road collision")==null&&GameObject.Find("Service water and collision")==null,"cold collision agrees with saved progress");
+    pose(new Vector2(-1,-20));check(!chest.TryCollect(player),"cold chest remains exhausted");
+    check(game.Progress.Has("prototype/sluice/service")&&game.Progress.Has("prototype/sluice/distributor"),"all earlier milestones retained");
+    check(RoadOfTheOldKing.UI.DevRuntimeCommands.Instance.DamagePlayer(9999),"real death accepted");
+    check(!player.IsAlive,"player defeated");
+    game.Checkpoints.Respawn();
+    SessionState.SetInt(p+"Phase",2);
+    return new{checks=log.ToArray(),next="Allow actual respawn transition, then run phase 2."};
+}
+if(phase==2){
+    check(player.IsAlive,"actual respawn restores living player");
+    check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.PondLow&&chest.IsOpen,"respawn retains sluice and chest");
+    check(game.Progress.sunShards==1&&!GameObject.Find("Pond water and road collision"),"respawn neither duplicates reward nor restores water blocker");
+    check((player.transform.position-(Vector3)game.Checkpoints.Fires[0].SpawnPosition).sqrMagnitude<.05f,"respawn uses prototype fire");
+    SessionState.SetInt(p+"Phase",3);
+    return new{checks=log.ToArray(),next="Run phase 3 for the heart-fragment chest variant."};
+}
+if(phase==3){
+    var copy=UnityEngine.Object.Instantiate(chest.gameObject);copy.name="Verification Heart Chest";copy.transform.position=new Vector3(-2,-21);
+    try{
+        var heart=copy.GetComponent<RoadOfTheOldKing.World.RewardChest>();
+        heart.GetType().GetField("rewardId",flags).SetValue(heart,"prototype/sluice/heart-cache");
+        heart.GetType().GetField("reward",flags).SetValue(heart,RoadOfTheOldKing.World.ChestReward.HeartFragment);
+        heart.RestoreProgress(game.Progress);
+        int before=RoadOfTheOldKing.Progression.HeartFragmentProgression.Count(game.Progress);
+        check(!heart.IsOpen,"uncollected heart chest starts closed");
+        interact(new Vector2(-3,-21));
+        check(heart.IsOpen&&RoadOfTheOldKing.Progression.HeartFragmentProgression.Count(game.Progress)==before+1,"heart chest grants one fragment");
+        check(!heart.TryCollect(player),"heart chest rejects duplicate opening");
+        heart.RestoreProgress(new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(game.StorageKey).Load());
+        check(heart.IsOpen,"heart chest restores open from stored reward ID");
+    }finally{UnityEngine.Object.DestroyImmediate(copy);}
+    SessionState.SetInt(p+"Phase",4);
+    return new{checks=log.ToArray(),next="Stop; set command cleanup; run fixture."};
+}
+return "Complete. Stop and clean up.";

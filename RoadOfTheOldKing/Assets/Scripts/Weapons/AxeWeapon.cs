@@ -7,6 +7,9 @@ namespace RoadOfTheOldKing.Weapons
     public enum AxeState { OnGround, Held, LightChop, Charging, Cleaving, Flying, Stuck, Returning }
     public enum MeleePhase { None, Windup, Active, Recovery }
 
+    // Called only after an outbound impact has actually attached the owned axe.
+    public interface IAxeLodgingReceiver { void OnAxeLodged(AxeWeapon weapon); }
+
     [DisallowMultipleComponent]
     [DefaultExecutionOrder(-50)] // Advance before the player motor consumes action displacement.
     public sealed class AxeWeapon : MonoBehaviour
@@ -421,6 +424,8 @@ namespace RoadOfTheOldKing.Weapons
                 if (stuckTarget != null)
                     stuckOffset = stuckTarget.InverseTransformPoint(transform.position);
                 SetState(AxeState.Stuck);
+                if (stuckTarget != null)
+                    stuckTarget.GetComponentInParent<IAxeLodgingReceiver>()?.OnAxeLodged(this);
                 return;
             }
             transform.position = destination;

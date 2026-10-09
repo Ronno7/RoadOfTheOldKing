@@ -4,6 +4,7 @@ Shader "RoadOfTheOldKing/InteractiveVegetation"
     {
         _MainTex ("Plant atlas", 2D) = "white" {}
         [HideInInspector] _PlantDepthSide ("Depth side", Float) = -1
+        [HideInInspector] _CutDebris ("Cut debris", Float) = 0
     }
     SubShader
     {
@@ -23,6 +24,7 @@ Shader "RoadOfTheOldKing/InteractiveVegetation"
                 float4 _PlantTouch[8]; // world feet xy, intensity, radius
                 float4 _PlantDepthWindow; // nearby roots: min xy, max x, player's feet y
                 float _PlantDepthSide; // -1 ground draw, +1 foreground draw
+                float _CutDebris;
             CBUFFER_END
             struct Attributes
             {
@@ -30,11 +32,22 @@ Shader "RoadOfTheOldKing/InteractiveVegetation"
                 float2 uv:TEXCOORD0;
                 float4 plant:TEXCOORD1; // bottom pivot xy, phase, flexibility
                 float2 motion:TEXCOORD2; // rest angle radians, wind variation
+                half4 color:COLOR;
             };
-            struct Varyings { float4 vertex:SV_POSITION; float2 uv:TEXCOORD0; float depthSide:TEXCOORD1; };
+            struct Varyings
+            {
+                float4 vertex:SV_POSITION; float2 uv:TEXCOORD0; float depthSide:TEXCOORD1;
+                float mote:TEXCOORD2; half4 color:COLOR;
+            };
             Varyings Vert(Attributes v)
             {
-                Varyings o;
+                Varyings o=(Varyings)0;
+                if(_CutDebris>.5)
+                {
+                    o.vertex=TransformObjectToHClip(v.vertex);o.uv=v.uv;o.color=v.color;o.mote=v.plant.z;
+                    o.depthSide=(v.plant.y<_PlantDepthWindow.w?1:-1)*_PlantDepthSide;
+                    return o;
+                }
                 // Continuous angular motion rotates intact pixel artwork. The two leaves
                 // share the traveling breeze but carry their own rest angle and timing.
                 float t=_PlantClock;
@@ -71,6 +84,18 @@ Shader "RoadOfTheOldKing/InteractiveVegetation"
             half4 Frag(Varyings i):SV_Target
             {
                 clip(i.depthSide);
+                if(_CutDebris>.5)
+                {
+                    half4 debris=i.color;
+                    if(i.mote>.5)
+                    {
+                        float2 p=i.uv*2-1;
+                        debris.a*=1-smoothstep(.25,1,dot(p,p));
+                    }
+                    else debris*=SAMPLE_TEXTURE2D(_MainTex,sampler_MainTex,i.uv);
+                    clip(debris.a-.005);
+                    return debris;
+                }
                 half4 color=SAMPLE_TEXTURE2D(_MainTex,sampler_MainTex,i.uv);
                 clip(color.a-.5);
                 return half4(color.rgb,1);

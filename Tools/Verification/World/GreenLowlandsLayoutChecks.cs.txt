@@ -1,0 +1,169 @@
+// Edit Mode, read-only authored scene audit. Loads GreenLowlands additively if needed,
+// samples real .75-unit body clearance on a half-cell lattice and checks swept links.
+// Edit-state changes stay in this temporary load; never save it. No PlayerPrefs in Edit checks.
+// LIVE branch: use GreenLowlandsGameplayChecks setup ONLY, Play its isolated bootstrap,
+// GameSession.Continue() to Tutorial, then Checkpoints.LeaveScene to GreenLowlands.
+// Run here after arrival. Stop and use that fixture's cleanup afterwards.
+if(EditorApplication.isPlaying){
+    var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+    var game=RoadOfTheOldKing.Progression.GameSession.Instance;
+    if(game==null||game.IsLoading||!game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands.")||UnityEngine.SceneManagement.SceneManager.GetActiveScene().name!="GreenLowlands")throw new System.Exception("Settled isolated Lowlands session required.");
+    var player=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
+    var combat=player.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();
+    var axe=combat.Weapon;
+    var sluice=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RecallSluice>();
+    var body=player.GetComponent<Rigidbody2D>();
+    var logs=new System.Collections.Generic.List<string>();
+    System.Action<bool,string> check=(ok,label)=>{if(!ok)throw new System.Exception(label+" at "+body.position+" | "+string.Join(";",logs.ToArray()));logs.Add(label);};
+    System.Action<Vector2> pose=p=>{axe.CancelAction();body.position=p;player.transform.position=p;body.linearVelocity=Vector2.zero;combat.GetType().GetField("controlsActive",flags).SetValue(combat,true);Physics2D.SyncTransforms();};
+    System.Action<Vector2> stand=p=>{body.position=p;player.transform.position=p;body.linearVelocity=Vector2.zero;combat.GetType().GetField("controlsActive",flags).SetValue(combat,true);Physics2D.SyncTransforms();};
+    System.Action<int> tick=count=>{for(int i=0;i<count;i++){sluice.GetType().GetMethod("FixedUpdate",flags).Invoke(sluice,null);Physics2D.SyncTransforms();axe.GetType().GetMethod("Simulate",flags).Invoke(axe,new object[]{.02f});}};
+    System.Action<Vector2> lodge=p=>{pose(p);player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>().Restore();check(axe.TryThrow(Vector2.right),"throw accepted");tick(90);check(axe.State==RoadOfTheOldKing.Weapons.AxeState.Stuck,"real regional lodging");};
+    System.Action<Vector2> recall=p=>{stand(p);player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>().Restore();check(axe.TryPlayerRecall(),"Recall accepted");tick(80);};
+    game.Progress.completedIds.RemoveAll(id=>id.StartsWith("green-lowlands/sluice/"));sluice.RestoreProgress(game.Progress);
+    check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.High,"starts with high pond");
+    bool highWalkOnly=SessionState.GetBool("Lowlands.Layout.HighWalk",false);
+    if(!highWalkOnly){
+    pose(new Vector2(5,67.3f));
+    var crankPickup=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.ToolPickup>();
+    check(game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank) || crankPickup.TryCollect(player),"maintenance crank available before puzzle");
+    lodge(new Vector2(5,62));recall(new Vector2(6,66));
+    check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.DistributorReleased,"translated distributor solves with actual axe");
+    stand(new Vector2(6,64));check(player.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>().TryInteract(),"regional distributor F works");
+    check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.ServiceDiverted,"service channel opens");
+    lodge(new Vector2(5,50));stand(new Vector2(4.5f,52));
+    check(player.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>().TryInteract(),"regional carriage F works with axe away");tick(60);
+    check(Mathf.Abs(axe.transform.position.y-54)<.01f,"translated carriage keeps correct local attachment");
+    recall(new Vector2(4.5f,54));
+    check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.PondLow,"regional main return drains pond");
+    check(GameObject.Find("High pond - saved collision state")==null,"whole pond and road-cut barrier turn off");
+    check(new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(game.StorageKey).Load().Has("green-lowlands/sluice/pond-low"),"regional outcome written to isolated save");
+    }
+
+    var motor=player.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>();
+    var input=player.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();
+    var actions=(UnityEngine.InputSystem.InputActionMap)input.GetType().GetField("actions",flags).GetValue(input);
+    var oldDevices=actions.devices;var oldRouting=UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode;
+    var oldFocus=(bool)input.GetType().GetField("hasFocus",flags).GetValue(input);var oldPaused=(bool)input.GetType().GetField("paused",flags).GetValue(input);
+    var oldSimulation=Physics2D.simulationMode;Vector2 original=body.position;var keyboard=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
+    System.Action<UnityEngine.InputSystem.Key[]> keys=held=>{UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState(held));UnityEngine.InputSystem.InputSystem.Update();input.GetType().GetField("hasFocus",flags).SetValue(input,true);input.GetType().GetMethod("Update",flags).Invoke(input,null);};
+    try{
+        UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=UnityEngine.InputSystem.InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+        actions.devices=new UnityEngine.InputSystem.InputDevice[]{keyboard};input.GetType().GetField("paused",flags).SetValue(input,false);Physics2D.simulationMode=SimulationMode2D.Script;
+        var destinations=highWalkOnly?new[]{"Pasture","EastMeadow","Orchard","H1","NorthBank","RopeApproach","Distributor"}:new[]{"Pasture","EastMeadow","Orchard","H1","NorthBank","RopeApproach","Distributor","MainBay","S3","H2","Storehouse","BarrowRoad"};
+        foreach(string name in destinations){
+            string route=SessionState.GetString("Lowlands.Layout.Path."+(highWalkOnly?"high.":"")+name,"");if(route=="")throw new System.Exception("Run Edit geometry fixture to cache paths first.");
+            var points=route.Split(';').Select(s=>s.Split(',')).Select(a=>new Vector2(float.Parse(a[0],System.Globalization.CultureInfo.InvariantCulture),float.Parse(a[1],System.Globalization.CultureInfo.InvariantCulture))).ToArray();
+            pose(points[0]);motor.GetType().GetField("freeVelocity",flags).SetValue(motor,Vector2.zero);
+            bool walked=true;
+            for(int n=1;n<points.Length;n++){
+                int frames=0;
+                while(Vector2.Distance(body.position,points[n])>.065f&&frames++<80){
+                    Vector2 delta=points[n]-body.position;var held=new System.Collections.Generic.List<UnityEngine.InputSystem.Key>();
+                    if(delta.x>.025f)held.Add(UnityEngine.InputSystem.Key.D);else if(delta.x<-.025f)held.Add(UnityEngine.InputSystem.Key.A);
+                    if(delta.y>.025f)held.Add(UnityEngine.InputSystem.Key.W);else if(delta.y<-.025f)held.Add(UnityEngine.InputSystem.Key.S);
+                    keys(held.ToArray());motor.GetType().GetMethod("FixedUpdate",flags).Invoke(motor,null);Physics2D.Simulate(Time.fixedDeltaTime);
+                }
+                if(frames>=80){walked=false;break;}
+            }
+            keys(new UnityEngine.InputSystem.Key[0]);check(walked,"real input/motor reaches "+name+" along sampled route");
+        }
+    }finally{
+        keys(new UnityEngine.InputSystem.Key[0]);actions.devices=oldDevices;UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard);UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=oldRouting;
+        input.GetType().GetField("hasFocus",flags).SetValue(input,oldFocus);input.GetType().GetField("paused",flags).SetValue(input,oldPaused);Physics2D.simulationMode=oldSimulation;pose(original);
+    }
+    if(highWalkOnly)return new{passed=logs.Count,checks=logs.ToArray(),note="High-water outward routes, real motor with virtual input."};
+    // Real rest keeps the regional state; reload checks can follow through the existing session.
+    pose(new Vector2(15.5f,3));check(game.Checkpoints.Rest(game.Checkpoints.Fires.First(f=>f.Id=="green-lowlands/arrival-fire")),"real regional rest succeeds");
+    check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.PondLow,"regional rest retains low water");
+    return new{passed=logs.Count,checks=logs.ToArray(),note="Virtual input and real motor; teleported initial positions, no human playtest."};
+}
+if(EditorApplication.isPlayingOrWillChangePlaymode)throw new System.Exception("Use Edit Mode.");
+string path="Assets/Scenes/GreenLowlands.unity";
+var existing=UnityEngine.SceneManagement.SceneManager.GetSceneByPath(path);
+var originalSetup=UnityEditor.SceneManagement.EditorSceneManager.GetSceneManagerSetup();
+if(Enumerable.Range(0,UnityEngine.SceneManagement.SceneManager.sceneCount).Any(i=>UnityEngine.SceneManagement.SceneManager.GetSceneAt(i).isDirty))throw new System.Exception("Preserve unsaved scenes first.");
+if(existing.isLoaded)UnityEditor.SceneManagement.EditorSceneManager.NewScene(UnityEditor.SceneManagement.NewSceneSetup.EmptyScene,UnityEditor.SceneManagement.NewSceneMode.Single);
+var scene=UnityEditor.SceneManagement.EditorSceneManager.OpenScene(path,UnityEditor.SceneManagement.OpenSceneMode.Additive);
+try{
+    var root=scene.GetRootGameObjects().First(g=>g.name=="Sleeping River Greybox");
+    var sluice=root.GetComponentInChildren<RoadOfTheOldKing.World.RecallSluice>(true);
+    var original=scene.GetRootGameObjects().First(g=>g.name=="Green Lowlands Zone");
+    var logs=new System.Collections.Generic.List<string>();
+    var failed=new System.Collections.Generic.List<string>();
+    System.Action<bool,string> check=(ok,name)=>{if(!ok)failed.Add(name);else logs.Add(name);};
+    check(scene.GetRootGameObjects().Sum(g=>g.GetComponentsInChildren<RoadOfTheOldKing.Progression.GameSession>(true).Length)==1,"one authored regional session");
+    check(scene.GetRootGameObjects().Sum(g=>g.GetComponentsInChildren<RoadOfTheOldKing.Player.PlayerHealth>(true).Length)==1,"one authored regional player");
+    check(scene.GetRootGameObjects().SelectMany(g=>g.GetComponentsInChildren<Component>(true)).All(c=>c!=null),"no missing scene components");
+    check(root.GetComponentsInChildren<RoadOfTheOldKing.Progression.GameSession>(true).Length==0&&root.GetComponentsInChildren<RoadOfTheOldKing.Player.PlayerHealth>(true).Length==0,"expansion adds no duplicate session/player");
+    check(scene.GetRootGameObjects().SelectMany(g=>g.GetComponentsInChildren<RoadOfTheOldKing.World.RewardChest>(true)).All(c=>!c.RewardId.StartsWith("prototype")),"regional chests have no prototype reward IDs");
+    const int w=212,h=162;const float step=.5f;
+    var filter=new ContactFilter2D{useTriggers=false};
+    var overlap=new System.Collections.Generic.List<Collider2D>();
+    var sweep=new System.Collections.Generic.List<RaycastHit2D>();
+    System.Func<Collider2D,bool> solid=c=>c!=null&&c.gameObject.scene==scene&&!c.isTrigger&&c.GetComponentInParent<RoadOfTheOldKing.Player.PlayerHealth>()==null;
+    System.Func<int,Vector2> position=i=>new Vector2(.5f+(i%w)*step,.5f+(i/w)*step);
+    System.Func<Vector2,int> index=v=>Mathf.RoundToInt((v.x-.5f)/step)+Mathf.RoundToInt((v.y-.5f)/step)*w;
+    var anchors=new System.Collections.Generic.Dictionary<string,Vector2>{
+        {"OutsideSouthEast",new Vector2(72,10)}, {"Fire",new Vector2(15.5f,3)}, {"MillOverlook",new Vector2(18,22)},
+        {"Pasture",new Vector2(64,27)}, {"EastMeadow",new Vector2(92,22)}, {"Orchard",new Vector2(77,55)},
+        {"H1",new Vector2(69,48.5f)}, {"NorthBank",new Vector2(27,61)},
+        {"Distributor",new Vector2(5,62)}, {"MainBay",new Vector2(5,50)},
+        {"S3",new Vector2(18.5f,26.5f)}, {"H2",new Vector2(30.5f,56.5f)},
+        {"Storehouse",new Vector2(26,28)}, {"BarrowRoad",new Vector2(66,66)},
+        {"RopeApproach",new Vector2(87,53)}, {"RopeWorkshop",new Vector2(93,54)}, {"HighPass",new Vector2(88,67)},
+        {"H1Lookout",new Vector2(69,44)}, {"H2Lookout",new Vector2(30.5f,61)},
+        {"RopeLookout",new Vector2(86,50)}, {"PassLookout",new Vector2(80,65)},
+        {"BarrowLookout",new Vector2(71,69)}, {"S2Lookout",new Vector2(84,51)} };
+    var results=new System.Collections.Generic.List<object>();
+    foreach(string state in new[]{"high","service","low"}){
+        var progress=new RoadOfTheOldKing.Progression.ProgressState();
+        if(state=="service")progress.Complete("green-lowlands/sluice/service");
+        if(state=="low")progress.Complete("green-lowlands/sluice/pond-low");
+        sluice.RestoreProgress(progress);
+        foreach(var collider in scene.GetRootGameObjects().SelectMany(g=>g.GetComponentsInChildren<UnityEngine.Tilemaps.TilemapCollider2D>()))collider.ProcessTilemapChanges();
+        Physics2D.SyncTransforms();
+        var clear=new bool[w*h];var previous=Enumerable.Repeat(-1,w*h).ToArray();var distances=new float[w*h];
+        for(int i=0;i<clear.Length;i++){Physics2D.OverlapBox(position(i),new Vector2(.76f,.76f),0,filter,overlap);clear[i]=!overlap.Any(solid);}
+        int start=index(anchors["Fire"]);check(clear[start],state+": fire spawn clear");
+        var queue=new System.Collections.Generic.Queue<int>();queue.Enqueue(start);previous[start]=start;
+        while(queue.Count>0){
+            int current=queue.Dequeue(),cx=current%w,cy=current/w;
+            foreach(int next in new[]{cx>0?current-1:-1,cx<w-1?current+1:-1,cy>0?current-w:-1,cy<h-1?current+w:-1}){
+                if(next<0||!clear[next]||previous[next]>=0)continue;
+                Vector2 a=position(current),b=position(next);
+                Physics2D.BoxCast(a,new Vector2(.76f,.76f),0,(b-a).normalized,filter,sweep,step);
+                if(sweep.Any(hit=>solid(hit.collider)))continue;
+                previous[next]=current;distances[next]=distances[current]+step;queue.Enqueue(next);
+            }
+        }
+        // Body-clear combat footprints; not a substitute for fights with enemy telegraphs.
+        var arenas=new[]{new Vector4(64,27,18,12),new Vector4(76,55,14,10),new Vector4(89,23,8,6)};
+        foreach(var area in arenas){Physics2D.OverlapBox(new Vector2(area.x,area.y),new Vector2(area.z,area.w),0,filter,overlap);check(!overlap.Any(solid),state+": combat clearing "+area.x+","+area.y+" "+area.z+"x"+area.w);}
+        var targets=new System.Collections.Generic.List<object>();
+        foreach(var entry in anchors){
+            int at=index(entry.Value);bool expected=entry.Key!="RopeWorkshop"&&entry.Key!="HighPass"&&entry.Key!="OutsideSouthEast";
+            if(new[]{"S3","H2","Storehouse","BarrowRoad"}.Contains(entry.Key))expected=state=="low";
+            if(entry.Key=="MainBay")expected=state!="high";
+            bool reachable=previous[at]>=0;
+            check(reachable==expected,state+": "+entry.Key+" reachability "+reachable);
+            targets.Add(new{name=entry.Key,clear=clear[at],reachable=reachable,distance=reachable?distances[at]:-1});
+        }
+        Physics2D.OverlapBox(new Vector2(91,53),new Vector2(.76f,.76f),0,filter,overlap);
+        check(!overlap.Any(solid),state+": upper rope landing body-clear");
+        // Cache actual collision-safe paths for the live motor fixture, not authored waypoints.
+        foreach(string name in new[]{"Pasture","EastMeadow","Orchard","H1","NorthBank","RopeApproach","Distributor","MainBay","S3","H2","Storehouse","BarrowRoad"}){
+            var points=new System.Collections.Generic.List<Vector2>();int at=index(anchors[name]);
+            if(previous[at]<0)continue;
+            while(at!=start){points.Add(position(at));at=previous[at];}points.Add(position(start));points.Reverse();
+            string route=string.Join(";",points.Select(v=>v.x.ToString(System.Globalization.CultureInfo.InvariantCulture)+","+v.y.ToString(System.Globalization.CultureInfo.InvariantCulture)).ToArray());
+            SessionState.SetString("Lowlands.Layout.Path."+state+"."+name,route);
+            if(state=="low")SessionState.SetString("Lowlands.Layout.Path."+name,route);
+        }
+        results.Add(new{state=state,reachableNodes=previous.Count(n=>n>=0),targets=targets.ToArray()});
+    }
+    check(Vector2.Distance(anchors["MillOverlook"],anchors["S3"])>1.5f,"S3 tease outside pickup radius");
+    check(Vector2.Distance(new Vector2(69,44),anchors["H1"])>1.5f,"H1 tease outside pickup radius");
+    check(Vector2.Distance(new Vector2(30.5f,60),anchors["H2"])>1.5f,"H2 tease outside pickup radius");
+    return new{passed=logs.Count,failed=failed.ToArray(),states=results.ToArray(),notes="Real collider graph, no player motor or human readability claim."};
+}finally{UnityEditor.SceneManagement.EditorSceneManager.CloseScene(scene,true);UnityEditor.SceneManagement.EditorSceneManager.RestoreSceneManagerSetup(originalSetup);}

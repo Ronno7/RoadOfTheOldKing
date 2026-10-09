@@ -8,13 +8,17 @@ namespace RoadOfTheOldKing.World
     public sealed class HeartFragmentPickup : WorldPickup, IProgressParticipant
     {
         [SerializeField] private string rewardId;
+        [SerializeField] private bool requireClearAccess;
+        [SerializeField] private string requiredMilestone;
         [SerializeField] private GameObject visual;
         public string RewardId => rewardId;
         public bool IsCollected { get; private set; }
 
         public override string Prompt => "Take fragment";
         public override bool CanCollect(PlayerHealth player) => base.CanCollect(player) &&
-            !IsCollected && !string.IsNullOrEmpty(rewardId) && GameSession.Instance != null;
+            !IsCollected && !string.IsNullOrEmpty(rewardId) && GameSession.Instance != null &&
+            !GameSession.Instance.IsLoading && (!requireClearAccess || HasClearAccess(player)) &&
+            (string.IsNullOrEmpty(requiredMilestone) || GameSession.Instance.Progress.Has(requiredMilestone));
 
         public override bool TryCollect(PlayerHealth player)
         {
