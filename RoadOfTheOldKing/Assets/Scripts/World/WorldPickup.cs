@@ -12,6 +12,10 @@ namespace RoadOfTheOldKing.World
         public static IEnumerable<WorldPickup> Active => active;
         public abstract string Prompt { get; }
         protected virtual float PickupDistance => 1.5f;
+        private readonly List<RaycastHit2D> accessHits = new List<RaycastHit2D>(8);
+
+        // Opt-in for new physical interactions; existing pickups keep their authored behavior.
+        protected bool HasClearAccess(PlayerHealth player) => WorldAccess.IsClear(player, transform, accessHits);
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetRegistry() => active.Clear();

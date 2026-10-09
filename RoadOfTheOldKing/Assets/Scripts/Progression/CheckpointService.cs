@@ -175,5 +175,27 @@ namespace RoadOfTheOldKing.Progression
             if (Camera.main != null)
                 Camera.main.GetComponent<CameraFollow2D>()?.SnapToTarget();
         }
+
+        // Authored terrain can change between development builds. Keep the already placed
+        // arrival/checkpoint when an exact resume would put the body inside a new solid.
+        internal bool TryResumeAt(Vector2 position)
+        {
+            var player = session.Player;
+            if (player == null || float.IsNaN(position.x) || float.IsNaN(position.y) ||
+                float.IsInfinity(position.x) || float.IsInfinity(position.y)) return false;
+            var shape = player.GetComponent<BoxCollider2D>();
+            if (shape == null) return false;
+            Physics2D.SyncTransforms();
+            var overlaps = new System.Collections.Generic.List<Collider2D>(8);
+            Vector2 offset = player.transform.TransformVector(shape.offset);
+            Vector2 size = Vector2.Scale(shape.size, new Vector2(
+                Mathf.Abs(player.transform.lossyScale.x), Mathf.Abs(player.transform.lossyScale.y)));
+            Physics2D.OverlapBox(position + offset, size, player.transform.eulerAngles.z,
+                new ContactFilter2D { useTriggers = false }, overlaps);
+            foreach (var hit in overlaps)
+                if (hit != null && !hit.transform.IsChildOf(player.transform)) return false;
+            MoveTo(position);
+            return true;
+        }
     }
 }

@@ -3,13 +3,17 @@
 ## Unreleased
 
 **Added**
-- Tutorial grass, flowers and reeds sway, react to footsteps, draw in front of or behind the player, and can be cut by the axe; resting restores them.
+- Reusable exploration tools and contextual traversal interactions.
+- Bronze Coins, breakable pots, treasure chests and limited shop stock, with coins and tools shown in Tab status.
+- Tools, coins and purchased stock persist through death and reload.
+- Tutorial grass, flowers and reeds sway, react to footsteps, draw in front of or behind the player, and can be cut by the axe with spinning airborne blades and green particles; resting restores them.
 - A title screen with Continue, New Game, Settings and Quit, and a Main Menu option in the pause menu.
 - A Settings page, reachable from the pause menu and the title, holding the vitals option.
 - Continue resumes exactly where you left off, with the health and flasks you had; dying still returns you to the bonfire.
 - The Tutorial road now reaches a Green Lowlands arrival area, with an abandoned farmstead, river crossing and a bonfire for resting, saving and travel between regions.
 
 **Changed**
+- Expanded the Green Lowlands blockout with more room for exploration and combat.
 - All bonfires share the new animated flame; regional bonfire bases can vary.
 - The bonfire menu has a new hearth look (oak beams, rope lashings and bronze trim) and is larger; the defeat screen has a bronze frame and carved heading.
 - The pause menu's Restart is now Return to bonfire; New Game moved to the title screen.
@@ -17,6 +21,7 @@
 - Respawning, restarting and starting a new game fade the screen out and back in.
 
 **Fixed**
+- Continue falls back to safe arrival/checkpoint footing when revised terrain obstructs a saved position, preserving saved health and flasks.
 - The player now renders in front of defeated enemies and bonfire flames; revived enemies recover their original sorting.
 
 ## 0.4 — Vertical slice
@@ -32,7 +37,7 @@
 **Changed**
 - Wolves circle, feint and punish openings, with readable lunges and coordinated pack attacks; new eight-direction art.
 - Reworked stamina, dodging and combat: stamina debt, moving light attacks, committed cleaves and less spammable throw/Recall.
-- Tutorial now flows from the lone wolf through recovery and Recall to a wolf pack. Spatial hints guide attention; awakening Recall opens the sealed courtyard gate.
+- Reworked Tutorial encounter pacing, ability teaching and spatial hints.
 - Pixel font and framed menus, world-space prompts and enemy bars, and an overhead stamina arc with an always-visible vitals option.
 - Smaller bonfire menu with a camera close-up and upgrade previews before affordability. New Game moved to pause; defeat text simplified.
 - Rendering now uses URP's 2D Renderer.
@@ -52,7 +57,7 @@
 **Added**
 - A Tutorial guide that teaches the route one hint at a time and completes each lesson when the player actually does it. Progress is saved.
 - A contextual HUD: health and stamina appear when they matter, interaction prompts sit beside objects, and Tab opens a status panel.
-- Recall awakening: striking the ancient sun-wheel stone with a thrown axe unlocks Recall, followed by a short Recall drill.
+- A new ability introduction and practice sequence in the Tutorial.
 - Dust trails while running and skid clouds on sharp stops and turns.
 - An F3 developer stats panel in the Editor and development builds.
 
@@ -84,7 +89,7 @@
 **Added**
 - The animated wolf enemy and enemy health bars.
 - An aim marker, attack coverage effects, impact sounds and hit particles.
-- The Tutorial's first fight, a Sun Shard reward and a bonfire checkpoint, with their own save.
+- Tutorial combat, collectible rewards and bonfire checkpoints, with saved progression.
 - Press F to pick up items. A thrown axe is still retrieved by walking over it.
 - A combat effects preview tool for the Editor.
 

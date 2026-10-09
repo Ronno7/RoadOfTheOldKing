@@ -4,7 +4,7 @@
 
 This guide explains how Road of the Old King works at runtime: its major systems, which component owns what, and how they communicate. The enabled build scenes are `Title`, `Tutorial` and `GreenLowlands`, in that order. `PrototypeLoop.unity` is a retired mechanics sandbox kept for reference, and `MovementPlayground.unity` is a small movement test scene.
 
-**Status:** the Tutorial is playable end to end: movement, axe pickup, throwing, melee, the first wolf, healing, the Recall awakening, a wolf pack, a Sun Shard and a bonfire. Its exit now leads to the Green Lowlands arrival pocket, with a return route, regional bonfire, cross-scene travel, respawn and Continue. The broader overworld, Puzzle 1, enemies and first upgrade are not yet placed. HUD and menus use the shared pixel font and frames.
+**Status:** the Tutorial is playable end to end: movement, axe pickup, throwing, melee, the first wolf, healing, the Recall awakening, a wolf pack, a Sun Shard and a bonfire. Its exit now leads to the Green Lowlands arrival pocket, with a return route, regional bonfire, cross-scene travel, respawn and Continue. Green Lowlands now includes a regional blockout with an owned-crank Recall puzzle, coins, pots, chests, finite stock offers and a persistent workshop rope route. Enemies, final art and first upgrade integration remain unfinished. HUD and menus use the shared pixel font and frames.
 
 [Architecture](#architecture) · [Player](#player) · [Combat](#combat) · [Enemies](#enemies) · [Progression and saving](#progression-and-saving) · [World and interaction](#world-and-interaction) · [Tutorial](#tutorial) · [Camera](#camera) · [Presentation and UI](#presentation-and-ui) · [Tools](#tools-and-verification) · [Limitations](#current-limitations) · [Key files](#key-files)
 
@@ -111,7 +111,9 @@ Keyboard and mouse today; Xbox controller support is planned and not yet impleme
 4. **Weapon action:** attacks and throws scale walking speed, and the finisher adds its lunge.
 5. **Free movement:** momentum eases the body toward the input velocity (walk 4.5 u/s, sprint 7.2 u/s) with separate acceleration, stopping and turning rates. Hard sprint impacts with static walls bounce slightly.
 
-All of these write velocity rather than the Transform, so every kind of movement collides with walls. Momentum starts from the body's collision-resolved velocity, which stops slides at walls instead of letting them push through.
+Ordinary locomotion writes velocity rather than the Transform and collides with walls. Momentum starts from the body's collision-resolved velocity, which stops slides at walls instead of letting them push through.
+
+**Authored rope traversal** is an explicit motor mode before normal locomotion. `PlayerMovement.Rope.cs` owns the kinematic crossing between fixed anchors, with body sweeps that ignore only the assigned cliff. Landings must be clear, and attacks, dash, drinking, an away axe, combat or an existing control lock prevent starting. Its input lease blocks actions; pause freezes movement. Interruption restores landing footing and normal body behavior. Position saves during a climb record the departure, so Continue cannot resume inside the cliff.
 
 ### Stamina, dash and defence
 
@@ -245,12 +247,12 @@ The prototype `SimpleMeleeEnemy` (approach, windup, single strike, recovery) rem
 
 ## Progression and saving
 
-`GameSession` is one game-level session for every scene. Each playable scene contains the `GameSession` prefab so it can be played directly; the first instance survives scene loads through `DontDestroyOnLoad`, and later copies remove themselves, so the save key and upgrade tiers always come from the prefab. It owns the player's permanent progress and writes it through `IProgressStore` as one versioned JSON record in PlayerPrefs, which also works in the browser build. Two services hang off it: `CheckpointService` (rest, travel, scene exits, respawn and placing the player on load) and `RewardService` (Sun Shards, heart fragments and upgrade purchases).
+`GameSession` is one game-level session for every scene. Each playable scene contains the `GameSession` prefab so it can be played directly; the first instance survives scene loads through `DontDestroyOnLoad`, and later copies remove themselves, so the save key and upgrade tiers always come from the prefab. It owns the player's permanent progress and writes it through `IProgressStore` as one versioned JSON record in PlayerPrefs, which also works in the browser build. Two services hang off it: `CheckpointService` (rest, travel, scene exits, respawn and placing the player on load) and `RewardService` (shards, fragments, coins, tools and purchases).
 
-- **Versions.** `ProgressMigrations` reads any known save version and upgrades it step by step. Version 2 (0.4.8) replaced the per-scene Tutorial save; on first launch the old record is migrated into the game-wide key and kept as a backup until New Game.
+- **Versions.** `ProgressMigrations` reads any known save version and upgrades it step by step. Version 2 replaced the per-scene Tutorial save. Version 3 adds a wallet, owned tools and pending/exhausted coin sources; v1/v2 records retain earlier progress and start with an empty economy. Legacy-key migration keeps the original as a backup until New Game.
 - **Scene changes.** `SceneTransitions`, on the session, fades out with the world frozen and input locked, loads the scene and fades back in. The session places the arriving player at a named `SceneSpawnPoint` (or a fire, for travel), otherwise at the checkpoint fire if it is in that scene.
 - **Exits.** `SceneExit` is a trigger with a target scene and spawn id. It saves, carries current health and flask charges across, and can record a milestone on first use. Tutorial and Green Lowlands now have reciprocal exits and named arrival points; the Tutorial exit records `tutorial/complete`. An unconfigured exit only shows its notice.
-- **Resume point.** `ResumePoint` (scene, position, health, flasks) is a small record beside the save. It is written when the player pauses, leaves to the title, quits or the window loses focus, and by a throttled autosave (every 5 s, only when alive, out of combat and moved). Death, resting, travel, Return to bonfire, scene exits and New Game clear it.
+- **Resume point.** `ResumePoint` (scene, position, health, flasks) is a small record beside the save. It is written when the player pauses, leaves to the title, quits or the window loses focus, and by a throttled autosave (every 5 s, only when alive, out of combat and moved). Death, resting, travel, Return to bonfire, scene exits and New Game clear it. Before restoring an exact position, a body-sized solid query rejects obstructed/nonfinite positions; the already placed arrival/checkpoint stays in effect, with saved health and flasks still carried. Clear resumes remain exact.
 - **Title.** The game starts in the `Title` scene. Continue resumes at the resume point if there is one, otherwise at the checkpoint's fire (or the new-game scene's start without a checkpoint); New Game clears the save, confirming first when one exists; the pause menu's Main Menu saves and returns there.
 - **The axe.** Taking the axe from the Tutorial stump is a one-time pickup. Once the save owns it, `PlayerCombatController` spawns the player's own copy from its `ownedAxePrefab` on every scene load, and an unowned world axe with `AxePickup` hides itself.
 
@@ -258,7 +260,8 @@ The prototype `SimpleMeleeEnemy` (approach, windup, single strike, recovery) rem
 - axe ownership and the Recall unlock;
 - the last checkpoint and its scene, plus discovered fires with their scenes (so travel can list fires in other scenes);
 - the Sun Shard balance and chosen upgrades;
-- a list of completed string IDs.
+- Bronze Coins, owned tool IDs and one-time coin-source results, including empty and uncollected results;
+- a list of completed string IDs, including secured rope routes.
 
 The ID list holds most progress: lessons, collected rewards, guide steps and solved puzzles, for example `tutorial/lesson/melee`, `shard/collected/<rewardId>`, `tutorial/step/<id>` and `tutorial/complete`. IDs are permanent; renaming one that has shipped orphans saved progress.
 
@@ -288,6 +291,8 @@ sequenceDiagram
 | Death or Return to bonfire | Unchanged | Through the reload | Yes | Yes: the checkpoint's scene at its fire, or this scene's arrival point without a checkpoint |
 | New Game (title screen, confirmed over a save) | Cleared | Through the reload | Save deleted | Yes, the new-game scene |
 
+**Economy and tools.** `RewardService` records each authored source result before showing its drop. Collection saves the wallet and source exhaustion together; pending coins reappear at their authored source after loading, and death keeps the wallet. `ShopOffer` validates reach, physical access, price, ownership and stock before saving the debit, reward and finite-stock flag together. Tool ownership is shared across scenes. The existing session-only save-failure status still applies. Tab shows coins and tools.
+
 **Rewards and upgrades**
 - **Sun Shards** (`SunShardReward`): a pickup that an event can unlock, such as an enemy's `Defeated` (or a whole pack's, with `alsoDefeat`) or a puzzle's `Solved`, or that is simply placed. Collecting it records `shard/collected/<id>` and adds to the balance, so each reward is one-time even though enemies come back.
 - **Upgrades** (`WeaponUpgradeProgression`): tiers of three mutually exclusive choices, defined as `AxeUpgradeTier` and `AxeUpgrade` assets. Buying one for 3 shards at a bonfire that offers upgrades removes the other two for the run. Tier one:
@@ -301,12 +306,16 @@ sequenceDiagram
 - **Tilemaps.** Visual layers are separate from an invisible Collision map, and canopies and roofs draw on an Above Player layer. Elevation is visual only; everything shares one physics plane. See [World and tilemaps](World.md).
 - **Gameplay objects** live under each zone's `Interactive Objects`, usually as prefab instances; the persistent session, player and follow camera remain scene roots. The Recall seal combines scene-authored tilemaps with a gameplay component and collision.
 - **Interaction (F).** `PlayerBonfireInteraction` is the single interaction selector.
-  - It picks one nearby `WorldPickup` (axe, shard, heart fragment) first, otherwise a nearby bonfire. One press commits one thing.
+  - It picks one nearby `WorldPickup` (axe, shard, fragment, tool, chest, crank or shop offer) first, otherwise a nearby bonfire. One press commits one thing.
   - The HUD prompt reads the same selection, so it always matches what F will do.
-  - Proximity alone never collects, with one exception: an axe the player already owns is retrieved by walking over it.
+  - Coins collect through a proximity trigger with a physical-access check; the owned axe is also retrieved by walking over it. Other rewards use F.
 - **Bonfires.** `Bonfire` holds a stable ID, a display name and a spawn point. Resting heals, refills stamina, returns the axe, resets enemies, sets the respawn point and saves. Discovered fires offer travel between them, including fires in other scenes; travel saves and respawns at the destination. The Lowlands Bonfire (`green-lowlands/arrival-fire`) supports rest/travel and upgrade previews, with purchases disabled. All bonfires inherit the same flame from the shared prefab; regional bases may vary. `BonfireSpriteView` samples discovery state and animates four native flame frames at 6 fps; the flame stays hidden before discovery and changes no gameplay state.
+- **Pots and chests.** `Breakable` raises one accepted-break event. `CoinSource` owns a saved result and pending pickup, with six brief ceramic flecks for feedback; pots stay broken after rest/reload. `RewardChest` supports fixed shard, fragment, coin or tool contents and restores opening from progression. `EncounterUnlock` saves a permanent guard-group milestone; empty or missing assignments fail closed.
+- **Regional sluice.** `RecallSluice` binds actual lodging and ordered return hits to one axe flight, moves the lodged axe on a carriage and saves service-diverted/pond-low states. Regional sockets require the maintenance crank; the separate proof retains installed cranks.
 - **Puzzle pieces.** `AxePuzzleTarget` turns hits into puzzle input. `ThrowRecallPuzzle` requires an outbound throw into its anchor, then a Recall through its switch, and can open a `PuzzleDoor`.
-- **Vegetation.** `InteractiveVegetation` renders a baked `VegetationLayout` in small spatial mesh groups sharing one atlas. Grass pairs two intact leaf sprites with independent phases; flowers and reeds use one sprite each. Continuous GPU rotation around bottom pivots combines wind with a bounded player trail, preserving UVs and source pixels while deliberately allowing smooth rotated pixel art. Nearby roots sort against the player's stable feet line through ground/foreground draws sharing the same mesh; distant foreground draws stay disabled. `WeaponSweep` reports actual axe damage intervals and traveled flight segments independently of hit receivers; nearby plants are cut without hit pause, collision or rewards. `IResetOnRest` restores the field; cut state is not saved. Tutorial is the first placement, with density excluding paths and interaction clearings.
+- **Vegetation.** `InteractiveVegetation` renders a baked `VegetationLayout` in small spatial mesh groups sharing one atlas. Grass pairs two intact leaf sprites with independent phases; flowers and reeds use one sprite each. Continuous GPU rotation around bottom pivots combines wind with a bounded player trail, preserving UVs and source pixels while deliberately allowing smooth rotated pixel art. Nearby roots sort against the player's stable feet line through ground/foreground draws sharing the same mesh; distant foreground draws stay disabled. `WeaponSweep` reports actual axe damage intervals and traveled flight segments independently of hit receivers; nearby plants are cut without hit pause, collision or rewards. `VegetationDebris` throws atlas leaf fragments and soft green motes with smooth arcs, spin and fading, using a fixed 192-particle pool and one shared mesh with front/back draws. `IResetOnRest` restores the field and clears debris; cut state is not saved. Tutorial is the first placement, with density excluding paths and interaction clearings.
+
+`RopeAnchor` is a contextual F interaction at either end of a `RopeRoute`. The first valid use requires a purchased rope kit and saves a unique secured ID; subsequent trips cost nothing. `RopeRoute_Placeholder.prefab` provides paired anchor/rope visuals; each scene supplies a unique route ID and traversed cliff. The Green Lowlands workshop has a working two-way route, while its guarded reward remains locked until guards are assigned.
 
 ## Tutorial
 
@@ -394,8 +403,8 @@ Gameplay posts text through `HudNotifications` (receipts and the hint), and the 
 
 ## Current limitations
 
-- No overworld yet: the Tutorial exit records completion and shows a message where the scene transition will go.
-- There is no title screen or full settings menu; the pause menu currently exposes the vitals preference.
+- Green Lowlands has a regional blockout and first economy slice; actual encounters, a dedicated inventory/trader interface, lantern/interiors, final art and first upgrade integration remain unfinished.
+- Title/Continue and shared Settings exist; settings currently expose only the vitals preference.
 - Dedicated melee, cleave, catch, death and pickup body animations are still pending; their slots fall back to standing or locomotion. Throw, hurt, drink and seated rest have dedicated art.
 - Key names in hints come from a fixed table; rebinding isn't supported.
 - Melee footprints draw across walls even though walls block the damage.

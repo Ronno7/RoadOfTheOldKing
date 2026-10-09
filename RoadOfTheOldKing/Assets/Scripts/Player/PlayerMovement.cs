@@ -7,7 +7,7 @@ namespace RoadOfTheOldKing.Player
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D))]
     [RequireComponent(typeof(PlayerStamina), typeof(PlayerDash))]
-    public sealed class PlayerMovement : MonoBehaviour
+    public sealed partial class PlayerMovement : MonoBehaviour
     {
         [SerializeField, Min(0.1f)] private float moveSpeed = 4.5f;
         [SerializeField, Min(1f)] private float sprintMultiplier = 1.6f;
@@ -70,6 +70,7 @@ namespace RoadOfTheOldKing.Player
             combat = GetComponent<PlayerCombatController>();
             dash = GetComponent<PlayerDash>();
             flask = GetComponent<PlayerFlask>();
+            InitializeRopeTraversal();
             FacingDirection = initialFacing.sqrMagnitude > 0f ? initialFacing.normalized : Vector2.down;
             body.bodyType = RigidbodyType2D.Dynamic;
             body.gravityScale = 0f;
@@ -95,6 +96,11 @@ namespace RoadOfTheOldKing.Player
                 ? combat.Weapon.ConsumeActionDisplacement() : Vector2.zero;
             dash.Tick(Time.fixedDeltaTime);
             bool dashRequested = movementInput.ConsumeDashPress();
+            if (IsTraversingRope)
+            {
+                TickRopeTraversal(Time.fixedDeltaTime);
+                return;
+            }
             // Only the free-movement branch below sets this; every other owner clears the rebound source.
             freeVelocity = Vector2.zero;
             // Let the reaction's impulse move the body during stagger.
@@ -192,6 +198,7 @@ namespace RoadOfTheOldKing.Player
 
         private void OnDisable()
         {
+            CancelRopeTraversal();
             IsSprinting = false;
             if (dash != null)
                 dash.Cancel();

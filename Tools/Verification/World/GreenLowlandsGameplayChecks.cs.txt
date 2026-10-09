@@ -35,6 +35,7 @@ if(command=="setup"){
         SessionState.SetString(prefix+"Value."+i,PlayerPrefs.GetString(key,""));i++;
     }
     SessionState.SetInt(prefix+"ProtectedCount",i);
+    SessionState.SetInt(prefix+"ResumeSafetyPhase",0);
     SessionState.SetInt(prefix+"SceneCount",setup.Length);
     for(i=0;i<setup.Length;i++){
         SessionState.SetString(prefix+"Scene."+i,setup[i].path);
@@ -85,6 +86,50 @@ if(command=="cleanup"){
     SessionState.SetBool(prefix+"Active",false);SessionState.EraseString(prefix+"Command");
     return (changed.Count==0?"PASS: protected save entries unchanged; ":"FAIL: protected entries changed during run and were restored: "+string.Join(", ",changed.ToArray())+"; ")+"isolated main/resume deleted, editor setup restored. Completed assertions: "+SessionState.GetInt(prefix+"Passed",0);
 }
+
+if(command=="resume-safety"){
+ if(!EditorApplication.isPlaying||!SessionState.GetBool(prefix+"Active",false))throw new System.Exception("Active isolated Play run required");
+ var game=RoadOfTheOldKing.Progression.GameSession.Instance;
+ if(game==null||game.StorageKey!=SessionState.GetString(prefix+"Key","")||!game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new System.Exception("Storage isolation mismatch");
+ if(game.IsLoading)return "Wait for transition";
+ int stage=SessionState.GetInt(prefix+"ResumeSafetyPhase",0);
+ var checks=new System.Collections.Generic.List<string>();
+ System.Action<bool,string> resumeCheck=(ok,label)=>{if(!ok)throw new System.Exception(label);checks.Add(label);};
+ if(stage==1||stage==3){
+  resumeCheck(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name=="Title","Title reached with saved resume");
+  resumeCheck(game.Continue(),"Continue starts real scene load");
+ }else{
+  var resumePlayer=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
+  resumeCheck(resumePlayer!=null&&resumePlayer.gameObject.scene.name=="GreenLowlands","Regional player restored");
+  var body=resumePlayer.GetComponent<Rigidbody2D>();var flask=resumePlayer.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>();
+  System.Action<Vector2> pose=at=>{resumePlayer.transform.position=at;body.position=at;body.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();};
+  var fire=game.Checkpoints.Fires.First(fireItem=>fireItem.Id=="green-lowlands/arrival-fire");
+  if(stage==0){
+   pose(new Vector2(15.5f,3));resumeCheck(game.Checkpoints.Rest(fire),"Checkpoint established before resume checks");
+   var method=game.Checkpoints.GetType().GetMethod("TryResumeAt",flags);
+   resumeCheck((bool)method.Invoke(game.Checkpoints,new object[]{new Vector2(87,53)}),"Clear body-size resume accepted");
+   Vector2 original=body.position;
+   resumeCheck(!(bool)method.Invoke(game.Checkpoints,new object[]{new Vector2(float.NaN,53)})&&body.position==original,"Nonfinite resume rejected without movement");
+   resumeCheck(!(bool)method.Invoke(game.Checkpoints,new object[]{new Vector2(88.5f,53)})&&body.position==original,"Solid cliff resume rejected without movement");
+   var obstacle=new GameObject("Resume clearance verification");
+   try{obstacle.transform.position=new Vector3(87.55f,53,0);obstacle.AddComponent<BoxCollider2D>().size=new Vector2(.5f,1);Physics2D.SyncTransforms();resumeCheck(!(bool)method.Invoke(game.Checkpoints,new object[]{new Vector2(87,53)}),"Body edge overlap rejected even with clear center");}
+   finally{UnityEngine.Object.DestroyImmediate(obstacle);Physics2D.SyncTransforms();}
+   resumePlayer.Health.SetHealth(55);flask.SetCharges(1);pose(new Vector2(88.5f,53));
+   resumeCheck(game.ReturnToTitle(),"Blocked resume staged through actual Main Menu save");
+  }else if(stage==2){
+   resumeCheck(Vector2.Distance(body.position,fire.SpawnPosition)<.1f,"Blocked resume falls back to checkpoint footing");
+   resumeCheck(resumePlayer.Health.Health==55&&flask.Charges==1,"Fallback preserves saved health and flasks");
+   resumeCheck(game.Progress.checkpointId==fire.Id,"Fallback does not change checkpoint identity");
+   pose(new Vector2(64,27));resumeCheck(game.ReturnToTitle(),"Clear resume staged through Main Menu");
+  }else if(stage==4){
+   resumeCheck(Vector2.Distance(body.position,new Vector2(64,27))<.1f,"Clear exact resume remains exact");
+   resumeCheck(resumePlayer.Health.Health==55&&flask.Charges==1,"Exact resume carries vitals");
+  }else return "Resume safety complete";
+ }
+ SessionState.SetInt(prefix+"ResumeSafetyPhase",stage+1);
+ return new{phase=stage,passed=checks.Count,checks=checks.ToArray()};
+}
+
 if(command!="advance"||!SessionState.GetBool(prefix+"Active",false))throw new System.Exception("Run setup first.");
 if(!EditorApplication.isPlaying)throw new System.Exception("Enter Play Mode in the existing unsaved bootstrap, or set Command=cleanup to restore the editor.");
 Application.runInBackground=true;EditorApplication.QueuePlayerLoopUpdate();

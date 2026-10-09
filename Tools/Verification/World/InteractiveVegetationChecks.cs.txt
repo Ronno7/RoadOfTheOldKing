@@ -298,8 +298,47 @@ try{
             check(counts[2]==0,"Rendered species "+kind+" gives the player a stable foreground tie at equal root depth");
         }
         detector.Melee(probe,Vector2.up,2,360,hit);flush();
-        check(field.CutCount==1&&root.GetComponentsInChildren<MeshRenderer>().Where(r=>r.sharedMaterial.shader==field.vegetationShader).All(r=>!r.enabled),"Cut removes geometry from both depth draws");
+        check(field.CutCount==1&&root.GetComponentsInChildren<MeshRenderer>().Where(r=>r.sharedMaterial.shader==field.vegetationShader&&r.sharedMaterial.GetFloat("_CutDebris")<.5f).All(r=>!r.enabled),"Cut removes geometry from both depth draws");
+        var debris=field.GetType().GetField("debris",flags).GetValue(field);
+        var debrisType=debris.GetType();
+        var debrisTick=(System.Action<float>)System.Delegate.CreateDelegate(typeof(System.Action<float>),debris,debrisType.GetMethod("Tick"));
+        var debrisMesh=(Mesh)debrisType.GetField("mesh",flags).GetValue(debris);
+        var debrisRoot=(GameObject)debrisType.GetField("root",flags).GetValue(debris);
+        var particleData=new System.Collections.Generic.List<Vector4>();debrisMesh.GetUVs(1,particleData);
+        check((int)debrisType.GetProperty("ActiveCount").GetValue(debris,null)==7&&
+            particleData.Take(28).Count(v=>v.z==0)==8&&particleData.Take(28).Count(v=>v.z==1)==20,
+            "One cut emits two accepted leaf sprites and five green motes");
+        check(debrisRoot.GetComponentsInChildren<MeshFilter>().All(m=>m.sharedMesh==debrisMesh)&&
+            debrisRoot.GetComponentsInChildren<Collider2D>().Length==0,
+            "Airborne debris shares one bounded mesh across depth draws without particle physics");
+        var initialVertices=debrisMesh.vertices;
+        debrisTick(.1f);var rising=debrisMesh.vertices;
+        check(rising.Take(8).Average(v=>v.y)>initialVertices.Take(8).Average(v=>v.y),"Cut blades rise into the air");
+        check(Vector3.Distance(rising[1]-rising[0],initialVertices[1]-initialVertices[0])>.001f,
+            "Airborne blades spin continuously");
+        var debrisSort=(System.Action<int,int,float>)System.Delegate.CreateDelegate(typeof(System.Action<int,int,float>),debris,debrisType.GetMethod("SetSorting"));
+        var debrisPixels=new int[2];
+        for(int side=0;side<2;side++){
+            debrisSort(actorRenderer.sortingLayerID,actorRenderer.sortingOrder,probe.y+(side==0?-10:10));
+            camera.Render();RenderTexture.active=rt;image.ReadPixels(new Rect(0,0,256,256),0,0);image.Apply();
+            debrisPixels[side]=image.GetPixels32().Count(c=>c.g>c.r&&c.g>c.b);
+        }
+        check(debrisPixels[0]==0&&debrisPixels[1]>20,
+            "Rendered airborne blades and motes pass behind or in front of the actor using ground depth");
+        debrisTick(.6f);
+        check(debrisMesh.colors32.Take((int)debrisMesh.GetIndexCount(0)/6*4).Any(c=>c.a>0&&c.a<255),
+            "Cut particles fade smoothly instead of disappearing on a pixel step");
+        debrisTick(2);
+        check((int)debrisType.GetProperty("ActiveCount").GetValue(debris,null)==0&&debrisMesh.GetIndexCount(0)==0&&
+            debrisRoot.GetComponentsInChildren<MeshRenderer>().All(r=>!r.enabled),"Expired particles release every rendered triangle");
+        var emit=(System.Action<Vector2,Vector2,Color,float>)System.Delegate.CreateDelegate(typeof(System.Action<Vector2,Vector2,Color,float>),debris,debrisType.GetMethod("Emit"));
+        for(int burst=0;burst<100;burst++)emit(probe,Vector2.right,Color.green,burst*.1f);
+        debrisTick(.01f);
+        check((int)debrisType.GetProperty("ActiveCount").GetValue(debris,null)==192&&debrisMesh.vertexCount==768,
+            "Dense cutting stays capped at 64 blades and 128 motes");
         reset();check(root.GetComponentsInChildren<MeshRenderer>().Any(r=>r.name=="Vegetation foreground"&&r.enabled),"Regrowth restores foreground geometry without rebuilding it");
+        check((int)debrisType.GetProperty("ActiveCount").GetValue(debris,null)==0&&debrisMesh.GetIndexCount(0)==0,
+            "Rest clears all airborne cut effects");
     }finally{
         RenderTexture.active=previousRT;camera.targetTexture=null;
         UnityEngine.Object.DestroyImmediate(rt);UnityEngine.Object.DestroyImmediate(image);UnityEngine.Object.DestroyImmediate(square);

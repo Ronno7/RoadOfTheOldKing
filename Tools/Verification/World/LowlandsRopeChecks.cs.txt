@@ -1,0 +1,114 @@
+// Use GreenLowlandsGameplayChecks setup ONLY, Play, Continue, then LeaveScene to GreenLowlands.
+// Set Lowlands.Rope.Phase=0. Run phases 0-2 around their real reload/death transitions.
+// Stop/re-enter the SAME isolated bootstrap and Continue for phase 3. Once it reaches Title,
+// Continue to Lowlands and run phase 4. Finally stop and cleanup the bootstrap.
+// Real Rigidbody2D simulation + F selector; teleported test staging, not human climbing/art review.
+var game=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(!EditorApplication.isPlaying||game==null||game.IsLoading||!game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands.")||UnityEngine.SceneManagement.SceneManager.GetActiveScene().name!="GreenLowlands")throw new System.Exception("Settled isolated GreenLowlands required.");
+var f=System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance;
+var p=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
+var motor=p.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>();var body=p.GetComponent<Rigidbody2D>();
+var input=p.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();var combat=p.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();
+var locks=p.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>();var axe=combat.Weapon;
+var route=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RopeRoute>();
+var anchors=route.GetComponentsInChildren<RoadOfTheOldKing.World.RopeAnchor>().OrderBy(a=>a.transform.position.x).ToArray();
+var lower=anchors[0];var upper=anchors[1];
+var store=new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(game.StorageKey);
+int phase=SessionState.GetInt("Lowlands.Rope.Phase",0);
+var checks=new System.Collections.Generic.List<string>();
+System.Action<bool,string> check=(ok,label)=>{if(!ok)throw new System.Exception(label+" | "+string.Join("; ",checks.ToArray()));checks.Add(label);};
+System.Action<Vector2> pose=at=>{motor.CancelRopeTraversal();body.position=at;p.transform.position=at;body.linearVelocity=Vector2.zero;axe.CancelAction();input.GetType().GetField("hasFocus",f).SetValue(input,true);input.GetType().GetField("paused",f).SetValue(input,false);combat.GetType().GetField("controlsActive",f).SetValue(combat,true);Physics2D.SyncTransforms();};
+System.Action<int> tick=count=>{for(int i=0;i<count;i++){motor.GetType().GetMethod("FixedUpdate",f).Invoke(motor,null);Physics2D.Simulate(.02f);Physics2D.SyncTransforms();}};
+System.Action ready=()=>{combat.GetType().GetField("controlsActive",f).SetValue(combat,true);input.GetType().GetField("hasFocus",f).SetValue(input,true);};
+var oldSimulation=Physics2D.simulationMode;bool oldFocus=(bool)input.GetType().GetField("hasFocus",f).GetValue(input);
+GameObject obstacle=null;object otherOwner=new object();
+try{
+ Physics2D.simulationMode=SimulationMode2D.Script;ready();
+ if(phase==0){
+  string checkpointBefore=game.Progress.checkpointId;
+  new GameObject("Rope verification session marker").transform.SetParent(game.transform);
+  game.Progress.completedIds.Remove(route.ProgressId);game.Progress.ownedTools.Remove(RoadOfTheOldKing.Progression.WorldTool.RopeKit);route.RestoreProgress(game.Progress);
+  pose(new Vector2(87,53));check(route.IsConfigured&&!route.IsSecured,"authored route starts unsecured");
+  check(lower.CanCollect(p)&&lower.Prompt=="Requires rope kit"&&!lower.TryCollect(p),"missing kit gives contextual prompt and cannot climb");
+  check(!motor.IsTraversingRope&&!locks.IsLocked,"rejected use leaves motor and controls unchanged");
+  // Test funding and prior temporary acquisition IDs belong only to this isolated key.
+  game.Progress.completedIds.Remove("shop/purchased/green-lowlands/rope-kit");game.Progress.completedIds.Remove("tool/collected/green-lowlands/rope-kit");
+  game.Progress.bronzeCoins=45;
+  foreach(var stock in UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.ShopOffer>(FindObjectsSortMode.None))stock.RestoreProgress(game.Progress);
+  pose(new Vector2(10,3));check(p.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>().TryInteract(),"F buys actual regional rope offer");
+  check(game.Progress.bronzeCoins==15&&game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.RopeKit),"price debited once and kit owned");
+  pose(new Vector2(84,53));check(!lower.TryCollect(p),"distant activation rejected");
+  pose(new Vector2(88.2f,53));check(!lower.TryCollect(p),"activation from inside cliff rejected");
+  pose(new Vector2(87,53));locks.Lock(otherOwner);check(!lower.TryCollect(p),"existing control lease rejects climb");locks.Unlock(otherOwner);
+  p.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>().Restore();
+  check(p.GetComponent<RoadOfTheOldKing.Player.PlayerDash>().TryStart(Vector2.down),"dash started for exclusion");
+  check(!lower.TryCollect(p),"dash rejects climb");p.GetComponent<RoadOfTheOldKing.Player.PlayerDash>().Cancel();
+  check(axe.TryThrow(Vector2.left),"throw started for exclusion");check(!lower.TryCollect(p),"away axe rejects climb");axe.CancelAction();
+  check(axe.TryLightChop(Vector2.right),"attack started for exclusion");check(!lower.TryCollect(p),"attack rejects climb");axe.CancelAction();
+  obstacle=new GameObject("Verification rope obstacle");var box=obstacle.AddComponent<BoxCollider2D>();box.size=Vector2.one;
+  obstacle.transform.position=new Vector3(91,53,0);Physics2D.SyncTransforms();check(!lower.TryCollect(p)&&!route.IsSecured,"occupied destination rejects without persisting rope");
+  obstacle.transform.position=new Vector3(89,53,0);Physics2D.SyncTransforms();check(!lower.TryCollect(p),"second solid along cliff crossing rejected");
+  UnityEngine.Object.DestroyImmediate(obstacle);obstacle=null;Physics2D.SyncTransforms();
+  ready();check(p.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>().TryInteract(),"F secures and starts actual rope");
+  check(motor.IsTraversingRope&&locks.IsLockedBy(motor)&&body.bodyType==RigidbodyType2D.Kinematic,"motor owns traversal and its control lease");
+  check(route.IsSecured&&store.Load().Has(route.ProgressId),"secured rope immediately persisted");
+  check(game.Progress.bronzeCoins==15&&game.Progress.checkpointId==checkpointBefore,"rope consumes no further coins and does not set checkpoint");
+  check(!lower.TryCollect(p),"duplicate interaction rejected during traversal");
+  tick(25);check(body.position.x>87.5f&&body.position.x<90.5f,"real physics advances smoothly across cliff");
+  game.RecordResume();var resume=store.LoadResume();
+  check(resume!=null&&Mathf.Abs(resume.x-87)<.01f&&Mathf.Abs(resume.y-53)<.01f,"mid-climb resume records clear departure");
+  var pause=RoadOfTheOldKing.UI.SimulationPause.Acquire();Vector2 before=body.position;
+  try{motor.GetType().GetMethod("FixedUpdate",f).Invoke(motor,null);check(body.position==before&&motor.IsTraversingRope,"simulation pause holds climb");}finally{pause.Dispose();}
+  locks.Lock(otherOwner);tick(100);check(!motor.IsTraversingRope&&Vector2.Distance(body.position,new Vector2(91,53))<.01f,"climb reaches clear upper landing");
+  check(body.bodyType==RigidbodyType2D.Dynamic&&!locks.IsLockedBy(motor)&&locks.IsLockedBy(otherOwner),"landing restores body and only releases own lease");locks.Unlock(otherOwner);
+  ready();check(upper.TryCollect(p),"secured rope usable from upper landing");tick(110);check(Vector2.Distance(body.position,new Vector2(87,53))<.01f&&!motor.IsTraversingRope,"two-way return completes");
+  check(game.Progress.completedIds.Count(id=>id==route.ProgressId)==1&&game.Progress.bronzeCoins==15,"repeat climb neither duplicates progress nor charges");
+  ready();check(lower.TryCollect(p),"interruption climb starts");tick(25);
+  obstacle=new GameObject("Verification occupied landing");obstacle.transform.position=new Vector3(91,53,0);obstacle.AddComponent<BoxCollider2D>();Physics2D.SyncTransforms();tick(1);
+  check(!motor.IsTraversingRope&&Vector2.Distance(body.position,new Vector2(87,53))<.01f,"new landing obstruction returns to departure");
+  UnityEngine.Object.DestroyImmediate(obstacle);obstacle=null;Physics2D.SyncTransforms();
+  ready();check(lower.TryCollect(p),"route-disable climb starts");tick(25);route.enabled=false;
+  check(!motor.IsTraversingRope&&!locks.IsLockedBy(motor)&&body.bodyType==RigidbodyType2D.Dynamic,"disabled route releases traversal safely");route.enabled=true;
+  ready();check(lower.TryCollect(p),"motor-disable climb starts");tick(25);motor.enabled=false;
+  check(!motor.IsTraversingRope&&!locks.IsLockedBy(motor)&&Vector2.Distance(body.position,new Vector2(87,53))<.01f,"disabled motor returns to clear departure");motor.enabled=true;
+  ready();check(lower.TryCollect(p),"damage interruption climb starts");tick(25);p.Health.SetHealth(p.Health.Health-1);tick(1);
+  check(!motor.IsTraversingRope&&Vector2.Distance(body.position,new Vector2(87,53))<.01f,"lost health interrupts to departure");p.HealAtRest();
+  pose(new Vector2(15.5f,3));check(game.Checkpoints.Rest(game.Checkpoints.Fires.First(x=>x.Id=="green-lowlands/arrival-fire")),"real rest succeeds");
+  check(route.IsSecured&&store.Load().Has(route.ProgressId),"rest retains secured rope");game.Checkpoints.RestartFromCheckpoint();SessionState.SetInt("Lowlands.Rope.Phase",1);
+ }else if(phase==1){
+  check(route.IsSecured&&game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.RopeKit),"checkpoint reload restores rope and kit");
+  check(route.transform.Find("Secured rope - placeholder").gameObject.activeSelf,"restored rope visual visible");
+  pose(new Vector2(87,53));check(lower.TryCollect(p),"restored route climbs");tick(25);
+  check(p.Health.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(null,RoadOfTheOldKing.Combat.AttackKind.EnemyMelee,10000,Vector2.left,0,.1f)),"real defeat listeners execute during climb");
+  check(!p.IsAlive&&!motor.IsTraversingRope&&!locks.IsLockedBy(motor)&&!body.simulated,"death cancels climb without reenabling physics");
+  check(!lower.TryCollect(p)&&store.LoadResume()==null,"dead player rejected and resume cleared");game.Checkpoints.Respawn();SessionState.SetInt("Lowlands.Rope.Phase",2);
+ }else if(phase==2){
+  check(p.IsAlive&&motor.enabled&&body.bodyType==RigidbodyType2D.Dynamic&&!locks.IsLocked,"respawn restores normal player motor");
+  check(route.IsSecured&&game.Progress.bronzeCoins==15,"death retains rope and wallet");
+  pose(new Vector2(87,53));check(lower.TryCollect(p),"post-respawn climb starts");tick(110);
+  check(Vector2.Distance(body.position,new Vector2(91,53))<.01f&&!motor.IsTraversingRope,"post-respawn climb reaches workshop");
+  game.SaveProgress();game.RecordResume();SessionState.SetInt("Lowlands.Rope.Phase",3);
+ }else if(phase==3){
+  check(game.transform.Find("Rope verification session marker")==null,"fresh GameSession loaded from store");
+  check(route.IsSecured&&game.Progress.bronzeCoins==15&&game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.RopeKit),"cold Continue restores placement, kit and coins");
+  check(Vector2.Distance(body.position,new Vector2(91,53))<.1f,"cold Continue returns to completed upper landing");
+  ready();check(upper.TryCollect(p),"cold upper landing supports return");tick(110);
+  check(!motor.IsTraversingRope&&Vector2.Distance(body.position,new Vector2(87,53))<.01f,"cold return safely reaches lower approach");
+  // Write a real mid-climb resume, then use title/Continue to verify actual restoration.
+  ready();check(lower.TryCollect(p),"mid-climb exit starts");tick(25);
+  check(p.GetComponent<RoadOfTheOldKing.UI.PauseMenuController>().Open(),"pause menu opens during climb");
+  check(Time.timeScale==0f&&Mathf.Abs(store.LoadResume().x-87)<.01f,"pause menu freezes and records departure");
+  check(game.ReturnToTitle(),"Main Menu accepted during climb");SessionState.SetInt("Lowlands.Rope.Phase",4);
+ }else if(phase==4){
+  check(Vector2.Distance(body.position,new Vector2(87,53))<.1f&&!motor.IsTraversingRope&&!locks.IsLocked,"title Continue restores departure with no leftover lock");
+  check(route.IsSecured,"interrupted departure keeps rope secured");
+  RoadOfTheOldKing.Combat.EncounterState.ReportThreat();
+  check(!motor.CanStartRopeTraversal&&!lower.TryCollect(p),"shared combat threat rejects traversal");
+  SessionState.SetInt("Lowlands.Rope.Phase",5);
+ }else return "Complete.";
+ return new{phase,passed=checks.Count,checks=checks.ToArray()};
+}finally{
+ if(obstacle!=null)UnityEngine.Object.DestroyImmediate(obstacle);
+ locks.Unlock(otherOwner);Physics2D.simulationMode=oldSimulation;
+ if(input!=null)input.GetType().GetField("hasFocus",f).SetValue(input,oldFocus);
+}

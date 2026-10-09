@@ -26,6 +26,30 @@ namespace RoadOfTheOldKing.Progression
             public List<UpgradeSelection> upgrades;
         }
 
+        // Version 2 (multi-scene saving): before wallet, owned tools and pending coin sources.
+        [Serializable]
+        private sealed class SaveV2
+        {
+            public int version;
+            public bool hasAxe, recallUnlocked;
+            public string checkpointId, scenePath;
+            public List<FireRecord> fires;
+            public List<string> completedIds;
+            public int sunShards;
+            public List<UpgradeSelection> upgrades;
+        }
+
+        private static ProgressState FromV2(SaveV2 old)
+        {
+            if (old == null) throw new InvalidOperationException("Unreadable version 2 save.");
+            return new ProgressState {
+                hasAxe = old.hasAxe, recallUnlocked = old.recallUnlocked,
+                checkpointId = old.checkpointId, scenePath = old.scenePath,
+                fires = old.fires, completedIds = old.completedIds,
+                sunShards = old.sunShards, upgrades = old.upgrades
+            };
+        }
+
         public static ProgressState Read(string json, out bool migrated)
         {
             var probe = string.IsNullOrEmpty(json) ? null : JsonUtility.FromJson<VersionProbe>(json);
@@ -35,6 +59,7 @@ namespace RoadOfTheOldKing.Progression
             switch (probe.version)
             {
                 case 1: state = FromV1(JsonUtility.FromJson<SaveV1>(json)); break;
+                case 2: state = FromV2(JsonUtility.FromJson<SaveV2>(json)); break;
                 case ProgressState.CurrentVersion: state = JsonUtility.FromJson<ProgressState>(json); break;
                 default: throw new InvalidOperationException("Unknown save version " + probe.version + ".");
             }
@@ -67,11 +92,19 @@ namespace RoadOfTheOldKing.Progression
 
         private static void Validate(ProgressState state)
         {
-            if (state == null || state.fires == null || state.completedIds == null || state.upgrades == null)
+            if (state == null || state.fires == null || state.completedIds == null || state.upgrades == null ||
+                state.ownedTools == null || state.coinSources == null)
                 throw new InvalidOperationException("Incomplete save.");
             if (state.sunShards < 0 || state.upgrades.Exists(s => s == null ||
                 string.IsNullOrEmpty(s.tierId) || string.IsNullOrEmpty(s.upgradeId)))
                 throw new InvalidOperationException("Invalid weapon progression.");
+            if (state.bronzeCoins < 0 || state.ownedTools.Exists(t => t == WorldTool.None || !Enum.IsDefined(typeof(WorldTool), t)) ||
+                new HashSet<WorldTool>(state.ownedTools).Count != state.ownedTools.Count ||
+                state.coinSources.Exists(s => s == null || string.IsNullOrWhiteSpace(s.id) || s.amount < 0))
+                throw new InvalidOperationException("Invalid economy progression.");
+            var sourceIds = new HashSet<string>();
+            foreach (var source in state.coinSources)
+                if (!sourceIds.Add(source.id)) throw new InvalidOperationException("Duplicate coin source.");
             state.fires.RemoveAll(f => f == null || string.IsNullOrEmpty(f.id));
             state.checkpointId ??= "";
             state.scenePath ??= "";

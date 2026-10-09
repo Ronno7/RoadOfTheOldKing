@@ -7,7 +7,7 @@ namespace RoadOfTheOldKing.Progression
     [Serializable]
     public sealed class ProgressState
     {
-        public const int CurrentVersion = 2;
+        public const int CurrentVersion = 3;
 
         public int version = CurrentVersion;
         public bool hasAxe;
@@ -18,7 +18,13 @@ namespace RoadOfTheOldKing.Progression
         public List<FireRecord> fires = new List<FireRecord>();
         public List<string> completedIds = new List<string>();
         public int sunShards;
+        public int bronzeCoins;
+        public List<WorldTool> ownedTools = new List<WorldTool>();
+        public List<CoinSourceRecord> coinSources = new List<CoinSourceRecord>();
         public List<UpgradeSelection> upgrades = new List<UpgradeSelection>();
+
+        public bool OwnsTool(WorldTool tool) => tool != WorldTool.None && ownedTools.Contains(tool);
+        public CoinSourceRecord FindCoinSource(string id) => string.IsNullOrEmpty(id) ? null : coinSources.Find(s => s.id == id);
 
         public bool Has(string id) => !string.IsNullOrEmpty(id) && completedIds.Contains(id);
         public void Complete(string id)
@@ -40,6 +46,29 @@ namespace RoadOfTheOldKing.Progression
             fire.displayName = displayName;
             fire.displayOrder = displayOrder;
         }
+    }
+
+    // Append enum values; serialized IDs must remain stable.
+    public enum WorldTool { None, RopeKit, MaintenanceCrank, ProtectedLantern }
+
+    public static class WorldToolNames
+    {
+        public static string Display(WorldTool tool) => tool switch
+        {
+            WorldTool.RopeKit => "Rope kit",
+            WorldTool.MaintenanceCrank => "Maintenance crank",
+            WorldTool.ProtectedLantern => "Protected lantern",
+            _ => ""
+        };
+    }
+
+    // A revealed one-time source keeps its result until collected, including an empty roll.
+    [Serializable]
+    public sealed class CoinSourceRecord
+    {
+        public string id = "";
+        public int amount;
+        public bool collected;
     }
 
     // A discovered bonfire. Name and order are copied so fires in unloaded scenes can be listed.

@@ -10,7 +10,7 @@ namespace RoadOfTheOldKing.Progression
 {
     // Game-level session: one save for the whole game, kept across scene loads. It owns the progress
     // record, its store and scene-load restoration; CheckpointService owns rest/travel/exits/respawn,
-    // RewardService owns shards, hearts and upgrades, SceneTransitions owns fades and loading, and scene
+        // RewardService owns rewards, wallet, tools and purchases; SceneTransitions owns fades/loading, and scene
     // participants own how their state is represented. Every playable scene holds the GameSession prefab
     // so it can be played directly; the first instance persists and later copies remove themselves, so
     // the save key and upgrade tiers always come from the prefab.
@@ -40,13 +40,15 @@ namespace RoadOfTheOldKing.Progression
         private string pendingScene;
 
         public static GameSession Instance { get; private set; }
+        public string StorageKey => saveKey;
         public ProgressState Progress { get; private set; } = new ProgressState();
         public CheckpointService Checkpoints { get; private set; }
         public RewardService Rewards { get; private set; }
         // Includes a transition's fade-in: input is locked then and a new load would be refused.
         public bool IsLoading => loading || (transitions != null && transitions.IsBusy);
         // Anything worth continuing: a rest point, the axe or any milestone.
-        public bool HasSave => !loadFailed && (resume != null || Checkpoints.HasCheckpoint || Progress.hasAxe || Progress.completedIds.Count > 0);
+        public bool HasSave => !loadFailed && (resume != null || Checkpoints.HasCheckpoint || Progress.hasAxe ||
+            Progress.completedIds.Count > 0 || Progress.bronzeCoins > 0 || Progress.ownedTools.Count > 0 || Progress.coinSources.Count > 0);
         // Continue resumes at this exact spot instead of the last fire.
         public bool HasResumePoint => !loadFailed && resume != null;
         public bool CanReturnToTitle => SceneLoader.CanLoad(titleScene) && SceneLoader.ActivePath != titleScene;
@@ -109,7 +111,7 @@ namespace RoadOfTheOldKing.Progression
             // Continue from a resume point: the exact spot, with the health and flasks the player left with.
             if (pendingResume != null && pendingResume.scenePath == scene.path)
             {
-                Checkpoints.MoveTo(new Vector2(pendingResume.x, pendingResume.y));
+                Checkpoints.TryResumeAt(new Vector2(pendingResume.x, pendingResume.y));
                 Checkpoints.Carry(pendingResume.health, pendingResume.flasks);
             }
             pendingResume = null;
@@ -222,7 +224,8 @@ namespace RoadOfTheOldKing.Progression
         private void RecordResume(bool force)
         {
             if (Player == null || !Player.IsAlive || loading || loadFailed) return;
-            Vector2 position = Player.transform.position;
+            var motor = Player.GetComponent<PlayerMovement>();
+            Vector2 position = motor != null ? motor.SafeResumePosition : (Vector2)Player.transform.position;
             var flask = Player.GetComponent<PlayerFlask>();
             var next = new ResumePoint
             {
