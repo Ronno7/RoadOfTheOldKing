@@ -1,0 +1,9 @@
+#collection-overlay { display: none; background-color: rgba(15, 19, 18, 0.4); }
+#collection-panel { width: 490px; }
+#collection-panel .menu-heading { font-size: 20px; margin-bottom: 8px; }
+#collection-panel .menu-meta, #collection-panel .menu-text { font-size: 10px; }
+#collection-body { flex-direction: row; margin-top: 10px; min-height: 130px; }
+#entry-scroll { width: 240px; max-height: 210px; flex-shrink: 0; }
+#entries { padding-left: 8px; padding-right: 4px; }
+#collection-panel .menu-button { margin-left: 18px; margin-right: 4px; }
+#collection-panel .menu-description { flex-grow: 1; flex-shrink: 1; width: 145px; padding-left: 14px; font-size: 10px; -unity-text-align: upper-left; }

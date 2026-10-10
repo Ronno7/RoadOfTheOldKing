@@ -155,6 +155,375 @@
       "tool": "built-in image_gen",
       "prompt": "Create ONE isolated tiny pixel-art decoration sprite for a top-down 2D RPG. Match a restrained 16-bit countryside style: chunky native pixel clusters, clean cut/fluid silhouettes, broad FLAT color fills, only the named colors, no gradients or tiny texture. Render as a large nearest-neighbor-like enlargement of the stated NATIVE pixel dimensions; keep a single consistent coarse pixel grid. A few simple organic shapes, no microdetail. Light from upper left, orthographic RPG camera slightly above front. Genuine TRANSPARENT background, full object with margin. No ground patch, dirt base, painted grass carpet, cast shadow, halo, text, grid or other props. Vegetation has MATERIAL-COLORED edges and shadow; absolutely no charcoal/black outline. This is separate spatial dressing for an abandoned farmstead only lightly reclaimed, not dense wilderness. SUBJECT: one low EMPTY COLLAPSED WOODEN FIELD CRATE, tipped slightly onto a broken side with two loose attached slats resting across its edge. Native painted footprint22x12 pixels inside32x16canvas. Simple oblong farm box, its shallow dark empty interior visible from above; intact end board left and one missing section on right. No metal ornament, handles, fruit, sacks, plants inside, loot glow or spare props. Looks abandoned for a few generations; a single tiny moss patch at one lower corner. Render with broad quiet planks, one deliberate split, no tiny grain marks. Exactly FIVE colors: #543F36 deepest wood/interior, #826047 timber shade, #B58C61 timber light, #DFC291 tiny cut-edge highlight, #4F7050 moss. No black outline. Full image aspect2:1.",
       "direction": "Separate native Detail/Decoration art; restrained slight reclamation, Tutorial material-colored vegetation edges, 16 PPU; no changes to accepted Ground or architecture."
+    },
+    {
+      "file": "Environment/Sluice_Headwall.png",
+      "tool": "built-in image_gen",
+      "prompt": "Use case: stylized-concept. Asset type: one transparent pixel-art environment sprite for a top-down 16-PPU adventure game. Input reference 1 shows our accepted architecture, reference 2 shows our accepted stone/terrain: match their extremely simple, clean chunky pixel art and restrained material colors. Create a NEW modest ancient sluice retaining headwall, viewed from the same slightly elevated front-facing top-down game angle. This is a low broad wall panel, 96 pixels wide by 64 pixels tall at its intended native resolution, shown at a large nearest-neighbor enlargement. A straight weathered gray-green masonry lintel, two low square stone end piers, a broad inset closed stone panel with one small bronze sun-wheel relief, and two slim precise bronze reinforcing strips. The bronze relief is a carved static emblem, NOT a handle or usable wheel. About three generations of light abandonment: a few tiny moss patches and two clean chips, mostly intact. Flat broad surfaces and sparse deliberate seams. True transparent background, no ground plane, no drop shadow, no scenery, no water, no perspective skew, no floating pieces, no people, no letters. Entire silhouette visible with generous transparent margin. No roof, no doorway, no stairs, no handles, no glowing runes, no magical effects, no gears or ornate fantasy flourishes. Aim for a functional retaining structure rather than a temple. Strict palette: stone #585F58 #7C8370 #A6AA8A #D4CCAA; bronze #543F36 #826047 #B58C61 #E7B85C; sparse moss #4F7050. At most these nine opaque colors plus transparency. Uniform coarse pixel grid, hard binary-alpha clean edges, no anti-aliasing, blur, dithering, noise, gradients or modern rendered lighting. Keep details broad enough to read after native 96x64 import.",
+      "direction": "Modest functional ancient sluice; match accepted Lowlands architecture rendering. No new building silhouette reused from Tutorial.",
+      "native_export": {
+        "path": "Assets/Art/Tiles/GreenLowlands/Environment/Sluice/SluiceHeadwall.png",
+        "source": "E:\\Unity Projects\\RoadOfTheOldKing/ArtSource/GreenLowlands/Environment/Sluice_Headwall.png",
+        "crop": [
+          88,
+          237,
+          1359,
+          555
+        ],
+        "native": "96x40",
+        "colors": 9,
+        "palette": [
+          "585F58",
+          "7C8370",
+          "A6AA8A",
+          "D4CCAA",
+          "543F36",
+          "826047",
+          "B58C61",
+          "E7B85C",
+          "4F7050"
+        ],
+        "recipe": "Crop source alpha >=128 inclusive; sample each output pixel at floor((index+0.5)*cropSize/nativeSize) from crop origin, nearest RGB squared-distance palette color, alpha <128 -> transparent else 255. Native 96x40 at 16 PPU, Point/uncompressed/no mipmaps, center pivot/full rect. Source untouched. Source originally requested 96x64; aspect-fit native silhouette is 96x40."
+      }
+    },
+    {
+      "file": "Interactive/SluiceFittings_Source.png",
+      "tool": "built-in image_gen",
+      "prompt": "Create a transparent sprite sheet with exactly THREE separate tiny bronze mechanism sprites in one horizontal row, evenly spaced with wide transparent gaps. Match the attached accepted clean chunky 16-bit game artwork at native 16 PPU; display as a large nearest-neighbor enlargement. LEFT: a short upright U-shaped bronze axe-catching fork on a compact square stone foot, two stout prongs and a dark open slot between them, intended native 8x16 pixels. CENTER: a vertically oriented broad bronze paddle/vane on a tiny central axle, rounded rectangular blade with a single diagonal raised rib, intended native 8x12 pixels. RIGHT: a small round bronze crank socket with a bent L-shaped crank and dark wooden grip, intended native16x16 pixels. All seen from slightly elevated front-facing top-down RPG view, broad flat simple shapes, functional ancient engineering, no magic, no text or frame. Material-colored hard edges. Only six opaque colors: #543F36 #826047 #B58C61 #E7B85C #585F58 #A6AA8A. No gradients, noise, antialiasing, blur, shadow, ground, lighting effects, or decoration. Each silhouette separate and entirely visible, genuine transparent background.",
+      "native_export": {
+        "pieces": [
+          {
+            "path": "Assets/Art/Tiles/GreenLowlands/Environment/Sluice/SluiceFork.png",
+            "crop": [
+              307,
+              125,
+              204,
+              393
+            ],
+            "width": 8,
+            "height": 16,
+            "colors": 6
+          },
+          {
+            "path": "Assets/Art/Tiles/GreenLowlands/Environment/Sluice/SluiceVane.png",
+            "crop": [
+              996,
+              93,
+              180,
+              441
+            ],
+            "width": 8,
+            "height": 12,
+            "colors": 4
+          },
+          {
+            "path": "Assets/Art/Tiles/GreenLowlands/Environment/Sluice/SluiceCrank.png",
+            "crop": [
+              1591,
+              112,
+              437,
+              330
+            ],
+            "width": 12,
+            "height": 10,
+            "colors": 4
+          }
+        ],
+        "palette": [
+          "543F36",
+          "826047",
+          "B58C61",
+          "E7B85C",
+          "585F58",
+          "A6AA8A"
+        ],
+        "recipe": "Divide source into equal vertical thirds; alpha>=128 inclusive bounds per third, then same pixel-center nearest sampling/RGB palette quantization as headwall. Fork8x16, vane8x12, crank12x10; binary alpha, center pivot/full rect,16 PPU/Point/uncompressed/no mipmaps. Native dimensions follow existing mechanism footprint; original colliders/pivots unchanged."
+      }
+    },
+    {
+      "tool": "Direct crop of accepted native terrain sprites",
+      "native_export": {
+        "directory": "Assets/Art/Tiles/GreenLowlands/Environment/Sluice/",
+        "pieces": [
+          {
+            "file": "SluiceWallVertical.png",
+            "source": "Terrain/Tiles/StoneWall_Straight_NS_005.asset",
+            "crop_relative_to_sprite": [
+              4,
+              0,
+              8,
+              16
+            ]
+          },
+          {
+            "file": "SluiceWallHorizontal.png",
+            "source": "Terrain/Tiles/StoneWall_Straight_EW_010.asset",
+            "crop_relative_to_sprite": [
+              0,
+              4,
+              16,
+              8
+            ]
+          }
+        ],
+        "recipe": "Copy exact sprite-rect pixels from GreenLowlandsTerrain16.png; preserve its two colors and alpha. 16 PPU, Point/uncompressed/no mipmaps, center pivot/full rect. SpriteRenderer Continuous tiled at existing wall size, never transform scaled."
+      }
+    },
+    {
+      "file": "Interactive/TimberChest_Source.png",
+      "tool": "built-in image_gen",
+      "prompt": "Use case: stylized-concept. Asset type: transparent pixel-art animation source sheet for a 16-PPU top-down countryside adventure game. Reference image shows the accepted environment style: broad flat material colors, extremely clean simple shapes, quiet details. Generate ONE small modest weathered timber chest in THREE animation poses, evenly spaced left to right: CLOSED, HALF-OPEN lid, FULLY OPEN lid. Same front-facing slightly elevated orthographic RPG perspective in all poses. Chest base is identical, aligned along one baseline, stays perfectly stationary. Hinged lid swings up toward the back. Short wide rectangular wooden coffer with a slightly curved lid, two narrow muted bronze straps and one small square central latch. Sparse wear, one small nick, no decoration, no treasure inside. Intended native base width 20 pixels, closed height 16 pixels, open height 22 pixels, each pose within a 24x24 native canvas; show as a large uniform nearest-neighbor enlargement. Must read at tiny gameplay size, no microtexture or wood grain scribbles. Exact limited palette: #543F36 deep timber and empty interior, #826047 timber shade, #B58C61 timber light, #DFC291 small wood highlight, #A17D3D bronze shade, #E7B85C bronze light. ONLY SIX opaque colors plus genuine transparency. Material-colored crisp edges, binary alpha, no black outlines, no gradients, blur, anti-aliasing, noise, checkerboard, painted shadow, ground, glow, text, labels, borders, people or other objects. Wide transparent gutters between the three poses. Same scale and base registration for every pose. Chest should feel like an ordinary old farm coffer, not an ornate fantasy treasure chest.",
+      "native_export": {
+        "path": "Assets/Art/Sprites/World/LowlandsRewards/LowlandsRewards16.png",
+        "builder": "Assets/Editor/RewardPropArtBuilder.cs",
+        "frames": [
+          "TimberChest_Closed",
+          "TimberChest_HalfOpen",
+          "TimberChest_Open"
+        ],
+        "canvas": "24x24 per pose, 16 PPU",
+        "source_crops_bottom_left": [
+          [
+            103,
+            85,
+            540,
+            540
+          ],
+          [
+            816,
+            85,
+            540,
+            540
+          ],
+          [
+            1529,
+            85,
+            540,
+            540
+          ]
+        ],
+        "recipe": "Common source/native scale and baseline; pixel-center nearest sampling, alpha<128 transparent, other pixels nearest RGB palette entry. Lower eight native rows copied from closed pose for exact base registration. Six colors, Point/uncompressed/no mipmaps, stable sprite names/IDs.",
+        "palette": [
+          "543F36",
+          "826047",
+          "B58C61",
+          "DFC291",
+          "A17D3D",
+          "E7B85C"
+        ]
+      }
+    },
+    {
+      "file": "Interactive/ClayPot_Source.png",
+      "tool": "built-in image_gen",
+      "prompt": "Use case: stylized-concept. Asset type: ONE transparent native pixel-art clay pot sprite for a top-down 16-PPU countryside adventure. Reference is the accepted environment rendering style, clean simple shapes, quiet flat colors. One small squat round ochre earthenware storage pot, empty dark oval mouth visible from slightly above, short thick neck and flared lip, broad shoulders tapering into a flat narrow foot. Front-facing slightly elevated orthographic RPG view, full silhouette. Intended native footprint 12 pixels wide by 15 pixels high inside a 16x16 canvas. Show as a large nearest-neighbor enlargement with one consistent coarse pixel grid. Plain local farmhouse pottery, lightly worn lip with one single clean notch; no handles, lid, motif, plant, contents or ornament. Broad flat color clusters, upper-left light, material-colored edge shadows, no black outline. Exactly FIVE opaque colors: #543F36 dark mouth, #826047 clay shade, #B58C61 clay base, #DFC291 lit lip, #A17D3D ochre midtone. Genuine transparent background, no ground or cast shadow, no glow, blur, gradients, anti-aliasing, dithering, noise, labels, text, frame, checkerboard or other objects. Preserve a clear simple ceramic silhouette that reads beside our small hero.",
+      "native_export": {
+        "path": "Assets/Art/Sprites/World/LowlandsRewards/LowlandsRewards16.png",
+        "sprite": "ClayPot",
+        "canvas": "16x16; 12x14 drawing offset(2,1);16 PPU",
+        "source_crop_bottom_left": [
+          420,
+          231,
+          534,
+          616
+        ],
+        "palette": [
+          "543F36",
+          "826047",
+          "B58C61",
+          "DFC291",
+          "A17D3D"
+        ],
+        "recipe": "Same pixel-center sampling, binary alpha, palette matching and import as chest; bounded source silhouette and no procedural drawing."
+      }
+    },
+    {
+      "file": "Interactive/SunShard_Source.png",
+      "tool": "built-in image_gen",
+      "prompt": "Use case: stylized-concept. ONE transparent pixel-art SUN SHARD pickup sprite for our top-down 16-PPU adventure game. Attached gameplay image is a STYLE REFERENCE ONLY: clean chunky shapes, very limited palette, crisp native pixels, readable beside the small blue-cloaked hero. Subject: one small asymmetrical pointed fragment of warm amber-gold crystal, a long broken sunlight shard with three broad flat facets, one broken notch on its upper side, a pale upper-left face and warm ochre lower-right face. Silhouette tilts slightly right within the drawing, pointed top and narrower chipped bottom; avoid a perfectly symmetric rupee diamond. Intended native silhouette 12 pixels wide by 18 pixels tall inside a 16x24 canvas, displayed as a large nearest-neighbor enlargement. Exactly FIVE flat opaque colors: #826047 darkest warm edge, #B58C61 ochre shade, #E7B85C sun gold, #DFC291 pale gold, #FFF0B3 tiny bright facet. Broad planes only, no microtexture, no extra sparks, sun rays, metal settings, engraving, ground or cast shadow. Material-colored crisp edge, no black outline, no smooth glow or gradients. Genuine transparent background, hard alpha, no blur, anti-aliasing, dithering, noise, checkerboard, text or frame. One shard only, entirely visible with margin.",
+      "edit_prompt": "Edit the supplied Sun Shard sprite. Keep the shard's exact silhouette, notch, broad facets, orientation and warm gold palette. REMOVE ALL glow, haze and soft brown halo outside the shard. Outside its hard stepped pixel silhouette must be completely transparent (alpha zero), with NO partially transparent fringe or aura. Clean binary alpha, flat opaque pixel-art faces. No gradients, blur or new detail. This is a tiny native pixel game sprite, not a glowing illustration. Preserve the shard itself and ample transparent margin.",
+      "native_export": {
+        "sprite": "SunShard",
+        "source_crop_bottom_left": [
+          316,
+          273,
+          472,
+          1021
+        ],
+        "canvas": "16x24",
+        "drawing": "10x20 at (3,2)",
+        "palette": [
+          "826047",
+          "B58C61",
+          "E7B85C",
+          "DFC291",
+          "FFF0B3"
+        ],
+        "path": "Assets/Art/Sprites/World/LowlandsRewards/LowlandsPickups16.png",
+        "builder": "Assets/Editor/RewardPropArtBuilder.cs",
+        "recipe": "Pixel-center nearest sampling of specified source crop; alpha<128 transparent, otherwise nearest RGB palette entry with alpha255. Binary alpha removes source fringe; no glow is baked into native sprites. 16 PPU, unit scale, identity rotation, Point/uncompressed/no mipmaps; stable sprite IDs."
+      }
+    },
+    {
+      "file": "Interactive/BronzeCoin_Source.png",
+      "tool": "built-in image_gen",
+      "prompt": "Use case: stylized-concept. One isolated tiny BRONZE COIN sprite for a top-down 16-PPU game, genuine transparent background. This is a modest dull copper-brown circular coin with a slightly irregular hammered edge, a simple inset ring and ONE short central stamped notch. Face-on view, only a one-pixel lower-right rim suggesting thickness. Intended NATIVE sprite 10x10 pixels inside a 16x16 canvas. Show a large nearest-neighbor enlargement of that exact coarse grid, chunky readable clusters. Only FOUR flat opaque colors: #543F36 deepest bronze rim, #826047 bronze shade, #B58C61 copper bronze face, #DFC291 tiny upper-left rim highlight. Copper-brown NOT bright yellow gold. Broad flat color faces. Clean crisp cut pixel silhouette, no black outline, no gradients, haze, glow, rays, sparkle, dithering, antialiasing, lettering, numeral, cross symbol, checkerboard, ground, cast shadow or other object. Entire coin visible. Match the restrained timber/metal colors of attached countryside game reference.",
+      "native_export": {
+        "sprite": "BronzeCoin",
+        "source_crop_bottom_left": [
+          664,
+          125,
+          759,
+          758
+        ],
+        "canvas": "16x16",
+        "drawing": "11x11 at (2,2); use large right-hand source drawing only",
+        "palette": [
+          "543F36",
+          "826047",
+          "B58C61",
+          "DFC291"
+        ],
+        "path": "Assets/Art/Sprites/World/LowlandsRewards/LowlandsPickups16.png",
+        "builder": "Assets/Editor/RewardPropArtBuilder.cs",
+        "recipe": "Pixel-center nearest sampling of specified source crop; alpha<128 transparent, otherwise nearest RGB palette entry with alpha255. Binary alpha removes source fringe; no glow is baked into native sprites. 16 PPU, unit scale, identity rotation, Point/uncompressed/no mipmaps; stable sprite IDs."
+      }
+    },
+    {
+      "file": "Interactive/HeartFragment_Source.png",
+      "tool": "built-in image_gen",
+      "prompt": "Use case: stylized-concept. Create a single isolated tiny pixel-art HEART FRAGMENT pickup for a top-down adventure game. One red carved heart-shaped gem with a clearly visible simple zigzag fracture dividing the right third, intact overall iconic heart silhouette with one tiny chipped pixel at the fracture's upper end. Bold simple heart silhouette, two rounded upper lobes, tapered bottom point. Intended NATIVE 14x12 pixels inside a16x16 canvas. Uniform coarse square pixel grid, shown enlarged. Broad flat red planes with a tiny upper-left highlight, no intricate facets. Exactly FIVE opaque colors: #703C3C deepest red edge and crack, #A34E46 shaded red, #CA6E57 warm red body, #E6A275 coral lit face, #DFC291 tiny highlight. Clean sharp flat pixel art matching the attached game's simplicity. True transparency everywhere outside the hard silhouette. NO glow, bloom, haze, vignette, background color, outline halo, cast shadow, ground, sparks, rays, gradients, blur, antialiasing, dithering, text, labels, second small copy or comparison. ONE sprite centered with transparent margin, no insets.",
+      "native_export": {
+        "sprite": "HeartFragment",
+        "source_crop_bottom_left": [
+          531,
+          338,
+          387,
+          362
+        ],
+        "canvas": "16x16",
+        "drawing": "14x12 at (1,2)",
+        "palette": [
+          "703C3C",
+          "A34E46",
+          "CA6E57",
+          "E6A275",
+          "DFC291"
+        ],
+        "path": "Assets/Art/Sprites/World/LowlandsRewards/LowlandsPickups16.png",
+        "builder": "Assets/Editor/RewardPropArtBuilder.cs",
+        "recipe": "Pixel-center nearest sampling of specified source crop; alpha<128 transparent, otherwise nearest RGB palette entry with alpha255. Binary alpha removes source fringe; no glow is baked into native sprites. 16 PPU, unit scale, identity rotation, Point/uncompressed/no mipmaps; stable sprite IDs."
+      }
+    },
+    {
+      "file": "Interactive/RopeAnchor_Source.png",
+      "tool": "built-in image_gen",
+      "prompt": "Use case: stylized-concept. ONE tiny transparent pixel-art rope anchor for a top-down countryside adventure, matching the attached clean flat 16-bit environment style. A low squat square weathered gray-green stone bollard with a broad bronze ring fastened to its front face, seen from slightly above and in front. Functional modest old farm/roadside fitting; NOT an axe-catching fork, not a lever, no roof, no inscription, no rope yet. Small chipped upper corner, one tiny moss patch at base. Intended NATIVE drawing 12 pixels wide by 16 pixels tall in a16x24 canvas. Render as large nearest-neighbor enlargement with one consistent coarse pixel grid. Broad flat shapes, crisp cut contours, material-colored edges. Exactly six opaque colors: #585F58 stone shadow, #7C8370 stone middle, #A6AA8A stone light, #543F36 ring hole and bronze shadow, #B58C61 bronze, #4F7050 tiny moss. Genuine transparent background, entire object visible with margin. No cast shadow, ground, fog, glow, gradients, blur, anti-aliasing, fine texture, dithering, text, frame, checkerboard, extra object or small duplicate.",
+      "native_export": {
+        "sprite": "RopeAnchor",
+        "source_crop_bottom_left": [
+          311,
+          446,
+          464,
+          505
+        ],
+        "canvas": "16x24",
+        "drawing": "14x16 at (1,2)",
+        "palette": [
+          "585F58",
+          "7C8370",
+          "A6AA8A",
+          "543F36",
+          "B58C61",
+          "4F7050"
+        ],
+        "path": "Assets/Art/Sprites/World/LowlandsRewards/LowlandsTraversal16.png",
+        "builder": "Assets/Editor/RewardPropArtBuilder.cs",
+        "recipe": "Pixel-center nearest sampling; alpha<128 transparent, otherwise nearest RGB palette entry with alpha255. 16 PPU, unit scale, Point/uncompressed/no mipmaps; stable sprite IDs. Reuses SluiceCrank.png separately for maintenance tool; no new tool sprite."
+      }
+    },
+    {
+      "file": "Interactive/RopeSpan_Source.png",
+      "tool": "built-in image_gen",
+      "prompt": "Use case: stylized-concept. ONE isolated short horizontal rope span on transparent background, for a clean pixel art countryside adventure. Entire rope visible, stretched between two anchors but show ONLY rope, no anchor. Slight natural shallow sag along center, one small knot at either end. Intended native art 64 pixels long and 5 pixels high, extremely wide thin silhouette, consistent coarse pixel grid enlarged nearest-neighbor. Clear silhouette, simple alternating tan and warm brown blocks suggesting twisted hemp, no tiny fuzzy strands. Four opaque colors only #543F36 #826047 #B58C61 #DFC291. No shadows, background, labels, scene, frame, glow, antialiasing or painterly texture.",
+      "native_export": {
+        "sprite": "RopeSpan",
+        "source_crop_bottom_left": [
+          66,
+          322,
+          1867,
+          147
+        ],
+        "canvas": "64x8",
+        "drawing": "64x5 at (0,1)",
+        "palette": [
+          "543F36",
+          "826047",
+          "B58C61",
+          "DFC291"
+        ],
+        "path": "Assets/Art/Sprites/World/LowlandsRewards/LowlandsTraversal16.png",
+        "builder": "Assets/Editor/RewardPropArtBuilder.cs",
+        "recipe": "Pixel-center nearest sampling; alpha<128 transparent, otherwise nearest RGB palette entry with alpha255. 16 PPU, unit scale, Point/uncompressed/no mipmaps; stable sprite IDs. Reuses SluiceCrank.png separately for maintenance tool; no new tool sprite."
+      }
+    },
+    {
+      "file": "Interactive/ForgeCarving_Source.png",
+      "tool": "built-in image_gen",
+      "prompt": "Use case: stylized-concept. One weathered stone smiths' carving sprite on transparent background for the attached clean top-down countryside pixel game. A low broad irregular rectangular gray-green stone tablet viewed slightly from above, subtle visible lower thickness edge. Ancient but modest roadside scale. Face has ONE simple deeply engraved hammer symbol (broad head, short handle) above three short carved tally grooves. Small chip off top right corner, tiny moss patch at bottom left. No text, letters, glowing runes, pedestal, framing or other objects. Intended native sprite 24x20 pixels, coarse consistent pixel grid as large nearest-neighbor enlargement. Broad flat shapes, crisp fluid cut contours and material-colored edges, no black outline. Six colors only: #48534F #657266 #8B967B #B1B69A #536848 #798952. Transparent background, generous margin, no ground, cast shadow, antialiasing, fog, blur, fine detail, noise or gradients.",
+      "native_export": {
+        "sprite": "ForgeCarving",
+        "source_crop_bottom_left": [
+          323,
+          290,
+          745,
+          570
+        ],
+        "canvas": "24x24",
+        "drawing": "24x18 at (0,3)",
+        "palette": [
+          "48534F",
+          "657266",
+          "8B967B",
+          "B1B69A",
+          "536848",
+          "798952"
+        ],
+        "path": "Assets/Art/Sprites/World/LowlandsRewards/LowlandsTraversal16.png",
+        "builder": "Assets/Editor/RewardPropArtBuilder.cs",
+        "recipe": "Pixel-center nearest sampling; alpha<128 transparent, otherwise nearest RGB palette entry with alpha255. 16 PPU, unit scale, Point/uncompressed/no mipmaps; stable sprite IDs. Reuses SluiceCrank.png separately for maintenance tool; no new tool sprite."
+      }
+    },
+    {
+      "file": "Interactive/TravelingTrader_Source.png",
+      "tool": "built-in image_gen",
+      "prompt": "Use case: stylized-concept. ONE traveling trader NPC sprite on genuinely transparent background for the attached top-down pixel game. Match the blue player's compact body proportions and clean 16-bit art, but a distinct peaceful older traveler: ochre hood and short brown cloak, muted green tunic, dark brown boots, leather shoulder satchel and small bronze belt clasp. Standing still facing south toward viewer, slightly top-down view, both hands visible resting calmly at waist. Small neutral face, graying beard. No weapons, walking stick, hat brim, goods, cart, ground or cast shadow. Intended NATIVE figure about 18 pixels wide by 26 pixels tall within a24x32 canvas, enlarged using one consistent coarse pixel grid. Crisp cut edges, broad flat pixel clusters, material-colored dark edge pixels. Maximum ten opaque colors: #393C39 #543F36 #826047 #B58C61 #DFC291 #A17D3D #E7B85C #536848 #798952 #A6AA8A. No glow, blur, antialiasing, gradients, dithering, fine texture, text, inset or second figure. The attached image is style/proportion reference only, do not reproduce scene.",
+      "native_export": {
+        "sprite": "TravelingTrader",
+        "source_crop_bottom_left": [
+          288,
+          267,
+          510,
+          910
+        ],
+        "canvas": "24x32",
+        "drawing": "16x28 at (4,2)",
+        "palette": [
+          "393C39",
+          "543F36",
+          "826047",
+          "B58C61",
+          "DFC291",
+          "A17D3D",
+          "E7B85C",
+          "536848",
+          "798952",
+          "A6AA8A"
+        ],
+        "path": "Assets/Art/Sprites/World/LowlandsRewards/LowlandsTrader16.png",
+        "builder": "Assets/Editor/RewardPropArtBuilder.cs",
+        "recipe": "Pixel-center nearest sampling; alpha<128 transparent, otherwise nearest RGB palette entry with alpha255. 16 PPU, unit scale, Point/uncompressed/no mipmaps. Visual child +.875 Y registers feet to trader root. Static NPC, no enemy art or new animation."
+      }
     }
   ]
 }

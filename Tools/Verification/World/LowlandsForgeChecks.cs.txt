@@ -1,0 +1,145 @@
+// C#6 Editor-bridge method body. "pure" is save-free. Live phases use the setup/cleanup
+// from GreenLowlandsGameplayChecks.cs.txt; NEVER run against a normal save.
+// Set Lowlands.Forge.Command=pure for the catalog checks. For live checks, erase Command,
+// set Lowlands.Forge.Phase=0 after entering GreenLowlands in the isolated bootstrap.
+// Run phases 0..7 with real frames between calls. Phase 0 leaves the reader open for visual QA.
+// After phase 7, STOP fully then re-enter the SAME bootstrap; phase 8 starts cold Continue.
+// Run phase 9, then 10 after New Game loads. Stop and use shared isolation cleanup.
+string prefix="Lowlands.Forge.";
+var flags=System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance;
+var checks=new System.Collections.Generic.List<string>();
+System.Action<bool,string> check=(ok,label)=>{if(!ok)throw new System.Exception("FAIL: "+label);checks.Add(label);};
+if(SessionState.GetString(prefix+"Command","")=="pure"){
+ for(int mask=0;mask<256;mask++){
+  var state=new RoadOfTheOldKing.Progression.ProgressState();int expected=0;
+  for(int site=1;site<=8;site++)if((mask&(1<<(site-1)))!=0){
+   RoadOfTheOldKing.Progression.ForgeInscriptionProgression.TryLearn(state,site);expected++;
+   state.completedIds.Add(RoadOfTheOldKing.Progression.ForgeInscriptionProgression.KnowledgeId(site));
+  }
+  state.Complete("forge/inscription/9");state.Complete("forge/inscription/01");state.Complete("forge/inscription/1-extra");
+  check(RoadOfTheOldKing.Progression.ForgeInscriptionProgression.Count(state)==expected &&
+   RoadOfTheOldKing.Progression.ForgeInscriptionProgression.HasRequiredKnowledge(state)==(expected>=6),"Distinct catalog subset "+mask);
+ }
+ var fresh=new RoadOfTheOldKing.Progression.ProgressState();
+ check(!RoadOfTheOldKing.Progression.ForgeInscriptionProgression.TryLearn(fresh,0)&&
+  !RoadOfTheOldKing.Progression.ForgeInscriptionProgression.TryLearn(fresh,9)&&
+  !RoadOfTheOldKing.Progression.ForgeInscriptionProgression.TryLearn(null,1)&&
+  RoadOfTheOldKing.Progression.ForgeInscriptionProgression.Count(null)==0,"Null and invalid site IDs rejected");
+ check(RoadOfTheOldKing.Progression.ForgeInscriptionProgression.TryLearn(fresh,8)&&
+  !RoadOfTheOldKing.Progression.ForgeInscriptionProgression.TryLearn(fresh,8),"First read once, reread idempotent");
+ bool migrated;var loaded=RoadOfTheOldKing.Progression.ProgressMigrations.Read(JsonUtility.ToJson(fresh),out migrated);
+ check(!migrated&&RoadOfTheOldKing.Progression.ForgeInscriptionProgression.Knows(loaded,8),"Current v3 JSON retains knowledge without migration");
+ var old=RoadOfTheOldKing.Progression.ProgressMigrations.Read("{\"version\":2,\"hasAxe\":true,\"sunShards\":3,\"completedIds\":[\"existing/milestone\"]}",out migrated);
+ check(migrated&&old.hasAxe&&old.sunShards==3&&old.Has("existing/milestone")&&
+  RoadOfTheOldKing.Progression.ForgeInscriptionProgression.Count(old)==0,"Older saves retain progress with no invented knowledge");
+ return new {passed=checks.Count,summary="All 256 subsets, duplicate/unknown IDs, rereads and save compatibility"};
+}
+if(!EditorApplication.isPlaying||!SessionState.GetBool("GreenLowlands.Gameplay.Active",false))throw new System.Exception("Isolated Play run required.");
+var game=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(game==null||game.StorageKey!=SessionState.GetString("GreenLowlands.Gameplay.Key","")||
+ !game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new System.Exception("Storage isolation mismatch.");
+Application.runInBackground=true;
+if(game.IsLoading)return "Wait for real scene transition.";
+int phase=SessionState.GetInt(prefix+"Phase",0);
+var save=new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(game.StorageKey);
+if(phase==5||phase==8){
+ check(phase==5?UnityEngine.SceneManagement.SceneManager.GetActiveScene().name=="Title":
+  string.IsNullOrEmpty(UnityEngine.SceneManagement.SceneManager.GetActiveScene().path),"Expected title/bootstrap");
+ if(phase==8)check(game.transform.Find("Forge verification session marker")==null&&
+  RoadOfTheOldKing.Progression.ForgeInscriptionProgression.Count(game.Progress)==1,"Fresh session loaded knowledge from storage");
+ check(game.Continue(),"Actual Continue starts load");
+}else if(phase==10){
+ check(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name=="Tutorial","New Game loads Tutorial");
+ check(RoadOfTheOldKing.Progression.ForgeInscriptionProgression.Count(game.Progress)==0&&
+  !game.Progress.Has("green-lowlands/workshop-cleared")&&RoadOfTheOldKing.Progression.ForgeInscriptionProgression.Count(save.Load())==0,"New Game resets learned knowledge and encounter");
+}else{
+ var player=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
+ check(player!=null&&player.gameObject.scene.name=="GreenLowlands","Regional player present");
+ var reader=player.GetComponent<RoadOfTheOldKing.UI.InscriptionReader>();
+ var source=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.ForgeInscription>(FindObjectsInactive.Include);
+ var locks=player.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>();
+ var body=player.GetComponent<Rigidbody2D>();
+ System.Action<Vector2> pose=at=>{player.transform.position=at;body.position=at;body.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();};
+ var interact=player.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>();
+ var fire=game.Checkpoints.Fires.First(f=>f.Id=="green-lowlands/arrival-fire");
+ if(phase==0){
+  check(reader!=null&&source!=null&&source.SiteNumber==1,"Shared Player reader and F1 exist");
+  check(RoadOfTheOldKing.Progression.ForgeInscriptionProgression.Count(game.Progress)==0,"Fresh isolated knowledge");
+  pose(new Vector2(134,77));check(!source.CanCollect(player)&&!source.TryCollect(player),"Missing workshop encounter blocks reading");
+  var encounter=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Progression.EncounterUnlock>(FindObjectsSortMode.None).First(e=>e.name.StartsWith("Workshop"));
+  encounter.GetType().GetMethod("TryUnlock",flags).Invoke(encounter,null);
+  check(!game.Progress.Has("green-lowlands/workshop-cleared"),"Empty guard list fails closed");
+  var guardA=new GameObject("Forge check guard A").AddComponent<RoadOfTheOldKing.Combat.Damageable>();
+  var guardB=new GameObject("Forge check guard B").AddComponent<RoadOfTheOldKing.Combat.Damageable>();
+  var guardField=encounter.GetType().GetField("guards",flags);
+  encounter.enabled=false;guardField.SetValue(encounter,new[]{guardA,guardB});encounter.enabled=true;
+  var hit=new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,1000,Vector2.up,0,0);
+  guardA.ReceiveHit(hit);check(!source.CanCollect(player),"One living guard still blocks carving");
+  guardB.ReceiveHit(hit);check(game.Progress.Has("green-lowlands/workshop-cleared")&&source.CanCollect(player),"Actual two-guard defeat unlocks reading");
+  encounter.enabled=false;guardField.SetValue(encounter,new RoadOfTheOldKing.Combat.Damageable[0]);encounter.enabled=true;
+  UnityEngine.Object.DestroyImmediate(guardA.gameObject);UnityEngine.Object.DestroyImmediate(guardB.gameObject);
+  pose(new Vector2(134,75));check(!source.TryCollect(player),"Distance is checked again on commit");
+  pose(new Vector2(134,77));
+  var wall=new GameObject("Forge access check wall");wall.transform.position=new Vector3(134,77.5f,0);wall.AddComponent<BoxCollider2D>().size=new Vector2(.5f,.15f);Physics2D.SyncTransforms();
+  try{check(!source.TryCollect(player),"Solid line of sight blocks reading through walls");}finally{UnityEngine.Object.DestroyImmediate(wall);Physics2D.SyncTransforms();}
+  object other=new object();locks.Lock(other);
+  try{check(!source.TryCollect(player),"Existing control lease blocks reading");}finally{locks.Unlock(other);}
+  var siteField=source.GetType().GetField("siteNumber",flags);siteField.SetValue(source,9);
+  try{check(!source.TryCollect(player),"Invalid authored site rejected");}finally{siteField.SetValue(source,1);}
+  var textField=source.GetType().GetField("inscriptionText",flags);var oldText=textField.GetValue(source);textField.SetValue(source," ");
+  try{check(!source.TryCollect(player),"Unwritten carving rejected");}finally{textField.SetValue(source,oldText);}
+  player.Health.SetHealth(55);player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().SetCharges(1);
+  SessionState.SetInt(prefix+"Coins",game.Progress.bronzeCoins);SessionState.SetInt(prefix+"Shards",game.Progress.sunShards);
+  SessionState.SetString(prefix+"Checkpoint",game.Progress.checkpointId);
+  check(interact.TryInteract()&&reader.IsOpen,"Real F selector opens the carving");
+  check(RoadOfTheOldKing.Progression.ForgeInscriptionProgression.Count(game.Progress)==1&&
+   RoadOfTheOldKing.Progression.ForgeInscriptionProgression.Count(save.Load())==1,"First reading is saved immediately");
+  check(RoadOfTheOldKing.UI.MenuStack.Top==reader&&Time.timeScale==0&&locks.IsLockedBy(reader),"Reader owns modal input, simulation pause and input lease");
+  check(source.gameObject.activeInHierarchy&&source.enabled,"Carving remains in world");
+  var chest=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.RewardChest>(FindObjectsSortMode.None).First(c=>c.RewardId=="green-lowlands/workshop-cache");
+  check(!chest.IsOpen&&game.Progress.bronzeCoins==SessionState.GetInt(prefix+"Coins",-1)&&game.Progress.sunShards==SessionState.GetInt(prefix+"Shards",-1),"Knowledge does not award chest, coins or shards");
+  check(player.Health.Health==55&&player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().Charges==1&&
+   game.Progress.checkpointId==SessionState.GetString(prefix+"Checkpoint",""),"Reading neither heals, refills nor changes checkpoint");
+ }else if(phase==1){
+  check(reader.IsOpen&&!interact.TryInteract(),"Reading cannot repeat through F while modal");
+  player.GetComponent<RoadOfTheOldKing.UI.PauseMenuController>().Toggle();
+  check(!reader.IsOpen&&!RoadOfTheOldKing.UI.MenuStack.IsAnyOpen&&Time.timeScale==1,"Escape routes to reader and resumes simulation");
+  check(locks.IsLockedBy(reader),"Closing frame retains only reader control lease");
+ }else if(phase==2){
+  check(!locks.IsLockedBy(reader)&&reader.CanOpen,"Following frame releases reader lease");
+  int records=game.Progress.completedIds.Count;
+  check(interact.TryInteract()&&reader.IsOpen&&records==game.Progress.completedIds.Count,"Reread opens without duplicate record");
+  object other=new object();locks.Lock(other);var otherPause=RoadOfTheOldKing.UI.SimulationPause.Acquire();
+  try{
+   reader.enabled=false;
+   check(!reader.IsOpen&&!RoadOfTheOldKing.UI.MenuStack.Contains(reader)&&!locks.IsLockedBy(reader),"Disabling reader cleans up its modal and lease");
+   check(locks.IsLockedBy(other)&&Time.timeScale==0,"Another owner's pause and controls survive cleanup");
+  }finally{locks.Unlock(other);otherPause.Dispose();reader.enabled=true;}
+  check(Time.timeScale==1,"Last pause owner restores simulation");
+ }else if(phase==3){
+  check(source.TryCollect(player),"Reader works after re-enable");
+  source.gameObject.SetActive(false);
+ }else if(phase==4){
+  check(!reader.IsOpen&&!locks.IsLockedBy(reader)&&Time.timeScale==1,"Removing source closes safely on next frame");
+  source.gameObject.SetActive(true);
+  pose(new Vector2(15.5f,3));check(game.Checkpoints.Rest(fire),"Real rest records regional checkpoint");
+  check(RoadOfTheOldKing.Progression.ForgeInscriptionProgression.Count(game.Progress)==1,"Rest retains knowledge");
+  new GameObject("Forge verification session marker").transform.SetParent(game.transform,false);
+  check(game.ReturnToTitle(),"Real Main Menu saves and unloads region");
+ }else if(phase==6){
+  check(RoadOfTheOldKing.Progression.ForgeInscriptionProgression.Knows(game.Progress,1)&&source.gameObject.activeInHierarchy,"Continue restores knowledge and persistent carving");
+  pose(new Vector2(134,77));check(source.TryCollect(player),"Restored carving remains rereadable");
+  player.Health.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.EnemyMelee,10000,Vector2.down,0,0));
+ }else if(phase==7){
+  check(!player.IsAlive&&!reader.IsOpen&&!locks.IsLockedBy(reader),"Death cleans up reader and gameplay lock");
+  check(RoadOfTheOldKing.Progression.ForgeInscriptionProgression.Knows(game.Progress,1),"Death retains permanent knowledge");
+  game.Checkpoints.Respawn();check(game.IsLoading,"Actual respawn starts checkpoint reload");
+ }else if(phase==9){
+  check(RoadOfTheOldKing.Progression.ForgeInscriptionProgression.Knows(game.Progress,1),"Cold Continue retains knowledge");
+  pose(new Vector2(134,77));check(source.CanCollect(player),"Cold Continue retains encounter and allows reread");
+  game.StartNewRun();check(game.IsLoading,"New Game starts actual reset/load");
+ }else return "All live phases complete.";
+}
+SessionState.SetInt(prefix+"Phase",phase+1);
+SessionState.SetInt(prefix+"Passed",SessionState.GetInt(prefix+"Passed",0)+checks.Count);
+return new {phase,passed=checks.Count,checks=checks.ToArray(),next=phase==7?"Let respawn settle; inspect alive player, then STOP fully and re-enter same bootstrap.":phase==10?"STOP and run shared cleanup.":"Allow real frames, then run next phase."};

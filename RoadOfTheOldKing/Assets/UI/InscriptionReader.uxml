@@ -1,0 +1,15 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="MenuTheme.uss" />
+    <ui:Style src="OrnateMenu.uss" />
+    <ui:Style src="InscriptionReader.uss" />
+    <ui:VisualElement name="inscription-overlay" class="menu-overlay">
+        <ui:VisualElement name="inscription-panel" class="menu-panel ornate-panel bronze-frame">
+            <ui:Label name="heading" class="menu-heading" />
+            <ui:VisualElement class="menu-divider" />
+            <ui:Label name="body" class="menu-text" />
+            <ui:Label name="knowledge" class="menu-meta" />
+            <ui:Button name="close" text="Leave" class="menu-button selected" />
+            <ui:Label text="Esc / Enter Leave" class="menu-hint" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

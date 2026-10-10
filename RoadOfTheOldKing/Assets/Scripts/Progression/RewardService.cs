@@ -5,9 +5,8 @@ using RoadOfTheOldKing.World;
 
 namespace RoadOfTheOldKing.Progression
 {
-    // Shards, hearts, coins, owned tools and purchases: small operations over the session's progress
-    // that save and then raise presentation events. The rules live in HeartFragmentProgression and
-    // WeaponUpgradeProgression.
+    // Rewards, knowledge and purchases: small operations over the session's progress that save
+    // and raise presentation events where needed. Pure progression classes own their rules.
     public sealed class RewardService
     {
         private readonly GameSession session;
@@ -29,6 +28,14 @@ namespace RoadOfTheOldKing.Progression
         public event Action<WorldTool> ToolCollected;
 
         private bool CanAward => !session.IsLoading && session.Player != null && session.Player.IsAlive;
+
+        public bool TryLearnInscription(ForgeInscription inscription, PlayerHealth player)
+        {
+            if (!CanAward || player != session.Player || inscription == null || !inscription.CanCollect(player) ||
+                !ForgeInscriptionProgression.TryLearn(session.Progress, inscription.SiteNumber)) return false;
+            session.CaptureAndSave("Inscription remembered.");
+            return true;
+        }
 
         public CoinSourceRecord RevealCoinSource(string sourceId, int guaranteedCoins)
         {

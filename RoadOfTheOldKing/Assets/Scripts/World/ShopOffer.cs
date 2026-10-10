@@ -1,3 +1,4 @@
+using System.Linq;
 using RoadOfTheOldKing.Player;
 using RoadOfTheOldKing.Progression;
 using RoadOfTheOldKing.UI;
@@ -7,7 +8,7 @@ namespace RoadOfTheOldKing.World
 {
     public enum ShopReward { Tool, HeartFragment }
 
-    // One authored, finite offer. A full merchant menu can later present this same transaction.
+    // One authored finite offer. A merchant presents the same saved transaction.
     public sealed class ShopOffer : WorldPickup, IProgressParticipant
     {
         [SerializeField] private string offerId, rewardId;
@@ -15,6 +16,8 @@ namespace RoadOfTheOldKing.World
         [SerializeField] private WorldTool tool;
         [SerializeField, Min(1)] private int price = 30;
         [SerializeField] private GameObject stockVisual, soldVisual;
+        [SerializeField] private Trader merchant;
+        public Trader Merchant => merchant;
         public string OfferId => offerId;
         public string RewardId => rewardId;
         public ShopReward Reward => reward;
@@ -28,7 +31,9 @@ namespace RoadOfTheOldKing.World
         public override bool CanCollect(PlayerHealth player)
         {
             var game = GameSession.Instance;
-            return base.CanCollect(player) && HasClearAccess(player) && game != null && !game.IsLoading &&
+            bool accessible = merchant != null ? isActiveAndEnabled && merchant.Offers.Contains(this) && merchant.CanTradeFrom(player)
+                : base.CanCollect(player) && HasClearAccess(player);
+            return accessible && game != null && !game.IsLoading &&
                 price > 0 && !string.IsNullOrWhiteSpace(offerId) && !IsSold(game.Progress) &&
                 (reward == ShopReward.Tool ? tool != WorldTool.None && System.Enum.IsDefined(typeof(WorldTool), tool) :
                     reward == ShopReward.HeartFragment && !string.IsNullOrWhiteSpace(rewardId));
@@ -46,6 +51,7 @@ namespace RoadOfTheOldKing.World
             return bought;
         }
         public void CaptureProgress(ProgressState state) { }
+        protected override void OnEnable() { if (merchant == null) base.OnEnable(); }
         public void RestoreProgress(ProgressState state)
         {
             bool sold = IsSold(state);

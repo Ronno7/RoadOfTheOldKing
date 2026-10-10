@@ -18,6 +18,7 @@ namespace RoadOfTheOldKing.World
         [SerializeField] private string requiredMilestone;
         [SerializeField] private GameObject closedVisual;
         [SerializeField] private GameObject openVisual;
+        [SerializeField] private RewardChestSpriteView spriteView;
         public bool IsOpen { get; private set; }
         public string RewardId => rewardId;
         public override string Prompt => "Open chest";
@@ -44,6 +45,7 @@ namespace RoadOfTheOldKing.World
             };
             // Also reconcile a reward granted elsewhere under the same unique ID.
             RestoreProgress(session.Progress);
+            if (awarded && spriteView != null) spriteView.PlayOpening();
             return awarded;
         }
 
@@ -59,6 +61,7 @@ namespace RoadOfTheOldKing.World
             };
             if (closedVisual != null) closedVisual.SetActive(!IsOpen);
             if (openVisual != null) openVisual.SetActive(IsOpen);
+            if (spriteView != null) spriteView.SetOpen(IsOpen);
         }
     }
 }

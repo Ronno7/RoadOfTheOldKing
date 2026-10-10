@@ -14,6 +14,8 @@ namespace RoadOfTheOldKing.World
     {
         public VegetationLayout layout;
         public Shader vegetationShader;
+        [Tooltip("Draw above this scene's ground surfaces; foreground depth still follows the player.")]
+        public int groundSortingOrder = 35;
         public Transform interactor;
         private const int ChunkSize = 8, TouchCount = 8;
         private readonly Dictionary<Vector2Int, List<Chunk>> cells = new Dictionary<Vector2Int, List<Chunk>>();
@@ -128,7 +130,7 @@ namespace RoadOfTheOldKing.World
                     chunk.gameObject.transform.SetParent(transform,false);
                     chunk.renderer=chunk.gameObject.AddComponent<MeshRenderer>();
                     chunk.renderer.sharedMaterial=materials[texture];
-                    chunk.renderer.sortingLayerName="Ground"; chunk.renderer.sortingOrder=35;
+                    chunk.renderer.sortingLayerName="Ground"; chunk.renderer.sortingOrder=groundSortingOrder;
                     chunk.renderer.shadowCastingMode=ShadowCastingMode.Off; chunk.renderer.receiveShadows=false;
                     chunk.renderer.lightProbeUsage=LightProbeUsage.Off; chunk.renderer.reflectionProbeUsage=ReflectionProbeUsage.Off;
                     chunk.mesh=new Mesh { name="Vegetation chunk", hideFlags=HideFlags.HideAndDontSave };

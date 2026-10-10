@@ -1,5 +1,5 @@
 // C#6 execute_code method body. First use GreenLowlandsGameplayChecks setup, enter
-// Play, and load Tutorial through its isolated GameSession. Run after the load settles.
+// Play, and load Tutorial or GreenLowlands through its isolated GameSession. Run after the load settles.
 // This creates an identity field at remote coordinates and exercises the equipped
 // axe on a known Tutorial meadow patch. It restores player position/control/stamina,
 // regrows the authored field, never edits layout assets or calls CheckpointService.Rest/save,
@@ -13,10 +13,11 @@ if(!SessionState.GetBool(prefix+"Active",false)||session==null||
     !expectedKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands.")||
     (string)session.GetType().GetField("saveKey",flags).GetValue(session)!=expectedKey||session.IsLoading)
     throw new System.Exception("Requires the settled GreenLowlandsGameplayChecks isolated session.");
-if(UnityEngine.SceneManagement.SceneManager.GetActiveScene().path!="Assets/Scenes/Tutorial.unity")
-    throw new System.Exception("Load Tutorial in the isolated session first.");
+string scenePath=UnityEngine.SceneManagement.SceneManager.GetActiveScene().path;
+bool lowlands=scenePath=="Assets/Scenes/GreenLowlands.unity";
+if(!lowlands&&scenePath!="Assets/Scenes/Tutorial.unity")throw new System.Exception("Load Tutorial or GreenLowlands in the isolated session first.");
 var authored=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.InteractiveVegetation>(FindObjectsSortMode.None)
-    .FirstOrDefault(f=>f.gameObject.scene.path=="Assets/Scenes/Tutorial.unity"&&f.layout!=null&&f.vegetationShader!=null);
+    .FirstOrDefault(f=>f.gameObject.scene.path==scenePath&&f.layout!=null&&f.vegetationShader!=null);
 if(authored==null)throw new System.Exception("Tutorial needs an authored vegetation field.");
 var species=authored.layout.species.FirstOrDefault(s=>s!=null&&s.leaves!=null&&
     s.leaves.Count(l=>l!=null&&l.sprite!=null)>=2);
@@ -41,6 +42,8 @@ System.Action<RoadOfTheOldKing.Weapons.WeaponSweep> observe=sweep=>{
 };
 RoadOfTheOldKing.Weapons.WeaponSweep.Raised+=observe;
 try{
+    check(authored.groundSortingOrder==(lowlands?55:35),"Scene-specific ground order preserves Tutorial and clears Lowlands terrain");
+    check(authored.GetComponentsInChildren<MeshRenderer>().Where(r=>r.name.StartsWith("Vegetation chunk")).All(r=>r.sortingLayerName=="Ground"&&r.sortingOrder==authored.groundSortingOrder),"Every ground batch uses the configured order");
     Vector2 origin=new Vector2(1000,1000);
     source=new GameObject("Vegetation verification source");created.Add(source);source.transform.position=origin;
     source.AddComponent<CircleCollider2D>().radius=.15f;
@@ -225,7 +228,10 @@ try{
     var equipped=player.Weapon;
     var stamina=player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>();
     var motorBody=player.GetComponent<Rigidbody2D>();
-    int targetIndex=System.Array.FindIndex(authored.layout.plants,p=>p.position.x>=10&&p.position.x<=15&&p.position.y>=38&&p.position.y<=42);
+    int targetIndex=System.Array.FindIndex(authored.layout.plants,p=>lowlands
+        ? p.position.x>=76&&p.position.x<=92&&p.position.y>=27&&p.position.y<=37&&
+          !Physics2D.OverlapCircleAll(p.position-Vector2.right*.75f,.4f).Any(c=>c.enabled&&!c.isTrigger&&(c.attachedRigidbody==null||c.attachedRigidbody.bodyType==RigidbodyType2D.Static))
+        : p.position.x>=10&&p.position.x<=15&&p.position.y>=38&&p.position.y<=42);
     if(targetIndex<0||stamina==null||motorBody==null)throw new System.Exception("Expected player components and meadow patch are missing.");
     Vector3 savedPosition=player.transform.position;
     Vector2 savedBodyPosition=motorBody.position,savedVelocity=motorBody.linearVelocity,savedAim=equipped.AimDirection;

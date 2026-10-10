@@ -4,7 +4,7 @@
 
 This guide explains how Road of the Old King works at runtime: its major systems, which component owns what, and how they communicate. The enabled build scenes are `Title`, `Tutorial` and `GreenLowlands`, in that order. `PrototypeLoop.unity` is a retired mechanics sandbox kept for reference, and `MovementPlayground.unity` is a small movement test scene.
 
-**Status:** the Tutorial is playable end to end: movement, axe pickup, throwing, melee, the first wolf, healing, the Recall awakening, a wolf pack, a Sun Shard and a bonfire. Its exit now leads to the Green Lowlands arrival pocket, with a return route, regional bonfire, cross-scene travel, respawn and Continue. Green Lowlands now includes a regional blockout with an owned-crank Recall puzzle, coins, pots, chests, finite stock offers and a persistent workshop rope route. Enemies, final art and first upgrade integration remain unfinished. HUD and menus use the shared pixel font and frames.
+**Status:** the Tutorial is playable end to end: movement, axe pickup, throwing, melee, the first wolf, healing, the Recall awakening, a wolf pack, a Sun Shard and a bonfire. Its exit now leads to a Green Lowlands border road with two separated easy wolves before the farm bonfire, plus a return route, cross-scene travel, respawn and Continue. Green Lowlands now includes a regional blockout with an owned-crank Recall puzzle, coins, pots, chests, finite stock offers and a persistent workshop rope route. Core regional encounters, final art and first upgrade integration remain unfinished. HUD and menus use the shared pixel font and frames.
 
 [Architecture](#architecture) · [Player](#player) · [Combat](#combat) · [Enemies](#enemies) · [Progression and saving](#progression-and-saving) · [World and interaction](#world-and-interaction) · [Tutorial](#tutorial) · [Camera](#camera) · [Presentation and UI](#presentation-and-ui) · [Tools](#tools-and-verification) · [Limitations](#current-limitations) · [Key files](#key-files)
 
@@ -95,7 +95,7 @@ Keyboard and mouse today; Xbox controller support is planned and not yet impleme
 | E | Tap to throw, hold to aim and release to throw; while the axe is away, Recall |
 | Q | Drink a healing flask |
 | F | Pick up, rest at a bonfire |
-| Tab | Status panel |
+| Tab | Inventory (pauses play) |
 | Alt (hold) | Look toward the cursor |
 | Mouse wheel | Zoom |
 | Esc | Pause |
@@ -247,7 +247,7 @@ The prototype `SimpleMeleeEnemy` (approach, windup, single strike, recovery) rem
 
 ## Progression and saving
 
-`GameSession` is one game-level session for every scene. Each playable scene contains the `GameSession` prefab so it can be played directly; the first instance survives scene loads through `DontDestroyOnLoad`, and later copies remove themselves, so the save key and upgrade tiers always come from the prefab. It owns the player's permanent progress and writes it through `IProgressStore` as one versioned JSON record in PlayerPrefs, which also works in the browser build. Two services hang off it: `CheckpointService` (rest, travel, scene exits, respawn and placing the player on load) and `RewardService` (shards, fragments, coins, tools and purchases).
+`GameSession` is one game-level session for every scene. Each playable scene contains the `GameSession` prefab so it can be played directly; the first instance survives scene loads through `DontDestroyOnLoad`, and later copies remove themselves, so the save key and upgrade tiers always come from the prefab. It owns the player's permanent progress and writes it through `IProgressStore` as one versioned JSON record in PlayerPrefs, which also works in the browser build. Two services hang off it: `CheckpointService` (rest, travel, scene exits, respawn and placing the player on load) and `RewardService` (shards, fragments, coins, tools, inscription knowledge and purchases).
 
 - **Versions.** `ProgressMigrations` reads any known save version and upgrades it step by step. Version 2 replaced the per-scene Tutorial save. Version 3 adds a wallet, owned tools and pending/exhausted coin sources; v1/v2 records retain earlier progress and start with an empty economy. Legacy-key migration keeps the original as a backup until New Game.
 - **Scene changes.** `SceneTransitions`, on the session, fades out with the world frozen and input locked, loads the scene and fades back in. The session places the arriving player at a named `SceneSpawnPoint` (or a fire, for travel), otherwise at the checkpoint fire if it is in that scene.
@@ -306,16 +306,19 @@ sequenceDiagram
 - **Tilemaps.** Visual layers are separate from an invisible Collision map, and canopies and roofs draw on an Above Player layer. Elevation is visual only; everything shares one physics plane. See [World and tilemaps](World.md).
 - **Gameplay objects** live under each zone's `Interactive Objects`, usually as prefab instances; the persistent session, player and follow camera remain scene roots. The Recall seal combines scene-authored tilemaps with a gameplay component and collision.
 - **Interaction (F).** `PlayerBonfireInteraction` is the single interaction selector.
-  - It picks one nearby `WorldPickup` (axe, shard, fragment, tool, chest, crank or shop offer) first, otherwise a nearby bonfire. One press commits one thing.
+  - It picks one nearby `WorldPickup` (axe, shard, fragment, tool, chest, crank, inscription or shop offer) first, otherwise a nearby bonfire. One press commits one thing.
   - The HUD prompt reads the same selection, so it always matches what F will do.
   - Coins collect through a proximity trigger with a physical-access check; the owned axe is also retrieved by walking over it. Other rewards use F.
 - **Bonfires.** `Bonfire` holds a stable ID, a display name and a spawn point. Resting heals, refills stamina, returns the axe, resets enemies, sets the respawn point and saves. Discovered fires offer travel between them, including fires in other scenes; travel saves and respawns at the destination. The Lowlands Bonfire (`green-lowlands/arrival-fire`) supports rest/travel and upgrade previews, with purchases disabled. All bonfires inherit the same flame from the shared prefab; regional bases may vary. `BonfireSpriteView` samples discovery state and animates four native flame frames at 6 fps; the flame stays hidden before discovery and changes no gameplay state.
-- **Pots and chests.** `Breakable` raises one accepted-break event. `CoinSource` owns a saved result and pending pickup, with six brief ceramic flecks for feedback; pots stay broken after rest/reload. `RewardChest` supports fixed shard, fragment, coin or tool contents and restores opening from progression. `EncounterUnlock` saves a permanent guard-group milestone; empty or missing assignments fail closed.
+- **Pots and chests.** `Breakable` raises one accepted-break event. `CoinSource` owns a saved result and pending pickup, with six brief ceramic flecks for feedback; pots stay broken after rest/reload. `RewardChest` supports fixed shard, fragment, coin or tool contents and restores opening from progression. Its optional `RewardChestSpriteView` plays a .22-second three-pose opening after the immediate reward commit; restore displays the final pose without replay. `WorldPropDepth` sorts native chest/pot art against the player's fixed ground position. `EncounterUnlock` saves a permanent guard-group milestone; empty or missing assignments fail closed.
+- **Inscriptions.** `ForgeInscription` is a persistent, rereadable interaction with distance, solid-access and optional encounter checks. `RewardService` records the first reading; `ForgeInscriptionProgression` counts valid distinct catalog IDs in existing milestones. `InscriptionReader` uses shared menu routing and pause/control leases, including a closing-frame input shield. Knowledge appears only in the reader and Tab inventory, without a hidden-site checklist. The final forge upgrade and light-dependent interior inscriptions are not implemented.
 - **Regional sluice.** `RecallSluice` binds actual lodging and ordered return hits to one axe flight, moves the lodged axe on a carriage and saves service-diverted/pond-low states. Regional sockets require the maintenance crank; the separate proof retains installed cranks.
 - **Puzzle pieces.** `AxePuzzleTarget` turns hits into puzzle input. `ThrowRecallPuzzle` requires an outbound throw into its anchor, then a Recall through its switch, and can open a `PuzzleDoor`.
 - **Vegetation.** `InteractiveVegetation` renders a baked `VegetationLayout` in small spatial mesh groups sharing one atlas. Grass pairs two intact leaf sprites with independent phases; flowers and reeds use one sprite each. Continuous GPU rotation around bottom pivots combines wind with a bounded player trail, preserving UVs and source pixels while deliberately allowing smooth rotated pixel art. Nearby roots sort against the player's stable feet line through ground/foreground draws sharing the same mesh; distant foreground draws stay disabled. `WeaponSweep` reports actual axe damage intervals and traveled flight segments independently of hit receivers; nearby plants are cut without hit pause, collision or rewards. `VegetationDebris` throws atlas leaf fragments and soft green motes with smooth arcs, spin and fading, using a fixed 192-particle pool and one shared mesh with front/back draws. `IResetOnRest` restores the field and clears debris; cut state is not saved. Tutorial is the first placement, with density excluding paths and interaction clearings.
 
-`RopeAnchor` is a contextual F interaction at either end of a `RopeRoute`. The first valid use requires a purchased rope kit and saves a unique secured ID; subsequent trips cost nothing. `RopeRoute_Placeholder.prefab` provides paired anchor/rope visuals; each scene supplies a unique route ID and traversed cliff. The Green Lowlands workshop has a working two-way route, while its guarded reward remains locked until guards are assigned.
+`RopeAnchor` is a contextual F interaction at either end of a `RopeRoute`. The first valid use requires a purchased rope kit and saves a unique secured ID; subsequent trips cost nothing. `RopeRoute_Placeholder.prefab` now provides native stone/bronze anchors and a hemp span at 16 PPU; each scene supplies a unique route ID and traversed cliff. The Green Lowlands workshop has a working two-way route, while its guarded reward remains locked until guards are assigned.
+
+`Trader` provides one contextual F interaction. Merchant-owned `ShopOffer` objects leave the world-pickup registry and validate reach/solid access at their merchant; the original `RewardService.TryPurchase` still commits wallet, reward and stock together. `CollectionMenu` on the shared Player handles stock, purchase confirmation and Tab inventory through the shared menu stack and pause/control leases. Opening or browsing spends nothing; confirmation defaults to Back, unavailable purchases are disabled, and sold stock stays listed. Leaving reach, disabling the menu, death or a scene transition closes it. Capture-phase UI navigation suppression prevents a second native button activation after MenuStack handles Enter. [Stock preview](Art/GreenLowlands/green-lowlands-trader-menu.png) and [inventory preview](Art/GreenLowlands/green-lowlands-inventory.png).
 
 ## Tutorial
 
@@ -377,7 +380,7 @@ Presentation components read gameplay state and never change it, so art can be r
 - **Stamina arc:** in combat, stamina is a pixel arc over the hero (`PixelArc`, a world-space document) that fades in and out and sits just above the carried halberd: ochre-gold, red while in deficit, and its outline flashes when an action is refused.
 - **Prompt:** one `[F] <verb>` prompt above whatever the interaction selector chose.
 - **Contextual pieces:** a weapon-away chip, the cleave charge bar, up to three reward receipts and the single guide hint.
-- **Status:** Tab toggles a panel with health, stamina, flasks, shards, fragments, axe, Recall and upgrades.
+- **Inventory:** Tab opens `CollectionMenu`, a paused collection view of owned equipment, contextual tools, chosen upgrades and discovered smiths? knowledge. Coins, shards, fragment progress and health remain visible. Undiscovered tools/lore are omitted. Tab/Escape closes it with a one-frame input shield.
 
 Gameplay posts text through `HudNotifications` (receipts and the hint), and the HUD never writes gameplay state.
 
@@ -403,7 +406,7 @@ Gameplay posts text through `HudNotifications` (receipts and the hint), and the 
 
 ## Current limitations
 
-- Green Lowlands has a regional blockout and first economy slice; actual encounters, a dedicated inventory/trader interface, lantern/interiors, final art and first upgrade integration remain unfinished.
+- Green Lowlands has a regional blockout and first economy slice; core encounters beyond the two border wolves, lantern/interiors, final art and first upgrade integration remain unfinished.
 - Title/Continue and shared Settings exist; settings currently expose only the vitals preference.
 - Dedicated melee, cleave, catch, death and pickup body animations are still pending; their slots fall back to standing or locomotion. Throw, hurt, drink and seated rest have dedicated art.
 - Key names in hints come from a fixed table; rebinding isn't supported.
