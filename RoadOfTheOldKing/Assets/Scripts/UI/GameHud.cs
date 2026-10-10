@@ -1,12 +1,10 @@
 using System.Collections.Generic;
-using System.Text;
 using RoadOfTheOldKing.Combat;
 using RoadOfTheOldKing.Player;
 using RoadOfTheOldKing.Progression;
 using RoadOfTheOldKing.Weapons;
 using RoadOfTheOldKing.World;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
 namespace RoadOfTheOldKing.UI
@@ -17,7 +15,7 @@ namespace RoadOfTheOldKing.UI
     //  damage, healing or combat and hide after a hold once full and safe.
     //  Stamina otherwise is a pixel arc over the hero, shown only in combat.
     //  One interaction prompt beside the object the interaction selector actually chose.
-    //  Weapon-away chip, charge bar near the player, reward receipts, one Tutorial hint, Tab status.
+    //  Weapon-away chip, charge bar near the player, reward receipts, one Tutorial hint. Inventory lives in CollectionMenu.
     // The prompt, charge bar and stamina arc are world-space documents (WorldUIDocument); the rest is a screen panel.
     [DisallowMultipleComponent, RequireComponent(typeof(PlayerHealth))]
     public sealed class GameHud : MonoBehaviour
@@ -58,14 +56,14 @@ namespace RoadOfTheOldKing.UI
         // Corner art is authored in art pixels and drawn at 3 reference px each: the world's density at camera size 5.5.
         private const float HudPixel = 3f;
         private VisualElement root, vignette, vitals, healthBar, healthFill, staminaRow, staminaBar, staminaFill, staminaDebt, flaskRow;
-        private VisualElement weaponAway, chargeFill, receipts, hint, status;
+        private VisualElement weaponAway, chargeFill, receipts, hint;
         private readonly List<VisualElement> flaskIcons = new List<VisualElement>();
         private WorldUIDocument prompt, charge, staminaArc, tutorialCue;
         private Label tutorialText;
         private bool promptVisible;
         private PixelArc arc;
         private PlayerFlask flask;
-        private Label weaponAwayText, promptText, hintText, statusText;
+        private Label weaponAwayText, promptText, hintText;
         private PlayerHealth player;
         private Damageable playerDamageable;
         private PlayerStamina stamina;
@@ -76,9 +74,7 @@ namespace RoadOfTheOldKing.UI
         private float vitalsUntil, hurtAmount;
         private Texture2D vignetteTexture;
         private int receiptsVersion = -1;
-        private bool statusOpen;
         private float arcAlpha;
-        private readonly StringBuilder text = new StringBuilder(256);
 
         private void Awake()
         {
@@ -151,9 +147,8 @@ namespace RoadOfTheOldKing.UI
             arc = staminaArc.Q<PixelArc>("stamina-arc");
             receipts = root.Q("receipts");
             hint = root.Q("hint"); hintText = root.Q<Label>("hint-text");
-            status = root.Q("status"); statusText = root.Q<Label>("status-text");
-            foreach (var label in new[] { weaponAwayText, promptText, hintText, statusText }) label.enableRichText = true;
-            prompt.Show(false); charge.Show(false); staminaArc.Show(false); SetVisible(hint, false); SetVisible(status, false);
+            foreach (var label in new[] { weaponAwayText, promptText, hintText }) label.enableRichText = true;
+            prompt.Show(false); charge.Show(false); staminaArc.Show(false); SetVisible(hint, false);
             SetVisible(weaponAway, false);
             BuildVignette();
             return true;
@@ -199,9 +194,6 @@ namespace RoadOfTheOldKing.UI
             menuOpen |= DevToolsPanel.CapturesInput;
 #endif
             bool alive = player.IsAlive;
-            var keyboard = Keyboard.current;
-            if (keyboard != null && keyboard.tabKey.wasPressedThisFrame && !menuOpen && alive && Time.timeScale > 0f) statusOpen = !statusOpen;
-            if (menuOpen || !alive) statusOpen = false;
 
             UpdateVitals();
             UpdateStaminaArc(alive && !menuOpen);
@@ -213,8 +205,6 @@ namespace RoadOfTheOldKing.UI
             UpdateReceipts();
             SetVisible(receipts, alive && !menuOpen && !scripted && !EncounterState.InCombat && !HudNotifications.HintCompleted);
             UpdateHint(alive && !menuOpen && !scripted);
-            SetVisible(status, statusOpen);
-            if (statusOpen) UpdateStatus();
         }
 
         // Corner cluster: health, then stamina (only with the always-visible setting; otherwise stamina is
@@ -236,7 +226,7 @@ namespace RoadOfTheOldKing.UI
                 staminaBar.EnableInClassList("exhausted", stamina.IsExhausted);
             }
             UpdateFlasks();
-            if (healthRatio < 0.999f || EncounterState.InCombat || !player.IsAlive || statusOpen) Reveal();
+            if (healthRatio < 0.999f || EncounterState.InCombat || !player.IsAlive) Reveal();
             SetVisible(vitals, always || Time.time < vitalsUntil);
         }
 
@@ -405,41 +395,6 @@ namespace RoadOfTheOldKing.UI
             hint.EnableInClassList("completed", HudNotifications.HintCompleted);
             hintText.text = HudNotifications.Hint;
 
-        }
-
-        private void UpdateStatus()
-        {
-            text.Length = 0;
-            var health = player.Health;
-            if (health != null) text.Append("Health  ").Append(health.Health).Append(" / ").Append(health.MaxHealth).Append('\n');
-            if (stamina != null) text.Append("Stamina  ").Append(Mathf.FloorToInt(stamina.Current)).Append(" / ").Append(Mathf.RoundToInt(stamina.Maximum)).Append('\n');
-            var progress = GameSession.Instance != null ? GameSession.Instance.Progress : null;
-            if (progress != null)
-            {
-                text.Append("Bronze Coins  ").Append(progress.bronzeCoins).Append('\n');
-                foreach (var tool in progress.ownedTools) text.Append(WorldToolNames.Display(tool)).Append('\n');
-                text.Append("Sun Shards  ").Append(progress.sunShards).Append('\n');
-                int fragments = HeartFragmentProgression.Count(progress);
-                text.Append("Fragments  ").Append(fragments % HeartFragmentProgression.FragmentsPerHeart).Append("/").Append(HeartFragmentProgression.FragmentsPerHeart);
-                int bonus = HeartFragmentProgression.BonusHealth(progress);
-                if (bonus > 0) text.Append("  (+").Append(bonus).Append(" HP)");
-                text.Append('\n');
-            }
-            var weapon = combat != null ? combat.Weapon : null;
-            text.Append("Axe  ").Append(weapon == null ? "not yet found" : weapon.IsAway ? "away" : "in hand").Append('\n');
-            text.Append("Recall  ").Append(combat != null && combat.CanRecall ? "awakened" : "dormant").Append('\n');
-            if (flask != null) text.Append("Flasks  ").Append(flask.Charges).Append("/").Append(flask.MaxCharges).Append("  [").Append(ControlLabels.Get("heal")).Append("]\n");
-            if (GameSession.Instance != null)
-            {
-                bool any = false;
-                foreach (var upgrade in GameSession.Instance.Rewards.Upgrades.Selected)
-                {
-                    text.Append(any ? ", " : "Upgrades  ").Append(upgrade.displayName);
-                    any = true;
-                }
-                if (!any) text.Append("Upgrades  none yet");
-            }
-            statusText.text = text.ToString();
         }
 
         private static void SetVisible(VisualElement element, bool visible)

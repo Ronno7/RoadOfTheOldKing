@@ -65,8 +65,4 @@ Label { margin: 0; padding: 0; -unity-font-style: normal; }
 }
 #hint.completed #hint-text { color: rgb(231, 184, 92); }
 
-/* Status, toggled with Tab; readable without stopping play */
-#status { position: absolute; right: 12px; top: 60px; width: 240px; padding: 12px 15px; }
-#status-heading { font-size: 20px; color: rgb(231, 184, 92); }
 .divider { height: 3px; background-color: rgb(82, 83, 65); margin-top: 6px; margin-bottom: 9px; }
-#status-text { font-size: 20px; white-space: normal; }

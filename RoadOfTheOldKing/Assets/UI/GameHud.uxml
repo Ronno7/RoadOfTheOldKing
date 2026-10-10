@@ -31,10 +31,5 @@
         <ui:VisualElement name="hint" class="panel" picking-mode="Ignore">
             <ui:Label name="hint-text" picking-mode="Ignore" />
         </ui:VisualElement>
-        <ui:VisualElement name="status" class="panel" picking-mode="Ignore">
-            <ui:Label text="STATUS" name="status-heading" picking-mode="Ignore" />
-            <ui:VisualElement class="divider" picking-mode="Ignore" />
-            <ui:Label name="status-text" picking-mode="Ignore" />
-        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

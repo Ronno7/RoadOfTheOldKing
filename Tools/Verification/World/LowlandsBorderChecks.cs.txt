@@ -1,0 +1,109 @@
+// C#6 Editor bridge. Use GreenLowlandsGameplayChecks SETUP only, then Play and Continue
+// to Tutorial. Requires isolated save + cached paths from GreenLowlandsLayoutChecks.
+// Set Lowlands.Border.Phase=0, Passed=0; run phases 0..5 with real scene transitions.
+// Uses existing Tutorial wolves, staged positions/AI ticks and actual axe collision sweeps.
+// Phase 3 drives the real input/motor over the border road after defeating both wolves.
+// Stop fully, then shared isolation cleanup. Never run with normal progress.
+if(!EditorApplication.isPlaying)throw new System.Exception("Isolated Play Mode required");
+var game=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(game==null||game.StorageKey!=SessionState.GetString("GreenLowlands.Gameplay.Key","")||!game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new System.Exception("Isolation mismatch");
+if(game.IsLoading)return "Wait for transition";
+Application.runInBackground=true;
+int phase=SessionState.GetInt("Lowlands.Border.Phase",0);
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var logs=new System.Collections.Generic.List<string>();
+System.Action<bool,string> check=(ok,label)=>{if(!ok)throw new System.Exception("Phase "+phase+": "+label);logs.Add(label);};
+var player=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
+var body=player.GetComponent<Rigidbody2D>();
+var combat=player.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();
+System.Action<Vector2> pose=at=>{if(combat.Weapon!=null)combat.Weapon.CancelAction();player.transform.position=at;body.position=at;body.linearVelocity=Vector2.zero;combat.GetType().GetField("controlsActive",flags).SetValue(combat,true);Physics2D.SyncTransforms();};
+System.Action<RoadOfTheOldKing.World.SceneExit> cross=exit=>{pose(exit.transform.position);exit.GetType().GetMethod("OnTriggerEnter2D",flags).Invoke(exit,new object[]{player.GetComponent<Collider2D>()});};
+if(phase==0||phase==2||phase==4){
+ check(player.gameObject.scene.name=="Tutorial","Tutorial loaded");
+ var fire=game.Checkpoints.Fires.First(f=>f.Id=="tutorial/roadside-fire");
+ if(phase==0){
+  pose(fire.SpawnPosition);check(game.Checkpoints.Rest(fire),"Establish actual Tutorial checkpoint");
+  player.Health.SetHealth(42);player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().SetCharges(1);
+ }else if(phase==2){
+  check(Vector2.Distance(body.position,fire.SpawnPosition)<.1f&&player.IsAlive,"Death before the next fire returns to Tutorial checkpoint");
+ }else{
+  var spawn=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SceneSpawnPoint>(FindObjectsSortMode.None).First(s=>s.Id=="from-green-lowlands");
+  check(Vector2.Distance(body.position,spawn.transform.position)<.1f,"Reverse road exit reaches existing Tutorial arrival");
+  check(player.Health.Health==42&&player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().Charges==1,"Reverse transition preserves carried vitals");
+ }
+ cross(UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SceneExit>());
+ check(game.IsLoading,"Actual Tutorial exit begins region transition");
+}else{
+ check(player.gameObject.scene.name=="GreenLowlands","Lowlands loaded");
+ if(phase==1||phase==3||phase==5)check(Vector2.Distance(body.position,new Vector2(6,-58))<.1f,"Region enters at border road, clear of return trigger");
+ var wolves=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Combat.WolfAI>(FindObjectsSortMode.None).OrderBy(w=>w.name).ToArray();
+ if(phase==1){
+  check(wolves.Length==2&&wolves.All(w=>w.State==RoadOfTheOldKing.Combat.WolfState.Idle),"Two separated wolves idle outside arrival notice range");
+  check(player.Health.Health==42&&player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().Charges==1,"Border arrival preserves Tutorial damage and flask use");
+  check(game.Progress.checkpointId=="tutorial/roadside-fire"&&!game.Progress.HasFire("green-lowlands/arrival-fire"),"Road traversal has not rested or lit the next fire");
+  check(Vector2.Distance(wolves[0].transform.position,wolves[1].transform.position)>26&&
+   wolves.All(w=>Vector2.Distance(w.transform.position,new Vector2(14.5f,4))>25),"Encounter spacing and retreat from fire");
+  player.Health.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.EnemyMelee,10000,Vector2.down,0,0));
+  check(!player.IsAlive,"Actual defeat before Lowlands fire");
+  game.Checkpoints.Respawn();check(game.IsLoading,"Checkpoint respawn starts");
+ }else if(phase==3){
+  check(wolves.Length==2&&wolves.All(w=>w.GetComponent<RoadOfTheOldKing.Combat.Damageable>().MaxHealth==40),"Instances use reduced health; shared prefab remains separate");
+  player.DebugGodMode=true;
+  pose(new Vector2(6,-48));
+  foreach(var wolf in wolves)wolf.GetType().GetMethod("Tick",flags).Invoke(wolf,new object[]{.02f});
+  check(wolves[0].IsAware&&!wolves[1].IsAware,"First encounter notices without pulling second");
+  pose(new Vector2(15.5f,3));
+  for(int n=0;n<80;n++)wolves[0].GetType().GetMethod("Tick",flags).Invoke(wolves[0],new object[]{.02f});
+  check(wolves[0].State==RoadOfTheOldKing.Combat.WolfState.Return||wolves[0].State==RoadOfTheOldKing.Combat.WolfState.Idle,"First wolf gives up before the bonfire");
+  foreach(var wolf in wolves)wolf.ResetOnRest();
+  var axe=combat.Weapon;var simulate=axe.GetType().GetMethod("Simulate",flags);
+  foreach(var wolf in wolves){
+   // Synchronous weapon stepping cannot wait out real-time kill hit-stop between enemies.
+   var feedback=wolf.GetComponent<RoadOfTheOldKing.Combat.EnemyImpactFeedback>();bool feedbackEnabled=feedback.enabled;feedback.enabled=false;
+   try{
+   var hp=wolf.GetComponent<RoadOfTheOldKing.Combat.Damageable>();
+   pose((Vector2)wolf.transform.position+Vector2.down*5);
+   for(int attempt=0;attempt<3&&hp.IsAlive;attempt++){
+    player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>().Restore();
+    Vector2 aim=(Vector2)wolf.GetComponent<Collider2D>().bounds.center-(Vector2)player.transform.position;
+    check(axe.TryThrow(aim.normalized),"Actual axe throw accepted for "+wolf.name);
+    for(int t=0;t<100;t++){simulate.Invoke(axe,new object[]{.02f});Physics2D.SyncTransforms();}
+    if(axe.IsAway){check(axe.TryPlayerRecall(),"Actual Recall accepted");for(int t=0;t<100;t++)simulate.Invoke(axe,new object[]{.02f});}
+   }
+   check(!hp.IsAlive&&wolf.IsDefeated&&!wolf.GetComponent<Collider2D>().enabled,"Real axe sweeps defeat "+wolf.name+" and clear corpse collision");
+   }finally{feedback.enabled=feedbackEnabled;}
+  }
+  // Walk the entire connector with its actual native tile/prop collision after clearing both fights.
+  var route=SessionState.GetString("Lowlands.Layout.Path.high.BorderArrival","");
+  if(route=="")throw new System.Exception("Run geometry fixture first");
+  var points=route.Split(';').Select(s=>s.Split(',')).Select(a=>new Vector2(float.Parse(a[0],System.Globalization.CultureInfo.InvariantCulture),float.Parse(a[1],System.Globalization.CultureInfo.InvariantCulture))).Reverse().ToArray();
+  var motor=player.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>();var input=player.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();
+  var actions=(UnityEngine.InputSystem.InputActionMap)input.GetType().GetField("actions",flags).GetValue(input);
+  var oldDevices=actions.devices;var oldRouting=UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode;
+  var oldFocus=(bool)input.GetType().GetField("hasFocus",flags).GetValue(input);var oldPaused=(bool)input.GetType().GetField("paused",flags).GetValue(input);
+  var oldSimulation=Physics2D.simulationMode;var keyboard=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
+  System.Action<UnityEngine.InputSystem.Key[]> keys=held=>{UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState(held));UnityEngine.InputSystem.InputSystem.Update();input.GetType().GetField("hasFocus",flags).SetValue(input,true);input.GetType().GetMethod("Update",flags).Invoke(input,null);};
+  try{
+   UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=UnityEngine.InputSystem.InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+   actions.devices=new UnityEngine.InputSystem.InputDevice[]{keyboard};input.GetType().GetField("paused",flags).SetValue(input,false);Physics2D.simulationMode=SimulationMode2D.Script;
+   pose(points[0]);motor.GetType().GetField("freeVelocity",flags).SetValue(motor,Vector2.zero);bool walked=true;
+   for(int n=1;n<points.Length;n++){int frames=0;while(Vector2.Distance(body.position,points[n])>.065f&&frames++<80){
+    Vector2 delta=points[n]-body.position;var held=new System.Collections.Generic.List<UnityEngine.InputSystem.Key>();
+    if(delta.x>.025f)held.Add(UnityEngine.InputSystem.Key.D);else if(delta.x<-.025f)held.Add(UnityEngine.InputSystem.Key.A);
+    if(delta.y>.025f)held.Add(UnityEngine.InputSystem.Key.W);else if(delta.y<-.025f)held.Add(UnityEngine.InputSystem.Key.S);
+    keys(held.ToArray());motor.GetType().GetMethod("FixedUpdate",flags).Invoke(motor,null);Physics2D.Simulate(Time.fixedDeltaTime);
+   }if(frames>=80){walked=false;break;}}
+   keys(new UnityEngine.InputSystem.Key[0]);check(walked,"Real player input/motor traverses complete border road into farm");
+  }finally{keys(new UnityEngine.InputSystem.Key[0]);actions.devices=oldDevices;UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard);UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=oldRouting;input.GetType().GetField("hasFocus",flags).SetValue(input,oldFocus);input.GetType().GetField("paused",flags).SetValue(input,oldPaused);Physics2D.simulationMode=oldSimulation;}
+  check(game.Checkpoints.Rest(game.Checkpoints.Fires.First(f=>f.Id=="green-lowlands/arrival-fire")),"Next bonfire reached after road");
+  check(wolves.All(w=>w.State==RoadOfTheOldKing.Combat.WolfState.Idle&&w.GetComponent<RoadOfTheOldKing.Combat.Damageable>().Health==40&&w.GetComponent<Collider2D>().enabled),"Actual rest restores both wolves and their collision");
+  check(game.Progress.checkpointId=="green-lowlands/arrival-fire","Rest now records Lowlands checkpoint");
+  player.DebugGodMode=false;player.Health.SetHealth(42);player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().SetCharges(1);
+  cross(UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SceneExit>());check(game.IsLoading,"Actual southern border exit starts return");
+ }else if(phase==5){
+  check(!game.IsLoading&&wolves.All(w=>!w.IsAware),"Re-entry is settled and safe, with no trigger bounce");
+ }else return "Border phases complete";
+}
+SessionState.SetInt("Lowlands.Border.Phase",phase+1);
+SessionState.SetInt("Lowlands.Border.Passed",SessionState.GetInt("Lowlands.Border.Passed",0)+logs.Count);
+return new{phase,passed=logs.Count,checks=logs.ToArray()};

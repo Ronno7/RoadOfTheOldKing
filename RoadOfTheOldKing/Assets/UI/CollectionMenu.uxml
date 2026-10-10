@@ -1,0 +1,20 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="MenuTheme.uss" />
+    <ui:Style src="OrnateMenu.uss" />
+    <ui:Style src="CollectionMenu.uss" />
+    <ui:VisualElement name="collection-overlay" class="menu-overlay">
+        <ui:VisualElement name="collection-panel" class="menu-panel ornate-panel bronze-frame">
+            <ui:Label name="heading" class="menu-heading" />
+            <ui:Label name="balances" class="menu-meta" />
+            <ui:VisualElement class="menu-divider" />
+            <ui:Label name="context" class="menu-text" />
+            <ui:VisualElement name="collection-body">
+                <ui:ScrollView name="entry-scroll" mode="Vertical" horizontal-scroller-visibility="Hidden">
+                    <ui:VisualElement name="entries" />
+                </ui:ScrollView>
+                <ui:Label name="description" class="menu-description" />
+            </ui:VisualElement>
+            <ui:Label name="hint" class="menu-hint" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

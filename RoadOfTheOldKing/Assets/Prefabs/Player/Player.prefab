@@ -34,6 +34,8 @@ GameObject:
   - component: {fileID: 8916193356242753977}
   - component: {fileID: 637550051732109431}
   - component: {fileID: 8525511693263056149}
+  - component: {fileID: 2981494936759904667}
+  - component: {fileID: 4619141286165907218}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -547,6 +549,34 @@ MonoBehaviour:
   layout: {fileID: 9197481963319205126, guid: 21187f149d5dcc74fb103cca1e6ea226, type: 3}
   panelSettings: {fileID: 11400000, guid: e8d13b02f4a53d441b064a4b1cf6e2bf, type: 2}
   showDelay: 0.9
+--- !u!114 &2981494936759904667
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dcd9277d9409a7840b308d1283b74d43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.UI.InscriptionReader
+  layout: {fileID: 9197481963319205126, guid: ab386ae0c5708ef4d8d984a6dc9b0ecf, type: 3}
+  panelSettings: {fileID: 11400000, guid: e8d13b02f4a53d441b064a4b1cf6e2bf, type: 2}
+--- !u!114 &4619141286165907218
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7af4b465a4bc75e4a84ab1854d4dd28b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.UI.CollectionMenu
+  layout: {fileID: 9197481963319205126, guid: 398d2198fab6e404a8d77d3a128f3406, type: 3}
+  panelSettings: {fileID: 11400000, guid: e8d13b02f4a53d441b064a4b1cf6e2bf, type: 2}
 --- !u!1 &1007
 GameObject:
   m_ObjectHideFlags: 0

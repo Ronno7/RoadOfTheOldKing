@@ -1,0 +1,96 @@
+// Shared GreenLowlandsGameplayChecks isolated setup; Play/Continue to Tutorial.
+// Set Lowlands.Trader.Phase=0; run phases 0..10 with real frames/transitions between.
+// Phases 7..10 queue real-frame Enter events without manually polling; cleanup their keyboard on failure.
+// Phase 2 leaves stock open for capture. Staged funding/fragments use only the isolated key.
+// Stop fully and shared cleanup. No normal saves, builds or enemy changes.
+var game=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(!EditorApplication.isPlaying||game==null||game.IsLoading||game.StorageKey!=SessionState.GetString("GreenLowlands.Gameplay.Key","")||!game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new System.Exception("Settled isolated game required");
+var f=System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance;
+var p=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
+var menu=p.GetComponent<RoadOfTheOldKing.UI.CollectionMenu>();var combat=p.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();
+var locks=p.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>();var body=p.GetComponent<Rigidbody2D>();
+var pauseInput=p.GetComponent<RoadOfTheOldKing.UI.PauseMenuInput>();
+var checks=new System.Collections.Generic.List<string>();System.Action<bool,string> check=(ok,s)=>{if(!ok)throw new System.Exception("FAIL: "+s);checks.Add(s);};
+System.Action ready=()=>{combat.GetType().GetField("controlsActive",f).SetValue(combat,true);};ready();
+System.Action<Vector2> pose=at=>{body.position=at;p.transform.position=at;body.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();};
+System.Func<string,string> label=name=>((UnityEngine.UIElements.Label)menu.GetType().GetField(name,f).GetValue(menu)).text;
+System.Func<string[]> rows=()=>((System.Collections.Generic.IReadOnlyList<RoadOfTheOldKing.UI.PauseMenuAction>)typeof(RoadOfTheOldKing.UI.MenuList).GetField("actions",f).GetValue(menu.GetType().GetField("list",f).GetValue(menu))).Select(a=>a.Label).ToArray();
+int phase=SessionState.GetInt("Lowlands.Trader.Phase",0);
+var oldKeyboard=UnityEngine.InputSystem.Keyboard.current;var keyboard=phase<7?UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>():null;
+System.Action<UnityEngine.InputSystem.Key> press=key=>{
+ UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState());UnityEngine.InputSystem.InputSystem.Update();
+ UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState(key));UnityEngine.InputSystem.InputSystem.Update();
+ if(key==UnityEngine.InputSystem.Key.Tab)menu.GetType().GetMethod("Update",f).Invoke(menu,null);else pauseInput.GetType().GetMethod("PollInput",f).Invoke(pauseInput,null);
+ UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState());UnityEngine.InputSystem.InputSystem.Update();
+};
+try{
+ if(phase==0){
+  check(p.gameObject.scene.name=="Tutorial"&&menu!=null,"Tutorial inherits collection menu");
+  if(!menu.IsOpen)check(menu.OpenInventory(),"Inventory opens");
+  check(menu.IsOpen&&Time.timeScale==0&&locks.IsLockedBy(menu)&&RoadOfTheOldKing.UI.MenuStack.Top==menu,"Inventory owns pause, input and menu stack");
+  check(rows().SequenceEqual(new[]{"Axe","Flasks  3/3","Close"}),"Fresh pack contains only owned equipment");
+  check(!rows().Any(s=>s.Contains("lantern")||s.Contains("knowledge")),"Undiscovered tools and lore are not advertised");
+  check(!menu.OpenInventory()&&!p.GetComponent<RoadOfTheOldKing.UI.PauseMenuController>().Open(),"No overlapping modal");
+  press(UnityEngine.InputSystem.Key.Tab);check(!menu.IsOpen&&Time.timeScale==1&&locks.IsLockedBy(menu),"Tab closes while retaining same-frame input lease");
+  check(!menu.OpenInventory(),"Closing frame cannot reopen");
+ }else if(phase==1){
+  check(!locks.IsLocked,"Next frame releases inventory lease");press(UnityEngine.InputSystem.Key.Tab);check(menu.IsOpen,"Virtual Tab opens inventory");
+  press(UnityEngine.InputSystem.Key.Escape);check(!menu.IsOpen&&!p.GetComponent<RoadOfTheOldKing.UI.PauseMenuController>().IsOpen,"Escape closes top menu without opening pause");
+  game.Checkpoints.LeaveScene("Assets/Scenes/GreenLowlands.unity","from-tutorial");
+ }else if(phase==2){
+  var trader=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.Trader>();check(trader!=null&&trader.Offers.Count==2,"Regional trader owns two original offers");
+  check(!RoadOfTheOldKing.World.WorldPickup.Active.OfType<RoadOfTheOldKing.World.ShopOffer>().Any(),"Stock offers no longer compete as world interactions");
+  game.Progress.bronzeCoins=20;pose(new Vector2(10,2.3f));check(p.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>().TryInteract(),"Actual F selector opens trader");
+  check(menu.IsOpen&&Time.timeScale==0&&game.Progress.bronzeCoins==20,"Opening stock spends nothing");
+  menu.Submit();check(label("context").Contains("10 more"),"Insufficient funds explained");
+  menu.Navigate(1);menu.Submit();check(game.Progress.bronzeCoins==20&&!game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.RopeKit),"Disabled purchase cannot spend");
+  menu.Back();menu.Submit();menu.Submit();
+  check(label("heading")=="TRAVELING TRADER"&&game.Progress.bronzeCoins==20,"Confirmation defaults to Back");
+  press(UnityEngine.InputSystem.Key.Tab);check(menu.IsOpen,"Tab does not replace active trader with inventory");
+ }else if(phase==3){
+  menu.enabled=false;menu.enabled=true;ready();check(menu.OpenTrader(UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.Trader>()),"Fresh stocked menu for purchase checks");
+  game.Progress.bronzeCoins=100;
+  RoadOfTheOldKing.Progression.HeartFragmentProgression.TryCollect(game.Progress,"verification/trader/one");RoadOfTheOldKing.Progression.HeartFragmentProgression.TryCollect(game.Progress,"verification/trader/two");p.RestoreProgress(game.Progress);int hp=p.Health.MaxHealth;
+  menu.Submit();menu.Navigate(1);menu.Submit();check(game.Progress.bronzeCoins==70&&game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.RopeKit),"Confirmed rope transaction debits exactly 30");
+  check(rows()[0].Contains("Sold out"),"Purchased stock remains listed as sold");
+  menu.Submit();menu.Navigate(1);menu.Submit();check(game.Progress.bronzeCoins==70,"Sold item cannot be purchased again");menu.Back();
+  menu.Navigate(1);menu.Submit();menu.Navigate(1);menu.Submit();
+  check(game.Progress.bronzeCoins==10&&RoadOfTheOldKing.Progression.HeartFragmentProgression.Count(game.Progress)==3&&p.Health.MaxHealth==hp+20,"Fragment transaction grants third piece and health tier");
+  var saved=new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(game.StorageKey).Load();
+  check(saved.bronzeCoins==10&&saved.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.RopeKit)&&saved.Has("shop/purchased/green-lowlands/trader-fragment"),"Debit, ownership and finite stock persisted together");
+  check(rows().Take(2).All(s=>s.Contains("Sold out")),"Both finite offers exhausted");menu.Close();
+ }else if(phase==4){
+  ready();press(UnityEngine.InputSystem.Key.Tab);check(menu.IsOpen&&rows().Contains("Rope kit"),"Inventory reflects purchased contextual tool");
+  check(label("balances").Contains("10 Bronze Coins")&&label("balances").Contains("0/3 Fragments"),"Inventory balances read actual progression");
+  menu.enabled=false;check(Time.timeScale==1&&!locks.IsLocked&&RoadOfTheOldKing.UI.MenuStack.Top==null,"Disable releases modal and input lease");menu.enabled=true;
+  var trader=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.Trader>();ready();check(menu.OpenTrader(trader),"Sold-out trader remains accessible");
+  pose(new Vector2(5,3));menu.GetType().GetMethod("Update",f).Invoke(menu,null);check(!menu.IsOpen,"Leaving reach closes trade");
+ }else if(phase==5){
+  var trader=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.Trader>();check(!menu.OpenTrader(trader),"Remote trade rejected");
+  pose(new Vector2(10,2.3f));var obstacle=new GameObject("Trader verification wall");obstacle.transform.position=new Vector3(10,2.65f,0);var box=obstacle.AddComponent<BoxCollider2D>();box.size=new Vector2(1,.1f);Physics2D.SyncTransforms();
+  try{check(!menu.OpenTrader(trader),"Solid access obstruction rejects trade");}finally{UnityEngine.Object.DestroyImmediate(obstacle);Physics2D.SyncTransforms();}
+  pose(new Vector2(15.5f,3));check(game.Checkpoints.Rest(game.Checkpoints.Fires.First(x=>x.Id=="green-lowlands/arrival-fire")),"Actual rest succeeds");game.Checkpoints.RestartFromCheckpoint();
+ }else if(phase==6){
+  var trader=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.Trader>();
+  check(game.Progress.bronzeCoins==10&&trader.Offers.All(o=>o.IsSold(game.Progress)),"Reload retains wallet and sold stock");
+  pose(new Vector2(10,2.3f));ready();check(menu.OpenTrader(trader)&&rows().Take(2).All(s=>s.Contains("Sold out")),"Reloaded shop shows sold stock");
+  menu.enabled=false;menu.enabled=true;ready();check(menu.OpenInventory()&&rows().Contains("Rope kit"),"Reloaded pack retains owned tool");
+  check(p.Health.MaxHealth==120&&label("balances").Contains("10 Bronze Coins"),"Reloaded pack reflects earned health and wallet");
+ }else if(phase==7){
+  menu.enabled=false;menu.enabled=true;ready();pose(new Vector2(10,2.3f));
+  check(menu.OpenTrader(UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.Trader>()),"Real-frame keyboard probe opens stock");
+  var realKeyboard=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();SessionState.SetInt("Lowlands.Trader.Keyboard",realKeyboard.deviceId);
+  UnityEngine.InputSystem.InputSystem.QueueStateEvent(realKeyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.Enter));
+ }else if(phase==8){
+  check(label("heading")=="ROPE KIT","One real-frame Enter opens one confirmation, no native double-submit");
+  var realKeyboard=(UnityEngine.InputSystem.Keyboard)UnityEngine.InputSystem.InputSystem.GetDeviceById(SessionState.GetInt("Lowlands.Trader.Keyboard",0));
+  UnityEngine.InputSystem.InputSystem.QueueStateEvent(realKeyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState());
+ }else if(phase==9){
+  var realKeyboard=(UnityEngine.InputSystem.Keyboard)UnityEngine.InputSystem.InputSystem.GetDeviceById(SessionState.GetInt("Lowlands.Trader.Keyboard",0));
+  UnityEngine.InputSystem.InputSystem.QueueStateEvent(realKeyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.Enter));
+ }else if(phase==10){
+  var realKeyboard=UnityEngine.InputSystem.InputSystem.GetDeviceById(SessionState.GetInt("Lowlands.Trader.Keyboard",0));if(realKeyboard!=null)UnityEngine.InputSystem.InputSystem.RemoveDevice(realKeyboard);
+  check(label("heading")=="TRAVELING TRADER"&&game.Progress.bronzeCoins==10,"Second real-frame Enter activates Back once without debit");
+ }else return "Complete";
+ SessionState.SetInt("Lowlands.Trader.Phase",phase+1);return new{phase,passed=checks.Count,checks=checks.ToArray()};
+}finally{if(keyboard!=null){UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard);if(oldKeyboard!=null)oldKeyboard.MakeCurrent();}}

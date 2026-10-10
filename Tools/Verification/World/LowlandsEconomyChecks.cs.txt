@@ -1,3 +1,4 @@
+// Trader-menu input is covered by LowlandsTraderChecks; purchase phases here call original transactions at merchant reach.
 // Run stopped first for migration/geometry-independent checks. Live phases require the existing
 // GreenLowlandsGameplayChecks unsaved isolated bootstrap, Continued into GreenLowlands.
 // Execute phase 0, allow its real reload, then phase 1, allow death/respawn, then phase 2.
@@ -6,6 +7,80 @@
 var checks=new System.Collections.Generic.List<string>();
 System.Action<bool,string> check=(ok,label)=>{if(!ok)throw new System.Exception(label+" | "+string.Join("; ",checks.ToArray()));checks.Add(label);};
 var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+// Pickup-art slice: fresh isolated bootstrap -> Tutorial phase 0 -> Lowlands phase 1
+// -> Main Menu/Continue back to Lowlands phase 2 -> stop/cleanup. Never normal saves.
+if(EditorApplication.isPlaying&&SessionState.GetBool("Lowlands.Economy.PickupArt",false)){
+    var pg=RoadOfTheOldKing.Progression.GameSession.Instance;
+    if(pg==null||pg.IsLoading||pg.StorageKey!=SessionState.GetString("GreenLowlands.Gameplay.Key","")||!pg.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new System.Exception("Settled isolated pickup-art session required");
+    var hero=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
+    var rb=hero.GetComponent<Rigidbody2D>();
+    System.Action<Vector2> move=p=>{rb.position=p;hero.transform.position=p;rb.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();};
+    System.Func<GameObject,string,bool> native=(go,name)=>go.GetComponentsInChildren<SpriteRenderer>(true).Where(r=>r.enabled).All(r=>r.sprite.name==name&&r.sprite.pixelsPerUnit==16&&r.transform.lossyScale==Vector3.one&&r.color==Color.white&&r.drawMode==SpriteDrawMode.Simple);
+    int stage=SessionState.GetInt("Lowlands.Economy.PickupArtPhase",0);
+    if(stage==0){
+        check(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name=="Tutorial","Tutorial pickup-art phase");
+        var shard=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SunShardReward>();
+        var visual=(GameObject)shard.GetType().GetField("pickupVisual",flags).GetValue(shard);
+        check(native(visual,"SunShard"),"Tutorial inherits native shared Sun Shard art");
+        check(!shard.IsAvailable&&!visual.activeSelf,"pack reward artwork hidden until unlocked");
+        var first=(RoadOfTheOldKing.Combat.Damageable)shard.GetType().GetField("defeatSource",flags).GetValue(shard);
+        var rest=(RoadOfTheOldKing.Combat.Damageable[])shard.GetType().GetField("alsoDefeat",flags).GetValue(shard);
+        first.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(hero.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.up,0,0));
+        check(!shard.IsAvailable&&!visual.activeSelf,"first pack defeat does not reveal shard early");
+        foreach(var enemy in rest)enemy.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(hero.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.up,0,0));
+        check(shard.IsAvailable&&visual.activeSelf&&shard.transform.position==rest.Last().transform.position,"last pack defeat reveals native shard at fallen position");
+        move(shard.transform.position);int count=pg.Progress.sunShards;
+        check(shard.TryCollect(hero)&&pg.Progress.sunShards==count+1&&!visual.activeSelf,"Tutorial shard grants once and hides native art");
+        check(!shard.TryCollect(hero),"Tutorial shard cannot duplicate");
+        pg.Checkpoints.LeaveScene("Assets/Scenes/GreenLowlands.unity","from-tutorial");
+        SessionState.SetInt("Lowlands.Economy.PickupArtPhase",1);
+    }else if(stage==1){
+        check(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name=="GreenLowlands","regional pickup-art phase");
+        var shard=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SunShardReward>();
+        var visual=(GameObject)shard.GetType().GetField("pickupVisual",flags).GetValue(shard);
+        check(native(visual,"SunShard")&&visual.activeSelf,"regional shard uses same visible native art");
+        move(shard.transform.position);check(!shard.TryCollect(hero),"native shard still respects water-state gate");
+        pg.Progress.Complete("green-lowlands/sluice/pond-low");
+        UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RecallSluice>().RestoreProgress(pg.Progress);
+        int count=pg.Progress.sunShards;
+        check(shard.TryCollect(hero)&&pg.Progress.sunShards==count+1&&!visual.activeSelf,"accessible regional shard grants and hides once");
+        var heart=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.HeartFragmentPickup>(FindObjectsSortMode.None).First(h=>h.name=="H1 fragment");
+        var heartVisual=(GameObject)heart.GetType().GetField("visual",flags).GetValue(heart);
+        check(native(heartVisual,"HeartFragment"),"heart fragment replaces enabled row blocks with native sprite");
+        move(heart.transform.position);int fragments=RoadOfTheOldKing.Progression.HeartFragmentProgression.Count(pg.Progress);
+        check(heart.TryCollect(hero)&&RoadOfTheOldKing.Progression.HeartFragmentProgression.Count(pg.Progress)==fragments+1&&!heartVisual.activeSelf,"heart grants once and hides native art");
+        check(!heart.TryCollect(hero),"heart cannot duplicate");
+        var practice=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.CoinSource>(FindObjectsSortMode.None).First(s=>s.SourceId=="green-lowlands/practice-pot");
+        var coin=(GameObject)practice.GetType().GetField("coinVisual",flags).GetValue(practice);
+        check(native(coin,"BronzeCoin")&&!coin.activeSelf,"native coin remains hidden inside intact pot");
+        var pot=practice.GetComponentInChildren<RoadOfTheOldKing.Combat.Breakable>(true);
+        check(pot.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(hero.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,10,Vector2.up,0,0))&&coin.activeSelf,"breaking pot reveals native coin");
+        check(pg.Progress.FindCoinSource(practice.SourceId).amount==1&&!pg.Progress.FindCoinSource(practice.SourceId).collected,"coin art retains saved pending amount");
+        var ordinary=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.CoinSource>(FindObjectsSortMode.None).First(s=>s.SourceId=="green-lowlands/pot-01");
+        var randomState=UnityEngine.Random.state;
+        try{
+            int seed=0;for(;seed<1000;seed++){UnityEngine.Random.InitState(seed);if(UnityEngine.Random.value<.8f)break;}UnityEngine.Random.InitState(seed);
+            ordinary.GetComponentInChildren<RoadOfTheOldKing.Combat.Breakable>(true).ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(hero.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,10,Vector2.up,0,0));
+            check(pg.Progress.FindCoinSource(ordinary.SourceId).amount==0&&!((GameObject)ordinary.GetType().GetField("coinVisual",flags).GetValue(ordinary)).activeSelf,"empty pot roll never displays a coin");
+        }finally{UnityEngine.Random.state=randomState;}
+        check(pg.ReturnToTitle(),"real scene unload after native pickup collection");
+        SessionState.SetInt("Lowlands.Economy.PickupArtPhase",2);
+    }else{
+        var shard=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SunShardReward>();
+        check(shard.IsCollected&&!((GameObject)shard.GetType().GetField("pickupVisual",flags).GetValue(shard)).activeSelf,"reload keeps collected shard hidden");
+        var heart=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.HeartFragmentPickup>(FindObjectsSortMode.None).First(h=>h.name=="H1 fragment");
+        check(heart.IsCollected&&!((GameObject)heart.GetType().GetField("visual",flags).GetValue(heart)).activeSelf,"reload keeps collected heart hidden");
+        var pendingSource=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.CoinSource>(FindObjectsSortMode.None).First(s=>s.SourceId=="green-lowlands/practice-pot");
+        var coin=(GameObject)pendingSource.GetType().GetField("coinVisual",flags).GetValue(pendingSource);
+        check(pendingSource.IsRevealed&&coin.activeSelf&&native(coin,"BronzeCoin"),"reload restores native pending coin from broken pot");
+        move(pendingSource.transform.position);int wallet=pg.Progress.bronzeCoins;
+        check(pendingSource.TryCollect(hero)&&pg.Progress.bronzeCoins==wallet+1&&!coin.activeSelf,"pending bronze coin credits once and hides");
+        check(!pendingSource.TryCollect(hero)&&pg.Progress.bronzeCoins==wallet+1,"bronze coin cannot duplicate");
+    }
+    int total=SessionState.GetInt("Lowlands.Economy.PickupArtAssertions",0)+checks.Count;
+    SessionState.SetInt("Lowlands.Economy.PickupArtAssertions",total);
+    return new{stage=stage,passed=checks.Count,total=total,checks=checks.ToArray()};
+}
 if(!EditorApplication.isPlaying){
     bool migrated;
     string v2="{\"version\":2,\"hasAxe\":true,\"recallUnlocked\":true,\"checkpointId\":\"old-fire\",\"scenePath\":\"Assets/Scenes/Tutorial.unity\",\"fires\":[{\"id\":\"old-fire\",\"scenePath\":\"Assets/Scenes/Tutorial.unity\",\"displayName\":\"Old fire\",\"displayOrder\":1}],\"completedIds\":[\"shard/collected/old\",\"heart/collected/old\"],\"sunShards\":2,\"upgrades\":[{\"tierId\":\"tier-1\",\"upgradeId\":\"old-choice\"}]}";
@@ -40,6 +115,66 @@ System.Func<string,RoadOfTheOldKing.World.RewardChest> chest=id=>UnityEngine.Obj
 System.Func<string,RoadOfTheOldKing.World.ShopOffer> offer=id=>UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.ShopOffer>(FindObjectsSortMode.None).First(c=>c.OfferId=="green-lowlands/"+id);
 var fire=game.Checkpoints.Fires.First(f=>f.Id=="green-lowlands/arrival-fire");
 int phase=SessionState.GetInt("Lowlands.Economy.Phase",0);
+
+// Optional art-only regression slice in a fresh isolated bootstrap. Run phase 0,
+// Continue from Title after its real scene unload, then run phase 1. No enemy gates
+// are changed in authored data; the orchard milestone is staged in the test save.
+if(SessionState.GetBool("Lowlands.Economy.Art",false)){
+    var reward=chest("orchard");
+    var view=reward.GetComponentInChildren<RoadOfTheOldKing.World.RewardChestSpriteView>(true);
+    var sprite=view.GetComponentInChildren<SpriteRenderer>();
+    var artPhase=SessionState.GetInt("Lowlands.Economy.ArtPhase",0);
+    if(artPhase==0){
+        check(UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.RewardChestSpriteView>(FindObjectsInactive.Include,FindObjectsSortMode.None).Length==3,"three regional chests use native views");
+        check(sprite.sprite.name=="TimberChest_Closed"&&!view.enabled,"new chest settled closed without idle animation");
+        pose((Vector2)reward.transform.position-Vector2.up);
+        check(!reward.TryCollect(player)&&!reward.IsOpen&&sprite.sprite.name=="TimberChest_Closed","encounter gate retains closed art");
+        game.Progress.Complete("green-lowlands/orchard-cleared");
+        int shards=game.Progress.sunShards;
+        var at=sprite.transform.localPosition;var scale=sprite.transform.lossyScale;
+        check(interaction.TryInteract()&&reward.IsOpen&&game.Progress.sunShards==shards+1,"F grants chest reward once and starts presentation");
+        check(view.enabled&&sprite.sprite.name=="TimberChest_Closed","opening begins at closed pose");
+        check(!reward.TryCollect(player)&&game.Progress.sunShards==shards+1,"repeat input during opening cannot award twice");
+        view.GetType().GetMethod("Advance",flags).Invoke(view,new object[]{.1f});
+        check(sprite.sprite.name=="TimberChest_HalfOpen","opening reaches intermediate lid pose");
+        view.GetType().GetMethod("Advance",flags).Invoke(view,new object[]{.13f});
+        check(sprite.sprite.name=="TimberChest_Open"&&!view.enabled,"opening settles at open pose and stops updating");
+        check(sprite.transform.localPosition==at&&sprite.transform.lossyScale==scale&&scale==Vector3.one,"lid animation keeps native registration and scale");
+        view.PlayOpening();reward.RestoreProgress(game.Progress);
+        check(!view.enabled&&sprite.sprite.name=="TimberChest_Open","restoring progress snaps to final open state");
+        foreach(var depth in UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.WorldPropDepth>(FindObjectsSortMode.None)){
+            var anchor=(Transform)depth.GetType().GetField("groundAnchor",flags).GetValue(depth);
+            var art=depth.GetComponent<SpriteRenderer>();var hero=player.GetComponentInChildren<SpriteRenderer>();
+            pose((Vector2)anchor.position+Vector2.up*.5f);depth.GetType().GetMethod("LateUpdate",flags).Invoke(depth,null);
+            check(art.sortingLayerID==hero.sortingLayerID&&art.sortingOrder>hero.sortingOrder,"north-side player behind "+anchor.name);
+            pose((Vector2)anchor.position-Vector2.up*.5f);depth.GetType().GetMethod("LateUpdate",flags).Invoke(depth,null);
+            check(art.sortingOrder<hero.sortingOrder,"south-side player in front of "+anchor.name);
+        }
+        var practice=source("practice-pot");var pot=practice.GetComponentInChildren<RoadOfTheOldKing.Combat.Breakable>(true);
+        check(pot.GetComponentsInChildren<SpriteRenderer>(true).Count(r=>r.enabled)==1,"native pot replaces both placeholder renderers");
+        pose(new Vector2(17.5f,3.5f));player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>().Restore();
+        check(axe.TryThrow(Vector2.up),"throw at native practice pot accepted");
+        for(int i=0;i<80;i++){axe.GetType().GetMethod("Simulate",flags).Invoke(axe,new object[]{.02f});Physics2D.SyncTransforms();}
+        check(pot.IsBroken&&!pot.gameObject.activeSelf,"actual axe removes native pot with original hitbox");
+        check(game.Progress.FindCoinSource(practice.SourceId).amount==1&&!game.Progress.FindCoinSource(practice.SourceId).collected,"broken native pot retains pending guaranteed coin");
+        check(practice.GetComponentInChildren<ParticleSystem>().particleCount==6,"native pot keeps six bounded ceramic flecks");
+        check(game.ReturnToTitle(),"unload regional scene after reward and break");
+        SessionState.SetInt("Lowlands.Economy.ArtPhase",1);
+        SessionState.SetInt("Lowlands.Economy.ArtAssertions",checks.Count);
+        return new{passed=checks.Count,checks=checks.ToArray(),next="Continue from Title, wait for GreenLowlands, run art slice again."};
+    }
+    check(reward.IsOpen&&sprite.sprite.name=="TimberChest_Open"&&!view.enabled,"real scene reload restores open chest without animation");
+    pose((Vector2)reward.transform.position-Vector2.up);
+    check(!reward.TryCollect(player),"reloaded chest cannot duplicate reward");
+    var restored=source("practice-pot");var broken=restored.GetComponentInChildren<RoadOfTheOldKing.Combat.Breakable>(true);
+    check(broken.IsBroken&&!broken.gameObject.activeSelf,"reload keeps native pot broken");
+    check(game.Progress.FindCoinSource(restored.SourceId).amount==1&&!game.Progress.FindCoinSource(restored.SourceId).collected,"reload preserves uncollected drop");
+    pose(new Vector2(17.5f,4.85f));int coins=game.Progress.bronzeCoins;
+    check(restored.TryCollect(player)&&game.Progress.bronzeCoins==coins+1,"restored coin remains collectible once");
+    check(!restored.TryCollect(player),"restored coin cannot duplicate");
+    SessionState.SetInt("Lowlands.Economy.ArtPhase",2);
+    return new{passed=checks.Count,total=SessionState.GetInt("Lowlands.Economy.ArtAssertions",0)+checks.Count,checks=checks.ToArray(),next="Stop and bootstrap cleanup."};
+}
 
 if(phase>=4)return new{total=SessionState.GetInt("Lowlands.Economy.Assertions",0),next="Checks complete; inspect UI or clean up."};
 if(phase==3){
@@ -106,21 +241,21 @@ if(phase==0){
             check(record.amount==wanted&&UnityEngine.Random.state.Equals(rng),"existing source never rerolls or consumes RNG");
         }
     }finally{UnityEngine.Random.state=randomState;}
-    pose(new Vector2(77,54));check(!chest("orchard").CanCollect(player),"orchard chest fails closed without encounter");
+    pose(new Vector2(117,87));check(!chest("orchard").CanCollect(player),"orchard chest fails closed without encounter");
     var h2=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.HeartFragmentPickup>(FindObjectsSortMode.None).First(h=>h.RewardId=="green-lowlands/lower-recess");
-    pose(new Vector2(30.5f,56.5f));check(!h2.CanCollect(player),"lower fragment milestone gate blocks staged early access");
+    pose(new Vector2(30.5f,80.5f));check(!h2.CanCollect(player),"lower fragment milestone gate blocks staged early access");
     var sluice=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RecallSluice>();
     game.Progress.Complete("green-lowlands/sluice/distributor");sluice.RestoreProgress(game.Progress);
-    var crank=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SluiceCrank>(FindObjectsSortMode.None).OrderBy(c=>Vector2.Distance(c.transform.position,new Vector2(6,64))).First();
-    pose(new Vector2(6,64));check(!crank.TryCollect(player)&&sluice.Stage==RoadOfTheOldKing.World.SluiceStage.DistributorReleased,"unowned crank cannot divert released machinery");
-    pose(new Vector2(5,67.3f));check(interaction.TryInteract()&&game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank),"F acquires maintenance crank");
+    var crank=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SluiceCrank>(FindObjectsSortMode.None).OrderBy(c=>Vector2.Distance(c.transform.position,new Vector2(6,88))).First();
+    pose(new Vector2(6,88));check(!crank.TryCollect(player)&&sluice.Stage==RoadOfTheOldKing.World.SluiceStage.DistributorReleased,"unowned crank cannot divert released machinery");
+    pose(new Vector2(5,91.3f));check(interaction.TryInteract()&&game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank),"F acquires maintenance crank");
     check(!game.Rewards.TryCollectTool("duplicate-crank",RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank),"tool ownership deduplicates");
     game.Progress.completedIds.Remove("green-lowlands/sluice/distributor");sluice.RestoreProgress(game.Progress);
     System.Action<int> tick=count=>{for(int i=0;i<count;i++){sluice.GetType().GetMethod("FixedUpdate",flags).Invoke(sluice,null);Physics2D.SyncTransforms();axe.GetType().GetMethod("Simulate",flags).Invoke(axe,new object[]{.02f});}};
     System.Action<Vector2> lodge=p=>{pose(p);player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>().Restore();check(axe.TryThrow(Vector2.right),"sluice throw accepted");tick(90);check(axe.State==RoadOfTheOldKing.Weapons.AxeState.Stuck,"sluice actual lodging");};
     System.Action<Vector2> recall=p=>{stand(p);player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>().Restore();check(axe.TryPlayerRecall(),"sluice Recall accepted");tick(80);};
-    lodge(new Vector2(5,62));recall(new Vector2(6,66));stand(new Vector2(6,64));check(interaction.TryInteract()&&sluice.Stage==RoadOfTheOldKing.World.SluiceStage.ServiceDiverted,"owned crank F diverts service water");
-    lodge(new Vector2(5,50));stand(new Vector2(4.5f,52));check(interaction.TryInteract(),"owned crank F moves lodged carriage");tick(60);recall(new Vector2(4.5f,54));check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.PondLow,"owned-tool puzzle reaches permanent low water");
+    lodge(new Vector2(5,86));recall(new Vector2(6,90));stand(new Vector2(6,88));check(interaction.TryInteract()&&sluice.Stage==RoadOfTheOldKing.World.SluiceStage.ServiceDiverted,"owned crank F diverts service water");
+    lodge(new Vector2(5,74));stand(new Vector2(4.5f,76));check(interaction.TryInteract(),"owned crank F moves lodged carriage");tick(60);recall(new Vector2(4.5f,78));check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.PondLow,"owned-tool puzzle reaches permanent low water");
 
     // Temporary hit receivers exercise the real group event; no enemy asset is imported or authored.
     var group=new GameObject("Verification guards");group.SetActive(false);
@@ -134,25 +269,27 @@ if(phase==0){
         ga.ReceiveHit(hit);check(game.Progress.Has("green-lowlands/orchard-cleared"),"whole defeated group saves unlock");
         ga.RestoreHealth();gb.RestoreHealth();check(game.Progress.Has("green-lowlands/orchard-cleared"),"revived guards cannot relock stash");
     }finally{UnityEngine.Object.DestroyImmediate(group);}
-    pose(new Vector2(77,54.3f));int shards=game.Progress.sunShards;check(interaction.TryInteract()&&chest("orchard").IsOpen&&game.Progress.sunShards==shards+1,"F opens unlocked shard chest");
+    pose(new Vector2(117,87.3f));int shards=game.Progress.sunShards;check(interaction.TryInteract()&&chest("orchard").IsOpen&&game.Progress.sunShards==shards+1,"F opens unlocked shard chest");
     check(!chest("orchard").TryCollect(player),"opened shard chest cannot repeat");
-    pose(new Vector2(79,56));check(source("orchard-coins").TryCollect(player)&&game.Progress.bronzeCoins==20,"separate orchard bundle is ten fixed coins");
+    pose(new Vector2(119,89));check(source("orchard-coins").TryCollect(player)&&game.Progress.bronzeCoins==20,"separate orchard bundle is ten fixed coins");
     pose(new Vector2(33,30.2f));check(interaction.TryInteract()&&chest("basin-cache").IsOpen&&game.Progress.bronzeCoins==45,"basin coin chest completes fixed 45 budget");
     check(!chest("basin-cache").TryCollect(player)&&game.Progress.bronzeCoins==45,"coin chest cannot repeat");
-    pose(new Vector2(10,2.2f));check(interaction.TryInteract()&&game.Progress.bronzeCoins==15&&game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.RopeKit),"F buys rope for thirty");
+    pose(new Vector2(10,2.2f));check(offer("rope-kit").TryCollect(player)&&game.Progress.bronzeCoins==15&&game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.RopeKit),"Regional trader transaction buys rope for thirty");
     check(!offer("rope-kit").TryCollect(player)&&game.Progress.bronzeCoins==15,"owned finite tool cannot charge again");
-    pose(new Vector2(12.5f,2.2f));check(!offer("trader-fragment").TryCollect(player)&&game.Progress.bronzeCoins==15,"unaffordable fragment changes nothing");
+    pose(new Vector2(10,2.2f));check(!offer("trader-fragment").TryCollect(player)&&game.Progress.bronzeCoins==15,"unaffordable fragment changes nothing");
     check(!game.Rewards.TryCollectCoinCache("invalid",0)&&!game.Rewards.TryCollectCoinCache("invalid",-1),"nonpositive coin awards rejected");
     int balance=game.Progress.bronzeCoins;game.Progress.bronzeCoins=int.MaxValue-1;check(!game.Rewards.TryCollectCoinCache("overflow",5)&&!game.Progress.Has("coins/collected/overflow"),"overflow does not consume reward");game.Progress.bronzeCoins=balance;
     check(game.Rewards.TryCollectCoinCache("verification/trader-funding",100),"isolated test funding");
     foreach(var heart in UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.HeartFragmentPickup>(FindObjectsSortMode.None)){pose(heart.transform.position);check(heart.TryCollect(player),"collect reachable authored fragment "+heart.RewardId);}
-    pose(new Vector2(12.5f,2.2f));int oldMax=player.Health.MaxHealth;
-    check(interaction.TryInteract()&&game.Progress.bronzeCoins==55&&player.Health.MaxHealth==oldMax+20,"finite shop fragment completes heart and debits once");
+    pose(new Vector2(10,2.2f));int oldMax=player.Health.MaxHealth;
+    check(offer("trader-fragment").TryCollect(player)&&game.Progress.bronzeCoins==55&&player.Health.MaxHealth==oldMax+20,"finite shop fragment completes heart and debits once");
     check(!offer("trader-fragment").TryCollect(player)&&game.Progress.bronzeCoins==55,"sold fragment cannot charge or grant twice");
     stored=new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(game.StorageKey).Load();
     check(stored.bronzeCoins==55&&stored.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.RopeKit)&&stored.Has("shop/purchased/green-lowlands/trader-fragment")&&RoadOfTheOldKing.Progression.HeartFragmentProgression.Count(stored)==3,"purchase wallet/reward/stock persisted together");
-    var hud=RoadOfTheOldKing.UI.GameHud.Active;hud.GetType().GetMethod("UpdateStatus",flags).Invoke(hud,null);
-    var status=(UnityEngine.UIElements.Label)hud.GetType().GetField("statusText",flags).GetValue(hud);check(status.text.Contains("Bronze Coins  55")&&status.text.Contains("Rope kit")&&status.text.Contains("Maintenance crank"),"Tab status shows wallet and tools");
+    var collection=player.GetComponent<RoadOfTheOldKing.UI.CollectionMenu>();check(collection.OpenInventory(),"Inventory opens with earned items");
+    var balances=(UnityEngine.UIElements.Label)collection.GetType().GetField("balances",flags).GetValue(collection);
+    check(balances.text.Contains("55 Bronze Coins")&&game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.RopeKit)&&game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank),"Inventory uses shared wallet/tool state");
+    collection.enabled=false;collection.enabled=true;
     pose(fire.SpawnPosition);check(game.Checkpoints.Rest(fire),"rest accepted");
     check(source("pot-01").GetComponentInChildren<RoadOfTheOldKing.Combat.Breakable>(true).IsBroken&&game.Progress.FindCoinSource(source("pot-01").SourceId).collected,"rest retains broken empty pot");
     check(!game.Progress.FindCoinSource(source("pot-02").SourceId).collected,"rest retains uncollected five coins");

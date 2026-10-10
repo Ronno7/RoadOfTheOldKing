@@ -3,17 +3,22 @@
 ## Unreleased
 
 **Added**
+- Readable environmental lore with persistent discoveries and a shared reading interface.
 - Reusable exploration tools and contextual traversal interactions.
-- Bronze Coins, breakable pots, treasure chests and limited shop stock, with coins and tools shown in Tab status.
+- Bronze Coins, breakable pots, treasure chests and limited shop stock.
+- A paused Tab inventory for owned equipment and tools, plus a traveling trader with a stock menu and purchase confirmation.
 - Tools, coins and purchased stock persist through death and reload.
-- Tutorial grass, flowers and reeds sway, react to footsteps, draw in front of or behind the player, and can be cut by the axe with spinning airborne blades and green particles; resting restores them.
+- Tutorial and Green Lowlands grass, flowers and reeds sway, react to footsteps, draw in front of or behind the player, and can be cut by the axe with spinning airborne blades and green particles; resting restores them.
 - A title screen with Continue, New Game, Settings and Quit, and a Main Menu option in the pause menu.
 - A Settings page, reachable from the pause menu and the title, holding the vitals option.
 - Continue resumes exactly where you left off, with the health and flasks you had; dying still returns you to the bonfire.
-- The Tutorial road now reaches a Green Lowlands arrival area, with an abandoned farmstead, river crossing and a bonfire for resting, saving and travel between regions.
+- The Tutorial road now reaches Green Lowlands, with countryside encounters, an abandoned farmstead, river crossing and a bonfire for resting, saving and travel between regions.
 
 **Changed**
-- Expanded the Green Lowlands blockout with more room for exploration and combat.
+- Added native artwork for treasure chests, clay pots, Sun Shards, heart fragments and bronze coins, with a brief chest-opening animation and player-relative prop depth.
+- Replaced more interaction placeholders with native stonework, rope and tool artwork.
+- Enlarged Green Lowlands with winding paths, branching exploration routes and combat clearings, plus a short combat approach connecting the regions.
+- Added regional landscape art, woodland clusters, countryside landmarks, cliff faces and weathered stonework.
 - All bonfires share the new animated flame; regional bonfire bases can vary.
 - The bonfire menu has a new hearth look (oak beams, rope lashings and bronze trim) and is larger; the defeat screen has a bronze frame and carved heading.
 - The pause menu's Restart is now Return to bonfire; New Game moved to the title screen.
@@ -21,6 +26,7 @@
 - Respawning, restarting and starting a new game fade the screen out and back in.
 
 **Fixed**
+- Improved Green Lowlands height readability, with clearer woodland boundaries, ascent steps and corrected tree/fence footing.
 - Continue falls back to safe arrival/checkpoint footing when revised terrain obstructs a saved position, preserving saved health and flasks.
 - The player now renders in front of defeated enemies and bonfire flames; revived enemies recover their original sorting.
 

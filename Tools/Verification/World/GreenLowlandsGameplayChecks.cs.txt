@@ -107,14 +107,14 @@ if(command=="resume-safety"){
   if(stage==0){
    pose(new Vector2(15.5f,3));resumeCheck(game.Checkpoints.Rest(fire),"Checkpoint established before resume checks");
    var method=game.Checkpoints.GetType().GetMethod("TryResumeAt",flags);
-   resumeCheck((bool)method.Invoke(game.Checkpoints,new object[]{new Vector2(87,53)}),"Clear body-size resume accepted");
+   resumeCheck((bool)method.Invoke(game.Checkpoints,new object[]{new Vector2(127,77)}),"Clear body-size resume accepted");
    Vector2 original=body.position;
    resumeCheck(!(bool)method.Invoke(game.Checkpoints,new object[]{new Vector2(float.NaN,53)})&&body.position==original,"Nonfinite resume rejected without movement");
-   resumeCheck(!(bool)method.Invoke(game.Checkpoints,new object[]{new Vector2(88.5f,53)})&&body.position==original,"Solid cliff resume rejected without movement");
+   resumeCheck(!(bool)method.Invoke(game.Checkpoints,new object[]{new Vector2(128.5f,77)})&&body.position==original,"Solid cliff resume rejected without movement");
    var obstacle=new GameObject("Resume clearance verification");
-   try{obstacle.transform.position=new Vector3(87.55f,53,0);obstacle.AddComponent<BoxCollider2D>().size=new Vector2(.5f,1);Physics2D.SyncTransforms();resumeCheck(!(bool)method.Invoke(game.Checkpoints,new object[]{new Vector2(87,53)}),"Body edge overlap rejected even with clear center");}
+   try{obstacle.transform.position=new Vector3(127.55f,77,0);obstacle.AddComponent<BoxCollider2D>().size=new Vector2(.5f,1);Physics2D.SyncTransforms();resumeCheck(!(bool)method.Invoke(game.Checkpoints,new object[]{new Vector2(127,77)}),"Body edge overlap rejected even with clear center");}
    finally{UnityEngine.Object.DestroyImmediate(obstacle);Physics2D.SyncTransforms();}
-   resumePlayer.Health.SetHealth(55);flask.SetCharges(1);pose(new Vector2(88.5f,53));
+   resumePlayer.Health.SetHealth(55);flask.SetCharges(1);pose(new Vector2(128.5f,77));
    resumeCheck(game.ReturnToTitle(),"Blocked resume staged through actual Main Menu save");
   }else if(stage==2){
    resumeCheck(Vector2.Distance(body.position,fire.SpawnPosition)<.1f,"Blocked resume falls back to checkpoint footing");
