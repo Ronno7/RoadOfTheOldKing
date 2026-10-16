@@ -1,36 +1,44 @@
 # Changelog
 
-## Unreleased
+## 0.4 — Vertical slice
+
+### 0.4.8 — 2026-10-16 · Green Lowlands, exploration and economy
 
 **Added**
-- Readable environmental lore with persistent discoveries and a shared reading interface.
-- Reusable exploration tools and contextual traversal interactions.
-- Bronze Coins, breakable pots, treasure chests and limited shop stock.
-- A paused Tab inventory for owned equipment and tools, plus a traveling trader with a stock menu and purchase confirmation.
-- Tools, coins and purchased stock persist through death and reload.
-- Tutorial and Green Lowlands grass, flowers and reeds sway, react to footsteps, draw in front of or behind the player, and can be cut by the axe with spinning airborne blades and green particles; resting restores them.
-- A title screen with Continue, New Game, Settings and Quit, and a Main Menu option in the pause menu.
-- A Settings page, reachable from the pause menu and the title, holding the vitals option.
-- Continue resumes exactly where you left off, with the health and flasks you had; dying still returns you to the bonfire.
-- The Tutorial road now reaches Green Lowlands, with countryside encounters, an abandoned farmstead, river crossing and a bonfire for resting, saving and travel between regions.
+- Green Lowlands at the end of the Tutorial road: open countryside with winding paths, branching routes and combat clearings, an abandoned farmstead, a village, a river crossing and a bonfire for resting, saving and travel between regions.
+- Ancient waterworks that respond to the axe, with water that recedes in stages to reveal new ground.
+- A woodland approach and a dark interior lit only by lanterns, joined to the Lowlands by two-way passages, plus gates and bridges that stay open.
+- Mossback Boars with committed charges and recovery openings, and Road Scavengers that drop coins.
+- Bronze Coins from enemies, cut vegetation, breakable pots and treasure chests, spent at a traveling trader with limited stock and purchase confirmation.
+- Readable environmental lore with saved discoveries, and contextual traversal interactions with new exploration tools.
+- Grass, flowers and reeds in both regions sway, react to footsteps and can be cut by the axe; resting restores them.
+- Crisp pixel smoke from lit bonfires.
+- A title screen with Continue, New Game, Settings and Quit, and a Settings page in the pause menu and title holding the vitals option.
+- Continue resumes where you left off, with the health and flasks you had, on safe footing; dying still returns you to the bonfire.
 
 **Changed**
-- Added native artwork for treasure chests, clay pots, Sun Shards, heart fragments and bronze coins, with a brief chest-opening animation and player-relative prop depth.
-- Replaced more interaction placeholders with native stonework, rope and tool artwork.
-- Enlarged Green Lowlands with winding paths, branching exploration routes and combat clearings, plus a short combat approach connecting the regions.
-- Added regional landscape art, woodland clusters, countryside landmarks, cliff faces and weathered stonework.
-- All bonfires share the new animated flame; regional bonfire bases can vary.
-- The bonfire menu has a new hearth look (oak beams, rope lashings and bronze trim) and is larger; the defeat screen has a bronze frame and carved heading.
-- The pause menu's Restart is now Return to bonfire; New Game moved to the title screen.
-- One save now covers the whole game instead of a single area; existing saves carry over automatically.
+- One save now covers the whole game instead of a single area; existing saves carry over automatically. Tools, coins and purchases persist through death and reload.
+- Leaving and returning to an area keeps defeated enemies, wounded enemy health and cut vegetation until you rest or die; Continue starts encounters fresh.
+- Reworked the first weapon-upgrade choices and enabled purchases at the Lowlands bonfire; existing Sweeping Edge upgrades remain intact.
+- Charged cleaves build exponentially and slow walking to a crawl; hard obstacles need a fully charged release.
+- The returning axe becomes translucent cyan with a short spectral trail, turning solid again on catch.
+- Bonfires light on the first interaction; resting, healing and setting a checkpoint take a separate interaction. All bonfires share a new animated flame.
+- Rebuilt the Tutorial's art on a shared palette, with grounding shadows, a Recall stone outline and glimmer, and village buildings with thicker roofs, projecting entrances and recessed doors and windows.
+- Tutorial and Green Lowlands share a restrained daylight color finish with crisp pixel edges.
+- Sun Shards and heart fragments have new artwork and distinct idle and collection motion; chests and tools glint briefly.
+- Tab opens a paused inventory: a compact dark panel with carried-item icons and resource counts.
+- The bonfire menu has a larger hearth look of oak beams, rope lashings and bronze trim, which is reserved for bonfires; the defeat screen has a bronze frame and carved heading.
+- The pause menu's Restart is now Return to bonfire, with a new Main Menu option; New Game moved to the title screen.
 - Respawning, restarting and starting a new game fade the screen out and back in.
+- Softer collision against foliage.
 
 **Fixed**
-- Improved Green Lowlands height readability, with clearer woodland boundaries, ascent steps and corrected tree/fence footing.
-- Continue falls back to safe arrival/checkpoint footing when revised terrain obstructs a saved position, preserving saved health and flasks.
-- The player now renders in front of defeated enemies and bonfire flames; revived enemies recover their original sorting.
-
-## 0.4 — Vertical slice
+- Weapon hits land on enemies' visible bodies while their movement collision stays at their feet.
+- The player renders in front of defeated enemies and bonfire flames.
+- Bonfire interaction text sits consistently above the flame.
+- The axe can be picked up from the clear front of its stump.
+- Upgrade descriptions match the current three-hit combat.
+- Leftover development labels no longer show in the world.
 
 ### 0.4.7 — 2026-10-03 · Combat and Tutorial overhaul
 
