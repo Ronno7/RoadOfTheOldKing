@@ -1,6 +1,12 @@
 // Tutorial Play Mode: pathfind with the player's clearance, then traverse every
-// route anchor with the actual motor/physics. Restores the player and camera.
+// route anchor with the actual motor/physics. Seed axe/Recall in an isolated save first.
+// The exit is last and should start real travel before its editor anchor. Check arrival on the next call.
+// Restores the player and camera before the queued scene load completes.
 if(!Application.isPlaying)throw new Exception("Enter Tutorial Play Mode first.");
+var routeSession=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(routeSession==null||!routeSession.StorageKey.StartsWith("RoadOfTheOldKing.Verification.")||routeSession.IsLoading||
+    UnityEngine.SceneManagement.SceneManager.GetActiveScene().path!="Assets/Scenes/Tutorial.unity")
+    throw new Exception("Settled Tutorial with an isolated verification save required.");
 var player=GameObject.Find("Player");
 var body=player.GetComponent<Rigidbody2D>();
 var movement=player.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>();
@@ -18,7 +24,7 @@ var oldPaused=input.GetType().GetField("paused",flags).GetValue(input);
 var oldFacing=movement.GetType().GetProperty("FacingDirection").GetValue(movement,null);
 var world=GameObject.Find("Tutorial Zone");
 var collision=world.transform.Find("Collision").GetComponent<UnityEngine.Tilemaps.Tilemap>();
-var anchors=world.transform.Find("Layout Anchors (editor only)").Cast<Transform>().ToArray();
+var anchors=world.transform.Find("Layout Anchors (editor only)").Cast<Transform>().OrderBy(t=>t.name=="08 Overworld Exit"?1:0).ToArray();
 var visited=new System.Collections.Generic.Dictionary<Vector2Int,Vector2Int>();
 var queue=new System.Collections.Generic.Queue<Vector2Int>();
 var origin=new Vector2Int(15,13);visited[origin]=origin;queue.Enqueue(origin);
@@ -46,14 +52,23 @@ try {
         bool blocked=false;
         foreach(var waypoint in path){
             var target=(Vector2)waypoint+Vector2.one*.5f;int attempts=0;
-            while(Vector2.Distance(body.position,target)>.015f && attempts++<20){
+            // Approach with ordinary analogue input so the current momentum motor can settle.
+            // The old one-fixed-step correction oscillated around waypoints after acceleration was added.
+            while(Vector2.Distance(body.position,target)>.015f && attempts++<120){
                 var delta=target-body.position;
-                moveInput.SetValue(input,Vector2.ClampMagnitude(delta/(movement.MoveSpeed*Time.fixedDeltaTime),1),null);
+                moveInput.SetValue(input,Vector2.ClampMagnitude(delta*6f/movement.MoveSpeed,1),null);
                 motorStep.Invoke(movement,null);Physics2D.Simulate(Time.fixedDeltaTime);visualStep.Invoke(animation,null);steps++;
+                if(routeSession.IsLoading)break;
+            }
+            if(routeSession.IsLoading){
+                blocked=true;
+                results.Add((anchor.name=="08 Overworld Exit"?"PASS actual motor enters Tutorial exit and starts travel":"FAIL unexpected scene transition: "+anchor.name));
+                break;
             }
             if(Vector2.Distance(body.position,target)>.015f){blocked=true;results.Add("FAIL motor blocked: "+anchor.name+" at "+body.position);break;}
         }
         if(!blocked){follow.SnapToTarget();results.Add("PASS actual motor reaches "+anchor.name);}
+        if(routeSession.IsLoading)break;
     }
 } finally {
     moveInput.SetValue(input,Vector2.zero,null);body.linearVelocity=Vector2.zero;

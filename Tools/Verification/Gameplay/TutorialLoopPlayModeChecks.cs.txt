@@ -1,88 +1,131 @@
-// Run once per phase in Tutorial Play Mode, using a save key prefixed
-// RoadOfTheOldKing.Verification. Phase 0/1/3 reload the scene; wait between calls.
-// After phase 2, leave and re-enter Play Mode with the same isolated key for phase 3.
-if (!EditorApplication.isPlaying) throw new System.Exception("Play Mode required.");
-var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
-var session = RoadOfTheOldKing.Progression.GameSession.Instance;
-if (session == null) throw new System.Exception("Tutorial session missing.");
-string key = (string)session.GetType().GetField("saveKey", flags).GetValue(session);
-if (!key.StartsWith("RoadOfTheOldKing.Verification.")) throw new System.Exception("Isolated save required.");
-var results = new System.Collections.Generic.List<string>();
-System.Action<bool, string> check = (ok, name) => {
-    if (!ok) throw new System.Exception("FAIL: " + name);
-    results.Add("PASS: " + name);
-};
-var player = UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
-var combat = player.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();
-var body = player.GetComponent<Rigidbody2D>();
-var stamina = player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>();
-var interaction = player.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>();
-var enemy = UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>();
-var enemyHealth = enemy.GetComponent<RoadOfTheOldKing.Combat.Damageable>();
-var reward = UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SunShardReward>();
-var fire = session.Checkpoints.Fires.Single();
-var store = new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(key);
-var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
-check(scene.path == "Assets/Scenes/Tutorial.unity" && scene.buildIndex >= 0, "Tutorial supports scene reload");
-check(reward.RewardId == "tutorial/first-enemy" && fire.Id == "tutorial/roadside-fire", "Stable Tutorial reward/checkpoint IDs");
-int phase = SessionState.GetInt("Tutorial.LoopCheckPhase", 0);
-System.Action<Vector2> move = p => {
-    body.position = p; body.linearVelocity = Vector2.zero;
-    player.transform.position = p; Physics2D.SyncTransforms();
-};
-var killingHit = new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,
-    RoadOfTheOldKing.Combat.AttackKind.ChargedCleave, 1000, Vector2.up, 0, 0, true);
-System.Action die = () => {
-    player.Health.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(enemy.gameObject,
-        RoadOfTheOldKing.Combat.AttackKind.EnemyMelee, 1000, Vector2.down, 0, 0));
-    check(!player.IsAlive, "Player defeat");
-    session.Checkpoints.Respawn();
-};
-if (phase == 0) {
-    check(!session.Checkpoints.HasCheckpoint && session.Progress.sunShards == 0 && !reward.IsAvailable, "Fresh run has no checkpoint or reward");
-    check(Vector2.Distance(player.transform.position, new Vector2(15, 13)) < .1f && !combat.CanRecall, "Home start; Recall locked");
-    check(!session.Checkpoints.Rest(fire) && !reward.TryCollect(player), "Remote rest and locked pickup rejected");
-    var weapon = UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Weapons.AxeWeapon>();
-    check(combat.TryEquip(weapon), "Existing axe equips");
-    enemyHealth.ReceiveHit(killingHit);
-    check(reward.IsAvailable && !reward.IsCollected && session.Progress.sunShards == 0, "Defeat unlocks a physical shard");
-    check(store.Load().Has("shard/available/tutorial/first-enemy"), "Uncollected drop saved before first rest");
-    SessionState.SetInt("Tutorial.LoopCheckPhase", 1);
-    die();
-} else if (phase == 1) {
-    check(player.IsAlive && !session.Checkpoints.HasCheckpoint && Vector2.Distance(player.transform.position, new Vector2(15,13)) < .1f, "Death before rest returns home");
-    check(combat.Weapon != null && !combat.CanRecall, "Axe ownership restored without unlocking Recall");
-    check(reward.IsAvailable && !reward.IsCollected && enemyHealth.IsAlive, "Uncollected shard survives reload and enemy respawn");
-    move(reward.transform.position);
-    check(reward.TryCollect(player) && session.Progress.sunShards == 1, "Pickup credits exactly one shard");
-    check(!reward.TryCollect(player) && store.Load().sunShards == 1, "Duplicate pickup rejected and balance saved");
-    move(fire.SpawnPosition);
-    player.Health.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(enemy.gameObject,
-        RoadOfTheOldKing.Combat.AttackKind.EnemyMelee, 10, Vector2.up, 0, 0));
-    stamina.TrySpend(50);
-    check(interaction.Open(fire), "Nearby fire opens and rests");
-    check(player.Health.Health == player.Health.MaxHealth && stamina.Current == stamina.Maximum, "Rest restores health and stamina");
-    check(session.Checkpoints.HasCheckpoint && fire.IsDiscovered && enemyHealth.IsAlive, "Rest saves checkpoint and resets enemy");
-    check(!player.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>().enabled &&
-          !player.GetComponent<RoadOfTheOldKing.Input.PlayerCombatInput>().enabled, "Fire menu suspends action input");
-    interaction.Close();
-    check(player.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>().enabled &&
-          player.GetComponent<RoadOfTheOldKing.Input.PlayerCombatInput>().enabled, "Closing fire restores input");
-    SessionState.SetInt("Tutorial.LoopCheckPhase", 2);
-    die();
-} else if (phase == 2 || phase == 3) {
-    check(player.IsAlive && Vector2.Distance(player.transform.position, fire.SpawnPosition) < .1f, phase == 2 ? "Death after rest returns to bonfire" : "New Play session restores checkpoint");
-    check(session.Progress.sunShards == 1 && reward.IsCollected, "Collected reward stays collected");
-    enemyHealth.ReceiveHit(killingHit);
-    move(reward.transform.position);
-    check(!reward.TryCollect(player) && session.Progress.sunShards == 1, "Respawned enemy cannot farm shards");
-    move(fire.SpawnPosition);
-    check(session.Checkpoints.Rest(fire) && enemyHealth.IsAlive && session.Progress.sunShards == 1, "Repeated rest retains progression");
-    SessionState.SetInt("Tutorial.LoopCheckPhase", phase + 1);
-    if (phase == 3) session.StartNewRun();
-} else if (phase == 4) {
-    check(!session.Checkpoints.HasCheckpoint && session.Progress.sunShards == 0 && !reward.IsAvailable && !combat.CanRecall, "New run clears only test progression");
-    check(Vector2.Distance(player.transform.position, new Vector2(15,13)) < .1f, "New run starts at home");
-    SessionState.SetInt("Tutorial.LoopCheckPhase", 5);
-} else throw new System.Exception("All phases already completed.");
-return new { phase, checks = results, next = phase == 2 ? "Exit/re-enter Play Mode with same test key" : "Wait for any reload, then run next phase" };
+// Current Tutorial integration, staged positions and real production interactions.
+// Use GreenLowlandsGameplayChecks SETUP/CLEANUP only. Enter its unsaved bootstrap,
+// set SessionState Tutorial.LoopCommand=start, then execute this file. This clears
+// only the isolated seed and loads a fresh Tutorial (no owned axe or Recall).
+// Run once per phase; allow real frames/reloads. After phase 9, stop/re-enter the
+// same unsaved bootstrap before phase 10. Never save the bootstrap. Enemy defeats
+// use direct Damageable hits: this checks progression, not human combat balance.
+if (!Application.isPlaying) throw new Exception("Play Mode required.");
+var session=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(session==null||!session.StorageKey.StartsWith("RoadOfTheOldKing.Verification."))throw new Exception("Isolated save required.");
+if(session.IsLoading)return "WAIT: scene load in progress.";
+if(SessionState.GetString("Tutorial.LoopCommand","")=="start"){
+    if(!SessionState.GetBool("GreenLowlands.Gameplay.Active",false))throw new Exception("Use the isolated bootstrap setup first.");
+    // Its cleanup restores this setting; keep scene loads/animations ticking without Editor focus.
+    Application.runInBackground=true;EditorApplication.QueuePlayerLoopUpdate();
+    SessionState.EraseString("Tutorial.LoopCommand");
+    SessionState.SetInt("Tutorial.LoopCheckPhase",0);SessionState.SetInt("Tutorial.LoopCheckPassed",0);
+    session.StartNewRun();return "WAIT: fresh isolated Tutorial loading; execute again when settled.";
+}
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var checks=new System.Collections.Generic.List<string>();
+System.Action<bool,string> check=(ok,label)=>{if(!ok)throw new Exception("FAIL: "+label);checks.Add(label);};
+int phase=SessionState.GetInt("Tutorial.LoopCheckPhase",0);
+var scene=UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+var store=new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(session.StorageKey);
+if(phase==8||phase==10){
+    check(phase==8?scene.path=="Assets/Scenes/Title.unity":string.IsNullOrEmpty(scene.path),phase==8?"Real Title scene loaded":"Cold session in unsaved bootstrap");
+    check(session.Progress.hasAxe&&session.Progress.recallUnlocked&&session.Progress.sunShards==1,"Stored equipment, Recall and reward restored");
+    check(session.Continue(),"Continue starts real scene load");
+}else{
+    var player=GameObject.Find("Player").GetComponent<RoadOfTheOldKing.Player.PlayerHealth>();
+    var combat=player.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();
+    var body=player.GetComponent<Rigidbody2D>();
+    var interaction=player.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>();
+    var flask=player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>();
+    System.Action<Vector2> move=p=>{body.position=p;body.linearVelocity=Vector2.zero;player.transform.position=p;Physics2D.SyncTransforms();};
+    System.Action<float> tick=seconds=>{var w=combat.Weapon;var sim=w.GetType().GetMethod("Simulate",flags);for(int i=0;i<Mathf.CeilToInt(seconds/.02f);i++)sim.Invoke(w,new object[]{.02f});};
+    var hit=new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.ChargedCleave,1000,Vector2.up,0,0,true);
+    System.Action die=()=>{check(player.Health.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.EnemyMelee,1000,Vector2.down,0,0)),"Defeat hit accepted");check(!player.IsAlive,"Player defeated");session.Checkpoints.Respawn();};
+    if(phase==6){
+        check(scene.path=="Assets/Scenes/GreenLowlands.unity"&&Vector2.Distance(body.position,new Vector2(6,-58))<.2f,"Real exit arrives in Lowlands");
+        check(combat.Weapon!=null&&combat.CanRecall&&session.Progress.sunShards==1,"Equipment and reward cross scenes");
+        move(new Vector2(6,-62));
+    }else{
+        check(scene.path=="Assets/Scenes/Tutorial.unity","Tutorial active");
+        var stone=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Tutorial.RecallAwakeningStone>();
+        var glimmers=stone.GetComponentsInChildren<SpriteRenderer>(true).Where(r=>r.name=="Recall glimmer").ToArray();
+        var gate=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Tutorial.RecallSealGate>();
+        var gateShadow=gate.transform.Find("Gate-shadow").GetComponent<SpriteRenderer>();
+        var lesson=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Tutorial.ThrowRetrieveLesson>();
+        var melee=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Tutorial.HitCountLesson>();
+        var reward=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SunShardReward>();
+        var fire=session.Checkpoints.Fires.Single(f=>f.Id=="tutorial/roadside-fire");
+        var wolves=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Combat.WolfAI>(FindObjectsSortMode.None);
+        var lone=wolves.Single(w=>w.GetComponent<RoadOfTheOldKing.Progression.DefeatMilestone>()!=null);
+        var pack=wolves.Where(w=>w!=lone).OrderBy(w=>w.name).ToArray();
+        check(wolves.Length==3&&pack.Length==2,"Lone wolf and two-wolf pack present");
+        if(phase==0){
+            check(!session.Checkpoints.HasCheckpoint&&!session.Progress.hasAxe&&!combat.CanRecall&&combat.Weapon==null,"Fresh equipment and checkpoint locked");
+            check(Vector2.Distance(body.position,new Vector2(11.82f,36.92f))<.1f,"Fresh home spawn");
+            check(!stone.IsReady&&!stone.IsAwakened&&!gate.IsOpen&&gateShadow.enabled&&gateShadow.color.a==1&&!reward.IsAvailable&&glimmers.Length==4&&glimmers.All(r=>!r.enabled),"Recall/gate/shard gated; gate shadow visible, stone glimmer hidden");
+            var pickup=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Weapons.AxePickup>();
+            check(!pickup.TryCollect(player),"Distant axe rejected");
+            var stumpFront=(Vector2)pickup.transform.position+Vector2.down*1.8f;
+            move(stumpFront);
+            var feet=player.GetComponent<BoxCollider2D>();
+            check(!Physics2D.OverlapBoxAll(stumpFront+feet.offset,feet.size,0).Any(c=>!c.isTrigger&&c.GetComponentInParent<RoadOfTheOldKing.Player.PlayerHealth>()==null),"Stump front approach is clear of solid collision");
+            check(pickup.CanCollect(player),"Axe reachable from the clear front of its solid stump");
+            check(interaction.TryInteract()&&combat.Weapon!=null&&store.Load().hasAxe,"Real F interaction takes and saves axe");
+            var stand=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Tutorial.ThrowPracticeStand>(FindObjectsSortMode.None).Single(s=>s.name.Contains("New"));
+            move((Vector2)stand.GetComponent<Collider2D>().bounds.center+Vector2.down*3);tick(.02f);
+            check(combat.Weapon.TryThrow(Vector2.up),"Practice throw starts");tick(1.1f);
+            check(lesson.IsArmed&&combat.Weapon.IsAway,"Actual throw hits rebuilt target");
+            move((Vector2)combat.Weapon.transform.position+Vector2.down*(combat.Weapon.Settings.retrieveDistance*.5f));tick(.1f);
+            lesson.GetType().GetMethod("Update",flags).Invoke(lesson,null);
+            check(lesson.IsComplete&&!combat.Weapon.IsAway&&store.Load().Has("tutorial/lesson/throw-retrieve"),"Proximity retrieval completes and saves lesson");
+        }else if(phase==1){
+            var dummy=GameObject.Find("PracticeDummy");move((Vector2)dummy.transform.position+Vector2.down*1.1f);tick(.1f);
+            for(int i=0;i<3;i++){check(combat.Weapon.TryLightChop(Vector2.up),"Dummy chop starts "+i);tick(1f);}
+            check(melee.IsComplete&&store.Load().Has("tutorial/lesson/melee"),"Three actual melee hits complete lesson");
+            check(!combat.CanRecall&&!stone.IsReady,"Lessons alone do not unlock Recall");
+            lone.GetComponent<RoadOfTheOldKing.Combat.Damageable>().ReceiveHit(hit);
+            check(session.Progress.Has("tutorial/enemy/first-wolf")&&!reward.IsAvailable,"Lone wolf saves milestone, not pack reward");
+            check(!stone.IsReady&&glimmers.All(r=>!r.enabled),"Recall and glimmer wait for safe recovery");
+            move(new Vector2(81.5f,28.5f));
+            check(player.Health.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(lone.gameObject,RoadOfTheOldKing.Combat.AttackKind.EnemyMelee,30,Vector2.down,0,0)),"Recovery damage accepted");
+        }else if(phase==2){
+            if(flask.Charges==flask.MaxCharges){check(flask.TryDrink(),"Real flask drink starts after hit-stop");return "WAIT: allow the real drink and safe recovery to finish, then repeat phase 2.";}
+            check(!flask.IsDrinking&&player.Health.Health==player.Health.MaxHealth&&flask.Charges==flask.MaxCharges-1,"Flask heals with one charge spent");
+            check(session.Progress.Has("tutorial/step/flask")&&stone.IsReady,"Safe recovery makes stone ready");
+            check(!gate.IsOpen&&!combat.CanRecall,"Gate closed before awakening");
+            move(new Vector2(81.5f,28.5f));tick(.1f);check(combat.Weapon.TryThrow(Vector2.up),"Actual Recall-stone throw starts");tick(.7f);
+            check(stone.IsAwakening&&player.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>().IsLockedBy(stone)&&glimmers.All(r=>!r.enabled),"Stone hit starts awakening, hides idle glimmer and locks controls");
+        }else if(phase==3){
+            check(stone.IsAwakened&&!stone.IsAwakening&&combat.CanRecall&&!combat.Weapon.IsAway&&glimmers.All(r=>!r.enabled),"Awakening recalls axe and restores control without idle glimmer");
+            check(gate.IsOpen&&!gateShadow.enabled&&combat.CanStartAttack&&store.Load().recallUnlocked,"Seal opens, shadow hides and Recall persists");
+            pack[0].GetComponent<RoadOfTheOldKing.Combat.Damageable>().ReceiveHit(hit);check(!reward.IsAvailable,"One pack defeat cannot release shard");
+            pack[1].GetComponent<RoadOfTheOldKing.Combat.Damageable>().ReceiveHit(hit);check(reward.IsAvailable&&!reward.IsCollected&&session.Progress.sunShards==0,"Full pack unlocks physical uncollected shard");
+            check(store.Load().Has("shard/available/tutorial/first-enemy"),"Uncollected shard saved before rest");die();
+        }else if(phase==4){
+            check(player.IsAlive&&!session.Checkpoints.HasCheckpoint&&Vector2.Distance(body.position,new Vector2(11.82f,36.92f))<.1f,"Death before fire returns home");
+            check(combat.Weapon!=null&&combat.CanRecall&&gate.IsOpen&&lesson.IsComplete&&melee.IsComplete,"Equipment, gate and lessons survive death");
+            check(wolves.All(w=>w.GetComponent<RoadOfTheOldKing.Combat.Damageable>().IsAlive)&&reward.IsAvailable&&!reward.IsCollected,"Wolves reset; pending shard preserved");
+            move((Vector2)reward.transform.position+Vector2.down*.8f);check(interaction.TryInteract()&&reward.IsCollected&&session.Progress.sunShards==1,"Real F interaction collects one shard");
+            check(!reward.TryCollect(player)&&store.Load().sunShards==1,"Duplicate reward rejected and saved");
+            move(fire.SpawnPosition+Vector2.down);check(interaction.TryInteract()&&fire.IsDiscovered,"Real F lights rebuilt bonfire");
+            check(interaction.TryInteract()&&interaction.IsOpen,"Second F rests and opens bonfire menu");
+            check(player.Health.Health==player.Health.MaxHealth&&flask.Charges==flask.MaxCharges,"Rest refills health and flasks");interaction.Close();die();
+        }else if(phase==5){
+            check(player.IsAlive&&Vector2.Distance(body.position,fire.SpawnPosition)<.1f,"Death after rest returns to bonfire");
+            check(combat.CanRecall&&reward.IsCollected&&session.Progress.sunShards==1&&gate.IsOpen,"Progress retained after checkpoint respawn");
+            foreach(var w in pack)w.GetComponent<RoadOfTheOldKing.Combat.Damageable>().ReceiveHit(hit);
+            check(!reward.TryCollect(player)&&session.Progress.sunShards==1,"Respawned pack cannot farm shard");
+            move(new Vector2(87.5f,97));
+        }else if(phase==7){
+            check(Vector2.Distance(body.position,new Vector2(87.5f,94.5f))<.2f,"Reverse exit returns to Tutorial arrival");
+            check(combat.CanRecall&&reward.IsCollected&&gate.IsOpen&&session.Progress.sunShards==1,"Return preserves gate and reward");
+            move(new Vector2(87,81));check(session.ReturnToTitle(),"Real Return to Title saves exact position");
+        }else if(phase==9||phase==11){
+            check(Vector2.Distance(body.position,new Vector2(87,81))<.2f,phase==9?"Title Continue restores exact position":"Cold Continue restores exact position");
+            check(combat.Weapon!=null&&combat.CanRecall&&gate.IsOpen&&!gateShadow.enabled&&reward.IsCollected&&session.Progress.sunShards==1&&lesson.IsComplete&&melee.IsComplete&&glimmers.All(r=>!r.enabled),"Continue retains progression without open-gate shadow or idle glimmer");
+            if(phase==11)session.StartNewRun();
+        }else if(phase==12){
+            check(combat.Weapon==null&&!combat.CanRecall&&!gate.IsOpen&&gateShadow.enabled&&gateShadow.color.a==1&&!reward.IsAvailable&&!session.Checkpoints.HasCheckpoint,"New run resets isolated progression and gate shadow");
+            check(!lesson.IsComplete&&!melee.IsComplete&&Vector2.Distance(body.position,new Vector2(11.82f,36.92f))<.1f,"Lessons reset at home");
+        }else throw new Exception("All phases completed or unexpected phase "+phase);
+    }
+}
+SessionState.SetInt("Tutorial.LoopCheckPhase",phase+1);
+int total=SessionState.GetInt("Tutorial.LoopCheckPassed",0)+checks.Count;SessionState.SetInt("Tutorial.LoopCheckPassed",total);
+return new{phase,passed=checks.Count,total,checks,next=phase==9?"Stop/re-enter same unsaved bootstrap, then phase 10":phase==12?"Stop and run isolated bootstrap cleanup":"Allow real frames/reloads; run next phase"};

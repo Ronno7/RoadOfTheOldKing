@@ -15,6 +15,7 @@ PREVIEW = os.path.join(ROOT, "DeveloperNotes", "Previews", "RecallStoneConcepts.
 
 def hx(s): return tuple(int(s[i:i+2], 16) for i in (1, 3, 5)) + (255,)
 P = {
+    'K': hx("#171C1B"),  # shared world ink: one-pixel outer contour
     'O': hx("#60724D"),  # moss outline (matches existing ruins)
     'M': hx("#8B9B5E"),  # moss
     'S': hx("#585F58"),  # ruins shadow
@@ -106,14 +107,14 @@ def render(g, state, glints=()):
     if state == 'awakening':
         for x, y in carve_set:
             for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
-                if (x + dx, y + dy) not in carve_set and inside(g, x + dx, y + dy) and g[y + dy][x + dx] != 'O':
+                if (x + dx, y + dy) not in carve_set and inside(g, x + dx, y + dy) and g[y + dy][x + dx] not in 'OK':
                     halo.add((x + dx, y + dy))
     for y in range(h):
         for x in range(w):
             ch = g[y][x]
             if ch == '.': continue
             if ch == 'X':
-                ch = {'dormant': 'D', 'glint': 'D', 'charging': 'c', 'awakening': 'W', 'awakened': 'C'}[state]
+                ch = {'dormant': 'D', 'glint': 'c', 'charging': 'c', 'awakening': 'W', 'awakened': 'C'}[state]
                 if state == 'glint' and (x, y) in glints: ch = 'C'
             elif (x, y) in halo: ch = 'C'
             elif state == 'awakened' and ch == 'H' and any((x, y - k) in carve_set for k in (1,)): ch = 'c'
@@ -149,6 +150,11 @@ def menhir():
     put(g, 12, 1, ["MM", "MMM", ".MO"])
     put(g, 16, 18, ["OO", "MO", "MMO", "OM"])
     footing(g)
+    # Outline the complete body before splitting Top/Footing. Recolor its existing
+    # edge inward so its silhouette, moss detail and shadow-casting mask stay intact.
+    edge = [(x, y) for y in range(len(g)) for x in range(len(g[0])) if inside(g, x, y) and
+            any(not inside(g, x+dx, y+dy) for dx,dy in ((1,0),(-1,0),(0,1),(0,-1)))]
+    for x, y in edge: g[y][x] = 'K'
     return g, {(11, 16), (8, 13), (14, 19)}
 
 # ---------------- B: Cup-and-Ring Boulder (30 x 30) ----------------

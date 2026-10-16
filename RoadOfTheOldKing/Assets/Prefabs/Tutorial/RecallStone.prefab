@@ -188,12 +188,16 @@ MonoBehaviour:
   - top: {fileID: 841288150840188580, guid: 6fb7ddfacfbcd26489b781e6dc52b112, type: 3}
     footing: {fileID: 3596747030919006353, guid: 6fb7ddfacfbcd26489b781e6dc52b112, type: 3}
   glintInterval: 2.4
-  glintSeconds: 0.3
+  glintSeconds: 0.75
+  glimmerSprite: {fileID: 21300000, guid: ab6058c4ddee5c148cd9d34a78a0a92e, type: 3}
   chargingFraction: 0.4
   flickerSeconds: 0.1
   hitBody: {fileID: 1144381046411165317}
+  requiredMilestone: 
+  silentNotice: The stone is cold.
   awakenedNotice: Recall awakened. While your axe is away, press {recall} to call
     it back.
+  recoveryMilestone: 
 --- !u!1 &8026963068748780652
 GameObject:
   m_ObjectHideFlags: 0

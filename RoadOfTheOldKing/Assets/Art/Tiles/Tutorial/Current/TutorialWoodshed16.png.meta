@@ -1,31 +1,10 @@
 fileFormatVersion: 2
-guid: 4ff43933dd5b9694e957fa4bab439cd3
+guid: 10a4866956d0386448da44a93e4af2ac
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5848843812103513561
-    second: GrassLeaves16_0
-  - first:
-      213: 4327690906703054191
-    second: GrassLeaves16_1
-  - first:
-      213: -1009997749590724768
-    second: GrassLeaves16_2
-  - first:
-      213: -7777383792415103902
-    second: GrassLeaves16_3
-  - first:
-      213: -5390452182138161775
-    second: GrassLeaves16_4
-  - first:
-      213: -4792037527810971335
-    second: GrassLeaves16_5
-  - first:
-      213: 8950346001637246247
-    second: GrassLeaves16_6
-  - first:
-      213: -227394373030270365
-    second: GrassLeaves16_7
+      213: -1851478749638153822
+    second: TutorialWoodshed16_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -134,133 +113,265 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: GrassLeaf_Left
+      name: Woodshed_0_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 16
-        height: 24
-      alignment: 9
-      pivot: {x: 0.65625, y: 0.041666668}
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: cef705f54cf1f6a4c90559f33cba9cd7
-      internalID: -921467465
+      spriteID: 10330c87cefd2c3459f2b9a13d4d5787
+      internalID: -737881525
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: GrassLeaf_Right
+      name: Woodshed_1_0
       rect:
         serializedVersion: 2
         x: 16
         y: 0
         width: 16
-        height: 24
-      alignment: 9
-      pivot: {x: 0.34375, y: 0.041666668}
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 103f847fc3d79bc48bd5bd1b303535ee
-      internalID: 2001097858
+      spriteID: 84688d4e7e9448742b717802402b2e9c
+      internalID: -805424391
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: GrassLeaf_LeftShort
+      name: Woodshed_2_0
       rect:
         serializedVersion: 2
         x: 32
         y: 0
         width: 16
-        height: 24
-      alignment: 9
-      pivot: {x: 0.65625, y: 0.041666668}
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 39c73b9879eed9646b48f69ad1826136
-      internalID: 1511132739
+      spriteID: 6378ac29c54f54247a6ae869083837af
+      internalID: -2031536327
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: GrassLeaf_RightShort
+      name: Woodshed_3_0
       rect:
         serializedVersion: 2
         x: 48
         y: 0
         width: 16
-        height: 24
-      alignment: 9
-      pivot: {x: 0.34375, y: 0.041666668}
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 628678a580fbc924da133fc31cda193c
-      internalID: -536228506
+      spriteID: 8085ea0c899d7b5408cf4ef34b410ea5
+      internalID: -998721212
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: MeadowFlowers
+      name: Woodshed_0_1
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 16
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 54bbe15da35565947b7993491b753aee
+      internalID: 831007897
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Woodshed_1_1
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 16
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1acb0b293c3312d4bab09519557b6735
+      internalID: 960287436
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Woodshed_2_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 16
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 87a7c11b541389c48816794bb76e9677
+      internalID: -1622148090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Woodshed_3_1
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 16
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8124b6ec1d7cacd4c98d6e6a21c876e5
+      internalID: 1333096615
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Woodshed_0_2
       rect:
         serializedVersion: 2
         x: 0
         y: 32
-        width: 14
-        height: 14
-      alignment: 9
-      pivot: {x: 0.5, y: 0}
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 990147b6f30c7fe439eb85d5b54c074a
-      internalID: 1826342390
+      spriteID: 90ea2f10ebebe92438837c58d0311796
+      internalID: -1041015215
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Meadow_Reeds
+      name: Woodshed_1_2
       rect:
         serializedVersion: 2
         x: 16
         y: 32
-        width: 8
-        height: 22
-      alignment: 9
-      pivot: {x: 0.5, y: 0}
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 931c964d1630abd4b8d19fbd7177fa1d
-      internalID: 168462884
+      spriteID: 17309bbeb34f3fe419ad78689fc65403
+      internalID: -414387670
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Woodshed_2_2
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 32
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7a62192cd90a76a4aa48f6ee5a7d5139
+      internalID: -279693039
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Woodshed_3_2
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 32
+        width: 16
+        height: 16
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 802f71ea145cd4847a5f521c39ec91d3
+      internalID: 1274116633
       vertices: []
       indices: 
       edges: []
@@ -269,7 +380,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 179db83942cb3de4397f8cb824d6cf51
+    spriteID: b465d9464a6426149ab5e17336195446
     internalID: 0
     vertices: []
     indices: 
@@ -279,12 +390,18 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      GrassLeaf_Left: -921467465
-      GrassLeaf_LeftShort: 1511132739
-      GrassLeaf_Right: 2001097858
-      GrassLeaf_RightShort: -536228506
-      MeadowFlowers: 1826342390
-      Meadow_Reeds: 168462884
+      Woodshed_0_0: -737881525
+      Woodshed_0_1: 831007897
+      Woodshed_0_2: -1041015215
+      Woodshed_1_0: -805424391
+      Woodshed_1_1: 960287436
+      Woodshed_1_2: -414387670
+      Woodshed_2_0: -2031536327
+      Woodshed_2_1: -1622148090
+      Woodshed_2_2: -279693039
+      Woodshed_3_0: -998721212
+      Woodshed_3_1: 1333096615
+      Woodshed_3_2: 1274116633
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

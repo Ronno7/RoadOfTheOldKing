@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "sourceTool": "OpenAI built-in image_gen, 2026-10-16",
+  "palette": "ArtSource/GreenLowlands/ZonePalette.json",
+  "processing": "Threshold source alpha at 128, crop to explicit sourceBounds for registered native edits or opaque bounds for generated high-resolution sources, nearest sample into registered native bounds, map RGB to nearest permitted shared color without dithering. No baked ground shadow.",
+  "buildingColors": ["ink", "soilcontact", "deepsoil", "soil", "soilmid", "soillight", "soilshine", "rockshadow", "stonejoint", "stoneshade", "stone", "stonelight"],
+  "pieces": {
+    "Thatch": {"source": "Longhouse_Source.png", "prompt": "Longhouse.prompt.txt", "editPrompt": "LonghouseChimney.prompt.txt", "editRegion": [0, 0, 44, 34], "sourceNote": "Registered native composite: image_gen chimney edit only; pixels outside editRegion preserved from the first depth pass.", "sourceBounds": [0, 0, 128, 96], "canvas": [128, 96], "bounds": [0, 0, 128, 96]},
+    "Clay": {"source": "Workshop_Source.png", "prompt": "Workshop.prompt.txt", "canvas": [96, 80], "bounds": [0, 0, 96, 80]},
+    "Woodshed": {"source": "Woodshed_Source.png", "prompt": "Woodshed.prompt.txt", "canvas": [64, 48], "bounds": [0, 1, 64, 47], "colors": ["ink", "soilcontact", "deepsoil", "soil", "soilmid", "soillight", "soilshine", "stonejoint"]}
+  }
+}

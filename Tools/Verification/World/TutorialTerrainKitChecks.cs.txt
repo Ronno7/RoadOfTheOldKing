@@ -1,4 +1,54 @@
 // Edit Mode only; all temporary objects live in a preview scene. Does not touch saves or gameplay.
+// SessionState TutorialTerrainKit.Scope: current = shallow earth, stone = northern shelf, legacy = original kit.
+if (SessionState.GetString("TutorialTerrainKit.Scope", "legacy") != "legacy")
+{
+if(EditorApplication.isPlayingOrWillChangePlaymode)throw new Exception("Stopped Edit Mode required.");
+string root="Assets/Art/Tiles/Tutorial/Current";
+bool stone=SessionState.GetString("TutorialTerrainKit.Scope", "current")=="stone";
+string family=stone?"RaisedStone":"ShallowEarth";int front=stone?3:1;
+var brush=AssetDatabase.LoadAssetAtPath<RoadOfTheOldKing.World.RaisedCliffTile>(root+"/Rules/Paint_"+family+".asset");
+var sprites=AssetDatabase.LoadAllAssetsAtPath(root+(stone?"/TutorialStoneCliffs16.png":"/TutorialCliffs16.png")).OfType<Sprite>().ToArray();
+int passed=0;Action<bool,string> check=(ok,label)=>{if(!ok)throw new Exception(label);passed++;};
+check(brush!=null&&sprites.Length==188,"Complete joined cliff asset");
+check(sprites.All(s=>s.rect.width==16&&s.rect.height==16*(front+1)&&s.pixelsPerUnit==16),"188 native complete columns");
+check(sprites.All(s=>s.pivot==new Vector2(8,front*16+8)&&Mathf.Abs(s.bounds.min.y+front+.5f)<.001f),"Top-cell anchors");
+var importer=(TextureImporter)AssetImporter.GetAtPath(root+(stone?"/TutorialStoneCliffs16.png":"/TutorialCliffs16.png"));
+check(importer.filterMode==FilterMode.Point&&!importer.mipmapEnabled&&importer.textureCompression==TextureImporterCompression.Uncompressed,"Native import settings");
+var previous=UnityEngine.SceneManagement.SceneManager.GetActiveScene();bool dirty=previous.isDirty;
+var scratch=UnityEditor.SceneManagement.EditorSceneManager.NewPreviewScene();
+try{
+ var go=new GameObject("Shallow cliff authoring check");UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(go,scratch);go.AddComponent<Grid>();
+ var child=new GameObject("Tiles");child.transform.SetParent(go.transform,false);
+ var map=child.AddComponent<UnityEngine.Tilemaps.Tilemap>();
+ var offsets=new[]{new Vector3Int(0,1),new Vector3Int(1,0),new Vector3Int(0,-1),new Vector3Int(-1,0),new Vector3Int(1,1),new Vector3Int(1,-1),new Vector3Int(-1,-1),new Vector3Int(-1,1)};
+ var seen=new System.Collections.Generic.HashSet<Sprite>();bool populated=true,visualOnly=true;
+ for(int phase=-2;phase<2;phase++)for(int mask=0;mask<256;mask++){
+  map.ClearAllTiles();var c=new Vector3Int(phase,0,0);map.SetTile(c,brush);
+  for(int n=0;n<8;n++)if((mask&(1<<n))!=0)map.SetTile(c+offsets[n],brush);
+  var sprite=map.GetSprite(c);populated&=sprite!=null;if(sprite!=null)seen.Add(sprite);
+  visualOnly&=map.GetColliderType(c)==UnityEngine.Tilemaps.Tile.ColliderType.None;
+ }
+ check(populated&&seen.Count==188,"All neighborhoods resolve all sprites");
+ check(visualOnly,"No collision added");
+ map.ClearAllTiles();foreach(var p in offsets)map.SetTile(p,brush);map.SetTile(Vector3Int.zero,brush);
+ check(map.GetSprite(Vector3Int.zero).name==family+"_255_0","Interior selects full top");
+ var before=offsets.Select(p=>map.GetSprite(p)).ToArray();map.SetTile(Vector3Int.zero,null);
+ check(offsets.Where((p,i)=>map.GetSprite(p)!=before[i]).Count()==8,"Erasing refreshes eight corners");
+ map.SetTile(Vector3Int.zero,brush);
+ check(offsets.Select((p,i)=>map.GetSprite(p)==before[i]).All(v=>v),"Repainting restores joins");
+ map.ClearAllTiles();map.SetTile(new Vector3Int(-1,0),brush);
+ check(map.GetSprite(new Vector3Int(-1,0)).name==family+"_000_3","Negative-column phase");
+ map.SetTile(Vector3Int.zero,brush);
+ check(map.GetSprite(new Vector3Int(-1,0)).name==family+"_002_3"&&map.GetSprite(Vector3Int.zero).name==family+"_008_0","Horizontal material continuity");
+ var shed=AssetDatabase.LoadAllAssetsAtPath(root+"/TutorialWoodshed16.png").OfType<Sprite>().ToArray();
+ check(shed.Length==12&&shed.All(s=>s.rect.size==new Vector2(16,16)&&s.pixelsPerUnit==16),"Woodshed twelve native slices");
+}
+finally{UnityEditor.SceneManagement.EditorSceneManager.ClosePreviewScene(scratch);}
+check(previous.isDirty==dirty&&UnityEngine.SceneManagement.SceneManager.GetActiveScene()==previous,"Production scene preserved");
+return new{passed,neighborhoods=1024,family,front,sprites=sprites.Length,scene=previous.path,dirty=previous.isDirty};
+}
+else
+{
 if(EditorApplication.isPlaying)throw new System.Exception("Edit Mode required.");
 string root="Assets/Art/Tiles/Tutorial/Terrain";
 var results=new System.Collections.Generic.List<string>();int assertions=0;
@@ -53,3 +103,4 @@ check(single!=joined&&single.name.EndsWith("_000"),"Neighbor erase refresh "+mat
 }finally{UnityEditor.SceneManagement.EditorSceneManager.ClosePreviewScene(scene);}
 results.Insert(0,(results.Count==0?"PASS ":"FAILED ")+assertions+" terrain kit assertions; 1536 neighbor arrangements exercised.");
 return string.Join("\n",results.ToArray());
+}
