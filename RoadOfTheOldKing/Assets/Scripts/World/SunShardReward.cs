@@ -18,7 +18,6 @@ namespace RoadOfTheOldKing.World
         [SerializeField] private Damageable defeatSource;
         [Tooltip("With a defeat source: these must be defeated too (a pack); the shard appears where the last one fell.")]
         [SerializeField] private Damageable[] alsoDefeat = Array.Empty<Damageable>();
-        [SerializeField] private ThrowRecallPuzzle puzzleSource;
         [SerializeField] private GameObject pickupVisual;
         [SerializeField] private bool awardImmediately;
         public string RewardId => rewardId;
@@ -38,7 +37,6 @@ namespace RoadOfTheOldKing.World
                 source.Defeated += handler;
                 defeatHandlers.Add((source, handler));
             }
-            if (puzzleSource != null) puzzleSource.Solved += Unlock;
         }
 
         protected override void OnDisable()
@@ -46,7 +44,6 @@ namespace RoadOfTheOldKing.World
             base.OnDisable();
             foreach (var (source, handler) in defeatHandlers) if (source != null) source.Defeated -= handler;
             defeatHandlers.Clear();
-            if (puzzleSource != null) puzzleSource.Solved -= Unlock;
         }
 
         private IEnumerable<Damageable> DefeatSources()
@@ -102,10 +99,7 @@ namespace RoadOfTheOldKing.World
 
         public void RestoreProgress(ProgressState state)
         {
-            IsAvailable = (defeatSource == null && puzzleSource == null) ||
-                state.Has("shard/available/" + rewardId) || (puzzleSource != null && puzzleSource.IsSolved);
-            // Puzzle restoration order is independent of participant discovery order.
-            if (puzzleSource != null && state.Has(puzzleSource.ProgressId)) IsAvailable = true;
+            IsAvailable = defeatSource == null || state.Has("shard/available/" + rewardId);
             if (IsAvailable && awardImmediately && !IsCollected) Collect();
             RefreshVisual();
         }

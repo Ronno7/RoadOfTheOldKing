@@ -449,7 +449,7 @@ namespace RoadOfTheOldKing.EditorTools
                     if (component == null) continue;
                     float radius = component is Bonfire ? 2.2f : component is SceneSpawnPoint ? 1.5f :
                         component is PlayerMovement ? 1.8f : component is WorldPickup ? 1.4f :
-                        component is AxePuzzleTarget ? 1.5f : component is SceneExit ? 1.1f : 0f;
+                        component is SceneExit ? 1.1f : 0f;
                     if (radius > 0f) mask.clearings.Add(new Vector3(component.transform.position.x, component.transform.position.y, radius));
                 }
             }

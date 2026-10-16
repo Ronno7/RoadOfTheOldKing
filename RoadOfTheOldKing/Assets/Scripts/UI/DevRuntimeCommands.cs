@@ -115,8 +115,6 @@ namespace RoadOfTheOldKing.UI
             Combat.UnlockRecall();
             var session = GameSession.Instance;
             session.Progress.recallUnlocked = true;
-            foreach (var pickup in FindObjectsByType<RecallUnlockPickup>(FindObjectsSortMode.None))
-                pickup.RestoreProgress(session.Progress);
             session.SaveProgress();
             return Report(true, "Recall unlocked. " + session.Status);
         }

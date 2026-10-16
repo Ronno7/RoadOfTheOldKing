@@ -36,7 +36,7 @@ check(!clock.Advance(float.NaN, out flight) && !clock.Advance(float.PositiveInfi
 clock.Cancel();
 check(!clock.Begin(new RoadOfTheOldKing.Weapons.ThrowActionTiming { preparation = new float[0] }) &&
     !clock.Begin(new RoadOfTheOldKing.Weapons.ThrowActionTiming { launchCel = 4 }), "Invalid exposure/marker data rejected");
-foreach (string path in new[]{"Assets/Settings/Weapons/PrototypeAxeSettings.asset", "Assets/Settings/Weapons/AxeSettings.asset"}) {
+foreach (string path in new[]{"Assets/Settings/Weapons/AxeSettings.asset"}) {
     var settings = AssetDatabase.LoadAssetAtPath<RoadOfTheOldKing.Weapons.AxeSettings>(path);
     check(clock.Begin(settings.throwAction), "Serialized timing loads: " + settings.name); clock.Cancel();
 }

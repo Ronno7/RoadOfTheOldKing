@@ -208,13 +208,6 @@ try {
     combat.GetType().GetMethod("ProcessInput",flags).Invoke(combat,new object[]{new RoadOfTheOldKing.Input.CombatInputFrame{Active=true}});
     check(interaction.TryInteract() && fragment.IsCollected,"F collects heart fragment");
     check(!fragment.TryCollect(player),"Collected heart cannot duplicate");
-    var altar=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RecallUnlockPickup>();
-    if(altar!=null) {
-        combat.GetType().GetField("recallUnlocked",flags).SetValue(combat,false);
-        move(altar.transform.position);Physics2D.Simulate(.02f);refresh();
-        check(!combat.CanRecall,"Legacy altar no longer unlocks through overlap");
-        check(interaction.TryInteract() && combat.CanRecall && store.Load().recallUnlocked,"Legacy altar requires explicit F and saves unlock");
-    }
     string realKey=SessionState.GetString("PickupCheck.OriginalKey","");
     check(PlayerPrefs.HasKey(realKey)==SessionState.GetBool("PickupCheck.RealSaveExists",false) &&
         PlayerPrefs.GetString(realKey,"")==SessionState.GetString("PickupCheck.RealSave",""),"Normal Tutorial save untouched");

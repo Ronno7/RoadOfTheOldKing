@@ -5,40 +5,38 @@
 ### 0.4.8 — 2026-10-16 · Green Lowlands, exploration and economy
 
 **Added**
-- Green Lowlands at the end of the Tutorial road: open countryside with winding paths, branching routes and combat clearings, an abandoned farmstead, a village, a river crossing and a bonfire for resting, saving and travel between regions.
-- Ancient waterworks that respond to the axe, with water that recedes in stages to reveal new ground.
-- A woodland approach and a dark interior lit only by lanterns, joined to the Lowlands by two-way passages, plus gates and bridges that stay open.
-- Mossback Boars with committed charges and recovery openings, and Road Scavengers that drop coins.
-- Bronze Coins from enemies, cut vegetation, breakable pots and treasure chests, spent at a traveling trader with limited stock and purchase confirmation.
-- Readable environmental lore with saved discoveries, and contextual traversal interactions with new exploration tools.
-- Grass, flowers and reeds in both regions sway, react to footsteps and can be cut by the axe; resting restores them.
-- Crisp pixel smoke from lit bonfires.
-- A title screen with Continue, New Game, Settings and Quit, and a Settings page in the pause menu and title holding the vitals option.
-- Continue resumes where you left off, with the health and flasks you had, on safe footing; dying still returns you to the bonfire.
+- Green Lowlands, reached by the Tutorial road: countryside with branching routes, a farmstead, a village, a river crossing and a bonfire.
+- Ancient waterworks, worked with the axe, that drain water to reveal new ground.
+- A woodland approach and a lantern-lit dark interior, with gates and bridges that stay open.
+- Two new enemies: charging Mossback Boars and coin-dropping Road Scavengers.
+- Bronze Coins from enemies, grass, pots and chests, spent at a traveling trader.
+- Readable lore, exploration tools and contextual traversal.
+- Swaying, cuttable grass, flowers and reeds that regrow when you rest.
+- A title screen (Continue, New Game, Settings, Quit) and a Settings page.
+- Continue resumes exactly where you left off, health and flasks included.
 
 **Changed**
-- One save now covers the whole game instead of a single area; existing saves carry over automatically. Tools, coins and purchases persist through death and reload.
-- Leaving and returning to an area keeps defeated enemies, wounded enemy health and cut vegetation until you rest or die; Continue starts encounters fresh.
-- Reworked the first weapon-upgrade choices and enabled purchases at the Lowlands bonfire; existing Sweeping Edge upgrades remain intact.
-- Charged cleaves build exponentially and slow walking to a crawl; hard obstacles need a fully charged release.
-- The returning axe becomes translucent cyan with a short spectral trail, turning solid again on catch.
-- Bonfires light on the first interaction; resting, healing and setting a checkpoint take a separate interaction. All bonfires share a new animated flame.
-- Rebuilt the Tutorial's art on a shared palette, with grounding shadows, a Recall stone outline and glimmer, and village buildings with thicker roofs, projecting entrances and recessed doors and windows.
-- Tutorial and Green Lowlands share a restrained daylight color finish with crisp pixel edges.
-- Sun Shards and heart fragments have new artwork and distinct idle and collection motion; chests and tools glint briefly.
-- Tab opens a paused inventory: a compact dark panel with carried-item icons and resource counts.
-- The bonfire menu has a larger hearth look of oak beams, rope lashings and bronze trim, which is reserved for bonfires; the defeat screen has a bronze frame and carved heading.
-- The pause menu's Restart is now Return to bonfire, with a new Main Menu option; New Game moved to the title screen.
-- Respawning, restarting and starting a new game fade the screen out and back in.
+- One save covers the whole game, keeping tools, coins and purchases through death; existing saves carry over.
+- Areas remember defeated enemies and cut grass until you rest or die.
+- Reworked the first weapon upgrades, now bought at the Lowlands bonfire; existing Sweeping Edge upgrades are kept.
+- Charged cleaves build exponentially and slow you to a crawl; hard obstacles need a full charge.
+- The returning axe glows spectral cyan until caught.
+- Bonfires light first and rest on a second interaction, with a new animated flame and smoke.
+- Rebuilt the Tutorial's art on the shared palette and daylight finish, with ground shadows and more dimensional village buildings.
+- New artwork and animation for Sun Shards and heart fragments.
+- Tab opens a paused inventory of carried items and resources.
+- Restyled, larger bonfire menu and defeat screen.
+- Pause menu: Restart is now Return to bonfire, plus Main Menu; New Game moved to the title screen.
+- Respawns and new games fade the screen out and in.
 - Softer collision against foliage.
 
 **Fixed**
-- Weapon hits land on enemies' visible bodies while their movement collision stays at their feet.
-- The player renders in front of defeated enemies and bonfire flames.
-- Bonfire interaction text sits consistently above the flame.
-- The axe can be picked up from the clear front of its stump.
-- Upgrade descriptions match the current three-hit combat.
-- Leftover development labels no longer show in the world.
+- Weapon hits land on enemies' visible bodies.
+- The player draws in front of defeated enemies and bonfire flames.
+- Bonfire prompts sit above the flame.
+- The axe can be picked up from the front of its stump.
+- Upgrade descriptions match current combat.
+- Removed leftover development labels.
 
 ### 0.4.7 — 2026-10-03 · Combat and Tutorial overhaul
 
