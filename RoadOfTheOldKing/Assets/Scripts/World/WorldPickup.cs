@@ -24,6 +24,7 @@ namespace RoadOfTheOldKing.World
 
         public virtual bool CanCollect(PlayerHealth player) => isActiveAndEnabled &&
             player != null && player.IsAlive &&
+            DarkInterior.CanRead(transform.position) &&
             Vector2.Distance(player.transform.position, transform.position) <= PickupDistance;
         public abstract bool TryCollect(PlayerHealth player);
     }

@@ -43,8 +43,28 @@ namespace RoadOfTheOldKing.EditorTools
             });
             BuildPickups();
             BuildTraversal();
-            BuildTrader();
+            BuildSluiceRelief();
             AssetDatabase.SaveAssets();
+        }
+
+        [MenuItem("Tools/Road of the Old King/Art/Build Lowlands Sluice Relief")]
+        public static void BuildSluiceRelief()
+        {
+            if (EditorApplication.isPlaying) throw new InvalidOperationException("Use stopped Edit Mode.");
+            Directory.CreateDirectory(Root);
+            var source = Load("SluiceRelief_Source");
+            var atlas = new Texture2D(96,32,TextureFormat.RGBA32,false);
+            try
+            {
+                var palette = new[]{"#434944","#585F58","#7C8370","#A6AA8A","#D4CCAA","#4F7050"}
+                    .Select(hex => { Color c; ColorUtility.TryParseHtmlString(hex, out c); return (Color32)c; }).ToArray();
+                var pixels = new Color32[96*32];
+                Sample(source,new RectInt(237,138,1301,583),pixels,0,1,64,29,palette);
+                atlas.SetPixels32(pixels); atlas.Apply();
+                File.WriteAllBytes(Root+"/LowlandsSluiceRelief16.png",atlas.EncodeToPNG());
+            }
+            finally { UnityEngine.Object.DestroyImmediate(source); UnityEngine.Object.DestroyImmediate(atlas); }
+            ImportSprites(Root+"/LowlandsSluiceRelief16.png",new[]{new Entry{name="SluiceRelief",x=0,y=0,width=64,height=32}});
         }
 
         static void BuildPickups()
@@ -105,22 +125,6 @@ namespace RoadOfTheOldKing.EditorTools
                 new Entry{name="ForgeCarving",x=16,y=24,width=24,height=24},
                 new Entry{name="RopeSpan",x=0,y=0,width=64,height=8}
             });
-        }
-
-        static void BuildTrader()
-        {
-            var source=Load("TravelingTrader_Source");
-            var atlas=new Texture2D(96,32,TextureFormat.RGBA32,false);
-            try
-            {
-                var palette=new[]{"#393C39","#543F36","#826047","#B58C61","#DFC291","#A17D3D","#E7B85C","#536848","#798952","#A6AA8A"}
-                    .Select(hex=>{Color c;ColorUtility.TryParseHtmlString(hex,out c);return (Color32)c;}).ToArray();
-                var pixels=new Color32[96*32];
-                Sample(source,new RectInt(288,267,510,910),pixels,4,2,16,28,palette);
-                atlas.SetPixels32(pixels);atlas.Apply();File.WriteAllBytes(Root+"/LowlandsTrader16.png",atlas.EncodeToPNG());
-            }
-            finally {UnityEngine.Object.DestroyImmediate(source);UnityEngine.Object.DestroyImmediate(atlas);}
-            ImportSprites(Root+"/LowlandsTrader16.png",new[]{new Entry{name="TravelingTrader",x=0,y=0,width=24,height=32}});
         }
 
         static Texture2D Load(string name)

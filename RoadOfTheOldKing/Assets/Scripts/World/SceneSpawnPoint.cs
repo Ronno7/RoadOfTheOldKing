@@ -7,8 +7,11 @@ namespace RoadOfTheOldKing.World
     public sealed class SceneSpawnPoint : MonoBehaviour
     {
         [SerializeField] private string id;
+        [Tooltip("Optional world-space facing on arrival. Zero preserves the player's normal initial facing.")]
+        [SerializeField] private Vector2 arrivalFacing = Vector2.zero;
         public string Id => id;
         public Vector2 Position => transform.position;
+        public Vector2 ArrivalFacing => arrivalFacing;
 
         public static SceneSpawnPoint Find(string id)
         {

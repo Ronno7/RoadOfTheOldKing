@@ -1,5 +1,4 @@
-/* Title screen foundation (3 Oct): the Bronze panel centred on a dark backdrop. A decorated title screen
-   (art, logo, ambient motion) will build on this layout later. Frame and buttons: OrnateMenu.uss. */
+/* Title uses the plain shared menu theme; ornate bronze/hearth styling is reserved for bonfires. */
 #title-root { background-color: rgb(24, 22, 20); }
 #title-panel { width: 300px; }
 /* The game's name in RotOK Title 32 at 32 px, one font pixel per reference px (user, 4 Oct). */

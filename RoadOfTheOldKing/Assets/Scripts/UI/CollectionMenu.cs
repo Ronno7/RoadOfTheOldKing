@@ -16,12 +16,14 @@ namespace RoadOfTheOldKing.UI
     {
         [SerializeField] private VisualTreeAsset layout;
         [SerializeField] private PanelSettings panelSettings;
+        [SerializeField] private Sprite axeIcon, flaskIcon, coinIcon, shardIcon, heartIcon, crankIcon, knowledgeIcon;
         private PlayerHealth player;
         private PlayerCombatController combat;
         private PlayerControlLocks locks;
         private UIDocument document;
         private VisualElement overlay;
-        private Label heading, balances, context, hint;
+        private Label heading, coins, shards, fragments, context, hint;
+        private InventoryGridView inventory;
         private MenuList list;
         private Trader trader;
         private ShopOffer confirming;
@@ -48,9 +50,17 @@ namespace RoadOfTheOldKing.UI
 #if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
             if (DevToolsPanel.CapturesInput) return;
 #endif
-            if (!Application.isFocused || Keyboard.current == null || !Keyboard.current.tabKey.wasPressedThisFrame) return;
-            if (IsOpen) { if (trader == null) Close(); }
-            else OpenInventory();
+            if (!Application.isFocused || Keyboard.current == null) return;
+            var keyboard = Keyboard.current;
+            if (keyboard.tabKey.wasPressedThisFrame)
+            {
+                if (IsOpen) { if (trader == null) Close(); }
+                else OpenInventory();
+                return;
+            }
+            if (!IsOpen || trading || !ReferenceEquals(MenuStack.Top, this)) return;
+            if (keyboard.leftArrowKey.wasPressedThisFrame) inventory.Navigate(-1, 0);
+            if (keyboard.rightArrowKey.wasPressedThisFrame) inventory.Navigate(1, 0);
         }
 
         private bool Build()
@@ -65,9 +75,15 @@ namespace RoadOfTheOldKing.UI
             // submit handler; a bubbling callback is too late and would activate twice.
             overlay.RegisterCallback<NavigationSubmitEvent>(e => e.StopImmediatePropagation(), TrickleDown.TrickleDown);
             overlay.RegisterCallback<NavigationMoveEvent>(e => e.StopImmediatePropagation(), TrickleDown.TrickleDown);
-            heading = overlay.Q<Label>("heading"); balances = overlay.Q<Label>("balances");
+            heading = overlay.Q<Label>("heading"); coins = overlay.Q<Label>("coins");
+            shards = overlay.Q<Label>("shards"); fragments = overlay.Q<Label>("fragments");
             context = overlay.Q<Label>("context"); hint = overlay.Q<Label>("hint");
             list = new MenuList(overlay.Q("entries"), overlay.Q<Label>("description"), action => { if (IsOpen) action.Execute(); });
+            inventory = new InventoryGridView(overlay, CreateIcon);
+            overlay.Q<Button>("collection-close").clicked += Back;
+            overlay.Q<Image>("coin-icon").sprite = coinIcon;
+            overlay.Q<Image>("shard-icon").sprite = shardIcon;
+            overlay.Q<Image>("heart-icon").sprite = heartIcon;
             return true;
         }
 
@@ -75,6 +91,8 @@ namespace RoadOfTheOldKing.UI
         {
             if (!CanOpen || !Build()) return false;
             trader = source; trading = source != null; confirming = null; stockSelection = 0;
+            overlay.EnableInClassList("trading", trading);
+            overlay.Q<Button>("collection-close").text = trading ? "Leave" : "Close";
             locks.Lock(this); pause = SimulationPause.Acquire(); MenuStack.Push(this);
             overlay.style.display = DisplayStyle.Flex;
             GameSession.Instance.RecordResume();
@@ -96,32 +114,36 @@ namespace RoadOfTheOldKing.UI
         private void RefreshBalances()
         {
             var state = GameSession.Instance.Progress;
-            int fragments = HeartFragmentProgression.Count(state);
-            balances.text = state.bronzeCoins + " Bronze Coins    " + state.sunShards + " Sun Shards    " +
-                fragments % HeartFragmentProgression.FragmentsPerHeart + "/3 Fragments";
+            int count = HeartFragmentProgression.Count(state);
+            coins.text = state.bronzeCoins.ToString();
+            shards.text = state.sunShards.ToString();
+            coins.style.fontSize = state.bronzeCoins >= 1000 ? 10 : 20;
+            shards.style.fontSize = state.sunShards >= 1000 ? 10 : 20;
+            fragments.text = count % HeartFragmentProgression.FragmentsPerHeart + "/3";
         }
 
         private void ShowInventory()
         {
-            heading.text = "YOUR PACK"; RefreshBalances();
-            var state = GameSession.Instance.Progress;
-            context.text = "Health " + player.Health.Health + "/" + player.Health.MaxHealth + "  ·  Tools are used where needed.";
-            hint.text = "↑ ↓ Browse    Tab / Esc Close";
-            var rows = new List<PauseMenuAction>();
-            if (state.hasAxe) rows.Add(new PauseMenuAction("Axe", state.recallUnlocked
-                ? "Your axe. Throw it, strike with it, and call it back." : "Your axe. Throw it or strike at close range.", null));
-            var flask = GetComponent<PlayerFlask>();
-            if (flask != null) rows.Add(new PauseMenuAction("Flasks  " + flask.Charges + "/" + flask.MaxCharges,
-                "Drink with " + ControlLabels.Get("heal") + " to recover health. Rest at a bonfire to refill.", null));
-            foreach (WorldTool tool in Enum.GetValues(typeof(WorldTool)))
-                if (tool != WorldTool.None && state.OwnsTool(tool))
-                    rows.Add(new PauseMenuAction(WorldToolNames.Display(tool), ToolDescription(tool), null));
-            foreach (var upgrade in GameSession.Instance.Rewards.Upgrades.Selected)
-                rows.Add(new PauseMenuAction(upgrade.displayName, upgrade.description, null));
-            int lore = ForgeInscriptionProgression.Count(state);
-            if (lore > 0) rows.Add(new PauseMenuAction("Smiths' knowledge  " + Math.Min(lore, ForgeInscriptionProgression.RequiredKnowledge) + "/" + ForgeInscriptionProgression.RequiredKnowledge,
-                "The measures you have learned from the old smiths' carvings.", null));
-            rows.Add(new PauseMenuAction("Close", "", Close)); list.Show(rows);
+            heading.text = "INVENTORY"; RefreshBalances();
+            context.text = "";
+            hint.text = "Tab / Esc";
+            inventory.Show(player);
+        }
+
+        private VisualElement CreateIcon(string id)
+        {
+            VisualElement icon;
+            if (id == "rope" || id == "lantern") icon = new InventoryToolGlyph(id == "lantern");
+            else
+            {
+                Sprite sprite = id switch {
+                    "axe" => axeIcon, "flask" => flaskIcon, "crank" => crankIcon,
+                    "knowledge" => knowledgeIcon, _ => heartIcon
+                };
+                icon = new Image { sprite = sprite, scaleMode = ScaleMode.ScaleToFit, pickingMode = PickingMode.Ignore };
+            }
+            icon.AddToClassList("pack-icon");
+            return icon;
         }
 
         private static string ToolDescription(WorldTool tool)
@@ -141,6 +163,7 @@ namespace RoadOfTheOldKing.UI
         private void ShowStock(string receipt = null)
         {
             confirming = null; heading.text = "TRAVELING TRADER"; RefreshBalances();
+            overlay.Q<Button>("collection-close").text = "Leave";
             context.text = receipt ?? "A little rope can make a long road shorter.";
             hint.text = "↑ ↓ Browse    Enter Select    Esc Leave";
             var rows = new List<PauseMenuAction>();
@@ -160,6 +183,7 @@ namespace RoadOfTheOldKing.UI
         private void ShowConfirmation(ShopOffer offer)
         {
             confirming = offer; heading.text = offer.ItemName.ToUpperInvariant(); RefreshBalances();
+            overlay.Q<Button>("collection-close").text = "Back";
             var state = GameSession.Instance.Progress;
             bool sold = offer.IsSold(state);
             bool affordable = state.bronzeCoins >= offer.Price;
@@ -181,8 +205,8 @@ namespace RoadOfTheOldKing.UI
         }
 
         public void Back() { if (confirming != null) ShowStock(); else Close(); }
-        public void Navigate(int direction) { if (IsOpen) list.Navigate(direction); }
-        public void Submit() { if (IsOpen) list.Submit(); }
+        public void Navigate(int direction) { if (IsOpen) { if (trading) list.Navigate(direction); else inventory.Navigate(0, direction); } }
+        public void Submit() { if (IsOpen && trading) list.Submit(); }
         public void Close()
         {
             if (!IsOpen) return;

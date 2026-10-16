@@ -17,7 +17,7 @@ namespace RoadOfTheOldKing.Combat
 
         public bool ReceiveHit(CombatHit hit)
         {
-            if (IsBroken || (requiresFullCleave && !hit.BreaksGuard))
+            if (IsBroken || (requiresFullCleave && (hit.Kind != AttackKind.ChargedCleave || !hit.BreaksGuard)))
                 return false;
             IsBroken = true;
             Broken?.Invoke(hit);

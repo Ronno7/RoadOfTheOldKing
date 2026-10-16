@@ -1,8 +1,8 @@
-"""Lowlands farm routes, using clean Tutorial connections and accepted soil marks."""
+"""Quiet Lowlands farm routes with unchanged native path masks/connections."""
 import json
 import random
 import re
-from PIL import Image
+from PIL import Image, ImageDraw
 import build_tutorial_ground as ground
 import build_tutorial_paths as paths
 import build_green_lowlands_ground as lowlands
@@ -18,19 +18,43 @@ def tile(material, mask, variant=0, palette=None):
     if material == 'DirtLane':
         im = lowlands.lowlands_tile('Earth',255,variant,p)
     else:
-        # A small, quiet worn trail. No directional hatching or physical grass.
+        # Scale the lane's worn patches down to the narrow six-pixel trail.
+        # Keep the core and joins clean; all detail stays away from tile edges.
         im = Image.new('RGBA',(16,16),p['earth'])
-        x,y = ((7,6),(9,9),(6,10),(8,5))[variant]
-        im.putpixel((x,y),p['soil'])
-        im.putpixel((10-x+5,13-y+2),p['sand'])
+        d = ImageDraw.Draw(im)
+        if variant == 1:
+            d.polygon([(6,7),(7,7),(7,6),(9,6),(9,7),(10,7),
+                       (10,9),(8,9),(8,10),(6,10)],fill=p['pathworn'])
+            d.line((7,7,8,7),fill=p['sand'])
+        elif variant == 2:
+            d.polygon([(7,8),(9,8),(9,9),(10,9),(10,11),
+                       (8,11),(8,10),(7,10)],fill=p['pathworn'])
+            d.line((8,9,9,9),fill=p['sand'])
+            d.line((7,11,8,11),fill=p['pathshade'])
+        elif variant == 3:
+            d.polygon([(6,4),(8,4),(8,5),(10,5),(10,7),
+                       (7,7),(7,6),(6,6)],fill=p['pathworn'])
+            d.line((8,5,9,5),fill=p['sand'])
+            d.point((6,10),fill=p['pathshade'])
+    # Short grass tongues expose the actual underlying surface. Leave all
+    # connection ports intact, so the native joins remain exact across tiles.
+    source=alpha.copy()
+    for y in range(1,15):
+        for x in range(1,15):
+            if not source.getpixel((x,y)):continue
+            distance=min((abs(dx)+abs(dy) for dx,dy in
+                [(0,-1),(0,1),(-1,0),(1,0),(0,-2),(0,2),(-2,0),(2,0)]
+                if 0<=x+dx<16 and 0<=y+dy<16 and not source.getpixel((x+dx,y+dy))),default=9)
+            tongue=(x*3+y*5)%11
+            if distance<=2 and tongue in (0,1,3):alpha.putpixel((x,y),0)
+            elif distance==1 and tongue in (5,6):im.putpixel((x,y),p['pathshade'])
+    if material=='DirtLane' and variant==2:
+        d=ImageDraw.Draw(im)
+        d.polygon([(5,9),(7,8),(9,9),(8,11),(5,11)],fill=p['stone'])
+        d.line((5,9,7,9),fill=p['sand'])
     im.putalpha(alpha)
-    for y in range(16):
-        for x in range(16):
-            if not alpha.getpixel((x,y)): continue
-            # A single continuous lower rim; no scattered fuzzy boundary pixels.
-            # Upper edges stay at the soil base value so the trail reads flat.
-            if y<15 and not alpha.getpixel((x,y+1)):
-                im.putpixel((x,y),p['soil'])
+    # Level ground has no black perimeter; grass interruptions and occasional
+    # embedded flint break the ribbon without obscuring its walking direction.
     return im
 
 
@@ -100,4 +124,5 @@ if __name__ == '__main__':
     paths.main(OUTPUT,PREVIEW,'GreenLowlandsPaths16','green-lowlands-paths-atlas',
                lowlands.PALETTE,render_tile=tile,
                reused_brushes=['Ground/Paint_Cobbles','Ground/Paint_WornStone'])
+    lowlands.zone.validate(Image.open(OUTPUT/'GreenLowlandsPaths16.png').convert('RGBA'))
     review_sheet()

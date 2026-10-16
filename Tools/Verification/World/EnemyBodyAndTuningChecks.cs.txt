@@ -1,0 +1,70 @@
+// Run in the confirmed GreenLowlandsGameplayChecks isolated Play session, then shared cleanup.
+// Tests the real weapon detector against authored bodies; no normal save or authored scene edits.
+var game=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(!Application.isPlaying||game==null||game.StorageKey!=SessionState.GetString("GreenLowlands.Gameplay.Key","")||!game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new Exception("Isolated Play required");
+var checks=new System.Collections.Generic.List<string>();Action<bool,string> check=(ok,label)=>{if(!ok)throw new Exception(label);checks.Add(label);};
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var player=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
+var playerBody=player.GetComponent<Rigidbody2D>();var oldPosition=playerBody.position;
+var owner=new GameObject("Weapon body verification");var weapon=new GameObject("Test axe");weapon.transform.SetParent(owner.transform);
+GameObject root=null,wall=null,trigger=null;
+var simulation=Physics2D.simulationMode;
+try{
+ Physics2D.simulationMode=SimulationMode2D.Script;
+ foreach(string name in new[]{"RoadScavenger","MossbackBoar","Wolf"}){
+  root=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Combat/"+name+".prefab"),new Vector3(1000,1000),Quaternion.identity);
+  var health=root.GetComponent<RoadOfTheOldKing.Combat.Damageable>();var feet=root.GetComponent<CircleCollider2D>();
+  var body=root.GetComponentInChildren<RoadOfTheOldKing.Combat.EnemyHurtbox>();var shape=body.GetComponent<CapsuleCollider2D>();
+  var brain=(MonoBehaviour)root.GetComponent<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>()??root.GetComponent<RoadOfTheOldKing.Combat.WolfAI>();
+  brain.enabled=false;var feedback=root.GetComponent<RoadOfTheOldKing.Combat.EnemyImpactFeedback>();if(feedback!=null)feedback.enabled=false;
+  var render=body.GetType().GetMethod("LateUpdate",flags);
+  check(shape.isTrigger&&!feet.isTrigger&&Mathf.Abs(feet.offset.y)<=.2f&&feet.radius<=.65f,name+" separates body hits from foot collision");
+  var authored=new SerializedObject(body);var sizes=authored.FindProperty("sizes");var offsets=authored.FindProperty("offsets");
+  for(int i=0;i<8;i++){
+   float a=i*45*Mathf.Deg2Rad;brain.GetType().GetProperty("FacingDirection").SetValue(brain,new Vector2(Mathf.Cos(a),Mathf.Sin(a)),null);render.Invoke(body,null);
+   check(shape.size==sizes.GetArrayElementAtIndex(i).vector2Value&&shape.offset==offsets.GetArrayElementAtIndex(i).vector2Value,name+" native body coverage direction "+i);
+  }
+  brain.GetType().GetProperty("FacingDirection").SetValue(brain,Vector2.down,null);render.Invoke(body,null);Physics2D.SyncTransforms();
+  Vector2 chest=shape.bounds.center;owner.transform.position=chest+Vector2.left*3;
+  var hit=new RoadOfTheOldKing.Combat.CombatHit(owner,RoadOfTheOldKing.Combat.AttackKind.Throw,5,Vector2.right,0,0);
+  var detector=new RoadOfTheOldKing.Weapons.AxeHitDetector(owner.transform,weapon.transform);
+  RaycastHit2D impact;
+  float preview=detector.PreviewFlightDistance(chest+Vector2.left*3,Vector2.right,6,.05f);
+  detector.BeginAttack();bool caught=detector.Flight(chest+Vector2.left*3,chest+Vector2.right*3,.05f,hit,true,out impact);
+  check(caught&&impact.collider==shape&&health.Health==health.MaxHealth-5&&Mathf.Abs(preview-impact.distance)<.001f,name+" throw/aim preview strike torso above feet");
+  health.RestoreHealth();detector.BeginAttack();detector.Melee(chest+Vector2.left*1.3f,Vector2.right,1.5f,90,hit);
+  check(health.Health==health.MaxHealth-5,name+" melee reaches visible torso");
+  health.RestoreHealth();detector.BeginAttack();detector.Melee(root.transform.position,Vector2.right,3,360,hit);detector.Melee(root.transform.position,Vector2.right,3,360,hit);
+  check(health.Health==health.MaxHealth-5,name+" foot/body overlap still receives one hit per attack");
+  health.RestoreHealth();wall=new GameObject("Solid hit obstruction");wall.transform.position=chest+Vector2.left;wall.AddComponent<BoxCollider2D>().size=new Vector2(.1f,4);Physics2D.SyncTransforms();
+  detector.BeginAttack();detector.Melee(chest+Vector2.left*2,Vector2.right,3,90,hit);
+  detector.BeginAttack();detector.Flight(chest+Vector2.left*3,chest+Vector2.right*3,.05f,hit,true,out impact);
+  check(health.Health==health.MaxHealth&&impact.collider==wall.GetComponent<Collider2D>(),name+" terrain blocks body melee and throw");
+  UnityEngine.Object.DestroyImmediate(wall);wall=null;
+  trigger=new GameObject("Unrelated pickup trigger");trigger.transform.position=chest+Vector2.left;trigger.AddComponent<BoxCollider2D>().isTrigger=true;Physics2D.SyncTransforms();
+  detector.BeginAttack();detector.Flight(chest+Vector2.left*3,chest+Vector2.right*3,.05f,hit,true,out impact);
+  check(impact.collider==shape&&health.Health==health.MaxHealth-5,name+" ordinary triggers do not catch weapons");
+  UnityEngine.Object.DestroyImmediate(trigger);trigger=null;
+  health.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(owner,RoadOfTheOldKing.Combat.AttackKind.Throw,999,Vector2.right,0,0));Physics2D.SyncTransforms();
+  detector.BeginAttack();check(!body.CanReceiveHits&&!detector.Flight(chest+Vector2.left*3,chest+Vector2.right*3,.05f,hit,true,out impact),name+" defeated body does not catch throws");
+  ((RoadOfTheOldKing.Progression.IResetOnRest)brain).ResetOnRest();Physics2D.SyncTransforms();detector.BeginAttack();
+  check(body.CanReceiveHits&&detector.Flight(chest+Vector2.left*3,chest+Vector2.right*3,.05f,hit,true,out impact),name+" rest restores body hits");
+  UnityEngine.Object.DestroyImmediate(root);root=null;
+ }
+ // Run the authored bandit's actual brain: approach, longer commitment and delivery.
+ root=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Combat/RoadScavenger.prefab"),new Vector3(1000,1000),Quaternion.identity);
+ var bandit=root.GetComponent<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>();var rigid=root.GetComponent<Rigidbody2D>();
+ bandit.GetType().GetField("target",flags).SetValue(bandit,player);var tick=bandit.GetType().GetMethod("Tick",flags);
+ Action<Vector2> move=p=>{playerBody.position=p;player.transform.position=p;playerBody.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();};
+ move(new Vector2(1004,1000));tick.Invoke(bandit,new object[]{.02f});
+ check(bandit.State==RoadOfTheOldKing.Combat.MeleeEnemyState.Pursuing&&Mathf.Abs(rigid.linearVelocity.magnitude-3.3f)<.001f,"bandit pursues at 3.3 units/sec");
+ move(new Vector2(1001.8f,1000));tick.Invoke(bandit,new object[]{.02f});
+ check(bandit.State==RoadOfTheOldKing.Combat.MeleeEnemyState.Windup,"bandit commits from 1.8 units");
+ player.Health.RestoreHealth();player.DebugGodMode=false;player.GetType().GetField("invulnerableUntil",flags).SetValue(player,-1f);
+ move(new Vector2(1002.3f,1000));tick.Invoke(bandit,new object[]{.5f});tick.Invoke(bandit,new object[]{.02f});
+ check(player.Health.Health==player.Health.MaxHealth-18&&bandit.AttackReach==2.25f,"bandit extended arc lands after readable half-second windup");
+}finally{
+ Physics2D.simulationMode=simulation;if(root!=null)UnityEngine.Object.DestroyImmediate(root);if(wall!=null)UnityEngine.Object.DestroyImmediate(wall);if(trigger!=null)UnityEngine.Object.DestroyImmediate(trigger);UnityEngine.Object.DestroyImmediate(owner);
+ player.DebugGodMode=false;player.Health.RestoreHealth();player.GetComponent<RoadOfTheOldKing.Combat.HitReaction>().Clear();playerBody.position=oldPosition;player.transform.position=oldPosition;playerBody.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();
+}
+return new{passed=checks.Count,checks=checks.ToArray()};

@@ -55,6 +55,9 @@ namespace RoadOfTheOldKing.Combat
 
         public void RestoreHealth() => Health = MaxHealth;
 
+        // Rehydrate a visit without replaying hit/defeat events, loot or impact effects.
+        internal void RestoreVisitHealth(int value) => Health = Mathf.Clamp(value, 0, MaxHealth);
+
         // Carries health across a scene change; never revives or empties.
         public void SetHealth(int value) { if (IsAlive) Health = Mathf.Clamp(value, 1, MaxHealth); }
 

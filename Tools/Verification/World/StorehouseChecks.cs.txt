@@ -1,0 +1,313 @@
+// Use GreenLowlandsGameplayChecks setup; enter Play ONLY after successful SETUP.
+// Reset Storehouse.Checks.Phase/Passed to 0 before a new run. Call between real frames.
+// Stop then run shared cleanup even after failure. Never run with normal save keys.
+// Phases 10-21 cover contents, reading, pottery, motor navigation and persistence.
+// Phases 22-24 prove actual motor/physics doorway crossings; select phase 22 after phase 9 to skip contents.
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var game=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(!Application.isPlaying||!SessionState.GetBool("GreenLowlands.Gameplay.Active",false)||game==null||
+ game.StorageKey!=SessionState.GetString("GreenLowlands.Gameplay.Key","")||
+ !game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new System.Exception("Confirmed isolated session required");
+Application.runInBackground=true;
+if(game.IsLoading)return "WAIT: load/fade";
+string prefix="Storehouse.Checks.";
+int phase=SessionState.GetInt(prefix+"Phase",0);
+var checks=new System.Collections.Generic.List<string>();
+System.Action<bool,string> check=(ok,label)=>{if(!ok)throw new System.Exception("Phase "+phase+": "+label);checks.Add(label);};
+string region="Assets/Scenes/GreenLowlands.unity",interior="Assets/Scenes/LowlandsStorehouse.unity";
+var scene=UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+var player=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
+var dark=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.DarkInterior>();
+System.Action<Vector2> pose=at=>{player.transform.position=at;var body=player.GetComponent<Rigidbody2D>();body.position=at;body.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();};
+System.Action<string> doorway=name=>{
+ var exit=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SceneExit>(FindObjectsSortMode.None).Single(e=>e.name==name);
+ pose(exit.transform.position);
+ var direction=(Vector2)typeof(RoadOfTheOldKing.World.SceneExit).GetField("inwardDirection",flags).GetValue(exit);
+ check(direction.sqrMagnitude>.9f,"storehouse doorway opts into inward traversal");
+ var input=player.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();var body=player.GetComponent<Rigidbody2D>();
+ var actions=(UnityEngine.InputSystem.InputActionMap)input.GetType().GetField("actions",flags).GetValue(input);
+ var devices=actions.devices;var routing=UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode;
+ var focus=input.GetType().GetField("hasFocus",flags).GetValue(input);var paused=input.GetType().GetField("paused",flags).GetValue(input);
+ var keyboard=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
+ System.Action<UnityEngine.InputSystem.Key[]> keys=held=>{UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState(held));UnityEngine.InputSystem.InputSystem.Update();input.GetType().GetMethod("Update",flags).Invoke(input,null);};
+ var inwardKey=direction.y>0?UnityEngine.InputSystem.Key.W:UnityEngine.InputSystem.Key.S;
+ var outwardKey=direction.y>0?UnityEngine.InputSystem.Key.S:UnityEngine.InputSystem.Key.W;
+ var predicate=typeof(RoadOfTheOldKing.World.SceneExit).GetMethod("IsMovingInward",flags);
+ System.Func<bool> accepts=()=>(bool)predicate.Invoke(exit,new object[]{player,player.GetComponent<Collider2D>()});
+ try{
+  UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=UnityEngine.InputSystem.InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+  actions.devices=new UnityEngine.InputSystem.InputDevice[]{keyboard};input.GetType().GetField("hasFocus",flags).SetValue(input,true);input.GetType().GetField("paused",flags).SetValue(input,false);
+  keys(new UnityEngine.InputSystem.Key[0]);body.linearVelocity=direction;check(!accepts(),"idle or pushed body does not enter doorway");
+  keys(new[]{UnityEngine.InputSystem.Key.D});body.linearVelocity=Vector2.right;check(!accepts(),"sideways brush does not enter doorway");
+  keys(new[]{outwardKey});body.linearVelocity=-direction;check(!accepts(),"outward retreat does not enter doorway");
+  keys(new[]{inwardKey});body.linearVelocity=Vector2.zero;check(!accepts(),"inward intent without body movement does not enter doorway");
+  body.linearVelocity=direction;var locks=player.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>();var owner=new object();locks.Lock(owner);
+  try{check(!accepts(),"locked player does not enter doorway");}finally{locks.Unlock(owner);}
+  var probe=new GameObject("Doorway child-trigger probe");probe.transform.SetParent(player.transform,false);
+  try{
+   var trigger=probe.AddComponent<BoxCollider2D>();trigger.isTrigger=true;trigger.enabled=false;
+   check(trigger.attachedRigidbody==body&&!(bool)predicate.Invoke(exit,new object[]{player,trigger}),"child trigger sharing player body cannot enter doorway");
+  }finally{probe.SetActive(false);UnityEngine.Object.Destroy(probe);}
+  check(accepts(),"inward intent and body velocity accept doorway");
+  // Staged overlap proves the runtime callback/loader contract; separate motor phases cover walking.
+  typeof(RoadOfTheOldKing.World.SceneExit).GetMethod("OnTriggerStay2D",flags).Invoke(exit,new object[]{player.GetComponent<Collider2D>()});
+  check(game.IsLoading,"inward threshold stay starts real transition");
+ }finally{
+  try{keys(new UnityEngine.InputSystem.Key[0]);}finally{
+   actions.devices=devices;UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard);UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=routing;
+   input.GetType().GetField("hasFocus",flags).SetValue(input,focus);input.GetType().GetField("paused",flags).SetValue(input,paused);
+  }
+ }
+};
+System.Action vitals=()=>check(player.Health.Health==55&&player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().Charges==1,"doorways preserve vitals");
+System.Action checkpoint=()=>check(game.Progress.checkpointId=="green-lowlands/arrival-fire"&&game.Progress.scenePath==region,"interior does not change checkpoint");
+System.Action<UnityEngine.InputSystem.Key> walkIntoDoor=held=>{
+ var motor=player.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>();var input=player.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();var body=player.GetComponent<Rigidbody2D>();
+ var actions=(UnityEngine.InputSystem.InputActionMap)input.GetType().GetField("actions",flags).GetValue(input);
+ var devices=actions.devices;var routing=UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode;var simulation=Physics2D.simulationMode;
+ var focus=input.GetType().GetField("hasFocus",flags).GetValue(input);var paused=input.GetType().GetField("paused",flags).GetValue(input);
+ var keyboard=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
+ System.Action<UnityEngine.InputSystem.Key[]> keys=pressed=>{UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState(pressed));UnityEngine.InputSystem.InputSystem.Update();input.GetType().GetMethod("Update",flags).Invoke(input,null);};
+ var start=body.position;int steps=0;
+ try{
+  UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=UnityEngine.InputSystem.InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+  actions.devices=new UnityEngine.InputSystem.InputDevice[]{keyboard};input.GetType().GetField("hasFocus",flags).SetValue(input,true);input.GetType().GetField("paused",flags).SetValue(input,false);Physics2D.simulationMode=SimulationMode2D.Script;
+  while(!game.IsLoading&&steps++<100){keys(new[]{held});motor.GetType().GetMethod("FixedUpdate",flags).Invoke(motor,null);Physics2D.Simulate(.02f);}
+  check(game.IsLoading,"actual movement and physics cross doorway trigger after "+steps+" steps at "+body.position);
+  check(Vector2.Distance(body.position,start)>.25f,"doorway committed after walking from clear arrival footing");
+ }finally{
+  try{keys(new UnityEngine.InputSystem.Key[0]);}finally{
+   actions.devices=devices;UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard);UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=routing;Physics2D.simulationMode=simulation;
+   input.GetType().GetField("hasFocus",flags).SetValue(input,focus);input.GetType().GetField("paused",flags).SetValue(input,paused);
+  }
+ }
+};
+if(phase==0){check(game.Continue(),"isolated Continue");}
+else if(phase==1){check(game.Checkpoints.LeaveScene(region,"from-tutorial"),"load region");}
+else if(phase==2){
+ check(scene.path==region,"region loaded");
+ var entry=Resources.FindObjectsOfTypeAll<RoadOfTheOldKing.World.SceneExit>().Single(e=>e.gameObject.scene==scene&&e.name=="Enter storehouse");
+ check(entry.gameObject.activeInHierarchy,"dry bank doorway remains visible above high water");
+ var fire=game.Checkpoints.Fires.Single(f=>f.Id=="green-lowlands/arrival-fire");pose(fire.transform.position);
+ if(!fire.IsDiscovered)check(game.Checkpoints.Light(fire),"light exterior fire before first rest");
+ check(game.Checkpoints.Rest(fire),"establish exterior checkpoint");
+ game.Progress.Complete("green-lowlands/sluice/pond-low");
+ UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RecallSluice>().RestoreProgress(game.Progress);
+ check(entry.gameObject.activeInHierarchy,"drained entrance available");
+ player.Health.SetHealth(55);player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().SetCharges(1);
+ doorway("Enter storehouse");
+}
+else if(phase==3){
+ check(scene.path==interior&&dark!=null,"interior loaded with darkness");vitals();checkpoint();
+ check(Vector2.Distance(player.transform.position,Vector2.zero)<.1f,"named interior arrival");
+ check(player.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>().FacingDirection==Vector2.up,"interior arrival faces inward");
+ var exit=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SceneExit>();
+ check(!exit.GetComponent<Collider2D>().bounds.Intersects(player.GetComponent<Collider2D>().bounds),"arrival clear of return trigger");
+ check(dark.VisibilityAt(new Vector2(0,0))>.99f&&dark.VisibilityAt(new Vector2(0,-2.5f))>.99f,"daylight arrival and retreat");
+ check(dark.VisibilityAt(new Vector2(9,11))==0,"deep chamber fully black without lantern");
+ pose(new Vector2(9,11));dark.Present(player.transform.position,false);
+ var carving=new GameObject("Isolated light-gate probe");carving.transform.position=new Vector3(10,11,0);
+ try{
+  var inscription=carving.AddComponent<RoadOfTheOldKing.World.ForgeInscription>();
+  typeof(RoadOfTheOldKing.World.ForgeInscription).GetField("siteNumber",flags).SetValue(inscription,2);
+  typeof(RoadOfTheOldKing.World.ForgeInscription).GetField("inscriptionText",flags).SetValue(inscription,"Isolated visibility probe");
+  check(!inscription.CanCollect(player)&&!inscription.TryCollect(player),"unlit carving cannot prompt or read");
+  check(!game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.ProtectedLantern),"no free lantern on entry");
+  dark.Present(player.transform.position,true);
+  check(inscription.CanCollect(player),"light on carving enables interaction");
+ }finally{UnityEngine.Object.Destroy(carving);}
+ game.Progress.ownedTools.Add(RoadOfTheOldKing.Progression.WorldTool.ProtectedLantern);
+ dark.Present(player.transform.position,false); // next real LateUpdate must apply ownership.
+}
+else if(phase==4){
+ check(dark.VisibilityAt(new Vector2(9,11))>.99f,"ownership automatically enables lantern");
+ check(dark.VisibilityAt(new Vector2(10,11))>.99f,"lantern core readable");
+ float mid=dark.VisibilityAt(new Vector2(13,11));check(mid>.1f&&mid<.9f,"soft gradient before outer radius");
+ check(dark.VisibilityAt(new Vector2(16,12))==0,"beyond radius fully black");
+ check(dark.VisibilityAt(new Vector2(5.5f,11))==0,"wall blocks nearby light");
+ var camera=Camera.main;var cameraPosition=camera.transform.position;camera.transform.position+=Vector3.right*2;
+ check(dark.VisibilityAt(new Vector2(9,11))>.99f,"camera offset does not shift visibility");camera.transform.position=cameraPosition;
+ // Render probes use actual world sorting: cyan sprite and a line under the cover.
+ var probe=new GameObject("Visibility render probe",typeof(SpriteRenderer));var sr=probe.GetComponent<SpriteRenderer>();
+ sr.sprite=AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Sprites/WhiteSquare.png");sr.color=Color.cyan;sr.sortingLayerName="Player";sr.sortingOrder=10000;probe.transform.localScale=Vector3.one*.5f;
+ var line=probe.AddComponent<LineRenderer>();line.sharedMaterial=sr.sharedMaterial;line.startColor=line.endColor=Color.cyan;line.startWidth=line.endWidth=.25f;line.positionCount=2;line.sortingLayerName="Player";line.sortingOrder=10001;
+ var rt=new RenderTexture(320,180,24);var tex=new Texture2D(320,180,TextureFormat.RGBA32,false);var previous=RenderTexture.active;var previousTarget=camera.targetTexture;float size=camera.orthographicSize,aspect=camera.aspect;
+ try{
+  camera.targetTexture=rt;camera.orthographicSize=5.5f;camera.aspect=320f/180;camera.transform.position=new Vector3(9,11,-10);
+  System.Func<Vector2,bool,Color> sample=(at,lit)=>{probe.transform.position=at;line.SetPosition(0,(Vector3)at+Vector3.left*.2f);line.SetPosition(1,(Vector3)at+Vector3.right*.2f);dark.Present(new Vector2(9,11),lit);camera.Render();RenderTexture.active=rt;tex.ReadPixels(new Rect(0,0,320,180),0,0);tex.Apply();var uv=camera.WorldToViewportPoint(at);return tex.GetPixel(Mathf.RoundToInt(uv.x*319),Mathf.RoundToInt(uv.y*179));};
+  var unlit=sample(new Vector2(10,11),false);check(unlit.maxColorComponent<.015f,"rendered world sprite and line hidden without lantern");
+  var core=sample(new Vector2(10,11),true);check(core.g>.4f&&core.b>.4f,"rendered world visible in core");
+  var falloff=sample(new Vector2(13,11),true);check(falloff.g>.05f&&falloff.g<core.g-.05f,"rendered gradient dims world");
+  var blocked=sample(new Vector2(5.5f,11),true);check(blocked.maxColorComponent<.015f,"rendered wall shadow hides world effects");
+  var outside=sample(new Vector2(16,12),true);check(outside.maxColorComponent<.015f,"rendered outside radius is black");
+ }finally{camera.targetTexture=previousTarget;camera.transform.position=cameraPosition;camera.orthographicSize=size;camera.aspect=aspect;RenderTexture.active=previous;rt.Release();UnityEngine.Object.Destroy(rt);UnityEngine.Object.Destroy(tex);UnityEngine.Object.Destroy(probe);}
+ // Body-sized samples through the complete ring (not a player-motor playthrough).
+ var points=new[]{new Vector2(0,0),new Vector2(0,8),new Vector2(9,8),new Vector2(9,14),new Vector2(1,14),new Vector2(1,8)};
+ var walls=UnityEngine.Object.FindObjectsByType<BoxCollider2D>(FindObjectsSortMode.None).Where(c=>!c.isTrigger&&c.enabled&&!c.transform.IsChildOf(player.transform)).ToArray();
+ var bodyCollider=player.GetComponent<Collider2D>();var bodySize=bodyCollider.bounds.size;var offset=bodyCollider.bounds.center-player.transform.position;
+ for(int i=1;i<points.Length;i++)for(int j=0;j<=30;j++){
+  var p=Vector2.Lerp(points[i-1],points[i],j/30f);var b=new Bounds((Vector3)p+offset,bodySize);
+  check(!walls.Any(w=>w.bounds.Intersects(b)),"ring body clearance "+i+"/"+j);
+ }
+ doorway("Return to Lowlands");
+}
+else if(phase==5){
+ check(scene.path==region&&dark==null,"exterior return");vitals();checkpoint();
+ check(Vector2.Distance(player.transform.position,new Vector2(20.5f,76.5f))<.1f,"named exterior return");
+ check(player.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>().FacingDirection==Vector2.down,"exterior return faces the approach");
+ check(RoadOfTheOldKing.World.DarkInterior.CanRead(new Vector2(100,100)),"unloading restores ordinary outdoor interaction");
+ check(game.Progress.Has("green-lowlands/sluice/pond-low"),"drainage persists");
+ var exit=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SceneExit>(FindObjectsSortMode.None).Single(e=>e.name=="Enter storehouse");
+ check(!exit.GetComponent<Collider2D>().bounds.Intersects(player.GetComponent<Collider2D>().bounds),"return clear of entry trigger");
+ doorway("Enter storehouse");
+}
+else if(phase==6){pose(new Vector2(9,11));check(game.ReturnToTitle(),"save interior position to Main Menu");}
+else if(phase==7){check(scene.name=="Title","Main Menu loaded");check(game.Continue(),"Continue interior");}
+else if(phase==8){
+ check(scene.path==interior&&Vector2.Distance(player.transform.position,new Vector2(9,11))<.1f,"Continue restores exact interior position");vitals();checkpoint();
+ check(dark.VisibilityAt(new Vector2(9,11))>.99f,"Continue restores owned lantern light");
+ player.Health.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(null,RoadOfTheOldKing.Combat.AttackKind.EnemyMelee,9999,Vector2.up,0,0));check(!player.IsAlive,"death inside");game.Checkpoints.Respawn();
+}
+else if(phase==9){
+ check(scene.path==region,"interior death returns to exterior checkpoint");checkpoint();
+ check(player.IsAlive&&player.Health.Health==player.Health.MaxHealth,"respawn restores health");
+ check(game.Progress.Has("green-lowlands/sluice/pond-low")&&game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.ProtectedLantern),"permanent progress survives interior death");
+}
+else if(phase==10){doorway("Enter storehouse");}
+else if(phase==11){
+ var carving=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.ForgeInscription>(FindObjectsSortMode.None).Single();
+ check(carving.SiteNumber==2&&carving.Text.Contains("Heat the heart"),"authored F2 with distinct text");
+ check(!RoadOfTheOldKing.Progression.ForgeInscriptionProgression.Knows(game.Progress,2),"F2 undiscovered initially");
+ pose(new Vector2(12,13.25f));dark.Present(player.transform.position,false);
+ var interaction=player.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>();
+ check(!interaction.TryInteract()&&interaction.NearbyPickup==null&&interaction.Prompt=="","no F2 prompt or interaction without actual light even when lantern owned");
+ dark.Present(new Vector2(9,8),true);check(!carving.CanCollect(player),"ownership alone does not reveal distant carving");
+ dark.Present(player.transform.position,true);
+ int coins=game.Progress.bronzeCoins,health=player.Health.Health,flasks=player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().Charges;
+ check(interaction.TryInteract(),"ordinary interaction opens authored F2");
+ var reader=player.GetComponent<RoadOfTheOldKing.UI.InscriptionReader>();
+ check(reader.IsOpen&&Time.timeScale==0,"reader pauses world");
+ check(RoadOfTheOldKing.Progression.ForgeInscriptionProgression.Count(game.Progress)==1,"first read learns exactly one inscription");
+ check(new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(game.StorageKey).Load().Has("forge/inscription/2"),"F2 immediately durable");
+ check(game.Progress.bronzeCoins==coins&&player.Health.Health==health&&player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().Charges==flasks,"reading changes no wallet or vitals");checkpoint();
+}
+else if(phase==12){
+ var reader=player.GetComponent<RoadOfTheOldKing.UI.InscriptionReader>();reader.Close();check(!reader.IsOpen&&Time.timeScale==1,"reader close restores simulation");
+}
+else if(phase==13){
+ var carving=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.ForgeInscription>(FindObjectsSortMode.None).Single();
+ pose(new Vector2(12,13.25f));dark.Present(player.transform.position,true);
+ check(carving.TryCollect(player),"authored F2 reread available");
+ check(RoadOfTheOldKing.Progression.ForgeInscriptionProgression.Count(game.Progress)==1,"reread does not duplicate knowledge");
+ player.GetComponent<RoadOfTheOldKing.UI.InscriptionReader>().Close();
+ var sources=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.CoinSource>(FindObjectsSortMode.None).OrderBy(s=>s.SourceId).ToArray();
+ check(sources.Length==3&&sources.Select(s=>s.SourceId).Distinct().Count()==3&&sources.All(s=>s.SourceId.StartsWith("lowlands-storehouse/pot-")),"three unique interior pot IDs");
+ int wallet=game.Progress.bronzeCoins;var randomState=UnityEngine.Random.state;
+ try{
+  int rollIndex=0;
+  foreach(var source in sources){
+   // Seed each actual first roll to cover empty, one and five without changing the table.
+   int desired=rollIndex++;int seed=0;
+   for(;seed<1000;seed++){UnityEngine.Random.InitState(seed);float v=UnityEngine.Random.value;if(desired==0?v<.8f:desired==1?v>=.8f&&v<.95f:v>=.95f)break;}
+   UnityEngine.Random.InitState(seed);
+   check((int)source.GetType().GetField("guaranteedCoins",flags).GetValue(source)==0,"pot uses ordinary intermittent table");
+   var breakable=(RoadOfTheOldKing.Combat.Breakable)source.GetType().GetField("breakable",flags).GetValue(source);
+   check(breakable!=null&&!breakable.IsBroken,"intact pot wired");
+   pose((Vector2)source.transform.position+Vector2.down*.8f);
+   check(breakable.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,5,Vector2.up,0,0)),"hit breaks authored pot");
+   var record=game.Progress.FindCoinSource(source.SourceId);check(record!=null&&source.IsRevealed&&record.amount==(desired==0?0:desired==1?1:5),"break records expected ordinary table tier");
+   int amount=record.amount;bool collected=source.TryCollect(player);
+   check(collected==(amount>0),"only nonempty pot grants coins");
+   check(!source.TryCollect(player)&&record.amount==amount,"no repeated roll or payout");
+  }
+ }finally{UnityEngine.Random.state=randomState;}
+ int awarded=sources.Sum(s=>game.Progress.FindCoinSource(s.SourceId).amount);
+ check(game.Progress.bronzeCoins==wallet+awarded,"wallet matches recorded pot contents");
+ SessionState.SetInt(prefix+"Wallet",game.Progress.bronzeCoins);
+ SessionState.SetString(prefix+"PotRecords",string.Join("|",sources.Select(s=>JsonUtility.ToJson(game.Progress.FindCoinSource(s.SourceId))).ToArray()));
+ var depths=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.WorldPropDepth>(FindObjectsSortMode.None);
+ var slab=carving.GetComponentInChildren<RoadOfTheOldKing.World.WorldPropDepth>();var slabRenderer=slab.GetComponent<SpriteRenderer>();var playerRenderer=player.GetComponentInChildren<SpriteRenderer>();
+ pose((Vector2)carving.transform.position+Vector2.down);typeof(RoadOfTheOldKing.World.WorldPropDepth).GetMethod("LateUpdate",flags).Invoke(slab,null);
+ check(slabRenderer.sortingOrder<playerRenderer.sortingOrder,"player in front of slab at its south side");
+ pose((Vector2)carving.transform.position+Vector2.up);typeof(RoadOfTheOldKing.World.WorldPropDepth).GetMethod("LateUpdate",flags).Invoke(slab,null);
+ check(slabRenderer.sortingOrder>playerRenderer.sortingOrder,"slab covers player behind its north side");
+ doorway("Return to Lowlands");
+}
+else if(phase==14){check(game.Progress.Has("forge/inscription/2"),"knowledge retained outside");doorway("Enter storehouse");}
+else if(phase==15){
+ var sources=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.CoinSource>(FindObjectsSortMode.None).OrderBy(s=>s.SourceId).ToArray();
+ check(sources.All(s=>s.IsRevealed),"all broken pottery restored after round trip");
+ check(string.Join("|",sources.Select(s=>JsonUtility.ToJson(game.Progress.FindCoinSource(s.SourceId))).ToArray())==SessionState.GetString(prefix+"PotRecords",""),"pot records unchanged on reload");
+ check(game.Progress.bronzeCoins==SessionState.GetInt(prefix+"Wallet",-1),"no currency from revisiting pots");
+ pose(new Vector2(12,13.25f));dark.Present(player.transform.position,true);
+ check(player.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>().TryInteract(),"F2 reread after real scene reload");
+ check(RoadOfTheOldKing.Progression.ForgeInscriptionProgression.Count(game.Progress)==1,"knowledge still unique after reload");
+ player.GetComponent<RoadOfTheOldKing.UI.InscriptionReader>().Close();
+}
+else if(phase==16){check(game.ReturnToTitle(),"save discovered interior to Main Menu");}
+else if(phase==17){check(game.Continue(),"Continue discovered interior");}
+else if(phase==18){
+ check(scene.path==interior&&game.Progress.Has("forge/inscription/2"),"Continue restores interior and F2");
+ check(game.Progress.bronzeCoins==SessionState.GetInt(prefix+"Wallet",-1),"Continue retains pot wallet");
+ check(UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.CoinSource>(FindObjectsSortMode.None).All(s=>s.IsRevealed),"Continue restores broken pottery");
+}
+else if(phase==19){
+ var motor=player.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>();var input=player.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();var body=player.GetComponent<Rigidbody2D>();
+ var actions=(UnityEngine.InputSystem.InputActionMap)input.GetType().GetField("actions",flags).GetValue(input);
+ var devices=actions.devices;var routing=UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode;var simulation=Physics2D.simulationMode;
+ bool focus=(bool)input.GetType().GetField("hasFocus",flags).GetValue(input),paused=(bool)input.GetType().GetField("paused",flags).GetValue(input);Vector2 original=body.position;
+ var keyboard=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
+ System.Action<UnityEngine.InputSystem.Key[]> keys=held=>{UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState(held));UnityEngine.InputSystem.InputSystem.Update();input.GetType().GetField("hasFocus",flags).SetValue(input,true);input.GetType().GetMethod("Update",flags).Invoke(input,null);};
+ try{
+  UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=UnityEngine.InputSystem.InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+  actions.devices=new UnityEngine.InputSystem.InputDevice[]{keyboard};input.GetType().GetField("paused",flags).SetValue(input,false);Physics2D.simulationMode=SimulationMode2D.Script;
+  var points=new[]{Vector2.zero,new Vector2(0,8),new Vector2(9,8),new Vector2(9,13.25f),new Vector2(12,13.25f),new Vector2(9,14),new Vector2(1,14),new Vector2(1,8),new Vector2(0,8),Vector2.zero};
+  pose(points[0]);
+  for(int i=1;i<points.Length;i++){
+   int samples=Mathf.CeilToInt(Vector2.Distance(points[i-1],points[i])/.5f);
+   for(int j=1;j<=samples;j++){
+    Vector2 target=Vector2.Lerp(points[i-1],points[i],(float)j/samples);int steps=0;
+    while(Vector2.Distance(body.position,target)>.065f&&steps++<80){
+     var delta=target-body.position;var held=new System.Collections.Generic.List<UnityEngine.InputSystem.Key>();
+     if(delta.x>.025f)held.Add(UnityEngine.InputSystem.Key.D);else if(delta.x<-.025f)held.Add(UnityEngine.InputSystem.Key.A);
+     if(delta.y>.025f)held.Add(UnityEngine.InputSystem.Key.W);else if(delta.y<-.025f)held.Add(UnityEngine.InputSystem.Key.S);
+     keys(held.ToArray());motor.GetType().GetMethod("FixedUpdate",flags).Invoke(motor,null);Physics2D.Simulate(Time.fixedDeltaTime);
+    }
+    if(steps>=80)throw new System.Exception("Motor stuck on leg "+i+" at "+body.position);
+   }
+   check(Vector2.Distance(body.position,points[i])<.1f,"real motor reaches loop/discovery waypoint "+i);
+  }
+ }finally{keys(new UnityEngine.InputSystem.Key[0]);actions.devices=devices;UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard);UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=routing;input.GetType().GetField("hasFocus",flags).SetValue(input,focus);input.GetType().GetField("paused",flags).SetValue(input,paused);Physics2D.simulationMode=simulation;pose(original);}
+ player.Health.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(null,RoadOfTheOldKing.Combat.AttackKind.EnemyMelee,9999,Vector2.up,0,0));check(!player.IsAlive,"death after discoveries");game.Checkpoints.Respawn();
+}
+else if(phase==20){
+ check(scene.path==region&&game.Progress.Has("forge/inscription/2"),"death preserves learned F2 at exterior checkpoint");
+ check(game.Progress.bronzeCoins==SessionState.GetInt(prefix+"Wallet",-1),"death preserves pot wallet");
+ doorway("Enter storehouse");
+}
+else if(phase==21){
+ check(UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.CoinSource>(FindObjectsSortMode.None).All(s=>s.IsRevealed),"pottery stays depleted after death");
+ check(RoadOfTheOldKing.Progression.ForgeInscriptionProgression.Count(game.Progress)==1,"death keeps unique knowledge");
+ doorway("Return to Lowlands");
+}
+else if(phase==22){
+ check(scene.path==region&&game.Progress.Has("green-lowlands/sluice/pond-low"),"motor entry begins in drained exterior");
+ pose(new Vector2(20.5f,76.5f));
+ var exit=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SceneExit>(FindObjectsSortMode.None).Single(e=>e.name=="Enter storehouse");
+ check(!exit.GetComponent<Collider2D>().bounds.Intersects(player.GetComponent<BoxCollider2D>().bounds),"motor entry starts outside doorway trigger");
+ walkIntoDoor(UnityEngine.InputSystem.Key.W);
+}
+else if(phase==23){
+ check(scene.path==interior&&Vector2.Distance(player.transform.position,Vector2.zero)<.1f,"real doorway crossing arrives inside at named spawn");
+ check(player.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>().FacingDirection==Vector2.up,"real entry arrives facing into room");
+ walkIntoDoor(UnityEngine.InputSystem.Key.S);
+}
+else if(phase==24){
+ check(scene.path==region&&Vector2.Distance(player.transform.position,new Vector2(20.5f,76.5f))<.1f,"real doorway return arrives outside at named spawn");
+ check(player.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>().FacingDirection==Vector2.down,"real return arrives facing the exterior approach");
+ var exit=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SceneExit>(FindObjectsSortMode.None).Single(e=>e.name=="Enter storehouse");
+ check(!exit.GetComponent<Collider2D>().bounds.Intersects(player.GetComponent<BoxCollider2D>().bounds),"real return lands clear of entry trigger");
+ check(!game.IsLoading,"no automatic return transition after exterior arrival and fade");
+}else return "DONE: "+SessionState.GetInt(prefix+"Passed",0)+" assertions; stop and clean up shared bootstrap";
+SessionState.SetInt(prefix+"Phase",phase+1);SessionState.SetInt(prefix+"Passed",SessionState.GetInt(prefix+"Passed",0)+checks.Count);
+return new{phase=phase,passed=checks.Count,total=SessionState.GetInt(prefix+"Passed",0),checks=checks.Where(c=>!c.StartsWith("ring body")).ToArray()};

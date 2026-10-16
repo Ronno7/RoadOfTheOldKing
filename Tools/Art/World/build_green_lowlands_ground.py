@@ -1,8 +1,8 @@
-"""Native Green Lowlands meadow, farm soil and buried fieldstone.
+"""Native Green Lowlands ground using the approved presentation-study ramps.
 
 Run from the repository root; uses the existing native exporter without changing
-Tutorial assets. Regional textures use Tutorial's clean contour geometry and
-material rims; asset names stay stable for existing palette references.
+Tutorial assets. Quiet meadow/path motifs retain the original masks and stable
+asset names. Material boundaries are flat transitions, not miniature ledges.
 """
 import build_tutorial_ground as ground
 import json
@@ -10,12 +10,10 @@ import random
 import re
 from PIL import Image, ImageDraw
 
+import lowlands_palette as zone
+
 PALETTE = dict(ground.P)
-PALETTE.update({k: tuple(bytes.fromhex(v)) + (255,) for k, v in {
-    'grass': '7F995A', 'leafshade': '4F7050', 'leaflight': 'B5C97C',
-    'deepgreen': '304C42', 'stone': 'A6AA8A', 'stoneshade': '7C8370',
-    'rockshadow': '585F58',
-}.items()})
+PALETTE.update(zone.COLORS)
 OUTPUT = ground.ROOT / 'RoadOfTheOldKing/Assets/Art/Tiles/GreenLowlands/Ground'
 PREVIEW = ground.ROOT / 'Docs/Art/GreenLowlands'
 
@@ -23,108 +21,102 @@ PREVIEW = ground.ROOT / 'Docs/Art/GreenLowlands'
 def lowlands_tile(material, mask, variant, palette):
     p = palette
     base = {'Grass':'grass','DryGrass':'leaflight','Earth':'earth',
-            'DampEarth':'soil','WornStone':'stoneshade','Cobbles':'rockshadow',
+            'DampEarth':'basinmud','WornStone':'stoneshade','Cobbles':'stonejoint',
             'TilledSoil':'soil'}[material]
     im = Image.new('RGBA',(16,16),p[base]); d = ImageDraw.Draw(im)
-    rng = random.Random(1400 + variant*137 + (['Grass']+ground.MATERIALS).index(material)*49)
 
     def patch(points, color):
         d.polygon(points,fill=p[color])
 
     if material == 'Grass':
-        if variant:
-            # Compact blade groups with definite base/shade/light separation.
-            x,y = rng.randint(2,6),rng.randint(4,8)
-            if variant in (1,4,7):
-                d.line((x,y+2,x+4,y+2),fill=p['leafshade'])
-                d.line((x+1,y+1,x+1,y-1),fill=p['leafshade'])
-                d.line((x+3,y+1,x+4,y),fill=p['leafshade'])
-            elif variant in (2,5):
-                d.line((x,y+1,x+3,y+1),fill=p['leaflight'])
-                d.point((x+3,y),fill=p['leaflight'])
-            else:
-                d.line((x,y+1,x+3,y+1),fill=p['leafshade'])
-                d.line((x+2,y,x+2,y-1),fill=p['leafshade'])
-            if variant in (1,7):
-                d.point((x+2,y+1),fill=p['leaflight'])
-            if variant >= 5:
-                d.line((11,12,13,12),fill=p['leafshade'])
+        # Broad single-value patches and a few grounded tufts; variants zero
+        # two and six stay empty to preserve resting space under physical plants.
+        patches = {
+            1: [(1,8),(3,8),(3,6),(6,6),(6,4),(12,4),(12,6),
+                (14,6),(14,10),(10,10),(10,12),(4,12),(4,11),(1,11)],
+            3: [(1,11),(4,11),(4,9),(10,9),(10,10),(13,10),
+                (13,12),(11,12),(11,14),(4,14),(4,13),(1,13)],
+        }
+        if variant in patches:
+            patch(patches[variant], 'grasspatch')
+        elif variant in (4,7):
+            x,y = (3,5) if variant == 4 else (8,9)
+            d.rectangle((x,y+2,x+5,y+3),fill=p['leafshade'])
+            d.line((x+1,y-1,x+1,y+2),fill=p['leaflight'])
+            d.line((x+4,y,x+4,y+2),fill=p['leaflight'])
+        elif variant == 5:
+            d.line((4,11,7,11),fill=p['leaflight'])
+            d.point((8,10),fill=p['leaflight'])
     elif material == 'DryGrass':
-        if variant != 2:
-            x,y=2+variant,4+variant
-            d.line((x,y,x+3,y),fill=p['grass'])
-            d.point((x+3,y-1),fill=p['grass'])
+        # A gentle vegetation-color change, not a bright sand-colored carpet.
         if variant in (1,3):
-            d.line((9,12,13,11),fill=p['grass'])
-            d.line((4,10,6,9),fill=p['sand'])
-    elif material == 'Earth':
-        # Compact rounded marks with varied positions. Avoid stair-step pairs
-        # and repeated diagonal crescents, which read as directional hatching.
-        def stamp(x,y,rows):
-            colors = {'s':'soil','h':'sand','r':'stone'}
-            for dy,row in enumerate(rows):
-                for dx,c in enumerate(row):
-                    if c != '.': im.putpixel((x+dx,y+dy),p[colors[c]])
-        if variant == 0:
-            stamp(4,6,('h',))
-            stamp(12,5,('s',))
-            stamp(8,12,('ss',))
-        elif variant == 1:
-            stamp(9,8,('hh','rr','ss'))
-            stamp(3,4,('s',))
+            x,y = (3,8) if variant == 1 else (8,5)
+            d.line((x,y,x+3,y),fill=p['drygrass'])
+            d.point((x+4,y-1),fill=p['drygrass'])
         elif variant == 2:
-            stamp(4,11,('.h.','sss'))
-            stamp(11,3,('h',))
-            stamp(12,11,('s',))
-        else:
-            stamp(3,6,('s.s','sss'))
-            stamp(12,10,('h',))
-            stamp(9,3,('s',))
+            patch([(3,10),(3,8),(7,8),(7,7),(12,7),(12,10),(9,10),(9,11),(5,11)],
+                  'grasspatch')
+    elif material == 'Earth':
+        # Leave common fill and boundaries empty. Connected, low-contrast worn
+        # patches carry the texture; tiny paired chips add grit without making
+        # the route a field of dots or borrowing a raised bank's dark outline.
+        if variant == 1:
+            patch([(2,8),(4,8),(4,7),(8,7),(8,8),(10,8),
+                   (10,10),(8,10),(8,11),(3,11),(3,10),(2,10)], 'pathworn')
+            d.line((4,9,6,9),fill=p['sand'])
+            d.point((7,8),fill=p['sand'])
+            d.line((11,4,12,4),fill=p['pathshade'])
+        elif variant == 2:
+            patch([(8,3),(11,3),(11,4),(13,4),(13,6),
+                   (11,6),(11,7),(8,7),(8,6),(7,6),(7,4),(8,4)], 'pathworn')
+            d.line((10,4,12,4),fill=p['sand'])
+            d.line((9,7,11,7),fill=p['pathshade'])
+            d.line((3,11,4,11),fill=p['pathshade'])
+            d.point((4,10),fill=p['sand'])
+        elif variant == 3:
+            patch([(5,10),(7,10),(7,9),(10,9),(10,10),(12,10),
+                   (12,12),(10,12),(10,13),(6,13),(6,12),(5,12)], 'pathworn')
+            d.line((7,11,9,11),fill=p['sand'])
+            d.line((7,13,8,13),fill=p['pathshade'])
+            patch([(3,3),(5,3),(5,4),(6,4),(6,5),(3,5)],'pathworn')
     elif material == 'DampEarth':
-        x,y = 2+variant,4+variant
-        patch([(x,y),(x+4,y-1),(x+7,y),(x+5,y+2),(x+1,y+2)],'deepsoil')
+        # Quiet cool sediment distinguishes the exposed bed from dry roads.
+        # Connected, low-contrast stains replace the repeated dark gouges.
         if variant in (1,3):
-            d.line((3,11,6,11),fill=p['earth'])
+            x,y = (3,8) if variant == 1 else (8,5)
+            patch([(x,y),(x+2,y-1),(x+5,y-1),(x+6,y),(x+5,y+2),
+                   (x+1,y+2)],'basinpatch')
         if variant == 2:
-            patch([(9,11),(12,10),(14,11),(13,12)],'deepsoil')
+            d.line((4,10,8,10),fill=p['basinsilt'])
+            d.line((7,11,10,11),fill=p['basinsilt'])
     elif material == 'WornStone':
-        # Broad embedded slabs, sparse recesses and grass in the broken joins.
+        # Broad embedded slabs; texture stays quieter than upright cliff faces.
         patch([(2,2),(10,1),(13,3),(12,8),(8,9),(2,7)],'stone')
-        d.line((3,2,9,2),fill=p['sand'])
         patch([(5,12),(9,10),(14,11),(13,14),(6,14)],'stone')
-        d.line((1,10,3,10),fill=p['grass'])
-        if variant: d.line((8,4,8+variant,6),fill=p['stoneshade'])
+        if variant == 1:
+            d.line((1,10,3,10),fill=p['grass'])
+        elif variant == 2:
+            d.line((8,4,10,5),fill=p['stoneshade'])
+        elif variant == 3:
+            d.line((3,3,6,3),fill=p['stonelight'])
     elif material == 'Cobbles':
-        # Uneven fieldstones, larger and less regular than the village's masonry.
+        # Recognizable laid fieldstone, with softer joins than structural walls.
         patch([(1,2),(5,1),(8,3),(7,7),(2,8),(1,6)],'stoneshade')
         patch([(9,1),(14,1),(15,4),(13,7),(10,6)],'stone')
         patch([(1,10),(6,9),(8,11),(6,15),(2,14)],'stone')
         patch([(10,9),(14,8),(15,12),(13,15),(9,14),(9,11)],'stoneshade')
-        d.line((2,2,5,2),fill=p['stone'])
-        d.line((10,10,13,9),fill=p['stone'])
-        if variant: patch([(6,8),(9,7),(10,8),(8,10)],'grass')
+        if variant == 1: d.line((2,2,5,2),fill=p['stone'])
+        if variant == 2: d.line((10,10,12,10),fill=p['stone'])
+        if variant == 3: patch([(6,8),(9,7),(10,8),(8,10)],'grass')
     elif material == 'TilledSoil':
         # Broad clean ridges, two furrows per native tile (Tutorial has four).
         for y in (3,11):
-            d.line((0,y,15,y),fill=p['deepsoil'],width=2)
-            d.line((0,y-2,15,y-2),fill=p['earth'])
+            d.line((0,y,15,y),fill=p['deepsoil'])
+            d.line((0,y-1,15,y-1),fill=p['soilmid'])
     if material != 'Grass' and mask != 255:
-        alpha = ground.coverage(mask)
-        im.putalpha(alpha)
-        # Match Tutorial's uninterrupted, one-native-pixel material rim.
-        # Only actual exposed contours receive a rim; shared tile edges do not.
-        dark = dict(DryGrass='grass',Earth='soil',DampEarth='deepsoil',
-                    WornStone='stoneshade',Cobbles='rockshadow',TilledSoil='deepsoil')[material]
-        light = dict(DryGrass='leaflight',Earth='sand',DampEarth='earth',
-                     WornStone='stone',Cobbles='stone',TilledSoil='earth')[material]
-        for y in range(16):
-            for x in range(16):
-                if not alpha.getpixel((x,y)): continue
-                exposed = [(dx,dy) for dx,dy in ground.OFFSETS[:4]
-                           if 0 <= x+dx < 16 and 0 <= y+dy < 16
-                           and not alpha.getpixel((x+dx,y+dy))]
-                if exposed:
-                    im.putpixel((x,y),p[light if (0,-1) in exposed else dark])
+        # Preserve every authored 47-shape footprint exactly. No lit upper rim
+        # or dark lower bevel: only dedicated terrain art communicates height.
+        im.putalpha(ground.coverage(mask))
     return im
 
 
@@ -219,4 +211,5 @@ if __name__ == '__main__':
     ground.main(OUTPUT, PREVIEW, 'GreenLowlandsGround16',
                 'green-lowlands-ground-atlas', PALETTE,
                 render_tile=lowlands_tile)
+    zone.validate(Image.open(OUTPUT/'GreenLowlandsGround16.png').convert('RGBA'))
     review_sheet()

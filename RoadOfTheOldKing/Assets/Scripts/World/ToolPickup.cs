@@ -17,6 +17,7 @@ namespace RoadOfTheOldKing.World
         public override bool TryCollect(PlayerHealth player)
         {
             if (!CanCollect(player) || !GameSession.Instance.Rewards.TryCollectTool(rewardId, tool)) return false;
+            PickupPresentation.Collected(visual, player);
             RestoreProgress(GameSession.Instance.Progress);
             return true;
         }

@@ -21,6 +21,7 @@ namespace RoadOfTheOldKing.World
         [SerializeField] private GameObject highWater;
         [SerializeField] private GameObject exposedBasin;
         [SerializeField] private Transform brake;
+        [SerializeField] private SluiceMechanismView mechanismView;
         private Vector3 brakeRest;
         private AxeWeapon attempt;
         private uint attemptFlight;
@@ -36,6 +37,10 @@ namespace RoadOfTheOldKing.World
         public string LowWaterId => puzzleId + "/pond-low";
         public string Feedback { get; private set; } = "";
         public event System.Action Changed;
+
+        // Presentation follows the owned, current throw, never a historical fork hit.
+        public bool IsForkArmed(SluicePart fork) => attemptFork == fork && ValidAttempt() &&
+            attempt.State == AxeState.Stuck;
 
         private void Awake()
         {
@@ -85,7 +90,7 @@ namespace RoadOfTheOldKing.World
             {
                 brakeLifted = true;
                 Feedback = "The brake lifts.";
-                ApplyState();
+                ApplyBrake();
                 Changed?.Invoke();
                 return true;
             }
@@ -93,6 +98,7 @@ namespace RoadOfTheOldKing.World
             if (!brakeLifted)
             {
                 Feedback = "The catch strains against the brake.";
+                if (mechanismView != null) mechanismView.Strain();
                 Changed?.Invoke();
                 return false;
             }
@@ -129,7 +135,7 @@ namespace RoadOfTheOldKing.World
             // One persistent outcome owns water, collision and revealed geometry.
             // Save before the reveal; a load restores the completed configuration.
             if (GameSession.Instance != null) GameSession.Instance.SaveProgress();
-            ApplyState();
+            ApplyState(true);
             Changed?.Invoke();
         }
 
@@ -142,15 +148,29 @@ namespace RoadOfTheOldKing.World
 
         private void ApplyBrake()
         {
+            if (mechanismView != null)
+            {
+                mechanismView.SetBrake(brakeLifted || Stage == SluiceStage.PondLow);
+                return;
+            }
             if (brake != null) brake.localPosition = brakeRest +
                 (brakeLifted || Stage == SluiceStage.PondLow ? Vector3.up * .35f : Vector3.zero);
         }
 
-        private void ApplyState()
+        private static void SetWater(GameObject water, bool visible, bool animate)
         {
-            if (distributorBolt != null) distributorBolt.SetActive(Stage == SluiceStage.High);
-            if (serviceWater != null) serviceWater.SetActive(Stage < SluiceStage.ServiceDiverted);
-            if (highWater != null) highWater.SetActive(Stage < SluiceStage.PondLow);
+            if (water == null) return;
+            if (water.TryGetComponent<SluiceWaterReveal>(out var reveal))
+                reveal.SetVisible(visible, animate);
+            else water.SetActive(visible);
+        }
+
+        private void ApplyState(bool animate = false)
+        {
+            if (mechanismView != null) mechanismView.Present(Stage, brakeLifted, animate);
+            else if (distributorBolt != null) distributorBolt.SetActive(Stage == SluiceStage.High);
+            SetWater(serviceWater, Stage < SluiceStage.ServiceDiverted, animate && Stage == SluiceStage.ServiceDiverted);
+            SetWater(highWater, Stage < SluiceStage.PondLow, animate && Stage == SluiceStage.PondLow);
             if (exposedBasin != null) exposedBasin.SetActive(Stage == SluiceStage.PondLow);
             ApplyBrake();
         }

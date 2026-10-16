@@ -37,7 +37,8 @@ namespace RoadOfTheOldKing.EditorTools
             try
             {
                 if (scene.isDirty) throw new InvalidOperationException("Preserve unsaved regional work first.");
-                if (scene.GetRootGameObjects().Any(g=>g.name==RootName)) throw new InvalidOperationException("Layout already seeded; edit the scene directly.");
+                if (scene.GetRootGameObjects().Any(g=>g.name==RootName || g.name=="Green Lowlands" ||
+                    g.GetComponentInChildren<RecallSluice>(true)!=null)) throw new InvalidOperationException("Layout already seeded; edit the scene directly.");
                 Directory.CreateDirectory("../tmp");
                 string backup = "../tmp/GreenLowlands-before-sleeping-river.unity";
                 if (!File.Exists(backup)) File.Copy(ScenePath, backup);

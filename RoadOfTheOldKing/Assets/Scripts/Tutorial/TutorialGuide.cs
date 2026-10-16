@@ -212,7 +212,7 @@ namespace RoadOfTheOldKing.Tutorial
             if (index < 0 || Time.time < completedUntil || (steps[index].id == "flask" && Time.time - safeSince < .5f))
             { HudNotifications.ClearHint(); return; }
             var current = steps[index];
-            // The bonfire already owns a proximity-sensitive [F] Rest prompt.
+            // The bonfire owns proximity-sensitive [F] Light / [F] Rest prompts.
             if (current.id == "rest") { HudNotifications.ClearHint(); return; }
             if (current.id == "move") moveHintSeconds += Time.deltaTime;
             Vector3? position = current.cueAtPlayer ? player.transform.position + (Vector3)current.cueOffset :

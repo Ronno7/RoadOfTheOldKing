@@ -9,7 +9,8 @@ namespace RoadOfTheOldKing.Weapons
     {
         private readonly Transform owner;
         private readonly Transform weapon;
-        private readonly ContactFilter2D filter = new ContactFilter2D { useTriggers = false };
+        private readonly ContactFilter2D filter = new ContactFilter2D { useTriggers = true };
+        private readonly ContactFilter2D solidFilter = new ContactFilter2D { useTriggers = false };
         private readonly List<Collider2D> overlaps = new List<Collider2D>(16);
         private readonly List<RaycastHit2D> casts = new List<RaycastHit2D>(16);
         private readonly List<RaycastHit2D> sight = new List<RaycastHit2D>(8);
@@ -41,14 +42,16 @@ namespace RoadOfTheOldKing.Weapons
         }
 
         private bool IsCandidate(Collider2D collider) => collider != null &&
-            !collider.transform.IsChildOf(owner) && !collider.transform.IsChildOf(weapon);
+            !collider.transform.IsChildOf(owner) && !collider.transform.IsChildOf(weapon) &&
+            (!collider.isTrigger ||
+                (collider.TryGetComponent<EnemyHurtbox>(out var hurtbox) && hurtbox.CanReceiveHits));
 
         private bool BlocksMelee(Collider2D collider) => IsCandidate(collider) &&
             collider.GetComponentInParent<IHitReceiver>() == null;
 
         private bool CanReachMeleePoint(Vector2 point)
         {
-            Physics2D.Linecast(meleeOrigin, point, filter, sight);
+            Physics2D.Linecast(meleeOrigin, point, solidFilter, sight);
             foreach (var blocker in sight)
                 if (BlocksMelee(blocker.collider)) return false;
             return true;
@@ -85,7 +88,7 @@ namespace RoadOfTheOldKing.Weapons
                     continue;
 
                 bool obstructed = false;
-                Physics2D.Linecast(center, point, filter, sight);
+                Physics2D.Linecast(center, point, solidFilter, sight);
                 foreach (var blocker in sight)
                     if (blocker.collider != collider && BlocksMelee(blocker.collider))
                     {

@@ -1,9 +1,36 @@
-#collection-overlay { display: none; background-color: rgba(15, 19, 18, 0.4); }
-#collection-panel { width: 490px; }
-#collection-panel .menu-heading { font-size: 20px; margin-bottom: 8px; }
-#collection-panel .menu-meta, #collection-panel .menu-text { font-size: 10px; }
-#collection-body { flex-direction: row; margin-top: 10px; min-height: 130px; }
-#entry-scroll { width: 240px; max-height: 210px; flex-shrink: 0; }
-#entries { padding-left: 8px; padding-right: 4px; }
-#collection-panel .menu-button { margin-left: 18px; margin-right: 4px; }
-#collection-panel .menu-description { flex-grow: 1; flex-shrink: 1; width: 145px; padding-left: 14px; font-size: 10px; -unity-text-align: upper-left; }
+/* Compact charcoal pack. Ornate bronze/hearth art belongs only to bonfires. */
+#collection-overlay {
+    display: none; position: absolute; left: 0; right: 0; top: 0; bottom: 0;
+    align-items: center; justify-content: center; background-color: rgba(12, 20, 18, .48);
+    color: rgb(215, 220, 200); -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKPixel.asset"); font-size: 20px;
+}
+Label { margin: 0; padding: 0; -unity-font-style: normal; white-space: normal; }
+#collection-overlay Button { border-radius: 0; -unity-font-style: normal; -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKPixel.asset"); }
+#collection-panel { width: 400px; max-width: 94%; max-height: 94%; padding: 18px; background-color: rgb(35, 46, 41); border-width: 2px; border-color: rgb(82, 105, 88); }
+#heading { font-size: 20px; margin-bottom: 14px; }
+#context { display: none; font-size: 10px; color: rgb(164, 183, 159); }
+#wallet { flex-direction: row; justify-content: space-between; margin-bottom: 16px; padding-bottom: 12px; border-bottom-width: 1px; border-bottom-color: rgb(66, 84, 70); }
+.resource { width: 100px; height: 24px; flex-direction: row; align-items: center; }
+.resource Image { width: 22px; height: 24px; margin-right: 8px; flex-shrink: 0; }
+.resource Label { font-size: 20px; white-space: nowrap; }
+#item-grid { flex-direction: row; flex-wrap: wrap; }
+.pack-item { width: 60px; height: 66px; margin: 0 4px 8px; padding: 4px; border-width: 1px; border-color: rgb(61, 80, 66); background-color: rgb(29, 39, 35); align-items: center; justify-content: center; color: rgb(221, 225, 204); }
+.pack-item.selected, .pack-item:hover, .pack-item:focus { border-color: rgb(156, 184, 145); background-color: rgb(59, 83, 65); }
+.pack-icon { width: 48px; height: 48px; flex-shrink: 0; }
+.item-count { position: absolute; right: 3px; bottom: 2px; font-size: 10px; white-space: nowrap; background-color: rgb(29, 39, 35); padding: 1px 2px; }
+#item-name { height: 18px; font-size: 10px; -unity-text-align: middle-center; color: rgb(185, 202, 175); }
+#pack-footer { flex-direction: row; align-items: center; justify-content: space-between; height: 24px; margin-top: 12px; }
+#hint { font-size: 10px; white-space: nowrap; color: rgb(143, 163, 141); }
+#collection-close { width: 60px; height: 24px; margin: 0; font-size: 10px; color: rgb(205, 218, 188); background-color: rgb(45, 62, 50); border-width: 1px; border-color: rgb(90, 116, 91); }
+#collection-close:hover, #collection-close:focus { background-color: rgb(65, 88, 67); border-color: rgb(156, 184, 145); }
+#trade-body { display: none; flex-direction: row; min-height: 154px; }
+#entry-scroll { width: 55%; margin-right: 16px; }
+#description { flex-grow: 1; flex-shrink: 1; width: 40%; font-size: 10px; padding: 12px; background-color: rgb(29, 39, 35); }
+#entries .menu-button { height: auto; min-height: 36px; padding: 8px; margin-bottom: 6px; font-size: 10px; white-space: normal; color: rgb(215, 220, 200); background-color: rgb(29, 39, 35); border-width: 1px; border-color: rgb(61, 80, 66); }
+#entries .menu-button.selected, #entries .menu-button:hover, #entries .menu-button:focus { background-color: rgb(59, 83, 65); border-color: rgb(156, 184, 145); }
+#entries .menu-button:disabled { opacity: .45; }
+.menu-cursor { display: none; }
+.trading #collection-panel { width: 540px; }
+.trading #context { display: flex; margin-bottom: 12px; }
+.trading #inventory-body { display: none; }
+.trading #trade-body { display: flex; }

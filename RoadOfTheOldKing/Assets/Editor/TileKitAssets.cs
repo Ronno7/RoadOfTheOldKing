@@ -26,7 +26,7 @@ namespace RoadOfTheOldKing.EditorTools
         }
         [Serializable] internal sealed class Manifest { public Entry[] entries; }
 
-        internal static Dictionary<string, Sprite> ImportSprites(string path, Entry[] entries)
+        internal static Dictionary<string, Sprite> ImportSprites(string path, Entry[] entries, bool anchorTopCell = false)
         {
             AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
             var importer = (TextureImporter)AssetImporter.GetAtPath(path);
@@ -54,7 +54,8 @@ namespace RoadOfTheOldKing.EditorTools
             var previous = provider.GetSpriteRects().ToDictionary(r => r.name, r => r.spriteID);
             var rects = entries.Select(e => new SpriteRect {
                 name = e.name, rect = new Rect(e.x,e.y,e.width,e.height),
-                alignment = SpriteAlignment.Center, pivot = Vector2.one * .5f,
+                alignment = anchorTopCell ? SpriteAlignment.Custom : SpriteAlignment.Center,
+                pivot = anchorTopCell ? new Vector2(.5f, 1f-8f/e.height) : Vector2.one * .5f,
                 spriteID = previous.TryGetValue(e.name, out var guid) ? guid : GUID.Generate()
             }).ToArray();
             provider.SetSpriteRects(rects);

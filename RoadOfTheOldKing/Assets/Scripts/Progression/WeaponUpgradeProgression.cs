@@ -51,14 +51,22 @@ namespace RoadOfTheOldKing.Progression
             {
                 foreach (var tier in tiers)
                 {
-                    if (tier == null || tier.choices == null) continue;
+                    if (tier == null) continue;
                     var selection = state.upgrades.Find(s => s.tierId == tier.id);
                     if (selection == null) continue;
-                    foreach (var choice in tier.choices)
-                        if (choice != null && choice.id == selection.upgradeId)
-                        { yield return choice; break; }
+                    var choice = FindChoice(tier.choices, selection.upgradeId) ??
+                        FindChoice(tier.retiredChoices, selection.upgradeId);
+                    if (choice != null) yield return choice;
                 }
             }
+        }
+
+        private static AxeUpgrade FindChoice(AxeUpgrade[] choices, string id)
+        {
+            if (choices == null || string.IsNullOrEmpty(id)) return null;
+            foreach (var choice in choices)
+                if (choice != null && choice.id == id) return choice;
+            return null;
         }
     }
 }

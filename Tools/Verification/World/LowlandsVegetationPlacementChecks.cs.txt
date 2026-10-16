@@ -1,0 +1,91 @@
+// Read-only Edit Mode regression checks. Run after the regional density bake.
+if(EditorApplication.isPlayingOrWillChangePlaymode)throw new System.Exception("Stopped Edit Mode required.");
+if(UnityEngine.SceneManagement.SceneManager.GetActiveScene().path!="Assets/Scenes/GreenLowlands.unity")throw new System.Exception("Open GreenLowlands.");
+var flags=System.Reflection.BindingFlags.Static|System.Reflection.BindingFlags.NonPublic;
+var builder=typeof(RoadOfTheOldKing.EditorTools.GreenLowlandsVegetationBuilder);
+var classify=builder.GetMethod("IsStructuralTile",flags);
+var envelope=builder.GetMethod("CanopyBounds",flags);
+var readMask=builder.GetMethod("ReadMask",flags);
+int checks=0;
+System.Action<bool,string> require=(ok,message)=>{if(!ok)throw new System.Exception(message);checks++;};
+System.Func<string,UnityEngine.Tilemaps.TileBase> tile=path=>AssetDatabase.LoadAssetAtPath<UnityEngine.Tilemaps.TileBase>(path);
+string terrain="Assets/Art/Tiles/GreenLowlands/Terrain/";
+foreach(string path in new[]{terrain+"Tiles/EarthCliff_Top_Center.asset",terrain+"Tiles/EarthCliff_Foot_Left.asset",terrain+"Rules/Paint_CliffCrest.asset",terrain+"Tiles/ShoreReturn_W_0.asset",terrain+"Tiles/ShoreInside_W_0.asset",terrain+"Tiles/ShoreLip_E.asset",terrain+"Tiles/Bank_East.asset",terrain+"Rules/Paint_GrassLedge.asset",terrain+"Rules/Paint_StoneLedge.asset",terrain+"Rules/Paint_RaisedEarth.asset","Assets/Art/Tiles/GreenLowlands/Architecture/Tiles/Foundation_Foot.asset"})
+{
+ var t=tile(path);require(t!=null,"Fixture source missing: "+path);
+ require((bool)classify.Invoke(null,new object[]{t}),"Structural tile family missed: "+path);
+}
+var grassTile=tile("Assets/Art/Tiles/GreenLowlands/Ground/Rules/Paint_Grass.asset");
+require(grassTile!=null&&!(bool)classify.Invoke(null,new object[]{grassTile}),"Ordinary meadow is not a structural face.");
+var layout=AssetDatabase.LoadAssetAtPath<RoadOfTheOldKing.World.VegetationLayout>(RoadOfTheOldKing.EditorTools.GreenLowlandsVegetationBuilder.LayoutPath);
+require(layout!=null&&layout.species.Length==5,"Expected accepted five-species field.");
+foreach(var species in layout.species)
+{
+ var box=(Rect)envelope.Invoke(null,new object[]{species});bool contains=true;
+ foreach(var leaf in species.leaves)
+ {
+  var s=leaf.sprite;float left=-s.pivot.x/s.pixelsPerUnit,right=(s.rect.width-s.pivot.x)/s.pixelsPerUnit;
+  float bottom=-s.pivot.y/s.pixelsPerUnit,top=(s.rect.height-s.pivot.y)/s.pixelsPerUnit;
+  for(int angle=-70;angle<=70;angle++)for(int corner=0;corner<4;corner++)
+  {
+   var v=new Vector2((corner&1)==0?left:right,(corner&2)==0?bottom:top);if(leaf.flipX)v.x=-v.x;
+   float a=angle*Mathf.Deg2Rad;var p=leaf.offset+new Vector2(v.x*Mathf.Cos(a)-v.y*Mathf.Sin(a),v.x*Mathf.Sin(a)+v.y*Mathf.Cos(a));
+   if(!box.Contains(p))contains=false;
+  }
+ }
+ require(contains,"A rotating leaf exits the bake's structural clearance envelope.");
+}
+var maskType=builder.GetNestedType("Mask",System.Reflection.BindingFlags.NonPublic);
+var sample=System.Activator.CreateInstance(maskType,true);
+var sampleGrass=(System.Collections.Generic.HashSet<Vector2Int>)maskType.GetField("grass").GetValue(sample);
+var sampleStructure=(System.Collections.Generic.HashSet<Vector2Int>)maskType.GetField("structure").GetValue(sample);
+for(int y=9994;y<=10006;y++)for(int x=9994;x<=10006;x++)sampleGrass.Add(new Vector2Int(x,y));
+var rootAllows=maskType.GetMethod("Allows",new System.Type[]{typeof(Vector2)});
+var plantAllows=maskType.GetMethod("Allows",new System.Type[]{typeof(Vector2),typeof(Rect)});
+var root=new Vector2(10000,10000);var leafBox=(Rect)envelope.Invoke(null,new object[]{layout.species[0]});
+require((bool)rootAllows.Invoke(sample,new object[]{root}),"Synthetic supported root must be allowed.");
+sampleStructure.Add(new Vector2Int(10001,10000));
+require(!(bool)plantAllows.Invoke(sample,new object[]{root,leafBox}),"Lateral overhang must reject a root whose .45-unit footprint is clear.");
+sampleStructure.Clear();sampleStructure.Add(new Vector2Int(10000,10001));
+require(!(bool)plantAllows.Invoke(sample,new object[]{root,leafBox}),"Tall blades must not hide a nearby cliff foot.");
+sampleStructure.Clear();sampleStructure.Add(new Vector2Int(10004,10000));
+require((bool)plantAllows.Invoke(sample,new object[]{root,leafBox}),"Distant structure must not erase supported meadow.");
+var actual=readMask.Invoke(null,null);
+var actualStructure=(System.Collections.Generic.HashSet<Vector2Int>)maskType.GetField("structure").GetValue(actual);
+var actualGrass=(System.Collections.Generic.HashSet<Vector2Int>)maskType.GetField("grass").GetValue(actual);
+var actualExcluded=(System.Collections.Generic.HashSet<Vector2Int>)maskType.GetField("excluded").GetValue(actual);
+int facesOnCaps=0,newFaces=0,raisedColumns=0;
+var repairedH1Faces=new System.Collections.Generic.HashSet<Vector2Int>();
+foreach(var m in UnityEngine.Object.FindObjectsByType<UnityEngine.Tilemaps.Tilemap>(FindObjectsInactive.Include,FindObjectsSortMode.None))
+{
+ if(m.gameObject.scene!=UnityEngine.SceneManagement.SceneManager.GetActiveScene()||m.name=="Meadow Backdrop")continue;
+ foreach(var cell in m.cellBounds.allPositionsWithin)
+ {
+  var t=m.GetTile(cell);if(t==null||!(bool)classify.Invoke(null,new object[]{t}))continue;
+  var p=m.GetCellCenterWorld(cell);var c=new Vector2Int(Mathf.FloorToInt(p.x),Mathf.FloorToInt(p.y));
+  if(!actualStructure.Contains(c)||!actualExcluded.Contains(c))throw new System.Exception("Authored structure not excluded: "+m.name+" "+cell);
+  if(t is RoadOfTheOldKing.World.RaisedCliffTile){
+   raisedColumns++;
+   for(int drop=1;drop<=3;drop++)if(!actualStructure.Contains(c+Vector2Int.down*drop)||!actualExcluded.Contains(c+Vector2Int.down*drop))throw new System.Exception("Automatic cliff extension not excluded: "+cell+" drop "+drop);
+  }
+  if(m.name=="Terrain - cliff caps"&&t.name.StartsWith("EarthCliff_"))facesOnCaps++;
+  if(t is RoadOfTheOldKing.World.RaisedCliffTile && ((RoadOfTheOldKing.World.RaisedCliffTile)t).crestLine)
+  {
+   newFaces++;
+   for(int drop=1;drop<=3;drop++){var face=c+Vector2Int.down*drop;if(face.x>=67&&face.x<=73&&face.y>=55&&face.y<=57)repairedH1Faces.Add(face);}
+  }
+ }
+}
+// The old duplicate cap-map faces were deliberately removed by the H1 repair. Asset-family
+// checks above retain that regression coverage without requiring the bad assembly to persist.
+require(repairedH1Faces.Count==21,"All 21 repaired H1 face cells must remain structural exclusions.");
+require(newFaces>0,"Regression requires the rebuilt northern shore overlay.");
+require(raisedColumns>0,"Production automatic cliffs include all three cells below each painted top in the vegetation exclusion.");
+// The old (-30,120) sample now belongs to the rebuilt northern cliff.
+var outside=new Vector2Int(-35,130);
+var backdropOwner=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.MeadowBackdrop>(FindObjectsInactive.Include,FindObjectsSortMode.None).Single(m=>m.gameObject.scene==UnityEngine.SceneManagement.SceneManager.GetActiveScene());
+var backdrop=backdropOwner.GetComponentInChildren<UnityEngine.Tilemaps.Tilemap>(true);
+require(backdrop.HasTile(backdrop.WorldToCell(new Vector3(outside.x+.5f,outside.y+.5f,0)))&&!actualGrass.Contains(outside)&&!actualExcluded.Contains(outside)&&!actualStructure.Contains(outside),"Render-only meadow backdrop must not become a placement or exclusion mask.");
+string validation=RoadOfTheOldKing.EditorTools.GreenLowlandsVegetationBuilder.ValidateLayout();
+require(validation=="0 invalid roots, 0 spacing violations.",validation);
+return checks+" Lowlands vegetation placement checks passed; "+repairedH1Faces.Count+" repaired H1 faces, "+facesOnCaps+" cap-map faces and "+newFaces+" shore overlays covered. "+layout.plants.Length+" plants; "+validation;

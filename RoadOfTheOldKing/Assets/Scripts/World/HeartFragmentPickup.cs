@@ -24,6 +24,7 @@ namespace RoadOfTheOldKing.World
         {
             if (!CanCollect(player) || !GameSession.Instance.Rewards.TryCollectHeartFragment(rewardId))
                 return false;
+            PickupPresentation.Collected(visual, player);
             IsCollected = true;
             Refresh();
             return true;

@@ -7,8 +7,8 @@ namespace RoadOfTheOldKing.World
     [RequireComponent(typeof(Collider2D))]
     public sealed class CoinPickup : MonoBehaviour
     {
-        private CoinSource source;
-        private void Awake() => source = GetComponentInParent<CoinSource>();
+        private ICoinPickupSource source;
+        private void Awake() => source = GetComponentInParent<ICoinPickupSource>();
         private void OnTriggerEnter2D(Collider2D other) => Collect(other);
         private void OnTriggerStay2D(Collider2D other) => Collect(other);
         private void Collect(Collider2D other)

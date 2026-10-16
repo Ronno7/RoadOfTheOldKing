@@ -1,0 +1,99 @@
+{
+  "date": "2026-10-12",
+  "tool": "PixelLab get_character (existing user-created character)",
+  "character_id": "16cfe365-79cd-4a04-a560-2bf3f3fac4a7",
+  "group_id": "17bfb8b0-9a52-4084-982a-7caf2f566cda",
+  "state_name": "Idle",
+  "selection": "User requested their other PixelLab trader in place of the agent-created compact trader.",
+  "directions": [
+    "south",
+    "east",
+    "north",
+    "west",
+    "south-east",
+    "north-east",
+    "north-west",
+    "south-west"
+  ],
+  "animations": [],
+  "source_policy": "Standing PNGs copied as delivered. No generation, resampling, recoloring or animation import.",
+  "superseded": {
+    "character_id": "4182faea-fde1-472e-b1df-39504024e02d",
+    "status": "Rejected compact source archived locally; no runtime reference."
+  },
+  "files": [
+    {
+      "direction": "south",
+      "url": "https://backblaze.pixellab.ai/file/pixellab-characters/ed5ccd62-d29a-40ad-960a-d0686784d758/16cfe365-79cd-4a04-a560-2bf3f3fac4a7/rotations/south.png?t=1791835064",
+      "file": "Rotations/south.png",
+      "sha256": "76466beb92c53f011ea001643ea370352504b16c00c0fdea302111844509b1ac"
+    },
+    {
+      "direction": "east",
+      "url": "https://backblaze.pixellab.ai/file/pixellab-characters/ed5ccd62-d29a-40ad-960a-d0686784d758/16cfe365-79cd-4a04-a560-2bf3f3fac4a7/rotations/east.png?t=1791835064",
+      "file": "Rotations/east.png",
+      "sha256": "a835cb2547658bf91aba04ebd50974e84badd4222c379681db988a2144de3dea"
+    },
+    {
+      "direction": "north",
+      "url": "https://backblaze.pixellab.ai/file/pixellab-characters/ed5ccd62-d29a-40ad-960a-d0686784d758/16cfe365-79cd-4a04-a560-2bf3f3fac4a7/rotations/north.png?t=1791835064",
+      "file": "Rotations/north.png",
+      "sha256": "56782e5b10cbdc7585f7854a2e705e4bfe63ebfcc0c4e034720a30cf87eedb64"
+    },
+    {
+      "direction": "west",
+      "url": "https://backblaze.pixellab.ai/file/pixellab-characters/ed5ccd62-d29a-40ad-960a-d0686784d758/16cfe365-79cd-4a04-a560-2bf3f3fac4a7/rotations/west.png?t=1791835064",
+      "file": "Rotations/west.png",
+      "sha256": "ce35423c727a3cf405b1d82375e369daf3463fca97bea54b5edbfcc64d9166b7"
+    },
+    {
+      "direction": "south-east",
+      "url": "https://backblaze.pixellab.ai/file/pixellab-characters/ed5ccd62-d29a-40ad-960a-d0686784d758/16cfe365-79cd-4a04-a560-2bf3f3fac4a7/rotations/south-east.png?t=1791835064",
+      "file": "Rotations/south-east.png",
+      "sha256": "74c6ad83c65b357980aa40bb09648d446f6c716e690f8c0f87ef183cbbf7567e"
+    },
+    {
+      "direction": "north-east",
+      "url": "https://backblaze.pixellab.ai/file/pixellab-characters/ed5ccd62-d29a-40ad-960a-d0686784d758/16cfe365-79cd-4a04-a560-2bf3f3fac4a7/rotations/north-east.png?t=1791835064",
+      "file": "Rotations/north-east.png",
+      "sha256": "43480984898b10869d34f29c0bab05a289933c872823e83facab754015fa1ae0"
+    },
+    {
+      "direction": "north-west",
+      "url": "https://backblaze.pixellab.ai/file/pixellab-characters/ed5ccd62-d29a-40ad-960a-d0686784d758/16cfe365-79cd-4a04-a560-2bf3f3fac4a7/rotations/north-west.png?t=1791835064",
+      "file": "Rotations/north-west.png",
+      "sha256": "a5d97f4da858cea7e182ed2fc881832aca84a356ba7139f3f3ab259b5c2292be"
+    },
+    {
+      "direction": "south-west",
+      "url": "https://backblaze.pixellab.ai/file/pixellab-characters/ed5ccd62-d29a-40ad-960a-d0686784d758/16cfe365-79cd-4a04-a560-2bf3f3fac4a7/rotations/south-west.png?t=1791835064",
+      "file": "Rotations/south-west.png",
+      "sha256": "1ec246156d122bfcd44a773ccafbda068f6f77d07ef306ae1fb92eb6b28423c2"
+    }
+  ],
+  "native_import": {
+    "importer": "DirectionalAnimationImporter.ImportStandingSprites",
+    "runtime": "Assets/Art/Sprites/World/TravelingTrader/Rotations",
+    "ppu": 16,
+    "filter": "Point",
+    "compression": "Uncompressed",
+    "mipmaps": false,
+    "foot_rows": {
+      "south": 11,
+      "east": 11,
+      "north": 11,
+      "west": 11,
+      "south-east": 11,
+      "north-east": 11,
+      "north-west": 11,
+      "south-west": 11
+    },
+    "opaque_height": 27,
+    "canvas": [
+      48,
+      48
+    ],
+    "opaque_colors_per_view": 7,
+    "scene": "South displayed at unit scale; visual child local zero at original trader root (10,3). Original sprite GUIDs, WorldPropDepth, shop offers and interaction retained."
+  }
+}

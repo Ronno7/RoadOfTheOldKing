@@ -16,12 +16,13 @@ namespace RoadOfTheOldKing.Player
         public Bonfire Nearby { get; private set; }
         public Bonfire ActiveFire { get; private set; }
         public bool IsOpen => ActiveFire != null;
-        // The bonfire menu presents these; this component only owns resting and the control lock.
+        // The bonfire menu presents these; this component owns interaction and its control lock.
         public event System.Action<Bonfire> Opened;
         public event System.Action Closed;
         public WorldPickup NearbyPickup { get; private set; }
         public string Prompt => IsOpen || !CanInteract ? "" : NearbyPickup != null
-            ? "F - " + NearbyPickup.Prompt : Nearby != null ? "F - Rest at " + Nearby.DisplayName : "";
+            ? "F - " + NearbyPickup.Prompt : Nearby != null
+                ? "F - " + (Nearby.IsDiscovered ? "Rest at " : "Light ") + Nearby.DisplayName : "";
         private bool CanInteract => isActiveAndEnabled && health != null && health.IsAlive &&
             combat != null && combat.CanStartAttack && !combat.IsAttacking;
 
@@ -88,13 +89,13 @@ namespace RoadOfTheOldKing.Player
                 RefreshNearby();
                 return collected;
             }
-            return Nearby != null && Open(Nearby);
+            return Nearby != null && (Nearby.IsDiscovered ? Open(Nearby) : GameSession.Instance.Checkpoints.Light(Nearby));
         }
 
         public bool Open(Bonfire fire)
         {
             var session = GameSession.Instance;
-            if (session == null || !session.Checkpoints.Rest(fire))
+            if (!CanInteract || IsOpen || session == null || !session.Checkpoints.Rest(fire))
                 return false;
             ActiveFire = fire;
             if (locks != null) locks.Lock(this);

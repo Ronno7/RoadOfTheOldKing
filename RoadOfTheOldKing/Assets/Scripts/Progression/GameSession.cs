@@ -44,6 +44,7 @@ namespace RoadOfTheOldKing.Progression
         public ProgressState Progress { get; private set; } = new ProgressState();
         public CheckpointService Checkpoints { get; private set; }
         public RewardService Rewards { get; private set; }
+        internal SceneVisitState Visits { get; } = new SceneVisitState();
         // Includes a transition's fade-in: input is locked then and a new load would be refused.
         public bool IsLoading => loading || (transitions != null && transitions.IsBusy);
         // Anything worth continuing: a rest point, the axe or any milestone.
@@ -118,6 +119,7 @@ namespace RoadOfTheOldKing.Progression
             // Dying returns to the fire, so a death clears the resume point at once (even if the game is closed
             // on the defeat screen).
             Player.Health.Defeated += ClearResume;
+            Player.Health.Defeated += Visits.Clear;
             // The axe belongs to the player once taken: each scene's player spawns its own copy.
             if (Combat != null && Progress.hasAxe)
                 Combat.EquipOwnedAxe();
@@ -125,6 +127,7 @@ namespace RoadOfTheOldKing.Progression
                 Combat.UnlockRecall();
             foreach (var participant in Participants<IProgressParticipant>())
                 participant.RestoreProgress(Progress);
+            Visits.Restore();
             Rewards.ApplyUpgrades();
             Checkpoints.ApplyCarriedVitals();
             transitions.HoldArrivingPlayer(Player.GetComponent<PlayerControlLocks>());
@@ -174,6 +177,7 @@ namespace RoadOfTheOldKing.Progression
             catch (Exception) { Status = "Could not clear the save."; return; }
             loadFailed = false;
             Progress = new ProgressState();
+            Visits.Clear();
             resume = pendingResume = null;
             Rewards.OnProgressReplaced();
             Checkpoints.Forget();
@@ -186,6 +190,8 @@ namespace RoadOfTheOldKing.Progression
         public bool Continue()
         {
             if (loading) return false;
+            // Continue retains the existing fresh-encounter behavior; visit snapshots are not saves.
+            Visits.Clear();
             if (HasResumePoint && SceneLoader.CanLoad(resume.scenePath))
             {
                 pendingResume = resume;

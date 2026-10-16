@@ -1,0 +1,97 @@
+// Shared GreenLowlandsGameplayChecks setup -> inspect SETUP -> Play -> reset VegetationCoins.Phase/Passed.
+// Execute between real frames until DONE, then stop and shared cleanup. No normal save access.
+// Controlled sweeps exercise the actual vegetation event path; one test uses real axe simulation.
+var game=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(!Application.isPlaying||game==null||game.StorageKey!=SessionState.GetString("GreenLowlands.Gameplay.Key","")||!game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new System.Exception("Isolated Play required");
+Application.runInBackground=true;EditorApplication.QueuePlayerLoopUpdate();
+if(game.IsLoading)return "WAIT";
+string prefix="VegetationCoins.";int phase=SessionState.GetInt(prefix+"Phase",0);
+if(phase==6)return "DONE: "+SessionState.GetInt(prefix+"Passed",0);
+var checks=new System.Collections.Generic.List<string>();
+System.Action<bool,string> check=(ok,label)=>{if(!ok)throw new System.Exception("Phase "+phase+": "+label);checks.Add(label);};
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var player=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
+if(phase==0)check(game.Continue(),"Continue isolated seed");
+else if(phase==1)check(game.Checkpoints.LeaveScene("Assets/Scenes/GreenLowlands.unity","from-tutorial"),"enter Lowlands");
+else if(phase==3)check(game.Continue(),"real Continue reload");
+else {
+ check(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name=="GreenLowlands","settled Lowlands");
+ var patches=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.VegetationCoinPatch>(FindObjectsSortMode.None).OrderBy(p=>p.name).ToArray();
+ var sources=patches.Select(p=>p.GetComponent<RoadOfTheOldKing.World.CoinSource>()).ToArray();
+ var field=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.InteractiveVegetation>();
+ var roots=field.layout.plants.Select(p=>(Vector2)field.transform.TransformPoint(p.position)).ToArray();
+ var body=player.GetComponent<Rigidbody2D>();
+ System.Action<Vector2> move=p=>{body.position=p;body.linearVelocity=Vector2.zero;player.transform.position=p;Physics2D.SyncTransforms();};
+ System.Func<int,GameObject> visual=i=>(GameObject)typeof(RoadOfTheOldKing.World.CoinSource).GetField("coinVisual",flags).GetValue(sources[i]);
+ var sweepType=typeof(RoadOfTheOldKing.Weapons.WeaponSweep);
+ var ctor=sweepType.GetConstructors(flags).Single();
+ var raise=sweepType.GetMethod("Raise",System.Reflection.BindingFlags.Static|System.Reflection.BindingFlags.NonPublic);
+ System.Action<Vector2,GameObject,bool> cut=(p,owner,clear)=>raise.Invoke(null,new[]{ctor.Invoke(new object[]{owner,p,p,Vector2.up,.01f,360f,.01f,false,new System.Func<Vector2,bool>(q=>clear)})});
+ if(phase==2){
+  check(patches.Length==16&&sources.Select(s=>s.SourceId).Distinct().Count()==16,"sixteen unique patch sources");
+  check(sources.All(s=>!s.IsRevealed)&&Enumerable.Range(0,16).All(i=>!visual(i).activeSelf),"uncut clumps hide coins");
+  for(int i=0;i<16;i++){
+   var p=(Vector2)sources[i].transform.position;
+   check(roots.Count(r=>(r-p).sqrMagnitude<=1.5625f)>=3,"patch "+i+" contains several rooted plants");
+   move(p);check(!sources[i].TryCollect(player),"walking on uncut patch "+i+" cannot roll or collect");
+  }
+  check(game.Progress.coinSources.Count==0,"walking leaves no reward records");
+  move(new Vector2(15.5f,3));
+  cut(sources[0].transform.position,field.gameObject,true);
+  check(game.Progress.coinSources.Count==0,"non-player sweep cannot earn grass coins");
+  cut(sources[0].transform.position,player.gameObject,false);
+  check(game.Progress.coinSources.Count==0,"terrain-blocked cut cannot roll");
+  var rng=UnityEngine.Random.state;
+  try{
+   for(int i=0;i<3;i++){
+    int seed=0;for(;seed<10000;seed++){UnityEngine.Random.InitState(seed);float r=UnityEngine.Random.value;if(i==0?r<.8f:i==1?r>=.8f&&r<.95f:r>=.95f)break;}
+    UnityEngine.Random.InitState(seed);cut(sources[i].transform.position,player.gameObject,true);
+    var record=game.Progress.FindCoinSource(sources[i].SourceId);int expected=i==0?0:i==1?1:5;
+    check(record!=null&&record.amount==expected&&record.collected==(i==0),"saved roll tier "+expected);
+    check(visual(i).activeSelf==(i!=0),"correct visible drop for tier "+expected);
+    int n=game.Progress.coinSources.Count;
+    foreach(var root in roots.Where(p=>(p-(Vector2)sources[i].transform.position).sqrMagnitude<=1.5625f))cut(root,player.gameObject,true);
+    check(game.Progress.coinSources.Count==n&&game.Progress.FindCoinSource(sources[i].SourceId)==record,"remaining blades do not reroll patch "+i);
+   }
+  }finally{UnityEngine.Random.state=rng;}
+  check(!sources[2].TryCollect(player),"pending coin refuses distant pickup");
+  move(sources[1].transform.position);int wallet=game.Progress.bronzeCoins;
+  check(sources[1].TryCollect(player)&&game.Progress.bronzeCoins==wallet+1,"nearby native coin credits wallet");
+  check(!sources[1].TryCollect(player)&&game.Progress.bronzeCoins==wallet+1,"collected patch cannot pay twice");
+  // Real axe attack, using the same simulation entry point as combat fixtures.
+  var combat=player.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();var axe=combat.Weapon;
+  bool controls=(bool)combat.GetType().GetField("controlsActive",flags).GetValue(combat);
+  try{
+   combat.GetType().GetField("controlsActive",flags).SetValue(combat,true);move((Vector2)sources[3].transform.position-Vector2.right*.7f);axe.CancelAction();player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>().Restore();
+   check(axe.TryLightChop(Vector2.right),"real light chop starts");
+   for(int i=0;i<30;i++)axe.GetType().GetMethod("Simulate",flags).Invoke(axe,new object[]{.02f});
+   check(game.Progress.FindCoinSource(sources[3].SourceId)!=null,"actual axe cuts and rolls authored clump");
+  }finally{axe.CancelAction();combat.GetType().GetField("controlsActive",flags).SetValue(combat,controls);}
+  int records=game.Progress.coinSources.Count;
+  var visit=field.CaptureVisitState();field.RestoreVisitState(visit);
+  check(game.Progress.coinSources.Count==records,"visit-mask restoration emits no reward");
+  move(new Vector2(15.5f,3));var fire=game.Checkpoints.Fires.First(f=>f.Id=="green-lowlands/arrival-fire");
+  check(game.Checkpoints.Light(fire)&&game.Checkpoints.Rest(fire),"light then real rest");
+  check(field.CutCount==0,"rest regrows field");
+  for(int i=0;i<3;i++){cut(sources[i].transform.position,player.gameObject,true);check(game.Progress.coinSources.Count==records,"rest recut cannot reroll patch "+i);}
+  // Pot regression: default sources keep the existing break-to-reveal contract.
+  var pot=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.CoinSource>(FindObjectsSortMode.None).First(s=>s.SourceId=="green-lowlands/practice-pot");
+  check(!pot.IsRevealed,"practice pot starts intact");
+  check(pot.GetComponentInChildren<RoadOfTheOldKing.Combat.Breakable>(true).ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,10,Vector2.up,0,0)),"practice pot still breaks");
+  check(pot.IsRevealed&&game.Progress.FindCoinSource(pot.SourceId).amount==1,"pot reveal remains guaranteed one");
+  SessionState.SetInt(prefix+"Records",game.Progress.coinSources.Count);SessionState.SetInt(prefix+"Wallet",game.Progress.bronzeCoins);
+  check(game.ReturnToTitle(),"save and unload with pending grass coin");
+ }else {
+  check(game.Progress.coinSources.Count==SessionState.GetInt(prefix+"Records",-1),"record count survives lifecycle");
+  check(game.Progress.FindCoinSource(sources[0].SourceId).amount==0&&!visual(0).activeSelf,"empty result remains exhausted");
+  check(game.Progress.FindCoinSource(sources[1].SourceId).collected&&!visual(1).activeSelf,"collected coin stays hidden");
+  check(sources[2].IsRevealed&&visual(2).activeSelf&&!game.Progress.FindCoinSource(sources[2].SourceId).collected,"pending five-coin drop restores");
+  check(game.Progress.bronzeCoins==SessionState.GetInt(prefix+"Wallet",-1),"wallet survives lifecycle");
+  cut(sources[0].transform.position,player.gameObject,true);cut(sources[2].transform.position,player.gameObject,true);
+  check(game.Progress.coinSources.Count==SessionState.GetInt(prefix+"Records",-1),"fresh regrown blades reuse saved outcomes");
+  if(phase==4){player.Health.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.up,0,0));check(!player.IsAlive,"real death");game.Checkpoints.Respawn();}
+  else{move(sources[2].transform.position);check(sources[2].TryCollect(player)&&game.Progress.bronzeCoins==SessionState.GetInt(prefix+"Wallet",-1)+5,"pending drop collected after Continue and death");check(!sources[2].TryCollect(player),"restored drop cannot duplicate");}
+ }
+}
+SessionState.SetInt(prefix+"Phase",phase+1);int total=SessionState.GetInt(prefix+"Passed",0)+checks.Count;SessionState.SetInt(prefix+"Passed",total);
+return new{phase=phase,passed=checks.Count,total=total,checks=checks.ToArray()};

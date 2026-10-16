@@ -1,3 +1,139 @@
+// Optional Lowlands presentation pass: set SessionState PickupCheck.Mode = "presentation".
+// Requires the existing GreenLowlands isolated bootstrap; leaves normal saves untouched.
+if (SessionState.GetString("PickupCheck.Mode","") == "presentation") {
+    if(!EditorApplication.isPlaying) throw new Exception("Isolated Play Mode required");
+    var pGame=RoadOfTheOldKing.Progression.GameSession.Instance;
+    if(pGame==null || !pGame.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands.") || pGame.IsLoading)
+        throw new Exception("Settled isolated Lowlands required");
+    var pResults=new System.Collections.Generic.List<string>();
+    Action<bool,string> pCheck=(ok,label)=>{if(!ok)throw new Exception("FAIL: "+label);pResults.Add(label);};
+    var pFlags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+    var pPlayer=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
+    var pBody=pPlayer.GetComponent<Rigidbody2D>();
+    var pOriginalPosition=pBody.position;
+    var pSimulation=Physics2D.simulationMode;
+    var pCreated=new System.Collections.Generic.List<GameObject>();
+    var pViewType=typeof(RoadOfTheOldKing.World.PickupPresentation);
+    var pAdvance=pViewType.GetMethod("Advance",pFlags);
+    Func<RoadOfTheOldKing.World.PickupPresentation,SpriteRenderer> pArt=v=>(SpriteRenderer)pViewType.GetField("art",pFlags).GetValue(v);
+    Action<Vector2> pMove=pos=>{pBody.position=pos;pBody.linearVelocity=Vector2.zero;pPlayer.transform.position=pos;Physics2D.SyncTransforms();};
+    Func<string,GameObject> pSpawn=path=>{var obj=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(path));obj.transform.position=new Vector3(14,4,0);pCreated.Add(obj);return obj;};
+    string pId="verification/presentation/"+System.Guid.NewGuid().ToString("N");
+    try {
+        Physics2D.simulationMode=SimulationMode2D.Script;
+        pMove(new Vector2(14,3.5f));
+        var pHeart=pSpawn("Assets/Prefabs/World/HeartFragment.prefab").GetComponent<RoadOfTheOldKing.World.HeartFragmentPickup>();
+        pHeart.GetType().GetField("rewardId",pFlags).SetValue(pHeart,pId+"/heart");
+        pHeart.RestoreProgress(pGame.Progress);
+        var pView=pHeart.GetComponentInChildren<RoadOfTheOldKing.World.PickupPresentation>();
+        pViewType.GetMethod("Start",pFlags).Invoke(pView,null);
+        var pRoot=pHeart.transform.position;
+        var pCollider=pHeart.GetComponent<Collider2D>();
+        var pBounds=pCollider.bounds;
+        var pArtBody=pArt(pView);
+        var pRandom=UnityEngine.Random.state;
+        var pOffsets=new System.Collections.Generic.HashSet<float>();
+        for(int n=0;n<40;n++){pAdvance.Invoke(pView,new object[]{.1f});pOffsets.Add(pArtBody.transform.localPosition.y);}
+        pCheck(pOffsets.Count>=3,"Heart visibly moves through multiple native-pixel heights");
+        pCheck(pHeart.transform.position==pRoot && pCollider.bounds==pBounds,"Idle presentation leaves pickup root and physical bounds unchanged");
+        pCheck(UnityEngine.Random.state.Equals(pRandom),"Presentation does not consume loot RNG");
+        pCheck(pView.GetComponent<SpriteRenderer>().forceRenderingOff && pArtBody.enabled,"Exactly the presentation proxy owns the visible sprite");
+        var pBefore=pArtBody.transform.localPosition;
+        pAdvance.Invoke(pView,new object[]{0f});
+        pCheck(pArtBody.transform.localPosition==pBefore,"Zero elapsed time freezes animation");
+        var pInteraction=pPlayer.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>();
+        pInteraction.GetType().GetMethod("RefreshNearby",pFlags).Invoke(pInteraction,null);
+        pAdvance.Invoke(pView,new object[]{.25f});
+        pCheck(pInteraction.NearbyPickup==pHeart && (float)pViewType.GetField("focus",pFlags).GetValue(pView)>.9f,"Actual nearest F target receives the focus cue");
+        pCheck(pHeart.CanCollect(pPlayer),"Bobbing heart remains collectible at its ground anchor");
+        int pBurstBefore=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.PickupCollectBurst>(FindObjectsSortMode.None).Length;
+        pCheck(pHeart.TryCollect(pPlayer) && pHeart.IsCollected,"Heart reward commits immediately");
+        int pBurstAfter=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.PickupCollectBurst>(FindObjectsSortMode.None).Length;
+        pCheck(pBurstAfter==pBurstBefore+1 && !pView.gameObject.activeInHierarchy && !pCollider.enabled,"Heart hides and emits exactly one collection effect");
+        pCheck(!pHeart.TryCollect(pPlayer),"Repeated heart collection is rejected");
+        pHeart.RestoreProgress(pGame.Progress);
+        pCheck(UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.PickupCollectBurst>(FindObjectsSortMode.None).Length==pBurstAfter,"Restore never replays collection feedback");
+        var pStored=new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(pGame.StorageKey).Load();
+        pCheck(RoadOfTheOldKing.Progression.HeartFragmentProgression.IsCollected(pStored,pHeart.RewardId),"Heart receipt is persisted before feedback ends");
+
+        var pShard=pSpawn("Assets/Prefabs/World/SunShard.prefab").GetComponent<RoadOfTheOldKing.World.SunShardReward>();
+        pShard.GetType().GetField("rewardId",pFlags).SetValue(pShard,pId+"/shard");
+        pShard.RestoreProgress(pGame.Progress);
+        int pShardCount=pGame.Progress.sunShards;
+        pCheck(pShard.TryCollect(pPlayer) && pGame.Progress.sunShards==pShardCount+1 && !pShard.TryCollect(pPlayer),"Shard award and duplicate protection survive animation");
+        pCheck(!pShard.GetComponentInChildren<RoadOfTheOldKing.World.PickupPresentation>(true).gameObject.activeInHierarchy,"Collected shard art stays hidden");
+
+        var pCoin=pSpawn("Assets/Prefabs/World/CoinSource_Placeholder.prefab").GetComponent<RoadOfTheOldKing.World.CoinSource>();
+        pCoin.GetType().GetField("sourceId",pFlags).SetValue(pCoin,pId+"/coin");
+        pCoin.GetType().GetField("guaranteedCoins",pFlags).SetValue(pCoin,5);
+        pCheck(pCoin.Reveal(),"Coin source reveals through the real reward service");
+        var pCoinView=pCoin.GetComponentInChildren<RoadOfTheOldKing.World.PickupPresentation>();
+        var pTrigger=pCoinView.GetComponent<Collider2D>();
+        var pTriggerBounds=pTrigger.bounds;
+        pAdvance.Invoke(pCoinView,new object[]{.2f});
+        pCheck(pArt(pCoinView).transform.localPosition.y>=.375f && pTrigger.bounds==pTriggerBounds,"Coin reveal hops without moving its collection trigger");
+        int pMoney=pGame.Progress.bronzeCoins;
+        pCheck(pCoin.TryCollect(pPlayer) && pGame.Progress.bronzeCoins==pMoney+5 && !pCoin.TryCollect(pPlayer),"Coin contact reward remains immediate and idempotent");
+        pCheck(!pCoinView.gameObject.activeInHierarchy,"Collected coin and idle glint are hidden");
+
+        var pEnemy=pSpawn("Assets/Prefabs/Combat/MossbackBoar.prefab").GetComponent<RoadOfTheOldKing.World.EnemyCoinDrop>();
+        var pSavedRandom=UnityEngine.Random.state;
+        for(int n=0;n<16 && pEnemy.PendingCoins==0;n++){
+            pEnemy.ResetOnRest();pEnemy.GetComponent<RoadOfTheOldKing.Combat.Damageable>().RestoreHealth();
+            UnityEngine.Random.InitState(721+n);
+            pEnemy.GetComponent<RoadOfTheOldKing.Combat.Damageable>().DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(pPlayer.gameObject,RoadOfTheOldKing.Combat.AttackKind.ChargedCleave,10000,Vector2.up,0,0,true));
+        }
+        UnityEngine.Random.state=pSavedRandom;
+        pCheck(pEnemy.PendingCoins>0,"Real enemy defeat reveals an animated coin");
+        var pEnemyView=pEnemy.GetComponentInChildren<RoadOfTheOldKing.World.PickupPresentation>();
+        var pDropPosition=pEnemyView.transform.position;
+        pEnemy.transform.position+=Vector3.right*3f;
+        pEnemy.GetType().GetMethod("LateUpdate",pFlags).Invoke(pEnemy,null);
+        pAdvance.Invoke(pEnemyView,new object[]{.2f});
+        pCheck(pEnemyView.transform.position==pDropPosition && pArt(pEnemyView).transform.localPosition.y>0f,"Coin art hops while its death-point trigger stays behind a moving corpse");
+        var pVisit=pEnemy.CaptureVisitState();
+        int pPending=pEnemy.PendingCoins;
+        pEnemy.RestoreVisitState(pVisit);
+        pMoney=pGame.Progress.bronzeCoins;
+        pCheck(pEnemy.TryCollect(pPlayer) && pGame.Progress.bronzeCoins==pMoney+pPending && !pEnemy.TryCollect(pPlayer),"Restored enemy drop collects exactly once");
+        pEnemy.ResetOnRest();
+        pCheck(!pEnemyView.gameObject.activeInHierarchy && pEnemy.PendingCoins==0,"Rest clears enemy coin presentation with the drop");
+        // A synthetic dark region exercises visibility gating without modifying a production scene.
+        var pDarkObject=new GameObject("Presentation dark check");pCreated.Add(pDarkObject);
+        var pDark=pDarkObject.AddComponent<RoadOfTheOldKing.World.DarkInterior>();
+        var pNewHeart=pSpawn("Assets/Prefabs/World/HeartFragment.prefab").GetComponent<RoadOfTheOldKing.World.HeartFragmentPickup>();
+        pNewHeart.GetType().GetField("rewardId",pFlags).SetValue(pNewHeart,pId+"/dark");
+        pNewHeart.RestoreProgress(pGame.Progress);
+        var pDarkView=pNewHeart.GetComponentInChildren<RoadOfTheOldKing.World.PickupPresentation>();
+        pAdvance.Invoke(pDarkView,new object[]{.1f});
+        var pGlints=(SpriteRenderer[])pViewType.GetField("glint",pFlags).GetValue(pDarkView);
+        pCheck(!pNewHeart.CanCollect(pPlayer) && pGlints.All(r=>!r.enabled),"Unreadable interior pickup offers neither interaction nor attention glint");
+        UnityEngine.Object.DestroyImmediate(pDarkObject);
+
+        var pChest=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.RewardChest>(FindObjectsSortMode.None).First(c=>c.RewardId=="green-lowlands/orchard");
+        var pChestView=pChest.GetComponentInChildren<RoadOfTheOldKing.World.PickupPresentation>();
+        var pChestPosition=pChestView.transform.position;
+        pAdvance.Invoke(pChestView,new object[]{.2f});
+        pCheck(pArt(pChestView).transform.localPosition==Vector3.zero && pChestView.transform.position==pChestPosition,"Chest remains grounded");
+        pMove((Vector2)pChest.transform.position+Vector2.down*.5f);
+        pCheck(!pChest.CanCollect(pPlayer),"Locked orchard chest preserves its encounter requirement");
+        pGame.Progress.Complete("green-lowlands/orchard-cleared");
+        pCheck(pChest.TryCollect(pPlayer) && pChest.IsOpen,"Actual orchard chest still opens and awards");
+        pAdvance.Invoke(pChestView,new object[]{.2f});
+        pCheck(((SpriteRenderer[])pViewType.GetField("glint",pFlags).GetValue(pChestView)).All(r=>!r.enabled),"Opened chest stops advertising a reward");
+        pChest.RestoreProgress(pGame.Progress);
+        pCheck(pChest.IsOpen && !pChest.TryCollect(pPlayer),"Opened chest restore is idempotent");
+
+        foreach(var pEffect in UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.PickupCollectBurst>(FindObjectsSortMode.None))
+            pCheck(pEffect.GetComponentsInChildren<SpriteRenderer>(true).Length<=7,"Collection effect has a bounded renderer count");
+        SessionState.SetInt("PickupCheck.PresentationPassed",pResults.Count);
+        return new {passed=pResults.Count,checks=pResults.ToArray()};
+    } finally {
+        Physics2D.simulationMode=pSimulation;pMove(pOriginalPosition);
+        foreach(var pObject in pCreated)if(pObject!=null)UnityEngine.Object.DestroyImmediate(pObject);
+        SessionState.EraseString("PickupCheck.Mode");
+    }
+}
 // Run in fresh Tutorial Play Mode with a RoadOfTheOldKing.Verification.Pickups.* save key.
 // Before play, capture the original key/save into PickupCheck.OriginalKey, RealSaveExists and RealSave
 // in Editor SessionState. Restore the scene key and remove the isolated test save afterward.

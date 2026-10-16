@@ -17,33 +17,33 @@ MonoBehaviour:
   seed: 1703
   species:
   - leaves:
-    - sprite: {fileID: -921467465, guid: 4ff43933dd5b9694e957fa4bab439cd3, type: 3}
+    - sprite: {fileID: 114144901, guid: 0d3d501988b4ace46892881628c3eca3, type: 3}
       offset: {x: -0.03125, y: 0}
-      restAngle: 12
+      restAngle: 4
       phaseOffset: 0
       flipX: 0
-    - sprite: {fileID: 2001097858, guid: 4ff43933dd5b9694e957fa4bab439cd3, type: 3}
+    - sprite: {fileID: 1564539887, guid: 0d3d501988b4ace46892881628c3eca3, type: 3}
       offset: {x: 0.03125, y: 0}
-      restAngle: -16
+      restAngle: -6
       phaseOffset: 0.7
       flipX: 0
     flexibility: 1
-    debrisColor: {r: 0.54509807, g: 0.60784316, b: 0.36862746, a: 1}
+    debrisColor: {r: 0.49803922, g: 0.61960787, b: 0.49411765, a: 1}
   - leaves:
-    - sprite: {fileID: 1511132739, guid: 4ff43933dd5b9694e957fa4bab439cd3, type: 3}
+    - sprite: {fileID: 1523964933, guid: 0d3d501988b4ace46892881628c3eca3, type: 3}
       offset: {x: -0.03125, y: 0}
-      restAngle: 10
+      restAngle: 3
       phaseOffset: 0.2
       flipX: 0
-    - sprite: {fileID: -536228506, guid: 4ff43933dd5b9694e957fa4bab439cd3, type: 3}
+    - sprite: {fileID: -1647900331, guid: 0d3d501988b4ace46892881628c3eca3, type: 3}
       offset: {x: 0.03125, y: 0}
-      restAngle: -13
+      restAngle: -5
       phaseOffset: 1
       flipX: 0
     flexibility: 1
-    debrisColor: {r: 0.54509807, g: 0.60784316, b: 0.36862746, a: 1}
+    debrisColor: {r: 0.49803922, g: 0.61960787, b: 0.49411765, a: 1}
   - leaves:
-    - sprite: {fileID: 1826342390, guid: 4ff43933dd5b9694e957fa4bab439cd3, type: 3}
+    - sprite: {fileID: 1804716582, guid: 0d3d501988b4ace46892881628c3eca3, type: 3}
       offset: {x: 0, y: 0}
       restAngle: 0
       phaseOffset: 0
@@ -51,20 +51,20 @@ MonoBehaviour:
     flexibility: 0.4
     debrisColor: {r: 0.3764706, g: 0.44705883, b: 0.3019608, a: 1}
   - leaves:
-    - sprite: {fileID: -921467465, guid: 4ff43933dd5b9694e957fa4bab439cd3, type: 3}
+    - sprite: {fileID: 114144901, guid: 0d3d501988b4ace46892881628c3eca3, type: 3}
       offset: {x: -0.0625, y: 0}
-      restAngle: 20
+      restAngle: 8
       phaseOffset: 0.4
       flipX: 0
-    - sprite: {fileID: -536228506, guid: 4ff43933dd5b9694e957fa4bab439cd3, type: 3}
+    - sprite: {fileID: -1647900331, guid: 0d3d501988b4ace46892881628c3eca3, type: 3}
       offset: {x: 0.0625, y: 0}
-      restAngle: -25
+      restAngle: -10
       phaseOffset: 1.3
       flipX: 0
     flexibility: 1
-    debrisColor: {r: 0.54509807, g: 0.60784316, b: 0.36862746, a: 1}
+    debrisColor: {r: 0.49803922, g: 0.61960787, b: 0.49411765, a: 1}
   - leaves:
-    - sprite: {fileID: 168462884, guid: 4ff43933dd5b9694e957fa4bab439cd3, type: 3}
+    - sprite: {fileID: 603266353, guid: 0d3d501988b4ace46892881628c3eca3, type: 3}
       offset: {x: 0, y: 0}
       restAngle: 0
       phaseOffset: 0.3
@@ -72,36 +72,24 @@ MonoBehaviour:
     flexibility: 0.65
     debrisColor: {r: 0.30980393, g: 0.4392157, b: 0.3137255, a: 1}
   plants:
+  - position: {x: 3.75, y: -63.6875}
+    species: 1
+    phase: 3.8170114
+  - position: {x: 4.3125, y: -63.75}
+    species: 1
+    phase: 5.9461823
+  - position: {x: 7.8125, y: -63.6875}
+    species: 3
+    phase: 1.6002086
   - position: {x: 7.625, y: -63.1875}
     species: 0
     phase: 5.2108154
-  - position: {x: 8.75, y: -63.375}
-    species: 1
-    phase: 2.047402
-  - position: {x: 2.75, y: -62.75}
-    species: 0
-    phase: 0.779669
-  - position: {x: 2.75, y: -62.3125}
-    species: 0
-    phase: 0.8210071
   - position: {x: 3.8125, y: -62.6875}
     species: 1
     phase: 6.2256336
-  - position: {x: 3.375, y: -62.25}
-    species: 0
-    phase: 5.9092116
   - position: {x: 8.1875, y: -62.875}
     species: 0
     phase: 6.0685825
-  - position: {x: 2.75, y: -61.875}
-    species: 0
-    phase: 3.186202
-  - position: {x: 2.75, y: -61.375}
-    species: 1
-    phase: 3.044877
-  - position: {x: 3.25, y: -61.625}
-    species: 0
-    phase: 0.69943494
   - position: {x: 3.8125, y: -61.1875}
     species: 1
     phase: 3.2905185
@@ -111,15 +99,9 @@ MonoBehaviour:
   - position: {x: 8.1875, y: -61.3125}
     species: 1
     phase: 1.0532535
-  - position: {x: 8.75, y: -61.1875}
-    species: 0
-    phase: 2.2122781
   - position: {x: 3.75, y: -60.6875}
     species: 1
     phase: 1.7637117
-  - position: {x: 3.1875, y: -60.1875}
-    species: 1
-    phase: 2.729126
   - position: {x: 4.1875, y: -60.625}
     species: 1
     phase: 4.1014466
@@ -129,60 +111,21 @@ MonoBehaviour:
   - position: {x: 8.25, y: -60.75}
     species: 0
     phase: 4.987028
-  - position: {x: 8.8125, y: -60.875}
-    species: 0
-    phase: 0.059908018
-  - position: {x: 8.8125, y: -60.25}
-    species: 0
-    phase: 0.46774805
-  - position: {x: 9.375, y: -60.6875}
-    species: 1
-    phase: 0.49545783
-  - position: {x: 9.25, y: -60.1875}
-    species: 0
-    phase: 2.9841871
-  - position: {x: 2.75, y: -59.1875}
-    species: 0
-    phase: 4.299654
-  - position: {x: 3.3125, y: -59.6875}
-    species: 1
-    phase: 1.6971371
-  - position: {x: 3.25, y: -59.375}
-    species: 1
-    phase: 1.5757579
   - position: {x: 4.1875, y: -59.3125}
     species: 0
     phase: 4.5696306
   - position: {x: 7.8125, y: -59.3125}
     species: 2
     phase: 2.2254808
-  - position: {x: 8.6875, y: -59.8125}
-    species: 1
-    phase: 2.0829976
   - position: {x: 8.3125, y: -59.125}
     species: 1
     phase: 0.058872133
-  - position: {x: 2.75, y: -58.75}
-    species: 1
-    phase: 5.3184953
   - position: {x: 8.25, y: -58.625}
     species: 1
     phase: 0.27492598
-  - position: {x: 8.75, y: -58.25}
-    species: 1
-    phase: 3.1265507
   - position: {x: 8.125, y: -57.25}
     species: 1
     phase: 3.0898879
-  - position: {x: 9.125, y: -57.3125}
-    species: 1
-    phase: 4.855166
-  - position: {x: 2.6875, y: -56.8125}
-    species: 1
-    phase: 2.0262036
-  - position: {x: 2.875, y: -56.125}
-    species: 1
-    phase: 2.7922263
   - position: {x: 3.875, y: -56.125}
     species: 1
     phase: 2.2383873
@@ -195,21 +138,12 @@ MonoBehaviour:
   - position: {x: 7.8125, y: -56.25}
     species: 1
     phase: 4.878161
-  - position: {x: 8.75, y: -56.125}
-    species: 0
-    phase: 2.1712158
   - position: {x: 7.75, y: -54.75}
     species: 0
     phase: 2.1353066
   - position: {x: 7.625, y: -54.1875}
     species: 3
     phase: 1.1028839
-  - position: {x: 8.6875, y: -54.75}
-    species: 1
-    phase: 6.137058
-  - position: {x: 9.125, y: -49.3125}
-    species: 1
-    phase: 1.4687679
   - position: {x: 2.375, y: -48.3125}
     species: 0
     phase: 4.1238976
@@ -222,24 +156,12 @@ MonoBehaviour:
   - position: {x: 9.25, y: -48.625}
     species: 0
     phase: 6.1786547
-  - position: {x: 9.875, y: -48.6875}
-    species: 1
-    phase: 1.5243104
   - position: {x: 9.3125, y: -48.125}
     species: 1
     phase: 4.3501363
-  - position: {x: 10.1875, y: -48.8125}
-    species: 1
-    phase: 3.924776
   - position: {x: 10.3125, y: -48.25}
     species: 3
     phase: 0.023275986
-  - position: {x: 11.3125, y: -48.375}
-    species: 1
-    phase: 6.1886883
-  - position: {x: 11.75, y: -48.125}
-    species: 0
-    phase: 4.9119244
   - position: {x: 1.75, y: -47.8125}
     species: 3
     phase: 4.888974
@@ -255,18 +177,9 @@ MonoBehaviour:
   - position: {x: 10.1875, y: -47.375}
     species: 1
     phase: 3.8163476
-  - position: {x: 11.75, y: -47.75}
-    species: 1
-    phase: 0.56667936
   - position: {x: 11.25, y: -47.1875}
     species: 3
     phase: 2.396308
-  - position: {x: 12.25, y: -47.8125}
-    species: 1
-    phase: 3.728301
-  - position: {x: -1.3125, y: -46.3125}
-    species: 0
-    phase: 1.9101623
   - position: {x: -0.6875, y: -46.125}
     species: 1
     phase: 5.449979
@@ -318,15 +231,6 @@ MonoBehaviour:
   - position: {x: 11.25, y: -46.8125}
     species: 2
     phase: 3.2456386
-  - position: {x: 12.1875, y: -46.6875}
-    species: 1
-    phase: 3.7208562
-  - position: {x: 12.75, y: -46.125}
-    species: 0
-    phase: 5.497576
-  - position: {x: -2.125, y: -45.125}
-    species: 1
-    phase: 2.5525973
   - position: {x: -0.25, y: -45.625}
     species: 1
     phase: 6.094735
@@ -381,18 +285,6 @@ MonoBehaviour:
   - position: {x: 12.125, y: -45.625}
     species: 0
     phase: 0.9156401
-  - position: {x: 12.875, y: -45.6875}
-    species: 1
-    phase: 2.9258134
-  - position: {x: 13.25, y: -45.6875}
-    species: 0
-    phase: 4.105908
-  - position: {x: 14.25, y: -45.3125}
-    species: 3
-    phase: 0.74442863
-  - position: {x: -2.3125, y: -44.6875}
-    species: 0
-    phase: 1.3730603
   - position: {x: -1.125, y: -44.8125}
     species: 1
     phase: 5.8263583
@@ -435,15 +327,9 @@ MonoBehaviour:
   - position: {x: 13.125, y: -44.75}
     species: 0
     phase: 5.397231
-  - position: {x: 13.8125, y: -44.625}
-    species: 1
-    phase: 4.9470825
   - position: {x: 13.25, y: -44.25}
     species: 1
     phase: 2.4723828
-  - position: {x: -1.625, y: -43.6875}
-    species: 1
-    phase: 3.8493419
   - position: {x: -1.3125, y: -43.1875}
     species: 1
     phase: 1.8048345
@@ -486,21 +372,9 @@ MonoBehaviour:
   - position: {x: 12.6875, y: -43.375}
     species: 0
     phase: 0.5871087
-  - position: {x: 13.375, y: -43.6875}
-    species: 1
-    phase: 3.3364425
-  - position: {x: 13.6875, y: -43.8125}
-    species: 1
-    phase: 4.330646
   - position: {x: 13.25, y: -43.3125}
     species: 0
     phase: 3.1048176
-  - position: {x: 14.3125, y: -43.8125}
-    species: 0
-    phase: 2.0798016
-  - position: {x: -1.75, y: -42.1875}
-    species: 1
-    phase: 3.3797216
   - position: {x: -0.625, y: -42.75}
     species: 1
     phase: 4.9568806
@@ -531,12 +405,6 @@ MonoBehaviour:
   - position: {x: 13.3125, y: -42.6875}
     species: 1
     phase: 5.602583
-  - position: {x: 14.3125, y: -42.75}
-    species: 1
-    phase: 0.5555055
-  - position: {x: 14.3125, y: -42.1875}
-    species: 1
-    phase: 3.3116593
   - position: {x: -0.8125, y: -41.875}
     species: 0
     phase: 3.9660025
@@ -579,12 +447,6 @@ MonoBehaviour:
   - position: {x: 13.25, y: -41.375}
     species: 0
     phase: 5.2141447
-  - position: {x: 14.1875, y: -41.75}
-    species: 0
-    phase: 4.346352
-  - position: {x: 14.1875, y: -41.25}
-    species: 0
-    phase: 4.8793073
   - position: {x: 0.3125, y: -40.6875}
     species: 1
     phase: 0.72810984
@@ -621,6 +483,9 @@ MonoBehaviour:
   - position: {x: 13.3125, y: -40.375}
     species: 0
     phase: 0.931156
+  - position: {x: -0.8125, y: -39.375}
+    species: 0
+    phase: 4.796064
   - position: {x: 0.875, y: -39.8125}
     species: 3
     phase: 0.2700885
@@ -660,15 +525,18 @@ MonoBehaviour:
   - position: {x: 7.1875, y: -39.25}
     species: 1
     phase: 4.0930843
-  - position: {x: 13.8125, y: -39.75}
-    species: 1
-    phase: 1.9371935
   - position: {x: 13.125, y: -39.25}
     species: 1
     phase: 4.6185875
   - position: {x: 13.6875, y: -39.3125}
     species: 2
     phase: 1.8530346
+  - position: {x: -0.8125, y: -38.875}
+    species: 1
+    phase: 5.8883615
+  - position: {x: -0.75, y: -38.25}
+    species: 0
+    phase: 0.6150776
   - position: {x: -0.1875, y: -38.25}
     species: 0
     phase: 5.1634636
@@ -714,15 +582,9 @@ MonoBehaviour:
   - position: {x: 12.8125, y: -38.8125}
     species: 1
     phase: 3.5507548
-  - position: {x: 13.75, y: -38.8125}
-    species: 0
-    phase: 1.4945482
   - position: {x: 13.75, y: -38.1875}
     species: 0
     phase: 1.3482329
-  - position: {x: 15.375, y: -38.25}
-    species: 2
-    phase: 5.1336274
   - position: {x: -0.1875, y: -37.8125}
     species: 1
     phase: 0.15540993
@@ -732,9 +594,6 @@ MonoBehaviour:
   - position: {x: 2.75, y: -37.75}
     species: 1
     phase: 6.1541944
-  - position: {x: 2.3125, y: -37.1875}
-    species: 0
-    phase: 6.138786
   - position: {x: 3.25, y: -37.6875}
     species: 3
     phase: 1.6456015
@@ -792,54 +651,24 @@ MonoBehaviour:
   - position: {x: 8.75, y: -36.3125}
     species: 0
     phase: 3.045997
+  - position: {x: 4.625, y: -35.375}
+    species: 1
+    phase: 3.4013472
+  - position: {x: 7.3125, y: -35.25}
+    species: 1
+    phase: 2.9653392
   - position: {x: 12.8125, y: -32.3125}
     species: 0
     phase: 6.231514
-  - position: {x: 19.25, y: -32.75}
-    species: 3
-    phase: 4.4330916
-  - position: {x: 19.8125, y: -32.25}
-    species: 1
-    phase: 4.985943
   - position: {x: 18.8125, y: -31.6875}
     species: 1
     phase: 4.0659404
   - position: {x: 19.3125, y: -31.8125}
     species: 0
     phase: 2.777513
-  - position: {x: 19.625, y: -31.375}
-    species: 1
-    phase: 4.8048434
-  - position: {x: 15.25, y: -29.25}
-    species: 0
-    phase: 3.6930296
-  - position: {x: 20.8125, y: -29.6875}
-    species: 1
-    phase: 4.239746
-  - position: {x: 20.6875, y: -29.375}
-    species: 0
-    phase: 1.3140756
-  - position: {x: 21.3125, y: -29.8125}
-    species: 1
-    phase: 5.6427584
   - position: {x: 25.125, y: -29.25}
     species: 2
     phase: 1.2183927
-  - position: {x: 25.75, y: -29.25}
-    species: 1
-    phase: 1.2846438
-  - position: {x: 26.1875, y: -29.1875}
-    species: 1
-    phase: 1.525514
-  - position: {x: 14.6875, y: -28.6875}
-    species: 1
-    phase: 2.974697
-  - position: {x: 15.3125, y: -28.75}
-    species: 0
-    phase: 5.264576
-  - position: {x: 15.3125, y: -28.3125}
-    species: 0
-    phase: 2.742766
   - position: {x: 16.3125, y: -28.1875}
     species: 3
     phase: 3.0576115
@@ -876,27 +705,12 @@ MonoBehaviour:
   - position: {x: 25.125, y: -28.25}
     species: 1
     phase: 3.4370666
-  - position: {x: 26.25, y: -28.875}
-    species: 0
-    phase: 3.049821
   - position: {x: 26.75, y: -28.25}
     species: 0
     phase: 3.6326337
-  - position: {x: 27.25, y: -28.3125}
-    species: 1
-    phase: 0.7358977
-  - position: {x: 27.8125, y: -28.3125}
-    species: 0
-    phase: 0.5243424
   - position: {x: 28.625, y: -28.375}
     species: 2
     phase: 0.88862544
-  - position: {x: 14.8125, y: -27.8125}
-    species: 1
-    phase: 1.9669458
-  - position: {x: 15.3125, y: -27.8125}
-    species: 1
-    phase: 4.2198777
   - position: {x: 15.8125, y: -27.375}
     species: 1
     phase: 6.2532167
@@ -930,12 +744,6 @@ MonoBehaviour:
   - position: {x: 27.75, y: -27.625}
     species: 0
     phase: 0.28137538
-  - position: {x: 29.375, y: -27.25}
-    species: 1
-    phase: 5.5338707
-  - position: {x: 30.25, y: -27.25}
-    species: 1
-    phase: 5.7356253
   - position: {x: 15.875, y: -26.8125}
     species: 1
     phase: 1.889798
@@ -945,15 +753,9 @@ MonoBehaviour:
   - position: {x: 16.625, y: -26.625}
     species: 1
     phase: 1.0122164
-  - position: {x: 16.25, y: -26.125}
-    species: 1
-    phase: 6.242816
   - position: {x: 17.375, y: -26.8125}
     species: 0
     phase: 3.0879402
-  - position: {x: 17.3125, y: -26.1875}
-    species: 1
-    phase: 0.67669713
   - position: {x: 18.3125, y: -26.375}
     species: 0
     phase: 6.1722193
@@ -987,30 +789,9 @@ MonoBehaviour:
   - position: {x: 28.875, y: -26.25}
     species: 0
     phase: 1.4598213
-  - position: {x: 30.25, y: -26.6875}
-    species: 1
-    phase: 4.338057
-  - position: {x: 30.1875, y: -26.375}
-    species: 1
-    phase: 2.2334676
-  - position: {x: 30.6875, y: -26.1875}
-    species: 0
-    phase: 0.42224357
   - position: {x: 15.875, y: -25.1875}
     species: 0
     phase: 0.55881995
-  - position: {x: 16.25, y: -25.8125}
-    species: 1
-    phase: 5.3572583
-  - position: {x: 16.875, y: -25.25}
-    species: 0
-    phase: 5.5985775
-  - position: {x: 17.25, y: -25.6875}
-    species: 0
-    phase: 2.3236094
-  - position: {x: 17.1875, y: -25.25}
-    species: 3
-    phase: 4.805821
   - position: {x: 17.625, y: -25.125}
     species: 0
     phase: 2.9807873
@@ -1047,9 +828,6 @@ MonoBehaviour:
   - position: {x: 29.1875, y: -25.25}
     species: 0
     phase: 3.3757956
-  - position: {x: 30.75, y: -25.75}
-    species: 1
-    phase: 4.4252996
   - position: {x: 31.75, y: -25.25}
     species: 0
     phase: 5.0551476
@@ -1104,6 +882,9 @@ MonoBehaviour:
   - position: {x: 31.375, y: -24.75}
     species: 2
     phase: 2.0429337
+  - position: {x: 32.8125, y: -24.375}
+    species: 0
+    phase: 2.1907947
   - position: {x: 15.75, y: -23.8125}
     species: 1
     phase: 0.9793475
@@ -1164,6 +945,9 @@ MonoBehaviour:
   - position: {x: 32.25, y: -23.625}
     species: 1
     phase: 2.4008894
+  - position: {x: 32.6875, y: -23.625}
+    species: 0
+    phase: 2.4780958
   - position: {x: 15.75, y: -22.25}
     species: 0
     phase: 3.840515
@@ -1188,9 +972,6 @@ MonoBehaviour:
   - position: {x: 15.6875, y: -21.75}
     species: 1
     phase: 1.9111124
-  - position: {x: 15.1875, y: -21.1875}
-    species: 0
-    phase: 4.983161
   - position: {x: 15.75, y: -21.1875}
     species: 0
     phase: 2.4292696
@@ -1236,12 +1017,18 @@ MonoBehaviour:
   - position: {x: 33.25, y: -21.25}
     species: 4
     phase: 2.2904499
+  - position: {x: 33.8125, y: -21.3125}
+    species: 4
+    phase: 5.2052627
   - position: {x: 20.625, y: -20.8125}
     species: 1
     phase: 3.1365776
   - position: {x: 28.75, y: -20.8125}
     species: 2
     phase: 1.3452083
+  - position: {x: 28.625, y: -20.1875}
+    species: 0
+    phase: 2.182758
   - position: {x: 29.3125, y: -20.75}
     species: 1
     phase: 6.1352196
@@ -1251,15 +1038,24 @@ MonoBehaviour:
   - position: {x: 30.875, y: -20.8125}
     species: 1
     phase: 1.0821363
+  - position: {x: 30.125, y: -20.1875}
+    species: 1
+    phase: 5.7368283
+  - position: {x: 31.75, y: -20.125}
+    species: 1
+    phase: 0.03897008
   - position: {x: 32.375, y: -20.75}
     species: 4
     phase: 1.536066
-  - position: {x: 74.6875, y: 21.875}
-    species: 0
-    phase: 4.306025
-  - position: {x: 75.375, y: 21.8125}
-    species: 1
-    phase: 4.179174
+  - position: {x: 32.375, y: -20.1875}
+    species: 4
+    phase: 2.906516
+  - position: {x: 33.1875, y: -20.25}
+    species: 4
+    phase: 4.940629
+  - position: {x: 33.6875, y: -20.1875}
+    species: 4
+    phase: 0.53801155
   - position: {x: 75.875, y: 21.875}
     species: 0
     phase: 0.4988857
@@ -1272,24 +1068,9 @@ MonoBehaviour:
   - position: {x: 79.8125, y: 21.75}
     species: 0
     phase: 2.9468644
-  - position: {x: 81.125, y: 21.625}
-    species: 1
-    phase: 1.923154
   - position: {x: 81.75, y: 21.75}
     species: 0
     phase: 1.6246891
-  - position: {x: 87.3125, y: 21.6875}
-    species: 1
-    phase: 2.3296874
-  - position: {x: 90.75, y: 21.625}
-    species: 3
-    phase: 1.3036047
-  - position: {x: 74.6875, y: 22.1875}
-    species: 0
-    phase: 4.270093
-  - position: {x: 75.25, y: 22.125}
-    species: 3
-    phase: 0.35868937
   - position: {x: 75.875, y: 22.1875}
     species: 1
     phase: 1.9702164
@@ -1422,33 +1203,12 @@ MonoBehaviour:
   - position: {x: 95.3125, y: 24.375}
     species: 2
     phase: 4.7619624
-  - position: {x: 95.75, y: 24.375}
-    species: 0
-    phase: 0.40182245
-  - position: {x: 96.25, y: 24.3125}
-    species: 1
-    phase: 3.6611347
   - position: {x: 96.25, y: 24.75}
     species: 1
     phase: 5.150808
-  - position: {x: 96.8125, y: 24.875}
-    species: 1
-    phase: 1.622872
-  - position: {x: 129.625, y: 24.8125}
-    species: 1
-    phase: 4.3765726
   - position: {x: 130.375, y: 24.75}
     species: 2
     phase: 4.7469506
-  - position: {x: 132.125, y: 24.125}
-    species: 0
-    phase: 2.332764
-  - position: {x: 133.25, y: 24.6875}
-    species: 1
-    phase: 0.0015369769
-  - position: {x: 134.1875, y: 24.875}
-    species: 0
-    phase: 3.5718658
   - position: {x: 73.3125, y: 25.3125}
     species: 1
     phase: 2.7383988
@@ -1509,24 +1269,6 @@ MonoBehaviour:
   - position: {x: 95.3125, y: 25.75}
     species: 2
     phase: 5.927169
-  - position: {x: 96.375, y: 25.25}
-    species: 1
-    phase: 1.683927
-  - position: {x: 96.8125, y: 25.6875}
-    species: 1
-    phase: 1.0876625
-  - position: {x: 97.125, y: 25.3125}
-    species: 0
-    phase: 0.19467999
-  - position: {x: 97.375, y: 25.75}
-    species: 1
-    phase: 2.7001855
-  - position: {x: 97.875, y: 25.6875}
-    species: 1
-    phase: 2.2883265
-  - position: {x: 128.625, y: 25.6875}
-    species: 1
-    phase: 1.4773662
   - position: {x: 131.8125, y: 25.25}
     species: 1
     phase: 4.401288
@@ -1539,18 +1281,9 @@ MonoBehaviour:
   - position: {x: 133.6875, y: 25.875}
     species: 1
     phase: 0.33180463
-  - position: {x: 134.25, y: 25.25}
-    species: 1
-    phase: 1.7518203
-  - position: {x: 134.6875, y: 25.6875}
+  - position: {x: 72.375, y: 26.8125}
     species: 0
-    phase: 3.5093298
-  - position: {x: 135.125, y: 25.6875}
-    species: 1
-    phase: 4.70648
-  - position: {x: 135.75, y: 25.6875}
-    species: 1
-    phase: 1.7173806
+    phase: 0.55166537
   - position: {x: 73.8125, y: 26.6875}
     species: 0
     phase: 2.0039086
@@ -1572,36 +1305,18 @@ MonoBehaviour:
   - position: {x: 96.625, y: 26.875}
     species: 1
     phase: 1.4262959
-  - position: {x: 97.375, y: 26.1875}
-    species: 0
-    phase: 5.5206766
-  - position: {x: 97.8125, y: 26.6875}
-    species: 1
-    phase: 3.886491
-  - position: {x: 123.1875, y: 26.625}
-    species: 0
-    phase: 2.0990093
   - position: {x: 123.6875, y: 26.75}
     species: 2
     phase: 2.4363728
-  - position: {x: 125.6875, y: 26.125}
-    species: 1
-    phase: 2.5929084
   - position: {x: 133.875, y: 26.1875}
     species: 1
     phase: 1.1596423
   - position: {x: 135.6875, y: 26.6875}
     species: 2
     phase: 5.6051955
-  - position: {x: 136.1875, y: 26.1875}
-    species: 0
-    phase: 3.7973523
   - position: {x: 136.25, y: 26.75}
     species: 0
     phase: 4.035323
-  - position: {x: 136.75, y: 26.75}
-    species: 0
-    phase: 2.5049813
   - position: {x: 72.75, y: 27.75}
     species: 1
     phase: 3.743921
@@ -1644,12 +1359,6 @@ MonoBehaviour:
   - position: {x: 97.25, y: 27.75}
     species: 1
     phase: 4.3763456
-  - position: {x: 98.25, y: 27.375}
-    species: 1
-    phase: 4.4003296
-  - position: {x: 122.3125, y: 27.1875}
-    species: 1
-    phase: 5.7185388
   - position: {x: 123.25, y: 27.6875}
     species: 1
     phase: 2.4980807
@@ -1665,18 +1374,6 @@ MonoBehaviour:
   - position: {x: 136.1875, y: 27.25}
     species: 1
     phase: 1.4238492
-  - position: {x: 136.6875, y: 27.375}
-    species: 0
-    phase: 4.5398884
-  - position: {x: 137.6875, y: 27.6875}
-    species: 1
-    phase: 3.9526222
-  - position: {x: 138.75, y: 27.75}
-    species: 3
-    phase: 3.332409
-  - position: {x: 139.3125, y: 27.75}
-    species: 1
-    phase: 4.6562843
   - position: {x: 72.6875, y: 28.8125}
     species: 1
     phase: 1.2357781
@@ -1701,21 +1398,12 @@ MonoBehaviour:
   - position: {x: 97.1875, y: 28.1875}
     species: 1
     phase: 5.2211647
-  - position: {x: 98.25, y: 28.75}
-    species: 0
-    phase: 5.5241785
   - position: {x: 137.875, y: 28.25}
     species: 1
     phase: 2.8488293
   - position: {x: 138.1875, y: 28.25}
     species: 1
     phase: 1.6689479
-  - position: {x: 138.6875, y: 28.625}
-    species: 1
-    phase: 0.6225899
-  - position: {x: 139.25, y: 28.375}
-    species: 1
-    phase: 0.019932013
   - position: {x: 140.1875, y: 28.8125}
     species: 0
     phase: 0.97753376
@@ -1755,18 +1443,9 @@ MonoBehaviour:
   - position: {x: 97.1875, y: 29.6875}
     species: 1
     phase: 3.0664186
-  - position: {x: 98.1875, y: 29.25}
-    species: 1
-    phase: 0.7716631
-  - position: {x: 129.875, y: 29.6875}
-    species: 1
-    phase: 5.1017704
-  - position: {x: 132.125, y: 29.6875}
-    species: 1
-    phase: 3.4568236
-  - position: {x: 133.3125, y: 29.625}
-    species: 1
-    phase: 4.664553
+  - position: {x: 130.125, y: 29.625}
+    species: 2
+    phase: 3.8136415
   - position: {x: 82.3125, y: 30.375}
     species: 0
     phase: 1.3963552
@@ -1791,168 +1470,24 @@ MonoBehaviour:
   - position: {x: 95.75, y: 30.3125}
     species: 0
     phase: 2.0117495
-  - position: {x: 97.875, y: 30.625}
-    species: 0
-    phase: 1.8644189
-  - position: {x: 98.25, y: 30.3125}
-    species: 0
-    phase: 1.7880315
-  - position: {x: 117.1875, y: 30.3125}
-    species: 1
-    phase: 4.566998
-  - position: {x: 126.875, y: 30.75}
-    species: 1
-    phase: 1.7537191
-  - position: {x: 127.25, y: 30.75}
-    species: 1
-    phase: 4.6511517
-  - position: {x: 98.25, y: 31.1875}
-    species: 1
-    phase: 2.8591979
-  - position: {x: 98.75, y: 31.8125}
-    species: 1
-    phase: 5.2720103
-  - position: {x: 99.25, y: 31.75}
-    species: 2
-    phase: 1.9562405
-  - position: {x: 115.6875, y: 31.3125}
-    species: 1
-    phase: 4.262486
-  - position: {x: 115.375, y: 31.8125}
-    species: 1
-    phase: 2.424247
-  - position: {x: 116.1875, y: 31.3125}
-    species: 1
-    phase: 3.100203
-  - position: {x: 121.8125, y: 31.625}
-    species: 1
-    phase: 5.267641
-  - position: {x: 122.6875, y: 31.8125}
-    species: 1
-    phase: 6.199404
-  - position: {x: 127.3125, y: 31.25}
-    species: 1
-    phase: 3.5934973
-  - position: {x: 128.375, y: 31.3125}
-    species: 3
-    phase: 4.3073015
-  - position: {x: 128.6875, y: 31.1875}
-    species: 1
-    phase: 2.1703784
-  - position: {x: 134.1875, y: 31.1875}
-    species: 1
-    phase: 5.4564652
-  - position: {x: 134.8125, y: 31.1875}
-    species: 1
-    phase: 5.2718487
-  - position: {x: 135.25, y: 31.8125}
-    species: 3
-    phase: 3.5001783
-  - position: {x: 135.8125, y: 31.625}
-    species: 0
-    phase: 6.0263476
-  - position: {x: 136.3125, y: 31.6875}
-    species: 0
-    phase: 2.055783
-  - position: {x: 136.625, y: 31.75}
-    species: 1
-    phase: 2.7971246
-  - position: {x: 137.1875, y: 31.8125}
-    species: 3
-    phase: 0.3315859
   - position: {x: 142.875, y: 31.1875}
     species: 1
     phase: 5.885183
   - position: {x: 143.3125, y: 31.25}
     species: 0
     phase: 2.440865
-  - position: {x: 145.25, y: 31.6875}
-    species: 1
-    phase: 3.337521
-  - position: {x: 145.75, y: 31.6875}
-    species: 1
-    phase: 3.1160777
   - position: {x: 99.25, y: 32.75}
     species: 1
     phase: 3.8554106
-  - position: {x: 99.6875, y: 32.625}
-    species: 1
-    phase: 4.1256895
-  - position: {x: 100.3125, y: 32.8125}
-    species: 1
-    phase: 0.51077217
-  - position: {x: 119.75, y: 32.75}
-    species: 1
-    phase: 3.168091
-  - position: {x: 121.8125, y: 32.875}
-    species: 3
-    phase: 4.430401
-  - position: {x: 122.75, y: 32.3125}
-    species: 1
-    phase: 2.7881753
-  - position: {x: 124.8125, y: 32.3125}
-    species: 0
-    phase: 0.536178
-  - position: {x: 136.25, y: 32.25}
-    species: 1
-    phase: 0.49147758
-  - position: {x: 137.375, y: 32.1875}
-    species: 1
-    phase: 5.798605
-  - position: {x: 137.125, y: 32.75}
-    species: 3
-    phase: 5.4730697
   - position: {x: 144.75, y: 32.375}
     species: 1
     phase: 3.4646747
-  - position: {x: 145.6875, y: 32.8125}
-    species: 1
-    phase: 4.199828
-  - position: {x: 146.1875, y: 32.1875}
-    species: 1
-    phase: 2.664504
-  - position: {x: 146.375, y: 32.8125}
-    species: 1
-    phase: 4.1919456
-  - position: {x: 99.6875, y: 33.25}
-    species: 1
-    phase: 4.6878157
-  - position: {x: 99.8125, y: 33.875}
-    species: 0
-    phase: 4.0848165
   - position: {x: 115.1875, y: 33.1875}
     species: 0
     phase: 3.8029888
-  - position: {x: 121.75, y: 33.25}
-    species: 0
-    phase: 4.6249757
-  - position: {x: 136.8125, y: 33.3125}
-    species: 0
-    phase: 4.49261
-  - position: {x: 137.125, y: 33.25}
-    species: 1
-    phase: 0.31670263
-  - position: {x: 137.75, y: 33.25}
-    species: 0
-    phase: 0.08429517
-  - position: {x: 138.3125, y: 33.1875}
-    species: 2
-    phase: 2.5838473
-  - position: {x: 138.8125, y: 33.8125}
-    species: 1
-    phase: 4.803828
-  - position: {x: 139.8125, y: 33.875}
-    species: 1
-    phase: 4.849133
-  - position: {x: 140.1875, y: 33.875}
-    species: 0
-    phase: 0.9234774
   - position: {x: 146.1875, y: 33.75}
     species: 1
     phase: 4.7342834
-  - position: {x: 146.75, y: 33.6875}
-    species: 0
-    phase: 4.8590145
   - position: {x: 72.6875, y: 34.25}
     species: 3
     phase: 5.260928
@@ -1983,21 +1518,9 @@ MonoBehaviour:
   - position: {x: 100.75, y: 34.625}
     species: 2
     phase: 1.4654479
-  - position: {x: 118.8125, y: 34.3125}
-    species: 1
-    phase: 1.728001
   - position: {x: 118.6875, y: 34.6875}
     species: 2
     phase: 0.8675736
-  - position: {x: 119.75, y: 34.1875}
-    species: 1
-    phase: 5.4250035
-  - position: {x: 141.75, y: 34.8125}
-    species: 0
-    phase: 2.1525671
-  - position: {x: 142.3125, y: 34.625}
-    species: 1
-    phase: 3.522198
   - position: {x: 145.625, y: 34.1875}
     species: 1
     phase: 2.5283763
@@ -2007,18 +1530,9 @@ MonoBehaviour:
   - position: {x: 146.1875, y: 34.1875}
     species: 1
     phase: 4.79812
-  - position: {x: 146.6875, y: 34.125}
-    species: 1
-    phase: 2.780394
   - position: {x: 146.25, y: 34.75}
     species: 1
     phase: 5.7479978
-  - position: {x: 146.75, y: 34.75}
-    species: 0
-    phase: 0.25349072
-  - position: {x: 147.25, y: 34.3125}
-    species: 1
-    phase: 1.2108741
   - position: {x: 73.1875, y: 35.75}
     species: 2
     phase: 2.5171244
@@ -2028,27 +1542,15 @@ MonoBehaviour:
   - position: {x: 96.3125, y: 35.75}
     species: 0
     phase: 1.5977856
-  - position: {x: 101.75, y: 35.75}
-    species: 0
-    phase: 1.9185613
   - position: {x: 117.6875, y: 35.75}
     species: 2
     phase: 4.933216
-  - position: {x: 140.75, y: 35.25}
-    species: 1
-    phase: 4.022583
-  - position: {x: 141.3125, y: 35.25}
-    species: 0
-    phase: 3.2583697
   - position: {x: 145.6875, y: 35.375}
     species: 0
     phase: 0.8185836
-  - position: {x: 146.8125, y: 35.1875}
-    species: 0
-    phase: 1.3285352
-  - position: {x: 147.1875, y: 35.75}
-    species: 0
-    phase: 4.160123
+  - position: {x: 72.1875, y: 36.25}
+    species: 1
+    phase: 0.717354
   - position: {x: 73.75, y: 36.25}
     species: 1
     phase: 2.2799673
@@ -2067,27 +1569,12 @@ MonoBehaviour:
   - position: {x: 96.3125, y: 36.6875}
     species: 3
     phase: 1.3709669
-  - position: {x: 102.3125, y: 36.25}
+  - position: {x: 72.3125, y: 37.3125}
     species: 0
-    phase: 5.9608026
-  - position: {x: 117.6875, y: 36.1875}
+    phase: 4.6187496
+  - position: {x: 72.3125, y: 37.6875}
     species: 1
-    phase: 0.6525384
-  - position: {x: 117.1875, y: 36.6875}
-    species: 1
-    phase: 1.0741353
-  - position: {x: 142.3125, y: 36.6875}
-    species: 1
-    phase: 0.88732177
-  - position: {x: 146.8125, y: 36.3125}
-    species: 3
-    phase: 2.6853387
-  - position: {x: 147.25, y: 36.3125}
-    species: 1
-    phase: 2.4435039
-  - position: {x: 147.125, y: 36.6875}
-    species: 3
-    phase: 4.282941
+    phase: 6.075658
   - position: {x: 72.875, y: 37.75}
     species: 0
     phase: 1.4968845
@@ -2106,54 +1593,24 @@ MonoBehaviour:
   - position: {x: 95.75, y: 37.3125}
     species: 0
     phase: 5.0376563
-  - position: {x: 103.25, y: 37.3125}
-    species: 1
-    phase: 0.43146843
   - position: {x: 104.875, y: 37.8125}
     species: 1
     phase: 1.9059072
   - position: {x: 107.3125, y: 37.8125}
     species: 1
     phase: 2.7608306
-  - position: {x: 107.8125, y: 37.625}
-    species: 1
-    phase: 3.7917025
-  - position: {x: 108.3125, y: 37.6875}
-    species: 1
-    phase: 3.5830238
   - position: {x: 109.3125, y: 37.75}
     species: 1
     phase: 0.10512787
-  - position: {x: 110.75, y: 37.25}
-    species: 1
-    phase: 4.407524
-  - position: {x: 110.6875, y: 37.6875}
-    species: 1
-    phase: 5.090644
   - position: {x: 111.25, y: 37.75}
     species: 0
     phase: 5.056873
-  - position: {x: 116.375, y: 37.6875}
-    species: 1
-    phase: 4.274324
-  - position: {x: 117.3125, y: 37.75}
-    species: 1
-    phase: 5.179229
-  - position: {x: 141.75, y: 37.1875}
-    species: 1
-    phase: 1.6131403
   - position: {x: 146.75, y: 37.75}
     species: 1
     phase: 1.2409639
-  - position: {x: 147.3125, y: 37.25}
-    species: 1
-    phase: 1.0509117
-  - position: {x: 147.375, y: 37.75}
-    species: 0
-    phase: 0.15870747
-  - position: {x: 147.8125, y: 37.8125}
-    species: 0
-    phase: 0.21743429
+  - position: {x: 72.3125, y: 38.3125}
+    species: 2
+    phase: 1.2425002
   - position: {x: 73.25, y: 38.75}
     species: 0
     phase: 5.540997
@@ -2220,33 +1677,18 @@ MonoBehaviour:
   - position: {x: 110.8125, y: 38.3125}
     species: 1
     phase: 4.341311
-  - position: {x: 114.625, y: 38.6875}
-    species: 1
-    phase: 5.2482104
-  - position: {x: 115.8125, y: 38.3125}
-    species: 1
-    phase: 3.4981258
-  - position: {x: 116.125, y: 38.1875}
-    species: 0
-    phase: 1.0185652
-  - position: {x: 117.3125, y: 38.3125}
-    species: 3
-    phase: 3.3025417
   - position: {x: 146.6875, y: 38.8125}
     species: 1
     phase: 4.4175706
-  - position: {x: 147.8125, y: 38.3125}
-    species: 0
-    phase: 2.0164988
   - position: {x: 147.1875, y: 38.6875}
     species: 0
     phase: 0.8227998
-  - position: {x: 148.3125, y: 38.25}
-    species: 3
-    phase: 6.121612
   - position: {x: 72.8125, y: 39.25}
     species: 0
     phase: 2.9049885
+  - position: {x: 72.3125, y: 39.75}
+    species: 1
+    phase: 1.3767662
   - position: {x: 72.75, y: 39.75}
     species: 1
     phase: 4.1809144
@@ -2307,27 +1749,15 @@ MonoBehaviour:
   - position: {x: 110.3125, y: 39.1875}
     species: 3
     phase: 0.2659749
-  - position: {x: 114.6875, y: 39.25}
-    species: 0
-    phase: 5.055313
-  - position: {x: 115.3125, y: 39.25}
-    species: 1
-    phase: 3.4560266
-  - position: {x: 115.875, y: 39.375}
-    species: 1
-    phase: 5.0921197
   - position: {x: 143.25, y: 39.6875}
     species: 1
     phase: 1.2784528
   - position: {x: 147.1875, y: 39.125}
     species: 2
     phase: 0.026780624
-  - position: {x: 148.25, y: 39.25}
-    species: 0
-    phase: 4.3432794
-  - position: {x: 148.3125, y: 39.625}
-    species: 0
-    phase: 3.3706958
+  - position: {x: 69.1875, y: 40.125}
+    species: 1
+    phase: 0.08366375
   - position: {x: 71.25, y: 40.6875}
     species: 0
     phase: 3.6150718
@@ -2352,48 +1782,15 @@ MonoBehaviour:
   - position: {x: 80.6875, y: 40.75}
     species: 1
     phase: 2.0186968
-  - position: {x: 82.3125, y: 40.875}
-    species: 1
-    phase: 2.1774533
-  - position: {x: 83.1875, y: 40.6875}
-    species: 0
-    phase: 2.642955
-  - position: {x: 83.8125, y: 40.8125}
-    species: 0
-    phase: 6.212416
   - position: {x: 84.125, y: 40.1875}
     species: 0
     phase: 0.63488907
-  - position: {x: 84.25, y: 40.6875}
-    species: 0
-    phase: 1.3284045
-  - position: {x: 85.125, y: 40.1875}
-    species: 1
-    phase: 2.9156568
-  - position: {x: 85.3125, y: 40.8125}
-    species: 3
-    phase: 5.350878
-  - position: {x: 87.1875, y: 40.3125}
-    species: 3
-    phase: 3.3438988
   - position: {x: 92.3125, y: 40.1875}
     species: 0
     phase: 1.0862128
-  - position: {x: 94.25, y: 40.625}
+  - position: {x: 66.1875, y: 41.125}
     species: 1
-    phase: 0.20696157
-  - position: {x: 114.6875, y: 40.3125}
-    species: 1
-    phase: 0.3382645
-  - position: {x: 114.1875, y: 40.625}
-    species: 0
-    phase: 1.5887064
-  - position: {x: 115.1875, y: 40.3125}
-    species: 2
-    phase: 0.5577387
-  - position: {x: 147.875, y: 40.6875}
-    species: 0
-    phase: 5.4266148
+    phase: 2.477574
   - position: {x: 70.25, y: 41.8125}
     species: 1
     phase: 2.7466257
@@ -2412,75 +1809,18 @@ MonoBehaviour:
   - position: {x: 75.25, y: 41.125}
     species: 0
     phase: 4.128017
-  - position: {x: 79.875, y: 41.6875}
-    species: 0
-    phase: 4.3986244
   - position: {x: 80.6875, y: 41.3125}
     species: 0
     phase: 2.5326815
-  - position: {x: 81.1875, y: 41.375}
-    species: 0
-    phase: 2.8738947
-  - position: {x: 81.8125, y: 41.1875}
-    species: 1
-    phase: 3.6267052
-  - position: {x: 81.25, y: 41.75}
-    species: 0
-    phase: 0.80875134
-  - position: {x: 81.75, y: 41.625}
-    species: 1
-    phase: 5.831031
-  - position: {x: 83.375, y: 41.75}
-    species: 3
-    phase: 0.17192495
-  - position: {x: 83.8125, y: 41.875}
-    species: 0
-    phase: 5.6598825
-  - position: {x: 84.8125, y: 41.375}
-    species: 1
-    phase: 0.4332421
-  - position: {x: 85.375, y: 41.25}
-    species: 1
-    phase: 2.044975
-  - position: {x: 85.75, y: 41.1875}
-    species: 3
-    phase: 0.03991571
-  - position: {x: 85.125, y: 41.75}
-    species: 1
-    phase: 3.41241
-  - position: {x: 85.875, y: 41.6875}
-    species: 1
-    phase: 5.9720445
-  - position: {x: 86.75, y: 41.875}
-    species: 1
-    phase: 2.7569673
-  - position: {x: 87.125, y: 41.25}
-    species: 1
-    phase: 2.0832994
-  - position: {x: 91.6875, y: 41.75}
-    species: 1
-    phase: 4.26518
-  - position: {x: 102.125, y: 41.6875}
-    species: 1
-    phase: 2.3931224
-  - position: {x: 103.3125, y: 41.6875}
-    species: 0
-    phase: 6.2084093
   - position: {x: 103.6875, y: 41.6875}
     species: 1
     phase: 5.0577197
   - position: {x: 112.8125, y: 41.6875}
     species: 1
     phase: 1.6051934
-  - position: {x: 113.75, y: 41.8125}
-    species: 1
-    phase: 0.64613926
-  - position: {x: 114.3125, y: 41.625}
-    species: 1
-    phase: 6.274342
-  - position: {x: 147.875, y: 41.3125}
-    species: 1
-    phase: 0.07919326
+  - position: {x: 67.375, y: 42.375}
+    species: 2
+    phase: 1.6760448
   - position: {x: 69.75, y: 42.8125}
     species: 1
     phase: 1.6752194
@@ -2505,36 +1845,9 @@ MonoBehaviour:
   - position: {x: 72.6875, y: 42.75}
     species: 0
     phase: 3.7687905
-  - position: {x: 82.75, y: 42.1875}
-    species: 3
-    phase: 1.7205617
-  - position: {x: 84.25, y: 42.125}
+  - position: {x: 75.75, y: 42.75}
     species: 1
-    phase: 2.2573779
-  - position: {x: 85.25, y: 42.25}
-    species: 1
-    phase: 5.4581227
-  - position: {x: 86.1875, y: 42.375}
-    species: 3
-    phase: 5.715607
-  - position: {x: 87.3125, y: 42.3125}
-    species: 1
-    phase: 4.9900618
-  - position: {x: 88.25, y: 42.25}
-    species: 2
-    phase: 2.8042376
-  - position: {x: 89.25, y: 42.1875}
-    species: 3
-    phase: 2.1761088
-  - position: {x: 91.6875, y: 42.3125}
-    species: 1
-    phase: 3.7508588
-  - position: {x: 93.3125, y: 42.375}
-    species: 2
-    phase: 2.7531986
-  - position: {x: 106.6875, y: 42.8125}
-    species: 0
-    phase: 0.024317866
+    phase: 2.1753087
   - position: {x: 108.25, y: 42.8125}
     species: 1
     phase: 4.0316095
@@ -2559,36 +1872,18 @@ MonoBehaviour:
   - position: {x: 112.6875, y: 42.25}
     species: 1
     phase: 1.8399494
-  - position: {x: 113.1875, y: 42.6875}
-    species: 1
-    phase: 0.7887017
-  - position: {x: 114.375, y: 42.125}
-    species: 1
-    phase: 5.810287
-  - position: {x: 132.25, y: 42.8125}
-    species: 1
-    phase: 2.637209
-  - position: {x: 132.625, y: 42.75}
-    species: 3
-    phase: 0.6158521
   - position: {x: 133.125, y: 42.6875}
     species: 2
     phase: 6.177995
   - position: {x: 134.25, y: 42.875}
     species: 1
     phase: 2.4661753
-  - position: {x: 134.75, y: 42.6875}
-    species: 1
-    phase: 4.1059766
   - position: {x: 135.1875, y: 42.8125}
     species: 1
     phase: 0.7683566
   - position: {x: 135.625, y: 42.75}
     species: 0
     phase: 0.033355843
-  - position: {x: 136.3125, y: 42.6875}
-    species: 0
-    phase: 0.6468943
   - position: {x: 137.25, y: 42.75}
     species: 0
     phase: 0.7019606
@@ -2601,12 +1896,9 @@ MonoBehaviour:
   - position: {x: 139.875, y: 42.8125}
     species: 2
     phase: 1.1698312
-  - position: {x: 147.75, y: 42.75}
-    species: 1
-    phase: 4.00936
-  - position: {x: 148.3125, y: 42.125}
-    species: 1
-    phase: 4.9915385
+  - position: {x: 68.875, y: 43.875}
+    species: 3
+    phase: 3.717878
   - position: {x: 71.3125, y: 43.125}
     species: 0
     phase: 5.724511
@@ -2631,12 +1923,6 @@ MonoBehaviour:
   - position: {x: 74.75, y: 43.875}
     species: 1
     phase: 4.6009164
-  - position: {x: 103.6875, y: 43.125}
-    species: 1
-    phase: 3.1619434
-  - position: {x: 107.3125, y: 43.25}
-    species: 0
-    phase: 3.3553832
   - position: {x: 107.6875, y: 43.3125}
     species: 1
     phase: 0.17867844
@@ -2661,27 +1947,6 @@ MonoBehaviour:
   - position: {x: 111.6875, y: 43.25}
     species: 1
     phase: 5.557729
-  - position: {x: 112.375, y: 43.125}
-    species: 1
-    phase: 2.0123405
-  - position: {x: 112.75, y: 43.1875}
-    species: 3
-    phase: 3.774859
-  - position: {x: 112.3125, y: 43.75}
-    species: 3
-    phase: 5.138302
-  - position: {x: 113.1875, y: 43.3125}
-    species: 0
-    phase: 6.1541324
-  - position: {x: 113.3125, y: 43.6875}
-    species: 3
-    phase: 3.7143407
-  - position: {x: 131.875, y: 43.3125}
-    species: 1
-    phase: 3.9663093
-  - position: {x: 132.25, y: 43.125}
-    species: 1
-    phase: 4.059522
   - position: {x: 132.6875, y: 43.3125}
     species: 1
     phase: 2.8149424
@@ -2721,18 +1986,6 @@ MonoBehaviour:
   - position: {x: 140.75, y: 43.25}
     species: 3
     phase: 5.0711155
-  - position: {x: 146.8125, y: 43.625}
-    species: 1
-    phase: 4.5441732
-  - position: {x: 147.6875, y: 43.1875}
-    species: 0
-    phase: 1.1156745
-  - position: {x: 148.1875, y: 43.1875}
-    species: 0
-    phase: 0.2489483
-  - position: {x: 148.1875, y: 43.8125}
-    species: 0
-    phase: 0.35873955
   - position: {x: 70.25, y: 44.3125}
     species: 3
     phase: 0.08161969
@@ -2757,6 +2010,9 @@ MonoBehaviour:
   - position: {x: 75.8125, y: 44.8125}
     species: 0
     phase: 0.22001015
+  - position: {x: 76.25, y: 44.125}
+    species: 1
+    phase: 4.8210096
   - position: {x: 107.6875, y: 44.375}
     species: 1
     phase: 3.7686524
@@ -2784,18 +2040,6 @@ MonoBehaviour:
   - position: {x: 109.75, y: 44.6875}
     species: 0
     phase: 1.8134803
-  - position: {x: 110.8125, y: 44.6875}
-    species: 3
-    phase: 3.6271198
-  - position: {x: 111.1875, y: 44.375}
-    species: 0
-    phase: 4.68573
-  - position: {x: 111.375, y: 44.6875}
-    species: 1
-    phase: 2.7050242
-  - position: {x: 113.1875, y: 44.1875}
-    species: 1
-    phase: 5.5951104
   - position: {x: 133.25, y: 44.3125}
     species: 1
     phase: 5.892405
@@ -2841,18 +2085,12 @@ MonoBehaviour:
   - position: {x: 139.625, y: 44.1875}
     species: 1
     phase: 1.2443914
-  - position: {x: 144.6875, y: 44.6875}
+  - position: {x: 70.375, y: 45.125}
     species: 0
-    phase: 1.0583962
-  - position: {x: 147.375, y: 44.3125}
+    phase: 3.5459518
+  - position: {x: 70.3125, y: 45.75}
     species: 1
-    phase: 4.2991576
-  - position: {x: 148.125, y: 44.125}
-    species: 1
-    phase: 0.70073974
-  - position: {x: 70.625, y: 45.125}
-    species: 0
-    phase: 1.7637353
+    phase: 1.5452902
   - position: {x: 71.1875, y: 45.1875}
     species: 0
     phase: 4.17602
@@ -2880,24 +2118,12 @@ MonoBehaviour:
   - position: {x: 75.125, y: 45.1875}
     species: 1
     phase: 1.1386119
-  - position: {x: 106.875, y: 45.875}
-    species: 0
-    phase: 0.9487791
   - position: {x: 108.125, y: 45.25}
     species: 1
     phase: 4.5989714
   - position: {x: 109.25, y: 45.8125}
     species: 1
     phase: 2.9012144
-  - position: {x: 110.75, y: 45.25}
-    species: 1
-    phase: 3.035376
-  - position: {x: 110.75, y: 45.6875}
-    species: 1
-    phase: 3.0529776
-  - position: {x: 111.375, y: 45.3125}
-    species: 0
-    phase: 3.7479975
   - position: {x: 132.875, y: 45.6875}
     species: 1
     phase: 4.42931
@@ -2946,12 +2172,12 @@ MonoBehaviour:
   - position: {x: 144.125, y: 45.8125}
     species: 3
     phase: 2.6392586
-  - position: {x: 146.375, y: 45.3125}
-    species: 1
-    phase: 2.9399788
   - position: {x: 71.875, y: 46.375}
     species: 1
     phase: 4.937869
+  - position: {x: 71.6875, y: 46.6875}
+    species: 1
+    phase: 5.3315663
   - position: {x: 72.625, y: 46.25}
     species: 1
     phase: 3.8073127
@@ -2973,15 +2199,9 @@ MonoBehaviour:
   - position: {x: 75.75, y: 46.875}
     species: 1
     phase: 4.696077
-  - position: {x: 110.8125, y: 46.1875}
-    species: 0
-    phase: 0.2779887
   - position: {x: 110.3125, y: 46.875}
     species: 1
     phase: 1.0918775
-  - position: {x: 110.75, y: 46.6875}
-    species: 1
-    phase: 2.8606918
   - position: {x: 130.625, y: 46.3125}
     species: 0
     phase: 5.355158
@@ -3000,33 +2220,15 @@ MonoBehaviour:
   - position: {x: 144.125, y: 46.3125}
     species: 0
     phase: 4.234753
-  - position: {x: 144.8125, y: 46.25}
-    species: 1
-    phase: 3.504244
-  - position: {x: 144.8125, y: 46.6875}
-    species: 0
-    phase: 3.1990604
-  - position: {x: 145.1875, y: 46.8125}
-    species: 1
-    phase: 2.6506488
   - position: {x: 74.1875, y: 47.75}
     species: 1
     phase: 3.3173418
   - position: {x: 75.6875, y: 47.1875}
     species: 1
     phase: 1.8090255
-  - position: {x: 78.125, y: 47.3125}
-    species: 1
-    phase: 0.353068
-  - position: {x: 107.1875, y: 47.3125}
-    species: 0
-    phase: 2.0564098
   - position: {x: 109.875, y: 47.8125}
     species: 1
     phase: 0.7363921
-  - position: {x: 111.1875, y: 47.25}
-    species: 1
-    phase: 1.6909375
   - position: {x: 130.875, y: 47.25}
     species: 1
     phase: 4.0684814
@@ -3057,12 +2259,6 @@ MonoBehaviour:
   - position: {x: 143.6875, y: 47.625}
     species: 1
     phase: 2.2634475
-  - position: {x: 144.6875, y: 47.375}
-    species: 0
-    phase: 4.0243726
-  - position: {x: 145.375, y: 47.3125}
-    species: 3
-    phase: 6.2046003
   - position: {x: 72.6875, y: 48.3125}
     species: 1
     phase: 0.23982495
@@ -3078,12 +2274,15 @@ MonoBehaviour:
   - position: {x: 76.1875, y: 48.375}
     species: 3
     phase: 6.1780667
+  - position: {x: 76.6875, y: 48.8125}
+    species: 2
+    phase: 2.8850527
   - position: {x: 77.3125, y: 48.1875}
     species: 0
     phase: 3.382625
-  - position: {x: 105.8125, y: 48.625}
-    species: 3
-    phase: 1.0599369
+  - position: {x: 77.125, y: 48.875}
+    species: 1
+    phase: 1.0265301
   - position: {x: 109.625, y: 48.3125}
     species: 0
     phase: 5.7615843
@@ -3123,12 +2322,12 @@ MonoBehaviour:
   - position: {x: 144.3125, y: 48.375}
     species: 1
     phase: 5.279338
-  - position: {x: 144.6875, y: 48.375}
-    species: 1
-    phase: 0.9724165
   - position: {x: 144.3125, y: 48.8125}
     species: 0
     phase: 3.4911504
+  - position: {x: 70.25, y: 49.375}
+    species: 1
+    phase: 5.411348
   - position: {x: 73.375, y: 49.1875}
     species: 0
     phase: 0.50005114
@@ -3141,9 +2340,18 @@ MonoBehaviour:
   - position: {x: 75.3125, y: 49.75}
     species: 1
     phase: 2.9949706
+  - position: {x: 75.75, y: 49.875}
+    species: 1
+    phase: 2.4976525
   - position: {x: 76.1875, y: 49.125}
     species: 0
     phase: 4.346335
+  - position: {x: 76.8125, y: 49.25}
+    species: 1
+    phase: 5.844001
+  - position: {x: 76.8125, y: 49.8125}
+    species: 0
+    phase: 0.5059871
   - position: {x: 129.6875, y: 49.8125}
     species: 1
     phase: 5.073878
@@ -3174,6 +2382,15 @@ MonoBehaviour:
   - position: {x: 144.3125, y: 49.6875}
     species: 0
     phase: 2.6802197
+  - position: {x: 69.1875, y: 50.1875}
+    species: 0
+    phase: 4.8658986
+  - position: {x: 69.75, y: 50.25}
+    species: 1
+    phase: 3.2549033
+  - position: {x: 70.375, y: 50.3125}
+    species: 3
+    phase: 0.1891916
   - position: {x: 70.75, y: 50.1875}
     species: 1
     phase: 1.8313866
@@ -3192,12 +2409,15 @@ MonoBehaviour:
   - position: {x: 74.6875, y: 50.3125}
     species: 1
     phase: 3.272852
+  - position: {x: 74.6875, y: 50.8125}
+    species: 1
+    phase: 3.1394408
   - position: {x: 75.3125, y: 50.25}
     species: 1
     phase: 2.3500328
-  - position: {x: 125.75, y: 50.8125}
-    species: 0
-    phase: 2.1706796
+  - position: {x: 75.3125, y: 50.6875}
+    species: 1
+    phase: 1.2673371
   - position: {x: 130.125, y: 50.3125}
     species: 0
     phase: 1.2874728
@@ -3216,9 +2436,12 @@ MonoBehaviour:
   - position: {x: 143.25, y: 50.25}
     species: 1
     phase: 1.5384843
-  - position: {x: 144.875, y: 50.3125}
+  - position: {x: 68.25, y: 51.1875}
     species: 1
-    phase: 4.8129697
+    phase: 2.8382034
+  - position: {x: 68.25, y: 51.875}
+    species: 1
+    phase: 5.452667
   - position: {x: 69.3125, y: 51.8125}
     species: 1
     phase: 3.1454873
@@ -3231,12 +2454,9 @@ MonoBehaviour:
   - position: {x: 72.25, y: 51.25}
     species: 0
     phase: 1.1743485
-  - position: {x: 106.6875, y: 51.3125}
+  - position: {x: 73.8125, y: 51.6875}
     species: 1
-    phase: 6.1731157
-  - position: {x: 107.875, y: 51.75}
-    species: 0
-    phase: 3.4356418
+    phase: 0.677675
   - position: {x: 141.1875, y: 51.625}
     species: 1
     phase: 3.318772
@@ -3258,6 +2478,12 @@ MonoBehaviour:
   - position: {x: 144.1875, y: 51.3125}
     species: 0
     phase: 0.70740336
+  - position: {x: 67.1875, y: 52.8125}
+    species: 1
+    phase: 3.1053104
+  - position: {x: 68.1875, y: 52.3125}
+    species: 3
+    phase: 3.2583573
   - position: {x: 68.75, y: 52.3125}
     species: 0
     phase: 1.7160736
@@ -3270,15 +2496,12 @@ MonoBehaviour:
   - position: {x: 70.8125, y: 52.8125}
     species: 1
     phase: 1.7204617
-  - position: {x: 107.75, y: 52.375}
-    species: 2
-    phase: 2.4253218
+  - position: {x: 73.6875, y: 52.125}
+    species: 1
+    phase: 4.7910194
   - position: {x: 109.3125, y: 52.6875}
     species: 1
     phase: 2.202828
-  - position: {x: 123.8125, y: 52.875}
-    species: 1
-    phase: 0.5908751
   - position: {x: 133.375, y: 52.75}
     species: 0
     phase: 4.606997
@@ -3315,9 +2538,6 @@ MonoBehaviour:
   - position: {x: 68.875, y: 53.3125}
     species: 1
     phase: 5.324798
-  - position: {x: 70.6875, y: 53.625}
-    species: 1
-    phase: 4.0009046
   - position: {x: 109.25, y: 53.125}
     species: 0
     phase: 4.0383697
@@ -3327,21 +2547,6 @@ MonoBehaviour:
   - position: {x: 110.6875, y: 53.75}
     species: 0
     phase: 0.5509066
-  - position: {x: 114.375, y: 53.1875}
-    species: 2
-    phase: 4.079596
-  - position: {x: 114.8125, y: 53.75}
-    species: 1
-    phase: 1.2964524
-  - position: {x: 115.3125, y: 53.8125}
-    species: 3
-    phase: 2.6182604
-  - position: {x: 121.8125, y: 53.875}
-    species: 3
-    phase: 0.31614012
-  - position: {x: 124.3125, y: 53.3125}
-    species: 1
-    phase: 5.634063
   - position: {x: 136.6875, y: 53.125}
     species: 0
     phase: 4.361303
@@ -3354,15 +2559,6 @@ MonoBehaviour:
   - position: {x: 139.25, y: 53.1875}
     species: 3
     phase: 4.3995605
-  - position: {x: 141.375, y: 53.625}
-    species: 0
-    phase: 5.900606
-  - position: {x: 142.75, y: 53.75}
-    species: 1
-    phase: 4.662025
-  - position: {x: 67.25, y: 54.25}
-    species: 1
-    phase: 1.8820739
   - position: {x: 109.75, y: 54.3125}
     species: 0
     phase: 5.7221966
@@ -3381,48 +2577,24 @@ MonoBehaviour:
   - position: {x: 114.1875, y: 54.3125}
     species: 1
     phase: 0.37935916
-  - position: {x: 115.3125, y: 54.3125}
-    species: 1
-    phase: 4.977047
   - position: {x: 116.3125, y: 54.75}
     species: 0
     phase: 4.526995
-  - position: {x: 116.875, y: 54.625}
-    species: 0
-    phase: 1.1917335
-  - position: {x: 118.6875, y: 54.6875}
-    species: 1
-    phase: 2.0310469
   - position: {x: 119.6875, y: 54.8125}
     species: 0
     phase: 3.1121674
-  - position: {x: 120.3125, y: 54.6875}
-    species: 0
-    phase: 3.3192735
-  - position: {x: 120.75, y: 54.6875}
-    species: 0
-    phase: 0.5162688
-  - position: {x: 121.6875, y: 54.25}
-    species: 0
-    phase: 2.5515907
   - position: {x: 122.8125, y: 54.1875}
     species: 0
     phase: 0.04293611
   - position: {x: 122.3125, y: 54.8125}
     species: 0
     phase: 5.569009
-  - position: {x: 132.1875, y: 54.8125}
-    species: 0
-    phase: 1.4330999
-  - position: {x: 133.125, y: 54.6875}
-    species: 1
-    phase: 0.49345645
-  - position: {x: 143.3125, y: 54.375}
-    species: 0
-    phase: 3.4936068
   - position: {x: 111.3125, y: 55.375}
     species: 1
     phase: 1.5008508
+  - position: {x: 111.25, y: 55.875}
+    species: 1
+    phase: 5.9887514
   - position: {x: 112.125, y: 55.1875}
     species: 0
     phase: 5.8454723
@@ -3462,12 +2634,15 @@ MonoBehaviour:
   - position: {x: 121.375, y: 55.3125}
     species: 1
     phase: 3.538281
-  - position: {x: 134.6875, y: 55.1875}
+  - position: {x: 111.125, y: 56.25}
     species: 1
-    phase: 6.237973
+    phase: 4.9723196
   - position: {x: 111.6875, y: 56.3125}
     species: 0
     phase: 2.8556042
+  - position: {x: 111.75, y: 56.875}
+    species: 0
+    phase: 0.8087502
   - position: {x: 112.6875, y: 56.125}
     species: 1
     phase: 1.3881321
@@ -3486,39 +2661,18 @@ MonoBehaviour:
   - position: {x: 120.1875, y: 56.25}
     species: 0
     phase: 5.6203175
-  - position: {x: 126.8125, y: 56.1875}
-    species: 1
-    phase: 3.2607024
-  - position: {x: 70.75, y: 57.125}
-    species: 0
-    phase: 1.0489391
-  - position: {x: 70.625, y: 57.6875}
-    species: 1
-    phase: 6.1211696
-  - position: {x: 72.875, y: 57.25}
-    species: 1
-    phase: 1.1884198
-  - position: {x: 74.375, y: 57.75}
-    species: 1
-    phase: 5.026684
-  - position: {x: 77.875, y: 57.75}
+  - position: {x: 112.25, y: 57.125}
     species: 2
-    phase: 5.0603805
-  - position: {x: 78.375, y: 57.8125}
-    species: 1
-    phase: 5.7474103
-  - position: {x: 78.8125, y: 57.625}
-    species: 1
-    phase: 2.1992657
-  - position: {x: 79.25, y: 57.6875}
-    species: 1
-    phase: 2.611332
-  - position: {x: 82.3125, y: 57.625}
-    species: 1
-    phase: 2.3906054
+    phase: 1.8708836
   - position: {x: 112.75, y: 57.3125}
     species: 1
     phase: 1.8302714
+  - position: {x: 112.25, y: 57.6875}
+    species: 1
+    phase: 1.6373683
+  - position: {x: 113.375, y: 57.75}
+    species: 1
+    phase: 2.2775133
   - position: {x: 115.6875, y: 57.6875}
     species: 1
     phase: 2.31862
@@ -3528,69 +2682,33 @@ MonoBehaviour:
   - position: {x: 118.75, y: 57.125}
     species: 3
     phase: 5.283282
-  - position: {x: 72.3125, y: 58.8125}
-    species: 1
-    phase: 5.4149837
-  - position: {x: 74.6875, y: 58.6875}
-    species: 1
-    phase: 2.6386447
-  - position: {x: 75.3125, y: 58.75}
-    species: 1
-    phase: 2.3783705
-  - position: {x: 76.25, y: 58.3125}
-    species: 1
-    phase: 1.8166794
-  - position: {x: 76.125, y: 58.8125}
-    species: 1
-    phase: 0.0753055
-  - position: {x: 76.875, y: 58.625}
-    species: 1
-    phase: 3.1573434
-  - position: {x: 77.875, y: 58.3125}
-    species: 1
-    phase: 1.1691957
   - position: {x: 77.375, y: 58.8125}
     species: 1
     phase: 2.4261663
-  - position: {x: 78.25, y: 58.3125}
+  - position: {x: 113.3125, y: 58.3125}
     species: 1
-    phase: 0.7055851
-  - position: {x: 79.1875, y: 58.125}
-    species: 1
-    phase: 2.8238902
-  - position: {x: 79.6875, y: 58.3125}
-    species: 1
-    phase: 5.2070065
-  - position: {x: 80.3125, y: 58.75}
+    phase: 1.9005536
+  - position: {x: 113.1875, y: 58.875}
     species: 0
-    phase: 0.40179026
-  - position: {x: 81.3125, y: 58.125}
-    species: 1
-    phase: 5.573807
-  - position: {x: 83.8125, y: 58.75}
-    species: 0
-    phase: 3.8486505
-  - position: {x: 85.375, y: 58.8125}
-    species: 3
-    phase: 1.0536554
+    phase: 4.1258397
   - position: {x: 114.1875, y: 58.1875}
     species: 1
     phase: 3.6656454
+  - position: {x: 114.8125, y: 58.6875}
+    species: 1
+    phase: 0.10579711
+  - position: {x: 115.6875, y: 58.6875}
+    species: 1
+    phase: 3.6621823
+  - position: {x: 116.375, y: 58.6875}
+    species: 0
+    phase: 2.2948306
   - position: {x: 117.125, y: 58.75}
     species: 0
     phase: 0.43827024
   - position: {x: 70.375, y: 59.875}
     species: 0
     phase: 3.628686
-  - position: {x: 72.3125, y: 59.3125}
-    species: 0
-    phase: 1.9755437
-  - position: {x: 72.625, y: 59.1875}
-    species: 1
-    phase: 3.9602187
-  - position: {x: 74.1875, y: 59.125}
-    species: 1
-    phase: 0.45125738
   - position: {x: 75.25, y: 59.75}
     species: 1
     phase: 3.4952114
@@ -3600,45 +2718,18 @@ MonoBehaviour:
   - position: {x: 76.625, y: 59.25}
     species: 2
     phase: 2.1775608
-  - position: {x: 76.375, y: 59.625}
-    species: 0
-    phase: 4.9966154
   - position: {x: 77.25, y: 59.3125}
     species: 1
     phase: 0.13218188
   - position: {x: 77.75, y: 59.375}
     species: 0
     phase: 3.8880646
-  - position: {x: 79.8125, y: 59.25}
-    species: 0
-    phase: 5.1240134
   - position: {x: 80.6875, y: 59.75}
     species: 1
     phase: 0.42225632
-  - position: {x: 81.6875, y: 59.1875}
-    species: 3
-    phase: 2.5354629
-  - position: {x: 83.625, y: 59.125}
-    species: 1
-    phase: 0.8197674
   - position: {x: 84.1875, y: 59.75}
     species: 1
     phase: 0.06436653
-  - position: {x: 85.1875, y: 59.6875}
-    species: 0
-    phase: 3.8909395
-  - position: {x: 86.75, y: 59.3125}
-    species: 2
-    phase: 4.11924
-  - position: {x: 91.625, y: 59.625}
-    species: 0
-    phase: 4.8531137
-  - position: {x: 92.8125, y: 59.875}
-    species: 1
-    phase: 0.3215761
-  - position: {x: 94.3125, y: 59.6875}
-    species: 1
-    phase: 4.095144
   - position: {x: 116.6875, y: 59.8125}
     species: 0
     phase: 3.7678666
@@ -3648,21 +2739,33 @@ MonoBehaviour:
   - position: {x: 70.1875, y: 60.3125}
     species: 0
     phase: 0.45390478
+  - position: {x: 70.75, y: 60.8125}
+    species: 0
+    phase: 5.594592
   - position: {x: 73.875, y: 60.25}
     species: 1
     phase: 3.2413
+  - position: {x: 74.8125, y: 60.625}
+    species: 0
+    phase: 5.938417
+  - position: {x: 75.8125, y: 60.875}
+    species: 1
+    phase: 5.5207243
   - position: {x: 76.125, y: 60.25}
     species: 0
     phase: 2.6664631
+  - position: {x: 76.6875, y: 60.875}
+    species: 1
+    phase: 3.0240695
   - position: {x: 77.25, y: 60.375}
     species: 0
     phase: 0.87932754
   - position: {x: 77.6875, y: 60.125}
     species: 2
     phase: 2.0667436
-  - position: {x: 78.875, y: 60.1875}
-    species: 0
-    phase: 1.4909619
+  - position: {x: 77.3125, y: 60.8125}
+    species: 1
+    phase: 0.35711342
   - position: {x: 80.8125, y: 60.3125}
     species: 1
     phase: 0.7073161
@@ -3684,42 +2787,12 @@ MonoBehaviour:
   - position: {x: 86.3125, y: 60.875}
     species: 1
     phase: 3.0749402
-  - position: {x: 89.75, y: 60.1875}
-    species: 0
-    phase: 3.3868656
-  - position: {x: 90.25, y: 60.375}
-    species: 0
-    phase: 5.817864
-  - position: {x: 92.75, y: 60.6875}
-    species: 1
-    phase: 2.582001
-  - position: {x: 93.375, y: 60.375}
-    species: 1
-    phase: 5.7411723
-  - position: {x: 93.75, y: 60.75}
-    species: 0
-    phase: 0.07670691
-  - position: {x: 95.125, y: 60.8125}
-    species: 1
-    phase: 5.605222
-  - position: {x: 96.3125, y: 60.625}
-    species: 1
-    phase: 1.9305823
-  - position: {x: 96.6875, y: 60.75}
-    species: 2
-    phase: 3.094268
   - position: {x: 117.3125, y: 60.1875}
     species: 1
     phase: 4.768017
   - position: {x: 117.3125, y: 60.625}
     species: 1
     phase: 2.6511574
-  - position: {x: 123.25, y: 60.3125}
-    species: 1
-    phase: 3.4244733
-  - position: {x: 123.25, y: 60.75}
-    species: 2
-    phase: 2.489233
   - position: {x: 79.8125, y: 61.375}
     species: 0
     phase: 2.6666613
@@ -3729,51 +2802,18 @@ MonoBehaviour:
   - position: {x: 84.6875, y: 61.3125}
     species: 1
     phase: 3.620321
-  - position: {x: 89.1875, y: 61.75}
+  - position: {x: 84.875, y: 61.625}
     species: 1
-    phase: 1.8859223
-  - position: {x: 90.875, y: 61.25}
-    species: 1
-    phase: 6.0609026
+    phase: 2.4385393
   - position: {x: 91.8125, y: 61.3125}
     species: 0
     phase: 5.7678547
-  - position: {x: 91.1875, y: 61.875}
-    species: 0
-    phase: 1.9684509
-  - position: {x: 92.75, y: 61.3125}
-    species: 0
-    phase: 0.9165798
-  - position: {x: 92.6875, y: 61.6875}
-    species: 0
-    phase: 3.2569826
-  - position: {x: 93.375, y: 61.25}
-    species: 1
-    phase: 0.8172399
   - position: {x: 93.25, y: 61.75}
     species: 2
     phase: 4.6237206
-  - position: {x: 94.25, y: 61.3125}
-    species: 1
-    phase: 3.3611486
-  - position: {x: 94.125, y: 61.625}
-    species: 1
-    phase: 5.657703
   - position: {x: 94.8125, y: 61.875}
     species: 1
     phase: 1.3707725
-  - position: {x: 95.1875, y: 61.3125}
-    species: 1
-    phase: 5.530141
-  - position: {x: 95.875, y: 61.375}
-    species: 0
-    phase: 5.9900455
-  - position: {x: 95.625, y: 61.75}
-    species: 1
-    phase: 5.7108045
-  - position: {x: 96.125, y: 61.625}
-    species: 1
-    phase: 0.76418424
   - position: {x: 120.8125, y: 61.625}
     species: 1
     phase: 0.49653268
@@ -3783,12 +2823,6 @@ MonoBehaviour:
   - position: {x: 121.875, y: 61.875}
     species: 0
     phase: 3.6244345
-  - position: {x: 122.375, y: 61.3125}
-    species: 0
-    phase: 2.476971
-  - position: {x: 122.6875, y: 61.3125}
-    species: 1
-    phase: 3.3951712
   - position: {x: 86.3125, y: 62.125}
     species: 1
     phase: 2.9072907
@@ -3807,207 +2841,102 @@ MonoBehaviour:
   - position: {x: 95.375, y: 62.8125}
     species: 0
     phase: 5.050837
-  - position: {x: 96.1875, y: 62.3125}
-    species: 1
-    phase: 2.701848
-  - position: {x: 96.8125, y: 62.25}
-    species: 0
-    phase: 5.744439
   - position: {x: 96.25, y: 62.8125}
     species: 3
     phase: 5.144752
-  - position: {x: 97.25, y: 62.1875}
+  - position: {x: 115.1875, y: 62.3125}
     species: 1
-    phase: 3.831465
+    phase: 3.9793084
   - position: {x: 121.3125, y: 62.25}
     species: 1
     phase: 3.961316
   - position: {x: 121.3125, y: 62.8125}
     species: 2
     phase: 4.5872545
+  - position: {x: 122.25, y: 62.8125}
+    species: 1
+    phase: 5.846945
+  - position: {x: 91.3125, y: 63.75}
+    species: 1
+    phase: 2.6746626
   - position: {x: 93.3125, y: 63.125}
     species: 3
     phase: 2.1152644
+  - position: {x: 93.125, y: 63.6875}
+    species: 1
+    phase: 0.26512215
   - position: {x: 95.625, y: 63.6875}
     species: 1
     phase: 2.5253153
   - position: {x: 120.8125, y: 63.625}
     species: 0
     phase: 5.2252603
+  - position: {x: 121.8125, y: 63.375}
+    species: 0
+    phase: 2.4662127
   - position: {x: 121.1875, y: 63.75}
     species: 1
     phase: 2.855875
-  - position: {x: 97.3125, y: 64.25}
-    species: 1
-    phase: 0.52488136
+  - position: {x: 115.75, y: 64.3125}
+    species: 0
+    phase: 6.1712346
   - position: {x: 122.1875, y: 64.625}
     species: 0
     phase: 0.80618143
-  - position: {x: 123.3125, y: 65.6875}
+  - position: {x: 96.125, y: 65.375}
+    species: 2
+    phase: 3.0474136
+  - position: {x: 115.75, y: 65.875}
     species: 1
-    phase: 0.21733056
-  - position: {x: 103.6875, y: 66.75}
-    species: 0
-    phase: 0.64591193
-  - position: {x: 123.875, y: 66.6875}
-    species: 0
-    phase: 1.2832042
-  - position: {x: 124.25, y: 66.75}
+    phase: 4.96832
+  - position: {x: 99.375, y: 67.25}
     species: 1
-    phase: 3.18484
-  - position: {x: 103.1875, y: 67.75}
-    species: 0
-    phase: 2.6700656
-  - position: {x: 104.25, y: 67.3125}
-    species: 1
-    phase: 6.118522
-  - position: {x: 104.25, y: 67.625}
-    species: 1
-    phase: 3.445564
-  - position: {x: 123.8125, y: 67.25}
-    species: 1
-    phase: 2.7956946
-  - position: {x: 125.3125, y: 67.8125}
-    species: 1
-    phase: 3.4433045
+    phase: 2.8400948
   - position: {x: 102.25, y: 68.8125}
     species: 2
     phase: 4.087374
-  - position: {x: 103.8125, y: 68.25}
+  - position: {x: 102.1875, y: 70.1875}
     species: 0
-    phase: 0.66231906
-  - position: {x: 104.8125, y: 68.3125}
+    phase: 4.8546915
+  - position: {x: 120.125, y: 70.25}
     species: 1
-    phase: 6.2301974
-  - position: {x: 104.25, y: 68.8125}
-    species: 1
-    phase: 2.6662805
-  - position: {x: 105.375, y: 68.75}
-    species: 1
-    phase: 4.8844886
-  - position: {x: 106.25, y: 68.6875}
-    species: 1
-    phase: 1.218526
-  - position: {x: 125.25, y: 68.125}
-    species: 1
-    phase: 4.991783
-  - position: {x: 103.125, y: 69.3125}
-    species: 0
-    phase: 1.8388592
-  - position: {x: 105.3125, y: 69.1875}
-    species: 0
-    phase: 3.0357347
-  - position: {x: 106.1875, y: 69.3125}
-    species: 1
-    phase: 5.8690805
-  - position: {x: 126.25, y: 69.625}
-    species: 1
-    phase: 3.9262276
-  - position: {x: 104.1875, y: 70.3125}
-    species: 0
-    phase: 3.4469452
-  - position: {x: 104.75, y: 70.1875}
-    species: 0
-    phase: 1.0874029
-  - position: {x: 104.25, y: 70.6875}
-    species: 1
-    phase: 4.55189
-  - position: {x: 105.625, y: 70.1875}
-    species: 1
-    phase: 3.4992125
-  - position: {x: 105.1875, y: 70.6875}
-    species: 1
-    phase: 3.1375818
-  - position: {x: 106.25, y: 70.25}
-    species: 1
-    phase: 2.2661223
-  - position: {x: 106.75, y: 70.625}
-    species: 1
-    phase: 5.681392
-  - position: {x: 125.8125, y: 70.1875}
-    species: 1
-    phase: 4.8255486
-  - position: {x: 126.6875, y: 70.8125}
-    species: 1
-    phase: 2.1611614
-  - position: {x: 105.3125, y: 71.75}
-    species: 0
-    phase: 2.0845144
-  - position: {x: 106.25, y: 71.75}
-    species: 2
-    phase: 0.41170382
-  - position: {x: 126.625, y: 71.3125}
-    species: 0
-    phase: 4.2493625
-  - position: {x: 127.1875, y: 71.125}
-    species: 3
-    phase: 1.0999594
-  - position: {x: 106.1875, y: 72.875}
-    species: 0
-    phase: 1.8944682
-  - position: {x: 108.125, y: 72.875}
-    species: 1
-    phase: 3.6584492
+    phase: 4.304445
   - position: {x: 126.6875, y: 72.1875}
     species: 1
     phase: 2.0129282
-  - position: {x: 127.75, y: 72.25}
-    species: 1
-    phase: 1.8857973
   - position: {x: 104.875, y: 73.1875}
     species: 1
     phase: 0.4033205
-  - position: {x: 105.8125, y: 73.6875}
+  - position: {x: 122.25, y: 73.75}
     species: 1
-    phase: 0.49789587
-  - position: {x: 106.1875, y: 74.3125}
-    species: 2
-    phase: 3.172615
-  - position: {x: 106.875, y: 75.625}
+    phase: 1.4263891
+  - position: {x: 105.6875, y: 75.75}
     species: 1
-    phase: 1.9327769
+    phase: 3.1993167
+  - position: {x: 106.25, y: 76.75}
+    species: 1
+    phase: 1.2639358
   - position: {x: 106.625, y: 76.75}
     species: 0
     phase: 3.4352717
-  - position: {x: 135.375, y: 76.75}
-    species: 0
-    phase: 0.47812226
-  - position: {x: 107.6875, y: 77.875}
+  - position: {x: 106.125, y: 77.1875}
     species: 1
-    phase: 1.4903414
-  - position: {x: 121.75, y: 77.3125}
-    species: 2
-    phase: 3.138459
-  - position: {x: 107.75, y: 78.1875}
+    phase: 1.5957977
+  - position: {x: 106.3125, y: 77.8125}
     species: 1
-    phase: 5.430656
-  - position: {x: 109.75, y: 79.6875}
-    species: 2
-    phase: 1.8575983
-  - position: {x: 108.375, y: 80.25}
-    species: 3
-    phase: 0.8857125
-  - position: {x: 109.375, y: 80.25}
+    phase: 4.7769213
+  - position: {x: 107.1875, y: 78.25}
     species: 1
-    phase: 2.906421
-  - position: {x: 110.6875, y: 80.25}
-    species: 0
-    phase: 5.458273
-  - position: {x: 134.3125, y: 80.3125}
-    species: 2
-    phase: 1.0422767
-  - position: {x: 110.25, y: 81.75}
+    phase: 5.178314
+  - position: {x: 106.125, y: 81.6875}
     species: 1
-    phase: 4.1125736
-  - position: {x: 119.8125, y: 81.25}
-    species: 3
-    phase: 0.18417956
-  - position: {x: 119.75, y: 81.875}
-    species: 1
-    phase: 0.65565133
+    phase: 1.8464613
   - position: {x: 126.25, y: 81.8125}
     species: 1
     phase: 5.19432
+  - position: {x: 105.3125, y: 82.375}
+    species: 0
+    phase: 5.001074
   - position: {x: 106.1875, y: 82.625}
     species: 1
     phase: 3.6981945
@@ -4020,12 +2949,6 @@ MonoBehaviour:
   - position: {x: 111.25, y: 82.8125}
     species: 1
     phase: 6.1950645
-  - position: {x: 114.625, y: 82.375}
-    species: 0
-    phase: 2.3653052
-  - position: {x: 121.3125, y: 82.375}
-    species: 0
-    phase: 6.1292114
   - position: {x: 126.25, y: 82.25}
     species: 2
     phase: 0.33326745
@@ -4053,6 +2976,9 @@ MonoBehaviour:
   - position: {x: 126.125, y: 83.25}
     species: 1
     phase: 5.116776
+  - position: {x: 18.6875, y: 84.375}
+    species: 0
+    phase: 1.8936971
   - position: {x: 18.6875, y: 84.75}
     species: 1
     phase: 4.506363
@@ -4083,9 +3009,6 @@ MonoBehaviour:
   - position: {x: 126.3125, y: 84.75}
     species: 1
     phase: 4.3478374
-  - position: {x: 33.6875, y: 85.25}
-    species: 1
-    phase: 5.5050316
   - position: {x: 106.375, y: 85.3125}
     species: 1
     phase: 4.7386584
@@ -4095,30 +3018,9 @@ MonoBehaviour:
   - position: {x: 126.1875, y: 85.1875}
     species: 0
     phase: 3.3405256
-  - position: {x: 126.625, y: 85.3125}
-    species: 1
-    phase: 5.247807
-  - position: {x: 26.6875, y: 86.75}
-    species: 0
-    phase: 2.5187163
-  - position: {x: 27.375, y: 86.75}
-    species: 0
-    phase: 0.77474195
-  - position: {x: 35.8125, y: 86.6875}
-    species: 0
-    phase: 3.0534992
   - position: {x: 104.8125, y: 86.3125}
     species: 2
     phase: 2.4173505
-  - position: {x: 105.625, y: 86.125}
-    species: 1
-    phase: 3.3728392
-  - position: {x: 105.6875, y: 86.8125}
-    species: 0
-    phase: 3.6845744
-  - position: {x: 106.875, y: 86.3125}
-    species: 1
-    phase: 0.075872876
   - position: {x: 107.625, y: 86.3125}
     species: 1
     phase: 2.305645
@@ -4134,51 +3036,15 @@ MonoBehaviour:
   - position: {x: 126.25, y: 86.75}
     species: 0
     phase: 3.9565096
-  - position: {x: 126.625, y: 86.75}
-    species: 1
-    phase: 2.638567
-  - position: {x: 20.75, y: 87.6875}
-    species: 1
-    phase: 3.9740336
-  - position: {x: 24.25, y: 87.25}
-    species: 1
-    phase: 4.665464
-  - position: {x: 25.125, y: 87.3125}
-    species: 0
-    phase: 1.5801781
-  - position: {x: 25.75, y: 87.25}
-    species: 1
-    phase: 1.5638429
-  - position: {x: 26.1875, y: 87.25}
-    species: 1
-    phase: 3.076343
-  - position: {x: 28.25, y: 87.3125}
-    species: 1
-    phase: 2.0588913
-  - position: {x: 30.75, y: 87.6875}
-    species: 0
-    phase: 1.9266878
-  - position: {x: 35.75, y: 87.3125}
-    species: 1
-    phase: 1.457105
-  - position: {x: 36.125, y: 87.125}
-    species: 1
-    phase: 1.817179
   - position: {x: 104.6875, y: 87.875}
     species: 0
     phase: 2.236089
   - position: {x: 105.6875, y: 87.75}
     species: 1
     phase: 0.318219
-  - position: {x: 106.25, y: 87.3125}
-    species: 1
-    phase: 2.8410437
   - position: {x: 106.875, y: 87.875}
     species: 3
     phase: 5.2069707
-  - position: {x: 107.1875, y: 87.3125}
-    species: 1
-    phase: 3.8264563
   - position: {x: 108.75, y: 87.75}
     species: 1
     phase: 4.970537
@@ -4191,30 +3057,21 @@ MonoBehaviour:
   - position: {x: 125.8125, y: 87.8125}
     species: 3
     phase: 3.7876747
-  - position: {x: 126.75, y: 87.3125}
-    species: 1
-    phase: 1.8850081
   - position: {x: 126.3125, y: 87.8125}
     species: 1
     phase: 5.845296
-  - position: {x: 127.1875, y: 87.25}
-    species: 1
-    phase: 0.423348
-  - position: {x: 127.375, y: 87.75}
-    species: 3
-    phase: 2.9131598
-  - position: {x: 31.75, y: 88.75}
-    species: 0
-    phase: 5.654123
-  - position: {x: 32.3125, y: 88.8125}
-    species: 0
-    phase: 2.6233757
   - position: {x: 35.8125, y: 88.3125}
     species: 1
     phase: 6.152004
   - position: {x: 36.125, y: 88.875}
     species: 1
     phase: 6.1303
+  - position: {x: 104.375, y: 88.3125}
+    species: 0
+    phase: 5.3342423
+  - position: {x: 104.25, y: 88.75}
+    species: 1
+    phase: 0.21226871
   - position: {x: 104.8125, y: 88.6875}
     species: 0
     phase: 4.9617057
@@ -4260,21 +3117,15 @@ MonoBehaviour:
   - position: {x: 126.6875, y: 88.875}
     species: 1
     phase: 3.9514463
-  - position: {x: 127.3125, y: 88.1875}
-    species: 0
-    phase: 1.2421361
   - position: {x: 127.3125, y: 88.75}
     species: 0
     phase: 2.3959894
-  - position: {x: 18.8125, y: 89.1875}
-    species: 0
-    phase: 3.0714417
   - position: {x: 36.1875, y: 89.3125}
     species: 0
     phase: 2.036744
-  - position: {x: 104.625, y: 89.1875}
+  - position: {x: 104.375, y: 89.3125}
     species: 1
-    phase: 4.015272
+    phase: 1.0625405
   - position: {x: 104.625, y: 89.6875}
     species: 1
     phase: 1.8709633
@@ -4323,15 +3174,6 @@ MonoBehaviour:
   - position: {x: 127.3125, y: 89.8125}
     species: 1
     phase: 0.797315
-  - position: {x: 130.1875, y: 89.8125}
-    species: 0
-    phase: 0.35189092
-  - position: {x: 31.8125, y: 90.1875}
-    species: 1
-    phase: 1.4305604
-  - position: {x: 32.1875, y: 90.875}
-    species: 0
-    phase: 3.3823404
   - position: {x: 35.8125, y: 90.25}
     species: 1
     phase: 6.2153916
@@ -4344,9 +3186,9 @@ MonoBehaviour:
   - position: {x: 36.1875, y: 90.75}
     species: 1
     phase: 0.03341614
-  - position: {x: 105.6875, y: 90.125}
+  - position: {x: 104.375, y: 90.75}
     species: 1
-    phase: 3.140142
+    phase: 4.35257
   - position: {x: 122.8125, y: 90.8125}
     species: 1
     phase: 3.237554
@@ -4383,18 +3225,12 @@ MonoBehaviour:
   - position: {x: 127.3125, y: 90.3125}
     species: 3
     phase: 3.5735533
-  - position: {x: 129.75, y: 90.25}
+  - position: {x: 127.75, y: 90.8125}
     species: 1
-    phase: 2.9900615
-  - position: {x: 129.75, y: 90.8125}
-    species: 1
-    phase: 4.589539
-  - position: {x: 130.3125, y: 90.3125}
+    phase: 5.0814934
+  - position: {x: 129.1875, y: 90.6875}
     species: 0
-    phase: 5.9897075
-  - position: {x: 130.25, y: 90.75}
-    species: 1
-    phase: 2.4016185
+    phase: 4.151583
   - position: {x: 17.3125, y: 91.75}
     species: 2
     phase: 3.6976275
@@ -4404,21 +3240,6 @@ MonoBehaviour:
   - position: {x: 104.6875, y: 91.6875}
     species: 2
     phase: 5.140211
-  - position: {x: 105.125, y: 91.3125}
-    species: 0
-    phase: 0.5633728
-  - position: {x: 105.25, y: 91.6875}
-    species: 1
-    phase: 1.8155993
-  - position: {x: 105.875, y: 91.8125}
-    species: 1
-    phase: 1.1860106
-  - position: {x: 106.3125, y: 91.8125}
-    species: 1
-    phase: 0.02677276
-  - position: {x: 107.25, y: 91.625}
-    species: 1
-    phase: 0.034800693
   - position: {x: 116.25, y: 91.3125}
     species: 0
     phase: 2.502303
@@ -4449,27 +3270,39 @@ MonoBehaviour:
   - position: {x: 126.1875, y: 91.6875}
     species: 0
     phase: 6.0662394
-  - position: {x: 129.6875, y: 91.6875}
+  - position: {x: 127.75, y: 91.1875}
     species: 1
-    phase: 3.462635
-  - position: {x: 130.125, y: 91.1875}
+    phase: 3.0931528
+  - position: {x: 127.6875, y: 91.6875}
+    species: 1
+    phase: 1.1510283
+  - position: {x: 129.125, y: 91.6875}
     species: 0
-    phase: 3.8512263
-  - position: {x: 130.1875, y: 91.75}
+    phase: 2.8767598
+  - position: {x: 37.25, y: 92.3125}
     species: 1
-    phase: 2.5118744
+    phase: 4.384526
   - position: {x: 45.6875, y: 92.875}
     species: 1
     phase: 2.1258042
   - position: {x: 47.3125, y: 92.75}
     species: 1
     phase: 0.64204216
-  - position: {x: 76.6875, y: 92.625}
+  - position: {x: 91.125, y: 92.125}
     species: 1
-    phase: 2.3793204
-  - position: {x: 106.75, y: 92.1875}
+    phase: 0.22887886
+  - position: {x: 98.625, y: 92.6875}
     species: 1
-    phase: 1.5409946
+    phase: 5.1143956
+  - position: {x: 104.1875, y: 92.375}
+    species: 3
+    phase: 4.6082697
+  - position: {x: 104.375, y: 92.6875}
+    species: 0
+    phase: 6.0230174
+  - position: {x: 105.1875, y: 92.625}
+    species: 1
+    phase: 5.657027
   - position: {x: 110.25, y: 92.8125}
     species: 0
     phase: 2.785228
@@ -4536,21 +3369,21 @@ MonoBehaviour:
   - position: {x: 127.1875, y: 92.125}
     species: 1
     phase: 3.5221725
-  - position: {x: 129.75, y: 92.1875}
+  - position: {x: 127.75, y: 92.375}
+    species: 0
+    phase: 1.327505
+  - position: {x: 129.1875, y: 92.875}
     species: 1
-    phase: 3.1050048
-  - position: {x: 130.1875, y: 92.375}
+    phase: 4.4500003
+  - position: {x: 38.6875, y: 93.375}
     species: 1
-    phase: 2.6083283
-  - position: {x: 14.75, y: 93.125}
-    species: 2
-    phase: 3.883607
-  - position: {x: 15.375, y: 93.125}
-    species: 2
-    phase: 5.5299892
+    phase: 5.8712425
   - position: {x: 38.8125, y: 93.875}
     species: 0
     phase: 5.2752066
+  - position: {x: 39.3125, y: 93.25}
+    species: 1
+    phase: 4.718589
   - position: {x: 40.25, y: 93.8125}
     species: 2
     phase: 0.029167732
@@ -4560,21 +3393,21 @@ MonoBehaviour:
   - position: {x: 47.8125, y: 93.875}
     species: 1
     phase: 1.5630456
+  - position: {x: 59.25, y: 93.625}
+    species: 1
+    phase: 6.21287
   - position: {x: 60.1875, y: 93.8125}
     species: 1
     phase: 1.3150414
   - position: {x: 61.25, y: 93.75}
     species: 1
     phase: 1.241998
-  - position: {x: 61.8125, y: 93.6875}
+  - position: {x: 88.8125, y: 93.25}
+    species: 0
+    phase: 2.6118016
+  - position: {x: 90.6875, y: 93.125}
     species: 1
-    phase: 5.039697
-  - position: {x: 63.375, y: 93.1875}
-    species: 4
-    phase: 0.7694891
-  - position: {x: 78.3125, y: 93.1875}
-    species: 3
-    phase: 1.8864702
+    phase: 5.529438
   - position: {x: 90.6875, y: 93.75}
     species: 1
     phase: 5.03951
@@ -4593,6 +3426,9 @@ MonoBehaviour:
   - position: {x: 99.6875, y: 93.6875}
     species: 1
     phase: 0.6238621
+  - position: {x: 105.375, y: 93.3125}
+    species: 1
+    phase: 5.2952986
   - position: {x: 105.75, y: 93.25}
     species: 0
     phase: 3.384497
@@ -4671,6 +3507,15 @@ MonoBehaviour:
   - position: {x: 127.375, y: 93.125}
     species: 1
     phase: 4.034492
+  - position: {x: 127.25, y: 93.6875}
+    species: 0
+    phase: 3.549312
+  - position: {x: 129.1875, y: 93.375}
+    species: 1
+    phase: 5.249631
+  - position: {x: 129.1875, y: 93.75}
+    species: 1
+    phase: 5.061089
   - position: {x: 39.25, y: 94.25}
     species: 3
     phase: 5.5373025
@@ -4680,15 +3525,21 @@ MonoBehaviour:
   - position: {x: 42.375, y: 94.6875}
     species: 3
     phase: 0.9971658
-  - position: {x: 49.75, y: 94.125}
+  - position: {x: 51.3125, y: 94.125}
+    species: 0
+    phase: 6.024927
+  - position: {x: 57.375, y: 94.75}
     species: 1
-    phase: 1.9147377
+    phase: 2.8501525
   - position: {x: 58.25, y: 94.8125}
     species: 1
     phase: 3.7372327
   - position: {x: 58.6875, y: 94.8125}
     species: 0
     phase: 0.2828513
+  - position: {x: 59.3125, y: 94.25}
+    species: 0
+    phase: 1.7280414
   - position: {x: 59.625, y: 94.25}
     species: 1
     phase: 1.0641632
@@ -4701,12 +3552,6 @@ MonoBehaviour:
   - position: {x: 60.1875, y: 94.75}
     species: 1
     phase: 2.4846005
-  - position: {x: 62.1875, y: 94.125}
-    species: 1
-    phase: 3.318444
-  - position: {x: 79.75, y: 94.1875}
-    species: 1
-    phase: 3.5398693
   - position: {x: 86.875, y: 94.625}
     species: 1
     phase: 2.6644192
@@ -4722,6 +3567,15 @@ MonoBehaviour:
   - position: {x: 99.1875, y: 94.375}
     species: 1
     phase: 0.96368414
+  - position: {x: 101.25, y: 94.1875}
+    species: 1
+    phase: 0.702813
+  - position: {x: 101.8125, y: 94.625}
+    species: 1
+    phase: 3.5493238
+  - position: {x: 105.25, y: 94.8125}
+    species: 1
+    phase: 4.379229
   - position: {x: 106.75, y: 94.1875}
     species: 1
     phase: 1.4394706
@@ -4797,27 +3651,15 @@ MonoBehaviour:
   - position: {x: 58.8125, y: 95.375}
     species: 1
     phase: 4.403684
-  - position: {x: 66.75, y: 95.6875}
-    species: 0
-    phase: 2.7339463
   - position: {x: 74.75, y: 95.8125}
     species: 2
     phase: 3.5831385
-  - position: {x: 75.125, y: 95.6875}
-    species: 1
-    phase: 4.8323874
-  - position: {x: 80.75, y: 95.3125}
-    species: 0
-    phase: 2.1835194
   - position: {x: 83.6875, y: 95.75}
     species: 1
     phase: 1.8093256
   - position: {x: 84.25, y: 95.75}
     species: 0
     phase: 5.286825
-  - position: {x: 85.375, y: 95.625}
-    species: 1
-    phase: 0.6594474
   - position: {x: 85.6875, y: 95.8125}
     species: 1
     phase: 4.5801873
@@ -4836,15 +3678,27 @@ MonoBehaviour:
   - position: {x: 100.875, y: 95.1875}
     species: 0
     phase: 4.930608
+  - position: {x: 102.25, y: 95.1875}
+    species: 0
+    phase: 0.15821125
   - position: {x: 102.25, y: 95.75}
     species: 0
     phase: 6.0202613
+  - position: {x: 103.125, y: 95.25}
+    species: 1
+    phase: 0.19724798
+  - position: {x: 103.8125, y: 95.25}
+    species: 1
+    phase: 2.9477978
   - position: {x: 103.1875, y: 95.8125}
     species: 1
     phase: 2.8965156
   - position: {x: 103.75, y: 95.6875}
     species: 1
     phase: 5.326913
+  - position: {x: 104.8125, y: 95.375}
+    species: 1
+    phase: 1.5498071
   - position: {x: 104.1875, y: 95.8125}
     species: 1
     phase: 0.3217274
@@ -4863,6 +3717,9 @@ MonoBehaviour:
   - position: {x: 117.6875, y: 95.25}
     species: 1
     phase: 4.6061563
+  - position: {x: 117.25, y: 95.6875}
+    species: 1
+    phase: 3.519537
   - position: {x: 118.1875, y: 95.25}
     species: 0
     phase: 3.5979576
@@ -4875,6 +3732,9 @@ MonoBehaviour:
   - position: {x: 123.25, y: 95.75}
     species: 1
     phase: 4.028544
+  - position: {x: 127.125, y: 95.3125}
+    species: 1
+    phase: 3.8974016
   - position: {x: 44.1875, y: 96.375}
     species: 0
     phase: 4.6739373
@@ -4896,9 +3756,6 @@ MonoBehaviour:
   - position: {x: 56.875, y: 96.125}
     species: 0
     phase: 6.1748962
-  - position: {x: 63.625, y: 96.8125}
-    species: 1
-    phase: 0.5699375
   - position: {x: 67.1875, y: 96.1875}
     species: 0
     phase: 0.41104844
@@ -4908,12 +3765,6 @@ MonoBehaviour:
   - position: {x: 73.875, y: 96.125}
     species: 0
     phase: 4.516069
-  - position: {x: 75.75, y: 96.6875}
-    species: 1
-    phase: 2.1145892
-  - position: {x: 77.375, y: 96.875}
-    species: 1
-    phase: 3.988942
   - position: {x: 83.875, y: 96.375}
     species: 1
     phase: 2.4576156
@@ -4932,9 +3783,6 @@ MonoBehaviour:
   - position: {x: 85.125, y: 96.375}
     species: 0
     phase: 2.3788128
-  - position: {x: 96.6875, y: 96.6875}
-    species: 1
-    phase: 3.4580219
   - position: {x: 102.125, y: 96.125}
     species: 1
     phase: 5.141789
@@ -4956,297 +3804,39 @@ MonoBehaviour:
   - position: {x: 122.6875, y: 96.375}
     species: 0
     phase: 0.73469555
-  - position: {x: 132.8125, y: 96.75}
-    species: 3
-    phase: 0.82993793
-  - position: {x: 135.6875, y: 96.75}
-    species: 1
-    phase: 4.6913295
-  - position: {x: 39.25, y: 97.625}
-    species: 0
-    phase: 3.6315374
-  - position: {x: 49.3125, y: 97.6875}
-    species: 3
-    phase: 4.5811863
   - position: {x: 55.1875, y: 97.1875}
     species: 0
     phase: 1.250118
-  - position: {x: 61.25, y: 97.75}
-    species: 1
-    phase: 2.337601
-  - position: {x: 61.6875, y: 97.6875}
-    species: 1
-    phase: 1.165091
-  - position: {x: 64.125, y: 97.25}
-    species: 0
-    phase: 2.01132
-  - position: {x: 75.6875, y: 97.1875}
-    species: 0
-    phase: 1.9885709
-  - position: {x: 77.6875, y: 97.8125}
-    species: 1
-    phase: 1.3824744
-  - position: {x: 90.3125, y: 97.75}
-    species: 3
-    phase: 3.4743032
   - position: {x: 91.625, y: 97.75}
     species: 2
     phase: 0.5659277
-  - position: {x: 92.625, y: 97.25}
-    species: 1
-    phase: 2.816397
-  - position: {x: 97.8125, y: 97.8125}
-    species: 1
-    phase: 5.9170475
-  - position: {x: 98.3125, y: 97.6875}
-    species: 0
-    phase: 5.1560764
   - position: {x: 103.6875, y: 97.375}
     species: 2
     phase: 1.4700027
-  - position: {x: 108.8125, y: 97.875}
-    species: 1
-    phase: 4.706977
-  - position: {x: 109.3125, y: 97.6875}
-    species: 1
-    phase: 6.2644577
-  - position: {x: 109.8125, y: 97.6875}
-    species: 1
-    phase: 4.8504577
   - position: {x: 110.8125, y: 97.3125}
     species: 0
     phase: 1.0343713
-  - position: {x: 110.3125, y: 97.8125}
+  - position: {x: 112.75, y: 97.6875}
     species: 0
-    phase: 1.0065985
-  - position: {x: 111.75, y: 97.375}
-    species: 1
-    phase: 1.9445484
+    phase: 4.1062803
   - position: {x: 113.1875, y: 97.125}
     species: 1
     phase: 5.776477
-  - position: {x: 124.25, y: 97.875}
+  - position: {x: 116.625, y: 97.625}
     species: 1
-    phase: 1.8692954
-  - position: {x: 131.8125, y: 97.8125}
-    species: 0
-    phase: 0.47103435
-  - position: {x: 132.6875, y: 97.375}
-    species: 0
-    phase: 5.111462
-  - position: {x: 133.125, y: 97.3125}
-    species: 1
-    phase: 3.6675014
-  - position: {x: 133.25, y: 97.6875}
-    species: 0
-    phase: 0.77666134
-  - position: {x: 134.1875, y: 97.6875}
-    species: 0
-    phase: 0.9390483
-  - position: {x: 39.25, y: 98.25}
-    species: 1
-    phase: 5.3211813
-  - position: {x: 58.6875, y: 98.6875}
-    species: 3
-    phase: 4.505467
+    phase: 3.215386
   - position: {x: 59.625, y: 98.8125}
     species: 2
     phase: 5.738801
-  - position: {x: 60.8125, y: 98.8125}
+  - position: {x: 113.125, y: 98.25}
     species: 1
-    phase: 1.5962868
-  - position: {x: 62.3125, y: 98.375}
-    species: 1
-    phase: 4.429533
-  - position: {x: 62.6875, y: 98.1875}
-    species: 1
-    phase: 6.018838
-  - position: {x: 78.1875, y: 98.125}
-    species: 3
-    phase: 6.246989
-  - position: {x: 78.75, y: 98.6875}
-    species: 0
-    phase: 6.1190934
-  - position: {x: 99.125, y: 98.875}
-    species: 1
-    phase: 3.5352771
-  - position: {x: 106.6875, y: 98.6875}
-    species: 0
-    phase: 0.2597757
-  - position: {x: 107.6875, y: 98.6875}
-    species: 1
-    phase: 5.046942
-  - position: {x: 110.375, y: 98.3125}
-    species: 1
-    phase: 4.953455
+    phase: 2.5772192
   - position: {x: 115.1875, y: 98.25}
     species: 1
     phase: 0.4956166
   - position: {x: 115.75, y: 98.3125}
     species: 0
     phase: 1.7879115
-  - position: {x: 131.6875, y: 98.1875}
-    species: 0
-    phase: 2.621963
-  - position: {x: 131.75, y: 98.75}
-    species: 1
-    phase: 4.771613
-  - position: {x: 132.3125, y: 98.1875}
-    species: 0
-    phase: 1.6269095
-  - position: {x: 133.8125, y: 98.375}
-    species: 3
-    phase: 5.7312503
-  - position: {x: 133.8125, y: 98.8125}
-    species: 1
-    phase: 1.7072322
-  - position: {x: 134.25, y: 98.125}
-    species: 1
-    phase: 1.836078
-  - position: {x: 134.875, y: 98.25}
-    species: 1
-    phase: 1.9872396
-  - position: {x: 134.8125, y: 98.625}
-    species: 1
-    phase: 3.4193552
-  - position: {x: 135.8125, y: 98.3125}
-    species: 0
-    phase: 1.3686783
-  - position: {x: 137.875, y: 98.8125}
-    species: 1
-    phase: 5.3235726
-  - position: {x: 53.375, y: 99.875}
-    species: 1
-    phase: 2.8789485
-  - position: {x: 57.375, y: 99.6875}
-    species: 0
-    phase: 2.478013
-  - position: {x: 58.6875, y: 99.3125}
-    species: 1
-    phase: 0.975101
-  - position: {x: 59.75, y: 99.25}
-    species: 0
-    phase: 4.7543955
-  - position: {x: 60.3125, y: 99.25}
-    species: 0
-    phase: 2.1484342
-  - position: {x: 80.6875, y: 99.8125}
-    species: 0
-    phase: 2.909735
-  - position: {x: 86.6875, y: 99.6875}
-    species: 0
-    phase: 0.6741711
-  - position: {x: 88.3125, y: 99.125}
-    species: 0
-    phase: 1.514572
-  - position: {x: 106.6875, y: 99.75}
-    species: 0
-    phase: 1.8479278
-  - position: {x: 107.3125, y: 99.375}
-    species: 0
-    phase: 0.13810284
-  - position: {x: 107.6875, y: 99.1875}
-    species: 1
-    phase: 1.0291499
-  - position: {x: 132.1875, y: 99.8125}
-    species: 1
-    phase: 2.3579304
-  - position: {x: 132.8125, y: 99.6875}
-    species: 1
-    phase: 5.8463883
-  - position: {x: 133.25, y: 99.625}
-    species: 1
-    phase: 5.7709503
-  - position: {x: 134.3125, y: 99.375}
-    species: 1
-    phase: 2.8355253
-  - position: {x: 134.625, y: 99.1875}
-    species: 1
-    phase: 0.36225504
-  - position: {x: 137.8125, y: 99.1875}
-    species: 1
-    phase: 3.9034123
-  - position: {x: 137.6875, y: 99.6875}
-    species: 3
-    phase: 2.5018415
-  - position: {x: 52.125, y: 100.1875}
-    species: 0
-    phase: 1.6024063
-  - position: {x: 54.1875, y: 100.8125}
-    species: 0
-    phase: 3.2829683
-  - position: {x: 55.875, y: 100.6875}
-    species: 1
-    phase: 1.1759255
-  - position: {x: 56.625, y: 100.1875}
-    species: 1
-    phase: 1.0259646
-  - position: {x: 57.25, y: 100.25}
-    species: 0
-    phase: 0.6131744
-  - position: {x: 81.3125, y: 100.25}
-    species: 2
-    phase: 0.47197998
   - position: {x: 84.8125, y: 100.75}
     species: 2
     phase: 4.9336123
-  - position: {x: 104.8125, y: 100.625}
-    species: 0
-    phase: 0.8467994
-  - position: {x: 105.375, y: 100.875}
-    species: 0
-    phase: 6.250903
-  - position: {x: 106.375, y: 100.3125}
-    species: 0
-    phase: 2.404517
-  - position: {x: 106.6875, y: 100.1875}
-    species: 1
-    phase: 2.32182
-  - position: {x: 107.3125, y: 100.375}
-    species: 0
-    phase: 1.8047509
-  - position: {x: 132.375, y: 100.3125}
-    species: 0
-    phase: 6.2730465
-  - position: {x: 132.875, y: 100.6875}
-    species: 1
-    phase: 0.29206905
-  - position: {x: 133.125, y: 100.25}
-    species: 1
-    phase: 3.945697
-  - position: {x: 133.25, y: 100.75}
-    species: 0
-    phase: 0.3873223
-  - position: {x: 134.8125, y: 100.25}
-    species: 0
-    phase: 0.6461205
-  - position: {x: 134.6875, y: 100.75}
-    species: 3
-    phase: 5.800277
-  - position: {x: 136.25, y: 100.1875}
-    species: 1
-    phase: 3.7621255
-  - position: {x: 53.75, y: 101.375}
-    species: 3
-    phase: 6.2618613
-  - position: {x: 54.75, y: 101.3125}
-    species: 0
-    phase: 4.540087
-  - position: {x: 55.8125, y: 101.3125}
-    species: 1
-    phase: 6.0872087
-  - position: {x: 56.1875, y: 101.125}
-    species: 3
-    phase: 3.452093
-  - position: {x: 84.8125, y: 101.25}
-    species: 0
-    phase: 0.01902009
-  - position: {x: 132.875, y: 101.3125}
-    species: 2
-    phase: 0.71646756
-  - position: {x: 134.3125, y: 101.1875}
-    species: 1
-    phase: 3.7195826
-  - position: {x: 134.75, y: 101.1875}
-    species: 1
-    phase: 3.2522821

@@ -11,6 +11,7 @@ namespace RoadOfTheOldKing.Tutorial
         [SerializeField] private RecallAwakeningStone stone;
         [SerializeField] private GameObject barrier;
         [SerializeField] private Tilemap stonework;
+        [SerializeField] private SpriteRenderer groundShadow;
         [SerializeField] private float openingSeconds = .8f;
         public bool IsOpen { get; private set; }
         private Coroutine opening;
@@ -36,12 +37,19 @@ namespace RoadOfTheOldKing.Tutorial
                 float t = Mathf.Clamp01(elapsed / Mathf.Max(.01f, openingSeconds));
                 barrier.transform.localPosition = closedPosition + Vector3.down * t;
                 if (stonework != null) stonework.color = new Color(1, 1, 1, 1 - t);
+                // The gate sinks; its ground contact stays fixed and fades with the stonework.
+                if (groundShadow != null) groundShadow.color = new Color(1, 1, 1, 1 - t);
                 yield return null;
             }
             opening = null;
             SetOpen();
         }
-        private void SetOpen() { IsOpen = true; if (barrier != null) barrier.SetActive(false); }
+        private void SetOpen()
+        {
+            IsOpen = true;
+            if (barrier != null) barrier.SetActive(false);
+            if (groundShadow != null) groundShadow.enabled = false;
+        }
         public void CaptureProgress(ProgressState state) { }
         public void RestoreProgress(ProgressState state) { if (state.recallUnlocked) SetOpen(); }
     }

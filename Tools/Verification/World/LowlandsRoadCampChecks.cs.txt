@@ -1,0 +1,76 @@
+// Shared confirmed GreenLowlandsGameplayChecks SETUP -> Play; reset RoadCamp.Phase/Passed.
+// Phases 0-6 test high-water isolation, real axe drainage, real motor, visits, rest and Continue.
+// Uses debug defeats, not a fought balance test.
+var game=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(!Application.isPlaying||game==null||game.StorageKey!=SessionState.GetString("GreenLowlands.Gameplay.Key","")||!game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new System.Exception("Isolated Play required");
+Application.runInBackground=true;EditorApplication.QueuePlayerLoopUpdate();if(game.IsLoading)return "WAIT";
+int phase=SessionState.GetInt("RoadCamp.Phase",0);if(phase>6)return "DONE: "+SessionState.GetInt("RoadCamp.Passed",0);
+var checks=new System.Collections.Generic.List<string>();System.Action<bool,string> check=(ok,label)=>{if(!ok)throw new System.Exception("Phase "+phase+": "+label);checks.Add(label);};
+if(phase==0||phase==5)check(game.Continue(),"Continue isolated session");
+else if(phase==1||phase==3)check(game.Checkpoints.LeaveScene("Assets/Scenes/GreenLowlands.unity","from-tutorial"),"enter/revisit region");
+else{
+ var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+ var player=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();var body=player.GetComponent<Rigidbody2D>();
+ var guards=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>(FindObjectsSortMode.None).Where(e=>e.name.StartsWith("Northern road scavenger ")).OrderBy(e=>e.name).ToArray();
+ var drops=guards.Select(e=>e.GetComponent<RoadOfTheOldKing.World.EnemyCoinDrop>()).ToArray();
+ System.Action<Vector2> move=at=>{player.transform.position=at;body.position=at;body.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();};
+ System.Action<int> kill=i=>{var feedback=guards[i].GetComponent<RoadOfTheOldKing.Combat.EnemyImpactFeedback>();feedback.enabled=false;var random=UnityEngine.Random.state;try{int seed=0;for(;seed<10000;seed++){UnityEngine.Random.InitState(seed);float roll=UnityEngine.Random.value;if(roll>=.5f&&roll<.9f)break;}UnityEngine.Random.InitState(seed);guards[i].GetComponent<RoadOfTheOldKing.Combat.Damageable>().DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.up,0,0));}finally{UnityEngine.Random.state=random;feedback.enabled=true;}};
+ var sluice=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RecallSluice>();
+ if(phase==2){
+  check(guards.Length==2&&guards.All(e=>!e.IsDefeated),"two living dry-shelf guards before drainage");
+  check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.High,"high pond on first visit");
+  foreach(var e in guards)check(!Physics2D.OverlapBoxAll(e.transform.position,Vector2.one*.9f,0).Any(c=>!c.isTrigger&&!c.transform.IsChildOf(e.transform)),"dry clear footing "+e.name);
+  move(new Vector2(79,94.5f));foreach(var e in guards)e.GetType().GetMethod("Tick",flags).Invoke(e,new object[]{.02f});
+  check(guards.All(e=>!e.IsAware),"cliff blocks aggro from upper road despite nearby sentry");
+  var camera=Camera.main;var cameraPosition=camera.transform.position;float cameraSize=camera.orthographicSize;
+  try{camera.transform.position=new Vector3(79,94.5f,-10);camera.orthographicSize=5.5f;var v=camera.WorldToViewportPoint(guards[1].transform.position+Vector3.up);check(v.x>0&&v.x<1&&v.y>0&&v.y<1,"northern sentry visible in normal camera framing");}
+  finally{camera.transform.position=cameraPosition;camera.orthographicSize=cameraSize;}
+  check(Physics2D.OverlapBoxAll(new Vector2(73.5f,80.5f),Vector2.one*.76f,0).Any(c=>!c.isTrigger),"high water blocks worksite stair");
+  var combat=player.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();var axe=combat.Weapon;
+  var reveals=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SluiceWaterReveal>(FindObjectsInactive.Include,FindObjectsSortMode.None);
+  System.Action<Vector2> pose=p=>{axe.CancelAction();move(p);combat.GetType().GetField("controlsActive",flags).SetValue(combat,true);};
+  System.Action<int> tick=count=>{for(int i=0;i<count;i++){sluice.GetType().GetMethod("FixedUpdate",flags).Invoke(sluice,null);Physics2D.SyncTransforms();axe.GetType().GetMethod("Simulate",flags).Invoke(axe,new object[]{.02f});foreach(var reveal in reveals)reveal.GetType().GetMethod("Advance",flags).Invoke(reveal,new object[]{.02f});}};
+  System.Action<Vector2> lodge=p=>{pose(p);player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>().Restore();check(axe.TryThrow(Vector2.right),"throw accepted");tick(90);check(axe.State==RoadOfTheOldKing.Weapons.AxeState.Stuck,"real regional lodging");};
+  System.Action<Vector2> recall=p=>{move(p);player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>().Restore();check(axe.TryPlayerRecall(),"Recall accepted");tick(180);};
+  pose(new Vector2(5,91.3f));check(UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.ToolPickup>().TryCollect(player),"maintenance crank collected");
+  lodge(new Vector2(5,86));recall(new Vector2(6,90));
+  check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.DistributorReleased,"real axe releases distributor");
+  move(new Vector2(6,88));check(player.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>().TryInteract(),"distributor crank F");
+  check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.ServiceDiverted,"service diverted");
+  check(Physics2D.OverlapBoxAll(new Vector2(73.5f,80.5f),Vector2.one*.76f,0).Any(c=>!c.isTrigger),"partial drainage still blocks stair");
+  lodge(new Vector2(5,74));move(new Vector2(4.5f,76));check(player.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>().TryInteract(),"carriage F");tick(60);recall(new Vector2(4.5f,78));
+  check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.PondLow,"real main return drains pond");
+  check(!Physics2D.OverlapBoxAll(new Vector2(73.5f,80.5f),Vector2.one*.76f,0).Any(c=>!c.isTrigger),"fully drained stair clears");
+  move(new Vector2(73.5f,82.5f));foreach(var e in guards)e.GetType().GetMethod("Tick",flags).Invoke(e,new object[]{.02f});
+  check(guards[0].IsAware&&!guards[1].IsAware,"first sentry can be pulled separately on the approach");
+  move(new Vector2(15.5f,3));foreach(var e in guards)e.ResetOnRest();kill(0);
+  check(guards[0].IsDefeated&&!guards[1].IsDefeated&&drops[0].PendingCoins==1,"partial encounter leaves one real coin");
+  check(game.Checkpoints.LeaveScene("Assets/Scenes/Tutorial.unity","from-green-lowlands"),"leave partial camp");
+ }else if(phase==4){
+  check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.PondLow,"ordinary visit retains low water");
+  check(guards[0].IsDefeated&&!guards[1].IsDefeated&&drops[0].PendingCoins==1,"ordinary visit retains partial encounter and pending coin");kill(1);
+  var motor=player.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>();var input=player.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();var actions=(UnityEngine.InputSystem.InputActionMap)input.GetType().GetField("actions",flags).GetValue(input);
+  var devices=actions.devices;var routing=UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode;var simulation=Physics2D.simulationMode;bool focus=(bool)input.GetType().GetField("hasFocus",flags).GetValue(input),paused=(bool)input.GetType().GetField("paused",flags).GetValue(input);
+  var keyboard=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
+  System.Action<UnityEngine.InputSystem.Key[]> keys=held=>{UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState(held));UnityEngine.InputSystem.InputSystem.Update();input.GetType().GetField("hasFocus",flags).SetValue(input,true);input.GetType().GetMethod("Update",flags).Invoke(input,null);};
+  try{
+   UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=UnityEngine.InputSystem.InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;actions.devices=new UnityEngine.InputSystem.InputDevice[]{keyboard};Physics2D.simulationMode=SimulationMode2D.Script;input.GetType().GetField("paused",flags).SetValue(input,false);
+   move(new Vector2(66,84));motor.GetType().GetField("freeVelocity",flags).SetValue(motor,Vector2.zero);
+   foreach(var destination in new[]{new Vector2(66,78),new Vector2(73.5f,78),new Vector2(73.5f,82.5f),new Vector2(73,86),new Vector2(79,89),new Vector2(80,84),new Vector2(73.5f,82.5f),new Vector2(73.5f,78),new Vector2(66,78),new Vector2(66,86)}){
+    int frames=0;while(Vector2.Distance(body.position,destination)>.09f&&frames++<350){Vector2 delta=destination-body.position;var held=new System.Collections.Generic.List<UnityEngine.InputSystem.Key>();if(delta.x>.03f)held.Add(UnityEngine.InputSystem.Key.D);else if(delta.x<-.03f)held.Add(UnityEngine.InputSystem.Key.A);if(delta.y>.03f)held.Add(UnityEngine.InputSystem.Key.W);else if(delta.y<-.03f)held.Add(UnityEngine.InputSystem.Key.S);keys(held.ToArray());motor.GetType().GetMethod("FixedUpdate",flags).Invoke(motor,null);Physics2D.Simulate(.02f);}
+    check(frames<350,"real motor reaches worksite waypoint "+destination);
+   }
+  }finally{keys(new UnityEngine.InputSystem.Key[0]);actions.devices=devices;UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard);UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=routing;Physics2D.simulationMode=simulation;input.GetType().GetField("hasFocus",flags).SetValue(input,focus);input.GetType().GetField("paused",flags).SetValue(input,paused);}
+  check(game.Progress.bronzeCoins==2&&drops.All(d=>d.PendingCoins==0),"motor collects real coin triggers once");
+  move(new Vector2(15.5f,3));var fire=game.Checkpoints.Fires.First(b=>b.Id=="green-lowlands/arrival-fire");
+  check(game.Checkpoints.Light(fire)&&game.Checkpoints.Rest(fire),"light then rest");
+  check(guards.All(e=>!e.IsDefeated)&&drops.All(d=>d.PendingCoins==0),"rest revives camp and resets drops");
+  check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.PondLow,"rest preserves exposed approach");
+  check(game.ReturnToTitle(),"save and return to title");
+ }else if(phase==6){
+  check(guards.All(e=>!e.IsDefeated)&&drops.All(d=>d.PendingCoins==0),"Continue restores fresh sentries");
+  check(game.Progress.bronzeCoins==2&&sluice.Stage==RoadOfTheOldKing.World.SluiceStage.PondLow,"Continue retains wallet and permanent drainage");
+ }
+}
+SessionState.SetInt("RoadCamp.Phase",phase+1);int total=SessionState.GetInt("RoadCamp.Passed",0)+checks.Count;SessionState.SetInt("RoadCamp.Passed",total);return new{phase=phase,passed=checks.Count,total=total};
+

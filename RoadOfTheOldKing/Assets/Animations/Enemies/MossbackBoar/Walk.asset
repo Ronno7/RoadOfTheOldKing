@@ -1,0 +1,99 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fd1d18a98bcd30469bcfd0f78adfbfa, type: 3}
+  m_Name: Walk
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Player.DirectionalSpriteAnimation
+  source: 
+  framesPerSecond: 10
+  loop: 1
+  contactFrame: -1
+  directions:
+  - sprites:
+    - {fileID: 21300000, guid: f0c8cae2b1753b44084677335a32c703, type: 3}
+    - {fileID: 21300000, guid: b828dc1ca2c418d41b7eec843bab9518, type: 3}
+    - {fileID: 21300000, guid: fcc2484b0f058f64dbbc56c8123fe1a3, type: 3}
+    - {fileID: 21300000, guid: 2ca3dcfdc398c3a4b8f9ddc9c991f0b0, type: 3}
+    - {fileID: 21300000, guid: 1103bf0b930c0ff4ea61018c46ef7948, type: 3}
+    - {fileID: 21300000, guid: 83b1c9de7ca35174da84b270582bd561, type: 3}
+    - {fileID: 21300000, guid: e1a7d61952c84f24ea6a9d81cf8e25b3, type: 3}
+    - {fileID: 21300000, guid: 9085ed0c96c38e24a917ba3320b917e1, type: 3}
+    heights: 1c0000001b0000001a0000001b0000001b0000001a0000001b0000001c000000
+  - sprites:
+    - {fileID: 21300000, guid: 25c6706209d300240b29710048c6d6dc, type: 3}
+    - {fileID: 21300000, guid: 0fd7983d73719b647adcb16a226afb42, type: 3}
+    - {fileID: 21300000, guid: a7c70a353acbb2d4595d7fb3e322616e, type: 3}
+    - {fileID: 21300000, guid: fa71080a3d0eb13409721b3c9ca0f731, type: 3}
+    - {fileID: 21300000, guid: e0d10ee889bc5aa4f9920f48b6480b22, type: 3}
+    - {fileID: 21300000, guid: 1cf4cdbd83e3c7641bbce8f268158d60, type: 3}
+    - {fileID: 21300000, guid: ad40fdaba18f867458beb1fd1c9d7964, type: 3}
+    - {fileID: 21300000, guid: e6ac5c706c8322c44a94d2c4453d00c3, type: 3}
+    heights: 21000000200000001f00000020000000200000001f0000002000000020000000
+  - sprites:
+    - {fileID: 21300000, guid: 5bdf09960a92c8e4286afc3b6b51d2e2, type: 3}
+    - {fileID: 21300000, guid: 520f1a36ed2ebb647ba48579474584a0, type: 3}
+    - {fileID: 21300000, guid: 65530ff70d93bb14081915b5808fcfa3, type: 3}
+    - {fileID: 21300000, guid: 2e889cdb7eb880e4988c429ea2a6f754, type: 3}
+    - {fileID: 21300000, guid: bec68b51d1e14694eb45cd9167ad32ca, type: 3}
+    - {fileID: 21300000, guid: e5cebbb67cee5ed449c23f44bfa1e457, type: 3}
+    - {fileID: 21300000, guid: 97b6f36eb298d68458b8d1e060172ede, type: 3}
+    - {fileID: 21300000, guid: 31a551ffca2fbdc498d7c4e80ead6673, type: 3}
+    heights: 2200000021000000210000002200000022000000210000002100000022000000
+  - sprites:
+    - {fileID: 21300000, guid: ef61f4256ff4b7044a27c73ccdc40d90, type: 3}
+    - {fileID: 21300000, guid: a82d04b9dc967a34e9274f368c3898a7, type: 3}
+    - {fileID: 21300000, guid: 4914489ff1b55994f87bf6c29b2ce80a, type: 3}
+    - {fileID: 21300000, guid: 8441505576d48074a939a36e1193bb67, type: 3}
+    - {fileID: 21300000, guid: a38db641079a6284d8a4b9d9d621285e, type: 3}
+    - {fileID: 21300000, guid: 2dadc19c5ce74ab4bba9b99a11b1f337, type: 3}
+    - {fileID: 21300000, guid: 384710a0f76895f4d822b112cdce546f, type: 3}
+    - {fileID: 21300000, guid: 93b892dba86667940b973f8f072318f3, type: 3}
+    heights: 21000000200000001f00000020000000200000001f0000002000000020000000
+  - sprites:
+    - {fileID: 21300000, guid: eb45fb6e49659194e9ad4bd774a965b6, type: 3}
+    - {fileID: 21300000, guid: 6c9dbbe5a8347934698ffacab43c2f1f, type: 3}
+    - {fileID: 21300000, guid: 21d3b56b1a063f648931c9d420e66b5c, type: 3}
+    - {fileID: 21300000, guid: ff3ba743f1f5f9f43ab177d3ea7e24d4, type: 3}
+    - {fileID: 21300000, guid: 6509b95ccc622e5429c7dbc5f1e37562, type: 3}
+    - {fileID: 21300000, guid: 84024812bb39a2542b7ab432e41d5cd6, type: 3}
+    - {fileID: 21300000, guid: 1c3553a23106ad14e8bbb06a12faaa97, type: 3}
+    - {fileID: 21300000, guid: 91de64fb4981136428af1ec114a3e20f, type: 3}
+    heights: 1c0000001b0000001a0000001b0000001b0000001a0000001b0000001c000000
+  - sprites:
+    - {fileID: 21300000, guid: 9e60639be805c754c9d9bd9e66f8ccab, type: 3}
+    - {fileID: 21300000, guid: 1e42eb3a4a50b3643a970305345e2ea1, type: 3}
+    - {fileID: 21300000, guid: 988245b78a94325419731a9049f0edeb, type: 3}
+    - {fileID: 21300000, guid: fc573c6e3d3c0e2439cb36f21b522119, type: 3}
+    - {fileID: 21300000, guid: 76aab44737bb2504089a9d47e0492f2b, type: 3}
+    - {fileID: 21300000, guid: 7648647baad47154c9c293e5d41945f4, type: 3}
+    - {fileID: 21300000, guid: d763a687ec3075b40ba7ed92a9db431d, type: 3}
+    - {fileID: 21300000, guid: 08059e15502719f4b9461ff490856e77, type: 3}
+    heights: 1f0000001e0000001e0000001f0000001f0000001e0000001e0000001f000000
+  - sprites:
+    - {fileID: 21300000, guid: 1a5b11ebee6115d49aa93ad53214d92a, type: 3}
+    - {fileID: 21300000, guid: 77f4eeaa6a98eca48bce573c8b1305d9, type: 3}
+    - {fileID: 21300000, guid: aa0fc47b51837f241bc058c68f8fad3c, type: 3}
+    - {fileID: 21300000, guid: 23a9679593ab5614fbbc9544b800d73d, type: 3}
+    - {fileID: 21300000, guid: d17b623734654ac4a9c07f766e5cc4bb, type: 3}
+    - {fileID: 21300000, guid: 04fe4e9318ae52343a5a97f81c5c8fcb, type: 3}
+    - {fileID: 21300000, guid: a52c29c10d2bf6844bec8d6f1f6ec8a9, type: 3}
+    - {fileID: 21300000, guid: 70c4e1007d891314d870611bc4b231ad, type: 3}
+    heights: 2300000023000000220000002200000023000000220000002300000023000000
+  - sprites:
+    - {fileID: 21300000, guid: 7282f05a1fcbe3e41876246bc5b32934, type: 3}
+    - {fileID: 21300000, guid: f4a5eb26438ed0844afd3d45866fc00b, type: 3}
+    - {fileID: 21300000, guid: 95a0038172b3ba1418872e4badf1dcdf, type: 3}
+    - {fileID: 21300000, guid: 9f29cdee4c5272d48a0f781ec6c431ff, type: 3}
+    - {fileID: 21300000, guid: 2c5d127bb57585b4189cbc3daf200145, type: 3}
+    - {fileID: 21300000, guid: 0b7aac799995b0740b4c49dc0ff052ff, type: 3}
+    - {fileID: 21300000, guid: cd38c6b9ff462814b810f30d4a3cfa48, type: 3}
+    - {fileID: 21300000, guid: 4158ef3dbc9db60478dbeb3f62f313ee, type: 3}
+    heights: 1f0000001e0000001e0000001f0000001f0000001e0000001e0000001f000000

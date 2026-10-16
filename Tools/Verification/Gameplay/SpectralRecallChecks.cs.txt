@@ -1,0 +1,51 @@
+// Run in the shared GreenLowlandsGameplayChecks isolated Tutorial session, after Continue.
+// Uses actual production axe, deterministic gameplay ticks and temporary terrain. Stop + shared cleanup afterward.
+var game=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(!Application.isPlaying||game==null||game.IsLoading||game.StorageKey!=SessionState.GetString("GreenLowlands.Gameplay.Key","")||!game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new System.Exception("Settled isolated session required");
+var f=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var player=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerCombatController>();
+var staminaPool=player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>();var axe=player.Weapon;var view=axe.GetComponent<RoadOfTheOldKing.Weapons.AxeView>();
+var blade=(SpriteRenderer)view.GetType().GetField("blade",f).GetValue(view);var trail=(TrailRenderer)view.GetType().GetField("trail",f).GetValue(view);
+var baseMaterial=blade.sharedMaterial;var sprite=blade.sprite;var baseColor=blade.color;var trailTime=trail.time;var trailWidth=trail.widthMultiplier;var trailColor=trail.startColor;
+var material=AssetDatabase.LoadAssetAtPath<Material>("Assets/Art/Materials/SpectralRecall.mat");
+var body=player.GetComponent<Rigidbody2D>();var original=body.position;var velocity=body.linearVelocity;var controls=player.GetType().GetField("controlsActive",f).GetValue(player);
+var sim=axe.GetType().GetMethod("Simulate",f);var draw=view.GetType().GetMethod("LateUpdate",f);
+var checks=new System.Collections.Generic.List<string>();System.Action<bool,string> check=(ok,label)=>{if(!ok)throw new System.Exception("FAIL: "+label+" ["+axe.State+"]");checks.Add(label);};
+System.Action redraw=()=>draw.Invoke(view,null);
+System.Action<int> tick=count=>{for(int i=0;i<count;i++){sim.Invoke(axe,new object[]{.02f});redraw();}};
+System.Action<Vector2> pose=at=>{body.position=at;player.transform.position=at;body.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();};
+System.Action solid=()=>check(blade.sharedMaterial==baseMaterial&&blade.sprite==sprite,"Original solid sprite/material restored");
+System.Action spectral=()=>check(blade.sharedMaterial==material&&blade.sprite==sprite&&trail.emitting&&Mathf.Abs(trail.time-.10f)<.001f&&Mathf.Abs(trail.widthMultiplier-trailWidth*.65f)<.001f&&trail.startColor.b>trail.startColor.r,"Shared spectral body and narrow cyan trail active");
+System.Action launch=()=>{axe.CancelAction();staminaPool.Restore();pose(new Vector2(300,300));redraw();check(axe.TryThrow(Vector2.right),"Throw accepted");tick(12);check(axe.State==RoadOfTheOldKing.Weapons.AxeState.Flying,"Actual launch reaches flight");};
+int catches=0;System.Action caught=()=>catches++;axe.ReturnedToHand+=caught;
+GameObject wall=null;
+try{
+ player.GetType().GetField("controlsActive",f).SetValue(player,true);
+ check(material!=null&&material.shader.isSupported&&!ShaderUtil.ShaderHasError(material.shader),"Recall shader supported and compiled");
+ check(!axe.TryPlayerRecall(),"Held Recall refused");redraw();solid();
+ launch();solid();tick(60);check(axe.State==RoadOfTheOldKing.Weapons.AxeState.Stuck,"Range exhaustion lodges solid axe");solid();
+ staminaPool.TrySpend(staminaPool.Current);check(!axe.TryPlayerRecall(),"Exhausted manual Recall refused");redraw();solid();check(!trail.emitting,"Failed input has no Recall trail");
+ staminaPool.Restore();float stamina=staminaPool.Current;check(axe.TryPlayerRecall(),"Manual Recall accepted");redraw();spectral();
+ check(Mathf.Abs(stamina-staminaPool.Current-axe.Settings.recallStaminaCost)<.001f,"Manual stamina cost unchanged");
+ var size=blade.transform.localScale;int order=blade.sortingOrder;int layer=blade.sortingLayerID;
+ check(!axe.TryPlayerRecall(),"Repeated return input refused");redraw();spectral();
+ tick(100);check(axe.State==RoadOfTheOldKing.Weapons.AxeState.Held&&catches==1,"Manual return catches exactly once");solid();
+ check(!trail.emitting&&trail.positionCount==0&&trail.time==trailTime&&trail.widthMultiplier==trailWidth&&trail.startColor==trailColor,"Catch clears and restores original trail");
+ launch();check(axe.TryRecall(),"Scripted Recall accepted");redraw();spectral();
+ check(blade.transform.localScale==size&&blade.sortingOrder==order&&blade.sortingLayerID==layer,"Detached scale and sorting preserved");
+ view.enabled=false;solid();check(!trail.emitting&&trail.positionCount==0,"Disabled view clears trail");view.enabled=true;redraw();spectral();
+ axe.enabled=false;redraw();solid();check(!trail.emitting,"Disabled weapon has no spectral trail");axe.enabled=true;redraw();spectral();
+ axe.CancelAction();redraw();solid();check(!trail.emitting&&catches==1,"Cancelled return does not fabricate catch");
+ launch();tick(60);staminaPool.TrySpend(staminaPool.Current);pose(new Vector2(300-axe.Settings.autoRecallDistance,300));tick(1);spectral();check(staminaPool.Current==0,"Distance return remains free at zero stamina");tick(250);check(axe.State==RoadOfTheOldKing.Weapons.AxeState.Held&&catches==2,"Automatic return catches exactly once");solid();
+ // Outbound terrain stops the axe; moving to the opposite side routes its return through that same wall.
+ wall=new GameObject("Recall verification terrain");wall.transform.position=new Vector3(303,300,0);wall.AddComponent<BoxCollider2D>().size=new Vector2(.5f,4);Physics2D.SyncTransforms();
+ launch();tick(60);check(axe.State==RoadOfTheOldKing.Weapons.AxeState.Stuck&&axe.transform.position.x<302.76f,"Real wall stops outbound flight");
+ pose(new Vector2(306,300));check(axe.TryRecall(),"Wall-crossing scripted Recall accepted");redraw();spectral();
+ float start=axe.transform.position.x;tick(1);check(Mathf.Abs(axe.transform.position.x-start-axe.Settings.recallSpeed*.02f)<.002f,"Spectral return retains configured movement speed");
+ tick(100);check(axe.State==RoadOfTheOldKing.Weapons.AxeState.Held&&catches==3,"Return crosses solid wall and catches once");solid();
+ check(!trail.emitting&&trail.positionCount==0,"Wall catch leaves no ghost trail");
+}finally{
+ axe.ReturnedToHand-=caught;axe.enabled=true;view.enabled=true;axe.CancelAction();pose(original);body.linearVelocity=velocity;redraw();
+ player.GetType().GetField("controlsActive",f).SetValue(player,controls);staminaPool.Restore();if(wall!=null)UnityEngine.Object.DestroyImmediate(wall);
+}
+return new {passed=checks.Count,checks=checks.ToArray()};

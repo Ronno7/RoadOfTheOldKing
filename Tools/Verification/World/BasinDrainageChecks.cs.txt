@@ -1,0 +1,48 @@
+// Run in a settled isolated Lowlands Play session. Temporary render probe uses
+// the existing camera and restores it in finally; no normal save access.
+var game=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(!Application.isPlaying||game==null||game.IsLoading||!game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands.")||UnityEngine.SceneManagement.SceneManager.GetActiveScene().name!="GreenLowlands")throw new System.Exception("Isolated Lowlands required");
+var f=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var r=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SluiceWaterReveal>(FindObjectsInactive.Include,FindObjectsSortMode.None).Single(x=>x.name=="Pond high water");
+var checks=new System.Collections.Generic.List<string>();System.Action<bool,string> check=(ok,label)=>{if(!ok)throw new System.Exception(label);checks.Add(label);};
+var originals=r.GetComponentsInChildren<Renderer>(true).Select(x=>x.sharedMaterial).ToArray();bool originalActive=r.gameObject.activeSelf;
+var surfaces=r.GetComponentsInChildren<Renderer>(true);var advance=r.GetType().GetMethod("Advance",f);
+var data=(Texture2D)r.GetType().GetField("basinDepth",f).GetValue(r);var bounds=(Vector4)r.GetType().GetField("basinBounds",f).GetValue(r);
+var duration=(float)r.GetType().GetField("duration",f).GetValue(r);
+check(data!=null&&data.filterMode==FilterMode.Point&&data.width==Mathf.RoundToInt(bounds.z*16)&&data.height==Mathf.RoundToInt(bounds.w*16),"Basin data retains native world density and Point sampling");
+check(duration==8f,"Regional drain has an eight-second readable retreat");
+try{
+ r.SetVisible(true,false);r.SetVisible(false,true);check(r.IsDraining&&r.gameObject.activeSelf,"Animated drainage retains active water boundary");
+ advance.Invoke(r,new object[]{4f});check(r.IsDraining&&Mathf.Abs(r.Progress-.5f)<.001f,"Half-drained basin remains physically blocked");
+ var block=new MaterialPropertyBlock();surfaces.Single(x=>x.name=="Terrain - changing pond water").GetPropertyBlock(block);
+ check(block.GetFloat("_UseBasinDepth")==1&&Mathf.Abs(block.GetFloat("_WaterLevel")-.5f)<.001f&&block.GetTexture("_BasinDepth")==data,"World height data reaches the real pond renderer at half level");
+ foreach(float invalid in new[]{0f,-1f,float.NaN,float.PositiveInfinity})advance.Invoke(r,new object[]{invalid});
+ check(Mathf.Abs(r.Progress-.5f)<.001f,"Paused and invalid time cannot advance the reveal");
+ advance.Invoke(r,new object[]{4f});check(!r.IsDraining&&!r.gameObject.activeSelf,"Collision opens only after the full retreat");
+ check(surfaces.Select((x,i)=>x.sharedMaterial==originals[i]).All(x=>x),"Completion restores original renderer materials");
+ r.SetVisible(true,false);check(r.gameObject.activeSelf&&!r.IsDraining,"Fresh restoration returns full water without replay");
+ r.SetVisible(false,false);check(!r.gameObject.activeSelf&&!r.IsDraining,"Loading a saved low-water outcome is immediate");
+}finally{r.SetVisible(originalActive,false);}
+
+// Render equal-Y samples over two different bed elevations. A Y wipe or
+// incorrectly bound depth map cannot pass this test by just updating a float.
+var cam=Camera.main;var pos=cam.transform.position;var size=cam.orthographicSize;var aspect=cam.aspect;var target=cam.targetTexture;var clear=cam.clearFlags;var background=cam.backgroundColor;var active=RenderTexture.active;
+var rt=new RenderTexture(16,16,24);var read=new Texture2D(16,16,TextureFormat.RGBA32,false,true);
+var white=new Texture2D(16,16,TextureFormat.RGBA32,false,true);white.SetPixels(Enumerable.Repeat(Color.white,256).ToArray());white.Apply();
+var bed=new Texture2D(2,1,TextureFormat.RGBA32,false,true);bed.filterMode=FilterMode.Point;bed.wrapMode=TextureWrapMode.Clamp;bed.SetPixels(new[]{new Color(.2f,0,0,1),new Color(.8f,0,0,1)});bed.Apply();
+var sprite=Sprite.Create(white,new Rect(0,0,16,16),Vector2.one*.5f,16);
+var probe=new GameObject("Temporary basin shader proof");var renderer=probe.AddComponent<SpriteRenderer>();renderer.sprite=sprite;renderer.sortingLayerName="Ground";probe.transform.position=new Vector3(300.5f,300.5f,0);
+var mat=new Material((Material)r.GetType().GetField("drainingMaterial",f).GetValue(r));renderer.sharedMaterial=mat;
+mat.SetTexture("_BasinDepth",bed);mat.SetVector("_BasinBounds",new Vector4(300,300,1,1));mat.SetFloat("_UseBasinDepth",1);mat.SetFloat("_Waterline",-1000);
+System.Func<float,Color[]> sample=level=>{mat.SetFloat("_WaterLevel",level);cam.Render();RenderTexture.active=rt;read.ReadPixels(new Rect(0,0,16,16),0,0);read.Apply();return new[]{read.GetPixel(3,8),read.GetPixel(12,8)};};
+try{
+ cam.transform.position=new Vector3(300.5f,300.5f,pos.z);cam.orthographicSize=.5f;cam.aspect=1;cam.targetTexture=rt;cam.clearFlags=CameraClearFlags.SolidColor;cam.backgroundColor=Color.black;
+ var high=sample(1);var middle=sample(.5f);var low=sample(0);
+ check(high.All(c=>c.r>.8f),"Shader renders both bed elevations at high water");
+ check(middle[0].r>.8f&&middle[1].r<.02f,"Shader exposes shallow bed first at equal world Y");
+ check(low.All(c=>c.r<.02f),"Shader clears all temporary water at zero level");
+}finally{
+ cam.transform.position=pos;cam.orthographicSize=size;cam.aspect=aspect;cam.targetTexture=target;cam.clearFlags=clear;cam.backgroundColor=background;RenderTexture.active=active;
+ foreach(var o in new UnityEngine.Object[]{probe,mat,sprite,bed,white,read,rt})UnityEngine.Object.DestroyImmediate(o);
+}
+return new{passed=checks.Count,checks=checks.ToArray()};

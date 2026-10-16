@@ -1,9 +1,12 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
 using System;
 using System.Collections.Generic;
+using System.IO;
 using RoadOfTheOldKing.Player;
+using RoadOfTheOldKing.Progression;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 namespace RoadOfTheOldKing.UI
@@ -19,12 +22,17 @@ namespace RoadOfTheOldKing.UI
         private DevRuntimeCommands commands;
         private UIDocument document;
         private PanelSettings settings;
-        private VisualElement overlay, playerPage, worldPage, travelPage, fires;
-        private Label summary, status, mode, active, speedReadout, nearby, marker;
+        private VisualElement overlay, playerPage, itemsPage, travelPage, destinations;
+        private Label summary, status, marker, inventory;
         private Label effects;
         private Toggle god, infinite, collision, pauseToggle;
         private Slider speed, time;
         private FloatField x, y;
+        private TextField travelSearch;
+        private DevTravelDestination[] travelEntries = Array.Empty<DevTravelDestination>();
+        private readonly List<VisualElement> destinationControls = new List<VisualElement>();
+        private readonly List<VisualElement> sessionControls = new List<VisualElement>();
+        private readonly Dictionary<WorldTool, Button> toolButtons = new Dictionary<WorldTool, Button>();
         private readonly List<VisualElement> aliveControls = new List<VisualElement>();
         private readonly List<Button> tabs = new List<Button>();
         private PlayerControlLocks lockedPlayer;
@@ -32,7 +40,6 @@ namespace RoadOfTheOldKing.UI
         private bool releasePending;
         private int closedFrame;
         private float refreshAt;
-        private float radius = 15f;
         private string currentTab = "Player";
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -60,19 +67,19 @@ namespace RoadOfTheOldKing.UI
             var root = document.rootVisualElement;
             root.pickingMode = PickingMode.Ignore;
             overlay = root.Q("overlay"); summary = root.Q<Label>("summary");
-            status = root.Q<Label>("result"); mode = root.Q<Label>("mode"); active = root.Q<Label>("active");
+            status = root.Q<Label>("result");
             effects = root.Q<Label>("effects");
             root.Q<Button>("close").clicked += Close;
             root.Q<Button>("reset").clicked += () => Run(() => commands.ResetOverrides());
             pauseToggle = root.Q<Toggle>("pause"); pauseToggle.SetValueWithoutNotify(true);
             pauseToggle.RegisterValueChangedCallback(e => SetPauseWhileOpen(e.newValue));
-            playerPage = root.Q("player-page"); worldPage = root.Q("world-page"); travelPage = root.Q("travel-page");
-            foreach (string title in new[] { "Player", "World", "Travel" })
+            playerPage = root.Q("player-page"); itemsPage = root.Q("items-page"); travelPage = root.Q("travel-page");
+            foreach (string title in new[] { "Player", "Items", "Travel" })
             {
                 var button = new Button(() => SelectTab(title)) { text = title };
                 button.AddToClassList("tab"); root.Q("tabs").Add(button); tabs.Add(button);
             }
-            BuildPlayer(); BuildWorld(); BuildTravel(); SelectTab("Player");
+            BuildPlayer(); BuildItems(); BuildTravel(); SelectTab("Player");
             commands.SceneChanged += OnSceneChanged;
             overlay.style.display = DisplayStyle.None;
         }
@@ -83,7 +90,7 @@ namespace RoadOfTheOldKing.UI
             {
                 LockPlayer();
                 // Defeat must be allowed to present normally, including when invoked from automation.
-                if (commands.HasPlayer && !commands.Alive && currentTab != "Travel") SelectTab("Travel");
+                if (commands.HasPlayer && !commands.Alive && currentTab != "Player") SelectTab("Player");
             }
             if (releasePending && Time.frameCount > closedFrame && InputsReleased()) ReleaseInput();
             if (Time.unscaledTime >= refreshAt)
@@ -111,8 +118,8 @@ namespace RoadOfTheOldKing.UI
             if (PauseWhileOpen) pause = SimulationPause.Acquire(true);
             overlay.style.display = DisplayStyle.Flex;
             effects.style.display = DisplayStyle.None;
-            RebuildFires(); Refresh();
-            tabs[0].Focus();
+            RebuildDestinations(); Refresh();
+            tabs.Find(t => t.text == currentTab)?.Focus();
         }
         public void Close()
         {
@@ -166,88 +173,106 @@ namespace RoadOfTheOldKing.UI
 
         private void BuildPlayer()
         {
-            Section(playerPage, "HEALTH & RECOVERY", "Test hits use real feedback. Debug damage bypasses protection.");
             var row = Row(playerPage);
-            var damage = new IntegerField("Damage") { value = 25, isDelayed = true }; damage.AddToClassList("amount"); row.Add(damage);
-            AddButton(row, "Apply hit", () => commands.DamagePlayer(damage.value), true);
-            AddButton(row, "Kill player", () => { Close(); return commands.KillPlayer(); }, true, "danger");
+            AddButton(row, "Restore all", commands.RestorePlayer, true).tooltip = "Fill health, stamina and flasks.";
+            AddButton(row, "Respawn", commands.Respawn).tooltip = "Reload at the checkpoint; keep progress.";
             row = Row(playerPage);
-            AddButton(row, "Full heal", commands.HealPlayer, true);
-            AddButton(row, "Refill flasks", commands.RefillFlasks, true);
-            AddButton(playerPage, "Restore player", commands.RestorePlayer, true);
-            Hint(playerPage, "Restore fills health, stamina and flasks, and clears stagger/dodge recovery.");
-            Section(playerPage, "TEST OVERRIDES", "These stay active when you close the panel.");
+            SessionButton(row, "Give axe", commands.GiveAxe);
+            SessionButton(row, "Unlock Recall", commands.UnlockRecall);
+            Section(playerPage, "Overrides");
             god = AddToggle(playerPage, "God mode", commands.SetGodMode);
             infinite = AddToggle(playerPage, "Infinite stamina", commands.SetInfiniteStamina);
-            collision = AddToggle(playerPage, "Player collision", commands.SetCollision); collision.SetValueWithoutNotify(true);
-            Section(playerPage, "MOVEMENT", "Scales walk, sprint and attack walking. Dodge distance stays authored.");
-            speed = AddSlider(playerPage, "Speed multiplier", .25f, 4f, 1f, commands.SetSpeed);
-            speedReadout = Hint(playerPage, "");
-            row = Row(playerPage);
-            foreach (float value in new[] { .5f, 1f, 2f, 4f }) AddButton(row, value + "x", () => commands.SetSpeed(value), true);
-            Section(playerPage, "STAMINA & AXE", "Set stamina for exhaustion and recovery tests.");
-            row = Row(playerPage);
-            AddButton(row, "Empty", () => commands.SetStamina(0), true);
-            AddButton(row, "Deficit", () => commands.SetStamina(-commands.Stamina.DeficitLimit), true);
-            AddButton(row, "Full", () => commands.SetStamina(commands.Stamina.Maximum), true);
-            AddButton(playerPage, "Return owned axe", commands.RetrieveAxe, true);
+            collision = AddToggle(playerPage, "No collision", value => commands.SetCollision(!value));
+            speed = AddSlider(playerPage, "Move speed", .25f, 4f, 1f, commands.SetSpeed);
+            var testing = new Foldout { text = "Combat & simulation", value = false }; playerPage.Add(testing);
+            row = Row(testing);
+            var damage = new IntegerField("Damage") { value = 25, isDelayed = true }; damage.AddToClassList("amount"); row.Add(damage);
+            AddButton(row, "Hit player", () => commands.DamagePlayer(damage.value), true);
+            AddButton(row, "Kill", () => { Close(); return commands.KillPlayer(); }, true, "danger");
+            row = Row(testing);
+            AddButton(row, "Empty stamina", () => commands.SetStamina(0), true);
+            AddButton(row, "Return axe", commands.RetrieveAxe, true);
+            time = AddSlider(testing, "Game speed", .1f, 3f, 1f, commands.SetGameSpeed);
+            var radius = new FloatField("Enemy radius") { value = 15, isDelayed = true }; testing.Add(radius);
+            row = Row(testing);
+            AddButton(row, "Kill nearby", () => commands.KillNearby(radius.value), true, "danger").tooltip = "Runs normal reward and save events.";
+            AddButton(row, "Reset enemies", commands.ResetEnemies);
         }
-        private void BuildWorld()
+        private void BuildItems()
         {
-            Section(worldPage, "SIMULATION", "Speed applies when the world resumes. Other pause owners are respected.");
-            time = AddSlider(worldPage, "Game speed", .1f, 3f, 1f, commands.SetGameSpeed);
-            var row = Row(worldPage);
-            foreach (float value in new[] { .25f, .5f, 1f, 2f }) AddButton(row, value + "x", () => commands.SetGameSpeed(value));
-            Section(worldPage, "ENCOUNTERS", "Radius is measured from the player in world units.");
-            var radiusSlider = new Slider("Radius", 1, 50) { value = radius, showInputField = true };
-            radiusSlider.RegisterValueChangedCallback(e => { radius = Mathf.Clamp(e.newValue, 1f, 50f); Refresh(); });
-            worldPage.Add(radiusSlider);
-            nearby = Hint(worldPage, "");
-            AddButton(worldPage, "Kill nearby enemies", () => commands.KillNearby(radius), true, "danger");
-            Hint(worldPage, "Runs real defeat events: rewards unlock and milestones may save.", "caution");
-            AddButton(worldPage, "Reset all enemies", commands.ResetEnemies);
-            Hint(worldPage, "Respawns enemies at their starting points. Saved progression stays completed.");
-            Section(worldPage, "SESSION", "Overrides reset on respawn or scene change; nothing edits source assets.");
-            AddButton(worldPage, "Reset all runtime overrides", commands.ResetOverrides);
+            Hint(itemsPage, "Grants are saved to the current game.");
+            inventory = Hint(itemsPage, "");
+            ResourceRow("Bronze Coins", 100, commands.GiveCoins);
+            ResourceRow("Sun Shards", 5, commands.GiveShards);
+            ResourceRow("Heart fragments", 3, commands.GiveHeartFragments);
+            Section(itemsPage, "Tools");
+            foreach (WorldTool tool in Enum.GetValues(typeof(WorldTool)))
+            {
+                if (tool == WorldTool.None) continue;
+                var item = tool;
+                toolButtons.Add(tool, SessionButton(itemsPage, "Give " + WorldToolNames.Display(tool), () => commands.GiveTool(item)));
+            }
+        }
+        private void ResourceRow(string label, int amount, Func<int, bool> grant)
+        {
+            var row = Row(itemsPage);
+            var field = new IntegerField(label) { value = amount, isDelayed = true };
+            field.AddToClassList("resource-amount"); row.Add(field);
+            SessionButton(row, "Give", () => grant(field.value)).AddToClassList("give");
         }
         private void BuildTravel()
         {
-            Section(travelPage, "BONFIRES", "Teleport only: no rest, unlock, heal or checkpoint change.");
-            fires = new VisualElement(); travelPage.Add(fires);
-            AddButton(travelPage, "Refresh destinations", () => { RebuildFires(); return true; });
-            Section(travelPage, "RETURN MARKER", "One temporary marker for this scene.");
-            marker = Hint(travelPage, "No marker set");
-            var row = Row(travelPage);
-            AddButton(row, "Set here", commands.SetMarker, true);
-            AddButton(row, "Return", commands.TeleportToMarker, true);
-            Section(travelPage, "COORDINATES", "World position. Collision-off mode lets you explore blocked areas.");
-            row = Row(travelPage);
+            travelSearch = new TextField("Search"); travelPage.Add(travelSearch);
+            travelSearch.RegisterValueChangedCallback(_ => ShowDestinations());
+            destinations = new VisualElement(); travelPage.Add(destinations);
+            Hint(travelPage, "No rest or checkpoint change. Scene changes save progress.");
+            var coordinates = new Foldout { text = "Marker & coordinates", value = false }; travelPage.Add(coordinates);
+            var row = Row(coordinates);
+            AddButton(row, "Set marker", commands.SetMarker, true);
+            AddButton(row, "Return to marker", commands.TeleportToMarker, true);
+            marker = Hint(coordinates, "No marker set");
+            row = Row(coordinates);
             x = new FloatField("X") { isDelayed = true }; y = new FloatField("Y") { isDelayed = true };
             row.Add(x); row.Add(y);
-            row = Row(travelPage);
+            row = Row(coordinates);
             AddButton(row, "Use current", () => { if (!commands.HasPlayer) return false; var p = commands.Player.transform.position; x.value = p.x; y.value = p.y; return true; }, true);
             AddButton(row, "Teleport", () => commands.Teleport(new Vector2(x.value, y.value)), true);
-            Section(travelPage, "RESPAWN", "Reload at the last checkpoint, or the start. Permanent progress is saved and kept.");
-            AddButton(travelPage, "Respawn at checkpoint", commands.Respawn);
         }
-        private void RebuildFires()
+        private void RebuildDestinations()
         {
-            fires.Clear();
-            var destinations = commands.GetBonfires();
-            if (destinations.Length == 0) Hint(fires, "No bonfires in this scene.");
-            foreach (var fire in destinations)
+            travelEntries = commands.GetDestinations();
+            ShowDestinations();
+        }
+        private void ShowDestinations()
+        {
+            destinations.Clear(); destinationControls.Clear();
+            string scene = null;
+            foreach (var entry in travelEntries)
             {
-                var destination = fire;
-                AddButton(fires, fire.DisplayName, () => commands.TeleportToBonfire(destination));
+                string sceneName = Path.GetFileNameWithoutExtension(entry.scenePath);
+                string query = travelSearch.value.Trim();
+                if (query.Length > 0 && (entry.label + " " + sceneName).IndexOf(query, StringComparison.OrdinalIgnoreCase) < 0) continue;
+                if (scene != entry.scenePath)
+                {
+                    scene = entry.scenePath;
+                    Section(destinations, sceneName + (scene == SceneManager.GetActiveScene().path ? " (here)" : ""));
+                }
+                var destination = entry;
+                destinationControls.Add(AddButton(destinations, entry.label, () => commands.TravelTo(destination)));
             }
+            if (destinationControls.Count == 0) Hint(destinations, "No matching destinations.");
+            Refresh();
         }
         private void SelectTab(string title)
         {
             currentTab = title;
             playerPage.style.display = title == "Player" ? DisplayStyle.Flex : DisplayStyle.None;
-            worldPage.style.display = title == "World" ? DisplayStyle.Flex : DisplayStyle.None;
+            itemsPage.style.display = title == "Items" ? DisplayStyle.Flex : DisplayStyle.None;
             travelPage.style.display = title == "Travel" ? DisplayStyle.Flex : DisplayStyle.None;
             foreach (var tab in tabs) tab.EnableInClassList("selected", tab.text == title);
+            if (IsOpen) tabs.Find(t => t.text == title)?.Focus();
+            if (title == "Travel") RebuildDestinations();
+            document.rootVisualElement.Q<ScrollView>("scroll").scrollOffset = Vector2.zero;
         }
         private void Run(Func<bool> command) { command(); Refresh(); }
         private Button AddButton(VisualElement parent, string title, Func<bool> command, bool needsAlive = false, string css = null)
@@ -255,6 +280,11 @@ namespace RoadOfTheOldKing.UI
             var button = new Button(() => Run(command)) { text = title };
             if (css != null) button.AddToClassList(css);
             parent.Add(button); if (needsAlive) aliveControls.Add(button); return button;
+        }
+        private Button SessionButton(VisualElement parent, string title, Func<bool> command)
+        {
+            var button = AddButton(parent, title, command);
+            sessionControls.Add(button); return button;
         }
         private Toggle AddToggle(VisualElement parent, string label, Func<bool, bool> apply)
         {
@@ -273,10 +303,9 @@ namespace RoadOfTheOldKing.UI
         {
             var label = new Label(text); label.AddToClassList("hint"); if (css != null) label.AddToClassList(css); parent.Add(label); return label;
         }
-        private static void Section(VisualElement parent, string title, string detail)
+        private static void Section(VisualElement parent, string title)
         {
             var label = new Label(title); label.AddToClassList("section-title"); parent.Add(label);
-            if (!string.IsNullOrEmpty(detail)) Hint(parent, detail);
         }
         private void Refresh()
         {
@@ -289,23 +318,30 @@ namespace RoadOfTheOldKing.UI
             string flags = modifiers.Count > 0 ? string.Join(" · ", modifiers) : "No runtime overrides";
             effects.text = flags;
             effects.style.display = !IsOpen && modifiers.Count > 0 ? DisplayStyle.Flex : DisplayStyle.None;
-            active.text = flags;
-            mode.text = SimulationPause.IsPaused ? "PAUSED" : "LIVE"; mode.EnableInClassList("live", !SimulationPause.IsPaused);
             if (!IsOpen) return;
             if (commands.HasPlayer)
             {
                 var p = commands.Player; var pos = p.transform.position;
-                summary.text = $"{(p.IsAlive ? "PLAYER" : "DEFEATED")}   HP {p.Health.Health}/{p.Health.MaxHealth}   STA {commands.Stamina.Current:0}/{commands.Stamina.Maximum:0}\n" +
-                    $"Flasks {commands.Flask.Charges}/{commands.Flask.MaxCharges}   Position {pos.x:0.0}, {pos.y:0.0}";
+                summary.text = $"{SceneManager.GetActiveScene().name}   |   {(p.IsAlive ? "HP " + p.Health.Health + "/" + p.Health.MaxHealth : "Defeated")}   |   {pos.x:0.0}, {pos.y:0.0}";
             }
             else summary.text = "No player in this scene";
-            foreach (var control in aliveControls) control.SetEnabled(commands.Alive);
-            speed.SetEnabled(commands.HasPlayer);
+            var session = GameSession.Instance;
+            bool ready = commands.Alive && (session == null || !session.IsLoading);
+            foreach (var control in aliveControls) control.SetEnabled(ready);
+            foreach (var control in sessionControls) control.SetEnabled(ready && session != null);
+            foreach (var control in destinationControls) control.SetEnabled(ready && session != null);
+            foreach (var entry in toolButtons)
+            {
+                bool owned = session != null && session.Progress.OwnsTool(entry.Key);
+                entry.Value.text = WorldToolNames.Display(entry.Key) + (owned ? "  (owned)" : "  + Give");
+                entry.Value.SetEnabled(ready && session != null && !owned);
+            }
+            inventory.text = session == null ? "No active game." :
+                $"{session.Progress.bronzeCoins} coins   |   {session.Progress.sunShards} shards   |   {HeartFragmentProgression.Count(session.Progress)} fragments";
+            speed.SetEnabled(ready);
             god.SetValueWithoutNotify(commands.GodMode); infinite.SetValueWithoutNotify(commands.InfiniteStamina);
-            collision.SetValueWithoutNotify(!commands.NoCollision);
+            collision.SetValueWithoutNotify(commands.NoCollision);
             speed.SetValueWithoutNotify(commands.SpeedMultiplier); time.SetValueWithoutNotify(SimulationPause.UnpausedTimeScale);
-            speedReadout.text = commands.Movement != null ? $"Walk {commands.Movement.MoveSpeed:0.##} u/s · Sprint {commands.Movement.SprintSpeed:0.##} u/s" : "";
-            nearby.text = $"{commands.NearbyCount(radius)} living enemies within {radius:0} units";
             marker.text = commands.Marker.HasValue ? $"Marker: {commands.Marker.Value.x:0.0}, {commands.Marker.Value.y:0.0}" : "No marker set";
             status.text = commands.LastResult; status.EnableInClassList("error", !commands.LastSucceeded);
         }

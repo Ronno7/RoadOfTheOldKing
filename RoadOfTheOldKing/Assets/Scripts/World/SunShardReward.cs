@@ -85,6 +85,7 @@ namespace RoadOfTheOldKing.World
             if (!IsAvailable || IsCollected || string.IsNullOrEmpty(rewardId) ||
                 GameSession.Instance == null || !GameSession.Instance.Rewards.TryCollectShard(rewardId))
                 return false;
+            if (!awardImmediately) PickupPresentation.Collected(pickupVisual);
             RefreshVisual();
             return true;
         }

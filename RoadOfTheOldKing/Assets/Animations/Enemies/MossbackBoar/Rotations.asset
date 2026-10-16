@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fd1d18a98bcd30469bcfd0f78adfbfa, type: 3}
+  m_Name: Rotations
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Player.DirectionalSpriteAnimation
+  source: 
+  framesPerSecond: 1
+  loop: 1
+  contactFrame: -1
+  directions:
+  - sprites:
+    - {fileID: 21300000, guid: 4661b85b0797bbf458d7e1d8f647cc6c, type: 3}
+    heights: 1c000000
+  - sprites:
+    - {fileID: 21300000, guid: c8a81ddf0c3ee0f4a99dcb97a6f879d7, type: 3}
+    heights: 21000000
+  - sprites:
+    - {fileID: 21300000, guid: e484aadcb682dd34c82204af27250f97, type: 3}
+    heights: 22000000
+  - sprites:
+    - {fileID: 21300000, guid: 0df4db8efe3544a4381ce3a4c5a97e43, type: 3}
+    heights: 21000000
+  - sprites:
+    - {fileID: 21300000, guid: dbe211207553c094ea491e3ffe8b9818, type: 3}
+    heights: 1c000000
+  - sprites:
+    - {fileID: 21300000, guid: f1b8b55422d60e94eb0f490622fce3e0, type: 3}
+    heights: 1e000000
+  - sprites:
+    - {fileID: 21300000, guid: f6666e2032f28004ea3f9b7cfe95c5a9, type: 3}
+    heights: 22000000
+  - sprites:
+    - {fileID: 21300000, guid: 947c3e4a27bd10943b147474614d1758, type: 3}
+    heights: 1e000000

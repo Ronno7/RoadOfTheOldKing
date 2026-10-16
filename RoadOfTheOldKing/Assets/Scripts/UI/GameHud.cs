@@ -342,7 +342,8 @@ namespace RoadOfTheOldKing.UI
             }
             promptVisible = target != null;
             if (target == null) { prompt.Show(false); return; }
-            prompt.Place(target.position + Vector3.up * promptHeight);
+            var fireView = interaction.NearbyPickup == null ? target.GetComponent<BonfireSpriteView>() : null;
+            prompt.Place(fireView != null ? fireView.PromptPosition : target.position + Vector3.up * promptHeight);
             promptText.text = ControlLabels.Format("{interact} ") + verb;
             prompt.Show(true);
         }

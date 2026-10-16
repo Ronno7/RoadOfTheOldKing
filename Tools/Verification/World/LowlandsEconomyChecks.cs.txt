@@ -287,8 +287,8 @@ if(phase==0){
     stored=new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(game.StorageKey).Load();
     check(stored.bronzeCoins==55&&stored.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.RopeKit)&&stored.Has("shop/purchased/green-lowlands/trader-fragment")&&RoadOfTheOldKing.Progression.HeartFragmentProgression.Count(stored)==3,"purchase wallet/reward/stock persisted together");
     var collection=player.GetComponent<RoadOfTheOldKing.UI.CollectionMenu>();check(collection.OpenInventory(),"Inventory opens with earned items");
-    var balances=(UnityEngine.UIElements.Label)collection.GetType().GetField("balances",flags).GetValue(collection);
-    check(balances.text.Contains("55 Bronze Coins")&&game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.RopeKit)&&game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank),"Inventory uses shared wallet/tool state");
+    var balances=(UnityEngine.UIElements.Label)collection.GetType().GetField("coins",flags).GetValue(collection);
+    check(balances.text=="55"&&game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.RopeKit)&&game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank),"Inventory uses shared wallet/tool state");
     collection.enabled=false;collection.enabled=true;
     pose(fire.SpawnPosition);check(game.Checkpoints.Rest(fire),"rest accepted");
     check(source("pot-01").GetComponentInChildren<RoadOfTheOldKing.Combat.Breakable>(true).IsBroken&&game.Progress.FindCoinSource(source("pot-01").SourceId).collected,"rest retains broken empty pot");

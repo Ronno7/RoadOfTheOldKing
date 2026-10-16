@@ -1,0 +1,41 @@
+// Shared isolated GreenLowlandsGameplayChecks setup, Continue, then travel to GreenLowlands.
+// Presentation lifecycle checks stage outcomes directly; follow with real-weapon Layout live Low checks.
+var game=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(!Application.isPlaying||game==null||game.IsLoading||game.StorageKey!=SessionState.GetString("GreenLowlands.Gameplay.Key","")||!game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new System.Exception("Settled isolated session required");
+var sluice=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RecallSluice>();
+var f=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var high=(GameObject)sluice.GetType().GetField("highWater",f).GetValue(sluice);var service=(GameObject)sluice.GetType().GetField("serviceWater",f).GetValue(sluice);
+var pond=high.GetComponent<RoadOfTheOldKing.World.SluiceWaterReveal>();var trench=service.GetComponent<RoadOfTheOldKing.World.SluiceWaterReveal>();
+var surfaces=high.GetComponentsInChildren<Renderer>(true).Where(r=>r.enabled).ToArray();var materials=surfaces.Select(r=>r.sharedMaterial).ToArray();
+var checks=new System.Collections.Generic.List<string>();System.Action<bool,string> check=(ok,s)=>{if(!ok)throw new System.Exception("FAIL: "+s);checks.Add(s);};
+System.Action<RoadOfTheOldKing.World.SluiceStage> stage=s=>sluice.GetType().GetMethod("CompleteStage",f).Invoke(sluice,new object[]{s,"Verification"});
+System.Action<RoadOfTheOldKing.World.SluiceWaterReveal,float> step=(r,t)=>r.GetType().GetMethod("Advance",f).Invoke(r,new object[]{t});
+System.Action reset=()=>{game.Progress.completedIds.RemoveAll(id=>id.StartsWith("green-lowlands/sluice/"));sluice.RestoreProgress(game.Progress);};
+try{
+ reset();check(pond!=null&&trench!=null,"Both regional water groups own reveal components");
+ check(high.activeSelf&&service.activeSelf&&!pond.IsDraining,"Fresh high water is stable");
+ stage(RoadOfTheOldKing.World.SluiceStage.DistributorReleased);check(!pond.IsDraining&&!trench.IsDraining,"Bolt release does not animate water");
+ stage(RoadOfTheOldKing.World.SluiceStage.ServiceDiverted);
+ check(trench.IsDraining&&service.activeSelf&&high.activeSelf&&!pond.IsDraining,"Service drain affects only the trench");
+ check(service.GetComponentsInChildren<Collider2D>().Any(c=>c.enabled),"Service collision retained during drain");
+ step(trench,.6f);check(trench.IsDraining&&Mathf.Abs(trench.Progress-.5f)<.001f,"Service reveal advances at authored duration");
+ step(trench,.7f);check(!service.activeSelf&&!trench.IsDraining&&high.activeSelf,"Service completes without lowering pond");
+ stage(RoadOfTheOldKing.World.SluiceStage.PondLow);
+ check(pond.IsDraining&&high.activeSelf&&!service.activeSelf,"Pond begins without replaying service reveal");
+ check(new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(game.StorageKey).Load().Has(sluice.LowWaterId),"Final outcome saved before visible drain completes");
+ check(high.GetComponentsInChildren<Collider2D>().Any(c=>c.enabled),"Pond collision retained while draining");
+ check(surfaces.All(r=>r.sharedMaterial.shader.name=="RoadOfTheOldKing/SluiceDrain"),"Enabled water renderers use shared drain shader");
+ check(high.GetComponentsInChildren<Renderer>(true).Any(r=>!r.enabled),"Retired blockout renderer stays disabled");
+ step(pond,0);check(pond.Progress==0,"Paused time does not advance reveal");
+ step(pond,1.3f);check(pond.IsDraining&&Mathf.Abs(pond.Progress-.5f)<.001f&&high.activeSelf,"Midpoint stays blocked");
+ sluice.ResetOnRest();check(!pond.IsDraining&&!high.activeSelf,"Rest snaps to saved final water outcome");
+ check(surfaces.Select((r,i)=>r.sharedMaterial==materials[i]).All(ok=>ok),"Original renderer materials restored");
+ reset();stage(RoadOfTheOldKing.World.SluiceStage.PondLow);step(pond,3);
+ check(!high.activeSelf&&!pond.IsDraining,"Completed reveal removes flooded collision group");
+ sluice.RestoreProgress(new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(game.StorageKey).Load());
+ check(!high.activeSelf&&!pond.IsDraining&&sluice.Stage==RoadOfTheOldKing.World.SluiceStage.PondLow,"Stored final state restores immediately without replay");
+ reset();stage(RoadOfTheOldKing.World.SluiceStage.PondLow);pond.enabled=false;
+ check(!high.activeSelf&&!pond.IsDraining,"Interrupted component settles final state");pond.enabled=true;
+ reset();check(high.activeSelf&&!pond.IsDraining&&surfaces.Select((r,i)=>r.sharedMaterial==materials[i]).All(ok=>ok),"Fresh restore recovers original water and materials");
+}finally{pond.enabled=true;reset();}
+return new {passed=checks.Count,checks=checks.ToArray()};

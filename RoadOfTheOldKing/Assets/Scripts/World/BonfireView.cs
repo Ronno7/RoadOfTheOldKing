@@ -27,7 +27,7 @@ namespace RoadOfTheOldKing.World
                 // Prototype world label; the contextual HUD's interaction prompt replaces it.
                 bool show = RoadOfTheOldKing.UI.GameHud.Active == null;
                 if (label.gameObject.activeSelf != show) label.gameObject.SetActive(show);
-                if (show) label.text = fire.DisplayName + (fire.IsDiscovered ? "\nF - REST / TRAVEL" : "\nF - LIGHT & REST");
+                if (show) label.text = fire.DisplayName + (fire.IsDiscovered ? "\nF - REST / TRAVEL" : "\nF - LIGHT");
             }
         }
     }

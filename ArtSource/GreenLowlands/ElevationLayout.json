@@ -1,0 +1,157 @@
+{
+  "schema": 1,
+  "scene": "Assets/Scenes/GreenLowlands.unity",
+  "units": "relative terrain tiers; independent of screen Y",
+  "projection": "One tier uses a three-cell front-facing stair flight; ridge switchback includes a landing. Terrain faces, backs and side contacts must agree with the named surfaces.",
+  "surfaces": [
+    {
+      "id": "Farm",
+      "height": 0,
+      "shoreNote": "The eastern pond strip remains H0 beside the H-1 basin and extends north to the headland at (65.5,68.5). Permanent banks separate it from the H1 upper grove and basin after drainage; opening the woodland does not create an upper-route shortcut.",
+      "sample": [15.5, 3]
+    },
+    {
+      "id": "Ridge",
+      "height": 1,
+      "groveNote": "The cleared northern orchard and western spur groves remain H1. Permanent banks along the worksite's east side and southern basin approach retain the drainage gate; the worksite still requires its basin stair. The rocky headland remains inaccessible terrain.",
+      "sample": [117, 88]
+    },
+    {
+      "id": "Basin",
+      "height": -1,
+      "sample": [35, 26]
+    },
+    {
+      "id": "ShardIsland",
+      "height": 0,
+      "sample": [18.5, 26.5]
+    },
+    {
+      "id": "SluiceDeck",
+      "height": 0,
+      "sample": [5, 74],
+      "southEntranceApproach": [[13, 92], [13.5, 84.5], [5, 84.5], [5, 86.5]],
+      "approachNote": "Same-height porch from the ridge stair foot to the south-facing distributor doorway. Service water still gates the main bay; the former east entry is sealed."
+    },
+    {
+      "id": "StorehouseThreshold",
+      "height": 0,
+      "sample": [20.5, 76.5]
+    },
+    {
+      "id": "FragmentShelf",
+      "height": 0,
+      "sample": [30.5, 80.5]
+    },
+    {
+      "id": "BarrowThreshold",
+      "height": -1,
+      "sample": [66, 88.7],
+      "note": "The drained old road enters a passage under the ridge. The former two stair flights are sealed; there is no dry upper-road bypass."
+    },
+    {
+      "id": "Worksite",
+      "height": 0,
+      "sample": [73, 86]
+    },
+    {
+      "id": "Workshop",
+      "height": 0,
+      "sample": [133, 78]
+    }
+  ],
+  "stairs": [
+    {
+      "name": "Orchard climb",
+      "from": "Farm",
+      "to": "Ridge",
+      "rect": [121, 78, 7, 3],
+      "fromLanding": [124, 77],
+      "toLanding": [124, 82],
+      "approachNote": "The three-tree grove southwest of this flight is open H0 ground. The adjoining x112..120 cliff occupies y78..80 to match the stair crest and base; its western return remains continuous.",
+      "nativeOrientation": true
+    },
+    {
+      "name": "Ridge descent",
+      "from": "Ridge",
+      "to": "SluiceDeck",
+      "rect": [12, 93, 3, 4],
+      "fromLanding": [13, 97.5],
+      "toLanding": [13, 92],
+      "nativeOrientation": true
+    },
+    {
+      "name": "Sluice descent",
+      "from": "SluiceDeck",
+      "to": "Basin",
+      "rect": [14, 64, 3, 3],
+      "fromLanding": [15, 68],
+      "toLanding": [15, 63],
+      "nativeOrientation": true
+    },
+    {
+      "name": "Barn switchback",
+      "from": "Farm",
+      "to": "Basin",
+      "rect": [34, 27, 3, 3],
+      "fromLanding": [35, 31],
+      "toLanding": [35, 26],
+      "nativeOrientation": true
+    },
+    {
+      "name": "Island stair",
+      "from": "Basin",
+      "to": "ShardIsland",
+      "rect": [17, 23, 3, 3],
+      "fromLanding": [18, 22],
+      "toLanding": [18.5, 26.5],
+      "nativeOrientation": true
+    },
+    {
+      "name": "Storehouse stair",
+      "from": "Basin",
+      "to": "StorehouseThreshold",
+      "rect": [19, 73, 3, 3],
+      "fromLanding": [20.5, 72],
+      "toLanding": [20.5, 76.5],
+      "nativeOrientation": true
+    },
+    {
+      "name": "Shelf stair",
+      "from": "Basin",
+      "to": "FragmentShelf",
+      "rect": [29, 77, 3, 3],
+      "fromLanding": [30.5, 76],
+      "toLanding": [30.5, 80.5],
+      "nativeOrientation": true
+    },
+    {
+      "name": "Worksite stair",
+      "from": "Basin",
+      "to": "Worksite",
+      "rect": [72, 79, 3, 3],
+      "fromLanding": [73.5, 78],
+      "toLanding": [73.5, 82.5],
+      "nativeOrientation": true
+    }
+  ],
+  "rope": {
+    "from": "Farm",
+    "to": "Workshop",
+    "fromLanding": [127, 77],
+    "toLanding": [131, 77],
+    "note": "Crosses the break between isolated farm-height ledges; no additional terrain tier."
+  },
+  "firstGlimpse": {
+    "from": [11, 26],
+    "target": "ShardIsland",
+    "reward": [18.5, 26.5]
+  },
+  "water": "High pond floods Basin and lower stair flights; permanent river stays wet. Surface heights do not change on drainage.",
+  "outOfBoundsUplands": [
+    {"name": "Western approach upland", "height": 1, "relativeTo": "local H0 approach", "projectedBounds": [-30, -82, 46, 72], "note": "Inaccessible top; three-cell fronts and directional banks. Western overscan is render-only. Scene owns the exact footprint."},
+    {"name": "Southern pond bluff", "height": 1, "relativeTo": "Farm", "projectedBounds": [43, 25, 26, 11], "note": "Inaccessible raised land replaces a former dense thicket; no new stair, reward or route."},
+    {"name": "Pasture grove", "height": 1, "relativeTo": "Farm", "projectedBounds": [79, 43, 29, 14], "note": "Compact inaccessible wooded rise south of the orchard ridge. A clear H0 grassy passage separates the two H1 masses; the orchard stairs remain mandatory for the upper route. Scene owns the exact footprint."}
+  ],
+  "authoring": "Scene owns hand-painted tiles. This contract is consumed by the layout fixture; no runtime height simulation or scene regeneration."
+}

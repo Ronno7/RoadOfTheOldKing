@@ -1,20 +1,30 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements">
-    <ui:Style src="MenuTheme.uss" />
-    <ui:Style src="OrnateMenu.uss" />
+﻿<ui:UXML xmlns:ui="UnityEngine.UIElements">
     <ui:Style src="CollectionMenu.uss" />
-    <ui:VisualElement name="collection-overlay" class="menu-overlay">
-        <ui:VisualElement name="collection-panel" class="menu-panel ornate-panel bronze-frame">
-            <ui:Label name="heading" class="menu-heading" />
-            <ui:Label name="balances" class="menu-meta" />
-            <ui:VisualElement class="menu-divider" />
-            <ui:Label name="context" class="menu-text" />
-            <ui:VisualElement name="collection-body">
-                <ui:ScrollView name="entry-scroll" mode="Vertical" horizontal-scroller-visibility="Hidden">
-                    <ui:VisualElement name="entries" />
-                </ui:ScrollView>
-                <ui:Label name="description" class="menu-description" />
+    <ui:VisualElement name="collection-overlay">
+        <ui:VisualElement name="collection-panel">
+            <ui:VisualElement name="pack-header">
+                <ui:VisualElement name="pack-title">
+                    <ui:Label name="heading" text="INVENTORY" />
+                    <ui:Label name="context" />
+                </ui:VisualElement>
+                <ui:VisualElement name="wallet">
+                    <ui:VisualElement class="resource"><ui:Image name="coin-icon" /><ui:Label name="coins" /></ui:VisualElement>
+                    <ui:VisualElement class="resource"><ui:Image name="shard-icon" /><ui:Label name="shards" /></ui:VisualElement>
+                    <ui:VisualElement class="resource"><ui:Image name="heart-icon" /><ui:Label name="fragments" /></ui:VisualElement>
+                </ui:VisualElement>
             </ui:VisualElement>
-            <ui:Label name="hint" class="menu-hint" />
+            <ui:VisualElement name="inventory-body">
+                <ui:VisualElement name="item-grid" />
+                <ui:Label name="item-name" />
+            </ui:VisualElement>
+            <ui:VisualElement name="trade-body">
+                <ui:ScrollView name="entry-scroll" mode="Vertical" horizontal-scroller-visibility="Hidden"><ui:VisualElement name="entries" /></ui:ScrollView>
+                <ui:Label name="description" />
+            </ui:VisualElement>
+            <ui:VisualElement name="pack-footer">
+                <ui:Label name="hint" />
+                <ui:Button name="collection-close" text="Close" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

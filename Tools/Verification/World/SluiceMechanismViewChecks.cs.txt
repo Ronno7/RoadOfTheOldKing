@@ -1,0 +1,125 @@
+// Shared isolated bootstrap, Continue to Tutorial, travel to GreenLowlands. Stop + shared cleanup after.
+// Real axe sweeps and deterministic ticks; staged positions are not a human aiming test.
+var game=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(!Application.isPlaying||!SessionState.GetBool("GreenLowlands.Gameplay.Active",false)||game==null||game.IsLoading||game.StorageKey!=SessionState.GetString("GreenLowlands.Gameplay.Key","")||!game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands.")||UnityEngine.SceneManagement.SceneManager.GetActiveScene().name!="GreenLowlands")throw new System.Exception("Settled isolated Lowlands session required");
+var f=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var s=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RecallSluice>();var v=s.GetComponent<RoadOfTheOldKing.World.SluiceMechanismView>();
+var p=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerCombatController>();var a=p.Weapon;var body=p.GetComponent<Rigidbody2D>();var stamina=p.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>();
+var origin=body.position;var controls=p.GetType().GetField("controlsActive",f).GetValue(p);var saved=game.Progress.completedIds.ToArray();
+float savedFlash=RoadOfTheOldKing.UI.FeedbackSettings.FlashScale;
+var marks=(SpriteRenderer[])v.GetType().GetField("forkMarks",f).GetValue(v);
+var savedTools=game.Progress.ownedTools.ToArray();bool savedExists=PlayerPrefs.HasKey(game.StorageKey);string savedRecord=PlayerPrefs.GetString(game.StorageKey,"");
+var bolt=(Transform)v.GetType().GetField("bolt",f).GetValue(v);var brake=(Transform)v.GetType().GetField("brake",f).GetValue(v);var weight=(Transform)v.GetType().GetField("counterweight",f).GetValue(v);var wire=(LineRenderer)v.GetType().GetField("suspension",f).GetValue(v);
+var left=(Transform)v.GetType().GetField("leftShutter",f).GetValue(v);var right=(Transform)v.GetType().GetField("rightShutter",f).GetValue(v);var leftRod=(LineRenderer)v.GetType().GetField("leftRod",f).GetValue(v);var rightRod=(LineRenderer)v.GetType().GetField("rightRod",f).GetValue(v);
+var outlet=(Transform)v.GetType().GetField("outletGate",f).GetValue(v);var outletTravel=(Vector3)v.GetType().GetField("outletTravel",f).GetValue(v);
+var architecture=GameObject.Find("Sluice architecture");
+var outfall=architecture!=null?architecture.GetComponent<RoadOfTheOldKing.World.SluiceOutfallView>():null;
+if(outlet==null||outfall==null)throw new System.Exception("Authored exterior outlet and SluiceOutfallView required");
+var pond=(RoadOfTheOldKing.World.SluiceWaterReveal)outfall.GetType().GetField("pondReveal",f).GetValue(outfall);
+var surge=(SpriteRenderer)outfall.GetType().GetField("surge",f).GetValue(outfall);var upstream=(SpriteRenderer)outfall.GetType().GetField("upstreamSurface",f).GetValue(outfall);
+var wet=(Renderer[])outfall.GetType().GetField("wetMarks",f).GetValue(outfall);var frames=(Sprite[])outfall.GetType().GetField("flowFrames",f).GetValue(outfall);
+if(pond==null||surge==null||upstream==null||wet==null||wet.Length==0||frames==null||frames.Length!=4||frames.Any(x=>x==null))throw new System.Exception("Complete four-frame outfall, intake and wet-line references required");
+var high=(GameObject)s.GetType().GetField("highWater",f).GetValue(s);var service=(GameObject)s.GetType().GetField("serviceWater",f).GetValue(s);
+var surgeOriginal=(Color)outfall.GetType().GetField("surgeColor",f).GetValue(outfall);var upstreamOriginal=(Color)outfall.GetType().GetField("upstreamColor",f).GetValue(outfall);
+var originalSurgeSprite=(Sprite)outfall.GetType().GetField("surgeSprite",f).GetValue(outfall);bool originalSurgeEnabled=(bool)outfall.GetType().GetField("surgeEnabled",f).GetValue(outfall);bool originalUpstreamEnabled=(bool)outfall.GetType().GetField("upstreamEnabled",f).GetValue(outfall);var originalWet=(bool[])outfall.GetType().GetField("wetEnabled",f).GetValue(outfall);
+var receivers=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SluiceTarget>(FindObjectsSortMode.None).Where(x=>x.Part!=RoadOfTheOldKing.World.SluicePart.MainFork).ToArray();var positions=receivers.Select(x=>x.transform.position).ToArray();
+var checks=new System.Collections.Generic.List<string>();System.Action<bool,string> check=(ok,label)=>{if(!ok)throw new System.Exception("FAIL: "+label);checks.Add(label);};
+System.Action<Vector2> pose=at=>{body.position=at;p.transform.position=at;body.linearVelocity=Vector2.zero;p.GetType().GetField("controlsActive",f).SetValue(p,true);Physics2D.SyncTransforms();};
+System.Action<int> tick=n=>{for(int i=0;i<n;i++){s.GetType().GetMethod("FixedUpdate",f).Invoke(s,null);Physics2D.SyncTransforms();a.GetType().GetMethod("Simulate",f).Invoke(a,new object[]{.02f});v.GetType().GetMethod("Advance",f).Invoke(v,new object[]{.02f});outfall.Present(.02f);}};
+System.Action<Vector2> lodge=at=>{a.CancelAction();pose(at);stamina.Restore();check(a.TryThrow(Vector2.right),"Throw accepted");tick(90);check(a.State==RoadOfTheOldKing.Weapons.AxeState.Stuck,"Real fork lodging");};
+System.Action<Vector2> recall=at=>{pose(at);stamina.Restore();check(a.TryPlayerRecall(),"Recall accepted");};
+System.Func<bool,bool> turn=carriage=>{pose(carriage?new Vector2(4.5f,76):new Vector2(6,88));return p.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>().TryInteract();};
+try{
+ if(!game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank))game.Progress.ownedTools.Add(RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank);
+ game.Progress.completedIds.RemoveAll(id=>id.StartsWith("green-lowlands/sluice/"));s.RestoreProgress(game.Progress);
+ var boltRest=bolt.localPosition;var brakeRest=brake.localPosition;var weightRest=weight.localPosition;
+ var leftRest=left.localPosition;var rightRest=right.localPosition;
+ var outletRest=outlet.localPosition;outfall.RefreshNow();
+ check(v.Opening==0f&&outletTravel.sqrMagnitude>.01f,"Exterior outlet begins closed with an authored travel distance");
+ check(outlet.GetComponentsInChildren<Collider2D>(true).Length==0,"Moving outlet gate is visual only");
+ check(!outlet.IsChildOf(high.transform)&&!outlet.IsChildOf(service.transform)&&!outfall.transform.IsChildOf(high.transform)&&!outfall.transform.IsChildOf(service.transform),"Exterior gate and outfall survive drained water-group deactivation");
+ check(!surge.enabled&&upstream.enabled&&wet.All(r=>r!=null&&!r.enabled),"Closed gate shows intake water without a draining surge or exposed wet line");
+ check(left.parent.GetComponentsInChildren<Collider2D>().Length==0,"Shutters and rods add no collision");
+ check(Vector3.Distance(left.position,new Vector3(8.3125f,80,0))<.001f&&Vector3.Distance(right.position,new Vector3(8.9375f,80,0))<.001f,"Gate sits in its authored headwall opening");
+ check(weight.GetComponentsInChildren<Collider2D>().Length==0&&brake.GetComponent<Collider2D>()==null&&bolt.GetComponent<Collider2D>()==null,"Animated pieces are visual only");
+ check(marks.All(m=>m!=null&&!m.enabled),"Fresh forks have no loaded cue");
+ // Actual outbound sweeps aimed at the fitting from several nearby standing heights.
+ foreach(float offset in new[]{-.3f,-.15f,0f,.15f,.3f}){
+  a.CancelAction();pose(new Vector2(5,86+offset));stamina.Restore();
+  check(a.TryThrow(new Vector2(10,86)-body.position),"Offset distributor throw accepted");tick(90);
+  check(s.IsForkArmed(RoadOfTheOldKing.World.SluicePart.DistributorFork)&&marks.Take(2).All(m=>m.enabled)&&marks.Skip(2).All(m=>!m.enabled),"Offset distributor catch lights only its fork");
+ }
+ a.CancelAction();tick(1);check(marks.All(m=>!m.enabled),"Cancelled throw clears loaded cue");
+ lodge(new Vector2(5,86.5f));check(!s.IsForkArmed(RoadOfTheOldKing.World.SluicePart.DistributorFork)&&marks.All(m=>!m.enabled),"Wall lodging cannot light fork");
+ lodge(new Vector2(5,86));
+ RoadOfTheOldKing.UI.FeedbackSettings.FlashScale=0;v.GetType().GetMethod("Advance",f).Invoke(v,new object[]{.02f});
+ check(marks.Take(2).All(m=>m.enabled&&Mathf.Abs(m.bounds.size.y-.125f)<.001f),"Flash-off retains quiet two-pixel loaded state");
+ v.enabled=false;check(marks.All(m=>!m.enabled),"Disabled view clears fork marks");v.enabled=true;
+ check(marks.Take(2).All(m=>m.enabled),"Re-enabled view restores valid loaded state");
+ s.ResetOnRest();check(marks.All(m=>!m.enabled),"Rest clears unsolved loaded state");
+ RoadOfTheOldKing.UI.FeedbackSettings.FlashScale=savedFlash;
+ lodge(new Vector2(5,86));recall(new Vector2(6,90));tick(1);
+ check(marks.All(m=>!m.enabled),"Starting Recall clears loaded inlay");
+ for(int i=0;i<70&&s.Stage==RoadOfTheOldKing.World.SluiceStage.High;i++)tick(1);
+ check(s.Stage==RoadOfTheOldKing.World.SluiceStage.DistributorReleased,"Real distributor stroke releases bolt");
+ check(bolt.gameObject.activeSelf&&bolt.localPosition.x<boltRest.x&&bolt.localPosition.x>boltRest.x-.5f,"Bolt slides instead of disappearing or snapping");
+ tick(30);check(Mathf.Abs(bolt.localPosition.x-(boltRest.x-.5f))<.001f,"Bolt remains fully retracted");
+ check(turn(false),"Owned crank and contextual interaction divert service");
+ // The main facade is closer to the player, so its slot admits a narrower aim-at-fork band.
+ foreach(float offset in new[]{-.15f,-.075f,0f,.075f,.15f}){
+  a.CancelAction();pose(new Vector2(5,74+offset));stamina.Restore();
+  check(a.TryThrow(new Vector2(10,74)-body.position),"Offset main throw accepted");tick(90);
+  check(s.IsForkArmed(RoadOfTheOldKing.World.SluicePart.MainFork)&&marks.Skip(2).All(m=>m.enabled)&&marks.Take(2).All(m=>!m.enabled),"Offset main catch lights only its fork");
+ }
+ lodge(new Vector2(5,74));var markStart=marks[2].transform.position;
+ check(turn(true),"Loaded carriage moves");tick(60);
+ check(marks.Skip(2).All(m=>m.enabled)&&Mathf.Abs(marks[2].transform.position.y-markStart.y-4f)<.001f,"Loaded inlay travels with the attached axe and carriage");
+ recall(new Vector2(4.5f,80));
+ float peak=0;for(int i=0;i<90;i++){tick(1);peak=Mathf.Max(peak,brake.localPosition.y-brakeRest.y);}
+ check(peak>.1f,"Partial real return visibly lifts brake");
+ check(!s.BrakeLifted&&s.Stage==RoadOfTheOldKing.World.SluiceStage.ServiceDiverted,"Single vane does not solve");
+ check((brake.localPosition-brakeRest).sqrMagnitude<.0001f&&weight.localPosition==weightRest,"Failed partial stroke settles brake without dropping weight");
+ check(left.localPosition==leftRest&&right.localPosition==rightRest,"Partial brake release leaves shutters closed");
+ check(v.Opening==0f&&outlet.localPosition==outletRest&&!surge.enabled,"Partial brake release leaves exterior water gate closed");
+ s.ResetOnRest();lodge(new Vector2(5,74));check(turn(true),"Second carriage move accepted");tick(60);
+ recall(new Vector2(4.5f,74));tick(7);pose(new Vector2(4.5f,81.7f));tick(6);
+ check(s.Feedback.Contains("strains")&&!s.BrakeLifted,"Catch-first real sweep remains blocked");
+ tick(3);check(weight.localPosition.y<weightRest.y&&weight.localPosition.y>weightRest.y-.08f,"Blocked catch gives restrained weight tug");
+ check(left.localPosition==leftRest&&right.localPosition==rightRest,"Blocked tug cannot open shutters");
+ check(v.Opening==0f&&outlet.localPosition==outletRest&&!surge.enabled,"Wrong-order catch cannot release exterior water");
+ pose(new Vector2(11,78));tick(90);check(weight.localPosition==weightRest&&s.Stage==RoadOfTheOldKing.World.SluiceStage.ServiceDiverted,"Wrong-order tug settles with no progress");
+ s.ResetOnRest();lodge(new Vector2(5,74));check(turn(true),"Final carriage move accepted");tick(60);recall(new Vector2(4.5f,78));
+ for(int i=0;i<70&&s.Stage!=RoadOfTheOldKing.World.SluiceStage.PondLow;i++)tick(1);
+ check(s.Stage==RoadOfTheOldKing.World.SluiceStage.PondLow,"Ordered real return releases main mechanism");
+ check(weight.localPosition.y<weightRest.y&&weight.localPosition.y>weightRest.y-1.25f,"Released counterweight begins a visible drop");
+ float fraction=(weightRest.y-weight.localPosition.y)/1.25f;
+ check(v.Opening>0f&&v.Opening<1f&&Mathf.Abs(v.Opening-fraction)<.001f&&(outlet.localPosition-outletRest-outletTravel*v.Opening).sqrMagnitude<.000001f,"Exterior gate opens on the same counterweight stroke");
+ check(Mathf.Abs(left.localPosition.x-leftRest.x+.4375f*fraction)<.001f&&Mathf.Abs(right.localPosition.x-rightRest.x-.4375f*fraction)<.001f,"Both shutters follow the same weight stroke");
+ tick(30);check(Mathf.Abs(weight.localPosition.y-(weightRest.y-1.25f))<.001f&&Mathf.Abs(brake.localPosition.y-brakeRest.y-.35f)<.001f,"Solved weight and brake settle at endpoints");
+ check((wire.GetPosition(1)-(weight.position+Vector3.up*.875f)).sqrMagnitude<.0001f,"Suspension follows weight");
+ check(Mathf.Abs(left.localPosition.x-leftRest.x+.4375f)<.001f&&Mathf.Abs(right.localPosition.x-rightRest.x-.4375f)<.001f,"Gate reaches full opening");
+ check(v.Opening==1f&&(outlet.localPosition-outletRest-outletTravel).sqrMagnitude<.000001f,"Exterior gate reaches its full authored opening");
+ check(pond.IsDraining&&surge.enabled&&Mathf.Abs(surge.color.a-surgeOriginal.a)<.001f,"Open gate carries the initial draining surge");
+ var pausedSprite=surge.sprite;float pausedAlpha=surge.color.a;outfall.Present(0f);
+ check(surge.sprite==pausedSprite&&surge.color.a==pausedAlpha,"Zero elapsed time preserves outfall animation frame and strength");
+ outfall.Present(.13f);check(surge.sprite!=pausedSprite,"Flow advances through distinct native artwork frames");
+ float drainDuration=(float)pond.GetType().GetField("duration",f).GetValue(pond);pond.GetType().GetMethod("Advance",f).Invoke(pond,new object[]{drainDuration*.5f});outfall.RefreshNow();
+ check(pond.IsDraining&&Mathf.Abs(pond.Progress-.5f)<.001f&&Mathf.Abs(surge.color.a-surgeOriginal.a*.65f)<.001f&&Mathf.Abs(upstream.color.a-upstreamOriginal.a*.5f)<.001f,"Outlet surge and intake recede with the pond reveal");
+ pond.GetType().GetMethod("Advance",f).Invoke(pond,new object[]{drainDuration});outfall.RefreshNow();
+ check(!high.activeSelf&&outlet.gameObject.activeInHierarchy&&outfall.gameObject.activeInHierarchy,"Exterior waterworks remain visible after pond collision clears");
+ check(surge.enabled&&Mathf.Abs(surge.color.a-surgeOriginal.a*.3f)<.001f&&!upstream.enabled&&wet.All(r=>r.enabled),"Settled low water leaves a small rivulet and exposed wet masonry");
+ outfall.enabled=false;
+ check(surge.color==surgeOriginal&&surge.sprite==originalSurgeSprite&&surge.enabled==originalSurgeEnabled&&upstream.color==upstreamOriginal&&upstream.enabled==originalUpstreamEnabled&&wet.Select((r,i)=>r.enabled==originalWet[i]).All(ok=>ok),"Disabling outlet presentation restores authored artwork states");
+ outfall.enabled=true;check(surge.enabled&&!upstream.enabled&&wet.All(r=>r.enabled),"Re-enabled outlet immediately restores the saved low-water presentation");
+ check((leftRod.GetPosition(1)-left.position-Vector3.up*.3125f).sqrMagnitude<.0001f&&(rightRod.GetPosition(1)-right.position-Vector3.up*.3125f).sqrMagnitude<.0001f,"Connecting rods remain attached to moving leaves");
+ check(receivers.Select((x,i)=>x.transform.position==positions[i]).All(ok=>ok),"All fixed vane/fork colliders keep authored positions");
+ s.ResetOnRest();check(Mathf.Abs(weight.localPosition.y-weightRest.y+1.25f)<.001f&&Mathf.Abs(bolt.localPosition.x-boltRest.x+.5f)<.001f,"Rest retains solved mechanical pose");
+ v.enabled=false;v.enabled=true;check(Mathf.Abs(weight.localPosition.y-weightRest.y+1.25f)<.001f,"Re-enable restores solved pose without replay");
+ check(Mathf.Abs(left.localPosition.x-leftRest.x+.4375f)<.001f,"Solved gate stays open after rest and re-enable");
+ check(v.Opening==1f&&(outlet.localPosition-outletRest-outletTravel).sqrMagnitude<.000001f,"Exterior gate remains open through rest and re-enable");
+ game.Progress.completedIds.RemoveAll(id=>id.StartsWith("green-lowlands/sluice/"));s.RestoreProgress(game.Progress);
+ check(bolt.localPosition==boltRest&&brake.localPosition==brakeRest&&weight.localPosition==weightRest,"Fresh restore recovers authored rest poses");
+ check(left.localPosition==leftRest&&right.localPosition==rightRest,"Fresh restore closes both leaves");
+ outfall.RefreshNow();check(v.Opening==0f&&outlet.localPosition==outletRest&&!surge.enabled&&upstream.enabled&&wet.All(r=>!r.enabled),"Fresh restore recovers closed outlet and high intake water");
+}finally{RoadOfTheOldKing.UI.FeedbackSettings.FlashScale=savedFlash;outfall.enabled=true;v.enabled=true;a.CancelAction();game.Progress.completedIds.Clear();game.Progress.completedIds.AddRange(saved);game.Progress.ownedTools.Clear();game.Progress.ownedTools.AddRange(savedTools);s.RestoreProgress(game.Progress);outfall.RefreshNow();pose(origin);p.GetType().GetField("controlsActive",f).SetValue(p,controls);if(savedExists)PlayerPrefs.SetString(game.StorageKey,savedRecord);else PlayerPrefs.DeleteKey(game.StorageKey);PlayerPrefs.Save();}
+return new{passed=checks.Count,checks=checks.ToArray()};

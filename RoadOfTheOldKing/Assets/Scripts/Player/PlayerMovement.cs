@@ -56,6 +56,14 @@ namespace RoadOfTheOldKing.Player
         public float SprintSpeed => MoveSpeed * sprintMultiplier;
         public bool IsSprinting { get; private set; }
         public Vector2 FacingDirection { get; private set; } = Vector2.down;
+        public Vector2 MovementIntent => movementInput != null && inputSource != null &&
+            inputSource.isActiveAndEnabled && movementInput.IsActive ? movementInput.MoveDirection : Vector2.zero;
+
+        // Scene arrivals can orient the idle pose without rotating the body or moving the player.
+        public void SetFacingDirection(Vector2 direction)
+        {
+            if (direction.sqrMagnitude > .0001f) FacingDirection = direction.normalized;
+        }
 
         private void Reset()
         {

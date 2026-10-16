@@ -12,7 +12,8 @@ namespace RoadOfTheOldKing.Weapons
     {
         private AxeWeapon weapon;
         public override string Prompt => "Take axe";
-        protected override float PickupDistance => 1.6f;
+        // The axe sits above the solid stump; include the player's clear approach at its front.
+        protected override float PickupDistance => 1.9f;
         private void Awake() => weapon = GetComponent<AxeWeapon>();
 
         public override bool CanCollect(PlayerHealth player)

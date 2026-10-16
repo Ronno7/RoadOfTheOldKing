@@ -24,10 +24,23 @@ namespace RoadOfTheOldKing.Progression
         // Fires in the active scene, in menu order. Discovered fires in any scene are in Progress.fires.
         public Bonfire[] Fires { get; private set; } = Array.Empty<Bonfire>();
 
+        // Discovery is permanent, but lighting alone does not rest or move the checkpoint.
+        public bool Light(Bonfire fire)
+        {
+            var player = session.Player;
+            if (session.IsLoading || player == null || !player.IsAlive || fire == null ||
+                !Fires.Contains(fire) || !fire.CanUse(player.transform) || fire.IsDiscovered)
+                return false;
+            session.Progress.DiscoverFire(fire.Id, SceneLoader.ActivePath, fire.DisplayName, fire.DisplayOrder);
+            session.CaptureAndSave("Bonfire lit. Saved.");
+            return true;
+        }
+
         public bool Rest(Bonfire fire)
         {
             var player = session.Player;
-            if (session.IsLoading || player == null || !player.IsAlive || fire == null || !fire.CanUse(player.transform))
+            if (session.IsLoading || player == null || !player.IsAlive || fire == null ||
+                !Fires.Contains(fire) || !fire.IsDiscovered || !fire.CanUse(player.transform))
                 return false;
             var progress = session.Progress;
             progress.DiscoverFire(fire.Id, SceneLoader.ActivePath, fire.DisplayName, fire.DisplayOrder);
@@ -58,7 +71,10 @@ namespace RoadOfTheOldKing.Progression
             session.Save("Travelled. Saved.");
             session.ClearResume();
             if (local == null)
+            {
+                session.Visits.Clear();
                 return session.Load(destination.scenePath, null);
+            }
             RestoreCombatArea();
             MoveTo(local.SpawnPosition);
             return true;
@@ -71,6 +87,7 @@ namespace RoadOfTheOldKing.Progression
             if (session.IsLoading || player == null || !player.IsAlive || !SceneLoader.CanLoad(scenePath))
                 return false;
             session.CaptureAndSave("Progress saved.");
+            session.Visits.Capture();
             // The old scene's spot is stale; the first autosave in the new scene writes a fresh one.
             session.ClearResume();
             carriedHealth = player.Health.Health;
@@ -93,6 +110,7 @@ namespace RoadOfTheOldKing.Progression
         public void RestartFromCheckpoint()
         {
             if (session.IsLoading || session.Player == null) return;
+            session.Visits.Clear();
             // Permanent rewards also survive a death before the first rest.
             session.CaptureAndSave(HasCheckpoint ? "Returned to the last bonfire." : "Returned to the start.");
             session.ClearResume();
@@ -123,6 +141,7 @@ namespace RoadOfTheOldKing.Progression
                 arrivalScene = scene.path;
                 arrivalId = arrival;
                 MoveTo(spawn != null ? spawn.Position : arrivalFire.SpawnPosition);
+                if (spawn != null) session.Player.GetComponent<PlayerMovement>()?.SetFacingDirection(spawn.ArrivalFacing);
                 return;
             }
             var checkpoint = Fires.FirstOrDefault(f => f.Id == session.Progress.checkpointId);
@@ -150,6 +169,8 @@ namespace RoadOfTheOldKing.Progression
 
         private void RestoreCombatArea()
         {
+            // A rest/bonfire journey starts a fresh clearing cycle in every visited scene.
+            session.Visits.Clear();
             var combat = session.Combat;
             if (combat != null && combat.Weapon != null)
                 combat.Weapon.CancelAction();

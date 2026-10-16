@@ -17,7 +17,7 @@ namespace RoadOfTheOldKing.Combat
     // misses. Its recovery is the player's window. Attack tokens make a pack take turns.
     // Owns movement, attack commitment and damage; WolfView only samples it.
     [DisallowMultipleComponent, RequireComponent(typeof(Damageable), typeof(HitReaction), typeof(Rigidbody2D))]
-    public sealed class WolfAI : MonoBehaviour, IEnemy, IResetOnRest
+    public sealed class WolfAI : MonoBehaviour, IEnemy, IResetOnRest, ISceneVisitParticipant
     {
         [SerializeField] private PlayerHealth target;
 
@@ -475,16 +475,10 @@ namespace RoadOfTheOldKing.Combat
         {
             var collider = target != null ? target.GetComponent<Collider2D>() : null;
             if (collider == null || !collider.enabled) return;
-            Vector2 point = collider.ClosestPoint(body.position);
-            Vector2 direction = point - body.position;
             // One damage attempt per snap, even when the player is invulnerable.
             struck = true;
-            if (direction.magnitude > snapReach ||
-                (direction.sqrMagnitude > .001f && Vector2.Angle(AttackDirection, direction) > snapArc * .5f) ||
-                !HasLineOfSight(point))
-                return;
-            target.Health.ReceiveHit(new CombatHit(gameObject, AttackKind.EnemyMelee, snapDamage,
-                AttackDirection, snapKnockback, snapStagger, false, point));
+            EnemyMeleeDelivery.Arc(gameObject, target, body.position, AttackDirection,
+                snapReach, snapArc, snapDamage, snapKnockback, snapStagger, HasLineOfSight);
         }
 
         private Vector2 Separation()
@@ -622,6 +616,20 @@ namespace RoadOfTheOldKing.Combat
             body.position += step.normalized * distance;
             body.linearVelocity = Vector2.zero;
             deathSlide *= Mathf.Exp(-body.linearDamping * dt);
+        }
+
+        public object CaptureVisitState() => new EnemyVisitState(health, body.position);
+
+        public void RestoreVisitState(object state)
+        {
+            if (!(state is EnemyVisitState snapshot)) return;
+            ResetOnRest();
+            health.RestoreVisitHealth(snapshot.health);
+            if (health.IsAlive) return;
+            body.position = snapshot.position;
+            transform.position = snapshot.position;
+            previousPosition = snapshot.position;
+            OnDefeated();
         }
 
         public void ResetOnRest()

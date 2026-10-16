@@ -1,0 +1,105 @@
+// Use GreenLowlandsGameplayChecks setup first; enter Play ONLY after successful SETUP.
+// Run this snippet repeatedly, allowing real frames between loads. Stop and run the
+// shared bootstrap cleanup afterwards. No authored scene edits or normal save access.
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var game=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(!Application.isPlaying||!SessionState.GetBool("GreenLowlands.Gameplay.Active",false)||game==null||
+ game.StorageKey!=SessionState.GetString("GreenLowlands.Gameplay.Key","")||
+ !game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new System.Exception("Confirmed isolated session required");
+Application.runInBackground=true;
+if(game.IsLoading)return "WAIT: load/fade";
+string prefix="SceneVisit.Checks.";
+int phase=SessionState.GetInt(prefix+"Phase",0);
+var checks=new System.Collections.Generic.List<string>();
+System.Action<bool,string> check=(ok,label)=>{if(!ok)throw new System.Exception("Phase "+phase+": "+label);checks.Add(label);};
+string tutorial="Assets/Scenes/Tutorial.unity",region="Assets/Scenes/GreenLowlands.unity";
+var scene=UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+var player=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
+var field=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.InteractiveVegetation>();
+var wolves=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Combat.WolfAI>(FindObjectsSortMode.None).OrderBy(w=>w.name).ToArray();
+System.Action<string> seed=label=>{
+ check(wolves.Length>=2,"two real enemies available");
+ SessionState.SetString(prefix+label+"Dead",wolves[0].name);
+ SessionState.SetString(prefix+label+"Wounded",wolves[1].name);
+ var health=wolves[0].GetComponent<RoadOfTheOldKing.Combat.Damageable>();
+ check(health.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,9999,Vector2.right,0,0)),"real enemy defeat");
+ wolves[1].GetComponent<RoadOfTheOldKing.Combat.Damageable>().SetHealth(7);
+ var p=(Vector2)field.layout.plants[0].position;
+ var type=typeof(RoadOfTheOldKing.Weapons.WeaponSweep);
+ var constructor=type.GetConstructors(System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).Single();
+ var sweep=constructor.Invoke(new object[]{player.gameObject,p,p,Vector2.right,1f,360f,0f,true,null});
+ type.GetMethod("Raise",System.Reflection.BindingFlags.Static|System.Reflection.BindingFlags.NonPublic).Invoke(null,new object[]{sweep});
+ check(field.CutCount>0,"weapon sweep cuts real field");
+ SessionState.SetString(prefix+label+"Cuts",string.Join(",",Enumerable.Range(0,field.layout.plants.Length).Where(i=>field.IsCut(i)).Select(i=>i.ToString()).ToArray()));
+ player.Health.SetHealth(55);player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().SetCharges(1);
+};
+System.Action<string> preserved=label=>{
+ var dead=wolves.Single(w=>w.name==SessionState.GetString(prefix+label+"Dead",""));
+ check(dead.IsDefeated&&!dead.GetComponent<RoadOfTheOldKing.Combat.Damageable>().IsAlive,"dead enemy remains dead after real load");
+ check(!dead.GetComponent<Collider2D>().enabled,"corpse collision disabled");
+ var hurt=wolves.Single(w=>w.name==SessionState.GetString(prefix+label+"Wounded",""));
+ check(hurt.GetComponent<RoadOfTheOldKing.Combat.Damageable>().Health==7,"wounded enemy health retained");
+ string cuts=string.Join(",",Enumerable.Range(0,field.layout.plants.Length).Where(i=>field.IsCut(i)).Select(i=>i.ToString()).ToArray());
+ check(cuts==SessionState.GetString(prefix+label+"Cuts","")&&field.CutCount>0,"exact cut mask retained");
+ check(player.Health.Health==55&&player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().Charges==1,"doorway retains player vitals");
+};
+System.Action fresh=()=>{
+ check(wolves.All(w=>!w.IsDefeated&&w.GetComponent<RoadOfTheOldKing.Combat.Damageable>().Health==w.GetComponent<RoadOfTheOldKing.Combat.Damageable>().MaxHealth),"all enemies refreshed");
+ check(field.CutCount==0,"vegetation regrown");
+};
+System.Action rest=()=>{
+ var fire=game.Checkpoints.Fires.First();var body=player.GetComponent<Rigidbody2D>();
+ player.transform.position=fire.transform.position;body.position=fire.transform.position;body.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();
+ check(game.Checkpoints.Rest(fire),"actual bonfire rest");
+};
+if(phase==0){check(game.Continue(),"isolated Continue starts");}
+else if(phase==1){check(scene.path==tutorial,"Tutorial loaded");seed("Tutorial");check(game.Checkpoints.LeaveScene(region,"from-tutorial"),"leave for region");}
+else if(phase==2){check(scene.path==region,"region loaded");fresh();seed("Region");check(game.Checkpoints.LeaveScene(tutorial,"from-green-lowlands"),"return to Tutorial");}
+else if(phase==3){
+ check(scene.path==tutorial,"Tutorial returned");preserved("Tutorial");
+ var enemy=wolves.Single(w=>w.IsDefeated);var health=enemy.GetComponent<RoadOfTheOldKing.Combat.Damageable>();int hits=0,defeats=0;
+ System.Action<RoadOfTheOldKing.Combat.CombatHit> hit=h=>hits++;System.Action defeat=()=>defeats++;
+ health.HitReceived+=hit;health.Defeated+=defeat;
+ try{var snapshot=enemy.CaptureVisitState();enemy.ResetOnRest();enemy.RestoreVisitState(snapshot);enemy.RestoreVisitState(snapshot);check(hits==0&&defeats==0&&enemy.IsDefeated,"restoration emits no damage/defeat events and is idempotent");}
+ finally{health.HitReceived-=hit;health.Defeated-=defeat;}
+ check(game.Checkpoints.LeaveScene(region,"from-tutorial"),"revisit region");
+}
+else if(phase==4){preserved("Region");check(game.Checkpoints.LeaveScene(tutorial,"from-green-lowlands"),"return for rest");}
+else if(phase==5){preserved("Tutorial");rest();fresh();check(game.Checkpoints.LeaveScene(region,"from-tutorial"),"visit region after remote rest");}
+else if(phase==6){fresh();seed("Region");check(game.Checkpoints.LeaveScene(tutorial,"from-green-lowlands"),"leave cleared region before death");}
+else if(phase==7){fresh();player.Health.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(null,RoadOfTheOldKing.Combat.AttackKind.EnemyMelee,9999,Vector2.up,0,0));check(!player.IsAlive,"actual player death");game.Checkpoints.Respawn();}
+else if(phase==8){check(scene.path==tutorial,"respawn uses established checkpoint");fresh();check(game.Checkpoints.LeaveScene(region,"from-tutorial"),"return after death");}
+else if(phase==9){fresh();seed("Region");check(!game.Checkpoints.LeaveScene("Assets/Scenes/DoesNotExist.unity","bad"),"invalid departure rejected");preserved("Region");check(game.ReturnToTitle(),"Main Menu starts");}
+else if(phase==10){check(scene.name=="Title","Title loaded");check(game.Continue(),"Continue starts");}
+else if(phase==11){check(scene.path==region,"Continue restores region");fresh();check(player.Health.Health==55,"Continue preserves player vitals");game.StartNewRun();}
+else if(phase==12){check(scene.path==tutorial,"New Game starts Tutorial");fresh();check(!game.Progress.hasAxe,"New Game clears permanent progress in isolated save only");}
+else if(phase==13){
+ var copies=new System.Collections.Generic.List<GameObject>();
+ try{
+  for(int i=0;i<2;i++){
+   var go=new GameObject("Duplicate visit test enemy");copies.Add(go);go.SetActive(false);go.transform.position=new Vector3(-100-i*5,-100,0);
+   go.AddComponent<BoxCollider2D>();go.AddComponent<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>();go.SetActive(true);
+  }
+  var a=copies[0].GetComponent<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>();var b=copies[1].GetComponent<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>();
+  var health=a.GetComponent<RoadOfTheOldKing.Combat.Damageable>();
+  health.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(null,RoadOfTheOldKing.Combat.AttackKind.LightChop,9999,Vector2.right,0,0));
+  b.GetComponent<RoadOfTheOldKing.Combat.Damageable>().SetHealth(7);
+  var visits=game.GetType().GetProperty("Visits",flags).GetValue(game,null);
+  visits.GetType().GetMethod("Capture",flags).Invoke(visits,null);
+  a.ResetOnRest();b.ResetOnRest();
+  var unrelated=new GameObject("Unrelated visit test root");copies.Add(unrelated);unrelated.transform.SetSiblingIndex(0);
+  int defeats=0,hits=0;System.Action defeat=()=>defeats++;System.Action<RoadOfTheOldKing.Combat.CombatHit> hit=h=>hits++;
+  health.Defeated+=defeat;health.HitReceived+=hit;
+  try{visits.GetType().GetMethod("Restore",flags).Invoke(visits,null);visits.GetType().GetMethod("Restore",flags).Invoke(visits,null);}
+  finally{health.Defeated-=defeat;health.HitReceived-=hit;}
+  check(a.IsDefeated&&!health.IsAlive,"simple enemy remains defeated");
+  check(!a.GetComponent<Collider2D>().enabled,"simple corpse collision disabled");
+  check(!b.IsDefeated&&b.GetComponent<RoadOfTheOldKing.Combat.Damageable>().Health==7,"duplicate names keep distinct snapshots despite root reordering");
+  check(hits==0&&defeats==0,"simple restore emits no combat events");
+  a.ResetOnRest();check(!a.IsDefeated&&health.IsAlive&&a.GetComponent<Collider2D>().enabled,"simple enemy revives on rest");
+  visits.GetType().GetMethod("Clear",flags).Invoke(visits,null);
+ }finally{foreach(var go in copies)if(go!=null)UnityEngine.Object.DestroyImmediate(go);}
+}
+else return "COMPLETE: "+SessionState.GetInt(prefix+"Passed",0)+" assertions";
+SessionState.SetInt(prefix+"Phase",phase+1);SessionState.SetInt(prefix+"Passed",SessionState.GetInt(prefix+"Passed",0)+checks.Count);
+return new {phase,passed=checks.Count,checks=checks.ToArray()};

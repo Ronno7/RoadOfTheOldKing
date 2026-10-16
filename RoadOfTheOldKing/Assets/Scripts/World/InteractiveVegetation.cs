@@ -10,7 +10,7 @@ namespace RoadOfTheOldKing.World
     // One field, no per-plant objects/colliders/Update. Shader wind is independent of field size.
     // Meshes are spatially culled; only touched chunks upload indices after an actual cut.
     [ExecuteAlways, DisallowMultipleComponent, DefaultExecutionOrder(220)]
-    public sealed class InteractiveVegetation : MonoBehaviour, IResetOnRest
+    public sealed class InteractiveVegetation : MonoBehaviour, IResetOnRest, ISceneVisitParticipant
     {
         public VegetationLayout layout;
         public Shader vegetationShader;
@@ -49,6 +49,8 @@ namespace RoadOfTheOldKing.World
 
         public int PlantCount => layout != null ? layout.plants.Length : 0;
         public int CutCount { get; private set; }
+        // Actual newly cut roots only; restoring visit state or regrowing a field emits nothing.
+        public event System.Action<Vector2> PlantCut;
         public int ChunkCount => chunks.Count;
         public int LastCandidates { get; private set; }
         public int LastCutCount { get; private set; }
@@ -354,6 +356,7 @@ namespace RoadOfTheOldKing.World
                         Vector2 point=transform.TransformPoint(layout.plants[i].position);
                         if(!Contains(sweep,point) || (sweep.CanReach!=null && !sweep.CanReach(point)))continue;
                         cut[i]=true; CutCount++; LastCutCount++; dirty.Add(chunk);
+                        PlantCut?.Invoke(point);
                         var species=layout.species[layout.plants[i].species];
                         debris?.Emit(point,sweep.Aim,species.debrisColor,layout.plants[i].phase);
                     }
@@ -379,6 +382,26 @@ namespace RoadOfTheOldKing.World
             Vector2 segment=sweep.End-sweep.Origin;
             float t=segment.sqrMagnitude>.00001f?Mathf.Clamp01(Vector2.Dot(delta,segment)/segment.sqrMagnitude):0;
             return (delta-segment*t).sqrMagnitude<=sweep.Radius*sweep.Radius;
+        }
+
+        private sealed class VisitSnapshot
+        {
+            public VegetationLayout layout;
+            public bool[] cut;
+        }
+
+        public object CaptureVisitState() => cut == null ? null :
+            new VisitSnapshot { layout = layout, cut = (bool[])cut.Clone() };
+
+        public void RestoreVisitState(object state)
+        {
+            if (!(state is VisitSnapshot snapshot) || snapshot.layout != layout ||
+                cut == null || snapshot.cut.Length != cut.Length) return;
+            System.Array.Copy(snapshot.cut, cut, cut.Length);
+            CutCount = 0;
+            foreach (bool removed in cut) if (removed) CutCount++;
+            foreach (var chunk in chunks) dirty.Add(chunk);
+            ClearTouches(); debris?.Clear();
         }
 
         public void ResetOnRest()

@@ -8,9 +8,11 @@ namespace RoadOfTheOldKing.Combat
     public enum MeleeEnemyState { Idle, Pursuing, Windup, Striking, Recovering, Returning, Defeated }
 
     [DisallowMultipleComponent, RequireComponent(typeof(Damageable), typeof(HitReaction), typeof(Rigidbody2D))]
-    public sealed class SimpleMeleeEnemy : MonoBehaviour, IEnemy, IResetOnRest
+    public sealed class SimpleMeleeEnemy : MonoBehaviour, IEnemy, IResetOnRest, ISceneVisitParticipant
     {
         [SerializeField] private PlayerHealth target;
+        [Tooltip("Optional authored action. Unassigned legacy enemies retain their serialized melee tuning.")]
+        [SerializeField] private EnemyAttackDefinition attack;
         [SerializeField, Min(0.1f)] private float moveSpeed = 2.1f;
         [SerializeField, Min(0.1f)] private float noticeRadius = 5f;
         [SerializeField, Min(0.1f)] private float leashRadius = 5.5f;
@@ -32,16 +34,24 @@ namespace RoadOfTheOldKing.Combat
         private Vector2 home;
         private float remaining;
         private float stateDuration;
-        private bool struck;
+        private EnemyAttackRunner action;
         private bool knockedBack;
         private Vector2 deathSlide;
         private readonly RaycastHit2D[] slideHits = new RaycastHit2D[8];
 
         public MeleeEnemyState State { get; private set; }
         public Vector2 FacingDirection { get; private set; } = Vector2.down;
-        public float AttackReach => attackReach;
-        public float AttackArc => attackArc;
-        public float StateProgress => stateDuration > 0f ? Mathf.Clamp01(1f - remaining / stateDuration) : 0f;
+        public float AttackReach => Settings.reach;
+        public float AttackArc => Settings.arc;
+        public float StateProgress => action != null && action.IsRunning ? action.Progress : stateDuration > 0f ? Mathf.Clamp01(1f - remaining / stateDuration) : 0f;
+        public bool IsChargeAttack => Settings.chargeSpeed > 0;
+        public bool IsLaneLocked => action != null && action.IsLocked;
+        public Vector2 AttackOrigin => action != null && State == MeleeEnemyState.Striking ? action.Origin : (Vector2)transform.position;
+        public float ChargeDistance => Settings.chargeSpeed * Settings.active;
+        public EnemyAttackRunner Action => action;
+        private EnemyAttackSpec Settings => attack != null ? attack.settings : new EnemyAttackSpec
+        { windup = windupDuration, active = strikeDuration, recovery = recoveryDuration, reach = attackReach,
+          arc = attackArc, damage = damage, knockback = 2.4f, stagger = .18f };
         public int ResetVersion { get; private set; }
         public bool IsAware { get; private set; }
         public bool IsDefeated => State == MeleeEnemyState.Defeated;
@@ -53,6 +63,7 @@ namespace RoadOfTheOldKing.Combat
             reaction = GetComponent<HitReaction>();
             body = GetComponent<Rigidbody2D>();
             bodyCollider = GetComponent<Collider2D>();
+            action = new EnemyAttackRunner(gameObject, body, bodyCollider, HasLineOfSight);
             home = body.position;
         }
 
@@ -65,7 +76,7 @@ namespace RoadOfTheOldKing.Combat
         private void OnEnable()
         {
             EnemyRegistry.Register(this);
-            health.HitReceived += OnHit;
+            reaction.Staggered += OnHit;
             health.Defeated += OnDefeated;
         }
 
@@ -73,8 +84,9 @@ namespace RoadOfTheOldKing.Combat
         {
             EnemyRegistry.Unregister(this);
             IsAware = false;
-            health.HitReceived -= OnHit;
+            reaction.Staggered -= OnHit;
             health.Defeated -= OnDefeated;
+            action.Cancel();
             if (body != null)
                 body.linearVelocity = Vector2.zero;
         }
@@ -98,22 +110,20 @@ namespace RoadOfTheOldKing.Combat
             }
             // Do not overwrite weapon knockback, and never strike while staggered.
             if (reaction.IsStaggered)
-                return;
-
-            remaining -= deltaTime;
-            if (State == MeleeEnemyState.Windup)
             {
-                if (remaining <= 0f)
-                    SetState(MeleeEnemyState.Striking, strikeDuration);
+                action.Cancel(false);
                 return;
             }
-            if (State == MeleeEnemyState.Striking)
+
+            remaining -= deltaTime;
+            if (action.IsRunning)
             {
-                if (!struck)
-                    TryStrike();
-                if (remaining <= 0f)
-                    SetState(MeleeEnemyState.Recovering, recoveryDuration);
-                return;
+                action.Tick(deltaTime);
+                FacingDirection = action.Direction;
+                State = action.Phase == EnemyAttackPhase.Windup ? MeleeEnemyState.Windup :
+                    action.Phase == EnemyAttackPhase.Active ? MeleeEnemyState.Striking :
+                    action.Phase == EnemyAttackPhase.Recovery ? MeleeEnemyState.Recovering : MeleeEnemyState.Idle;
+                if (action.IsRunning) return;
             }
             if (State == MeleeEnemyState.Recovering)
             {
@@ -152,7 +162,7 @@ namespace RoadOfTheOldKing.Combat
             if (toTarget.magnitude <= attackDistance)
             {
                 FacingDirection = toTarget.sqrMagnitude > 0.001f ? toTarget.normalized : FacingDirection;
-                SetState(MeleeEnemyState.Windup, windupDuration);
+                if (action.Begin(Settings, target, FacingDirection)) State = MeleeEnemyState.Windup;
             }
             else
             {
@@ -177,23 +187,6 @@ namespace RoadOfTheOldKing.Combat
             return true;
         }
 
-        private void TryStrike()
-        {
-            var collider = target.GetComponent<Collider2D>();
-            if (collider == null || !collider.enabled)
-                return;
-            Vector2 point = collider.ClosestPoint(body.position);
-            Vector2 direction = point - body.position;
-            if (direction.magnitude > attackReach ||
-                (direction.sqrMagnitude > 0.001f && Vector2.Angle(FacingDirection, direction) > attackArc * 0.5f) ||
-                !HasLineOfSight(point))
-                return;
-            // One damage attempt per swing, even when the player is invulnerable.
-            struck = true;
-            target.Health.ReceiveHit(new CombatHit(gameObject, AttackKind.EnemyMelee, damage,
-                FacingDirection, 2.4f, 0.18f, false, point));
-        }
-
         private void OnHit(CombatHit hit)
         {
             if (health.IsAlive && hit.StaggerDuration > 0f)
@@ -202,7 +195,7 @@ namespace RoadOfTheOldKing.Combat
                 State = MeleeEnemyState.Recovering;
                 remaining = hitRecovery;
                 stateDuration = remaining;
-                struck = false;
+                action.Cancel(false);
                 knockedBack = true;
             }
         }
@@ -240,6 +233,19 @@ namespace RoadOfTheOldKing.Combat
             deathSlide *= Mathf.Exp(-body.linearDamping * deltaTime);
         }
 
+        public object CaptureVisitState() => new EnemyVisitState(health, body.position);
+
+        public void RestoreVisitState(object state)
+        {
+            if (!(state is EnemyVisitState snapshot)) return;
+            ResetOnRest();
+            health.RestoreVisitHealth(snapshot.health);
+            if (health.IsAlive) return;
+            body.position = snapshot.position;
+            transform.position = snapshot.position;
+            OnDefeated();
+        }
+
         public void ResetOnRest()
         {
             IsAware = false;
@@ -259,7 +265,7 @@ namespace RoadOfTheOldKing.Combat
             State = state;
             remaining = duration;
             stateDuration = duration;
-            struck = false;
+            action.Cancel();
             knockedBack = false;
             body.linearVelocity = Vector2.zero;
         }

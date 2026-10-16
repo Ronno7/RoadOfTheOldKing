@@ -1,0 +1,90 @@
+// Shared GreenLowlandsGameplayChecks confirmed SETUP -> Play. Reset Workshop.Phase/Passed.
+// Run phases 0-8 between real frames, stop, shared cleanup. Debug defeats are not a fought balance test.
+var game=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(!Application.isPlaying||game==null||game.StorageKey!=SessionState.GetString("GreenLowlands.Gameplay.Key","")||!game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new System.Exception("Isolated Play required");
+Application.runInBackground=true;EditorApplication.QueuePlayerLoopUpdate();if(game.IsLoading)return "WAIT";
+int phase=SessionState.GetInt("Workshop.Phase",0);if(phase>8)return "DONE: "+SessionState.GetInt("Workshop.Passed",0);
+var checks=new System.Collections.Generic.List<string>();System.Action<bool,string> check=(ok,label)=>{if(!ok)throw new System.Exception("Phase "+phase+": "+label);checks.Add(label);};
+if(phase==0||phase==7)check(game.Continue(),"Continue isolated session");
+else if(phase==1||phase==3)check(game.Checkpoints.LeaveScene("Assets/Scenes/GreenLowlands.unity","from-tutorial"),"enter/revisit workshop region");
+else{
+ var f=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+ var p=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();var body=p.GetComponent<Rigidbody2D>();var motor=p.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>();
+ var combat=p.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();var input=p.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();var reader=p.GetComponent<RoadOfTheOldKing.UI.InscriptionReader>();
+ var guards=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>(FindObjectsSortMode.None).Where(e=>e.name.StartsWith("Workshop scavenger ")).OrderBy(e=>e.name).ToArray();
+ var chest=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.RewardChest>(FindObjectsSortMode.None).Single(c=>c.RewardId=="green-lowlands/workshop-cache");
+ var carving=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.ForgeInscription>(FindObjectsSortMode.None).Single(c=>c.SiteNumber==1);
+ var route=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RopeRoute>();var anchors=route.GetComponentsInChildren<RoadOfTheOldKing.World.RopeAnchor>().OrderBy(a=>a.transform.position.x).ToArray();
+ System.Action<Vector2> move=at=>{motor.CancelRopeTraversal();body.position=at;p.transform.position=at;body.linearVelocity=Vector2.zero;combat.Weapon.CancelAction();input.GetType().GetField("hasFocus",f).SetValue(input,true);input.GetType().GetField("paused",f).SetValue(input,false);combat.GetType().GetField("controlsActive",f).SetValue(combat,true);Physics2D.SyncTransforms();};
+ System.Action<int> kill=i=>{var feedback=guards[i].GetComponent<RoadOfTheOldKing.Combat.EnemyImpactFeedback>();feedback.enabled=false;try{guards[i].GetComponent<RoadOfTheOldKing.Combat.Damageable>().DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(p.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.up,0,0));}finally{feedback.enabled=true;}};
+ if(phase==2){
+  check(guards.Length==2&&guards.All(e=>!e.IsDefeated),"two live authored workshop guards");
+  check(guards.All(e=>Vector2.Distance(e.transform.position,anchors[1].transform.position)>8),"guards start beyond landing awareness radius");
+  var gate=GameObject.Find("Workshop encounter").GetComponent<RoadOfTheOldKing.Progression.EncounterUnlock>();
+  check(((RoadOfTheOldKing.Combat.Damageable[])gate.GetType().GetField("guards",f).GetValue(gate)).SequenceEqual(guards.Select(e=>e.GetComponent<RoadOfTheOldKing.Combat.Damageable>())),"gate owns exactly the two real guards");
+  var solids=new ContactFilter2D{useTriggers=false};var hits=new System.Collections.Generic.List<Collider2D>();
+  for(int y=77;y<=85;y++)for(int x=134;x<=143;x++){
+   Physics2D.OverlapBox(new Vector2(x+.5f,y+.5f),Vector2.one*.75f,0,solids,hits);
+   check(!hits.Any(c=>c.GetComponentInParent<RoadOfTheOldKing.Combat.IEnemy>()==null&&c.GetComponentInParent<RoadOfTheOldKing.Player.PlayerHealth>()==null),"body-clear yard "+x+","+y);
+  }
+  move(new Vector2(127,77));check(!anchors[0].TryCollect(p),"rope still requires purchased kit");
+  game.Progress.ownedTools.Add(RoadOfTheOldKing.Progression.WorldTool.RopeKit);game.SaveProgress();
+  var old=Physics2D.simulationMode;int health=p.Health.Health;
+  try{
+   Physics2D.simulationMode=SimulationMode2D.Script;
+   check(p.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>().TryInteract(),"real F secures rope and starts climb");
+   for(int i=0;i<110;i++){motor.GetType().GetMethod("FixedUpdate",f).Invoke(motor,null);foreach(var e in guards)e.GetType().GetMethod("Tick",f).Invoke(e,new object[]{.02f});Physics2D.Simulate(.02f);}
+   check(!motor.IsTraversingRope&&Vector2.Distance(body.position,new Vector2(131,77))<.03f,"real motor reaches original upper landing");
+   check(p.Health.Health==health&&guards.All(e=>!e.IsAware&&!e.Action.IsRunning),"no awareness or attack during climb and landing");
+   check(anchors[1].TryCollect(p),"safe landing permits immediate retreat");
+   for(int i=0;i<110;i++){motor.GetType().GetMethod("FixedUpdate",f).Invoke(motor,null);Physics2D.Simulate(.02f);}
+   check(!motor.IsTraversingRope&&Vector2.Distance(body.position,new Vector2(127,77))<.03f,"return rope motor reaches approach");
+  }finally{Physics2D.simulationMode=old;}
+  move((Vector2)chest.transform.position+Vector2.down);check(!chest.TryCollect(p),"chest locked with guards alive");
+  move((Vector2)carving.transform.position+Vector2.down);check(!carving.TryCollect(p),"carving locked with guards alive");
+  move(new Vector2(15.5f,3));kill(0);check(!game.Progress.Has("green-lowlands/workshop-cleared"),"one defeat cannot open encounter reward");
+  check(game.Checkpoints.LeaveScene("Assets/Scenes/Tutorial.unity","from-green-lowlands"),"leave with one guard defeated");
+ }else if(phase==4){
+  check(guards[0].IsDefeated&&!guards[1].IsDefeated,"ordinary round trip retains partial encounter");
+  check(route.IsSecured&&!game.Progress.Has("green-lowlands/workshop-cleared"),"secured route persists while gate stays locked");
+  kill(1);check(game.Progress.Has("green-lowlands/workshop-cleared"),"second actual defeat unlocks workshop");
+  check(new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(game.StorageKey).Load().Has("green-lowlands/workshop-cleared"),"clear milestone stored immediately");
+  var actions=(UnityEngine.InputSystem.InputActionMap)input.GetType().GetField("actions",f).GetValue(input);var devices=actions.devices;
+  var routing=UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode;var simulation=Physics2D.simulationMode;
+  var keyboard=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
+  System.Action<UnityEngine.InputSystem.Key[]> keys=held=>{UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState(held));UnityEngine.InputSystem.InputSystem.Update();input.GetType().GetField("hasFocus",f).SetValue(input,true);input.GetType().GetMethod("Update",f).Invoke(input,null);};
+  try{
+   UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=UnityEngine.InputSystem.InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;actions.devices=new UnityEngine.InputSystem.InputDevice[]{keyboard};Physics2D.simulationMode=SimulationMode2D.Script;
+   move(new Vector2(131,77));motor.GetType().GetField("freeVelocity",f).SetValue(motor,Vector2.zero);
+   foreach(var destination in new[]{new Vector2(134,77),new Vector2(142,77),new Vector2(142,84),new Vector2(138,85),new Vector2(134,80),new Vector2(134,77),new Vector2(131,77)}){
+    int frames=0;while(Vector2.Distance(body.position,destination)>.09f&&frames++<350){
+     Vector2 delta=destination-body.position;var held=new System.Collections.Generic.List<UnityEngine.InputSystem.Key>();
+     if(delta.x>.03f)held.Add(UnityEngine.InputSystem.Key.D);else if(delta.x<-.03f)held.Add(UnityEngine.InputSystem.Key.A);
+     if(delta.y>.03f)held.Add(UnityEngine.InputSystem.Key.W);else if(delta.y<-.03f)held.Add(UnityEngine.InputSystem.Key.S);
+     keys(held.ToArray());motor.GetType().GetMethod("FixedUpdate",f).Invoke(motor,null);Physics2D.Simulate(.02f);
+    }
+    check(frames<350,"real motor reaches yard waypoint "+destination);
+   }
+  }finally{keys(new UnityEngine.InputSystem.Key[0]);actions.devices=devices;UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard);UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=routing;Physics2D.simulationMode=simulation;move(new Vector2(15.5f,3));}
+ }else if(phase==5){
+  int wallet=game.Progress.bronzeCoins;move((Vector2)chest.transform.position+Vector2.down);
+  check(p.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>().TryInteract()&&chest.IsOpen,"real F opens earned workshop chest");
+  check(game.Progress.bronzeCoins==wallet+25&&!chest.TryCollect(p),"existing 25 coins pay exactly once");
+  move((Vector2)carving.transform.position+Vector2.down);
+  check(p.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>().TryInteract()&&reader.IsOpen,"real F reads earned carving");
+  check(RoadOfTheOldKing.Progression.ForgeInscriptionProgression.Knows(game.Progress,1),"F1 knowledge stored");reader.Close();
+ }else if(phase==6){
+  move((Vector2)carving.transform.position+Vector2.down);
+  check(carving.TryCollect(p)&&RoadOfTheOldKing.Progression.ForgeInscriptionProgression.Count(game.Progress)==1,"rereading does not duplicate knowledge");reader.Close();
+  move(new Vector2(15.5f,3));var fire=game.Checkpoints.Fires.First(b=>b.Id=="green-lowlands/arrival-fire");
+  check(game.Checkpoints.Light(fire)&&game.Checkpoints.Rest(fire),"real light and rest");
+  check(guards.All(e=>!e.IsDefeated)&&game.Progress.Has("green-lowlands/workshop-cleared")&&chest.IsOpen,"rest revives guards without relocking rewards");
+  check(guards.All(e=>e.GetComponent<RoadOfTheOldKing.World.EnemyCoinDrop>().PendingCoins==0),"rest clears renewable guard drops");
+  SessionState.SetInt("Workshop.Wallet",game.Progress.bronzeCoins);game.ReturnToTitle();
+ }else if(phase==8){
+  check(route.IsSecured&&chest.IsOpen&&guards.All(e=>!e.IsDefeated),"Continue restores secured rope, open chest and fresh guards");
+  check(game.Progress.Has("green-lowlands/workshop-cleared")&&RoadOfTheOldKing.Progression.ForgeInscriptionProgression.Knows(game.Progress,1),"Continue preserves clear and inscription knowledge");
+  check(game.Progress.bronzeCoins==SessionState.GetInt("Workshop.Wallet",-1),"Continue retains earned wallet");
+ }
+}
+SessionState.SetInt("Workshop.Phase",phase+1);int total=SessionState.GetInt("Workshop.Passed",0)+checks.Count;SessionState.SetInt("Workshop.Passed",total);return new{phase=phase,passed=checks.Count,total=total};

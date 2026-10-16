@@ -29,7 +29,7 @@ namespace RoadOfTheOldKing.UI
         public bool InfiniteStamina => Stamina != null && Stamina.DebugInfinite;
         public bool NoCollision { get; private set; }
         public float SpeedMultiplier => Movement != null ? Movement.DebugSpeedMultiplier : 1f;
-        public string LastResult { get; private set; } = "Ready. Runtime overrides reset on scene reload.";
+        public string LastResult { get; private set; } = "Ready.";
         public bool LastSucceeded { get; private set; } = true;
         public Vector2? Marker { get; private set; }
         public event Action SceneChanged;
@@ -87,8 +87,93 @@ namespace RoadOfTheOldKing.UI
             LastSucceeded = success; LastResult = message;
             return success;
         }
-        private bool RequireAlive() => Alive || Report(false, "No living player. Use Respawn to reload at the checkpoint.");
+        private bool RequireAlive() => GameSession.Instance != null && GameSession.Instance.IsLoading
+            ? Report(false, "Wait for the scene to finish loading.")
+            : Alive || Report(false, "No living player. Use Respawn.");
         private static bool Finite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);
+
+        private bool RequireSession() => RequireAlive() && (GameSession.Instance != null &&
+            GameSession.Instance.Player == Player || Report(false, "No active player session."));
+
+        public bool GiveAxe()
+        {
+            if (!RequireSession()) return false;
+            if (Combat == null || !Combat.EquipOwnedAxe()) return Report(false, "Player has no configured axe prefab.");
+            var session = GameSession.Instance;
+            session.Progress.hasAxe = true;
+            session.Rewards.ApplyUpgrades();
+            foreach (var pickup in FindObjectsByType<AxePickup>(FindObjectsSortMode.None))
+                pickup.RestoreProgress(session.Progress);
+            session.SaveProgress();
+            return Report(true, "Axe equipped. " + session.Status);
+        }
+
+        public bool UnlockRecall()
+        {
+            if (!RequireSession() || Combat == null) return false;
+            if (Combat.Weapon == null && !GiveAxe()) return false;
+            Combat.UnlockRecall();
+            var session = GameSession.Instance;
+            session.Progress.recallUnlocked = true;
+            foreach (var pickup in FindObjectsByType<RecallUnlockPickup>(FindObjectsSortMode.None))
+                pickup.RestoreProgress(session.Progress);
+            session.SaveProgress();
+            return Report(true, "Recall unlocked. " + session.Status);
+        }
+
+        public bool GiveCoins(int amount) => GiveResource(amount, "Bronze Coins", r => r.DebugGiveCoins(amount));
+        public bool GiveShards(int amount) => GiveResource(amount, "Sun Shards", r => r.DebugGiveShards(amount));
+        public bool GiveHeartFragments(int amount) => GiveResource(amount, "Heart fragments", r => r.DebugGiveHeartFragments(amount));
+        private bool GiveResource(int amount, string name, Func<RewardService, bool> grant)
+        {
+            if (!RequireSession()) return false;
+            var session = GameSession.Instance;
+            bool success = grant(session.Rewards);
+            return Report(success, success ? $"{name} +{amount}. {session.Status}" :
+                "Enter a positive quantity within the balance limit (heart fragments: 1–99).");
+        }
+
+        public bool GiveTool(WorldTool tool)
+        {
+            if (!RequireSession()) return false;
+            var session = GameSession.Instance;
+            if (tool == WorldTool.None || !Enum.IsDefined(typeof(WorldTool), tool)) return Report(false, "Unknown tool.");
+            if (session.Progress.OwnsTool(tool)) return Report(true, WorldToolNames.Display(tool) + " already owned.");
+            if (!session.Rewards.TryCollectTool("dev/" + tool, tool)) return Report(false, "Could not grant tool.");
+            foreach (var pickup in FindObjectsByType<ToolPickup>(FindObjectsSortMode.None))
+                pickup.RestoreProgress(session.Progress);
+            return Report(true, WorldToolNames.Display(tool) + " granted. " + session.Status);
+        }
+
+        public DevTravelDestination[] GetDestinations()
+        {
+            string current = SceneManager.GetActiveScene().path;
+            var source = Resources.Load<TextAsset>("DevTools/TravelDestinations");
+            var catalog = source != null ? JsonUtility.FromJson<DevTravelCatalog>(source.text) : new DevTravelCatalog();
+            return catalog.destinations.Where(d => d.scenePath != current && SceneLoader.CanLoad(d.scenePath))
+                .Concat(DevTravelCatalog.FromScene(SceneManager.GetActiveScene()))
+                .OrderBy(d => d.scenePath == current ? 0 : 1).ThenBy(d => d.scenePath).ThenBy(d => d.label).ToArray();
+        }
+
+        public bool TravelTo(DevTravelDestination destination)
+        {
+            if (!RequireSession()) return false;
+            if (destination == null || string.IsNullOrEmpty(destination.id) || !SceneLoader.CanLoad(destination.scenePath))
+                return Report(false, "Destination is unavailable.");
+            if (destination.scenePath == SceneManager.GetActiveScene().path)
+            {
+                if (destination.bonfire)
+                    return TeleportToBonfire(GetBonfires().FirstOrDefault(f => f.Id == destination.id));
+                var point = SceneSpawnPoint.Find(destination.id);
+                if (point == null) return Report(false, "Spawn point no longer exists. Reopen Travel.");
+                if (!Teleport(point.Position)) return false;
+                Movement?.SetFacingDirection(point.ArrivalFacing);
+                return Report(true, "Teleported to " + destination.label + ".");
+            }
+            DevToolsPanel.Instance?.Close();
+            bool loaded = GameSession.Instance.Checkpoints.LeaveScene(destination.scenePath, destination.id);
+            return Report(loaded, loaded ? "Travelling to " + destination.label + "." : "Could not load destination.");
+        }
 
         public bool DamagePlayer(int amount, bool bypassProtection = true)
         {
@@ -253,7 +338,8 @@ namespace RoadOfTheOldKing.UI
         }
         public bool Respawn()
         {
-            if (GameSession.Instance == null) return Report(false, "No checkpoint session in this scene.");
+            if (GameSession.Instance == null || !HasPlayer) return Report(false, "No player session in this scene.");
+            if (GameSession.Instance.IsLoading) return Report(false, "Wait for the scene to finish loading.");
             DevToolsPanel.Instance?.Close();
             RestoreOverrides();
             GameSession.Instance.Checkpoints.RestartFromCheckpoint();

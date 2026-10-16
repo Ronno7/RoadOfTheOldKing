@@ -1,5 +1,296 @@
 {
+  "zone_palette": "ZonePalette.json",
+  "palette_scope": "32 colors for revised environment art; five pickup-only accents. Existing decoration and compatible scenery retain their accepted original colors by user direction (11 Oct). Character art and shader output are separate.",
   "records": [
+    {
+      "file": "Interactive/BonfireBase_Source.png",
+      "tool": "built-in image_gen",
+      "date": "2026-10-12",
+      "purpose": "Lowlands bonfire stone ring and fuel to match the current world; accepted shared flame retained.",
+      "prompt": "Use case: stylized-concept. Create ONE isolated unlit bonfire base sprite for the supplied top-down pixel RPG. Images 1 and 2 are world STYLE REFERENCES only, not edit targets; do not reproduce their scenery. Design an original modest roadside hearth: an uneven low oval ring of seven broad worn gray-sage stones, with three chunky partly charred brown split logs crossing over a dark ash center. Camera looks obliquely down, cardinal 2D adventure perspective, visible shallow front faces. Compact low silhouette, no tall log teepee. Intended NATIVE footprint is only 28 pixels wide by 18 pixels tall within a 32x32 transparent canvas, so draw with a consistent coarse square pixel grid, as if enlarged nearest-neighbor from that small resolution. Place ring at bottom-center, generous empty transparent area above for the existing separate flame. Quiet broad flat color clusters, one-pixel near-black outer silhouette; simple two-plane stones, almost no bark marks. At most EIGHT opaque colors: #171C1B outline and ash, #42483F stone shadow, #69705B stone middle, #B1B496 stone top, #D2CCAB sparse stone highlight, #63523F charred timber, #82664C brown wood, #C19C70 one or two cut ends. No flame, embers, smoke, glow, ground patch, cast shadow, grass, sparks, sword, labels, frame, inset, duplicate sprite, gradients, fine texture, dithering, antialiasing, painterly shading or checkerboard. Genuine transparent background. All details must survive a 28x18 native sprite and harmonize with the restrained stone/timber props in the references.",
+      "native_asset": "Assets/Art/Sprites/World/Bonfire/LowlandsBonfireBase16.png",
+      "recipe": "BonfireFlameBuilder.BuildBase reads BonfireBaseManifest.json; alpha >=128 bounds, nearest pixel-center sampling to 28x15 within a bottom-aligned 32x32 canvas, 8 shared ZonePalette colors, binary alpha, 16 PPU, centered pivot. No generated flame or ground shadow.",
+      "integration": "Single Artwork sprite override in GreenLowlandsBonfire.prefab. Original transform, sorting, interaction, respawn, shared flame frames/animation/smoke and Tutorial ring remain unchanged.",
+      "review": "Agent ordinary-camera review; user review pending."
+    },
+    {
+      "file": "Assets/Art/Sprites/World/TravelingTrader/Rotations/south.png",
+      "tool": "PixelLab create_character, standard humanoid/chibi, four standing directions",
+      "date": "2026-10-11",
+      "source_manifest": "../NPCs/TravelingTrader/Manifest.json",
+      "purpose": "Original compact traveling merchant, same native figure height as the hero, replacing the historical imagegen standing art. Existing decoration is retained.",
+      "integration": "Native delivered pixels, 16 PPU/unit scale, measured foot pivot; south assigned at original trader root (10,3), local-zero art child. Same offers and WorldPropDepth. No animation generated or wired.",
+      "checks": "11 scoped isolated live assertions for trader assignment/footing/depth/shop opening and both sparse bush depths. 3,945 other live components, 1,833 other saved records and 4,473 protected art/gameplay files unchanged. Source/runtime bytes and reimport metadata match; normal saves preserved. Final user visual review pending."
+    },
+    {
+      "file": "Assets/Art/Tiles/GreenLowlands/Environment/Trees/LowlandsTrees16.png",
+      "tool": "built-in image_gen; existing deterministic native import",
+      "date": "2026-10-11",
+      "sources": [
+        "Environment/Trees/Oak.png",
+        "Environment/Trees/Birch.png",
+        "Environment/Trees/Apple_Tree.png"
+      ],
+      "prompts": "Environment/Trees/Prompts.json",
+      "purpose": "Separate outlined Lowlands tree art, preserving the established broad oak, slender birch and squat orchard silhouettes. Golden russet apples use existing timber highlights, without pickup-only red accents. Human visual review pending.",
+      "native_export": {
+        "builder": "Assets/Editor/GreenLowlandsEnvironmentKitBuilder.cs: BuildRegionalTrees",
+        "recipe": "EnvironmentManifest.json regionalTrees; existing TutorialEnvironmentKitBuilder.PrepareSprite alpha crop, nearest sampling with one-pixel base padding in 48x64, nearest 8-color recipe and binary alpha. Actual opaque counts 8/8/7. Separate 160x68 atlas: three whole sprites, 36 exact 16x16 slices.",
+        "import": "16 PPU, Point, uncompressed, no mipmaps; stable named sprite IDs; no tile collision."
+      },
+      "integration": "108 existing regional trees (57 oak, 43 birch, eight apple); scene-local visual overrides only, preserving position, lower row0, overhead rows1..3, single (1,0) trunk collision and sorting. Tutorial, shared prefabs and existing shadows unchanged.",
+      "checks": "286 Edit connectivity +110 presentation +38 vegetation checks pass. 216 changed visual components; 3,731 others identical. 108 changed saved prefab records; 1,727 others identical. All 77 output files rebuild identically, including metadata/Tiles. 3,548 protected existing files unchanged. Ordinary-camera staged Edit previews inspected; no new Play run."
+    },
+    {
+      "file": "Assets/Art/Sprites/World/LowlandsVegetation/SmallSageBush.png",
+      "tool": "built-in image_gen; deterministic native preparation",
+      "date": "2026-10-11",
+      "source": "SmallBush_Source.png",
+      "prompt": "SmallBush.prompt.txt",
+      "purpose": "Original compact whole sage shrub for sparse Lowlands scenery; three broad leaf masses, six shared colors and a grounded base. Two placed instances are implemented; user visual review precedes broader use. Rejected foliage walls are not replaced by this sample.",
+      "native_export": {
+        "compiler": "Tools/Art/World/build_lowlands_thickets.py --small-bush-only",
+        "builder": "Assets/Editor/LowlandsThicketKitBuilder.cs: BuildSmallBush",
+        "recipe": "Alpha crop; nearest sampling to 24px wide with one-pixel padding into 26x16; nearest six-color palette mapping; binary alpha. Separate 24x6 ink contact ellipse with .32 renderer opacity.",
+        "palette": [
+          "ink",
+          "deepgreen",
+          "leafshade",
+          "grass",
+          "leaflight",
+          "deepsoil"
+        ],
+        "import": "16 PPU, Point, uncompressed, no mipmaps, native foot pivot (13,2)."
+      },
+      "integration": "SmallSageBush.prefab: .625 x .375 base collider, Leaves child with existing WorldPropDepth anchored to root, separate Ground-36 contact shadow. Static scenery at (17,-26) and (16,-20). Shared Tutorial and breakable Bush prefab unchanged.",
+      "checks": "Six exact shared opaque colors plus transparent alpha; 27 high-water live assertions include both sorting directions, motor loops and physical base blocking for both bushes. 348 terrain and 38 placement assertions pass; visual approval and regional performance pending."
+    },
+    {
+      "file": "Assets/Art/Tiles/GreenLowlands/Terrain/GreenLowlandsDepth16.png",
+      "tool": "native deterministic authoring from existing shore geometry",
+      "date": "2026-10-11",
+      "purpose": "Three wet-shore shoulder caps join the island/barn side rims to their exposed front strip without drawing the full wall over water.",
+      "native_export": {
+        "compiler": "Tools/Art/World/build_green_lowlands_terrain.py --depth-only",
+        "builder": "Assets/Editor/GreenLowlandsTerrainKitBuilder.cs: BuildDepthEdges",
+        "recipe": "ShoreLip_W, ShoreLip_E and ShoreLip_Inside_E take the upper seven pixels from matching ShoreReturn/Inside faces; outer shoulder pixels are clipped. Appended in unused 128x176 atlas space; all old 56 rectangles/pixels remain unchanged.",
+        "import": "Native 16 PPU, Point, no mipmaps, binary alpha, no tile collision."
+      },
+      "integration": "Four above-water caps on the existing structural bank map; complete matching faces below water. Six obsolete island stair-side overlays removed, three barn shoulder blockers added, stair and water footprints retained. DepthManual palette contains all 59 pieces."
+    },
+    {
+      "file": "Assets/Art/Tiles/GreenLowlands/Terrain/GreenLowlandsCliffs16.png",
+      "tool": "native deterministic pixel authoring; connected cliff-volume kit",
+      "date": "2026-10-11",
+      "purpose": "One-map native earth cliffs with clear front, side and north-facing relief. The side/back readability correction follows user-supplied Moonshire crops and Ruby/2D Zelda references without copying their artwork.",
+      "native_export": {
+        "compiler": "Tools/Art/World/build_green_lowlands_terrain.py --cliffs-only",
+        "builder": "Assets/Editor/GreenLowlandsTerrainKitBuilder.cs: BuildCliffKit",
+        "manifest": "Assets/Art/Tiles/GreenLowlands/Terrain/CliffManifest.json",
+        "canvas": "256x768; 188 native 16x64 sprites",
+        "recipe": "47 normalized eight-neighbor footprints, extruded 48 pixels south. Four world-column phases sample a continuous 64px front material. Native illustrated side shoulders expose 6-8 earth pixels and north rims 4-6 (plus outer contour), with small chamfered facets and connected inner/outer turns. All relief is inside the existing alpha footprint. No raster reference sampling or AI generation; only the existing code-native exporter is revised.",
+        "palette": "10 colors from ZonePalette.json, binary alpha.",
+        "import": "16 PPU, Point, uncompressed, no mipmaps, FullRect, custom pivot (8,56) anchoring to the upper 16px cell. Stable named sprite IDs."
+      },
+      "integration": "RaisedCliffTile selects topology and horizontal phase and refreshes neighbors on edits. Dedicated palette; Individual/TopRight renderer. Existing boundary-upland map owns converted arrival, far-bank, village and southern pond terrain. The side/north readability correction changed atlas pixels only; subsequent scene placement and collision are independently authored and verified.",
+      "checks": "19 Editor assertions rerun across 1,024 neighborhood/phase combinations, including unsaved-scene preservation. All 188 alpha masks and south-facing extensions remain pixel-identical to the pre-correction atlas; manifest unchanged, ten shared colors, deterministic repeat export. Production scene byte-identical to the pre-art backup. Normal-camera previews inspected; the user welcomed the side/north revision; broader scene review remains pending. Prior reversed-insertion/translated-render equality remains the unchanged rendering-system baseline."
+    },
+    {
+      "file": "Assets/Art/Sprites/World/LowlandsInteractables/LowlandsInteractables16.png",
+      "tool": "native deterministic pixel authoring; regional interaction variants",
+      "date": "2026-10-10",
+      "purpose": "Apply the user's requested black interactive silhouettes to regional props and pickups, distinct from quieter terrain and masonry. Separate Lowlands scene substitutions preserve shared Tutorial art, prefabs, flame, player, enemies and gameplay identifiers. Native preview inspected by agents; no user approval of the resulting sprites is claimed.",
+      "native_export": {
+        "compiler": "Tools/Art/World/build_lowlands_interactables.py",
+        "builder": "Assets/Editor/LowlandsInteractableKitBuilder.cs",
+        "destination": "Assets/Art/Sprites/World/LowlandsInteractables",
+        "manifest": "Assets/Art/Sprites/World/LowlandsInteractables/InteractableManifest.json",
+        "canvas": "256x64; 15 named native sprites",
+        "sprites": "TimberChest_Closed, TimberChest_HalfOpen, TimberChest_Open, ClayPot, Machine_Fork, Machine_Crank, Machine_Brake, Machine_Catch, Machine_Counterweight, Machine_Axle, RopeAnchor, ForgeCarving, SunShard, BronzeCoin, HeartFragment",
+        "palette": "One #171C1B near-black silhouette color with the existing restrained timber, bronze, stone, clay, red and shard ramps. 3-8 opaque colors per sprite; most use 4-6, multi-material chest poses use 7-8.",
+        "import": "Native 16 PPU, centered pivots, Point, uncompressed, no mipmaps, binary alpha and no generated physics shapes. Fixed named rectangles use the shared stable-ID importer; no scene mutation in the asset builder.",
+        "recipe": "Original native chest/pot, traversal and pickup drawings with a one-pixel contour kept inside the authored shape. Six machine fittings re-render the existing build_lowlands_architecture.machine functions with the near-black contour; no source images are sampled, and the architecture atlas remains untouched. Existing canvases, drawing bounds and centered pivots match prior visuals; all hardware alpha silhouettes remain identical. The chest lower eight rows match across closed, half-open and open poses."
+      },
+      "integration": "Replace only Lowlands scene renderer references, plus all three serialized RewardChestSpriteView pose fields. Retain existing transforms, sort/depth bindings, receiver geometry, crate/pot behavior, pickup/reward IDs, save state and shared prefab art. Shared Tutorial and other scene references are not migrated by this kit.",
+      "native_checks": "All 15 prior canvases and bounds match; complete dark contours, binary alpha, non-overlapping atlas slices, stable chest bases, unchanged machine silhouettes and deterministic output bytes pass. Native preview inspected; live scene checks are recorded separately."
+    },
+    {
+      "file": "../../Tools/Art/World/build_lowlands_architecture.py",
+      "tool": "native deterministic pixel authoring; original Ardan architecture",
+      "date": "2026-10-11",
+      "purpose": "Production sluice and original Ardan timber/slate/stone grammar. All four main farm buildings and the regional well, cart, bridge, fences and stone fence remnants now use native scene-local art on their existing footprints. Shared source prefabs and previous native art remain unchanged. Human visual/play review, remaining props are pending; regional trees use a separate import.",
+      "references": [
+        "https://www.youtube.com/watch?v=jBYRUxGmEv0",
+        "https://acornbankwatermill.org.uk/millRace.html",
+        "https://www.nintendo.com/en-gb/Iwata-Asks/Iwata-Asks-The-Legend-of-Zelda-A-Link-Between-Worlds/The-Legend-of-Zelda-A-Link-Between-Worlds/4-Beautiful-Teamwork/4-Beautiful-Teamwork-832029.html"
+      ],
+      "native_export": {
+        "compiler": "Tools/Art/World/build_lowlands_architecture.py",
+        "builder": "Assets/Editor/LowlandsArchitectureKitBuilder.cs",
+        "destination": "Assets/Art/Tiles/GreenLowlands/Architecture",
+        "manifest": "Assets/Art/Tiles/GreenLowlands/Architecture/ArchitectureManifest.json",
+        "atlas": "LowlandsArchitecture16.png",
+        "canvas": [
+          512,
+          512
+        ],
+        "named_sprites": 479,
+        "paintable_16x16_tiles": 451,
+        "roof_canvases": {
+          "Roof_Main": [
+            160,
+            192
+          ],
+          "Roof_Wing": [
+            160,
+            144
+          ],
+          "Roof_Main_South": [
+            160,
+            192
+          ],
+          "Roof_Wing_South": [
+            160,
+            144
+          ]
+        },
+        "nominal_floor_footprints": {
+          "Roof_Main": [
+            10,
+            9
+          ],
+          "Roof_Wing": [
+            10,
+            7
+          ],
+          "Roof_Main_South": [
+            10,
+            10
+          ],
+          "Roof_Wing_South": [
+            10,
+            7
+          ]
+        },
+        "import": "16 PPU, Point, unit scale, uncompressed, no mipmaps, binary source alpha; named IDs preserved by shared importer.",
+        "recipe": "Direct native pixel clusters using recorded stone, timber, slate, bronze and water ramps. Whole roof sprites plus exact tile subdivisions, broad material planes and sparse marks. No image generation, source-image filtering or Moonshire asset extraction. The 26-entry revision preserves all earlier 248 rectangles and pixels: south-facing gables with north/south ridges and separate facades; quiet work/service floors; subdued iron tracks and low walls; distinct bronze fork, crank, brake, catch, counterweight and axle silhouettes. Native source export and revised Unity integration are complete; user readability review remains pending.",
+        "farm_extension": {
+          "canvases": {
+            "Farm_Cottage": [
+              128,
+              96
+            ],
+            "Farm_Barn": [
+              96,
+              80
+            ],
+            "Farm_DryingShed": [
+              64,
+              48
+            ]
+          },
+          "opaque_colors": {
+            "Farm_Cottage": 10,
+            "Farm_Barn": 10,
+            "Farm_DryingShed": 8
+          },
+          "recipe": "Extend the existing code-native architecture library with broad slate planes, near-black object contours, restrained timber framing, stone feet, recessed closed doors and sparse roof seams. Preserve the regional functions and distinct silhouettes; no copied source pixels or new image-generation request. Append three whole sprites and 90 exact 16x16 slices into unused 512x512 atlas space. All 274 earlier entries retain rectangles, metadata and pixels. Ground/contact shadows remain deferred to one coordinated scene-wide pass.",
+          "placement": "Scene-local replacements on the existing Environment/Above Player maps of Farmhouse_Weathered, Workshop_Weathered and Woodshed_Weathered. Keep lower 2/2/1 rows on Environment, respectively; all remaining rows are Above Player. Original prefab assets, root transforms, sorting and collision are unchanged. The subsequent mill extension is recorded below."
+        },
+        "watermill_extension": {
+          "canvas": [
+            144,
+            96
+          ],
+          "opaque_colors": 12,
+          "recipe": "Original native extension of the existing architecture exporter. Retain the low horizontal roof, small south porch gable, closed door/shutter and right-hand eight-spoke paddle wheel. Quiet slate planes, near-black contour, simple timber bearing/shaft, broad stone footing and one small ivy cluster use the shared palette. Transparent openings expose actual river pixels; no baked water or new cast/contact shadow. Wheel remains static as before.",
+          "append_only": "One whole Farm_Watermill sprite and 54 exact 16x16 slices append in unused atlas space x320..463/top112..207. All 367 prior entries retain rectangles, metadata, sprite/internal IDs and source pixels.",
+          "placement": "Only Watermill instance Environment/Above Player references change in GreenLowlands. Lower two rows stay Environment; four upper rows stay Above Player. Original 7x2 house plus 2x3 wheel collision, root (13,13), sorting, scale, river and shared prefab asset are unchanged."
+        },
+        "courtyard_extension": {
+          "canvases": {
+            "Farm_Well": [
+              32,
+              48
+            ],
+            "Farm_Cart": [
+              64,
+              48
+            ],
+            "Farm_Bridge": [
+              96,
+              64
+            ],
+            "Farm_Fence": [
+              48,
+              32
+            ],
+            "Farm_StonePost": [
+              32,
+              32
+            ]
+          },
+          "opaque_colors": {
+            "Farm_Well": 8,
+            "Farm_Cart": 5,
+            "Farm_Bridge": 5,
+            "Farm_Fence": 5,
+            "Farm_StonePost": 6
+          },
+          "recipe": "Extend the existing code-native architecture library with a roofless octagonal windlass well, open empty cart with right-hand shafts, quiet plank crossing, two-rail fence and small carved stone remnant with rail stubs. Near-black outlines, broad timber/stone planes and sparse attached wear; no cast/contact ground shadows. Five whole sprites and 52 exact native slices append in unused atlas space. All 422 previous entries retain rectangles, metadata, sprite/internal IDs and pixels.",
+          "placement": "Scene-local substitutions on 28 existing visual maps across 14 instances: one well/cart/bridge, eight fence sections and three stone posts including Pasture old fence post. All collision, transforms, depth sorting and shared prefab assets remain unchanged. Fence end posts match exactly across the eight-pixel overlap at the existing forty-pixel stride. Bridge middle two rows have opaque deck and remain walkable; near-rail row zero stays overhead, upper rail and deck stay below the actor. Cart retains two collision rows despite only one lower-renderer row."
+        }
+      }
+    },
+    {
+      "file": "ZonePalette.json",
+      "tool": "native deterministic tile authoring",
+      "date": "2026-10-10",
+      "purpose": "Adapt approved study materials to production Ground, Paths, Terrain and Depth while retaining named slices, connection masks and authored three-cell rises. Nature art and scene layouts unchanged.",
+      "native_export": {
+        "compilers": [
+          "Tools/Art/World/build_green_lowlands_ground.py",
+          "Tools/Art/World/build_green_lowlands_paths.py",
+          "Tools/Art/World/build_green_lowlands_terrain.py"
+        ],
+        "destinations": [
+          "Assets/Art/Tiles/GreenLowlands/Ground",
+          "Assets/Art/Tiles/GreenLowlands/Paths",
+          "Assets/Art/Tiles/GreenLowlands/Terrain"
+        ],
+        "import": "16 PPU, Point, uncompressed, no mipmaps, binary alpha; 731 named sprite IDs retained.",
+        "colors_per_family": "Ground 3-4; DirtLane 5, Footpath 4; Terrain 2-7. Direct code-authored pixels using approved study ramps, no source-image filtering.",
+        "dirt_revision": "11 Oct: retain four-color Earth/Footpath wear; add small embedded flint to one DirtLane variant (five colors). Two-pixel exposed path-margin interruptions reveal underlying ground while all joining ports remain unchanged. DampEarth alone now uses #756E5E, #807866 and #696453 as quiet cool silt; 258 other ground sprites remain pixel-identical. All 408 Ground/Paths names and rectangles remain stable; 6144 seam neighborhoods and 376 rendered ports pass. Unity refresh and staged review are complete; user review pending. Tutorial and the approved demo are unchanged."
+      },
+      "source_note": "The temporary study implementation was retired on 16 October; these production compilers own the retained native material drawings."
+    },
+    {
+      "file": "Interactive/SluiceRelief_Source.png",
+      "tool": "built-in image_gen",
+      "prompt": "Use case: stylized-concept. ONE small ancient weathered stone relief tablet, genuinely transparent background. Original environmental sprite for a clean 16-bit top-down countryside adventure. Landscape rectangular slab, shallow front-facing carved face seen slightly from above with a narrow visible upper ledge and bottom thickness. Intended native drawing 64 pixels wide by 32 pixels tall, enlarged with a uniform chunky pixel grid. Crisp cut contours, broad flat clusters, sparse wear, tiny moss at lower left and one chipped upper corner. Face carries one NON-SEQUENTIAL emblem: a dark engraved solid axe on the left of a squat central standing-stone glyph, and a pale carved returning axe crossing a simple four-spoked wheel on the right. Both axe silhouettes clearly have a broad single blade and short handle, not swords. These three motifs form ONE compact frieze, no separate panels, no arrows, no dotted paths, no numbers, no letters, no instructions, no map. The light axe/wheel overlap should suggest a spectral return, but NO glow or transparency inside the stone. Restrained six-color palette #434944 deep engraving #585F58 stone shadow #7C8370 stone body #A6AA8A light stone #D4CCAA pale carving #4F7050 sparse moss. Ancient functional masonry, modest scale not monumental, no ornate border. Exactly one tablet entirely visible with margin. No ground, cast shadow, frame, extra objects, antialiasing, blur, gradients, dithering, fine texture or realism. Match simple clean fluid pixel contours and limited palette of a sunlit meadow game.",
+      "native_export": {
+        "sprite": "SluiceRelief",
+        "source_crop_bottom_left": [
+          237,
+          138,
+          1301,
+          583
+        ],
+        "canvas": "64x32 in 96x32 sheet",
+        "drawing": "64x29 at (0,1)",
+        "palette": [
+          "434944",
+          "585F58",
+          "7C8370",
+          "A6AA8A",
+          "D4CCAA",
+          "4F7050"
+        ],
+        "path": "Assets/Art/Sprites/World/LowlandsRewards/LowlandsSluiceRelief16.png",
+        "builder": "Assets/Editor/RewardPropArtBuilder.cs: BuildSluiceRelief",
+        "recipe": "Pixel-center nearest sampling; alpha<128 transparent, otherwise nearest RGB palette entry with alpha255. 16 PPU, unit scale, Point/uncompressed/no mipmaps; stable sprite ID. Visual only, mounted on existing blocked entrance masonry."
+      }
+    },
     {
       "file": "Interactive/BonfireFlame_Source.png",
       "tool": "built-in image_gen",
@@ -495,35 +786,45 @@
       }
     },
     {
-      "file": "Interactive/TravelingTrader_Source.png",
-      "tool": "built-in image_gen",
-      "prompt": "Use case: stylized-concept. ONE traveling trader NPC sprite on genuinely transparent background for the attached top-down pixel game. Match the blue player's compact body proportions and clean 16-bit art, but a distinct peaceful older traveler: ochre hood and short brown cloak, muted green tunic, dark brown boots, leather shoulder satchel and small bronze belt clasp. Standing still facing south toward viewer, slightly top-down view, both hands visible resting calmly at waist. Small neutral face, graying beard. No weapons, walking stick, hat brim, goods, cart, ground or cast shadow. Intended NATIVE figure about 18 pixels wide by 26 pixels tall within a24x32 canvas, enlarged using one consistent coarse pixel grid. Crisp cut edges, broad flat pixel clusters, material-colored dark edge pixels. Maximum ten opaque colors: #393C39 #543F36 #826047 #B58C61 #DFC291 #A17D3D #E7B85C #536848 #798952 #A6AA8A. No glow, blur, antialiasing, gradients, dithering, fine texture, text, inset or second figure. The attached image is style/proportion reference only, do not reproduce scene.",
+      "file": "Assets/Art/Tiles/GreenLowlands/Terrain/GreenLowlandsDepth16.png",
+      "tool": "native deterministic tile authoring in the existing terrain exporter",
+      "date": "2026-10-10",
+      "purpose": "Directional bank crests, side faces, joined corners and ground contacts; original recessed bank doorway and broad three-cell earth shoreline faces with opaque end supports. Main terrain atlas unchanged.",
+      "recipe": "Tools/Art/World/build_green_lowlands_terrain.py --depth-only; GreenLowlandsTerrainKitBuilder.BuildDepthEdges",
       "native_export": {
-        "sprite": "TravelingTrader",
-        "source_crop_bottom_left": [
-          288,
-          267,
-          510,
-          910
-        ],
-        "canvas": "24x32",
-        "drawing": "16x28 at (4,2)",
+        "canvas": "128x128; 46 native 16x16 tiles",
+        "stable_rects": "All earlier 28 entries and source pixels remain identical in bottom-origin coordinates. Original eight names retain x=0,16,...112 and y=0; four Bank/Stone corners occupy x=0..48/y=16; Door_0_0 through Door_3_3 assemble a 64x64 block at x=64/y=16. Eighteen shore pieces append at y=80..127: two 32x48 faces at x=0 and 32, and 16x48 returns at x=64 and 80.",
+        "palette": "Bank/Stone edges use 2-4 current terrain colors per tile. The whole doorway uses six opaque colors: 181D19, 42483F, 69705B, 8C9276, B1B496, D2CCAB. Shore faces/returns use seven existing study colors: 709276, 344E40, A3825E, C19C70, 82664C, 63523F, 403D34.",
+        "import": "16 PPU, Point, uncompressed, no mipmaps, binary alpha, collider-free; stable named sprite IDs"
+      },
+      "direction": "Back has high ground south; West high ground west; East high ground east. WestBack/EastBack join high west+south/east+south around a low northeast/northwest quadrant. Side/back contours stay straight with matching repeat seams; authored corners supply shape changes. Both sides have a one-pixel dark crest, three-pixel material strip and two-pixel contact. Repeating lateral excursions were removed after normal-camera review found them serrated. Foot is a short opaque contact strip. Native stairs retain their original lighting.",
+      "door_recipe": "Original code-native 64x64 drawing: black 24x36 recess above a four-pixel stone sill, thick staggered jamb courses, stepped arch shoulders and restrained weathering. Transparent outside its hard silhouette. No copied source pixels, new image-generation request, scenery or physics. Scene assembly owns overhead rows, threshold and traversal.",
+      "shore_recipe": "Original native broad stepped earth masses span the 16px subdivisions of each 32x48 rise, with a grass lip, dark undercut and contact foot. No source-image filtering or repeated one-cell light wedges. ShoreFace_v_x_y uses v=0..1, x=0..1, y=0..2 with y=0 at the foot. ShoreReturn_W_y is high west/contact east; E reverses that. Each opaque return is 16x48 with turf only at its top. Separate visual overlays preserve underlying terrain RuleTile connection masks; scene placement and collision are independent.",
+      "native_checks": "Earlier four joined-corner seams and six-color doorway checks remain valid. The current extension has 50 native slices with stable names/rectangles: four convex BackOuter pieces supplement the concave corners. The doorway recess shares palette ink; shore-return caps meet directional banks. Eight convex ports and two return-cap joins match exactly. All pixels obey ZonePalette.json. Native previews were inspected; scene visual and traversal evidence is maintained separately."
+    },
+    {
+      "file": "Assets/Art/Tiles/GreenLowlands/Thickets/LowlandsThickets16.png",
+      "tool": "native deterministic connected foliage authoring",
+      "date": "2026-10-11",
+      "purpose": "Redesign regional vegetation as complete connected canopy volumes under the user's new authorization. This replaces the preceding four-color canopy/carpet/clump overlay recipe while retaining existing asset names and rectangles. Separate low shrubs use complete silhouettes; shared Tutorial nature assets remain untouched.",
+      "native_export": {
+        "compiler": "Tools/Art/World/build_lowlands_thickets.py",
+        "builder": "Assets/Editor/LowlandsThicketKitBuilder.cs",
+        "destination": "Assets/Art/Tiles/GreenLowlands/Thickets",
+        "manifest": "Assets/Art/Tiles/GreenLowlands/Thickets/ThicketManifest.json",
+        "canvas": "512x512; 1020 named 16x16 sprites: original 256 cardinal entries, 752 connected-neighborhood entries and 12 complete-shrub pieces",
+        "names": "Existing Thicket_mask_phase names/rectangles remain fixed, with intentionally redesigned pixels. ThicketBlob_mask_phase covers 47 valid eight-neighbor masks times 16 phases: N/E/S/W bits 1/2/4/8, NE/SE/SW/NW bits 16/32/64/128, with impossible diagonals removed. Phase 0..15 selects a row-major 4x4 tile of the 64x64 motif. Bramble_A_x_y and Bramble_B_x_y each assemble three columns and two rows into a 48x32 shrub, y=0 at its base.",
         "palette": [
-          "393C39",
-          "543F36",
-          "826047",
-          "B58C61",
-          "DFC291",
-          "A17D3D",
-          "E7B85C",
-          "536848",
-          "798952",
-          "A6AA8A"
+          "171C1B",
+          "52745A",
+          "709276",
+          "7F9E7E",
+          "96AF87"
         ],
-        "path": "Assets/Art/Sprites/World/LowlandsRewards/LowlandsTrader16.png",
-        "builder": "Assets/Editor/RewardPropArtBuilder.cs",
-        "recipe": "Pixel-center nearest sampling; alpha<128 transparent, otherwise nearest RGB palette entry with alpha255. 16 PPU, unit scale, Point/uncompressed/no mipmaps. Visual child +.875 Y registers feet to trader root. Static NPC, no enemy art or new animation."
-      }
+        "import": "16 PPU, Point, uncompressed, no mipmaps, binary alpha; stable named sprite IDs and collider-free Tile assets. Asset importer does not paint scenes.",
+        "recipe": "11 Oct pastel revision: original broad attached leaf planes, restrained small highlights and shallow 1-3px native silhouette variation replace the rejected pointed olive sprays. Five shared ZonePalette colors span a periodic 64x64 motif; no new private shades. Connected masks resolve inner corners, outer turns, tips and strips while keeping exposed margins close to authored blocked-cell boundaries. Two complete bramble silhouettes are drawn before subdivision. No source-image sampling, Moonshire asset-pixel copying or changes to shared Tutorial art; the generator never paints scenes."
+      },
+      "native_checks": "Manifest contains 1020 unique native slices; the exporter verifies exactly five opaque colors, 47 canonical neighbor masks and exact motif reconstruction from sixteen fully connected phases. Connected foliage is placed regionally with clear tree-base footing and supported eight-pixel collision insets. User review of the 11 Oct art remains pending; scene integration and physics are verified separately. Scene integration and traversal checks are maintained separately."
     }
   ]
 }

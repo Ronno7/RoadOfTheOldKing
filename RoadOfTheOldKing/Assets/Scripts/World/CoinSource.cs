@@ -7,7 +7,7 @@ using UnityEngine;
 namespace RoadOfTheOldKing.World
 {
     // One authored source, not one roll per collider/blade. Keep this parent active when the pot breaks.
-    public sealed class CoinSource : MonoBehaviour, IProgressParticipant, IResetOnRest
+    public sealed class CoinSource : MonoBehaviour, IProgressParticipant, IResetOnRest, ICoinPickupSource
     {
         [SerializeField] private string sourceId;
         [Tooltip("0 rolls the ordinary prop table; a positive amount is a fixed route cache.")]
@@ -15,18 +15,18 @@ namespace RoadOfTheOldKing.World
         [SerializeField] private Breakable breakable;
         [SerializeField] private GameObject coinVisual;
         [SerializeField] private string requiredMilestone;
+        [Tooltip("Keep coins hidden until an authored interaction reveals this source.")]
+        [SerializeField] private bool requiresActivation;
         [SerializeField] private ParticleSystem breakFeedback;
+        private bool activated;
         private readonly List<RaycastHit2D> accessHits = new List<RaycastHit2D>(8);
         public string SourceId => sourceId;
-        public bool IsRevealed => breakable == null || breakable.IsBroken;
+        public bool IsRevealed => (breakable == null || breakable.IsBroken) && (!requiresActivation || activated);
         private void OnEnable() { if (breakable != null) breakable.Broken += OnBroken; }
         private void OnDisable() { if (breakable != null) breakable.Broken -= OnBroken; }
         private void OnBroken(CombatHit hit)
         {
-            var game = GameSession.Instance;
-            if (game == null) return;
-            game.Rewards.RevealCoinSource(sourceId, guaranteedCoins);
-            Refresh(game.Progress);
+            if (!Reveal()) return;
             if (breakFeedback != null) {
                 breakFeedback.Play();
                 for (int i = 0; i < 6; i++) breakFeedback.Emit(new ParticleSystem.EmitParams {
@@ -38,6 +38,17 @@ namespace RoadOfTheOldKing.World
                 }, 1);
             }
         }
+        // Shared reveal seam for pots and authored vegetation patches. RewardService owns the durable roll.
+        public bool Reveal()
+        {
+            var game = GameSession.Instance;
+            if (!isActiveAndEnabled || game == null ||
+                (!string.IsNullOrEmpty(requiredMilestone) && !game.Progress.Has(requiredMilestone)) ||
+                game.Rewards.RevealCoinSource(sourceId, guaranteedCoins) == null) return false;
+            activated = true;
+            Refresh(game.Progress);
+            return true;
+        }
         public bool TryCollect(PlayerHealth player)
         {
             var game = GameSession.Instance;
@@ -47,13 +58,14 @@ namespace RoadOfTheOldKing.World
                 !WorldAccess.IsClear(player, transform, accessHits)) return false;
             if (game.Rewards.RevealCoinSource(sourceId, guaranteedCoins) == null) return false;
             bool awarded = game.Rewards.TryCollectCoinSource(sourceId);
+            if (awarded) PickupPresentation.Collected(coinVisual, player);
             Refresh(game.Progress);
             return awarded;
         }
         private void Refresh(ProgressState state)
         {
             var record = state.FindCoinSource(sourceId);
-            if (coinVisual != null) coinVisual.SetActive(record == null ? breakable == null : !record.collected && record.amount > 0);
+            if (coinVisual != null) coinVisual.SetActive(record == null ? IsRevealed : !record.collected && record.amount > 0);
         }
         public void CaptureProgress(ProgressState state) { }
         public void ResetOnRest()
@@ -62,6 +74,7 @@ namespace RoadOfTheOldKing.World
         }
         public void RestoreProgress(ProgressState state)
         {
+            activated = state.FindCoinSource(sourceId) != null;
             if (breakable != null && state.FindCoinSource(sourceId) != null) breakable.RestoreBrokenState();
             Refresh(state);
         }

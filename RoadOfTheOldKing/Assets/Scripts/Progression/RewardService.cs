@@ -64,6 +64,17 @@ namespace RoadOfTheOldKing.Progression
             return true;
         }
 
+        // EnemyCoinDrop consumes its per-life receipt; no permanent GUID record per renewable defeat.
+        internal bool TryCollectEnemyCoins(int amount)
+        {
+            var progress = session.Progress;
+            if (!CanAward || (amount != 1 && amount != 5) || progress.bronzeCoins > int.MaxValue - amount) return false;
+            progress.bronzeCoins += amount;
+            session.CaptureAndSave("Bronze Coins +" + amount);
+            CoinsCollected?.Invoke(amount, progress.bronzeCoins);
+            return true;
+        }
+
         public bool TryCollectCoinCache(string rewardId, int amount)
         {
             var progress = session.Progress;
@@ -112,6 +123,41 @@ namespace RoadOfTheOldKing.Progression
 
         // The upgrade view wraps a ProgressState, so it is rebuilt when the session replaces it.
         internal void OnProgressReplaced() => upgrades = null;
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+        // Dev grants have no world-source receipt, so authored pickups remain collectible.
+        public bool DebugGiveCoins(int amount)
+        {
+            if (!CanAward || amount <= 0 || session.Progress.bronzeCoins > int.MaxValue - amount) return false;
+            session.Progress.bronzeCoins += amount;
+            session.CaptureAndSave("Bronze Coins granted.");
+            CoinsCollected?.Invoke(amount, session.Progress.bronzeCoins);
+            return true;
+        }
+
+        public bool DebugGiveShards(int amount)
+        {
+            if (!CanAward || amount <= 0 || session.Progress.sunShards > int.MaxValue - amount) return false;
+            session.Progress.sunShards += amount;
+            session.CaptureAndSave("Sun Shards granted.");
+            ShardCollected?.Invoke(session.Progress.sunShards);
+            return true;
+        }
+
+        public bool DebugGiveHeartFragments(int amount)
+        {
+            if (!CanAward || amount <= 0 || amount > 99) return false;
+            int before = HeartFragmentProgression.Count(session.Progress);
+            string batch = "dev/" + Guid.NewGuid().ToString("N") + "/";
+            for (int i = 0; i < amount; i++) HeartFragmentProgression.TryCollect(session.Progress, batch + i);
+            session.Player.RestoreProgress(session.Progress);
+            int after = HeartFragmentProgression.Count(session.Progress);
+            session.CaptureAndSave("Heart fragments granted.");
+            HeartFragmentCollected?.Invoke(after, after / HeartFragmentProgression.FragmentsPerHeart >
+                before / HeartFragmentProgression.FragmentsPerHeart);
+            return true;
+        }
+#endif
 
         internal void ApplyUpgrades()
         {

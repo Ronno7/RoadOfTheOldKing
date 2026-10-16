@@ -1,0 +1,64 @@
+// Edit-only automatic cliff authoring checks. Scratch scene; no saves or production edits.
+if(EditorApplication.isPlayingOrWillChangePlaymode)throw new Exception("Stopped Edit Mode required.");
+string root="Assets/Art/Tiles/GreenLowlands/Terrain";
+var brush=AssetDatabase.LoadAssetAtPath<RoadOfTheOldKing.World.RaisedCliffTile>(root+"/Rules/Paint_RaisedEarth.asset");
+var sprites=AssetDatabase.LoadAllAssetsAtPath(root+"/GreenLowlandsCliffs16.png").OfType<Sprite>().ToArray();
+int passed=0;Action<bool,string> check=(ok,label)=>{if(!ok)throw new Exception(label);passed++;};
+check(brush!=null&&sprites.Length==188,"Complete automatic cliff asset");
+check(sprites.All(s=>s.rect.width==16&&s.rect.height==64&&s.pixelsPerUnit==16),"188 native complete columns");
+check(sprites.All(s=>s.pivot==new Vector2(8,56)&&Mathf.Abs(s.bounds.min.y+3.5f)<.001f),"Top-cell anchors and three-cell extension");
+var importer=(TextureImporter)AssetImporter.GetAtPath(root+"/GreenLowlandsCliffs16.png");
+check(importer.filterMode==FilterMode.Point&&!importer.mipmapEnabled&&importer.textureCompression==TextureImporterCompression.Uncompressed,"Native import settings");
+foreach(string name in new[]{"GreenLowlandsTerrain_Cliffs","GreenLowlandsTerrain_DepthManual"})
+    check(AssetDatabase.LoadAllAssetsAtPath(root+"/Palettes/"+name+".prefab").OfType<GridPalette>().Any(),"Registered palette "+name);
+var manual=AssetDatabase.LoadAssetAtPath<GameObject>(root+"/Palettes/GreenLowlandsTerrain_DepthManual.prefab");
+check(manual.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>().SelectMany(m=>m.GetTilesBlock(m.cellBounds)).Where(t=>t!=null).Distinct().Count()==47,"Current banks, doorway and wet corners accessible without obsolete face rows");
+var crest=AssetDatabase.LoadAssetAtPath<RoadOfTheOldKing.World.RaisedCliffTile>(root+"/Rules/Paint_CliffCrest.asset");
+check(crest!=null&&crest.crestLine&&!brush.crestLine&&crest.sprites.SequenceEqual(brush.sprites),"Retaining edges and full uplands share exactly the same native artwork");
+var template=AssetDatabase.LoadAssetAtPath<GameObject>(root+"/Templates/LowlandsCliffSurface.prefab");
+var renderer=template.GetComponentInChildren<UnityEngine.Tilemaps.TilemapRenderer>();
+check(renderer.mode==UnityEngine.Tilemaps.TilemapRenderer.Mode.Individual&&renderer.sortOrder==UnityEngine.Tilemaps.TilemapRenderer.SortOrder.TopRight,"Complete-column rendering order");
+check(template.GetComponentsInChildren<Collider2D>().Length==0,"Visual authoring does not add collision");
+var classify=typeof(RoadOfTheOldKing.EditorTools.GreenLowlandsVegetationBuilder).GetMethod("IsStructuralTile",System.Reflection.BindingFlags.Static|System.Reflection.BindingFlags.NonPublic);
+check((bool)classify.Invoke(null,new object[]{brush}),"Baker recognizes automatic cliffs as structure");
+var previous=UnityEngine.SceneManagement.SceneManager.GetActiveScene();bool dirty=previous.isDirty;
+var scratch=UnityEditor.SceneManagement.EditorSceneManager.NewScene(UnityEditor.SceneManagement.NewSceneSetup.EmptyScene,UnityEditor.SceneManagement.NewSceneMode.Additive);
+try{
+    UnityEngine.SceneManagement.SceneManager.SetActiveScene(scratch);
+    var instance=(GameObject)PrefabUtility.InstantiatePrefab(template);
+    var map=instance.GetComponentInChildren<UnityEngine.Tilemaps.Tilemap>();
+    var offsets=new[]{new Vector3Int(0,1),new Vector3Int(1,0),new Vector3Int(0,-1),new Vector3Int(-1,0),new Vector3Int(1,1),new Vector3Int(1,-1),new Vector3Int(-1,-1),new Vector3Int(-1,1)};
+    var seen=new System.Collections.Generic.HashSet<Sprite>();bool populated=true,visualOnly=true;
+    for(int phase=-2;phase<2;phase++)for(int mask=0;mask<256;mask++){
+        map.ClearAllTiles();var c=new Vector3Int(phase,0,0);map.SetTile(c,brush);
+        for(int n=0;n<8;n++)if((mask&(1<<n))!=0)map.SetTile(c+offsets[n],brush);
+        var sprite=map.GetSprite(c);populated&=sprite!=null;if(sprite!=null)seen.Add(sprite);
+        visualOnly&=map.GetColliderType(c)==UnityEngine.Tilemaps.Tile.ColliderType.None;
+    }
+    check(populated&&seen.Count==188,"All 256 neighborhoods at four positive/negative phases resolve all 188 sprites");
+    check(visualOnly,"All neighborhoods remain collision-free");
+    map.ClearAllTiles();foreach(var p in offsets)map.SetTile(p,brush);map.SetTile(Vector3Int.zero,brush);
+    check(map.GetSprite(Vector3Int.zero).name=="RaisedEarth_255_0","Closed interior selects full top");
+    var before=offsets.Select(p=>map.GetSprite(p)).ToArray();map.SetTile(Vector3Int.zero,null);
+    check(offsets.Where((p,i)=>map.GetSprite(p)!=before[i]).Count()==8,"Erasing refreshes all eight surrounding corners");
+    map.SetTile(Vector3Int.zero,brush);
+    check(offsets.Select((p,i)=>map.GetSprite(p)==before[i]).All(v=>v),"Repainting restores all surrounding joins");
+    map.ClearAllTiles();map.SetTile(new Vector3Int(-1,0),brush);
+    check(map.GetSprite(new Vector3Int(-1,0)).name=="RaisedEarth_000_3","Isolated negative-column texture phase");
+    map.SetTile(new Vector3Int(0,0),brush);
+    check(map.GetSprite(new Vector3Int(-1,0)).name=="RaisedEarth_002_3"&&map.GetSprite(Vector3Int.zero).name=="RaisedEarth_008_0","Horizontal joining preserves spatial texture sequence");
+    map.ClearAllTiles();for(int x=-2;x<=2;x++)map.SetTile(new Vector3Int(x,0,0),crest);
+    check(map.GetSprite(Vector3Int.zero).name=="RaisedEarth_155_0","Retaining rim connects to open upper meadow and both adjacent crest columns");
+    map.SetTile(new Vector3Int(1,0,0),null);map.SetTile(new Vector3Int(1,-1,0),crest);
+    check(map.GetSprite(Vector3Int.zero).name=="RaisedEarth_155_0","Stepped retaining rim sees the lower neighboring column across cell rows");
+    var sentinel=new GameObject("Unsaved work sentinel");sentinel.transform.position=new Vector3(12,34,56);
+    UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(scratch);
+    RoadOfTheOldKing.EditorTools.GreenLowlandsTerrainKitBuilder.BuildCliffKit();
+    RoadOfTheOldKing.EditorTools.GreenLowlandsTerrainKitBuilder.BuildDepthEdges();
+    check(scratch.isLoaded&&scratch.isDirty&&sentinel!=null&&sentinel.transform.position==new Vector3(12,34,56)&&UnityEngine.SceneManagement.SceneManager.GetActiveScene()==scratch,"Both palette builders preserve an active untitled scene with unsaved work");
+}finally{
+    UnityEngine.SceneManagement.SceneManager.SetActiveScene(previous);
+    UnityEditor.SceneManagement.EditorSceneManager.CloseScene(scratch,true);
+}
+check(previous.isDirty==dirty,"Original scene dirty state preserved");
+return new{passed,neighborhoods=1024,sprites=sprites.Length,note="Editor authoring checks; separate rendered order/translation comparison covers overlap."};

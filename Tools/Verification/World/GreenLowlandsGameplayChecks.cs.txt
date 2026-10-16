@@ -223,7 +223,7 @@ else if(phase==4){
 }
 else if(phase==5){
     check(active.path==regionPath,"Death reload remains in regional checkpoint scene");atFire(SessionState.GetString(prefix+"RegionalFire",""));
-    var anchor=active.GetRootGameObjects().Single(g=>g.name=="Green Lowlands Zone").transform.Find("Layout Anchors (editor only)/Farmhouse Approach");
+    var anchor=active.GetRootGameObjects().Single(g=>g.name=="Green Lowlands").transform.Find("Authoring/Layout Anchors (editor only)/Farmhouse Approach");
     move(anchor.position);player.Health.SetHealth(55);player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().SetCharges(2);
     SessionState.SetFloat(prefix+"ResumeX",anchor.position.x);SessionState.SetFloat(prefix+"ResumeY",anchor.position.y);
     check(session.ReturnToTitle(),"Main Menu service records exact resume and starts Title load");

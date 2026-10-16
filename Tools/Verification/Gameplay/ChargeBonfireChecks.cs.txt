@@ -1,0 +1,152 @@
+// Run shared GreenLowlandsGameplayChecks SETUP, inspect success, then enter Play.
+// Reset ChargeBonfire.Phase/Passed to zero. Execute between real frames until DONE.
+// Stop and run shared cleanup on success or failure. Only the isolated save is touched.
+var game=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(!Application.isPlaying||!SessionState.GetBool("GreenLowlands.Gameplay.Active",false)||game==null||
+ game.StorageKey!=SessionState.GetString("GreenLowlands.Gameplay.Key","")||
+ !game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new System.Exception("Isolated Play session required");
+Application.runInBackground=true;EditorApplication.QueuePlayerLoopUpdate();
+if(game.IsLoading)return "WAIT: transition";
+string prefix="ChargeBonfire.";int phase=SessionState.GetInt(prefix+"Phase",0);
+if(phase==7)return "DONE: "+SessionState.GetInt(prefix+"Passed",0)+" assertions";
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var checks=new System.Collections.Generic.List<string>();
+System.Action<bool,string> check=(ok,label)=>{if(!ok)throw new System.Exception("Phase "+phase+": "+label);checks.Add(label);};
+var player=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
+var combat=player==null?null:player.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();
+var weapon=combat==null?null:combat.Weapon;
+var body=player==null?null:player.GetComponent<Rigidbody2D>();
+var interaction=player==null?null:player.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>();
+System.Action<Vector2> pose=p=>{body.position=p;body.linearVelocity=Vector2.zero;player.transform.position=p;Physics2D.SyncTransforms();};
+string region="Assets/Scenes/GreenLowlands.unity";
+var store=new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(game.StorageKey);
+if(phase==0)check(game.Continue(),"Continue into Tutorial");
+else if(phase==1){
+ check(weapon!=null,"owned axe equipped");
+ var stamina=player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>();
+ var motor=player.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>();
+ var input=player.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();
+ bool controls=(bool)combat.GetType().GetField("controlsActive",flags).GetValue(combat);
+ bool focus=(bool)input.GetType().GetField("hasFocus",flags).GetValue(input);
+ Vector2 original=body.position;
+ var simulate=weapon.GetType().GetMethod("Simulate",flags);
+ System.Action<float> tick=dt=>simulate.Invoke(weapon,new object[]{dt});
+ GameObject target=null;
+ try{
+  combat.GetType().GetField("controlsActive",flags).SetValue(combat,true);
+  input.GetType().GetField("hasFocus",flags).SetValue(input,true);
+  input.GetType().GetProperty("MoveDirection").SetValue(input,Vector2.right,null);
+  input.GetType().GetProperty("SprintHeld").SetValue(input,true,null);
+  pose(new Vector2(1000,1000));weapon.CancelAction();stamina.Restore();
+  check(weapon.TryBeginCharge(),"charge starts");
+  check(Mathf.Abs(stamina.Current-65)<.001f,"charge pays 35 once");
+  float previousSpeed=1,previousCharge=0;
+  foreach(float portion in new[]{0f,.25f,.5f,.75f,1f}){
+   if(portion>0)tick(weapon.Settings.fullCharge*.25f);
+   check(weapon.Charge01>=previousCharge&&weapon.Charge01<=1,"charge increases and stays bounded");
+   check(weapon.ActionMovementScale<previousSpeed,"walking progressively slows");
+   if(portion==.5f)check(weapon.Charge01<.3f&&weapon.Charge01>.2f,"half-time strength is exponential, not linear");
+   motor.GetType().GetMethod("FixedUpdate",flags).Invoke(motor,null);
+   check(Mathf.Abs(body.linearVelocity.x-motor.MoveSpeed*weapon.ActionMovementScale)<.001f&&!motor.IsSprinting,"real motor honors charge speed despite sprint input");
+   previousCharge=weapon.Charge01;previousSpeed=weapon.ActionMovementScale;
+  }
+  check(weapon.Charge01==1&&Mathf.Abs(weapon.ActionMovementScale-.08f)<.001f,"full charge crawls at 8 percent");
+  tick(2f);check(weapon.Charge01==1&&Mathf.Abs(stamina.Current-65)<.001f,"overholding neither overcharges nor repays stamina");
+  weapon.CancelCharge();check(!weapon.ControlsMovement&&weapon.ActionMovementScale==1,"cancel releases movement constraint");
+  check(stamina.Current==65,"cancel does not refund charge");
+  stamina.Restore();check(weapon.TryBeginCharge(),"early charge starts");tick(.1f);
+  check(!weapon.TryReleaseCharge(Vector2.right)&&!weapon.IsAttacking,"early release cancels before minimum");
+  foreach(float seconds in new[]{.4f,.79999f,.8f,1.2f}){
+   weapon.CancelAction();stamina.Restore();pose(new Vector2(1000,1000));
+   target=new GameObject("Isolated hard obstacle");target.transform.position=new Vector2(1001,1000);target.AddComponent<CircleCollider2D>().radius=.1f;
+   var hard=target.AddComponent<RoadOfTheOldKing.Combat.Breakable>();
+   hard.GetType().GetField("requiresFullCleave",flags).SetValue(hard,true);Physics2D.SyncTransforms();
+   check(!hard.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(null,RoadOfTheOldKing.Combat.AttackKind.Recall,999,Vector2.right,0,0,true)),"guard-breaking non-cleave cannot break hard prop");
+   check(weapon.TryBeginCharge(),"obstacle charge begins");tick(seconds);
+   check(weapon.TryReleaseCharge(Vector2.right),"cleave releases");tick(.12f);
+   check(hard.IsBroken==(seconds>=weapon.Settings.fullCharge),"hard obstacle breaks only at full duration: "+seconds);
+   UnityEngine.Object.DestroyImmediate(target);target=null;
+  }
+  foreach(float seconds in new[]{.4f,.8f}){
+   weapon.CancelAction();stamina.Restore();
+   target=new GameObject("Isolated charge damage target");target.transform.position=new Vector2(1001,1000);target.AddComponent<CircleCollider2D>().radius=.1f;
+   var hp=target.AddComponent<RoadOfTheOldKing.Combat.Damageable>();Physics2D.SyncTransforms();
+   check(weapon.TryBeginCharge(),"damage charge begins");tick(seconds);float strength=weapon.Charge01;
+   check(weapon.TryReleaseCharge(Vector2.right),"damage release");tick(.12f);
+   check(hp.Health==hp.MaxHealth-Mathf.RoundToInt(30*Mathf.Lerp(.5f,1f,strength)),"real target receives curved strength damage");
+   int health=hp.Health;tick(.1f);check(hp.Health==health,"one damage hit per cleave");
+   UnityEngine.Object.DestroyImmediate(target);target=null;
+  }
+ }finally{
+  if(target!=null)UnityEngine.Object.DestroyImmediate(target);
+  weapon.CancelAction();stamina.Restore();pose(original);
+  input.GetType().GetProperty("MoveDirection").SetValue(input,Vector2.zero,null);
+  input.GetType().GetProperty("SprintHeld").SetValue(input,false,null);
+  input.GetType().GetField("hasFocus",flags).SetValue(input,focus);
+  combat.GetType().GetField("controlsActive",flags).SetValue(combat,controls);
+ }
+ var fire=game.Checkpoints.Fires.First();pose(fire.transform.position);
+ check(!interaction.Open(fire),"unlit fire cannot open rest directly");
+ check(game.Checkpoints.Light(fire),"Tutorial fire lights");
+ check(game.Checkpoints.Rest(fire),"Tutorial rest establishes old checkpoint");
+ SessionState.SetString(prefix+"OldFire",fire.Id);
+ check(game.Checkpoints.LeaveScene(region,"from-tutorial"),"enter Lowlands");
+}
+else if(phase==2){
+ var fire=game.Checkpoints.Fires.Single(f=>f.Id=="green-lowlands/arrival-fire");
+ var flask=player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>();
+ var stamina=player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>();
+ var enemy=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Combat.WolfAI>(FindObjectsSortMode.None).First();
+ var hp=enemy.GetComponent<RoadOfTheOldKing.Combat.Damageable>();hp.SetHealth(7);
+ var plants=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.InteractiveVegetation>();
+ var snapshot=plants.CaptureVisitState();var cuts=(bool[])snapshot.GetType().GetField("cut").GetValue(snapshot);cuts[0]=true;plants.RestoreVisitState(snapshot);
+ player.Health.SetHealth(47);flask.SetCharges(1);stamina.TrySpend(20);
+ pose(new Vector2(15.5f,3));weapon.CancelAction();combat.GetType().GetField("controlsActive",flags).SetValue(combat,true);
+ interaction.GetType().GetMethod("RefreshNearby",flags).Invoke(interaction,null);
+ check(interaction.Prompt.Contains("Light"),"unlit prompt says Light");
+ check(!fire.IsDiscovered&&!game.Checkpoints.Rest(fire),"unlit fire rejects direct Rest");
+ var smoke=fire.GetComponentInChildren<ParticleSystem>();check(smoke!=null&&!smoke.isPlaying&&smoke.particleCount==0,"unlit fire produces no smoke");
+ check(interaction.TryInteract(),"first real F interaction lights fire");
+ check(fire.IsDiscovered&&!interaction.IsOpen&&!player.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>().IsLocked,"lighting neither opens menu nor locks controls");
+ check(player.Health.Health==47&&flask.Charges==1&&stamina.Current==80,"lighting preserves health flasks stamina");
+ check(hp.Health==7&&plants.CutCount==1,"lighting preserves wounded enemies and cut grass");
+ check(game.Progress.checkpointId==SessionState.GetString(prefix+"OldFire","")&&game.Progress.scenePath.EndsWith("Tutorial.unity"),"lighting leaves previous rest checkpoint");
+ check(store.Load().HasFire(fire.Id),"lighting saved discovery immediately");
+ check(!game.Checkpoints.Light(fire)&&game.Progress.fires.Count==2,"lighting cannot duplicate discovery");
+ check(interaction.Prompt.Contains("Rest at"),"lit prompt changes to Rest");
+ check(!game.Rewards.TryPurchaseUpgrade(fire,AssetDatabase.LoadAssetAtPath<RoadOfTheOldKing.Weapons.AxeUpgrade>("Assets/Settings/Weapons/Upgrades/DeepNotch.asset")),"lighting alone does not permit menu purchase");
+ player.Health.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(null,RoadOfTheOldKing.Combat.AttackKind.EnemyMelee,9999,Vector2.up,0,0));
+ game.Checkpoints.Respawn();
+}
+else if(phase==3){
+ check(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name=="Tutorial","death after lighting returns to old rest");
+ check(game.Progress.HasFire("green-lowlands/arrival-fire"),"lighting persists through death");
+ check(game.Checkpoints.LeaveScene(region,"from-tutorial"),"revisit lit Lowlands");
+}
+else if(phase==4){
+ var fire=game.Checkpoints.Fires.Single(f=>f.Id=="green-lowlands/arrival-fire");
+ var smoke=fire.GetComponentInChildren<ParticleSystem>();
+ check(fire.IsDiscovered&&smoke!=null&&smoke.isPlaying,"lit smoke restores after scene load");
+ smoke.Simulate(4f,true,false);check(smoke.particleCount>0&&smoke.particleCount<=12,"smoke visible and bounded");smoke.Play();
+ var renderer=smoke.GetComponent<ParticleSystemRenderer>();
+ var view=fire.GetComponent<RoadOfTheOldKing.World.BonfireSpriteView>();
+ var flame=(SpriteRenderer)view.GetType().GetField("flame",flags).GetValue(view);
+ check(flame.enabled&&renderer.sortingLayerID==flame.sortingLayerID&&renderer.sortingOrder==flame.sortingOrder,"smoke shares lit flame depth");
+ view.enabled=false;check(smoke.particleCount==0&&!smoke.isPlaying,"disable clears smoke");view.enabled=true;
+ check(fire.GetComponentsInChildren<ParticleSystem>().Length==1&&smoke.isPlaying,"reenable reuses one emitter");
+ pose(new Vector2(15.5f,3));combat.GetType().GetField("controlsActive",flags).SetValue(combat,true);
+ player.Health.SetHealth(47);player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().SetCharges(1);
+ check(interaction.TryInteract()&&interaction.IsOpen,"second interaction rests and opens real menu");
+ check(player.Health.Health==player.Health.MaxHealth&&player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().Charges==player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().MaxCharges,"rest heals and refills");
+ check(game.Progress.checkpointId==fire.Id&&store.Load().checkpointId==fire.Id,"rest saves new checkpoint");
+ interaction.Close();check(!player.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>().IsLocked,"closing rest releases control lock");
+ check(game.ReturnToTitle(),"return to title");
+}
+else if(phase==5)check(game.Continue(),"Continue lit/rested save");
+else if(phase==6){
+ var fire=game.Checkpoints.Fires.Single(f=>f.Id=="green-lowlands/arrival-fire");
+ check(fire.IsDiscovered&&game.Progress.checkpointId==fire.Id,"Continue restores lighting and separate rest checkpoint");
+ check(fire.GetComponentInChildren<ParticleSystem>().isPlaying,"Continue restores smoke");
+}
+SessionState.SetInt(prefix+"Phase",phase+1);SessionState.SetInt(prefix+"Passed",SessionState.GetInt(prefix+"Passed",0)+checks.Count);
+return new{phase=phase,passed=checks.Count,total=SessionState.GetInt(prefix+"Passed",0),checks=checks.ToArray()};

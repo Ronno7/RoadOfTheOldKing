@@ -45,6 +45,10 @@ namespace RoadOfTheOldKing.Weapons
         [Header("Charged cleave")]
         [Min(0.05f)] public float minimumCharge = 0.2f;
         [Min(0.1f)] public float fullCharge = 0.8f;
+        [Tooltip("Exponential charge buildup: larger values concentrate strength near the end.")]
+        [Range(0.1f, 5f)] public float chargeExponent = 2f;
+        [Range(0f, 1f)] public float chargeStartMovementScale = 0.8f;
+        [Range(0f, 1f)] public float chargeFullMovementScale = 0.08f;
         [Min(0.1f)] public float cleaveDuration = 0.45f;
         [Min(0.1f)] public float cleaveRadius = 2.1f;
         [Min(1)] public int cleaveDamage = 30;
@@ -75,6 +79,7 @@ namespace RoadOfTheOldKing.Weapons
         private void OnValidate()
         {
             fullCharge = Mathf.Max(minimumCharge, fullCharge);
+            chargeFullMovementScale = Mathf.Min(chargeFullMovementScale, chargeStartMovementScale);
             autoRecallDistance = Mathf.Max(throwRange + 1f, autoRecallDistance);
             lightSwingEndFraction = Mathf.Max(lightWindupFraction + 0.05f, lightSwingEndFraction);
             finisherSwingEndFraction = Mathf.Max(finisherWindupFraction + 0.05f, finisherSwingEndFraction);

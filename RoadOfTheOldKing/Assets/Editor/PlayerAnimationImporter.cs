@@ -57,6 +57,19 @@ namespace RoadOfTheOldKing.EditorTools
             DirectionalAnimationImporter.Targets.Clear();
             DirectionalAnimationImporter.Targets.Add(Player);
             DirectionalAnimationImporter.Targets.Add(Wolf);
+            foreach (string name in new[] { "BriarWolf", "RoadScavenger", "MossbackBoar", "BrokenWatcher", "ThornRat" })
+                DirectionalAnimationImporter.Targets.Add(new DirectionalAnimationImporter.Target
+                {
+                    Name = name, ArtRoot = "Assets/Art/Sprites/Enemies/" + name,
+                    AnimationRoot = "Assets/Animations/Enemies/" + name,
+                    SetPath = "Assets/Animations/Enemies/" + name + "/AnimationSet.asset",
+                    SetType = typeof(EnemyAnimationSet), GroundFromRotations = true,
+                    Defaults = new Dictionary<string, (float, bool)>
+                    {
+                        { "rotations", (1f, true) }, { "idle", (6f, true) }, { "walk", (10f, true) },
+                        { "run", (12f, true) }, { "attack", (10f, false) }, { "hurt", (12f, false) }, { "death", (10f, false) }
+                    }
+                });
         }
 
         [MenuItem("Road of the Old King/Art/Import Player Animations")]
@@ -67,5 +80,12 @@ namespace RoadOfTheOldKing.EditorTools
 
         public static string Rebuild() => DirectionalAnimationImporter.Import(Player);
         public static string RebuildWolf() => DirectionalAnimationImporter.Import(Wolf);
+
+        [MenuItem("Road of the Old King/Art/Import Lowlands Enemy Animations")]
+        public static void RebuildLowlandsEnemies()
+        {
+            foreach (var target in DirectionalAnimationImporter.Targets)
+                if (target != Player && target != Wolf) Debug.Log(DirectionalAnimationImporter.Import(target));
+        }
     }
 }

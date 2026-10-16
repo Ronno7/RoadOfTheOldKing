@@ -43,6 +43,7 @@ namespace RoadOfTheOldKing.World
                 ChestReward.Tool => session.Rewards.TryCollectTool(rewardId, tool),
                 _ => false
             };
+            if (awarded) PickupPresentation.Collected(gameObject, player);
             // Also reconcile a reward granted elsewhere under the same unique ID.
             RestoreProgress(session.Progress);
             if (awarded && spriteView != null) spriteView.PlayOpening();

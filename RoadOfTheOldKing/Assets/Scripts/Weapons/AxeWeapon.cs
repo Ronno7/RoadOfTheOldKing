@@ -87,15 +87,24 @@ namespace RoadOfTheOldKing.Weapons
         public float ThrowLaunchFraction => throwAction.LaunchFraction;
         public bool IsThrowing => throwAction.IsActive;
         public bool CanCancelThrowAim => throwAction.CanCancelAim;
-        public bool ControlsMovement => IsThrowing || State == AxeState.LightChop;
-        public Vector2 ActionFacing => CanCancelThrowAim ? AimDirection : attackDirection;
+        public bool ControlsMovement => IsThrowing || State == AxeState.LightChop || State == AxeState.Charging;
+        public Vector2 ActionFacing => CanCancelThrowAim || State == AxeState.Charging ? AimDirection : attackDirection;
         public float AimDistance => hits == null || owner == null ? 0f : hits.PreviewFlightDistance(
             owner.transform.position, AimDirection, settings.throwRange, settings.flightRadius);
         public float ActionMovementScale => IsThrowing ? throwAction.MovementScale
+            : State == AxeState.Charging ? Mathf.Lerp(settings.chargeStartMovementScale, settings.chargeFullMovementScale, Charge01)
             : State == AxeState.LightChop ? Mathf.Max(settings.lightMovementScale, Mathf.SmoothStep(0f, 1f,
                 Mathf.InverseLerp(ComboIndex == 2 ? 0.84f : 0.78f, 1f, AttackProgress))) : 1f;
         public float Charge01 => State == AxeState.Charging
-            ? Mathf.Clamp01(elapsed / settings.fullCharge) : State == AxeState.Cleaving ? cleaveStrength : 0f;
+            ? EvaluateCharge(elapsed) : State == AxeState.Cleaving ? cleaveStrength : 0f;
+        private float EvaluateCharge(float seconds)
+        {
+            float t = Mathf.Clamp01(seconds / Mathf.Max(0.01f, settings.fullCharge));
+            // Clamp endpoints explicitly: only the full-duration release may break hard objects.
+            if (t >= 1f) return 1f;
+            float exponent = Mathf.Clamp(settings.chargeExponent, 0.1f, 5f);
+            return (Mathf.Exp(exponent * t) - 1f) / (Mathf.Exp(exponent) - 1f);
+        }
         public float AttackProgress => Mathf.Clamp01(elapsed / (State == AxeState.Cleaving
             ? CleaveDuration : LightDuration));
         public float LightDuration => settings.lightDuration * (ComboIndex == 2 ? settings.finisherDurationMultiplier : 1f) / lightSpeedMultiplier / ExhaustedSpeed;
@@ -375,7 +384,7 @@ namespace RoadOfTheOldKing.Weapons
                             new CombatHit(owner.gameObject, AttackKind.ChargedCleave,
                                 Exhausted(Mathf.Max(1, Mathf.RoundToInt(settings.cleaveDamage * Mathf.Lerp(0.5f, 1f, cleaveStrength)))),
                                 attackDirection, settings.cleaveKnockback * cleaveStrength,
-                                settings.cleaveStagger * cleaveStrength, cleaveStrength >= 0.999f));
+                                settings.cleaveStagger * cleaveStrength, cleaveStrength >= 1f));
                     if (elapsed >= CleaveDuration)
                         SetState(AxeState.Held);
                     break;

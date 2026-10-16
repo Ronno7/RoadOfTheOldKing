@@ -91,6 +91,106 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1 &3197009921053296683
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7318150259105994653}
+  - component: {fileID: 8218109932124917835}
+  - component: {fileID: 157020530734364784}
+  m_Layer: 0
+  m_Name: Hit body
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7318150259105994653
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3197009921053296683}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3403522340180570971}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!70 &8218109932124917835
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3197009921053296683}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 1}
+  m_Size: {x: 1, y: 1.875}
+  m_Direction: 0
+--- !u!114 &157020530734364784
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3197009921053296683}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67313ea74c5cb5740918e249a517471c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.EnemyHurtbox
+  sizes:
+  - {x: 2.5625, y: 1.5}
+  - {x: 2.0625, y: 2}
+  - {x: 0.875, y: 2.0625}
+  - {x: 2.0625, y: 2}
+  - {x: 2.5625, y: 1.5}
+  - {x: 2, y: 1.5}
+  - {x: 1, y: 1.875}
+  - {x: 2, y: 1.5}
+  offsets:
+  - {x: -0.03125, y: 0.8125}
+  - {x: -0.09375, y: 1.0625}
+  - {x: 0, y: 1.09375}
+  - {x: 0.09375, y: 1.0625}
+  - {x: 0.03125, y: 0.8125}
+  - {x: 0.125, y: 0.8125}
+  - {x: 0, y: 1}
+  - {x: -0.125, y: 0.8125}
 --- !u!1 &4239070564106877748
 GameObject:
   m_ObjectHideFlags: 0
@@ -240,6 +340,7 @@ Transform:
   - {fileID: 980551573255439911}
   - {fileID: 6754984832250148715}
   - {fileID: 8844307052046014739}
+  - {fileID: 7318150259105994653}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!50 &6907784124746300508
@@ -303,8 +404,8 @@ CircleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 1.3}
-  m_Radius: 1
+  m_Offset: {x: 0, y: 0.2}
+  m_Radius: 0.65
 --- !u!114 &1220608268331909534
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -315,7 +416,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.Damageable
   maxHealth: 100
   protectionSource: {fileID: 0}
@@ -329,7 +430,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0a3d61830c75a1945a2ae1374af9f9a1, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.HitReaction
   knockbackMultiplier: 1
   maxKnockbackImpulse: 0
@@ -349,7 +450,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ac9d1f244ded82f4c9efa81c8450afb8, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.WolfView
   animations: {fileID: 11400000, guid: 7d326a6e6fc09e746850cfce4ccef82c, type: 2}
   bodyVisual: {fileID: 7297936848709932806}
@@ -365,7 +466,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 66dead76a9dc0794392b1c7c8c51e277, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.EnemyHealthIndicator
   body: {fileID: 7297936848709932806}
   panel: {fileID: 11400000, guid: 18015c3b74002454fab6d92829abd2aa, type: 2}
@@ -382,7 +483,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dc8908e9a5554aa489e50ba0a13435b7, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.EnemyImpactFeedback
   body: {fileID: 7297936848709932806}
   impactSound: {fileID: 8300000, guid: c1c5b78e1cffb774d821e48418e46675, type: 3}
@@ -403,7 +504,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ded85ff939c67a34cbdaf660090669c6, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.EnemyAwarenessIndicator
   body: {fileID: 7297936848709932806}
   panel: {fileID: 11400000, guid: 18015c3b74002454fab6d92829abd2aa, type: 2}
@@ -421,7 +522,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d2ac9be31ec5cf44f89b146f402fd48f, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.WolfAI
   target: {fileID: 0}
   noticeRadius: 10
@@ -483,7 +584,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8791c7638d4963a498d6bde035b6e8a3, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.EnemyCorpseSorting
 --- !u!1 &5862377389906941612
 GameObject:

@@ -45,6 +45,26 @@ namespace RoadOfTheOldKing.EditorTools
                 ApplyPixelSettings(importer, new Vector2(0.5f, 0f));
         }
 
+        // Static NPC views use the same native import and measured foot pivot as animations,
+        // without creating an animation set or assigning any runtime playback slots.
+        public static string ImportStandingSprites(string folder)
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
+                throw new InvalidOperationException("Import standing sprites in stopped Edit Mode.");
+            var paths = Directory.GetFiles(folder, "*.png").OrderBy(p => p).ToArray();
+            if (paths.Length == 0) throw new InvalidDataException("No standing sprites: " + folder);
+            AssetDatabase.Refresh();
+            var report = new StringBuilder("Standing sprites\n");
+            foreach (string file in paths)
+            {
+                string path = file.Replace('\\', '/');
+                int ground = MeasureGround(new List<string> { path }, out int height, out _, out int[] heights);
+                SetPivot(path, new Vector2(.5f, ground / (float)height));
+                report.AppendLine($"  {Path.GetFileName(path)}: ground {ground}, drawn height {heights[0]} px");
+            }
+            return report.ToString();
+        }
+
         public static string Import(Target target)
         {
             AssetDatabase.Refresh();

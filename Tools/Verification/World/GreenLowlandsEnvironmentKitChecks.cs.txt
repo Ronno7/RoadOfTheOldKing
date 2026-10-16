@@ -2,6 +2,8 @@
 if(EditorApplication.isPlaying)throw new System.Exception("Edit Mode required.");
 string root=RoadOfTheOldKing.EditorTools.GreenLowlandsEnvironmentKitBuilder.Root;
 var catalog=RoadOfTheOldKing.EditorTools.GreenLowlandsEnvironmentKitBuilder.ReadCatalog();
+string native=RoadOfTheOldKing.EditorTools.GreenLowlandsEnvironmentKitBuilder.NativePrefabRoot;
+var treeNames=new System.Collections.Generic.HashSet<string>(catalog.regionalTrees.Select(t=>t.art.name));
 var failures=new System.Collections.Generic.List<string>();int count=0;
 System.Action<bool,string> check=(ok,label)=>{count++;if(!ok)failures.Add(label);};
 var sprites=AssetDatabase.LoadAllAssetsAtPath(root+"/GreenLowlandsEnvironment16.png").OfType<Sprite>().ToDictionary(s=>s.name);
@@ -26,7 +28,7 @@ var paletteMap=AssetDatabase.LoadAssetAtPath<GameObject>(palettePath).GetCompone
 var body=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Player/Player.prefab").GetComponentsInChildren<SpriteRenderer>().First(r=>r.name=="Body");
 int index=0;
 foreach(var prop in catalog.entries){
-var prefab=AssetDatabase.LoadAssetAtPath<GameObject>(RoadOfTheOldKing.EditorTools.GreenLowlandsEnvironmentKitBuilder.PrefabRoot+"/"+prop.name+".prefab");
+var prefab=AssetDatabase.LoadAssetAtPath<GameObject>(native+"/"+prop.name+".prefab");
 check(prefab!=null&&prefab.transform.localScale==Vector3.one,"Native prefab "+prop.name);if(!prefab)continue;
 var maps=prefab.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>().ToDictionary(m=>m.name);
 var bases=maps["Environment"];var upper=maps["Above Player"];var collision=maps["Collision"];
@@ -50,7 +52,7 @@ check(bases.HasTile(new Vector3Int(2,3,0))&&upper.HasTile(new Vector3Int(2,0,0))
 index++;
 }
 foreach(string name in catalog.reusedPrefabs){
-var prefab=AssetDatabase.LoadAssetAtPath<GameObject>(RoadOfTheOldKing.EditorTools.TutorialEnvironmentKitBuilder.PrefabRoot+"/"+name+".prefab");
+var prefab=AssetDatabase.LoadAssetAtPath<GameObject>((treeNames.Contains(name)?native:RoadOfTheOldKing.EditorTools.TutorialEnvironmentKitBuilder.PrefabRoot)+"/"+name+".prefab");
 check(prefab!=null,"Retained prefab "+name);
 var origin=new Vector3Int(index%4*12,-index/4*9,0);
 foreach(string mapName in new[]{"Environment","Above Player"}){
@@ -59,6 +61,16 @@ foreach(var p in map.cellBounds.allPositionsWithin)if(map.HasTile(p))check(palet
 }
 index++;
 }
-check(AssetDatabase.FindAssets("t:Prefab",new[]{RoadOfTheOldKing.EditorTools.GreenLowlandsEnvironmentKitBuilder.PrefabRoot}).Length==9,"Only nine regional prefabs; direct reuse is not duplicated");
+check(AssetDatabase.FindAssets("t:Prefab",new[]{RoadOfTheOldKing.EditorTools.GreenLowlandsEnvironmentKitBuilder.PrefabRoot}).Length==21,"Nine retained regional sources and twelve native variants");
 check(AssetDatabase.FindAssets("t:Scene",new[]{root}).Length==0,"No per-layer demo scene");
-return (failures.Count==0?"PASS ":"FAILED ")+count+" Environment assertions; 9 regional / 19 reused objects, 196 tile pieces\n"+string.Join("\n",failures.ToArray());
+foreach(string guid in AssetDatabase.FindAssets("t:Prefab",new[]{native})){
+var variant=AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guid));
+var source=PrefabUtility.GetCorrespondingObjectFromSource(variant);
+check(PrefabUtility.GetPrefabAssetType(variant)==PrefabAssetType.Variant&&source!=null,"Native placement inherits its source "+variant.name);
+var a=variant.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>(true).Single(m=>m.name=="Collision");
+var b=source.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>(true).Single(m=>m.name=="Collision");
+check(a.cellBounds==b.cellBounds&&a.GetTilesBlock(a.cellBounds).SequenceEqual(b.GetTilesBlock(b.cellBounds)),"Variant preserves complete source collision "+variant.name);
+var art=variant.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>(true).Where(m=>m.name=="Environment"||m.name=="Above Player");
+check(art.All(m=>m.GetTilesBlock(m.cellBounds).Where(t=>t!=null).All(t=>AssetDatabase.GetAssetPath(t).StartsWith(treeNames.Contains(variant.name)?root+"/Trees/Tiles/":"Assets/Art/Tiles/GreenLowlands/Architecture/Tiles/"))),"Variant uses current native art only "+variant.name);
+}
+return (failures.Count==0?"PASS ":"FAILED ")+count+" Environment assertions; 28 current stamps / 12 native variants; retained legacy source atlas also checked\n"+string.Join("\n",failures.ToArray());

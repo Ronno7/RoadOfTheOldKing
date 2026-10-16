@@ -8,5 +8,7 @@ namespace RoadOfTheOldKing.Weapons
         public string id;
         [Min(1)] public int shardCost = 3;
         public AxeUpgrade[] choices = new AxeUpgrade[3];
+        [Tooltip("Previously sold choices, kept only to restore existing saved selections. These are not offered for purchase.")]
+        public AxeUpgrade[] retiredChoices = System.Array.Empty<AxeUpgrade>();
     }
 }

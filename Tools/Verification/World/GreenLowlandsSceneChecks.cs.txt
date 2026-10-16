@@ -4,11 +4,11 @@
 if(EditorApplication.isPlaying)throw new System.Exception("Edit Mode required.");
 var scene=UnityEngine.SceneManagement.SceneManager.GetSceneByName("GreenLowlands");
 if(!scene.IsValid()||!scene.isLoaded)throw new System.Exception("Open Assets/Scenes/GreenLowlands.unity additively first.");
-var world=scene.GetRootGameObjects().Single(g=>g.name=="Green Lowlands Zone");
-var objects=world.transform.Find("Environment Objects");
-var decoration=world.transform.Find("Decoration Objects");
-var anchors=world.transform.Find("Layout Anchors (editor only)").Cast<Transform>().ToArray();
-var collision=world.transform.Find("Collision").GetComponent<UnityEngine.Tilemaps.Tilemap>();
+var world=scene.GetRootGameObjects().Single(g=>g.name=="Green Lowlands");
+var objects=world.transform.Find("Scenery/Arrival buildings and props");
+var decoration=world.transform.Find("Scenery/Arrival detail props");
+var anchors=world.transform.Find("Authoring/Layout Anchors (editor only)").Cast<Transform>().ToArray();
+var collision=world.transform.Find("Collision/Arrival collision").GetComponent<UnityEngine.Tilemaps.Tilemap>();
 var player=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Player/Player.prefab");
 var box=player.GetComponent<BoxCollider2D>();
 var body=player.GetComponentsInChildren<SpriteRenderer>(true).Single(r=>r.name=="Body");
@@ -99,7 +99,7 @@ int reachableCanopyCells=0;
 var images=new System.Collections.Generic.Dictionary<string,Texture2D>();
 try{
     foreach(var tree in trees){
-        var trunk=tree.Find("Collision").GetComponent<UnityEngine.Tilemaps.Tilemap>();
+        var trunk=tree.Find("Collision/Arrival collision").GetComponent<UnityEngine.Tilemaps.Tilemap>();
         var crown=tree.Find("Above Player").GetComponent<UnityEngine.Tilemaps.Tilemap>();
         var trunkCells=new System.Collections.Generic.List<Vector3Int>();
         foreach(var cell in trunk.cellBounds.allPositionsWithin)if(trunk.HasTile(cell))trunkCells.Add(cell);

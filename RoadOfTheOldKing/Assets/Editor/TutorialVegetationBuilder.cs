@@ -20,7 +20,9 @@ namespace RoadOfTheOldKing.EditorTools
         public const string Root = "Assets/Art/Vegetation";
         public const string DensityPath = Root + "/TutorialDensity.png";
         public const string LayoutPath = Root + "/TutorialVegetation.asset";
-        public const string LeafAtlas = Root + "/GrassLeaves16.png";
+        // Both regions use the current shared leaves; the retired demo atlas is no longer generated.
+        public const string LeafAtlas = GreenLowlandsVegetationBuilder.LeafAtlas;
+        public const string CurrentLeafAtlas = LeafAtlas;
         const string TutorialAtlas = "Assets/Art/Tiles/Tutorial/DetailDecoration/TutorialDecoration16.png";
         const string LowlandsAtlas = "Assets/Art/Tiles/GreenLowlands/DetailDecoration/GreenLowlandsDecoration16.png";
         const int Size = 100;
@@ -233,37 +235,45 @@ namespace RoadOfTheOldKing.EditorTools
 
         static VegetationLayout.Species[] ReadSpecies()
         {
-            var sprites = AssetDatabase.LoadAllAssetsAtPath(LeafAtlas).OfType<Sprite>().ToDictionary(s => s.name);
+            var sprites = AssetDatabase.LoadAllAssetsAtPath(CurrentLeafAtlas).OfType<Sprite>().ToDictionary(s => s.name);
+            if (sprites.Count != 6) throw new InvalidDataException("Build Lowlands Rooted Leaf Atlas first.");
             Func<string, float, float, float, VegetationLayout.Leaf> leaf = (name, x, angle, phase) =>
                 new VegetationLayout.Leaf { sprite = sprites[name], offset = new Vector2(x, 0),
                     restAngle = angle, phaseOffset = phase };
-            var green = new Color32(139, 155, 94, 255);
+            var colors = Newtonsoft.Json.Linq.JObject.Parse(
+                File.ReadAllText("../ArtSource/GreenLowlands/ZonePalette.json"))["colors"];
+            if (!ColorUtility.TryParseHtmlString("#" + (string)colors["grasspatch"], out var green))
+                throw new InvalidDataException("Missing shared grasspatch swatch.");
             return new[] {
                 new VegetationLayout.Species { leaves = new[] {
-                    leaf("GrassLeaf_Left", -.03125f, 12, 0), leaf("GrassLeaf_Right", .03125f, -16, .7f) },
+                    leaf("GrassLeaf_Left", -.03125f, 4, 0), leaf("GrassLeaf_Right", .03125f, -6, .7f) },
                     debrisColor = green },
                 new VegetationLayout.Species { leaves = new[] {
-                    leaf("GrassLeaf_LeftShort", -.03125f, 10, .2f), leaf("GrassLeaf_RightShort", .03125f, -13, 1) },
+                    leaf("GrassLeaf_LeftShort", -.03125f, 3, .2f), leaf("GrassLeaf_RightShort", .03125f, -5, 1) },
                     debrisColor = green },
                 new VegetationLayout.Species { leaves = new[] { leaf("MeadowFlowers", 0, 0, 0) },
                     flexibility = .4f, debrisColor = new Color32(96, 114, 77, 255) },
                 new VegetationLayout.Species { leaves = new[] {
-                    leaf("GrassLeaf_Left", -.0625f, 20, .4f), leaf("GrassLeaf_RightShort", .0625f, -25, 1.3f) },
+                    leaf("GrassLeaf_Left", -.0625f, 8, .4f), leaf("GrassLeaf_RightShort", .0625f, -10, 1.3f) },
                     debrisColor = green },
                 new VegetationLayout.Species { leaves = new[] { leaf("Meadow_Reeds", 0, 0, .3f) },
                     flexibility = .65f, debrisColor = new Color32(79, 112, 80, 255) }
             };
         }
 
-        // Import preparation only: sample the generated source, map to the accepted four-color
-        // grass ramp, and copy existing flowers/reeds unchanged. Never redraw source artwork.
+        // Keep the existing menu/API on the current shared leaf recipe.
         [MenuItem("Tools/Road of the Old King/Vegetation/Build Rooted Leaf Atlas")]
         public static void BuildLeafArt()
         {
+            GreenLowlandsVegetationBuilder.BuildLeafArt();
+        }
+
+        // Shared import preparation; regional callers supply their own source and destination.
+        internal static void BuildLeafArt(string sourcePath, string atlasPath, Color32[] palette,
+            int tallHeight, int shortHeight, int minimumWidth)
+        {
             if (EditorApplication.isPlayingOrWillChangePlaymode) throw new InvalidOperationException("Use Edit Mode.");
             Directory.CreateDirectory(Root);
-            var palette = new[] { new Color32(56,75,60,255), new Color32(96,114,77,255),
-                new Color32(139,155,94,255), new Color32(190,202,130,255) };
             var source = new Texture2D(2, 2, TextureFormat.RGBA32, false);
             var atlas = new Texture2D(64, 64, TextureFormat.RGBA32, false);
             var output = new Color32[64 * 64];
@@ -271,7 +281,7 @@ namespace RoadOfTheOldKing.EditorTools
             var pivots = new Dictionary<string, Vector2>();
             try
             {
-                if (!source.LoadImage(File.ReadAllBytes("../ArtSource/Vegetation/GrassLeaves_Source.png")))
+                if (!source.LoadImage(File.ReadAllBytes(sourcePath)))
                     throw new InvalidDataException("Cannot read generated grass leaves.");
                 var input = source.GetPixels32();
                 var names = new[] { "GrassLeaf_Left", "GrassLeaf_Right", "GrassLeaf_LeftShort", "GrassLeaf_RightShort" };
@@ -279,9 +289,10 @@ namespace RoadOfTheOldKing.EditorTools
                 {
                     var frame = new RectInt((n % 2) * (source.width / 2), 0, source.width / 2, source.height);
                     var crop = OpaqueBounds(input, source.width, frame);
-                    int h = n < 2 ? 18 : 14;
+                    int h = n < 2 ? tallHeight : shortHeight;
                     // Keep enough horizontal samples for the solid leaf face and narrow bottom stem.
-                    int w = Mathf.Max(8, Mathf.RoundToInt((float)crop.width * h / crop.height));
+                    int w = Mathf.Max(minimumWidth, Mathf.RoundToInt((float)crop.width * h / crop.height));
+                    if (w > 16 || h > 23) throw new InvalidDataException("Grass source exceeds its native atlas cell.");
                     int ox = n * 16 + (16 - w) / 2, oy = 1;
                     float rootSum = 0; int rootCount = 0;
                     for (int y = 0; y < h; y++) for (int x = 0; x < w; x++)
@@ -307,17 +318,17 @@ namespace RoadOfTheOldKing.EditorTools
                 CopyRootedSprite(TutorialAtlas, "MeadowFlowers", 0, 32, output, entries, pivots);
                 CopyRootedSprite(LowlandsAtlas, "Meadow_Reeds", 16, 32, output, entries, pivots);
                 atlas.SetPixels32(output); atlas.Apply();
-                File.WriteAllBytes(LeafAtlas, atlas.EncodeToPNG());
+                File.WriteAllBytes(atlasPath, atlas.EncodeToPNG());
             }
             finally { Object.DestroyImmediate(source); Object.DestroyImmediate(atlas); }
-            TileKitAssets.ImportSprites(LeafAtlas, entries.ToArray());
-            var importer = (TextureImporter)AssetImporter.GetAtPath(LeafAtlas);
+            TileKitAssets.ImportSprites(atlasPath, entries.ToArray());
+            var importer = (TextureImporter)AssetImporter.GetAtPath(atlasPath);
             var factories = new SpriteDataProviderFactories(); factories.Init();
             var provider = factories.GetSpriteEditorDataProviderFromObject(importer); provider.InitSpriteEditorDataProvider();
             var rects = provider.GetSpriteRects();
             foreach (var rect in rects) { rect.alignment = SpriteAlignment.Custom; rect.pivot = pivots[rect.name]; }
             provider.SetSpriteRects(rects); provider.Apply(); importer.SaveAndReimport();
-            Debug.Log("Rooted vegetation atlas: two generated blades in 18px/14px sizes, copied flowers/reeds, 16 PPU, bottom pivots.");
+            Debug.Log($"Rooted vegetation atlas {atlasPath}: {tallHeight}px/{shortHeight}px blades, copied flowers/reeds, 16 PPU, bottom pivots.");
         }
 
         static RectInt OpaqueBounds(Color32[] pixels, int stride, RectInt rect)

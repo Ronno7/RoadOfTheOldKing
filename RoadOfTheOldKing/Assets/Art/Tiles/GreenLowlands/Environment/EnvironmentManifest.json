@@ -340,5 +340,145 @@
     "Gate_Closed",
     "Axe_Stump",
     "Firewood_Rack"
+  ],
+  "regionalTrees": [
+    {
+      "art": {
+        "name": "Oak",
+        "source": "Trees/Oak",
+        "kind": "tree",
+        "sourceRect": {
+          "x": 0,
+          "y": 0,
+          "width": 1086,
+          "height": 1448
+        },
+        "width": 48,
+        "height": 64,
+        "overheadRow": 1,
+        "swatches": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "collision": [
+          {
+            "x": 1,
+            "y": 0,
+            "width": 1,
+            "height": 1
+          }
+        ],
+        "stretch": false,
+        "hueAware": false
+      },
+      "colors": [
+        "171C1B",
+        "344E40",
+        "52745A",
+        "709276",
+        "96AF87",
+        "63523F",
+        "82664C",
+        "A3825E"
+      ]
+    },
+    {
+      "art": {
+        "name": "Birch",
+        "source": "Trees/Birch",
+        "kind": "tree",
+        "sourceRect": {
+          "x": 0,
+          "y": 0,
+          "width": 1086,
+          "height": 1448
+        },
+        "width": 48,
+        "height": 64,
+        "overheadRow": 1,
+        "swatches": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "collision": [
+          {
+            "x": 1,
+            "y": 0,
+            "width": 1,
+            "height": 1
+          }
+        ],
+        "stretch": false,
+        "hueAware": false
+      },
+      "colors": [
+        "171C1B",
+        "344E40",
+        "52745A",
+        "96AF87",
+        "BAC394",
+        "69705B",
+        "B1B496",
+        "D2CCAB"
+      ]
+    },
+    {
+      "art": {
+        "name": "Apple_Tree",
+        "source": "Trees/Apple_Tree",
+        "kind": "tree",
+        "sourceRect": {
+          "x": 0,
+          "y": 0,
+          "width": 1086,
+          "height": 1448
+        },
+        "width": 48,
+        "height": 64,
+        "overheadRow": 1,
+        "swatches": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "collision": [
+          {
+            "x": 1,
+            "y": 0,
+            "width": 1,
+            "height": 1
+          }
+        ],
+        "stretch": false,
+        "hueAware": false
+      },
+      "colors": [
+        "171C1B",
+        "344E40",
+        "52745A",
+        "709276",
+        "96AF87",
+        "63523F",
+        "A3825E",
+        "D3B184"
+      ]
+    }
   ]
 }

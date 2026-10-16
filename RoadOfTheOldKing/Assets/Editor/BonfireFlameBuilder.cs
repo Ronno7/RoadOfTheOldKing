@@ -22,6 +22,58 @@ namespace RoadOfTheOldKing.EditorTools
         }
         public static Manifest ReadManifest() => JsonUtility.FromJson<Manifest>(File.ReadAllText(Root+"/BonfireFlameManifest.json"));
 
+        [MenuItem("Tools/Road of the Old King/Build Lowlands Bonfire Base")]
+        public static void BuildBase()
+        {
+            if (EditorApplication.isPlaying) throw new InvalidOperationException("Use Edit Mode.");
+            var manifest = JsonUtility.FromJson<Manifest>(File.ReadAllText(Root + "/BonfireBaseManifest.json"));
+            if (manifest.width != 32 || manifest.height != 32 || manifest.drawWidth != 28 ||
+                manifest.drawHeight != 16 || manifest.colors.Length > 8)
+                throw new InvalidDataException("Expected a 32x32 base, 28x16 drawing bounds and at most eight colors.");
+            var palette = manifest.colors.Select(hex => {
+                Color color;
+                if (!ColorUtility.TryParseHtmlString(hex, out color)) throw new InvalidDataException(hex);
+                return (Color32)color;
+            }).ToArray();
+            var source = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+            var output = new Texture2D(32, 32, TextureFormat.RGBA32, false);
+            try
+            {
+                if (!source.LoadImage(File.ReadAllBytes("../ArtSource/GreenLowlands/Interactive/" + manifest.source + ".png")))
+                    throw new InvalidDataException(manifest.source);
+                var pixels = source.GetPixels32();
+                int minX = source.width, minY = source.height, maxX = -1, maxY = -1;
+                for (int y = 0; y < source.height; y++) for (int x = 0; x < source.width; x++)
+                    if (pixels[y * source.width + x].a >= 128)
+                    { minX = Math.Min(minX, x); maxX = Math.Max(maxX, x); minY = Math.Min(minY, y); maxY = Math.Max(maxY, y); }
+                if (maxX < minX) throw new InvalidDataException("Empty bonfire base source.");
+                int sw = maxX - minX + 1, sh = maxY - minY + 1;
+                float scale = Math.Min((float)manifest.drawWidth / sw, (float)manifest.drawHeight / sh);
+                int w = Mathf.RoundToInt(sw * scale), h = Mathf.RoundToInt(sh * scale), ox = (32 - w) / 2;
+                var result = new Color32[32 * 32];
+                for (int y = 0; y < h; y++) for (int x = 0; x < w; x++)
+                {
+                    int sx = minX + Math.Min(sw - 1, (int)((x + .5f) * sw / w));
+                    int sy = minY + Math.Min(sh - 1, (int)((y + .5f) * sh / h));
+                    var color = pixels[sy * source.width + sx];
+                    if (color.a < 128) continue;
+                    int best = 0, distance = int.MaxValue;
+                    for (int i = 0; i < palette.Length; i++)
+                    {
+                        var p = palette[i];
+                        int d = (color.r - p.r) * (color.r - p.r) + (color.g - p.g) * (color.g - p.g) + (color.b - p.b) * (color.b - p.b);
+                        if (d < distance) { distance = d; best = i; }
+                    }
+                    result[y * 32 + ox + x] = palette[best];
+                }
+                output.SetPixels32(result); output.Apply();
+                File.WriteAllBytes(Root + "/LowlandsBonfireBase16.png", output.EncodeToPNG());
+            }
+            finally { Object.DestroyImmediate(source); Object.DestroyImmediate(output); }
+            ImportSprites(Root + "/LowlandsBonfireBase16.png", new[] { new Entry { name = "LowlandsBonfireBase", width = 32, height = 32 } });
+            AssetDatabase.SaveAssets();
+        }
+
         [MenuItem("Tools/Road of the Old King/Build Shared Bonfire Flame")]
         public static void Build()
         {

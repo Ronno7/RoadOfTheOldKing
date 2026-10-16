@@ -122,6 +122,8 @@ namespace RoadOfTheOldKing.EditorTools
             var root = new GameObject(prefix + " - Paint", typeof(Grid));
             var map = AddMap(root.transform, "Automatic brushes", 0);
             for (int i = 0; i < Materials.Length; i++) map.SetTile(new Vector3Int(i * 2, 0, 0), rules[Materials[i]]);
+            var basinWater = AssetDatabase.LoadAssetAtPath<RuleTile>(assetRoot + "/Rules/Paint_BasinWater.asset");
+            if (basinWater != null) map.SetTile(new Vector3Int(12, 0, 0), basinWater);
             int x = 0;
             foreach (var animation in animations.Values) { map.SetTile(new Vector3Int(x, -3, 0), animation); x += 2; }
             map.SetTile(new Vector3Int(6, -3, 0), tiles["FallLip_00"]);

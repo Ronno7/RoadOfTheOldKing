@@ -50,6 +50,7 @@ MonoBehaviour:
   breakable: {fileID: 0}
   coinVisual: {fileID: 9113473670942411824}
   requiredMilestone: 
+  requiresActivation: 0
   breakFeedback: {fileID: 0}
 --- !u!1 &9113473670942411824
 GameObject:
@@ -63,6 +64,7 @@ GameObject:
   - component: {fileID: 937407160735899396}
   - component: {fileID: 3213486125010268204}
   - component: {fileID: 4920474095774745772}
+  - component: {fileID: 7253020298824580205}
   m_Layer: 0
   m_Name: Coin
   m_TagString: Untagged
@@ -192,3 +194,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05a5a48f4aa349442a7b95f2cf14368e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.CoinPickup
+--- !u!114 &7253020298824580205
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9113473670942411824}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bcc80181ab83204d8f088ae970de6e2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.PickupPresentation
+  style: 2
+  sparkSprite: {fileID: 21300000, guid: ab6058c4ddee5c148cd9d34a78a0a92e, type: 3}

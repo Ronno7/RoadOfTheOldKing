@@ -18,11 +18,146 @@ namespace RoadOfTheOldKing.EditorTools
     {
         public const string Root = "Assets/Art/Tiles/GreenLowlands/Environment";
         public const string PrefabRoot = "Assets/Prefabs/Environment/GreenLowlands";
-        [Serializable] public class Catalog { public Prop[] entries; public string[] reusedPrefabs; }
+        [Serializable] public class RegionalTree { public Prop art; public string[] colors; }
+        [Serializable] public class Catalog { public Prop[] entries; public string[] reusedPrefabs; public RegionalTree[] regionalTrees; }
         public static Catalog ReadCatalog() => JsonUtility.FromJson<Catalog>(File.ReadAllText(Root+"/EnvironmentManifest.json"));
         public static string TilePath(string name,int x,int y) => Root+"/Tiles/"+name+"_"+x+"_"+y+".asset";
 
-        [MenuItem("Tools/Road of the Old King/Build Green Lowlands Environment Kit")]
+        public const string TreeRoot = Root+"/Trees";
+        public const string NativePrefabRoot = PrefabRoot+"/Native";
+
+        // Refresh authoring references without regenerating artwork or touching a placed scene.
+        [MenuItem("Tools/Road of the Old King/Refresh Lowlands Environment Painting Assets")]
+        public static void RefreshPaintingAssets()
+        {
+            if(EditorApplication.isPlayingOrWillChangePlaymode)throw new InvalidOperationException("Use Edit Mode.");
+            var replacements=new Dictionary<string,string> {
+                {"Watermill","Farm_Watermill"},{"Farm_Cart","Farm_Cart"},{"Plank_Bridge","Farm_Bridge"},
+                {"Reused_Stone_Post","Farm_StonePost"},{"Farmhouse_Weathered","Farm_Cottage"},
+                {"Workshop_Weathered","Farm_Barn"},{"Woodshed_Weathered","Farm_DryingShed"},
+                {"Well_Disused","Farm_Well"},{"Fence_Weathered","Farm_Fence"}
+            };
+            var catalog=ReadCatalog();
+            var treeNames=new HashSet<string>(catalog.regionalTrees.Select(t=>t.art.name));
+            var names=catalog.entries.Select(p=>p.name).Concat(catalog.reusedPrefabs).ToArray();
+            var sources=names.ToDictionary(n=>n,n=>AssetDatabase.LoadAssetAtPath<GameObject>(
+                (replacements.ContainsKey(n)?PrefabRoot:TutorialEnvironmentKitBuilder.PrefabRoot)+"/"+n+".prefab"));
+            if(sources.Any(p=>p.Value==null))throw new InvalidDataException("Missing environment source prefab.");
+            // Validate every revised slice before writing any authoring assets.
+            var tiles=new Dictionary<TileBase,TileBase>();
+            foreach(string name in names.Where(n=>replacements.ContainsKey(n)||treeNames.Contains(n)))
+                foreach(var map in sources[name].GetComponentsInChildren<Tilemap>(true).Where(m=>m.name=="Environment"||m.name=="Above Player"))
+                    foreach(var c in map.cellBounds.allPositionsWithin)
+                    {
+                        var old=map.GetTile(c);if(old==null)continue;
+                        string path=treeNames.Contains(name)?TreeRoot+"/Tiles/"+name+"_"+c.x+"_"+c.y+".asset":
+                            "Assets/Art/Tiles/GreenLowlands/Architecture/Tiles/"+replacements[name]+"_"+c.x+"_"+c.y+".asset";
+                        var tile=AssetDatabase.LoadAssetAtPath<Tile>(path);
+                        if(tile==null||tile.colliderType!=Tile.ColliderType.None)throw new InvalidDataException("Missing visual tile: "+path);
+                        tiles[old]=tile;
+                    }
+            Directory.CreateDirectory(NativePrefabRoot);
+            string palettePath=Root+"/Palettes/GreenLowlandsEnvironment.prefab";
+            var palette=PrefabUtility.LoadPrefabContents(palettePath);
+            var scratch=EditorSceneManager.NewPreviewScene();
+            try
+            {
+                var stamps=palette.GetComponentsInChildren<Tilemap>(true).Single();
+                stamps.ClearAllTiles();
+                for(int i=0;i<names.Length;i++)
+                {
+                    string name=names[i];var source=sources[name];
+                    bool revised=replacements.ContainsKey(name)||treeNames.Contains(name);
+                    var instance=(GameObject)PrefabUtility.InstantiatePrefab(source,scratch);
+                    try
+                    {
+                        foreach(var map in instance.GetComponentsInChildren<Tilemap>(true).Where(m=>m.name=="Environment"||m.name=="Above Player"))
+                        {
+                            foreach(var c in map.cellBounds.allPositionsWithin)
+                            {
+                                var tile=map.GetTile(c);if(tile==null)continue;
+                                if(revised){tile=tiles[tile];map.SetTile(c,tile);}
+                                stamps.SetTile(new Vector3Int(i%4*12,-i/4*9,0)+c,tile);
+                            }
+                            if(revised)PrefabUtility.RecordPrefabInstancePropertyModifications(map);
+                        }
+                        if(revised)PrefabUtility.SaveAsPrefabAsset(instance,NativePrefabRoot+"/"+name+".prefab");
+                    }
+                    finally{Object.DestroyImmediate(instance);}
+                }
+                stamps.CompressBounds();
+                PrefabUtility.SaveAsPrefabAsset(palette,palettePath);
+                AssetDatabase.SaveAssets();
+            }
+            finally
+            {
+                PrefabUtility.UnloadPrefabContents(palette);
+                EditorSceneManager.ClosePreviewScene(scratch);
+            }
+            Debug.Log("Lowlands authoring: 28 current object stamps and 12 native prefab variants; source prefabs and scenes preserved.");
+        }
+
+        // A separate import preserves Tutorial sources and the historical regional atlas.
+        // Scene placement and collision are deliberately outside this asset-only operation.
+        [MenuItem("Tools/Road of the Old King/Build Lowlands Regional Trees")]
+        public static void BuildRegionalTrees()
+        {
+            if(EditorApplication.isPlayingOrWillChangePlaymode)throw new InvalidOperationException("Use Edit Mode.");
+            var trees=ReadCatalog().regionalTrees;
+            if(trees==null||trees.Length!=3)throw new InvalidDataException("Expected oak, birch and apple sources.");
+            var zone=File.ReadAllText("../ArtSource/GreenLowlands/ZonePalette.json");
+            Directory.CreateDirectory(TreeRoot+"/Tiles");
+            var atlas=new Texture2D(160,68,TextureFormat.RGBA32,false);
+            try
+            {
+                atlas.SetPixels32(new Color32[160*68]);
+                var entries=new List<Entry>();
+                for(int i=0;i<trees.Length;i++)
+                {
+                    var tree=trees[i];var prop=tree.art;
+                    if(prop.width!=48||prop.height!=64||tree.colors.Length>8||tree.colors.Distinct().Count()!=tree.colors.Length)
+                        throw new InvalidDataException("Tree footprint/color budget: "+prop.name);
+                    var palette=tree.colors.Select(hex=>{
+                        Color color;
+                        if(!zone.Contains("\""+hex+"\"")||!ColorUtility.TryParseHtmlString("#"+hex,out color))
+                            throw new InvalidDataException("Color outside shared zone palette: "+hex);
+                        return (Color32)color;
+                    }).ToArray();
+                    if(prop.swatches.Any(index=>index<0||index>=palette.Length))throw new InvalidDataException("Tree palette indices.");
+                    var source=new Texture2D(2,2,TextureFormat.RGBA32,false);
+                    Color32[] pixels;
+                    try
+                    {
+                        if(!source.LoadImage(File.ReadAllBytes("../ArtSource/GreenLowlands/Environment/"+prop.source+".png")))
+                            throw new InvalidDataException(prop.source);
+                        pixels=TutorialEnvironmentKitBuilder.PrepareSprite(source,prop,palette);
+                    }
+                    finally{Object.DestroyImmediate(source);}
+                    if(pixels.Any(p=>p.a!=0&&(p.a!=255||!palette.Contains(p))))throw new InvalidDataException("Tree palette/alpha.");
+                    int ax=2+i*52,ay=2;
+                    atlas.SetPixels32(ax,ay,48,64,pixels);
+                    entries.Add(new Entry{name=prop.name,x=ax,y=ay,width=48,height=64});
+                    for(int y=0;y<4;y++)for(int x=0;x<3;x++)
+                        entries.Add(new Entry{name=prop.name+"_"+x+"_"+y,x=ax+x*16,y=ay+y*16,width=16,height=16});
+                }
+                atlas.Apply();
+                File.WriteAllBytes(TreeRoot+"/LowlandsTrees16.png",atlas.EncodeToPNG());
+                File.WriteAllText(TreeRoot+"/TreeManifest.json",JsonUtility.ToJson(new Manifest{entries=entries.ToArray()},true));
+                AssetDatabase.Refresh();
+                var sprites=ImportSprites(TreeRoot+"/LowlandsTrees16.png",entries.ToArray());
+                foreach(var entry in entries.Where(e=>e.width==16&&e.height==16))
+                {
+                    var tile=GetOrCreate<Tile>(TreeRoot+"/Tiles/"+entry.name+".asset");
+                    tile.sprite=sprites[entry.name];tile.colliderType=Tile.ColliderType.None;
+                    tile.color=Color.white;tile.transform=Matrix4x4.identity;EditorUtility.SetDirty(tile);
+                }
+                AssetDatabase.SaveAssets();
+                Debug.Log("Lowlands trees: three whole 48x64 sprites, 36 visual tiles; authored scenes and Tutorial unchanged.");
+            }
+            finally{Object.DestroyImmediate(atlas);}
+        }
+
+        [MenuItem("Tools/Road of the Old King/Legacy/Build Original Lowlands Environment Kit")]
         public static void Build()
         {
             if(EditorApplication.isPlaying)throw new InvalidOperationException("Use Edit Mode.");

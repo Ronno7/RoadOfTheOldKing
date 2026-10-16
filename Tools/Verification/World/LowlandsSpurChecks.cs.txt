@@ -1,0 +1,56 @@
+// Shared confirmed GreenLowlandsGameplayChecks SETUP -> Play; reset Spur.Phase/Passed.
+// Run phases 0-6 between real frames, then stop/shared cleanup. Debug defeats do not measure combat balance.
+var game=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(!Application.isPlaying||game==null||game.StorageKey!=SessionState.GetString("GreenLowlands.Gameplay.Key","")||!game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new System.Exception("Isolated Play required");
+Application.runInBackground=true;EditorApplication.QueuePlayerLoopUpdate();if(game.IsLoading)return "WAIT";
+int phase=SessionState.GetInt("Spur.Phase",0);if(phase>6)return "DONE: "+SessionState.GetInt("Spur.Passed",0);
+var checks=new System.Collections.Generic.List<string>();System.Action<bool,string> check=(ok,label)=>{if(!ok)throw new System.Exception("Phase "+phase+": "+label);checks.Add(label);};
+if(phase==0||phase==5)check(game.Continue(),"Continue isolated session");
+else if(phase==1||phase==3)check(game.Checkpoints.LeaveScene("Assets/Scenes/GreenLowlands.unity","from-tutorial"),"enter/revisit region");
+else{
+ var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+ var player=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();var body=player.GetComponent<Rigidbody2D>();
+ var guards=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>(FindObjectsSortMode.None).Where(e=>e.name.StartsWith("Upper spur scavenger ")).OrderBy(e=>e.name).ToArray();
+ var drops=guards.Select(e=>e.GetComponent<RoadOfTheOldKing.World.EnemyCoinDrop>()).ToArray();
+ var fragment=GameObject.Find("H1 fragment").GetComponent<RoadOfTheOldKing.World.HeartFragmentPickup>();
+ System.Action<Vector2> move=at=>{player.transform.position=at;body.position=at;body.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();};
+ System.Action<int> kill=i=>{var feedback=guards[i].GetComponent<RoadOfTheOldKing.Combat.EnemyImpactFeedback>();feedback.enabled=false;var random=UnityEngine.Random.state;try{int seed=0;for(;seed<10000;seed++){UnityEngine.Random.InitState(seed);float roll=UnityEngine.Random.value;if(roll>=.5f&&roll<.9f)break;}UnityEngine.Random.InitState(seed);guards[i].GetComponent<RoadOfTheOldKing.Combat.Damageable>().DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.up,0,0));}finally{UnityEngine.Random.state=random;feedback.enabled=true;}};
+ if(phase==2){
+  check(guards.Length==2&&guards.All(e=>!e.IsDefeated),"two living E6 guards");
+  check(drops.All(d=>d!=null&&d.PendingCoins==0),"renewable drops start empty");
+  check(Vector2.Distance(guards[0].transform.position,new Vector2(85.5f,60))<.01f&&Vector2.Distance(guards[1].transform.position,new Vector2(93.5f,62))<.01f,"authored sentry positions");
+  foreach(var e in guards){var at=(Vector2)e.transform.position;check(!Physics2D.OverlapBoxAll(at,Vector2.one*.9f,0).Any(c=>!c.isTrigger&&!c.transform.IsChildOf(e.transform)),"clear guard footprint "+e.name);}
+  move(new Vector2(69,54));foreach(var e in guards)e.GetType().GetMethod("Tick",flags).Invoke(e,new object[]{.02f});
+  check(guards.All(e=>!e.IsAware),"lower reward tease stays outside encounter");check(!fragment.TryCollect(player),"fragment remains out of reach from lower lookout");
+  move(new Vector2(98,64));foreach(var e in guards)e.GetType().GetMethod("Tick",flags).Invoke(e,new object[]{.02f});
+  check(guards[1].IsAware&&guards[1].State==RoadOfTheOldKing.Combat.MeleeEnemyState.Pursuing&&!guards[0].IsAware,"eastern guard notices first; western guard is not forced into engagement");
+  move(new Vector2(110,88));foreach(var e in guards)e.GetType().GetMethod("Tick",flags).Invoke(e,new object[]{.02f});check(guards.All(e=>!e.IsAware&&!e.Action.IsRunning),"disengagement clears pursuit");
+  foreach(var e in guards)e.ResetOnRest();
+  move((Vector2)fragment.transform.position+Vector2.right*.7f);check(fragment.CanCollect(player)&&game.Progress.ownedTools.Count==0,"H1 remains ordinary walking access without tool or kill gate");
+  move(new Vector2(15.5f,3));kill(0);check(guards[0].IsDefeated&&!guards[1].IsDefeated&&drops[0].PendingCoins==1,"partial encounter and one pending drop");
+  check(game.Checkpoints.LeaveScene("Assets/Scenes/Tutorial.unity","from-green-lowlands"),"leave partial encounter");
+ }else if(phase==4){
+  check(guards[0].IsDefeated&&!guards[1].IsDefeated&&drops[0].PendingCoins==1,"ordinary visit retains partial defeat and pending coin");kill(1);
+  var motor=player.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>();var input=player.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();var actions=(UnityEngine.InputSystem.InputActionMap)input.GetType().GetField("actions",flags).GetValue(input);
+  var devices=actions.devices;var routing=UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode;var simulation=Physics2D.simulationMode;bool focus=(bool)input.GetType().GetField("hasFocus",flags).GetValue(input),paused=(bool)input.GetType().GetField("paused",flags).GetValue(input);
+  var keyboard=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
+  System.Action<UnityEngine.InputSystem.Key[]> keys=held=>{UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState(held));UnityEngine.InputSystem.InputSystem.Update();input.GetType().GetField("hasFocus",flags).SetValue(input,true);input.GetType().GetMethod("Update",flags).Invoke(input,null);};
+  try{
+   UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=UnityEngine.InputSystem.InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;actions.devices=new UnityEngine.InputSystem.InputDevice[]{keyboard};Physics2D.simulationMode=SimulationMode2D.Script;input.GetType().GetField("paused",flags).SetValue(input,false);
+   move(new Vector2(100,67));motor.GetType().GetField("freeVelocity",flags).SetValue(motor,Vector2.zero);
+   foreach(var destination in new[]{new Vector2(97,64),new Vector2(93,62),new Vector2(88,60),new Vector2(85.5f,60),new Vector2(82,59),new Vector2(76,58),new Vector2(69.7f,58.5f)}){
+    int frames=0;while(Vector2.Distance(body.position,destination)>.09f&&frames++<350){Vector2 delta=destination-body.position;var held=new System.Collections.Generic.List<UnityEngine.InputSystem.Key>();if(delta.x>.03f)held.Add(UnityEngine.InputSystem.Key.D);else if(delta.x<-.03f)held.Add(UnityEngine.InputSystem.Key.A);if(delta.y>.03f)held.Add(UnityEngine.InputSystem.Key.W);else if(delta.y<-.03f)held.Add(UnityEngine.InputSystem.Key.S);keys(held.ToArray());motor.GetType().GetMethod("FixedUpdate",flags).Invoke(motor,null);Physics2D.Simulate(.02f);}
+    check(frames<350,"real motor reaches spur waypoint "+destination);
+   }
+  }finally{keys(new UnityEngine.InputSystem.Key[0]);actions.devices=devices;UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard);UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=routing;Physics2D.simulationMode=simulation;input.GetType().GetField("hasFocus",flags).SetValue(input,focus);input.GetType().GetField("paused",flags).SetValue(input,paused);}
+  check(player.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>().TryInteract()&&fragment.IsCollected,"real F collects H1 after walking detour");
+  check(!fragment.TryCollect(player)&&RoadOfTheOldKing.Progression.HeartFragmentProgression.Count(game.Progress)==1,"fragment credits once");
+  check(game.Progress.bronzeCoins==2&&drops.All(d=>d.PendingCoins==0),"walk collects the two real coin triggers once");
+  move(new Vector2(15.5f,3));var fire=game.Checkpoints.Fires.First(b=>b.Id=="green-lowlands/arrival-fire");check(game.Checkpoints.Light(fire)&&game.Checkpoints.Rest(fire),"light then rest");
+  check(guards.All(e=>!e.IsDefeated)&&drops.All(d=>d.PendingCoins==0)&&fragment.IsCollected,"rest revives sentries without renewing fragment");check(game.ReturnToTitle(),"save and return to title");
+ }else if(phase==6){
+  check(guards.All(e=>!e.IsDefeated)&&drops.All(d=>d.PendingCoins==0),"Continue starts fresh sentries");
+  check(fragment.IsCollected&&game.Progress.bronzeCoins==2&&RoadOfTheOldKing.Progression.HeartFragmentProgression.Count(game.Progress)==1,"Continue keeps earned fragment and wallet");
+ }
+}
+SessionState.SetInt("Spur.Phase",phase+1);int total=SessionState.GetInt("Spur.Passed",0)+checks.Count;SessionState.SetInt("Spur.Passed",total);return new{phase=phase,passed=checks.Count,total=total};

@@ -24,6 +24,11 @@ namespace RoadOfTheOldKing.Weapons
         [Header("Detached presentation")]
         [SerializeField, Min(0.01f)] private float detachedScale = 1.15f;
         [SerializeField, Min(0.1f)] private float rotationsPerSecond = 7f;
+        [Header("Spectral Recall")]
+        [Tooltip("Shared sprite treatment used only during a successful return. No light or collision changes.")]
+        [SerializeField] private Material recallMaterial;
+        [SerializeField, Min(0f)] private float recallTrailTime = .10f;
+        [SerializeField, Range(0f, 1f)] private float recallTrailWidth = .65f;
         private Vector3 originalBladePosition;
         private Vector3 groundModelPosition;
         private Quaternion groundModelRotation;
@@ -33,6 +38,10 @@ namespace RoadOfTheOldKing.Weapons
         private Vector3 originalBladeScale;
         private float bladeForwardExtent = 0.45f;
         private bool wasFlying;
+        private bool wasReturning;
+        private Material originalMaterial;
+        private Gradient originalTrailColor, recallTrailColor;
+        private float originalTrailTime, originalTrailWidth;
         private int originalSortingLayer;
         private int originalSortingOrder;
         private RoadOfTheOldKing.Player.PlayerCombatController carryOwner;
@@ -43,6 +52,17 @@ namespace RoadOfTheOldKing.Weapons
         private void Awake()
         {
             weapon = GetComponent<AxeWeapon>();
+            if (trail != null)
+            {
+                originalTrailColor = trail.colorGradient;
+                originalTrailTime = trail.time;
+                originalTrailWidth = trail.widthMultiplier;
+                recallTrailColor = new Gradient();
+                recallTrailColor.SetKeys(new[] {
+                    new GradientColorKey(new Color(76f/255f,203f/255f,221f/255f),0f),
+                    new GradientColorKey(new Color(42f/255f,127f/255f,149f/255f),1f)
+                }, new[] { new GradientAlphaKey(.32f,0f), new GradientAlphaKey(0f,1f) });
+            }
             if (model != null)
             {
                 groundModelPosition = model.localPosition;
@@ -51,6 +71,7 @@ namespace RoadOfTheOldKing.Weapons
             if (blade != null)
             {
                 originalBlade = blade.color;
+                originalMaterial = blade.sharedMaterial;
                 originalSprite = blade.sprite;
                 originalBladeScale = blade.transform.localScale;
                 originalBladePosition = blade.transform.localPosition;
@@ -74,16 +95,35 @@ namespace RoadOfTheOldKing.Weapons
 
         private void LateUpdate()
         {
+            DrawPose();
+            // Compose after every pose path, including detached and side-carry early returns.
+            if (blade != null)
+            {
+                var material = weapon.isActiveAndEnabled && weapon.State == AxeState.Returning && recallMaterial != null
+                    ? recallMaterial : originalMaterial;
+                if (blade.sharedMaterial != material) blade.sharedMaterial = material;
+            }
+        }
+
+        private void DrawPose()
+        {
             if (model == null || weapon.Settings == null)
                 return;
-            bool flying = weapon.State == AxeState.Flying || weapon.State == AxeState.Returning;
+            bool returning = weapon.isActiveAndEnabled && weapon.State == AxeState.Returning && recallMaterial != null;
+            bool flying = weapon.isActiveAndEnabled && (weapon.State == AxeState.Flying || weapon.State == AxeState.Returning);
             if (trail != null)
             {
-                if (flying != wasFlying)
+                if (flying != wasFlying || returning != wasReturning)
+                {
                     trail.Clear();
+                    trail.colorGradient = returning ? recallTrailColor : originalTrailColor;
+                    trail.time = returning ? recallTrailTime : originalTrailTime;
+                    trail.widthMultiplier = originalTrailWidth * (returning ? recallTrailWidth : 1f);
+                }
                 trail.emitting = flying;
             }
             wasFlying = flying;
+            wasReturning = returning;
             if (arc != null)
                 arc.enabled = false;
             if (weapon.ThrowPhase == ThrowPhase.Aim && weapon.Owner != null)
@@ -165,6 +205,18 @@ namespace RoadOfTheOldKing.Weapons
                     break;
             }
             model.SetPositionAndRotation(transform.position + offset, Quaternion.Euler(0f, 0f, angle + spriteAngleOffset));
+        }
+
+        private void OnDisable()
+        {
+            if (blade != null) { blade.sharedMaterial = originalMaterial; blade.color = originalBlade; }
+            if (trail != null)
+            {
+                trail.emitting = false; trail.Clear();
+                if (originalTrailColor != null) trail.colorGradient = originalTrailColor;
+                trail.time = originalTrailTime; trail.widthMultiplier = originalTrailWidth;
+            }
+            wasFlying = wasReturning = false;
         }
 
         private void DrawDetached()
