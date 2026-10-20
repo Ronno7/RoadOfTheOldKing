@@ -1,0 +1,128 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3772919994205699152
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 888453143711945280}
+  - component: {fileID: 1899103715288054819}
+  m_Layer: 0
+  m_Name: RewardChest
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &888453143711945280
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3772919994205699152}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4140476712970086018}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1899103715288054819
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3772919994205699152}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e790be472a76c69499a0dbb248a4d083, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.RewardChest
+  rewardId: 
+  reward: 0
+  coinAmount: 25
+  tool: 0
+  requiredMilestone: 
+  closedVisual: {fileID: 0}
+  openVisual: {fileID: 0}
+  spriteView: {fileID: 7681120085641591696}
+--- !u!1001 &5984033781329166477
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 888453143711945280}
+    m_Modifications:
+    - target: {fileID: 1420997872720269852, guid: 11b3f73038ae4ae44802bf364712d4b7, type: 3}
+      propertyPath: m_Name
+      value: Visual
+      objectReference: {fileID: 0}
+    - target: {fileID: 7673679284104062479, guid: 11b3f73038ae4ae44802bf364712d4b7, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7673679284104062479, guid: 11b3f73038ae4ae44802bf364712d4b7, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7673679284104062479, guid: 11b3f73038ae4ae44802bf364712d4b7, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7673679284104062479, guid: 11b3f73038ae4ae44802bf364712d4b7, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7673679284104062479, guid: 11b3f73038ae4ae44802bf364712d4b7, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7673679284104062479, guid: 11b3f73038ae4ae44802bf364712d4b7, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7673679284104062479, guid: 11b3f73038ae4ae44802bf364712d4b7, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7673679284104062479, guid: 11b3f73038ae4ae44802bf364712d4b7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7673679284104062479, guid: 11b3f73038ae4ae44802bf364712d4b7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7673679284104062479, guid: 11b3f73038ae4ae44802bf364712d4b7, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 11b3f73038ae4ae44802bf364712d4b7, type: 3}
+--- !u!4 &4140476712970086018 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7673679284104062479, guid: 11b3f73038ae4ae44802bf364712d4b7, type: 3}
+  m_PrefabInstance: {fileID: 5984033781329166477}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7681120085641591696 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4148761942524754717, guid: 11b3f73038ae4ae44802bf364712d4b7, type: 3}
+  m_PrefabInstance: {fileID: 5984033781329166477}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9dab94a47aad84a439dc3cb21d1e6bed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.RewardChestSpriteView

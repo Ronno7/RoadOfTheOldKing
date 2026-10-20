@@ -1,0 +1,82 @@
+// Stopped Edit Mode only. Temporary additive scene; no imports, bakes, saves or production edits.
+if(EditorApplication.isPlayingOrWillChangePlaymode) throw new Exception("Use stopped Edit Mode.");
+int passed=0;
+Action<bool,string> check=(ok,message)=>{if(!ok)throw new Exception(message);passed++;};
+var flags=System.Reflection.BindingFlags.Static|System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.Public|System.Reflection.BindingFlags.NonPublic;
+var assembly=typeof(RoadOfTheOldKing.EditorTools.PlayerAnimationImporter).Assembly;
+var brushType=assembly.GetType("RoadOfTheOldKing.EditorTools.DecorationBrushWindow");
+var imports=assembly.GetType("RoadOfTheOldKing.EditorTools.AnimationImportWindow");
+var targets=(RoadOfTheOldKing.EditorTools.DirectionalAnimationImporter.Target[])imports.GetMethod("Characters",flags).Invoke(null,null);
+check(targets.Select(t=>t.Name).OrderBy(n=>n).SequenceEqual(new[]{"Player","Wolf","TravelingTrader","BriarWolf","RoadScavenger","MossbackBoar","BrokenWatcher","ThornRat"}.OrderBy(n=>n)),"Every character has its own import target");
+check(targets.Select(t=>t.SetPath).Distinct().Count()==8,"Distinct animation sets");
+check(targets.All(t=>AssetDatabase.IsValidFolder(t.ArtRoot)),"Target sprite folders exist");
+check(assembly.GetType("RoadOfTheOldKing.EditorTools.LowlandsEnemyBuilder")==null,"One-time enemy builder retired");
+check(assembly.GetType("RoadOfTheOldKing.EditorTools.GreenLowlandsDetailScatter")==null,"Fixed meadow scatter retired");
+var menus=assembly.GetTypes().SelectMany(t=>t.GetMethods(flags)).SelectMany(m=>m.GetCustomAttributes(typeof(MenuItem),false).Cast<MenuItem>()).Select(m=>m.menuItem).ToArray();
+check(!menus.Any(m=>m.StartsWith("Tools/Road of the Old King/")),"Single project menu root");
+check(!menus.Any(m=>m.Contains("Create Mossback")||m.Contains("Create Road Scavenger")||m.Contains("Import Lowlands Enemy")||m.Contains("Seed Tutorial")||m.Contains("Scatter Lowlands")),"Retired commands absent");
+check(new[]{"Scene Tools","Decoration Brush","Animation Import","Height Brush"}.All(n=>menus.Contains("Road of the Old King/"+n)),"Recurring tool entries present");
+check(menus.Count(m=>m=="Road of the Old King/Advanced/Asset Maintenance/Shared/Refresh Grass Atlas")==1,"One shared leaf-atlas menu");
+var previous=UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+var selection=Selection.objects;
+var scene=UnityEditor.SceneManagement.EditorSceneManager.NewScene(UnityEditor.SceneManagement.NewSceneSetup.EmptyScene,UnityEditor.SceneManagement.NewSceneMode.Additive);
+UnityEngine.SceneManagement.SceneManager.SetActiveScene(scene);
+var brush=ScriptableObject.CreateInstance(brushType);
+var tile=ScriptableObject.CreateInstance<UnityEngine.Tilemaps.Tile>();
+int group=-1;
+try
+{
+    var parent=new GameObject("Test decoration").transform;
+    var center=new Vector2(10000,10000);
+    var method=brushType.GetMethod("Candidates",flags);
+    var excluded=new List<UnityEngine.Tilemaps.Tilemap>();
+    Func<List<Vector2>> candidates=()=> (List<Vector2>)method.Invoke(null,new object[]{center,2f,.5f,8,17,parent,excluded,.25f});
+    var points=candidates();
+    check(points.Count==8,"Requested stamp density on clear ground");
+    check(points.All(p=>(p-center).sqrMagnitude<=4f),"Preview remains inside brush radius");
+    check(points.SequenceEqual(candidates()),"Stable preview for unchanged cursor and seed");
+    check(points.All(p=>Mathf.Abs(p.x*16-Mathf.Round(p.x*16))<.001f&&Mathf.Abs(p.y*16-Mathf.Round(p.y*16))<.001f),"Native grid alignment");
+    check(points.All(a=>points.All(b=>a==b||(a-b).magnitude>=.5f)),"Minimum spacing within stamp");
+    var authored=new GameObject("Existing decoration");authored.transform.SetParent(parent);authored.transform.position=points[0];
+    check(candidates().All(p=>(p-points[0]).magnitude>=.5f),"Existing sibling spacing respected");
+    var grid=new GameObject("Exclusion grid",typeof(Grid));
+    grid.transform.position=new Vector3(9995,9995,0);
+    var mapObject=new GameObject("Excluded",typeof(UnityEngine.Tilemaps.Tilemap));mapObject.transform.SetParent(grid.transform,false);
+    var map=mapObject.GetComponent<UnityEngine.Tilemaps.Tilemap>();
+    for(int y=0;y<10;y++)for(int x=0;x<10;x++)map.SetTile(new Vector3Int(x,y,0),tile);
+    excluded.Add(map);
+    check(candidates().Count==0,"Assigned tile exclusion blocks placement");
+    excluded.Clear();
+    var obstacle=new GameObject("Solid",typeof(BoxCollider2D));obstacle.transform.position=center;obstacle.GetComponent<BoxCollider2D>().size=Vector2.one*10;
+    check(candidates().Count==0,"Solid collider clearance blocks placement");
+    UnityEngine.Object.DestroyImmediate(obstacle);
+    var prefab=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Environment/Shared/Small_Stones.prefab");
+    check(prefab!=null,"Existing test prefab available");
+    brushType.GetField("parent",flags).SetValue(brush,parent);
+    brushType.GetField("prefabs",flags).SetValue(brush,new List<GameObject>{prefab});
+    Undo.IncrementCurrentGroup();group=Undo.GetCurrentGroup();Undo.SetCurrentGroupName("Editor workflow test");
+    var placed=candidates().Take(2).ToList();
+    brushType.GetMethod("Place",flags).Invoke(brush,new object[]{placed});
+    Undo.FlushUndoRecordObjects();Undo.CollapseUndoOperations(group);
+    check(parent.childCount==3,"Brush adds without replacing authored decoration");
+    check(parent.GetChild(1).position==(Vector3)placed[0] && PrefabUtility.IsAnyPrefabInstanceRoot(parent.GetChild(1).gameObject),"Preview position and prefab link preserved");
+    Undo.PerformUndo();check(parent.childCount==1&&parent.GetChild(0)==authored.transform,"Undo removes only the new stamp");
+    Undo.PerformRedo();check(parent.childCount==3,"Redo restores stamp");
+    var tree=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Environment/Shared/Trees/Oak.prefab");
+    brushType.GetField("prefabs",flags).SetValue(brush,new List<GameObject>{tree});
+    brushType.GetMethod("Place",flags).Invoke(brush,new object[]{new List<Vector2>{new Vector2(10010,10)}});
+    var upper=parent.GetChild(parent.childCount-1).GetComponentsInChildren<UnityEngine.Tilemaps.TilemapRenderer>(true).Single(r=>r.name=="Above Player");
+    check(upper.sortingOrder==500-4*10,"Placed overhead art follows foot-depth contract");
+    parent.localScale=Vector3.one*2;
+    check(!(bool)brushType.GetProperty("Ready",flags).GetValue(brush),"Scaled parent refused");
+}
+finally
+{
+    if(group>=0)Undo.RevertAllDownToGroup(group);
+    UnityEngine.Object.DestroyImmediate(brush);
+    UnityEngine.Object.DestroyImmediate(tile);
+    UnityEngine.SceneManagement.SceneManager.SetActiveScene(previous);
+    UnityEditor.SceneManagement.EditorSceneManager.CloseScene(scene,true);
+    Selection.objects=selection;
+}
+return "PASS "+passed+" editor workflow assertions; temporary scene closed without saving.";

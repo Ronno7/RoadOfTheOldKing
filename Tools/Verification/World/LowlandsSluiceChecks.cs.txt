@@ -4,7 +4,7 @@
 // Stop, set SessionState "Sluice.Check.Command" to "cleanup", call once more.
 // Cleanup preserves authored scenes and main, legacy, prototype and resume saves.
 // Real weapon sweeps with deterministic ticks/teleported setup; not keyboard QA.
-string p="Sluice.Check.", path="Assets/Scenes/LowlandsSluiceProof.unity";
+string p="Sluice.Check.", path="Assets/Scenes/Development/LowlandsSluiceProof.unity";
 string command=SessionState.GetString(p+"Command",SessionState.GetBool(p+"Active",false)?"advance":"setup");
 var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
 if(command=="setup"){
@@ -180,7 +180,7 @@ if(phase==3){
     try{
         var heart=copy.GetComponent<RoadOfTheOldKing.World.RewardChest>();
         heart.GetType().GetField("rewardId",flags).SetValue(heart,"prototype/sluice/heart-cache");
-        heart.GetType().GetField("reward",flags).SetValue(heart,RoadOfTheOldKing.World.ChestReward.HeartFragment);
+        heart.GetType().GetField("reward",flags).SetValue(heart,RoadOfTheOldKing.Progression.RewardKind.HeartFragment);
         heart.RestoreProgress(game.Progress);
         int before=RoadOfTheOldKing.Progression.HeartFragmentProgression.Count(game.Progress);
         check(!heart.IsOpen,"uncollected heart chest starts closed");

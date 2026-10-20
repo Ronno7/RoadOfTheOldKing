@@ -4,24 +4,16 @@ using UnityEngine;
 
 namespace RoadOfTheOldKing.World
 {
-    public sealed class ToolPickup : WorldPickup, IProgressParticipant
+    // A contextual tool in the world; gating, pickup and saving come from RewardPickup (17 Oct refactor).
+    // Owning the tool is its record, so a second copy elsewhere is already taken.
+    public sealed class ToolPickup : RewardPickup
     {
-        [SerializeField] private string rewardId;
         [SerializeField] private WorldTool tool;
-        [SerializeField] private GameObject visual;
         public WorldTool Tool => tool;
+        protected override RewardKind Kind => RewardKind.Tool;
+        protected override WorldTool GrantedTool => tool;
         public override string Prompt => "Take " + WorldToolNames.Display(tool).ToLowerInvariant();
-        public override bool CanCollect(PlayerHealth player) => base.CanCollect(player) && HasClearAccess(player) &&
-            GameSession.Instance != null && !GameSession.Instance.IsLoading &&
-            !GameSession.Instance.Progress.OwnsTool(tool) && tool != WorldTool.None && !string.IsNullOrWhiteSpace(rewardId);
-        public override bool TryCollect(PlayerHealth player)
-        {
-            if (!CanCollect(player) || !GameSession.Instance.Rewards.TryCollectTool(rewardId, tool)) return false;
-            PickupPresentation.Collected(visual, player);
-            RestoreProgress(GameSession.Instance.Progress);
-            return true;
-        }
-        public void CaptureProgress(ProgressState state) { }
-        public void RestoreProgress(ProgressState state) { if (visual != null) visual.SetActive(!state.OwnsTool(tool)); }
+        // Tools always need a clear reach, as before the refactor.
+        public override bool CanCollect(PlayerHealth player) => tool != WorldTool.None && base.CanCollect(player) && HasClearAccess(player);
     }
 }

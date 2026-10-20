@@ -16,7 +16,7 @@ string tutorial="Assets/Scenes/Tutorial.unity",region="Assets/Scenes/GreenLowlan
 var scene=UnityEngine.SceneManagement.SceneManager.GetActiveScene();
 var player=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
 var field=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.InteractiveVegetation>();
-var wolves=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Combat.WolfAI>(FindObjectsSortMode.None).OrderBy(w=>w.name).ToArray();
+var wolves=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Enemies.PredatorBrain>(FindObjectsSortMode.None).OrderBy(w=>w.name).ToArray();
 System.Action<string> seed=label=>{
  check(wolves.Length>=2,"two real enemies available");
  SessionState.SetString(prefix+label+"Dead",wolves[0].name);
@@ -78,9 +78,9 @@ else if(phase==13){
  try{
   for(int i=0;i<2;i++){
    var go=new GameObject("Duplicate visit test enemy");copies.Add(go);go.SetActive(false);go.transform.position=new Vector3(-100-i*5,-100,0);
-   go.AddComponent<BoxCollider2D>();go.AddComponent<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>();go.SetActive(true);
+   go.AddComponent<BoxCollider2D>();go.AddComponent<RoadOfTheOldKing.Enemies.PursuitBrain>();go.SetActive(true);
   }
-  var a=copies[0].GetComponent<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>();var b=copies[1].GetComponent<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>();
+  var a=copies[0].GetComponent<RoadOfTheOldKing.Enemies.PursuitBrain>();var b=copies[1].GetComponent<RoadOfTheOldKing.Enemies.PursuitBrain>();
   var health=a.GetComponent<RoadOfTheOldKing.Combat.Damageable>();
   health.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(null,RoadOfTheOldKing.Combat.AttackKind.LightChop,9999,Vector2.right,0,0));
   b.GetComponent<RoadOfTheOldKing.Combat.Damageable>().SetHealth(7);

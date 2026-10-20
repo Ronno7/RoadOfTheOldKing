@@ -1,0 +1,70 @@
+// Empty unsaved Play Mode scene, no GameSession. Real player/axe/prefabs; no save writes.
+// Preserve editor setup/start-scene override and protected save keys before entering Play.
+if(!Application.isPlaying||UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Progression.GameSession>()!=null)
+    throw new Exception("Use an empty Play Mode scene without GameSession.");
+var created=new List<GameObject>();var failed=new List<string>();int passed=0;
+Action<bool,string> check=(ok,label)=>{if(ok)passed++;else failed.Add(label);};
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var simulation=Physics2D.simulationMode;var random=UnityEngine.Random.state;
+RoadOfTheOldKing.Weapons.AxeSettings settings=null;
+Func<string,GameObject> spawn=path=>{var g=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(path));created.Add(g);return g;};
+try{
+ Physics2D.simulationMode=SimulationMode2D.Script;
+ var player=spawn("Assets/Prefabs/Player/Player.prefab").GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();
+ var weapon=spawn("Assets/Prefabs/Weapons/Axe.prefab").GetComponent<RoadOfTheOldKing.Weapons.AxeWeapon>();
+ settings=UnityEngine.Object.Instantiate(weapon.Settings);settings.lightHitPause=0;
+ weapon.GetType().GetField("settings",flags).SetValue(weapon,settings);
+ check(player.TryEquip(weapon),"Real player equips axe");
+ Action<float> tick=dt=>weapon.GetType().GetMethod("Simulate",flags).Invoke(weapon,new object[]{dt});
+ Action reset=()=>{weapon.CancelAction();player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>().Restore();};
+ foreach(bool stone in new[]{false,true}){
+  string prefab="Assets/Prefabs/World/Shared/"+(stone?"CrackedStone":"BreakableBush")+".prefab";
+  var root=spawn(prefab);root.transform.position=new Vector2(1,0);
+  var target=root.GetComponent<RoadOfTheOldKing.Combat.Breakable>();string id="verification/breakable/"+stone;
+  target.GetType().GetField("progressId",flags).SetValue(target,id);
+  int events=0;target.Broken+=hit=>events++;
+  var lessonObject=new GameObject("Breakable lesson test");created.Add(lessonObject);lessonObject.SetActive(false);
+  var lesson=lessonObject.AddComponent<RoadOfTheOldKing.Tutorial.HitCountLesson>();
+  lesson.GetType().GetField("target",flags).SetValue(lesson,target);
+  lesson.GetType().GetField("requiredHits",flags).SetValue(lesson,1);
+  lesson.GetType().GetField("countedKinds",flags).SetValue(lesson,stone?RoadOfTheOldKing.Tutorial.HitCountLesson.Kinds.ChargedCleave:(RoadOfTheOldKing.Tutorial.HitCountLesson.Kinds)15);
+  lesson.GetType().GetField("progressId",flags).SetValue(lesson,id+"/lesson");
+  lesson.GetType().GetField("completionNotice",flags).SetValue(lesson,"");lessonObject.SetActive(true);
+  Physics2D.SyncTransforms();reset();
+  check(weapon.TryLightChop(Vector2.right),"Start swing "+stone);
+  tick(weapon.LightDuration*weapon.Settings.lightWindupFraction+.01f);
+  check(target.IsBroken==!stone,"Swing breaks bush but not stone");
+  if(stone){
+   check(!lesson.IsComplete&&events==0,"Rejected swing does not complete cleave lesson");
+   foreach(var kind in new[]{RoadOfTheOldKing.Combat.AttackKind.Throw,RoadOfTheOldKing.Combat.AttackKind.Recall}){
+    check(!target.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,kind,999,Vector2.right,0,0,true)),"Stone rejects "+kind);
+   }
+   reset();check(weapon.TryBeginCharge(),"Begin partial charge");tick(settings.minimumCharge+.02f);
+   check(weapon.TryReleaseCharge(Vector2.right),"Release partial charge");tick(weapon.CleaveDuration*.15f+.01f);
+   check(!target.IsBroken&&!lesson.IsComplete,"Partial cleave cannot break stone or complete lesson");
+   reset();check(weapon.TryBeginCharge(),"Begin full charge");tick(settings.fullCharge+.01f);
+   check(weapon.TryReleaseCharge(Vector2.right),"Release full charge");tick(weapon.CleaveDuration*.15f+.01f);
+  }
+  check(target.IsBroken&&!root.activeSelf,"Accepted hit removes obstacle "+stone);
+  check(lesson.IsComplete&&lesson.Hits==1&&events==1,"Exactly one accepted lesson hit "+stone);
+  Physics2D.SyncTransforms();
+  check(!Physics2D.OverlapBoxAll(new Vector2(1,.4f),new Vector2(1.5f,.7f),0).Any(c=>c.transform.IsChildOf(root.transform)),"Broken collider leaves physics "+stone);
+  check(!target.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.ChargedCleave,999,Vector2.right,0,0,true))&&events==1,"Repeated hit is ignored "+stone);
+  var state=new RoadOfTheOldKing.Progression.ProgressState();target.CaptureProgress(state);lesson.CaptureProgress(state);
+  check(state.Has(id)&&state.Has(id+"/lesson"),"Obstacle and lesson captured together "+stone);
+  var reload=spawn(prefab).GetComponent<RoadOfTheOldKing.Combat.Breakable>();reload.transform.position=new Vector2(10,0);
+  reload.GetType().GetField("progressId",flags).SetValue(reload,id);reload.RestoreProgress(state);
+  check(reload.IsBroken&&!reload.gameObject.activeSelf,"Reload keeps obstacle removed "+stone);
+  lesson.RestoreProgress(state);check(lesson.IsComplete,"Reload keeps lesson complete "+stone);
+  var fresh=spawn(prefab).GetComponent<RoadOfTheOldKing.Combat.Breakable>();fresh.transform.position=new Vector2(20,0);
+  fresh.GetType().GetField("progressId",flags).SetValue(fresh,id);fresh.RestoreProgress(new RoadOfTheOldKing.Progression.ProgressState());
+  check(!fresh.IsBroken&&fresh.gameObject.activeSelf,"New game keeps obstacle intact "+stone);
+  UnityEngine.Object.DestroyImmediate(lessonObject);UnityEngine.Object.DestroyImmediate(root);
+  UnityEngine.Object.DestroyImmediate(reload.gameObject);UnityEngine.Object.DestroyImmediate(fresh.gameObject);
+ }
+}finally{
+ Physics2D.simulationMode=simulation;UnityEngine.Random.state=random;
+ foreach(var g in created)if(g)UnityEngine.Object.DestroyImmediate(g);
+ if(settings)UnityEngine.Object.DestroyImmediate(settings);
+}
+return new{passed,failed};

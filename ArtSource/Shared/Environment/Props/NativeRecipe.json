@@ -1,0 +1,178 @@
+{
+  "source": "OutlinedProps_Source.png",
+  "method": "Alpha >= 128 crop; nearest sample to recorded size; nearest RGB shared swatch; binary alpha. Center horizontally, one-pixel base padding. Preserve canvas/registration.",
+  "pieces": [
+    {
+      "name": "Boulder",
+      "sourceRect": [
+        0,
+        0,
+        640,
+        640
+      ],
+      "alphaCrop": [
+        63,
+        177,
+        580,
+        575
+      ],
+      "canvas": [
+        32,
+        32
+      ],
+      "drawBounds": [
+        30,
+        24
+      ],
+      "sampleSize": [
+        30,
+        23
+      ],
+      "padding": [
+        1,
+        8
+      ],
+      "colors": [
+        "ink",
+        "stonejoint",
+        "stoneshade",
+        "stone",
+        "stonelight"
+      ],
+      "output": "RoadOfTheOldKing/Assets/Art/Sprites/World/Shared/Props/Boulder.png"
+    },
+    {
+      "name": "Boulder_Cluster",
+      "sourceRect": [
+        640,
+        0,
+        1280,
+        640
+      ],
+      "alphaCrop": [
+        44,
+        114,
+        573,
+        622
+      ],
+      "canvas": [
+        48,
+        32
+      ],
+      "drawBounds": [
+        36,
+        30
+      ],
+      "sampleSize": [
+        31,
+        30
+      ],
+      "padding": [
+        8,
+        1
+      ],
+      "colors": [
+        "ink",
+        "stonejoint",
+        "stoneshade",
+        "stone",
+        "leafshade",
+        "grasspatch"
+      ],
+      "output": "RoadOfTheOldKing/Assets/Art/Sprites/World/Shared/Props/Boulder_Cluster.png"
+    },
+    {
+      "name": "Breakable_Bush",
+      "sourceRect": [
+        0,
+        640,
+        640,
+        1280
+      ],
+      "alphaCrop": [
+        63,
+        101,
+        599,
+        501
+      ],
+      "canvas": [
+        32,
+        32
+      ],
+      "drawBounds": [
+        30,
+        25
+      ],
+      "sampleSize": [
+        30,
+        22
+      ],
+      "padding": [
+        1,
+        9
+      ],
+      "colors": [
+        "ink",
+        "deepgreen",
+        "leafshade",
+        "grasspatch",
+        "leaflight",
+        "soil"
+      ],
+      "output": "RoadOfTheOldKing/Assets/Art/Sprites/World/Shared/Breakables/Breakable_Bush.png"
+    },
+    {
+      "name": "Cracked_Stone",
+      "sourceRect": [
+        640,
+        640,
+        1280,
+        1280
+      ],
+      "alphaCrop": [
+        23,
+        138,
+        573,
+        508
+      ],
+      "canvas": [
+        32,
+        32
+      ],
+      "drawBounds": [
+        30,
+        23
+      ],
+      "sampleSize": [
+        30,
+        20
+      ],
+      "padding": [
+        1,
+        11
+      ],
+      "colors": [
+        "ink",
+        "stonejoint",
+        "stoneshade",
+        "stone",
+        "stonelight"
+      ],
+      "output": "RoadOfTheOldKing/Assets/Art/Sprites/World/Shared/Breakables/Cracked_Stone.png"
+    }
+  ],
+  "registration": {
+    "ppu": 16,
+    "filter": "Point",
+    "alpha": "binary",
+    "mesh": "FullRect",
+    "compression": "Uncompressed",
+    "mipmaps": false,
+    "pivot": [
+      0.5,
+      0.5
+    ],
+    "boulders": "Whole sprite plus 16x16 slices named <family>_<column>_<row>, rows bottom-up. Retarget existing Shared/Environment/Props/Tiles assets by name; preserve tile GUIDs. Other Props16 art stays installed.",
+    "breakables": "Whole sprites on Art child at local (0,1), foot anchor at root; separate box collider size (1.5,0.7), offset (0,0.4). Shared functional prefabs own behavior."
+  }
+}

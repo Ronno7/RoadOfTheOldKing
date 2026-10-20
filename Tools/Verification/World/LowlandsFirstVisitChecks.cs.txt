@@ -2,7 +2,7 @@ var checks=new System.Collections.Generic.List<string>();
 System.Action<bool,string> check=(ok,label)=>{if(!ok)throw new System.Exception(label+" | "+string.Join("; ",checks.ToArray()));checks.Add(label);};
 var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
 // First-visit integration: shared confirmed isolated SETUP, FirstVisit.Phase/Passed=0,
-// Play, run phases 0-7 between frames, then shared cleanup.
+// Play, run phases 0-8 between frames, then shared cleanup.
 // Earn rewards through authored events; no injected shards/coins/tools/milestones.
 // Teleported interaction setup, controlled debug defeats and empty enemy rolls are not a fought route.
 if(!EditorApplication.isPlaying)throw new System.Exception("Isolated Play required");
@@ -10,8 +10,8 @@ if(!EditorApplication.isPlaying)throw new System.Exception("Isolated Play requir
  var fg=RoadOfTheOldKing.Progression.GameSession.Instance;
  if(fg==null||fg.StorageKey!=SessionState.GetString("GreenLowlands.Gameplay.Key","")||!fg.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new System.Exception("Confirmed isolated first visit required");
  Application.runInBackground=true;EditorApplication.QueuePlayerLoopUpdate();if(fg.IsLoading)return "WAIT";
- int fvPhase=SessionState.GetInt("FirstVisit.Phase",0);if(fvPhase>7)return "DONE: "+SessionState.GetInt("FirstVisit.Passed",0);
- if(fvPhase==0||fvPhase==6)check(fg.Continue(),"Continue isolated first visit");
+ int fvPhase=SessionState.GetInt("FirstVisit.Phase",0);if(fvPhase>8)return "DONE: "+SessionState.GetInt("FirstVisit.Passed",0);
+ if(fvPhase==0||fvPhase==7)check(fg.Continue(),"Continue isolated first visit");
  else{
   var fp=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();var fb=fp.GetComponent<Rigidbody2D>();
   var fc=fp.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();var fa=fc.Weapon;
@@ -19,7 +19,7 @@ if(!EditorApplication.isPlaying)throw new System.Exception("Isolated Play requir
   System.Action<Vector2> fmove=at=>{fb.position=at;fp.transform.position=at;fb.linearVelocity=Vector2.zero;fc.GetType().GetField("controlsActive",flags).SetValue(fc,true);Physics2D.SyncTransforms();};
   System.Action<Vector2> fpose=at=>{fi.Close();fa.CancelAction();fmove(at);};
   System.Action<RoadOfTheOldKing.Combat.Damageable> fkill=health=>{
-   var feedback=health.GetComponent<RoadOfTheOldKing.Combat.EnemyImpactFeedback>();bool enabled=feedback!=null&&feedback.enabled;if(feedback!=null)feedback.enabled=false;
+   var feedback=health.GetComponent<RoadOfTheOldKing.Enemies.EnemyImpactFeedback>();bool enabled=feedback!=null&&feedback.enabled;if(feedback!=null)feedback.enabled=false;
    var random=UnityEngine.Random.state;
    try{for(int seed=0;seed<10000;seed++){UnityEngine.Random.InitState(seed);if(UnityEngine.Random.value<.5f){UnityEngine.Random.InitState(seed);break;}}
     health.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(fp.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.up,0,0));
@@ -30,8 +30,7 @@ if(!EditorApplication.isPlaying)throw new System.Exception("Isolated Play requir
   if(fvPhase==1){
    check(fp.gameObject.scene.name=="Tutorial"&&fg.Progress.sunShards==0&&fg.Progress.bronzeCoins==0,"Tutorial begins without staged money or shards");
    var firstShard=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SunShardReward>();
-   var firstGuard=(RoadOfTheOldKing.Combat.Damageable)firstShard.GetType().GetField("defeatSource",flags).GetValue(firstShard);
-   var otherGuards=(RoadOfTheOldKing.Combat.Damageable[])firstShard.GetType().GetField("alsoDefeat",flags).GetValue(firstShard);
+   var firstGuard=firstShard.Unlock.Guards[0];var otherGuards=firstShard.Unlock.Guards.Skip(1).ToArray();
    check(!firstShard.IsAvailable,"S1 locked before actual pack defeats");fkill(firstGuard);foreach(var guard in otherGuards)fkill(guard);
    check(firstShard.IsAvailable,"actual pack defeat events reveal S1");fpose(firstShard.transform.position);
    check(fi.TryInteract()&&firstShard.IsCollected&&fg.Progress.sunShards==1,"F earns Tutorial S1");
@@ -52,7 +51,7 @@ if(!EditorApplication.isPlaying)throw new System.Exception("Isolated Play requir
    check(routePurse.TryCollect(fp)&&fg.Progress.bronzeCoins==10,"route purse brings fixed income to ten");
    var orchardChest=fchest("orchard");fpose((Vector2)orchardChest.transform.position+Vector2.down*.7f);
    check(!orchardChest.TryCollect(fp)&&fg.Progress.sunShards==1,"S2 locked before orchard encounter");
-   var orchardGuards=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>(FindObjectsSortMode.None).Where(e=>e.name.StartsWith("Orchard scavenger ")).ToArray();
+   var orchardGuards=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Enemies.PursuitBrain>(FindObjectsSortMode.None).Where(e=>e.name.StartsWith("Orchard scavenger ")).ToArray();
    check(orchardGuards.Length==3,"three authored orchard guards");
    foreach(var guard in orchardGuards)fkill(guard.GetComponent<RoadOfTheOldKing.Combat.Damageable>());
    check(fg.Progress.Has("green-lowlands/orchard-cleared")&&orchardGuards.All(e=>e.GetComponent<RoadOfTheOldKing.World.EnemyCoinDrop>().PendingCoins==0),"real orchard defeats unlock stash with zero random income");
@@ -73,26 +72,37 @@ if(!EditorApplication.isPlaying)throw new System.Exception("Isolated Play requir
    fmove(new Vector2(6,88));check(fi.TryInteract()&&fs.Stage==RoadOfTheOldKing.World.SluiceStage.ServiceDiverted,"F diverts service channel");
    flodge(new Vector2(5,74));fmove(new Vector2(4.5f,76));check(fi.TryInteract(),"F moves lodged carriage");ftick(60);frecall(new Vector2(4.5f,78));
    check(fs.Stage==RoadOfTheOldKing.World.SluiceStage.PondLow,"ordered return permanently lowers pond");
+  }else if(fvPhase==4){
+   // The pond keeps its collision until the eight-second drain completes, so the basin shard's clear-reach check
+   // waits for it (17 Oct: split from phase 3, which pressed F in the same frame the pond began to lower).
+   var waitShard=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SunShardReward>();fpose((Vector2)waitShard.transform.position+Vector2.down*.7f);
+   if(!waitShard.CanCollect(fp))return "WAIT: pond still draining";
    var basinShard=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SunShardReward>();fpose((Vector2)basinShard.transform.position+Vector2.down*.7f);
    check(fi.TryInteract()&&basinShard.IsCollected&&fg.Progress.sunShards==3,"F earns S3; all three shards obtained through authored rewards");
    var basinMoney=fchest("basin-cache");fpose((Vector2)basinMoney.transform.position+Vector2.down*.7f);
    check(fi.TryInteract()&&basinMoney.IsOpen&&fg.Progress.bronzeCoins==45,"basin chest completes all 45 fixed coins without random payouts");
    fpose(new Vector2(15.5f,3));check(fi.TryInteract()&&fi.IsOpen,"second fire F rests and opens menu");
    var upgradeMenu=fp.GetComponent<RoadOfTheOldKing.UI.BonfireMenu>();
-   upgradeMenu.Navigate(1);upgradeMenu.Submit();upgradeMenu.Navigate(1);upgradeMenu.Submit();
+   // Upgrades is the first row since the separate Rest entry was removed (17 Oct).
+   upgradeMenu.Submit();upgradeMenu.Navigate(1);upgradeMenu.Submit();
    check(upgradeMenu.GetType().GetField("page",flags).GetValue(upgradeMenu).ToString()=="Confirm","earned shards reach Deep Notch confirmation");
    upgradeMenu.Submit();check(fg.Progress.sunShards==3&&fg.Progress.upgrades.Count==0,"safe Back preserves earned shards");
    upgradeMenu.Navigate(1);upgradeMenu.Submit();upgradeMenu.Navigate(1);upgradeMenu.Submit();
    check(fg.Progress.sunShards==0&&fg.Progress.upgrades.Count==1&&fg.Progress.upgrades[0].upgradeId=="hatchet/deep-notch","real menu buys one choice with exactly the three earned shards");
    check(fg.Progress.bronzeCoins==45,"weapon upgrade does not spend coins");fi.Close();
-  }else if(fvPhase==4){
-   fpose(new Vector2(10,2.3f));check(fi.TryInteract(),"F opens trader after upgrade");
-   var stockMenu=fp.GetComponent<RoadOfTheOldKing.UI.CollectionMenu>();check(stockMenu.IsOpen,"actual stock menu opens");
+  }else if(fvPhase==5){
+   // 17 Oct: the trader wanders (stand him at home) and F opens a conversation; Trade hands over to the stock menu.
+   var walker=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.TraderWalker>();walker.ReturnHome();
+   fpose(walker.Home+new Vector2(0,-.7f));check(fi.TryInteract(),"F talks to the trader after upgrade");
+   var talk=fp.GetComponent<RoadOfTheOldKing.UI.DialogueBox>();var atChoices=talk.GetType().GetProperty("AtChoices",flags);
+   for(int i=0;i<12&&talk.IsOpen&&!(bool)atChoices.GetValue(talk,null);i++)talk.Submit();
+   fc.GetType().GetField("controlsActive",flags).SetValue(fc,false);talk.Submit();
+   var stockMenu=fp.GetComponent<RoadOfTheOldKing.UI.CollectionMenu>();check(stockMenu.IsOpen&&!talk.IsOpen,"Trade opens the actual stock menu");
    stockMenu.Submit();stockMenu.Navigate(1);stockMenu.Submit();
    check(fg.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.RopeKit)&&fg.Progress.bronzeCoins==15,"fixed income buys rope kit with fifteen coins left");
    stockMenu.Submit();stockMenu.Navigate(1);stockMenu.Submit();
    check(fg.Progress.bronzeCoins==15,"sold rope cannot charge twice");stockMenu.Close();
-  }else if(fvPhase==5){
+  }else if(fvPhase==6){
    var ropeRoute=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RopeRoute>();
    fpose(new Vector2(127,77));check(fi.TryInteract()&&ropeRoute.IsSecured,"purchased kit secures actual workshop route");
    var fm=fp.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>();var priorSimulation=Physics2D.simulationMode;
@@ -100,13 +110,13 @@ if(!EditorApplication.isPlaying)throw new System.Exception("Isolated Play requir
    finally{Physics2D.simulationMode=priorSimulation;}
    check(!fm.IsTraversingRope&&Vector2.Distance(fb.position,new Vector2(131,77))<.05f,"real motor completes purchased rope climb");
    fpose(new Vector2(15.5f,3));check(fg.ReturnToTitle(),"save completed first-visit progression");
-  }else if(fvPhase==7){
+  }else if(fvPhase==8){
    check(fg.Progress.sunShards==0&&fg.Progress.upgrades.Count==1&&fg.Progress.upgrades[0].upgradeId=="hatchet/deep-notch","Continue retains purchased upgrade and spent shards");
    check(fg.Progress.bronzeCoins==15&&fg.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.RopeKit),"Continue retains earned balance and purchased kit");
    check(UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RopeRoute>().IsSecured,"Continue retains secured rope");
    check(UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RecallSluice>().Stage==RoadOfTheOldKing.World.SluiceStage.PondLow,"Continue retains player-changed water");
    check(fchest("orchard").IsOpen&&fchest("basin-cache").IsOpen&&UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SunShardReward>().IsCollected,"Continue keeps all regional route rewards exhausted");
-   check(UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>(FindObjectsSortMode.None).Where(e=>e.name.StartsWith("Orchard scavenger ")).All(e=>!e.IsDefeated)&&fg.Progress.Has("green-lowlands/orchard-cleared"),"guards revive without relocking earned stash");
+   check(UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Enemies.PursuitBrain>(FindObjectsSortMode.None).Where(e=>e.name.StartsWith("Orchard scavenger ")).All(e=>!e.IsDefeated)&&fg.Progress.Has("green-lowlands/orchard-cleared"),"guards revive without relocking earned stash");
   }
  }
  SessionState.SetInt("FirstVisit.Phase",fvPhase+1);int fvTotal=SessionState.GetInt("FirstVisit.Passed",0)+checks.Count;SessionState.SetInt("FirstVisit.Passed",fvTotal);

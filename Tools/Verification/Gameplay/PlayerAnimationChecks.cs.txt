@@ -1,5 +1,5 @@
 // Empty Play Mode scene without a GameSession (for example, set the play-mode start scene to
-// Assets/Scenes/CombatEffectsPreview.unity without starting the preview). Drives the real Player
+// Assets/Scenes/Development/CombatEffectsPreview.unity without starting the preview). Drives the real Player
 // prefab with script-stepped physics and checks PlayerSpriteAnimator plus the weapon-owned hit pause.
 // A temporary in-memory walk clip exercises distance-driven cycling; no assets are modified.
 if (!Application.isPlaying || UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Progression.GameSession>() != null)

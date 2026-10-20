@@ -1,0 +1,112 @@
+"""Shared path masks, seam checks and atlas packing.
+
+Library only. Production colors and destinations belong to build_shared_* recipes.
+"""
+from pathlib import Path
+from PIL import Image
+import csv
+import itertools
+import json
+import random
+import ground_tile_helpers as ground
+
+ROOT = Path(__file__).resolve().parents[3]
+OUT = ROOT / 'RoadOfTheOldKing/Assets/Art/Tiles/Shared/Paths'
+DOC = ROOT / 'DeveloperNotes/Previews/Shared'
+MATERIALS = {'DirtLane': 2, 'Footpath': 5}
+
+
+def coverage(mask, inset):
+    im = Image.new('L', (16,16))
+    for y in range(16):
+        for x in range(16):
+            right, bottom = x >= 8, y >= 8
+            u,v = (15-x if right else x),(15-y if bottom else y)
+            h,vert = (2 if right else 8),(4 if bottom else 1)
+            diag = (32 if bottom else 16) if right else (64 if bottom else 128)
+            if mask & h and mask & vert: inside = bool(mask & diag) or u+v >= inset
+            elif mask & h: inside = v >= inset
+            elif mask & vert: inside = u >= inset
+            else: inside = u>=inset and v>=inset and u+v>=2*inset+2
+            if inside: im.putpixel((x,y),255)
+    return im
+
+
+def tile(material, mask, variant=0, palette=None):
+    p = palette or ground.P
+    alpha = coverage(mask,MATERIALS[material])
+    im = Image.new('RGBA',(16,16),p['earth']);im.putalpha(alpha)
+    rng = random.Random(391+variant*71)
+    # Sparse grains and light scuff marks, leaving the walking surface calm.
+    for i in range(4 if material=='DirtLane' else 2):
+        x,y=rng.randint(5,10),rng.randint(5,10)
+        if alpha.getpixel((x,y)):
+            im.putpixel((x,y),p['sand' if i%2==0 else 'soil'])
+            if i==0 and alpha.getpixel((x+1,y)):im.putpixel((x+1,y),p['sand'])
+    # Interrupted dark grains suggest a worn edge, without the ground kit's hard outline.
+    for y in range(16):
+        for x in range(16):
+            if alpha.getpixel((x,y)) and (x*3+y*5)%7==0 and any(
+                0<=x+dx<16 and 0<=y+dy<16 and not alpha.getpixel((x+dx,y+dy))
+                for dx,dy in ground.OFFSETS[:4]):im.putpixel((x,y),p['soil'])
+    return im
+
+
+def verify():
+    checks=0
+    for material,inset in MATERIALS.items():
+        masks={m:coverage(m,inset) for m in ground.MASKS}
+        for vertical in (False,True):
+            centers=((0,0),(0,1) if vertical else (1,0))
+            coords=list(itertools.product(range(-1,2 if vertical else 3),range(-1,3 if vertical else 2)))
+            optional=[p for p in coords if p not in centers]
+            for bits in range(1<<len(optional)):
+                occupied=set(centers)|{p for i,p in enumerate(optional) if bits&(1<<i)}
+                def at(p):
+                    return masks[ground.normalize(sum(1<<b for b,(dx,dy) in enumerate(ground.OFFSETS) if (p[0]+dx,p[1]+dy) in occupied))]
+                a,b=[at(p) for p in centers]
+                for n in range(16):assert a.getpixel((n,15) if vertical else (15,n))==b.getpixel((n,0) if vertical else (0,n)),(material,bits)
+                checks+=1
+    return checks
+
+
+def main(output=OUT, preview=DOC, atlas_name='Paths16',
+         preview_name='shared-paths-atlas', palette=None,
+         render_tile=tile, reused_brushes=None):
+    OUT, p = output, palette or ground.P
+    OUT.mkdir(parents=True,exist_ok=True)
+    preview.mkdir(parents=True,exist_ok=True)
+    entries=[];images=[]
+    for material in MATERIALS:
+        for mask,v in [(m,0) for m in ground.MASKS]+[(255,v) for v in range(1,4)]:
+            name=f'{material}_{ground.shape_name(mask)}' if not v else f'{material}_Center_Variant_{v:02}'
+            entries.append(dict(name=name,material=material,mask=mask,variant=v));images.append(render_tile(material,mask,v,palette=p))
+    cols=10;rows=10;pitch=20;atlas=Image.new('RGBA',(200,200))
+    sheet=Image.new('RGB',(cols*64,rows*64),p['grass'][:3])
+    for i,(e,im) in enumerate(zip(entries,images)):
+        x=i%cols*pitch+2;y=i//cols*pitch+2
+        for dy in range(-2,18):
+            for dx in range(-2,18):atlas.putpixel((x+dx,y+dy),im.getpixel((max(0,min(15,dx)),max(0,min(15,dy)))))
+        e.update(index=i,x=x,y=200-y-16,width=16,height=16)
+        sample=Image.new('RGBA',(16,16),p['grass']);sample.alpha_composite(im)
+        sheet.paste(sample.resize((64,64),Image.Resampling.NEAREST),(i%cols*64,i//cols*64))
+    atlas.save(OUT/(atlas_name+'.png'))
+    sheet.save(preview/(preview_name+'.png'))
+    (OUT/'TileManifest.json').write_text(json.dumps(dict(tileSize=16,columns=cols,padding=2,entries=entries),indent=2)+'\n')
+    with (OUT/'TileIndex.csv').open('w',newline='') as f:
+        w=csv.DictWriter(f,fieldnames=entries[0].keys());w.writeheader();w.writerows(entries)
+    assert len(entries)==len({e['name'] for e in entries})==100
+    assert {c for im in images for c in im.get_flattened_data() if c[3]}<=set(p.values())
+    assert all(c[3] in (0,255) for im in images for c in im.get_flattened_data())
+    colors = {m:len({c[:3] for e,im in zip(entries,images) if e['material']==m
+                    for c in im.get_flattened_data() if c[3]}) for m in MATERIALS}
+    assert max(colors.values()) <= 5
+    report=dict(visual_tiles=100,new_brushes=2,reused_brushes=reused_brushes or ['Ground/Paint_Cobbles'],shapes_per_brush=47,
+                seam_neighborhoods_checked=verify(),colors_by_material=colors,tile_size=16,atlas_size=[200,200])
+    (OUT/'GenerationReport.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report))
+
+
+if __name__ == '__main__':
+    raise SystemExit(
+        'This module supplies shared export helpers. To refresh the installed art, run '
+        'python Tools/Art/World/build_shared_paths.py instead.')

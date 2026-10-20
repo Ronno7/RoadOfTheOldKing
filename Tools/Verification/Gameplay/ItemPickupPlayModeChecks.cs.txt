@@ -22,7 +22,7 @@ if (SessionState.GetString("PickupCheck.Mode","") == "presentation") {
     try {
         Physics2D.simulationMode=SimulationMode2D.Script;
         pMove(new Vector2(14,3.5f));
-        var pHeart=pSpawn("Assets/Prefabs/World/HeartFragment.prefab").GetComponent<RoadOfTheOldKing.World.HeartFragmentPickup>();
+        var pHeart=pSpawn("Assets/Prefabs/World/Shared/HeartFragment.prefab").GetComponent<RoadOfTheOldKing.World.HeartFragmentPickup>();
         pHeart.GetType().GetField("rewardId",pFlags).SetValue(pHeart,pId+"/heart");
         pHeart.RestoreProgress(pGame.Progress);
         var pView=pHeart.GetComponentInChildren<RoadOfTheOldKing.World.PickupPresentation>();
@@ -56,14 +56,14 @@ if (SessionState.GetString("PickupCheck.Mode","") == "presentation") {
         var pStored=new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(pGame.StorageKey).Load();
         pCheck(RoadOfTheOldKing.Progression.HeartFragmentProgression.IsCollected(pStored,pHeart.RewardId),"Heart receipt is persisted before feedback ends");
 
-        var pShard=pSpawn("Assets/Prefabs/World/SunShard.prefab").GetComponent<RoadOfTheOldKing.World.SunShardReward>();
+        var pShard=pSpawn("Assets/Prefabs/World/Shared/SunShard.prefab").GetComponent<RoadOfTheOldKing.World.SunShardReward>();
         pShard.GetType().GetField("rewardId",pFlags).SetValue(pShard,pId+"/shard");
         pShard.RestoreProgress(pGame.Progress);
         int pShardCount=pGame.Progress.sunShards;
         pCheck(pShard.TryCollect(pPlayer) && pGame.Progress.sunShards==pShardCount+1 && !pShard.TryCollect(pPlayer),"Shard award and duplicate protection survive animation");
         pCheck(!pShard.GetComponentInChildren<RoadOfTheOldKing.World.PickupPresentation>(true).gameObject.activeInHierarchy,"Collected shard art stays hidden");
 
-        var pCoin=pSpawn("Assets/Prefabs/World/CoinSource_Placeholder.prefab").GetComponent<RoadOfTheOldKing.World.CoinSource>();
+        var pCoin=pSpawn("Assets/Prefabs/World/Shared/CoinSource.prefab").GetComponent<RoadOfTheOldKing.World.CoinSource>();
         pCoin.GetType().GetField("sourceId",pFlags).SetValue(pCoin,pId+"/coin");
         pCoin.GetType().GetField("guaranteedCoins",pFlags).SetValue(pCoin,5);
         pCheck(pCoin.Reveal(),"Coin source reveals through the real reward service");
@@ -101,7 +101,7 @@ if (SessionState.GetString("PickupCheck.Mode","") == "presentation") {
         // A synthetic dark region exercises visibility gating without modifying a production scene.
         var pDarkObject=new GameObject("Presentation dark check");pCreated.Add(pDarkObject);
         var pDark=pDarkObject.AddComponent<RoadOfTheOldKing.World.DarkInterior>();
-        var pNewHeart=pSpawn("Assets/Prefabs/World/HeartFragment.prefab").GetComponent<RoadOfTheOldKing.World.HeartFragmentPickup>();
+        var pNewHeart=pSpawn("Assets/Prefabs/World/Shared/HeartFragment.prefab").GetComponent<RoadOfTheOldKing.World.HeartFragmentPickup>();
         pNewHeart.GetType().GetField("rewardId",pFlags).SetValue(pNewHeart,pId+"/dark");
         pNewHeart.RestoreProgress(pGame.Progress);
         var pDarkView=pNewHeart.GetComponentInChildren<RoadOfTheOldKing.World.PickupPresentation>();
@@ -150,7 +150,7 @@ var body=player.GetComponent<Rigidbody2D>();
 var interaction=player.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>();
 var stamina=player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>();
 var weapon=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Weapons.AxeWeapon>();
-var enemy=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>();
+var enemy=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Enemies.PursuitBrain>();
 var reward=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SunShardReward>();
 var fire=session.Checkpoints.Fires.Single();
 var store=new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(key);
@@ -181,7 +181,7 @@ try {
     enemy.GetComponent<RoadOfTheOldKing.Combat.Damageable>().ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(
         player.gameObject,RoadOfTheOldKing.Combat.AttackKind.ChargedCleave,1000,Vector2.up,0,0,true));
     move(fire.SpawnPosition);reward.transform.position=player.transform.position;
-    extra=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/World/SunShard.prefab"));
+    extra=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/World/Shared/SunShard.prefab"));
     extra.transform.position=player.transform.position+Vector3.right*.4f;
     var other=extra.GetComponent<RoadOfTheOldKing.World.SunShardReward>();
     other.GetType().GetField("rewardId",flags).SetValue(other,"verification/second-pickup");
@@ -195,7 +195,7 @@ try {
     check(interaction.TryInteract() && interaction.IsOpen && session.Checkpoints.HasCheckpoint,"Next F action opens nearby bonfire");
     check(interaction.TryInteract() && !interaction.IsOpen,"F closes bonfire without an extra interaction");
 
-    heart=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/World/HeartFragment.prefab"));
+    heart=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/World/Shared/HeartFragment.prefab"));
     heart.transform.position=player.transform.position+Vector3.up*.2f;
     var fragment=heart.GetComponent<RoadOfTheOldKing.World.HeartFragmentPickup>();
     fragment.GetType().GetField("rewardId",flags).SetValue(fragment,"verification/fragment");

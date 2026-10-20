@@ -1,0 +1,63 @@
+// Reward refactor guard (18 Oct): pre-refactor save keys load into RewardPickup/EncounterUnlock/RewardKeys, and an
+// EncounterUnlock gates a chest end to end. Run with FixtureRunner (compiler=codedom).
+// 1. Shared GreenLowlandsGameplayChecks SETUP (stopped). 2. Stopped: run this once to seed the isolated save with
+//    keys written exactly as the old code wrote them. 3. Play, then run between frames: Continue -> Tutorial checks ->
+//    travel -> Lowlands checks -> workshop unlock. 4. Stop and run the shared cleanup. Only the isolated key is touched.
+string key=SessionState.GetString("GreenLowlands.Gameplay.Key","");
+if(!key.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new System.Exception("Isolated setup required");
+var checks=new System.Collections.Generic.List<string>();
+System.Action<bool,string> check=(ok,s)=>{if(!ok)throw new System.Exception("FAIL: "+s+" | passed: "+string.Join("; ",checks.ToArray()));checks.Add(s);};
+var f=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+System.Func<RoadOfTheOldKing.World.RewardPickup,GameObject> visual=r=>(GameObject)typeof(RoadOfTheOldKing.World.RewardPickup).GetField("visual",f).GetValue(r);
+int phase=SessionState.GetInt("Rewards.Phase",0);
+if(!EditorApplication.isPlaying){
+ if(phase!=0)throw new System.Exception("Seed only before Play (Rewards.Phase 0)");
+ var store=new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(key);var s=store.Load();
+ s.Complete("shard/available/tutorial/first-enemy");                 // pack defeated, shard not taken
+ s.Complete("coins/collected/green-lowlands/basin-cache");s.bronzeCoins=25;   // basin chest opened
+ s.Complete("tool/collected/green-lowlands/maintenance-crank");s.ownedTools.Add(RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank);
+ RoadOfTheOldKing.Progression.HeartFragmentProgression.TryCollect(s,"green-lowlands/upper-spur");
+ store.Save(s);SessionState.SetInt("Rewards.Phase",1);return "SEEDED pre-refactor keys; enter Play and run again";
+}
+var g=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(g==null||g.StorageKey!=key)throw new System.Exception("Isolated Play session required");
+Application.runInBackground=true;if(g.IsLoading)return "WAIT";
+var player=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
+System.Action<Vector2> pose=at=>{var b=player.GetComponent<Rigidbody2D>();b.position=at;player.transform.position=at;b.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();};
+if(phase==1)check(g.Continue(),"Continue the seeded save");
+else if(phase==2){
+ check(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name=="Tutorial","old save continues into the Tutorial");
+ var shard=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SunShardReward>();
+ check(shard.Unlock!=null&&shard.Unlock.IsUnlocked(g.Progress),"old 'shard/available' key unlocks the migrated EncounterUnlock");
+ check(shard.IsAvailable&&!shard.IsCollected&&visual(shard).activeSelf,"unlocked-not-taken shard is shown without refighting the pack");
+ pose((Vector2)shard.transform.position+Vector2.down*.6f);int before=g.Progress.sunShards;
+ check(shard.TryCollect(player)&&g.Progress.sunShards==before+1&&g.Progress.Has("shard/collected/tutorial/first-enemy"),"grants once under the same collected key");
+ check(!shard.TryCollect(player),"cannot take twice");
+ check(g.Checkpoints.LeaveScene("Assets/Scenes/GreenLowlands.unity","from-tutorial"),"travel to Lowlands");
+}else if(phase==3){
+ var chests=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.RewardChest>(FindObjectsInactive.Include,FindObjectsSortMode.None);
+ check(chests.Single(c=>c.RewardId=="green-lowlands/basin-cache").IsOpen,"old 'coins/collected' key shows the basin chest open");
+ check(!chests.Single(c=>c.RewardId=="green-lowlands/orchard").IsOpen,"an unopened chest stays closed");
+ var tool=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.ToolPickup>(FindObjectsInactive.Include);
+ check(tool.IsCollected&&!visual(tool).activeSelf&&!tool.CanCollect(player),"owned crank's pickup is hidden and refuses");
+ var frags=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.HeartFragmentPickup>(FindObjectsInactive.Include,FindObjectsSortMode.None);
+ var spur=frags.Single(h=>h.RewardId=="green-lowlands/upper-spur");var recess=frags.Single(h=>h.RewardId=="green-lowlands/lower-recess");
+ check(spur.IsCollected&&!visual(spur).activeSelf&&!spur.GetComponent<Collider2D>().enabled,"taken fragment hidden with its collider off");
+ check(!recess.IsCollected&&recess.GetComponent<Collider2D>().enabled,"untaken fragment stays");
+ check(g.Progress.sunShards==1&&g.Progress.bronzeCoins==25,"balances carried exactly");
+ var unlock=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Progression.EncounterUnlock>(FindObjectsSortMode.None).Single(u=>u.Milestone=="green-lowlands/workshop-cleared");
+ var chest=chests.Single(c=>c.RewardId=="green-lowlands/workshop-cache");
+ check(!unlock.IsUnlocked(g.Progress),"workshop encounter starts locked");
+ pose((Vector2)chest.transform.position+Vector2.down*.7f);check(!chest.CanCollect(player),"its chest refuses before the guards fall");
+ int raised=0;Vector3? where=null;unlock.Unlocked+=u=>{raised++;where=u.LastFallen;};
+ var guards=unlock.Guards.ToArray();check(guards.Length==2,"two authored workshop guards");
+ guards[0].DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.up,0,0));
+ check(!unlock.IsUnlocked(g.Progress)&&raised==0,"one guard down is not enough");
+ guards[1].DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.up,0,0));
+ check(unlock.IsUnlocked(g.Progress)&&raised==1&&where.HasValue&&Vector3.Distance(where.Value,guards[1].transform.position)<.01f,"last guard unlocks once, reporting where it fell");
+ int coins=g.Progress.bronzeCoins;pose((Vector2)chest.transform.position+Vector2.down*.7f);
+ check(chest.TryCollect(player)&&chest.IsOpen&&g.Progress.bronzeCoins>coins,"chest opens through TryGrant");
+ check(!chest.TryCollect(player),"chest cannot pay twice");
+}else return "DONE";
+SessionState.SetInt("Rewards.Phase",phase+1);
+return new{phase,passed=checks.Count,checks=checks.ToArray()};

@@ -36,9 +36,9 @@ if(phase==0||phase==2||phase==4){
 }else{
  check(player.gameObject.scene.name=="GreenLowlands","Lowlands loaded");
  if(phase==1||phase==3||phase==5)check(Vector2.Distance(body.position,new Vector2(6,-58))<.1f,"Region enters at border road, clear of return trigger");
- var wolves=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Combat.WolfAI>(FindObjectsSortMode.None).OrderBy(w=>w.name).ToArray();
+ var wolves=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Enemies.PredatorBrain>(FindObjectsSortMode.None).OrderBy(w=>w.name).ToArray();
  if(phase==1){
-  check(wolves.Length==2&&wolves.All(w=>w.State==RoadOfTheOldKing.Combat.WolfState.Idle),"Two separated wolves idle outside arrival notice range");
+  check(wolves.Length==2&&wolves.All(w=>w.State==RoadOfTheOldKing.Enemies.PredatorState.Idle),"Two separated wolves idle outside arrival notice range");
   check(player.Health.Health==42&&player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().Charges==1,"Border arrival preserves Tutorial damage and flask use");
   check(game.Progress.checkpointId=="tutorial/roadside-fire"&&!game.Progress.HasFire("green-lowlands/arrival-fire"),"Road traversal has not rested or lit the next fire");
   check(Vector2.Distance(wolves[0].transform.position,wolves[1].transform.position)>26&&
@@ -54,12 +54,12 @@ if(phase==0||phase==2||phase==4){
   check(wolves[0].IsAware&&!wolves[1].IsAware,"First encounter notices without pulling second");
   pose(new Vector2(15.5f,3));
   for(int n=0;n<80;n++)wolves[0].GetType().GetMethod("Tick",flags).Invoke(wolves[0],new object[]{.02f});
-  check(wolves[0].State==RoadOfTheOldKing.Combat.WolfState.Return||wolves[0].State==RoadOfTheOldKing.Combat.WolfState.Idle,"First wolf gives up before the bonfire");
+  check(wolves[0].State==RoadOfTheOldKing.Enemies.PredatorState.Return||wolves[0].State==RoadOfTheOldKing.Enemies.PredatorState.Idle,"First wolf gives up before the bonfire");
   foreach(var wolf in wolves)wolf.ResetOnRest();
   var axe=combat.Weapon;var simulate=axe.GetType().GetMethod("Simulate",flags);
   foreach(var wolf in wolves){
    // Synchronous weapon stepping cannot wait out real-time kill hit-stop between enemies.
-   var feedback=wolf.GetComponent<RoadOfTheOldKing.Combat.EnemyImpactFeedback>();bool feedbackEnabled=feedback.enabled;feedback.enabled=false;
+   var feedback=wolf.GetComponent<RoadOfTheOldKing.Enemies.EnemyImpactFeedback>();bool feedbackEnabled=feedback.enabled;feedback.enabled=false;
    try{
    var hp=wolf.GetComponent<RoadOfTheOldKing.Combat.Damageable>();
    pose((Vector2)wolf.transform.position+Vector2.down*5);
@@ -96,7 +96,7 @@ if(phase==0||phase==2||phase==4){
    keys(new UnityEngine.InputSystem.Key[0]);check(walked,"Real player input/motor traverses complete border road into farm");
   }finally{keys(new UnityEngine.InputSystem.Key[0]);actions.devices=oldDevices;UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard);UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=oldRouting;input.GetType().GetField("hasFocus",flags).SetValue(input,oldFocus);input.GetType().GetField("paused",flags).SetValue(input,oldPaused);Physics2D.simulationMode=oldSimulation;}
   check(game.Checkpoints.Rest(game.Checkpoints.Fires.First(f=>f.Id=="green-lowlands/arrival-fire")),"Next bonfire reached after road");
-  check(wolves.All(w=>w.State==RoadOfTheOldKing.Combat.WolfState.Idle&&w.GetComponent<RoadOfTheOldKing.Combat.Damageable>().Health==40&&w.GetComponent<Collider2D>().enabled),"Actual rest restores both wolves and their collision");
+  check(wolves.All(w=>w.State==RoadOfTheOldKing.Enemies.PredatorState.Idle&&w.GetComponent<RoadOfTheOldKing.Combat.Damageable>().Health==40&&w.GetComponent<Collider2D>().enabled),"Actual rest restores both wolves and their collision");
   check(game.Progress.checkpointId=="green-lowlands/arrival-fire","Rest now records Lowlands checkpoint");
   player.DebugGodMode=false;player.Health.SetHealth(42);player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().SetCharges(1);
   cross(UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SceneExit>());check(game.IsLoading,"Actual southern border exit starts return");

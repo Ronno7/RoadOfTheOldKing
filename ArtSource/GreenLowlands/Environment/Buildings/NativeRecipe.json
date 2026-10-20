@@ -1,0 +1,187 @@
+{
+  "version": 1,
+  "sourceTool": "OpenAI built-in image_gen, 2026-10-16",
+  "palette": "ArtSource/Shared/Palettes/Meadow.json",
+  "processing": "Threshold alpha at 128; crop to explicit sourceBounds for registered native composites or opaque bounds for generated sources; nearest sample into native bounds; map to exact permitted shared colors without dithering. No baked ground shadows.",
+  "buildingColors": [
+    "ink",
+    "slatedark",
+    "slate",
+    "slatelight",
+    "deepsoil",
+    "soil",
+    "soilmid",
+    "soillight",
+    "stonejoint",
+    "stoneshade",
+    "stone",
+    "stonelight"
+  ],
+  "pieces": {
+    "Farm_Cottage": {
+      "source": "Farm_Cottage_Source.png",
+      "prompt": "Farm_Cottage.prompt.txt",
+      "canvas": [
+        128,
+        96
+      ],
+      "bounds": [
+        0,
+        0,
+        128,
+        96
+      ]
+    },
+    "Farm_Barn": {
+      "source": "Farm_Barn_Source.png",
+      "prompt": "Farm_Barn.prompt.txt",
+      "canvas": [
+        96,
+        80
+      ],
+      "bounds": [
+        0,
+        2,
+        96,
+        80
+      ]
+    },
+    "Farm_DryingShed": {
+      "source": "Farm_DryingShed_Source.png",
+      "prompt": "Farm_DryingShed.prompt.txt",
+      "canvas": [
+        64,
+        48
+      ],
+      "bounds": [
+        0,
+        3,
+        64,
+        48
+      ],
+      "colors": [
+        "ink",
+        "slatedark",
+        "slate",
+        "slatelight",
+        "deepsoil",
+        "soilmid",
+        "soillight",
+        "stonejoint"
+      ]
+    },
+    "Farm_Watermill": {
+      "source": "Farm_Watermill_Source.png",
+      "prompt": "Farm_Watermill.prompt.txt",
+      "canvas": [
+        144,
+        96
+      ],
+      "bounds": [
+        0,
+        17,
+        144,
+        96
+      ]
+    },
+    "Roof_Wing_South": {
+      "source": "Roof_Wing_South_Source.png",
+      "prompt": "Roof_Wing_South.prompt.txt",
+      "canvas": [
+        160,
+        144
+      ],
+      "bounds": [
+        0,
+        0,
+        160,
+        144
+      ],
+      "sourceBounds": [
+        0,
+        0,
+        160,
+        144
+      ],
+      "editPrompt": "RoofUnderside.prompt.txt",
+      "editRegion": [
+        0,
+        130,
+        160,
+        144
+      ],
+      "sourceNote": "Registered native composite: image_gen underside repair replaces only the bottom 14 rows; original depth-pass pixels above y130 are preserved."
+    },
+    "Facade_Main_South": {
+      "source": "Facade_Main_South_Source.png",
+      "prompt": "Facade_Main_South.prompt.txt",
+      "canvas": [
+        160,
+        48
+      ],
+      "bounds": [
+        3,
+        0,
+        157,
+        47
+      ]
+    },
+    "Storehouse_Door": {
+      "source": "Storehouse_Door_Source.png",
+      "prompt": "Storehouse_Door.prompt.txt",
+      "canvas": [
+        64,
+        64
+      ],
+      "bounds": [
+        9,
+        11,
+        56,
+        64
+      ],
+      "colors": [
+        "ink",
+        "rockshadow",
+        "stonejoint",
+        "stoneshade",
+        "stone",
+        "stonelight"
+      ]
+    },
+    "Sluice_BackWall": {
+      "source": "Sluice_BackWall_Source.png",
+      "prompt": "Sluice_BackWall.prompt.txt",
+      "canvas": [
+        144,
+        40
+      ],
+      "bounds": [
+        0,
+        0,
+        144,
+        40
+      ]
+    },
+    "Roof_Sluice_Compact": {
+      "source": "Roof_Wing_South_Source.png",
+      "prompt": "Roof_Wing_South.prompt.txt",
+      "canvas": [
+        160,
+        128
+      ],
+      "bounds": [
+        0,
+        0,
+        160,
+        128
+      ],
+      "sourceBounds": [
+        0,
+        0,
+        160,
+        144
+      ],
+      "sourceNote": "Native nearest registration of accepted south roof to an eight-unit main-hall canvas. Leaves a one-unit gap between its projected peak and the distributor porch; no transform scaling."
+    }
+  }
+}

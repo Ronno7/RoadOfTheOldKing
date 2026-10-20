@@ -11,12 +11,12 @@ else{
  var f=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
  var p=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();var body=p.GetComponent<Rigidbody2D>();var motor=p.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>();
  var combat=p.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();var input=p.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();var reader=p.GetComponent<RoadOfTheOldKing.UI.InscriptionReader>();
- var guards=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>(FindObjectsSortMode.None).Where(e=>e.name.StartsWith("Workshop scavenger ")).OrderBy(e=>e.name).ToArray();
+ var guards=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Enemies.PursuitBrain>(FindObjectsSortMode.None).Where(e=>e.name.StartsWith("Workshop scavenger ")).OrderBy(e=>e.name).ToArray();
  var chest=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.RewardChest>(FindObjectsSortMode.None).Single(c=>c.RewardId=="green-lowlands/workshop-cache");
  var carving=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.ForgeInscription>(FindObjectsSortMode.None).Single(c=>c.SiteNumber==1);
  var route=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RopeRoute>();var anchors=route.GetComponentsInChildren<RoadOfTheOldKing.World.RopeAnchor>().OrderBy(a=>a.transform.position.x).ToArray();
  System.Action<Vector2> move=at=>{motor.CancelRopeTraversal();body.position=at;p.transform.position=at;body.linearVelocity=Vector2.zero;combat.Weapon.CancelAction();input.GetType().GetField("hasFocus",f).SetValue(input,true);input.GetType().GetField("paused",f).SetValue(input,false);combat.GetType().GetField("controlsActive",f).SetValue(combat,true);Physics2D.SyncTransforms();};
- System.Action<int> kill=i=>{var feedback=guards[i].GetComponent<RoadOfTheOldKing.Combat.EnemyImpactFeedback>();feedback.enabled=false;try{guards[i].GetComponent<RoadOfTheOldKing.Combat.Damageable>().DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(p.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.up,0,0));}finally{feedback.enabled=true;}};
+ System.Action<int> kill=i=>{var feedback=guards[i].GetComponent<RoadOfTheOldKing.Enemies.EnemyImpactFeedback>();feedback.enabled=false;try{guards[i].GetComponent<RoadOfTheOldKing.Combat.Damageable>().DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(p.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.up,0,0));}finally{feedback.enabled=true;}};
  if(phase==2){
   check(guards.Length==2&&guards.All(e=>!e.IsDefeated),"two live authored workshop guards");
   check(guards.All(e=>Vector2.Distance(e.transform.position,anchors[1].transform.position)>8),"guards start beyond landing awareness radius");
@@ -25,7 +25,7 @@ else{
   var solids=new ContactFilter2D{useTriggers=false};var hits=new System.Collections.Generic.List<Collider2D>();
   for(int y=77;y<=85;y++)for(int x=134;x<=143;x++){
    Physics2D.OverlapBox(new Vector2(x+.5f,y+.5f),Vector2.one*.75f,0,solids,hits);
-   check(!hits.Any(c=>c.GetComponentInParent<RoadOfTheOldKing.Combat.IEnemy>()==null&&c.GetComponentInParent<RoadOfTheOldKing.Player.PlayerHealth>()==null),"body-clear yard "+x+","+y);
+   check(!hits.Any(c=>c.GetComponentInParent<RoadOfTheOldKing.Enemies.IEnemy>()==null&&c.GetComponentInParent<RoadOfTheOldKing.Player.PlayerHealth>()==null),"body-clear yard "+x+","+y);
   }
   move(new Vector2(127,77));check(!anchors[0].TryCollect(p),"rope still requires purchased kit");
   game.Progress.ownedTools.Add(RoadOfTheOldKing.Progression.WorldTool.RopeKit);game.SaveProgress();

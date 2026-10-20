@@ -1,9 +1,9 @@
 """HUD icons: hand-placed native-pixel art for the corner vitals (heart, stamina, flask) and the bar frame.
 
 Usage (repository root): PYTHONPATH=tmp/art-python python Tools/Art/UI/hud_icons.py
-Writes Assets/Art/Sprites/UI/{Heart,Stamina,Flask,FlaskEmpty,BarFrame}.png (1 px = 1 art pixel; the
-HUD draws them at 3 reference px per pixel, the world's pixel density at camera size 5.5) and a 6x review
-sheet to DeveloperNotes/Previews/HudIcons.png. Masks are interiors; the charcoal outline is added around them.
+Writes HUD icons under Assets/Art/Sprites/UI/HUD and developer panels under UI/DevTools,
+plus a 6x review sheet at DeveloperNotes/Previews/HudIcons.png. The current UI kit displays
+one art pixel at two reference pixels. Masks are interiors; the charcoal outline is added around them.
 """
 import os
 from PIL import Image
@@ -110,9 +110,7 @@ PANEL = [
 PANEL_SELECTED = [row.replace("O", "G").replace("H", "b") for row in PANEL]
 
 ICONS = {"Heart": HEART, "Stamina": STAMINA, "Flask": FLASK, "FlaskEmpty": FLASK_EMPTY, "BarFrame": BAR_FRAME,
-         "Panel": PANEL, "PanelSelected": PANEL_SELECTED,
-         # Same pixels for world-space panels (imported at 50 PPU: 2 panel px per pixel = the art grid).
-         "PanelWorld": PANEL}
+         "Panel": PANEL, "PanelSelected": PANEL_SELECTED}
 
 def image(rows):
     img = Image.new("RGBA", (len(rows[0]), len(rows)), (0, 0, 0, 0))
@@ -125,7 +123,9 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     images = {name: image(rows) for name, rows in ICONS.items()}
     for name, img in images.items():
-        img.save(os.path.join(OUT, name + ".png"))
+        folder = os.path.join(OUT, "DevTools" if name in {"Panel", "PanelSelected"} else "HUD")
+        os.makedirs(folder, exist_ok=True)
+        img.save(os.path.join(folder, name + ".png"))
     scale, pad = 6, 4
     width = sum(i.width for i in images.values()) + pad * (len(images) + 1)
     height = max(i.height for i in images.values()) + pad * 2

@@ -9,12 +9,15 @@ var f=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.Non
 var cut=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.BuildingCutaway>(FindObjectsSortMode.None).Single(c=>c.name=="Sluice architecture");
 var player=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerMovement>();var body=player.GetComponent<Rigidbody2D>();
 var originalPosition=player.transform.position;var originalBodyPosition=body.position;var originalVelocity=body.linearVelocity;bool originalCutEnabled=cut.enabled;
+var originalFreeVelocity=(Vector2)player.GetType().GetField("freeVelocity",f).GetValue(player);
 var occupant=(Transform)cut.GetType().GetField("occupant",f).GetValue(cut);
 var areas=(Rect[])cut.GetType().GetField("revealAreas",f).GetValue(cut);var roofs=(Renderer[])cut.GetType().GetField("coveringRenderers",f).GetValue(cut);
+var interiors=(Renderer[])cut.GetType().GetField("interiorRenderers",f).GetValue(cut);
 float fade=(float)cut.GetType().GetField("fadeSeconds",f).GetValue(cut),hysteresis=(float)cut.GetType().GetField("exitHysteresis",f).GetValue(cut);
-if(areas==null||areas.Length==0||areas.Any(r=>r.width<=0||r.height<=0)||roofs==null||roofs.Length==0||roofs.Any(r=>r==null)||!originalCutEnabled)throw new System.Exception("Enabled authored cutaway, bounds and roofs required");
+if(areas==null||areas.Length==0||areas.Any(r=>r.width<=0||r.height<=0)||roofs==null||roofs.Length==0||roofs.Any(r=>r==null)||interiors==null||interiors.Length==0||interiors.Any(r=>r==null)||!originalCutEnabled)throw new System.Exception("Enabled authored cutaway, bounds, roofs and interior artwork required");
 var checks=new System.Collections.Generic.List<string>();System.Action<bool,string> check=(ok,label)=>{if(!ok)throw new System.Exception("FAIL: "+label);checks.Add(label);};
 System.Func<Renderer,Color> color=r=>r is SpriteRenderer?((SpriteRenderer)r).color:r.GetComponent<UnityEngine.Tilemaps.Tilemap>()!=null?r.GetComponent<UnityEngine.Tilemaps.Tilemap>().color:Color.white;
+System.Func<Renderer[],Color[],bool[],float,bool> groupAt=(renderers,colors,enabled,visibility)=>renderers.Select((r,i)=>{var expected=colors[i];if(r is SpriteRenderer||r is UnityEngine.Tilemaps.TilemapRenderer)expected.a*=visibility;return color(r)==expected&&r.enabled==(enabled[i]&&visibility>0f);}).All(ok=>ok);
 System.Action<float> step=seconds=>cut.GetType().GetMethod("Advance",f).Invoke(cut,new object[]{seconds});
 System.Func<Vector2,Vector2> world=point=>(Vector2)cut.transform.TransformPoint(new Vector3(point.x,point.y,0));
 System.Action<Vector2> pose=point=>{player.transform.position=new Vector3(point.x,point.y,originalPosition.z);body.position=point;body.linearVelocity=Vector2.zero;};
@@ -23,6 +26,7 @@ var retained=world(new Vector2(rightmost.xMax+hysteresis*.5f,rightmost.center.y)
 var scene=UnityEngine.SceneManagement.SceneManager.GetActiveScene();
 var colliders=scene.GetRootGameObjects().SelectMany(g=>g.GetComponentsInChildren<Collider2D>(true)).ToArray();
 var colliderJson=colliders.Select(c=>EditorJsonUtility.ToJson(c)).ToArray();var active=colliders.Select(c=>c.gameObject.activeSelf).ToArray();
+var artworkObjects=roofs.Concat(interiors).Select(r=>r.gameObject).Distinct().ToArray();var artworkActive=artworkObjects.Select(g=>g.activeSelf).ToArray();
 var receivers=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SluiceTarget>(FindObjectsSortMode.None);var receiverPositions=receivers.Select(c=>c.transform.position).ToArray();
 var cameras=UnityEngine.Object.FindObjectsByType<Camera>(FindObjectsSortMode.None);var cameraJson=cameras.Select(c=>EditorJsonUtility.ToJson(c)).ToArray();var cameraPositions=cameras.Select(c=>c.transform.position).ToArray();
 var follows=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Cameras.CameraFollow2D>(FindObjectsSortMode.None);var followJson=follows.Select(c=>EditorJsonUtility.ToJson(c)).ToArray();
@@ -31,56 +35,73 @@ try{
  check(occupant==player.transform,"Cutaway follows the explicit player's foot transform");
  check(fade>0f&&hysteresis>0f,"Roof has a finite fade and exit hysteresis");
  cut.enabled=false;var originalColors=roofs.Select(color).ToArray();var originalEnabled=roofs.Select(r=>r.enabled).ToArray();
+ var interiorColors=interiors.Select(color).ToArray();var interiorEnabled=interiors.Select(r=>r.enabled).ToArray();
  check(originalEnabled.Any(x=>x),"Authored exterior has visible covering artwork");
+ check(interiorEnabled.Any(x=>x)&&!roofs.Intersect(interiors).Any(),"Production interior artwork has visible authored renderers with no cover ownership overlap");
  pose(outside);cut.enabled=true;
  check(!cut.IsRevealed&&cut.Coverage==1f&&roofs.Select((r,i)=>r.enabled==originalEnabled[i]&&color(r)==originalColors[i]).All(x=>x),"Exterior enable restores complete authored roof");
+ check(groupAt(interiors,interiorColors,interiorEnabled,0f),"Exterior hides all interior artwork without exposing alpha or generic renderers");
  cut.EvaluateAt(retained,true);check(!cut.IsRevealed&&cut.Coverage==1f,"Retention margin does not reveal the room on approach");
  cut.EvaluateAt(inside);check(cut.IsRevealed&&cut.Coverage==1f,"Entering begins a fade without hiding the room's GameObjects");
  step(fade*.5f);check(Mathf.Abs(cut.Coverage-.5f)<.001f,"Roof reaches half coverage at half duration");
  check(roofs.Select((r,i)=>Mathf.Abs(color(r).a-originalColors[i].a*.5f)<.001f&&r.enabled==originalEnabled[i]).All(x=>x),"Production Sprite/Tilemap roofs preserve authored tint while fading alpha");
- float beforePause=cut.Coverage;var pausedColors=roofs.Select(color).ToArray();step(0f);
- check(cut.Coverage==beforePause&&roofs.Select((r,i)=>color(r)==pausedColors[i]).All(x=>x),"Zero elapsed time freezes roof presentation");
+ check(groupAt(interiors,interiorColors,interiorEnabled,.5f),"Production interior reaches half authored alpha while the roof fades away");
+ float beforePause=cut.Coverage;var pausedColors=roofs.Concat(interiors).Select(color).ToArray();step(0f);
+ check(cut.Coverage==beforePause&&roofs.Concat(interiors).Select((r,i)=>color(r)==pausedColors[i]).All(x=>x),"Zero elapsed time freezes both presentation groups");
  step(fade);check(cut.Coverage==0f&&roofs.All(r=>!r.enabled),"Fully revealed room has no roof draw");
+ check(groupAt(interiors,interiorColors,interiorEnabled,1f),"Fully revealed room restores authored interior colors and enabled flags");
  cut.EvaluateAt(retained);step(fade);check(cut.IsRevealed&&cut.Coverage==0f,"Small movement beyond the threshold keeps roof open");
  cut.EvaluateAt(outside);step(fade*.5f);check(!cut.IsRevealed&&Mathf.Abs(cut.Coverage-.5f)<.001f,"Leaving the retention margin begins restoring the exterior");
  cut.enabled=false;
  check(roofs.Select((r,i)=>r.enabled==originalEnabled[i]&&color(r)==originalColors[i]).All(x=>x),"Disabling mid-fade restores every authored color and enabled state");
+ check(groupAt(interiors,interiorColors,interiorEnabled,1f),"Disabling mid-fade restores interior artwork exactly");
  pose(inside);cut.enabled=true;
  check(cut.IsRevealed&&cut.Coverage==0f&&roofs.All(r=>!r.enabled),"Re-enable already inside reveals the room immediately");
+ check(groupAt(interiors,interiorColors,interiorEnabled,1f),"Re-enable inside immediately shows the complete interior");
  cut.enabled=false;pose(outside);cut.enabled=true;
  check(!cut.IsRevealed&&cut.Coverage==1f,"Re-enable outside restores intact roof immediately");
+ check(groupAt(interiors,interiorColors,interiorEnabled,0f),"Re-enable outside immediately conceals the interior");
  pose(inside);cut.GetType().GetMethod("Start",f).Invoke(cut,null);
- check(cut.IsRevealed&&cut.Coverage==0f,"Start observes scene-session arrival placement after OnEnable");
+ check(cut.IsRevealed&&cut.Coverage==0f&&groupAt(interiors,interiorColors,interiorEnabled,1f),"Start observes scene-session arrival and reveals its interior after OnEnable");
  pose(outside);cut.EvaluateAt(outside,true);
- foreach(var area in areas){cut.EvaluateAt(outside,true);cut.EvaluateAt(world(area.center),true);check(cut.IsRevealed&&cut.Coverage==0f,"Each authored interior/threshold rectangle reveals the enclosure");}
+ foreach(var area in areas){cut.EvaluateAt(outside,true);cut.EvaluateAt(world(area.center),true);check(cut.IsRevealed&&cut.Coverage==0f&&groupAt(interiors,interiorColors,interiorEnabled,1f),"Each authored interior/threshold rectangle reveals the enclosure and interior");}
+ foreach(var stance in new[]{new Vector2(5,86),new Vector2(6,90),new Vector2(5,74),new Vector2(4.5f,78)}){cut.EvaluateAt(outside,true);cut.EvaluateAt(stance,true);check(cut.IsRevealed&&cut.Coverage==0f&&groupAt(interiors,interiorColors,interiorEnabled,1f),"Required throw/return stance reveals all interior artwork: "+stance);}
 
- // Walk north through the actual south door, then back onto its exterior porch.
+ // Stage analogue MoveDirection, then walk north through the actual south door
+ // and back onto its exterior porch using the production motor and physics.
  // The service-passage reveal must stop below the porch so it cannot hold the roof open here.
  var input=player.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();
- var actions=(UnityEngine.InputSystem.InputActionMap)input.GetType().GetField("actions",f).GetValue(input);
- var oldDevices=actions.devices;var oldRouting=UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode;
+ if(input==null||!input.isActiveAndEnabled||!player.enabled||!body.simulated||Time.timeScale<=0f)
+  throw new System.Exception("Enabled movement input and motor with live physics required for doorway crossing");
+ var move=input.GetType().GetProperty("MoveDirection");var sprint=input.GetType().GetProperty("SprintHeld");
+ var motorStep=player.GetType().GetMethod("FixedUpdate",f);
+ var oldMove=move.GetValue(input,null);var oldSprint=sprint.GetValue(input,null);
+ var oldDashQueue=input.GetType().GetField("dashQueuedUntil",f).GetValue(input);
  var oldFocus=(bool)input.GetType().GetField("hasFocus",f).GetValue(input);var oldPaused=(bool)input.GetType().GetField("paused",f).GetValue(input);
- var simulation=Physics2D.simulationMode;var keyboard=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
- System.Action<UnityEngine.InputSystem.Key[]> keys=held=>{UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState(held));UnityEngine.InputSystem.InputSystem.Update();input.GetType().GetField("hasFocus",f).SetValue(input,true);input.GetType().GetMethod("Update",f).Invoke(input,null);};
+ var simulation=Physics2D.simulationMode;var interpolation=body.interpolation;
+ var oldFacing=player.FacingDirection;var oldSprinting=player.GetType().GetProperty("IsSprinting").GetValue(player,null);
+ System.Action<Vector2> motorInput=direction=>{move.SetValue(input,direction,null);motorStep.Invoke(player,null);Physics2D.Simulate(Time.fixedDeltaTime);cut.EvaluateAt(body.position);step(Time.fixedDeltaTime);};
  try{
-  actions.devices=new UnityEngine.InputSystem.InputDevice[]{keyboard};input.GetType().GetField("paused",f).SetValue(input,false);
-  UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=UnityEngine.InputSystem.InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
-  Physics2D.simulationMode=SimulationMode2D.Script;pose(new Vector2(5f,84.5f));player.GetType().GetField("freeVelocity",f).SetValue(player,Vector2.zero);cut.EvaluateAt(body.position,true);
+  input.GetType().GetField("hasFocus",f).SetValue(input,true);input.GetType().GetField("paused",f).SetValue(input,false);
+  input.GetType().GetField("dashQueuedUntil",f).SetValue(input,-1f);sprint.SetValue(input,false,null);move.SetValue(input,Vector2.zero,null);
+  if(!input.IsActive)throw new System.Exception("Production movement input must remain active during staged analogue doorway traversal");
+  Physics2D.simulationMode=SimulationMode2D.Script;body.interpolation=RigidbodyInterpolation2D.None;
+  pose(new Vector2(5f,84.5f));player.GetType().GetField("freeVelocity",f).SetValue(player,Vector2.zero);Physics2D.SyncTransforms();cut.EvaluateAt(body.position,true);
   check(!cut.IsRevealed&&cut.Coverage==1f,"South porch remains outside every reveal area and retention margin");
   foreach(float targetY in new[]{86.5f,84.5f}){
    int frames=0;
-   while(Mathf.Abs(body.position.y-targetY)>.07f&&frames++<240){
-    keys(new[]{body.position.y>targetY?UnityEngine.InputSystem.Key.S:UnityEngine.InputSystem.Key.W});
-    player.GetType().GetMethod("FixedUpdate",f).Invoke(player,null);Physics2D.Simulate(Time.fixedDeltaTime);
-    cut.EvaluateAt(body.position);step(Time.fixedDeltaTime);
-   }
-   keys(new UnityEngine.InputSystem.Key[0]);step(fade);
-   check(frames<240&&Mathf.Abs(body.position.y-targetY)<.1f&&Mathf.Abs(body.position.x-5f)<.1f,"Real input/motor crosses south doorway to (5,"+targetY+"); actual "+body.position);
+   while(Mathf.Abs(body.position.y-targetY)>.025f&&frames++<240)
+    motorInput(Vector2.ClampMagnitude(new Vector2(0,targetY-body.position.y)*6f/player.MoveSpeed,1f));
+   for(int i=0;i<8;i++)motorInput(Vector2.zero);step(fade);
+   check(frames<240&&Mathf.Abs(body.position.y-targetY)<.1f&&Mathf.Abs(body.position.x-5f)<.1f,"Staged analogue input and actual motor cross south doorway to (5,"+targetY+"); actual "+body.position);
    check(targetY>85.5f?cut.IsRevealed&&cut.Coverage==0f:!cut.IsRevealed&&cut.Coverage==1f,"Walked south doorway sets the matching interior/exterior roof state");
+   check(groupAt(interiors,interiorColors,interiorEnabled,targetY>85.5f?1f:0f),"Walked south doorway shows or conceals the interior with its roof state");
   }
  }finally{
-  keys(new UnityEngine.InputSystem.Key[0]);actions.devices=oldDevices;UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard);UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=oldRouting;
-  input.GetType().GetField("hasFocus",f).SetValue(input,oldFocus);input.GetType().GetField("paused",f).SetValue(input,oldPaused);Physics2D.simulationMode=simulation;
+  move.SetValue(input,oldMove,null);sprint.SetValue(input,oldSprint,null);input.GetType().GetField("dashQueuedUntil",f).SetValue(input,oldDashQueue);
+  input.GetType().GetField("hasFocus",f).SetValue(input,oldFocus);input.GetType().GetField("paused",f).SetValue(input,oldPaused);
+  player.SetFacingDirection(oldFacing);player.GetType().GetProperty("IsSprinting").SetValue(player,oldSprinting,null);
+  body.interpolation=interpolation;Physics2D.SyncTransforms();Physics2D.simulationMode=simulation;
  }
  // A small disposable mixed-renderer assembly exercises the reusable component even
  // when this particular production building uses only one roof renderer type.
@@ -90,18 +111,39 @@ try{
  var disabledGo=new GameObject("Retired roof");disabledGo.transform.SetParent(probe.transform,false);var retired=disabledGo.AddComponent<SpriteRenderer>();retired.color=new Color(.6f,.3f,.1f,.4f);retired.enabled=false;
  var gridGo=new GameObject("Grid",typeof(Grid));gridGo.transform.SetParent(probe.transform,false);
  var tilesGo=new GameObject("Tile roof",typeof(UnityEngine.Tilemaps.Tilemap),typeof(UnityEngine.Tilemaps.TilemapRenderer));tilesGo.transform.SetParent(gridGo.transform,false);var tiles=tilesGo.GetComponent<UnityEngine.Tilemaps.Tilemap>();var tileRenderer=tilesGo.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>();tiles.color=new Color(.3f,.6f,.2f,.8f);
+ var interiorGo=new GameObject("Sprite interior");interiorGo.transform.SetParent(probe.transform,false);var interiorSprite=interiorGo.AddComponent<SpriteRenderer>();interiorSprite.color=new Color(.7f,.2f,.4f,.8f);
+ var interiorTilesGo=new GameObject("Tile interior",typeof(UnityEngine.Tilemaps.Tilemap),typeof(UnityEngine.Tilemaps.TilemapRenderer));interiorTilesGo.transform.SetParent(gridGo.transform,false);var interiorTiles=interiorTilesGo.GetComponent<UnityEngine.Tilemaps.Tilemap>();var interiorTileRenderer=interiorTilesGo.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>();interiorTiles.color=new Color(.4f,.5f,.6f,.4f);
+ var retiredInteriorGo=new GameObject("Retired interior");retiredInteriorGo.transform.SetParent(probe.transform,false);var retiredInterior=retiredInteriorGo.AddComponent<SpriteRenderer>();retiredInterior.color=new Color(.1f,.2f,.3f,.7f);retiredInterior.enabled=false;
+ var genericCoverGo=new GameObject("Generic cover");genericCoverGo.transform.SetParent(probe.transform,false);var genericCover=genericCoverGo.AddComponent<LineRenderer>();genericCover.positionCount=0;
+ var genericInteriorGo=new GameObject("Generic interior");genericInteriorGo.transform.SetParent(probe.transform,false);var genericInterior=genericInteriorGo.AddComponent<LineRenderer>();genericInterior.positionCount=0;
+ var mixedCovers=new Renderer[]{sprite,tileRenderer,retired,genericCover};var mixedInteriors=new Renderer[]{interiorSprite,interiorTileRenderer,retiredInterior,genericInterior};
+ var mixedCoverColors=mixedCovers.Select(color).ToArray();var mixedCoverEnabled=mixedCovers.Select(r=>r.enabled).ToArray();
+ var mixedInteriorColors=mixedInteriors.Select(color).ToArray();var mixedInteriorEnabled=mixedInteriors.Select(r=>r.enabled).ToArray();
  var mixed=probe.AddComponent<RoadOfTheOldKing.World.BuildingCutaway>();
- mixed.GetType().GetField("occupant",f).SetValue(mixed,subject);mixed.GetType().GetField("revealAreas",f).SetValue(mixed,new[]{new Rect(0,0,2,2)});mixed.GetType().GetField("coveringRenderers",f).SetValue(mixed,new Renderer[]{sprite,tileRenderer,retired});
- probe.SetActive(true);mixed.EvaluateAt(new Vector2(1,1));mixed.GetType().GetMethod("Advance",f).Invoke(mixed,new object[]{.1f});
- check(Mathf.Abs(sprite.color.a-.3f)<.001f&&Mathf.Abs(tiles.color.a-.4f)<.001f&&!retired.enabled,"Reusable cutaway fades both Sprite and Tilemap art without reviving retired artwork");
+ mixed.GetType().GetField("occupant",f).SetValue(mixed,subject);mixed.GetType().GetField("revealAreas",f).SetValue(mixed,new[]{new Rect(0,0,2,2)});mixed.GetType().GetField("coveringRenderers",f).SetValue(mixed,mixedCovers);mixed.GetType().GetField("interiorRenderers",f).SetValue(mixed,mixedInteriors);
+ probe.SetActive(true);
+ check(groupAt(mixedCovers,mixedCoverColors,mixedCoverEnabled,1f)&&groupAt(mixedInteriors,mixedInteriorColors,mixedInteriorEnabled,0f),"Mixed renderers initialize to a closed exterior with hidden interior");
+ mixed.EvaluateAt(new Vector2(1,1));mixed.GetType().GetMethod("Advance",f).Invoke(mixed,new object[]{.05f});
+ check(groupAt(mixedCovers,mixedCoverColors,mixedCoverEnabled,.75f)&&groupAt(mixedInteriors,mixedInteriorColors,mixedInteriorEnabled,.25f),"Quarter reveal proves opposite Sprite/Tilemap fades while generic renderers switch on");
+ mixed.GetType().GetMethod("Advance",f).Invoke(mixed,new object[]{.05f});
+ check(groupAt(mixedCovers,mixedCoverColors,mixedCoverEnabled,.5f)&&groupAt(mixedInteriors,mixedInteriorColors,mixedInteriorEnabled,.5f),"Mixed groups preserve authored tints and never revive disabled artwork");
  mixed.enabled=false;
- check(sprite.color==new Color(.2f,.4f,.6f,.6f)&&tiles.color==new Color(.3f,.6f,.2f,.8f)&&retired.color==new Color(.6f,.3f,.1f,.4f)&&sprite.enabled&&tileRenderer.enabled&&!retired.enabled,"Mixed renderer disable restores exact authored colors and flags");
+ check(groupAt(mixedCovers,mixedCoverColors,mixedCoverEnabled,1f)&&groupAt(mixedInteriors,mixedInteriorColors,mixedInteriorEnabled,1f),"Mixed renderer disable restores both groups' exact colors and enabled flags");
+ subject.localPosition=new Vector3(1,1,0);mixed.enabled=true;
+ check(groupAt(mixedCovers,mixedCoverColors,mixedCoverEnabled,0f)&&groupAt(mixedInteriors,mixedInteriorColors,mixedInteriorEnabled,1f),"Re-enable inside switches generic renderers and fully restores the interior");
+ mixed.EvaluateAt(new Vector2(5,5),true);
+ check(groupAt(mixedCovers,mixedCoverColors,mixedCoverEnabled,1f)&&groupAt(mixedInteriors,mixedInteriorColors,mixedInteriorEnabled,0f),"Immediate exterior restoration conceals Sprite, Tilemap and generic interior renderers");
+ check(mixedCovers.Concat(mixedInteriors).All(r=>r.gameObject.activeSelf),"Cutaway changes renderer presentation without deactivating its owners");
+ mixed.enabled=false;mixed.GetType().GetField("interiorRenderers",f).SetValue(mixed,new Renderer[0]);subject.localPosition=new Vector3(5,5,0);mixed.enabled=true;
+ mixed.EvaluateAt(new Vector2(1,1));mixed.GetType().GetMethod("Advance",f).Invoke(mixed,new object[]{.1f});
+ check(groupAt(mixedCovers,mixedCoverColors,mixedCoverEnabled,.5f)&&groupAt(mixedInteriors,mixedInteriorColors,mixedInteriorEnabled,1f),"Empty interior list retains existing cover-only behavior and leaves unbound art untouched");
  UnityEngine.Object.DestroyImmediate(probe);probe=null;
+ check(artworkObjects.Select((g,i)=>g.activeSelf==artworkActive[i]).All(ok=>ok),"Production cutaway never deactivates artwork owners");
  check(colliders.Select((c,i)=>EditorJsonUtility.ToJson(c)==colliderJson[i]&&c.gameObject.activeSelf==active[i]).All(x=>x),"Roof transitions change no collider or collider GameObject state");
  check(receivers.Select((c,i)=>c.transform.position==receiverPositions[i]).All(x=>x),"Roof transitions leave all gameplay receivers fixed");
  check(UnityEngine.Object.FindObjectsByType<Camera>(FindObjectsSortMode.None).Length==cameras.Length&&cameras.Select((c,i)=>EditorJsonUtility.ToJson(c)==cameraJson[i]&&c.transform.position==cameraPositions[i]).All(x=>x)&&follows.Select((c,i)=>EditorJsonUtility.ToJson(c)==followJson[i]).All(x=>x),"Cutaway preserves the shared camera and follow configuration");
 }finally{
  if(probe!=null)UnityEngine.Object.DestroyImmediate(probe);
- cut.enabled=false;player.transform.position=originalPosition;body.position=originalBodyPosition;body.linearVelocity=originalVelocity;cut.enabled=originalCutEnabled;Physics2D.SyncTransforms();
+ cut.enabled=false;player.transform.position=originalPosition;body.position=originalBodyPosition;body.linearVelocity=originalVelocity;player.GetType().GetField("freeVelocity",f).SetValue(player,originalFreeVelocity);cut.enabled=originalCutEnabled;Physics2D.SyncTransforms();
 }
-return new{passed=checks.Count,checks=checks.ToArray(),note="Deterministic presentation/lifecycle plus real motor doorway crossing with virtual input; no human visual review."};
+return new{passed=checks.Count,checks=checks.ToArray(),note="Deterministic presentation/lifecycle plus staged analogue MoveDirection and actual motor/physics doorway crossings; no keyboard-binding or human visual review."};

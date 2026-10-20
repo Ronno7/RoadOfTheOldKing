@@ -14,18 +14,30 @@ var left=(Transform)v.GetType().GetField("leftShutter",f).GetValue(v);var right=
 var outlet=(Transform)v.GetType().GetField("outletGate",f).GetValue(v);var outletTravel=(Vector3)v.GetType().GetField("outletTravel",f).GetValue(v);
 var architecture=GameObject.Find("Sluice architecture");
 var outfall=architecture!=null?architecture.GetComponent<RoadOfTheOldKing.World.SluiceOutfallView>():null;
-if(outlet==null||outfall==null)throw new System.Exception("Authored exterior outlet and SluiceOutfallView required");
+var cutaway=architecture!=null?architecture.GetComponent<RoadOfTheOldKing.World.BuildingCutaway>():null;
+if(outlet==null||outfall==null||cutaway==null||!cutaway.enabled)throw new System.Exception("Authored exterior outlet, SluiceOutfallView and enabled BuildingCutaway required");
+if((Transform)cutaway.GetType().GetField("occupant",f).GetValue(cutaway)!=p.transform)throw new System.Exception("Cutaway must follow the tested player's foot transform");
 var pond=(RoadOfTheOldKing.World.SluiceWaterReveal)outfall.GetType().GetField("pondReveal",f).GetValue(outfall);
 var surge=(SpriteRenderer)outfall.GetType().GetField("surge",f).GetValue(outfall);var upstream=(SpriteRenderer)outfall.GetType().GetField("upstreamSurface",f).GetValue(outfall);
 var wet=(Renderer[])outfall.GetType().GetField("wetMarks",f).GetValue(outfall);var frames=(Sprite[])outfall.GetType().GetField("flowFrames",f).GetValue(outfall);
 if(pond==null||surge==null||upstream==null||wet==null||wet.Length==0||frames==null||frames.Length!=4||frames.Any(x=>x==null))throw new System.Exception("Complete four-frame outfall, intake and wet-line references required");
 var high=(GameObject)s.GetType().GetField("highWater",f).GetValue(s);var service=(GameObject)s.GetType().GetField("serviceWater",f).GetValue(s);
+var serviceReveal=service.GetComponent<RoadOfTheOldKing.World.SluiceWaterReveal>();
+var serviceGate=v.GetType().GetField("serviceGate",f).GetValue(v);var mainGate=v.GetType().GetField("mainGate",f).GetValue(v);
+if(serviceReveal==null||serviceGate==null||mainGate==null)throw new System.Exception("Both authored passage gates and service reveal required");
+System.Func<object,string,object> gateField=(gate,name)=>gate.GetType().GetField(name,f).GetValue(gate);
+var serviceLeaf=(Transform)gateField(serviceGate,"leaf");var mainLeaf=(Transform)gateField(mainGate,"leaf");
+var serviceBlocker=(Collider2D)gateField(serviceGate,"blocker");var mainBlocker=(Collider2D)gateField(mainGate,"blocker");
+var serviceTravel=(Vector3)gateField(serviceGate,"travel");var mainTravel=(Vector3)gateField(mainGate,"travel");
+float serviceOpening=(float)gateField(serviceGate,"openingDuration"),mainOpening=(float)gateField(mainGate,"openingDuration");
+if(serviceLeaf==null||mainLeaf==null||serviceBlocker==null||mainBlocker==null||serviceTravel.sqrMagnitude<.01f||mainTravel.sqrMagnitude<.01f||serviceOpening<=0f||mainOpening<=0f)throw new System.Exception("Complete passage leaves, blockers, travel and timing required");
 var surgeOriginal=(Color)outfall.GetType().GetField("surgeColor",f).GetValue(outfall);var upstreamOriginal=(Color)outfall.GetType().GetField("upstreamColor",f).GetValue(outfall);
 var originalSurgeSprite=(Sprite)outfall.GetType().GetField("surgeSprite",f).GetValue(outfall);bool originalSurgeEnabled=(bool)outfall.GetType().GetField("surgeEnabled",f).GetValue(outfall);bool originalUpstreamEnabled=(bool)outfall.GetType().GetField("upstreamEnabled",f).GetValue(outfall);var originalWet=(bool[])outfall.GetType().GetField("wetEnabled",f).GetValue(outfall);
 var receivers=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SluiceTarget>(FindObjectsSortMode.None).Where(x=>x.Part!=RoadOfTheOldKing.World.SluicePart.MainFork).ToArray();var positions=receivers.Select(x=>x.transform.position).ToArray();
 var checks=new System.Collections.Generic.List<string>();System.Action<bool,string> check=(ok,label)=>{if(!ok)throw new System.Exception("FAIL: "+label);checks.Add(label);};
 System.Action<Vector2> pose=at=>{body.position=at;p.transform.position=at;body.linearVelocity=Vector2.zero;p.GetType().GetField("controlsActive",f).SetValue(p,true);Physics2D.SyncTransforms();};
-System.Action<int> tick=n=>{for(int i=0;i<n;i++){s.GetType().GetMethod("FixedUpdate",f).Invoke(s,null);Physics2D.SyncTransforms();a.GetType().GetMethod("Simulate",f).Invoke(a,new object[]{.02f});v.GetType().GetMethod("Advance",f).Invoke(v,new object[]{.02f});outfall.Present(.02f);}};
+// Synchronous ticks also run cutaway presentation before the mechanism reads fitting visibility.
+System.Action<int> tick=n=>{for(int i=0;i<n;i++){s.GetType().GetMethod("FixedUpdate",f).Invoke(s,null);Physics2D.SyncTransforms();a.GetType().GetMethod("Simulate",f).Invoke(a,new object[]{.02f});cutaway.EvaluateAt(body.position);cutaway.GetType().GetMethod("Advance",f).Invoke(cutaway,new object[]{.02f});v.GetType().GetMethod("Advance",f).Invoke(v,new object[]{.02f});outfall.Present(.02f);}};
 System.Action<Vector2> lodge=at=>{a.CancelAction();pose(at);stamina.Restore();check(a.TryThrow(Vector2.right),"Throw accepted");tick(90);check(a.State==RoadOfTheOldKing.Weapons.AxeState.Stuck,"Real fork lodging");};
 System.Action<Vector2> recall=at=>{pose(at);stamina.Restore();check(a.TryPlayerRecall(),"Recall accepted");};
 System.Func<bool,bool> turn=carriage=>{pose(carriage?new Vector2(4.5f,76):new Vector2(6,88));return p.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>().TryInteract();};
@@ -35,6 +47,10 @@ try{
  var boltRest=bolt.localPosition;var brakeRest=brake.localPosition;var weightRest=weight.localPosition;
  var leftRest=left.localPosition;var rightRest=right.localPosition;
  var outletRest=outlet.localPosition;outfall.RefreshNow();
+ var serviceRest=serviceLeaf.localPosition;var mainRest=mainLeaf.localPosition;
+ check(serviceBlocker.enabled&&mainBlocker.enabled,"High water keeps both pedestrian gates physically closed");
+ check((RoadOfTheOldKing.World.SluiceWaterReveal)gateField(serviceGate,"waterReveal")==serviceReveal&&(RoadOfTheOldKing.World.SluiceWaterReveal)gateField(mainGate,"waterReveal")==pond,"Passage gates wait for their own authored water transition");
+ check(!serviceLeaf.IsChildOf(service.transform)&&!mainLeaf.IsChildOf(high.transform)&&!serviceBlocker.transform.IsChildOf(service.transform)&&!mainBlocker.transform.IsChildOf(high.transform),"Passage leaves and blockers survive water-group deactivation without drain shaders");
  check(v.Opening==0f&&outletTravel.sqrMagnitude>.01f,"Exterior outlet begins closed with an authored travel distance");
  check(outlet.GetComponentsInChildren<Collider2D>(true).Length==0,"Moving outlet gate is visual only");
  check(!outlet.IsChildOf(high.transform)&&!outlet.IsChildOf(service.transform)&&!outfall.transform.IsChildOf(high.transform)&&!outfall.transform.IsChildOf(service.transform),"Exterior gate and outfall survive drained water-group deactivation");
@@ -64,7 +80,20 @@ try{
  check(s.Stage==RoadOfTheOldKing.World.SluiceStage.DistributorReleased,"Real distributor stroke releases bolt");
  check(bolt.gameObject.activeSelf&&bolt.localPosition.x<boltRest.x&&bolt.localPosition.x>boltRest.x-.5f,"Bolt slides instead of disappearing or snapping");
  tick(30);check(Mathf.Abs(bolt.localPosition.x-(boltRest.x-.5f))<.001f,"Bolt remains fully retracted");
+ check(serviceBlocker.enabled&&mainBlocker.enabled&&serviceLeaf.localPosition==serviceRest&&mainLeaf.localPosition==mainRest,"Distributor latch alone cannot open either pedestrian passage");
  check(turn(false),"Owned crank and contextual interaction divert service");
+ check(serviceReveal.IsDraining&&serviceBlocker.enabled&&serviceLeaf.localPosition==serviceRest,"Service diversion starts drainage before moving its passage gate");
+ float serviceDuration=(float)serviceReveal.GetType().GetField("duration",f).GetValue(serviceReveal);
+ // Water updates precede the gate view, matching Update before LateUpdate in play.
+ serviceReveal.GetType().GetMethod("Advance",f).Invoke(serviceReveal,new object[]{serviceDuration*.5f});v.GetType().GetMethod("Advance",f).Invoke(v,new object[]{serviceOpening});
+ check(serviceReveal.IsDraining&&serviceBlocker.enabled&&serviceLeaf.localPosition==serviceRest,"Service gate remains closed throughout active drainage");
+ serviceReveal.GetType().GetMethod("Advance",f).Invoke(serviceReveal,new object[]{serviceDuration});
+ check(!service.activeSelf&&serviceBlocker.enabled&&serviceLeaf.localPosition==serviceRest,"Water clearing alone cannot remove the still-closed service gate blocker");
+ v.GetType().GetMethod("Advance",f).Invoke(v,new object[]{serviceOpening*.5f});
+ check((serviceLeaf.localPosition-serviceRest).sqrMagnitude>.0001f&&(serviceLeaf.localPosition-serviceRest).sqrMagnitude<serviceTravel.sqrMagnitude&&serviceBlocker.enabled,"Partly retracted service gate remains solid");
+ v.GetType().GetMethod("Advance",f).Invoke(v,new object[]{serviceOpening});
+ check((serviceLeaf.localPosition-serviceRest-serviceTravel).sqrMagnitude<.000001f&&!serviceBlocker.enabled,"Service gate releases its crossing only after fully retracting");
+ check(mainLeaf.localPosition==mainRest&&mainBlocker.enabled,"Service diversion leaves the main exit gate closed");
  // The main facade is closer to the player, so its slot admits a narrower aim-at-fork band.
  foreach(float offset in new[]{-.15f,-.075f,0f,.075f,.15f}){
   a.CancelAction();pose(new Vector2(5,74+offset));stamina.Restore();
@@ -100,12 +129,21 @@ try{
  check(Mathf.Abs(left.localPosition.x-leftRest.x+.4375f)<.001f&&Mathf.Abs(right.localPosition.x-rightRest.x-.4375f)<.001f,"Gate reaches full opening");
  check(v.Opening==1f&&(outlet.localPosition-outletRest-outletTravel).sqrMagnitude<.000001f,"Exterior gate reaches its full authored opening");
  check(pond.IsDraining&&surge.enabled&&Mathf.Abs(surge.color.a-surgeOriginal.a)<.001f,"Open gate carries the initial draining surge");
+ check(mainLeaf.localPosition==mainRest&&mainBlocker.enabled&&!serviceBlocker.enabled,"Main pedestrian gate waits while the exterior sluice opens and drains");
  var pausedSprite=surge.sprite;float pausedAlpha=surge.color.a;outfall.Present(0f);
  check(surge.sprite==pausedSprite&&surge.color.a==pausedAlpha,"Zero elapsed time preserves outfall animation frame and strength");
  outfall.Present(.13f);check(surge.sprite!=pausedSprite,"Flow advances through distinct native artwork frames");
- float drainDuration=(float)pond.GetType().GetField("duration",f).GetValue(pond);pond.GetType().GetMethod("Advance",f).Invoke(pond,new object[]{drainDuration*.5f});outfall.RefreshNow();
+ float drainDuration=(float)pond.GetType().GetField("duration",f).GetValue(pond);pond.GetType().GetMethod("Advance",f).Invoke(pond,new object[]{drainDuration*.5f});v.GetType().GetMethod("Advance",f).Invoke(v,new object[]{mainOpening});outfall.RefreshNow();
  check(pond.IsDraining&&Mathf.Abs(pond.Progress-.5f)<.001f&&Mathf.Abs(surge.color.a-surgeOriginal.a*.65f)<.001f&&Mathf.Abs(upstream.color.a-upstreamOriginal.a*.5f)<.001f,"Outlet surge and intake recede with the pond reveal");
+ check(mainLeaf.localPosition==mainRest&&mainBlocker.enabled,"Half-drained pond cannot begin pedestrian gate retraction");
  pond.GetType().GetMethod("Advance",f).Invoke(pond,new object[]{drainDuration});outfall.RefreshNow();
+ check(mainLeaf.localPosition==mainRest&&mainBlocker.enabled,"Pond completion retains the physical exit gate until it moves");
+ v.GetType().GetMethod("Advance",f).Invoke(v,new object[]{0f});
+ check(mainLeaf.localPosition==mainRest&&mainBlocker.enabled,"Zero elapsed time cannot clear the exit gate");
+ v.GetType().GetMethod("Advance",f).Invoke(v,new object[]{mainOpening*.5f});
+ check((mainLeaf.localPosition-mainRest).sqrMagnitude>.0001f&&(mainLeaf.localPosition-mainRest).sqrMagnitude<mainTravel.sqrMagnitude&&mainBlocker.enabled,"Partly retracted exit gate remains solid after drainage");
+ v.GetType().GetMethod("Advance",f).Invoke(v,new object[]{mainOpening});
+ check((mainLeaf.localPosition-mainRest-mainTravel).sqrMagnitude<.000001f&&!mainBlocker.enabled,"Fully retracted exit gate releases the dry passage");
  check(!high.activeSelf&&outlet.gameObject.activeInHierarchy&&outfall.gameObject.activeInHierarchy,"Exterior waterworks remain visible after pond collision clears");
  check(surge.enabled&&Mathf.Abs(surge.color.a-surgeOriginal.a*.3f)<.001f&&!upstream.enabled&&wet.All(r=>r.enabled),"Settled low water leaves a small rivulet and exposed wet masonry");
  outfall.enabled=false;
@@ -117,9 +155,17 @@ try{
  v.enabled=false;v.enabled=true;check(Mathf.Abs(weight.localPosition.y-weightRest.y+1.25f)<.001f,"Re-enable restores solved pose without replay");
  check(Mathf.Abs(left.localPosition.x-leftRest.x+.4375f)<.001f,"Solved gate stays open after rest and re-enable");
  check(v.Opening==1f&&(outlet.localPosition-outletRest-outletTravel).sqrMagnitude<.000001f,"Exterior gate remains open through rest and re-enable");
+ check((serviceLeaf.localPosition-serviceRest-serviceTravel).sqrMagnitude<.000001f&&(mainLeaf.localPosition-mainRest-mainTravel).sqrMagnitude<.000001f&&!serviceBlocker.enabled&&!mainBlocker.enabled,"Rest and re-enable preserve both solved pedestrian passages");
+ // A view disabled during a staged animation settles to its owner's saved result.
+ v.Present(RoadOfTheOldKing.World.SluiceStage.High,false,false);v.Present(s.Stage,s.BrakeLifted,true);v.GetType().GetMethod("Advance",f).Invoke(v,new object[]{mainOpening*.25f});
+ check(mainBlocker.enabled,"Staged partial gate still blocks before lifecycle restoration");
+ v.enabled=false;
+ check((serviceLeaf.localPosition-serviceRest-serviceTravel).sqrMagnitude<.000001f&&(mainLeaf.localPosition-mainRest-mainTravel).sqrMagnitude<.000001f&&!serviceBlocker.enabled&&!mainBlocker.enabled,"Disabling the view settles passage gates to authoritative saved progress");
+ v.enabled=true;
  game.Progress.completedIds.RemoveAll(id=>id.StartsWith("green-lowlands/sluice/"));s.RestoreProgress(game.Progress);
  check(bolt.localPosition==boltRest&&brake.localPosition==brakeRest&&weight.localPosition==weightRest,"Fresh restore recovers authored rest poses");
  check(left.localPosition==leftRest&&right.localPosition==rightRest,"Fresh restore closes both leaves");
+ check(serviceLeaf.localPosition==serviceRest&&mainLeaf.localPosition==mainRest&&serviceBlocker.enabled&&mainBlocker.enabled,"Fresh restore returns both passage leaves and blockers to closed state");
  outfall.RefreshNow();check(v.Opening==0f&&outlet.localPosition==outletRest&&!surge.enabled&&upstream.enabled&&wet.All(r=>!r.enabled),"Fresh restore recovers closed outlet and high intake water");
-}finally{RoadOfTheOldKing.UI.FeedbackSettings.FlashScale=savedFlash;outfall.enabled=true;v.enabled=true;a.CancelAction();game.Progress.completedIds.Clear();game.Progress.completedIds.AddRange(saved);game.Progress.ownedTools.Clear();game.Progress.ownedTools.AddRange(savedTools);s.RestoreProgress(game.Progress);outfall.RefreshNow();pose(origin);p.GetType().GetField("controlsActive",f).SetValue(p,controls);if(savedExists)PlayerPrefs.SetString(game.StorageKey,savedRecord);else PlayerPrefs.DeleteKey(game.StorageKey);PlayerPrefs.Save();}
+}finally{RoadOfTheOldKing.UI.FeedbackSettings.FlashScale=savedFlash;outfall.enabled=true;v.enabled=true;a.CancelAction();game.Progress.completedIds.Clear();game.Progress.completedIds.AddRange(saved);game.Progress.ownedTools.Clear();game.Progress.ownedTools.AddRange(savedTools);s.RestoreProgress(game.Progress);outfall.RefreshNow();pose(origin);cutaway.EvaluateAt(origin,true);p.GetType().GetField("controlsActive",f).SetValue(p,controls);if(savedExists)PlayerPrefs.SetString(game.StorageKey,savedRecord);else PlayerPrefs.DeleteKey(game.StorageKey);PlayerPrefs.Save();}
 return new{passed=checks.Count,checks=checks.ToArray()};

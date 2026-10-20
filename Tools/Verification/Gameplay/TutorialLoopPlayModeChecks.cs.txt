@@ -51,7 +51,7 @@ if(phase==8||phase==10){
         var melee=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Tutorial.HitCountLesson>();
         var reward=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SunShardReward>();
         var fire=session.Checkpoints.Fires.Single(f=>f.Id=="tutorial/roadside-fire");
-        var wolves=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Combat.WolfAI>(FindObjectsSortMode.None);
+        var wolves=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Enemies.PredatorBrain>(FindObjectsSortMode.None);
         var lone=wolves.Single(w=>w.GetComponent<RoadOfTheOldKing.Progression.DefeatMilestone>()!=null);
         var pack=wolves.Where(w=>w!=lone).OrderBy(w=>w.name).ToArray();
         check(wolves.Length==3&&pack.Length==2,"Lone wolf and two-wolf pack present");

@@ -1,46 +1,14 @@
-using RoadOfTheOldKing.Player;
 using RoadOfTheOldKing.Progression;
 using UnityEngine;
 
 namespace RoadOfTheOldKing.World
 {
+    // A heart fragment in the world; gating, pickup and saving come from RewardPickup (17 Oct refactor).
     [DisallowMultipleComponent, RequireComponent(typeof(Collider2D))]
-    public sealed class HeartFragmentPickup : WorldPickup, IProgressParticipant
+    public sealed class HeartFragmentPickup : RewardPickup
     {
-        [SerializeField] private string rewardId;
-        [SerializeField] private bool requireClearAccess;
-        [SerializeField] private string requiredMilestone;
-        [SerializeField] private GameObject visual;
-        public string RewardId => rewardId;
-        public bool IsCollected { get; private set; }
-
+        protected override RewardKind Kind => RewardKind.HeartFragment;
         public override string Prompt => "Take fragment";
-        public override bool CanCollect(PlayerHealth player) => base.CanCollect(player) &&
-            !IsCollected && !string.IsNullOrEmpty(rewardId) && GameSession.Instance != null &&
-            !GameSession.Instance.IsLoading && (!requireClearAccess || HasClearAccess(player)) &&
-            (string.IsNullOrEmpty(requiredMilestone) || GameSession.Instance.Progress.Has(requiredMilestone));
-
-        public override bool TryCollect(PlayerHealth player)
-        {
-            if (!CanCollect(player) || !GameSession.Instance.Rewards.TryCollectHeartFragment(rewardId))
-                return false;
-            PickupPresentation.Collected(visual, player);
-            IsCollected = true;
-            Refresh();
-            return true;
-        }
-
-        private void Refresh()
-        {
-            if (visual != null) visual.SetActive(!IsCollected);
-            GetComponent<Collider2D>().enabled = !IsCollected;
-        }
-
-        public void CaptureProgress(ProgressState state) { }
-        public void RestoreProgress(ProgressState state)
-        {
-            IsCollected = HeartFragmentProgression.IsCollected(state, rewardId);
-            Refresh();
-        }
+        protected override void OnRefresh(bool shown) => GetComponent<Collider2D>().enabled = !IsCollected;
     }
 }

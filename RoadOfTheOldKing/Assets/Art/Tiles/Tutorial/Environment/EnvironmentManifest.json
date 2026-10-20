@@ -1,1051 +1,404 @@
 {
-    "entries": [
+  "entries": [
+    {
+      "name": "Cottage_Clay",
+      "kind": "static",
+      "width": 96,
+      "height": 80,
+      "overheadRow": 2,
+      "collision": [
         {
-            "name": "Cottage_Clay",
-            "source": "Cottages",
-            "kind": "static",
-            "sourceRect": {
-                "x": 0,
-                "y": 0,
-                "width": 680,
-                "height": 948
-            },
-            "width": 96,
-            "height": 80,
-            "overheadRow": 2,
-            "swatches": [
-                1,
-                2,
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11,
-                12,
-                13
-            ],
-            "collision": [
-                {
-                    "x": 0,
-                    "y": 0,
-                    "width": 6,
-                    "height": 2
-                }
-            ],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": true,
-            "hueAware": true
-        },
-        {
-            "name": "Cottage_Thatch",
-            "source": "Cottages",
-            "kind": "static",
-            "sourceRect": {
-                "x": 680,
-                "y": 0,
-                "width": 979,
-                "height": 948
-            },
-            "width": 128,
-            "height": 96,
-            "overheadRow": 2,
-            "swatches": [
-                1,
-                2,
-                4,
-                5,
-                6,
-                7,
-                11,
-                12,
-                13
-            ],
-            "collision": [
-                {
-                    "x": 0,
-                    "y": 0,
-                    "width": 8,
-                    "height": 2
-                }
-            ],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": true,
-            "hueAware": true
-        },
-        {
-            "name": "Woodshed",
-            "source": "Structures",
-            "kind": "static",
-            "sourceRect": {
-                "x": 525,
-                "y": 0,
-                "width": 515,
-                "height": 570
-            },
-            "width": 64,
-            "height": 48,
-            "overheadRow": 1,
-            "swatches": [
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10
-            ],
-            "collision": [
-                {
-                    "x": 0,
-                    "y": 0,
-                    "width": 4,
-                    "height": 1
-                }
-            ],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Village_Well",
-            "source": "Structures",
-            "kind": "static",
-            "sourceRect": {
-                "x": 1040,
-                "y": 0,
-                "width": 496,
-                "height": 570
-            },
-            "width": 32,
-            "height": 48,
-            "overheadRow": 1,
-            "swatches": [
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                12,
-                13
-            ],
-            "collision": [
-                {
-                    "x": 0,
-                    "y": 0,
-                    "width": 2,
-                    "height": 1
-                }
-            ],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Oak",
-            "source": "ApprovedSample16",
-            "kind": "tree",
-            "sourceRect": {
-                "x": 64,
-                "y": 64,
-                "width": 48,
-                "height": 64
-            },
-            "width": 48,
-            "height": 64,
-            "overheadRow": 1,
-            "swatches": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6
-            ],
-            "collision": [
-                {
-                    "x": 1,
-                    "y": 0,
-                    "width": 1,
-                    "height": 1
-                }
-            ],
-            "interactiveArt": false,
-            "native": true,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Birch",
-            "source": "Nature",
-            "kind": "tree",
-            "sourceRect": {
-                "x": 0,
-                "y": 0,
-                "width": 384,
-                "height": 600
-            },
-            "width": 48,
-            "height": 64,
-            "overheadRow": 1,
-            "swatches": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                7,
-                11
-            ],
-            "collision": [
-                {
-                    "x": 1,
-                    "y": 0,
-                    "width": 1,
-                    "height": 1
-                }
-            ],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Apple_Tree",
-            "source": "Nature",
-            "kind": "tree",
-            "sourceRect": {
-                "x": 384,
-                "y": 0,
-                "width": 396,
-                "height": 600
-            },
-            "width": 48,
-            "height": 64,
-            "overheadRow": 1,
-            "swatches": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6,
-                9
-            ],
-            "collision": [
-                {
-                    "x": 1,
-                    "y": 0,
-                    "width": 1,
-                    "height": 1
-                }
-            ],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Hedgerow",
-            "source": "Nature",
-            "kind": "static",
-            "sourceRect": {
-                "x": 780,
-                "y": 0,
-                "width": 400,
-                "height": 600
-            },
-            "width": 48,
-            "height": 32,
-            "overheadRow": 1,
-            "swatches": [
-                0,
-                1,
-                2,
-                3
-            ],
-            "collision": [
-                {
-                    "x": 0,
-                    "y": 0,
-                    "width": 3,
-                    "height": 1
-                }
-            ],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Boulder_Cluster",
-            "source": "Nature",
-            "kind": "static",
-            "sourceRect": {
-                "x": 1180,
-                "y": 0,
-                "width": 356,
-                "height": 600
-            },
-            "width": 48,
-            "height": 32,
-            "overheadRow": 2,
-            "swatches": [
-                12,
-                13
-            ],
-            "collision": [
-                {
-                    "x": 0,
-                    "y": 0,
-                    "width": 3,
-                    "height": 1
-                }
-            ],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Fallen_Log",
-            "source": "Nature",
-            "kind": "static",
-            "sourceRect": {
-                "x": 0,
-                "y": 600,
-                "width": 405,
-                "height": 424
-            },
-            "width": 48,
-            "height": 32,
-            "overheadRow": 1,
-            "swatches": [
-                4,
-                5,
-                6,
-                7
-            ],
-            "collision": [
-                {
-                    "x": 0,
-                    "y": 0,
-                    "width": 3,
-                    "height": 1
-                }
-            ],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Axe_Stump",
-            "source": "Nature",
-            "kind": "static",
-            "sourceRect": {
-                "x": 405,
-                "y": 600,
-                "width": 375,
-                "height": 424
-            },
-            "width": 32,
-            "height": 32,
-            "overheadRow": 2,
-            "swatches": [
-                4,
-                5,
-                6,
-                7
-            ],
-            "collision": [
-                {
-                    "x": 0,
-                    "y": 0,
-                    "width": 2,
-                    "height": 1
-                }
-            ],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Firewood_Rack",
-            "source": "Nature",
-            "kind": "static",
-            "sourceRect": {
-                "x": 780,
-                "y": 600,
-                "width": 400,
-                "height": 424
-            },
-            "width": 48,
-            "height": 32,
-            "overheadRow": 1,
-            "swatches": [
-                4,
-                5,
-                6,
-                7
-            ],
-            "collision": [
-                {
-                    "x": 0,
-                    "y": 0,
-                    "width": 3,
-                    "height": 1
-                }
-            ],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Target_Worn",
-            "source": "Practice",
-            "kind": "static",
-            "sourceRect": {
-                "x": 0,
-                "y": 0,
-                "width": 512,
-                "height": 1024
-            },
-            "width": 32,
-            "height": 32,
-            "overheadRow": 2,
-            "swatches": [
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11
-            ],
-            "collision": [],
-            "interactiveArt": true,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Target_New",
-            "source": "Practice",
-            "kind": "static",
-            "sourceRect": {
-                "x": 512,
-                "y": 0,
-                "width": 512,
-                "height": 1024
-            },
-            "width": 32,
-            "height": 32,
-            "overheadRow": 2,
-            "swatches": [
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11
-            ],
-            "collision": [],
-            "interactiveArt": true,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Practice_Dummy",
-            "source": "Practice",
-            "kind": "static",
-            "sourceRect": {
-                "x": 1024,
-                "y": 0,
-                "width": 512,
-                "height": 1024
-            },
-            "width": 32,
-            "height": 32,
-            "overheadRow": 2,
-            "swatches": [
-                4,
-                5,
-                6,
-                7,
-                8,
-                9,
-                10,
-                11
-            ],
-            "collision": [],
-            "interactiveArt": true,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Stone_Bridge",
-            "source": "Bridge",
-            "kind": "bridge",
-            "sourceRect": {
-                "x": 0,
-                "y": 0,
-                "width": 1536,
-                "height": 1024
-            },
-            "width": 160,
-            "height": 64,
-            "overheadRow": 4,
-            "swatches": [
-                1,
-                2,
-                7,
-                12,
-                13
-            ],
-            "collision": [
-                {
-                    "x": 0,
-                    "y": 0,
-                    "width": 10,
-                    "height": 1
-                },
-                {
-                    "x": 0,
-                    "y": 3,
-                    "width": 10,
-                    "height": 1
-                }
-            ],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": true,
-            "hueAware": false
-        },
-        {
-            "name": "Old_Arch",
-            "source": "Structures",
-            "kind": "static",
-            "sourceRect": {
-                "x": 0,
-                "y": 570,
-                "width": 525,
-                "height": 454
-            },
-            "width": 48,
-            "height": 64,
-            "overheadRow": 1,
-            "swatches": [
-                1,
-                2,
-                7,
-                12,
-                13
-            ],
-            "collision": [
-                {
-                    "x": 0,
-                    "y": 0,
-                    "width": 1,
-                    "height": 1
-                },
-                {
-                    "x": 2,
-                    "y": 0,
-                    "width": 1,
-                    "height": 1
-                }
-            ],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Broken_Pillar",
-            "source": "Structures",
-            "kind": "static",
-            "sourceRect": {
-                "x": 525,
-                "y": 570,
-                "width": 515,
-                "height": 454
-            },
-            "width": 32,
-            "height": 48,
-            "overheadRow": 1,
-            "swatches": [
-                1,
-                2,
-                7,
-                12,
-                13
-            ],
-            "collision": [
-                {
-                    "x": 0,
-                    "y": 0,
-                    "width": 2,
-                    "height": 1
-                }
-            ],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Ruined_Wall",
-            "source": "Structures",
-            "kind": "static",
-            "sourceRect": {
-                "x": 1040,
-                "y": 570,
-                "width": 496,
-                "height": 454
-            },
-            "width": 48,
-            "height": 32,
-            "overheadRow": 1,
-            "swatches": [
-                1,
-                2,
-                7,
-                12,
-                13
-            ],
-            "collision": [
-                {
-                    "x": 0,
-                    "y": 0,
-                    "width": 3,
-                    "height": 1
-                }
-            ],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Fence_Horizontal",
-            "source": "ApprovedSample16",
-            "kind": "static",
-            "sourceRect": {
-                "x": 32,
-                "y": 32,
-                "width": 48,
-                "height": 32
-            },
-            "width": 48,
-            "height": 32,
-            "overheadRow": 1,
-            "swatches": [
-                4,
-                5,
-                6,
-                7
-            ],
-            "collision": [
-                {
-                    "x": 0,
-                    "y": 0,
-                    "width": 3,
-                    "height": 1
-                }
-            ],
-            "interactiveArt": false,
-            "native": true,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Fence_Vertical",
-            "source": "Fences",
-            "kind": "static",
-            "sourceRect": {
-                "x": 0,
-                "y": 0,
-                "width": 418,
-                "height": 418
-            },
-            "width": 16,
-            "height": 48,
-            "overheadRow": 3,
-            "swatches": [
-                4,
-                5,
-                6,
-                7
-            ],
-            "collision": [
-                {
-                    "x": 0,
-                    "y": 0,
-                    "width": 1,
-                    "height": 3
-                }
-            ],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Fence_NW",
-            "source": "Fences",
-            "kind": "static",
-            "sourceRect": {
-                "x": 836,
-                "y": 0,
-                "width": 418,
-                "height": 418
-            },
-            "width": 32,
-            "height": 32,
-            "overheadRow": 2,
-            "swatches": [
-                4,
-                5,
-                6,
-                7
-            ],
-            "collision": [
-                {
-                    "x": 0,
-                    "y": 0,
-                    "width": 2,
-                    "height": 1
-                },
-                {
-                    "x": 1,
-                    "y": 1,
-                    "width": 1,
-                    "height": 1
-                }
-            ],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Fence_NE",
-            "source": "Fences",
-            "kind": "static",
-            "sourceRect": {
-                "x": 418,
-                "y": 0,
-                "width": 418,
-                "height": 418
-            },
-            "width": 32,
-            "height": 32,
-            "overheadRow": 2,
-            "swatches": [
-                4,
-                5,
-                6,
-                7
-            ],
-            "collision": [
-                {
-                    "x": 0,
-                    "y": 0,
-                    "width": 2,
-                    "height": 1
-                },
-                {
-                    "x": 0,
-                    "y": 1,
-                    "width": 1,
-                    "height": 1
-                }
-            ],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Fence_SW",
-            "source": "Fences",
-            "kind": "static",
-            "sourceRect": {
-                "x": 418,
-                "y": 418,
-                "width": 418,
-                "height": 418
-            },
-            "width": 32,
-            "height": 32,
-            "overheadRow": 2,
-            "swatches": [
-                4,
-                5,
-                6,
-                7
-            ],
-            "collision": [
-                {
-                    "x": 0,
-                    "y": 1,
-                    "width": 2,
-                    "height": 1
-                },
-                {
-                    "x": 1,
-                    "y": 0,
-                    "width": 1,
-                    "height": 1
-                }
-            ],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Fence_SE",
-            "source": "Fences",
-            "kind": "static",
-            "sourceRect": {
-                "x": 0,
-                "y": 418,
-                "width": 418,
-                "height": 418
-            },
-            "width": 32,
-            "height": 32,
-            "overheadRow": 2,
-            "swatches": [
-                4,
-                5,
-                6,
-                7
-            ],
-            "collision": [
-                {
-                    "x": 0,
-                    "y": 1,
-                    "width": 2,
-                    "height": 1
-                },
-                {
-                    "x": 0,
-                    "y": 0,
-                    "width": 1,
-                    "height": 1
-                }
-            ],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Gate_Closed",
-            "source": "Fences",
-            "kind": "static",
-            "sourceRect": {
-                "x": 836,
-                "y": 418,
-                "width": 418,
-                "height": 418
-            },
-            "width": 48,
-            "height": 32,
-            "overheadRow": 1,
-            "swatches": [
-                4,
-                5,
-                6,
-                7
-            ],
-            "collision": [
-                {
-                    "x": 0,
-                    "y": 0,
-                    "width": 3,
-                    "height": 1
-                }
-            ],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Gate_Open",
-            "source": "OpenGate",
-            "kind": "static",
-            "sourceRect": {
-                "x": 0,
-                "y": 0,
-                "width": 1536,
-                "height": 1024
-            },
-            "width": 48,
-            "height": 32,
-            "overheadRow": 1,
-            "swatches": [
-                4,
-                5,
-                6,
-                7
-            ],
-            "collision": [
-                {
-                    "x": 0,
-                    "y": 0,
-                    "width": 1,
-                    "height": 1
-                },
-                {
-                    "x": 2,
-                    "y": 0,
-                    "width": 1,
-                    "height": 1
-                }
-            ],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Fence_Repaired",
-            "source": "Fences",
-            "kind": "static",
-            "sourceRect": {
-                "x": 418,
-                "y": 836,
-                "width": 418,
-                "height": 418
-            },
-            "width": 48,
-            "height": 32,
-            "overheadRow": 1,
-            "swatches": [
-                4,
-                5,
-                6,
-                7
-            ],
-            "collision": [
-                {
-                    "x": 0,
-                    "y": 0,
-                    "width": 3,
-                    "height": 1
-                }
-            ],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Fence_Post",
-            "source": "Fences",
-            "kind": "static",
-            "sourceRect": {
-                "x": 836,
-                "y": 836,
-                "width": 418,
-                "height": 418
-            },
-            "width": 16,
-            "height": 32,
-            "overheadRow": 1,
-            "swatches": [
-                4,
-                5,
-                6,
-                7
-            ],
-            "collision": [
-                {
-                    "x": 0,
-                    "y": 0,
-                    "width": 1,
-                    "height": 1
-                }
-            ],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Boulder",
-            "source": "ApprovedSample16",
-            "kind": "static",
-            "sourceRect": {
-                "x": 0,
-                "y": 32,
-                "width": 32,
-                "height": 32
-            },
-            "width": 32,
-            "height": 32,
-            "overheadRow": 2,
-            "swatches": [
-                12,
-                13
-            ],
-            "collision": [
-                {
-                    "x": 0,
-                    "y": 0,
-                    "width": 2,
-                    "height": 1
-                }
-            ],
-            "interactiveArt": false,
-            "native": true,
-            "stretch": false,
-            "hueAware": false
-        },
-        {
-            "name": "Small_Stones",
-            "source": "Nature",
-            "kind": "static",
-            "sourceRect": {
-                "x": 1180,
-                "y": 600,
-                "width": 356,
-                "height": 424
-            },
-            "width": 32,
-            "height": 16,
-            "overheadRow": 1,
-            "swatches": [
-                12,
-                13
-            ],
-            "collision": [],
-            "interactiveArt": false,
-            "native": false,
-            "stretch": false,
-            "hueAware": false
+          "x": 0,
+          "y": 0,
+          "width": 6,
+          "height": 2
         }
-    ]
+      ],
+      "interactiveArt": false
+    },
+    {
+      "name": "Cottage_Thatch",
+      "kind": "static",
+      "width": 128,
+      "height": 96,
+      "overheadRow": 2,
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 8,
+          "height": 2
+        }
+      ],
+      "interactiveArt": false
+    },
+    {
+      "name": "Woodshed",
+      "kind": "static",
+      "width": 64,
+      "height": 48,
+      "overheadRow": 1,
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 4,
+          "height": 1
+        }
+      ],
+      "interactiveArt": false
+    },
+    {
+      "name": "Village_Well",
+      "kind": "static",
+      "width": 32,
+      "height": 48,
+      "overheadRow": 1,
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 2,
+          "height": 1
+        }
+      ],
+      "interactiveArt": false
+    },
+    {
+      "name": "Oak",
+      "kind": "tree",
+      "width": 48,
+      "height": 64,
+      "overheadRow": 1,
+      "collision": [
+        {
+          "x": 1,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "interactiveArt": false
+    },
+    {
+      "name": "Birch",
+      "kind": "tree",
+      "width": 48,
+      "height": 64,
+      "overheadRow": 1,
+      "collision": [
+        {
+          "x": 1,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "interactiveArt": false
+    },
+    {
+      "name": "Apple_Tree",
+      "kind": "tree",
+      "width": 48,
+      "height": 64,
+      "overheadRow": 1,
+      "collision": [
+        {
+          "x": 1,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "interactiveArt": false
+    },
+    {
+      "name": "Hedgerow",
+      "kind": "static",
+      "width": 48,
+      "height": 32,
+      "overheadRow": 1,
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 3,
+          "height": 1
+        }
+      ],
+      "interactiveArt": false
+    },
+    {
+      "name": "Boulder_Cluster",
+      "kind": "static",
+      "width": 48,
+      "height": 32,
+      "overheadRow": 2,
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 3,
+          "height": 1
+        }
+      ],
+      "interactiveArt": false
+    },
+    {
+      "name": "Fallen_Log",
+      "kind": "static",
+      "width": 48,
+      "height": 32,
+      "overheadRow": 1,
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 3,
+          "height": 1
+        }
+      ],
+      "interactiveArt": false
+    },
+    {
+      "name": "Axe_Stump",
+      "kind": "static",
+      "width": 32,
+      "height": 32,
+      "overheadRow": 2,
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 2,
+          "height": 1
+        }
+      ],
+      "interactiveArt": false
+    },
+    {
+      "name": "Firewood_Rack",
+      "kind": "static",
+      "width": 48,
+      "height": 32,
+      "overheadRow": 1,
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 3,
+          "height": 1
+        }
+      ],
+      "interactiveArt": false
+    },
+    {
+      "name": "Target_Worn",
+      "kind": "static",
+      "width": 32,
+      "height": 32,
+      "overheadRow": 2,
+      "collision": [],
+      "interactiveArt": true
+    },
+    {
+      "name": "Target_New",
+      "kind": "static",
+      "width": 32,
+      "height": 32,
+      "overheadRow": 2,
+      "collision": [],
+      "interactiveArt": true
+    },
+    {
+      "name": "Practice_Dummy",
+      "kind": "static",
+      "width": 32,
+      "height": 32,
+      "overheadRow": 2,
+      "collision": [],
+      "interactiveArt": true
+    },
+    {
+      "name": "Stone_Bridge",
+      "kind": "bridge",
+      "width": 160,
+      "height": 64,
+      "overheadRow": 4,
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 10,
+          "height": 1
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "width": 10,
+          "height": 1
+        }
+      ],
+      "interactiveArt": false
+    },
+    {
+      "name": "Old_Arch",
+      "kind": "static",
+      "width": 48,
+      "height": 64,
+      "overheadRow": 1,
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "interactiveArt": false
+    },
+    {
+      "name": "Broken_Pillar",
+      "kind": "static",
+      "width": 32,
+      "height": 48,
+      "overheadRow": 1,
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 2,
+          "height": 1
+        }
+      ],
+      "interactiveArt": false
+    },
+    {
+      "name": "Ruined_Wall",
+      "kind": "static",
+      "width": 48,
+      "height": 32,
+      "overheadRow": 1,
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 3,
+          "height": 1
+        }
+      ],
+      "interactiveArt": false
+    },
+    {
+      "name": "Fence_Horizontal",
+      "kind": "static",
+      "width": 48,
+      "height": 32,
+      "overheadRow": 1,
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 3,
+          "height": 1
+        }
+      ],
+      "interactiveArt": false
+    },
+    {
+      "name": "Fence_Vertical",
+      "kind": "static",
+      "width": 16,
+      "height": 48,
+      "overheadRow": 3,
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 3
+        }
+      ],
+      "interactiveArt": false
+    },
+    {
+      "name": "Gate_Closed",
+      "kind": "static",
+      "width": 48,
+      "height": 32,
+      "overheadRow": 1,
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 3,
+          "height": 1
+        }
+      ],
+      "interactiveArt": false
+    },
+    {
+      "name": "Fence_Repaired",
+      "kind": "static",
+      "width": 48,
+      "height": 32,
+      "overheadRow": 1,
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 3,
+          "height": 1
+        }
+      ],
+      "interactiveArt": false
+    },
+    {
+      "name": "Fence_Post",
+      "kind": "static",
+      "width": 16,
+      "height": 32,
+      "overheadRow": 1,
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "interactiveArt": false
+    },
+    {
+      "name": "Boulder",
+      "kind": "static",
+      "width": 32,
+      "height": 32,
+      "overheadRow": 2,
+      "collision": [
+        {
+          "x": 0,
+          "y": 0,
+          "width": 2,
+          "height": 1
+        }
+      ],
+      "interactiveArt": false
+    },
+    {
+      "name": "Small_Stones",
+      "kind": "static",
+      "width": 32,
+      "height": 16,
+      "overheadRow": 1,
+      "collision": [],
+      "interactiveArt": false
+    }
+  ]
 }

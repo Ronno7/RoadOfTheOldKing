@@ -1,7 +1,7 @@
 {
   "version": 1,
   "sourceTool": "OpenAI built-in image_gen, 2026-10-16",
-  "palette": "ArtSource/GreenLowlands/ZonePalette.json",
+  "palette": "ArtSource/Shared/Palettes/Meadow.json",
   "processing": "Threshold source alpha at 128, crop to explicit sourceBounds for registered native edits or opaque bounds for generated high-resolution sources, nearest sample into registered native bounds, map RGB to nearest permitted shared color without dithering. No baked ground shadow.",
   "buildingColors": ["ink", "soilcontact", "deepsoil", "soil", "soilmid", "soillight", "soilshine", "rockshadow", "stonejoint", "stoneshade", "stone", "stonelight"],
   "pieces": {

@@ -1,107 +1,15 @@
-using System;
-using System.Collections.Generic;
-using RoadOfTheOldKing.Combat;
-using RoadOfTheOldKing.Player;
 using RoadOfTheOldKing.Progression;
 using UnityEngine;
 
 namespace RoadOfTheOldKing.World
 {
-    // Optional event sources unlock a reward. Without a source it is an exploration pickup. A defeat
-    // source can bring a pack (alsoDefeat): the reward unlocks once all of them are down, where the last fell.
+    // A Sun Shard in the world. Gating (an EncounterUnlock, a milestone), the pickup and the save record live in
+    // RewardPickup, EncounterUnlock and RewardService (17 Oct refactor); this only names the reward. The Tutorial
+    // shard's wolf pack moved onto an EncounterUnlock whose milestone is "shard/available/<id>", the key older saves hold.
     [DisallowMultipleComponent]
-    public sealed class SunShardReward : WorldPickup, IProgressParticipant
+    public sealed class SunShardReward : RewardPickup
     {
-        [SerializeField] private string rewardId;
-        [SerializeField] private bool requireClearAccess;
-        [SerializeField] private string requiredMilestone;
-        [SerializeField] private Damageable defeatSource;
-        [Tooltip("With a defeat source: these must be defeated too (a pack); the shard appears where the last one fell.")]
-        [SerializeField] private Damageable[] alsoDefeat = Array.Empty<Damageable>();
-        [SerializeField] private GameObject pickupVisual;
-        [SerializeField] private bool awardImmediately;
-        public string RewardId => rewardId;
-        public bool IsAvailable { get; private set; }
-        private readonly List<(Damageable source, Action handler)> defeatHandlers = new List<(Damageable, Action)>();
-        private Damageable lastFallen;
-        public bool IsCollected => GameSession.Instance != null &&
-            GameSession.Instance.Progress.Has("shard/collected/" + rewardId);
-
-        protected override void OnEnable()
-        {
-            base.OnEnable();
-            foreach (var source in DefeatSources())
-            {
-                var fallen = source;
-                Action handler = () => OnDefeated(fallen);
-                source.Defeated += handler;
-                defeatHandlers.Add((source, handler));
-            }
-        }
-
-        protected override void OnDisable()
-        {
-            base.OnDisable();
-            foreach (var (source, handler) in defeatHandlers) if (source != null) source.Defeated -= handler;
-            defeatHandlers.Clear();
-        }
-
-        private IEnumerable<Damageable> DefeatSources()
-        {
-            if (defeatSource != null) yield return defeatSource;
-            if (alsoDefeat != null) foreach (var source in alsoDefeat) if (source != null) yield return source;
-        }
-
-        private void OnDefeated(Damageable fallen)
-        {
-            foreach (var source in DefeatSources()) if (source.IsAlive) return;
-            lastFallen = fallen;
-            Unlock();
-        }
-
-        private void Unlock()
-        {
-            if (IsAvailable || IsCollected) return;
-            IsAvailable = true;
-            if (lastFallen != null) transform.position = lastFallen.transform.position;
-            RefreshVisual();
-            if (awardImmediately) Collect();
-            else GameSession.Instance?.SaveProgress();
-        }
-
+        protected override RewardKind Kind => RewardKind.SunShard;
         public override string Prompt => "Take Sun Shard";
-        public override bool CanCollect(PlayerHealth player) => base.CanCollect(player) &&
-            IsAvailable && !IsCollected && !awardImmediately && !string.IsNullOrEmpty(rewardId) &&
-            GameSession.Instance != null && !GameSession.Instance.IsLoading &&
-            (!requireClearAccess || HasClearAccess(player)) &&
-            (string.IsNullOrEmpty(requiredMilestone) || GameSession.Instance.Progress.Has(requiredMilestone));
-        public override bool TryCollect(PlayerHealth player) => CanCollect(player) && Collect();
-
-        private bool Collect()
-        {
-            if (!IsAvailable || IsCollected || string.IsNullOrEmpty(rewardId) ||
-                GameSession.Instance == null || !GameSession.Instance.Rewards.TryCollectShard(rewardId))
-                return false;
-            if (!awardImmediately) PickupPresentation.Collected(pickupVisual);
-            RefreshVisual();
-            return true;
-        }
-
-        private void RefreshVisual()
-        {
-            if (pickupVisual != null) pickupVisual.SetActive(IsAvailable && !IsCollected && !awardImmediately);
-        }
-
-        public void CaptureProgress(ProgressState state)
-        {
-            if (IsAvailable) state.Complete("shard/available/" + rewardId);
-        }
-
-        public void RestoreProgress(ProgressState state)
-        {
-            IsAvailable = defeatSource == null || state.Has("shard/available/" + rewardId);
-            if (IsAvailable && awardImmediately && !IsCollected) Collect();
-            RefreshVisual();
-        }
     }
 }

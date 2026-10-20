@@ -89,7 +89,7 @@ check(!clearSegment(new Vector2(21.5f,7.5f),new Vector2(21.5f,5.5f))&&!clearSegm
 for(int x=19;x<=24;x++)foreach(int y in new[]{7,8})check(!collision.HasTile(new Vector3Int(x,y,0)),"Regional collision is cleared beneath the bridge deck "+x+","+y);
 foreach(var p in new[]{new Vector2(21.5f,12.5f),new Vector2(22.5f,2.5f)})check(collision.HasTile(collision.WorldToCell(p))&&!clear(p),"River remains solid away from the bridge at "+p);
 foreach(var p in new[]{new Vector2(-.25f,8),new Vector2(40.25f,8),new Vector2(10,-.25f),new Vector2(10,20.25f)})check(!clear(p),"Outer bounds prevent leaving the authored area at "+p);
-var grasses=decoration.Cast<Transform>().Where(t=>source(t).EndsWith("/Grass_Fan_Visual.prefab")||source(t).EndsWith("/Grass_Swept_Visual.prefab")||source(t).EndsWith("/Grass_Dry_Visual.prefab")).ToArray();
+var grasses=decoration.Cast<Transform>().Where(t=>source(t).EndsWith("/Grass_Fan.prefab")||source(t).EndsWith("/Grass_Swept.prefab")||source(t).EndsWith("/Grass_Dry.prefab")).ToArray();
 check(grasses.Length>0,"Physical grass artwork is placed separately from ground");
 foreach(var grass in grasses)check(grass.GetComponentsInChildren<Collider2D>(true).Length==0&&grass.GetComponentsInChildren<Rigidbody2D>(true).Length==0,"Grass is visual and does not block movement "+grass.name);
 check(grasses.Any(g=>{var p=(Vector2)g.GetComponentInChildren<SpriteRenderer>().bounds.center;var n=new Vector2Int(Mathf.RoundToInt(p.x*2),Mathf.RoundToInt(p.y*2));return clear(p)&&reached.Contains(n);}),"A placed grass clump is traversable from the arrival route");

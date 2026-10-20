@@ -1,0 +1,79 @@
+using System;
+using System.IO;
+using System.Linq;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.Tilemaps;
+using Object = UnityEngine.Object;
+using static RoadOfTheOldKing.EditorTools.TileKitAssets;
+
+namespace RoadOfTheOldKing.EditorTools
+{
+    public static class PathsKitBuilder
+    {
+        public const string Root = "Assets/Art/Tiles/Shared/Paths";
+
+        [MenuItem("Road of the Old King/Advanced/Asset Maintenance/Shared/Refresh Paths Assets")]
+        public static void Build()
+        {
+            BuildKit(Root, "Paths",
+                GroundKitBuilder.Root, includeWornStone: true);
+        }
+        internal static void BuildKit(string assetRoot, string prefix, string groundRoot,
+            bool includeWornStone = false)
+        {
+            if(EditorApplication.isPlaying)throw new InvalidOperationException("Use Edit Mode.");
+            var paving=AssetDatabase.LoadAssetAtPath<RuleTile>(groundRoot+"/Rules/Paint_Cobbles.asset");
+            var oldRoad=includeWornStone?AssetDatabase.LoadAssetAtPath<RuleTile>(groundRoot+"/Rules/Paint_WornStone.asset"):null;
+            if(paving==null || (includeWornStone && oldRoad==null))throw new InvalidOperationException("Build regional Ground before Paths.");
+            var previous=SceneManager.GetActiveScene();
+            var scratch=EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Additive);
+            try
+            {
+                SceneManager.SetActiveScene(scratch);
+                foreach(var folder in new[]{"Tiles","Rules","Palettes"})Directory.CreateDirectory(assetRoot+"/"+folder);
+                AssetDatabase.Refresh();
+                var entries=JsonUtility.FromJson<Manifest>(File.ReadAllText(assetRoot+"/TileManifest.json")).entries;
+                var sprites=ImportSprites(assetRoot+"/"+prefix+"16.png",entries);
+                foreach(var e in entries)
+                {
+                    var tile=GetOrCreate<Tile>(assetRoot+"/Tiles/"+e.name+".asset");
+                    tile.sprite=sprites[e.name];tile.colliderType=Tile.ColliderType.None;
+                    tile.color=Color.white;tile.transform=Matrix4x4.identity;EditorUtility.SetDirty(tile);
+                }
+                foreach(var material in new[]{"DirtLane","Footpath"})
+                {
+                    var tile=GetOrCreate<RuleTile>(assetRoot+"/Rules/Paint_"+material+".asset");
+                    tile.m_TilingRules.Clear();tile.m_DefaultColliderType=Tile.ColliderType.None;
+                    var fills=entries.Where(e=>e.material==material&&e.mask==255).Select(e=>sprites[e.name]).ToArray();
+                    tile.m_DefaultSprite=fills[0];
+                    foreach(var e in entries.Where(e=>e.material==material&&e.variant==0))
+                    {
+                        var rule=MakeRule(e.mask==255?fills:new[]{sprites[e.name]});rule.m_Id=tile.m_TilingRules.Count;
+                        for(int bit=0;bit<8;bit++)
+                        {
+                            if(bit>=4&&((e.mask&(1<<(bit-4)))==0||(e.mask&(1<<((bit-3)%4)))==0))continue;
+                            rule.m_NeighborPositions.Add(Neighbors[bit]);
+                            rule.m_Neighbors.Add((e.mask&(1<<bit))!=0?RuleTile.TilingRuleOutput.Neighbor.This:RuleTile.TilingRuleOutput.Neighbor.NotThis);
+                        }
+                        tile.m_TilingRules.Add(rule);
+                    }
+                    tile.UpdateNeighborPositions();EditorUtility.SetDirty(tile);
+                }
+                // One palette: everyday brushes above, optional manual shapes below.
+                var palette=new GameObject(prefix,typeof(Grid));var map=AddMap(palette.transform,"Paths",0);
+                map.SetTile(Vector3Int.zero,AssetDatabase.LoadAssetAtPath<RuleTile>(assetRoot+"/Rules/Paint_DirtLane.asset"));
+                map.SetTile(new Vector3Int(2,0,0),AssetDatabase.LoadAssetAtPath<RuleTile>(assetRoot+"/Rules/Paint_Footpath.asset"));
+                map.SetTile(new Vector3Int(4,0,0),paving);
+                if(includeWornStone)map.SetTile(new Vector3Int(6,0,0),oldRoad);
+                for(int i=0;i<entries.Length;i++)map.SetTile(new Vector3Int(i%10,-3-i/10-(i>=50?1:0),0),AssetDatabase.LoadAssetAtPath<Tile>(assetRoot+"/Tiles/"+entries[i].name+".asset"));
+                SavePalette(palette,assetRoot+"/Palettes/"+prefix+".prefab");
+                AssetDatabase.SaveAssets();
+                Debug.Log(prefix+" kit: 100 tiles, 2 RuleTiles, 1 palette with reused ground paving.");
+            }
+            finally{SceneManager.SetActiveScene(previous);EditorSceneManager.CloseScene(scratch,true);}
+        }
+    }
+}

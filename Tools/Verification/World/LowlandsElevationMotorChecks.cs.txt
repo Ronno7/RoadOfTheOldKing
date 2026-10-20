@@ -1,0 +1,168 @@
+// LIVE only. Use GreenLowlandsGameplayChecks' shared isolated setup, enter Play,
+// Continue and arrive in GreenLowlands; confirm setup succeeded before Play.
+// Start alive, unlocked, idle, with stable High or PondLow sluice state.
+// This stages LOW water through production RestoreProgress on a cloned state;
+// it does not solve the puzzle, collect rewards, alter game.Progress or save.
+// Both directions of all nine exported stair contracts use actual PlayerMovement
+// FixedUpdate + Physics2D.Simulate, with analogue MoveDirection injection. Only
+// each test's initial landing is staged; no movement across a flight is teleported.
+// Non-player dynamic bodies are held still, retaining their solid colliders.
+// Stop Play and run the shared cleanup even after a failure. No scene save.
+
+var game=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(!Application.isPlaying||!SessionState.GetBool("GreenLowlands.Gameplay.Active",false)||game==null||game.IsLoading||
+ game.StorageKey!=SessionState.GetString("GreenLowlands.Gameplay.Key","")||!game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands.")||
+ UnityEngine.SceneManagement.SceneManager.GetActiveScene().name!="GreenLowlands")throw new System.Exception("Settled shared isolated Lowlands session required");
+var f=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var motor=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerMovement>();
+var body=motor.GetComponent<Rigidbody2D>();var foot=motor.GetComponent<BoxCollider2D>();
+var input=motor.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();
+var health=motor.GetComponent<RoadOfTheOldKing.Player.PlayerHealth>();
+var combat=motor.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();
+var dash=motor.GetComponent<RoadOfTheOldKing.Player.PlayerDash>();
+var flask=motor.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>();
+var reaction=motor.GetComponent<RoadOfTheOldKing.Combat.HitReaction>();
+var sluice=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RecallSluice>();
+var reveals=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SluiceWaterReveal>(FindObjectsInactive.Include,FindObjectsSortMode.None);
+if(!health.IsAlive||!motor.enabled||!input.enabled||!body.simulated||!foot.enabled||foot.isTrigger||Time.timeScale<=0||
+ motor.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>().IsLocked||motor.IsTraversingRope||dash.IsDashing||flask.IsDrinking||reaction.IsStaggered||
+ combat.ControlsMovement||combat.IsAttacking||(combat.Weapon!=null&&combat.Weapon.State!=RoadOfTheOldKing.Weapons.AxeState.Held)||
+ sluice==null||sluice.IsMoving||reveals.Any(r=>r.IsDraining)||
+ (sluice.Stage!=RoadOfTheOldKing.World.SluiceStage.High&&sluice.Stage!=RoadOfTheOldKing.World.SluiceStage.PondLow))
+ throw new System.Exception("Idle, alive player and stable High/PondLow sluice required; do not interrupt an action or water reveal");
+
+string contractPath=System.IO.Path.GetFullPath(System.IO.Path.Combine(Application.dataPath,"../../ArtSource/GreenLowlands/ElevationLayout.json"));
+var contract=Newtonsoft.Json.Linq.JObject.Parse(System.IO.File.ReadAllText(contractPath));
+var stairs=((Newtonsoft.Json.Linq.JArray)contract["stairs"]).ToArray();
+if(stairs.Length!=9||(int)contract["unclassifiedCells"]!=0||contract["surfaceRuns"]==null)
+ throw new System.Exception("Current complete nine-stair scene export required");
+var checks=new System.Collections.Generic.List<string>();var walks=new System.Collections.Generic.List<object>();int steps=0;
+System.Action<bool,string> check=(ok,label)=>{if(!ok)throw new System.Exception("FAIL "+label+" at "+body.position+" | "+string.Join("; ",checks.ToArray()));checks.Add(label);};
+System.Func<Newtonsoft.Json.Linq.JToken,Vector2> point=t=>new Vector2((float)t[0],(float)t[1]);
+var move=input.GetType().GetProperty("MoveDirection");var sprint=input.GetType().GetProperty("SprintHeld");
+var motorStep=motor.GetType().GetMethod("FixedUpdate",f);
+var originalPosition=motor.transform.position;var originalBody=body.position;var originalVelocity=body.linearVelocity;float originalAngular=body.angularVelocity;
+var originalMode=Physics2D.simulationMode;var originalInterpolation=body.interpolation;
+var originalFocus=input.GetType().GetField("hasFocus",f).GetValue(input);var originalPaused=input.GetType().GetField("paused",f).GetValue(input);
+var originalMove=move.GetValue(input,null);var originalSprint=sprint.GetValue(input,null);var originalDashQueue=input.GetType().GetField("dashQueuedUntil",f).GetValue(input);
+var motorFields=new[]{"freeVelocity","bounceRemaining","lastBounceTime","leavingAction"};
+var motorValues=motorFields.Select(n=>motor.GetType().GetField(n,f).GetValue(motor)).ToArray();
+var originalFacing=motor.FacingDirection;var originalSprinting=motor.GetType().GetProperty("IsSprinting").GetValue(motor,null);
+var dashFields=new[]{"remaining","cooldownRemaining","<RecoverySeconds>k__BackingField"};
+var dashValues=dashFields.Select(n=>dash.GetType().GetField(n,f).GetValue(dash)).ToArray();
+bool originalGod=health.DebugGodMode;
+string progressBefore=JsonUtility.ToJson(game.Progress);string originalFeedback=sluice.Feedback;
+var restoreWater=JsonUtility.FromJson<RoadOfTheOldKing.Progression.ProgressState>(progressBefore);
+string sluicePrefix=sluice.LowWaterId.Substring(0,sluice.LowWaterId.LastIndexOf('/')+1);
+restoreWater.completedIds.RemoveAll(id=>id.StartsWith(sluicePrefix));sluice.CaptureProgress(restoreWater);
+var lowWater=JsonUtility.FromJson<RoadOfTheOldKing.Progression.ProgressState>(progressBefore);lowWater.Complete(sluice.LowWaterId);
+var otherBodies=UnityEngine.Object.FindObjectsByType<Rigidbody2D>(FindObjectsSortMode.None).Where(b=>b!=body&&b.bodyType==RigidbodyType2D.Dynamic).ToArray();
+var constraints=otherBodies.Select(b=>b.constraints).ToArray();var positions=otherBodies.Select(b=>b.position).ToArray();
+var rotations=otherBodies.Select(b=>b.rotation).ToArray();var velocities=otherBodies.Select(b=>b.linearVelocity).ToArray();var angular=otherBodies.Select(b=>b.angularVelocity).ToArray();
+var exits=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SceneExit>(FindObjectsSortMode.None).SelectMany(e=>e.GetComponents<Collider2D>()).Where(c=>c.enabled).ToArray();
+var coinTriggers=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.CoinPickup>(FindObjectsInactive.Include,FindObjectsSortMode.None)
+ .SelectMany(p=>p.GetComponents<Collider2D>()).Where(c=>c.isTrigger).Distinct().ToArray();
+var coinEnabled=coinTriggers.Select(c=>c.enabled).ToArray();
+// Leave production scene-exit triggers enabled. Reject risky segments before any
+// simulation rather than temporarily changing exit behavior or loading a scene.
+System.Action<Vector2> guardExit=p=>{
+ var bounds=foot.bounds;bounds.center+=(Vector3)(p-body.position);bounds.Expand(.12f);
+ foreach(var exit in exits)if(exit.gameObject.activeInHierarchy&&exit.bounds.Intersects(bounds))
+  throw new System.Exception("Fixture path approaches scene exit "+exit.name+" at "+p);
+};
+System.Action<Vector2,Vector2> guardSegment=(a,b)=>{
+ int count=Mathf.Max(1,Mathf.CeilToInt(Vector2.Distance(a,b)/.2f));
+ for(int i=0;i<=count;i++)guardExit(Vector2.Lerp(a,b,(float)i/count));
+};
+System.Action<Vector2> stage=p=>{
+ guardExit(p);move.SetValue(input,Vector2.zero,null);body.position=p;
+ motor.transform.position=new Vector3(p.x,p.y,originalPosition.z);body.linearVelocity=Vector2.zero;body.angularVelocity=0;
+ motor.GetType().GetField("freeVelocity",f).SetValue(motor,Vector2.zero);motor.GetType().GetField("bounceRemaining",f).SetValue(motor,0f);
+ motor.GetType().GetField("leavingAction",f).SetValue(motor,false);Physics2D.SyncTransforms();
+ var overlaps=Physics2D.OverlapBoxAll(foot.bounds.center,(Vector2)foot.bounds.size*.96f,0f).Where(c=>!c.isTrigger&&c.attachedRigidbody!=body).ToArray();
+ if(overlaps.Length>0)throw new System.Exception("Initial landing overlaps solid geometry: "+p+" / "+string.Join(", ",overlaps.Select(c=>c.name).ToArray()));
+};
+System.Action<Vector2> step=direction=>{
+ move.SetValue(input,direction,null);motorStep.Invoke(motor,null);Physics2D.Simulate(Time.fixedDeltaTime);steps++;
+ if(game.IsLoading)throw new System.Exception("Unexpected scene transition during terrain fixture");
+};
+System.Action<Vector2,string> reach=(target,label)=>{
+ guardSegment(body.position,target);int frames=0;
+ while(Vector2.Distance(body.position,target)>.025f&&frames++<360){
+  Vector2 delta=target-body.position;
+  step(Vector2.ClampMagnitude(delta*6f/motor.MoveSpeed,1f));
+ }
+ // Brake through the motor, retaining the actual continuous body position.
+ for(int i=0;i<8;i++)step(Vector2.zero);
+ check(frames<360&&Vector2.Distance(body.position,target)<.08f,label);
+ walks.Add(new{name=label,x=body.position.x,y=body.position.y,frames=frames});
+};
+try{
+ Physics2D.simulationMode=SimulationMode2D.Script;body.interpolation=RigidbodyInterpolation2D.None;
+ input.GetType().GetField("hasFocus",f).SetValue(input,true);input.GetType().GetField("paused",f).SetValue(input,false);
+ input.GetType().GetField("dashQueuedUntil",f).SetValue(input,-1f);sprint.SetValue(input,false,null);health.DebugGodMode=true;
+ foreach(var other in otherBodies){other.constraints=RigidbodyConstraints2D.FreezeAll;other.linearVelocity=Vector2.zero;other.angularVelocity=0;}
+ foreach(var trigger in coinTriggers)trigger.enabled=false;
+ sluice.RestoreProgress(lowWater);Physics2D.SyncTransforms();
+ check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.PondLow&&reveals.All(r=>!r.IsDraining&&!r.gameObject.activeSelf),"Production restore exposes stable low-water routes");
+ check(input.IsActive,"Production movement input remains active for motor stepping");
+ // Validate every segment up front. The published storehouse landing at y76.5
+ // stays outside its doorway trigger, as established by StorehouseChecks.
+ foreach(var stair in stairs){var a=point(stair["fromLanding"]);var b=point(stair["toLanding"]);var corner=new Vector2(b.x,a.y);guardSegment(a,corner);guardSegment(corner,b);}
+ foreach(var stair in stairs){
+  string name=(string)stair["name"];var a=point(stair["fromLanding"]);var b=point(stair["toLanding"]);var corner=new Vector2(b.x,a.y);
+  stage(a);
+  if(Vector2.Distance(a,corner)>.01f)reach(corner,name+" lower approach alignment");
+  reach(b,name+" forward actual motor traversal");
+  // Reverse from the reached landing: no staging/teleport between directions.
+  reach(corner,name+" reverse actual motor traversal");
+  if(Vector2.Distance(a,corner)>.01f)reach(a,name+" return alignment");
+ }
+ // North shore: upper floor y93, TWO non-walkable face rows y91..92.
+ // Ordinary walking must stop on BOTH sides of that two-level drop.
+ foreach(bool below in new[]{true,false}){
+  Vector2 start=new Vector2(50.5f,below?89.5f:94.5f);Vector2 direction=below?Vector2.up:Vector2.down;
+  guardSegment(start,start+direction*7f);stage(start);
+  for(int i=0;i<Mathf.CeilToInt(1.8f/Time.fixedDeltaTime);i++)step(direction);
+  for(int i=0;i<8;i++)step(Vector2.zero);
+  float travelled=Vector2.Dot(body.position-start,direction);
+  bool stopped=below?body.position.y<91f&&body.position.y>90f:body.position.y>93f&&body.position.y<94f;
+  check(stopped&&travelled>.35f&&travelled<1.6f&&Mathf.Abs(body.position.x-start.x)<.08f,
+   below?"Deep cliff blocks climbing from Lower basin":"Deep cliff blocks dropping from Upper ridge");
+  walks.Add(new{name=below?"Deep face lower approach":"Deep face upper approach",x=body.position.x,y=body.position.y,travelled=travelled});
+ }
+ // Thin side/rear edges are physical boundaries, including approaches from
+ // BOTH surfaces. No teleport or elevation-switching code crosses a rim.
+ var edgeProbes=new[]{
+  new {name="Worksite west lower",start=new Vector2(66.5f,86.375f),direction=Vector2.right},
+  new {name="Worksite west upper",start=new Vector2(69.5f,86.375f),direction=Vector2.left},
+  new {name="Worksite east lower",start=new Vector2(82.5f,85.5f),direction=Vector2.right},
+  new {name="Worksite east upper",start=new Vector2(85.5f,85.5f),direction=Vector2.left},
+  new {name="Barn rear upper",start=new Vector2(38.5f,33.5f),direction=Vector2.up},
+  new {name="Barn rear lower",start=new Vector2(38.5f,36.5f),direction=Vector2.down}
+ };
+ foreach(var probe in edgeProbes){
+  guardSegment(probe.start,probe.start+probe.direction*3);stage(probe.start);
+  for(int i=0;i<Mathf.CeilToInt(1.8f/Time.fixedDeltaTime);i++)step(probe.direction);
+  for(int i=0;i<8;i++)step(Vector2.zero);
+  float travelled=Vector2.Dot(body.position-probe.start,probe.direction);
+  float sideways=Mathf.Abs(Vector2.Dot(body.position-probe.start,new Vector2(-probe.direction.y,probe.direction.x)));
+  check(travelled>.35f&&travelled<1.6f&&sideways<.08f,probe.name+" stops at the thin cliff edge");
+  walks.Add(new{name=probe.name,x=body.position.x,y=body.position.y,travelled});
+ }
+ check(JsonUtility.ToJson(game.Progress)==progressBefore,"Terrain traversal leaves progression unchanged");
+}finally{
+ move.SetValue(input,Vector2.zero,null);body.linearVelocity=Vector2.zero;
+ motor.transform.position=originalPosition;body.position=originalBody;body.angularVelocity=originalAngular;
+ sluice.RestoreProgress(restoreWater);sluice.GetType().GetProperty("Feedback").SetValue(sluice,originalFeedback,null);
+ for(int i=0;i<otherBodies.Length;i++)if(otherBodies[i]!=null){otherBodies[i].position=positions[i];otherBodies[i].rotation=rotations[i];otherBodies[i].constraints=constraints[i];otherBodies[i].linearVelocity=velocities[i];otherBodies[i].angularVelocity=angular[i];}
+ for(int i=0;i<coinTriggers.Length;i++)if(coinTriggers[i]!=null)coinTriggers[i].enabled=coinEnabled[i];
+ body.interpolation=originalInterpolation;body.linearVelocity=originalVelocity;
+ for(int i=0;i<motorFields.Length;i++)motor.GetType().GetField(motorFields[i],f).SetValue(motor,motorValues[i]);
+ for(int i=0;i<dashFields.Length;i++)dash.GetType().GetField(dashFields[i],f).SetValue(dash,dashValues[i]);
+ motor.SetFacingDirection(originalFacing);motor.GetType().GetProperty("IsSprinting").SetValue(motor,originalSprinting,null);
+ health.DebugGodMode=originalGod;move.SetValue(input,originalMove,null);sprint.SetValue(input,originalSprint,null);
+ input.GetType().GetField("dashQueuedUntil",f).SetValue(input,originalDashQueue);input.GetType().GetField("hasFocus",f).SetValue(input,originalFocus);input.GetType().GetField("paused",f).SetValue(input,originalPaused);
+ Physics2D.SyncTransforms();Physics2D.simulationMode=originalMode;
+}
+return new{passed=checks.Count,stairs=stairs.Length,directions=stairs.Length*2,blockedCliffAttempts=8,steps=steps,checks=checks,walks=walks,progressUnchanged=JsonUtility.ToJson(game.Progress)==progressBefore};

@@ -141,7 +141,7 @@ try {
     release(); tick(.5f);
     check(weapon.State==RoadOfTheOldKing.Weapons.AxeState.Stuck && weapon.transform.position.x<100.6f, "Delayed launch cannot skip a wall next to the player");
     wall.SetActive(false); reset();
-    var target=spawn("Assets/Prefabs/Combat/PracticeDummy.prefab"); target.transform.position=new Vector3(103,100,0); target.GetComponent<Rigidbody2D>().position=target.transform.position;
+    var target=spawn("Assets/Prefabs/Tutorial/TutorialPracticeDummy.prefab"); target.transform.position=new Vector3(103,100,0); target.GetComponent<Rigidbody2D>().position=target.transform.position;
     var extra=new GameObject("Duplicate collider"); extra.transform.SetParent(target.transform,false); extra.AddComponent<CircleCollider2D>().radius=.2f;
     var targetHealth=target.GetComponent<RoadOfTheOldKing.Combat.Damageable>(); Physics2D.SyncTransforms(); int before=targetHealth.Health;
     press(); tick(.5f); viewTick.Invoke(view,null);

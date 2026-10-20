@@ -56,7 +56,7 @@ if(EditorApplication.isPlaying){
     var oldDevices=actions.devices;var oldRouting=UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode;
     var oldFocus=(bool)input.GetType().GetField("hasFocus",flags).GetValue(input);var oldPaused=(bool)input.GetType().GetField("paused",flags).GetValue(input);
     var oldSimulation=Physics2D.simulationMode;Vector2 original=body.position;var keyboard=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
-    var borderWolves=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Combat.WolfAI>(FindObjectsSortMode.None).Where(w=>w.name=="Border wolf 1"||w.name=="Border wolf 2").ToArray();
+    var borderWolves=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Enemies.PredatorBrain>(FindObjectsSortMode.None).Where(w=>w.name=="Border wolf 1"||w.name=="Border wolf 2").ToArray();
     var borderWolfColliders=borderWolves.SelectMany(w=>w.GetComponentsInChildren<Collider2D>(true)).Where(c=>!c.isTrigger).ToArray();
     var borderColliderStates=borderWolfColliders.Select(c=>c.enabled).ToArray();
     bool borderWalked=false;
@@ -245,20 +245,20 @@ try{
     var filter=new ContactFilter2D{useTriggers=false};
     var overlap=new System.Collections.Generic.List<Collider2D>();
     var sweep=new System.Collections.Generic.List<RaycastHit2D>();
-    System.Func<Collider2D,bool> solid=c=>c!=null&&c.gameObject.scene==scene&&!c.isTrigger&&c.GetComponentInParent<RoadOfTheOldKing.Player.PlayerHealth>()==null&&c.GetComponentInParent<RoadOfTheOldKing.Combat.IEnemy>()==null;
+    System.Func<Collider2D,bool> solid=c=>c!=null&&c.gameObject.scene==scene&&!c.isTrigger&&c.GetComponentInParent<RoadOfTheOldKing.Player.PlayerHealth>()==null&&c.GetComponentInParent<RoadOfTheOldKing.Enemies.IEnemy>()==null;
     System.Func<int,Vector2> position=i=>new Vector2(originX+(i%w)*step,originY+(i/w)*step);
     System.Func<Vector2,int> index=v=>Mathf.RoundToInt((v.x-originX)/step)+Mathf.RoundToInt((v.y-originY)/step)*w;
     var anchors=new System.Collections.Generic.Dictionary<string,Vector2>{
         {"OutsideSouth",new Vector2(6,-83)}, {"OutsideSouthEast",new Vector2(72,10)}, {"OutsideEast",new Vector2(159,45)}, {"BorderArrival",new Vector2(6,-58)}, {"BorderFight1",new Vector2(6,-43)}, {"BorderFight2",new Vector2(24,-22)}, {"Fire",new Vector2(15.5f,3)}, {"MillOverlook",new Vector2(11,26)},
-        {"Pasture",new Vector2(84,32)}, {"EastMeadow",new Vector2(137,45)}, {"Orchard",new Vector2(117,88)},
+        {"Pasture",new Vector2(84,32)}, {"EastMeadow",new Vector2(149,44)}, {"Orchard",new Vector2(117,88)},
         {"H1",new Vector2(69,58.5f)}, {"NorthBank",new Vector2(27,85)},
         {"Distributor",new Vector2(5,86)}, {"MainBay",new Vector2(5,74)},
         {"S3",new Vector2(18.5f,26.5f)}, {"H2",new Vector2(30.5f,80.5f)},
         {"Storehouse",new Vector2(20.5f,76.5f)}, {"BarrowRoad",new Vector2(66,86)}, {"RoadLanding",new Vector2(66,88.5f)},
         {"RoadCampWest",new Vector2(73,86)}, {"RoadCampEast",new Vector2(79,89)}, {"RoadCampLanding",new Vector2(73.5f,82.5f)},
-        {"RopeApproach",new Vector2(127,77)}, {"RopeWorkshop",new Vector2(133,78)}, {"HighPass",new Vector2(135,99)},
+        {"RopeApproach",new Vector2(110.5f,45.5f)}, {"RopeWorkshop",new Vector2(119.5f,45.5f)}, {"HighPass",new Vector2(135,99)},
         {"H1Lookout",new Vector2(69,54)}, {"H2Lookout",new Vector2(30.5f,85)},
-        {"RopeLookout",new Vector2(126,74)}, {"PassLookout",new Vector2(126,97)},
+        {"RopeLookout",new Vector2(109,44)}, {"PassLookout",new Vector2(126,97)},
         {"BarrowLookout",new Vector2(66,95)}, {"S2Lookout",new Vector2(123,84)} };
     var coinPatches=scene.GetRootGameObjects().SelectMany(g=>g.GetComponentsInChildren<RoadOfTheOldKing.World.VegetationCoinPatch>(true)).ToArray();
     check(coinPatches.Length==16,"Sixteen authored vegetation coin patches complete the prop-source budget");
@@ -267,6 +267,13 @@ try{
     foreach(var patch in coinPatches) anchors.Add(patch.name,patch.transform.position);
     var depthBanks=scene.GetRootGameObjects().SelectMany(g=>g.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>(true)).Single(m=>m.name=="Height boundaries");
     var depthCollider=depthBanks.GetComponent<UnityEngine.Tilemaps.TilemapCollider2D>();
+    var heightContract=Newtonsoft.Json.Linq.JObject.Parse(System.IO.File.ReadAllText("../ArtSource/GreenLowlands/ElevationLayout.json"));
+    var ridgeFlight=heightContract["stairs"].Single(t=>(string)t["name"]=="Ridge descent")["rect"];
+    var ridgeRect=new Rect((float)ridgeFlight[0],(float)ridgeFlight[1],(float)ridgeFlight[2],(float)ridgeFlight[3]);
+    System.Func<Vector2,Vector2,bool> blockedAcross=(a,b)=>{
+        Physics2D.BoxCast(a,new Vector2(.76f,.76f),0,(b-a).normalized,filter,sweep,Vector2.Distance(a,b));
+        return sweep.Any(hit=>hit.collider==depthCollider);
+    };
     check(depthCollider!=null&&!depthCollider.isTrigger,"Permanent height boundaries have solid tile collision");
     var storehouseEntrance=scene.GetRootGameObjects().SelectMany(g=>g.GetComponentsInChildren<Transform>(true)).Single(t=>t.name=="Storehouse stair entrance");
     var results=new System.Collections.Generic.List<object>();
@@ -331,21 +338,31 @@ try{
         }
         check(clear[index(anchors["Storehouse"])],state+": storehouse landing stays dry and body-clear");
         bool ridgeSealed=true,lowerRoadMatchesWater=true;
-        for(int y=91;y<=93;y++)for(int x=65;x<=66;x++)ridgeSealed&=!clear[index(new Vector2(x+.5f,y+.5f))];
-        for(int y=87;y<=89;y++)for(int x=65;x<=66;x++)lowerRoadMatchesWater&=clear[index(new Vector2(x+.5f,y+.5f))]==(state=="low");
+        for(int x=65;x<=66;x++)ridgeSealed&=blockedAcross(new Vector2(x+.5f,95),new Vector2(x+.5f,88.5f));
+        for(int y=87;y<=89;y++)for(int x=65;x<=66;x++)lowerRoadMatchesWater&=clear[index(new Vector2(x+.5f,y+.5f))]==(y==89||state=="low");
         check(ridgeSealed,state+": sealed ridge prevents a dry bypass into the Barrow passage");
         check(lowerRoadMatchesWater,state+": old road approach follows basin water access");
+        check(!blockedAcross(new Vector2(18.5f,8),new Vector2(25.5f,8)),state+": entrance bridge remains walkable over expanded river water");
         check(clear[index(anchors["RoadCampWest"])]&&clear[index(anchors["RoadCampEast"])],state+": roadworkers' sentries stand on dry ground");
         bool campStair=true,campRims=true;
-        for(int y=79;y<=81;y++)for(int x=72;x<=74;x++)campStair&=clear[index(new Vector2(x+.5f,y+.5f))]==(state=="low");
-        for(int x=69;x<=82;x++)campRims&=!clear[index(new Vector2(x+.5f,92.5f))];
-        // Native outer banks own the height change; former duplicate inner strips are open H0 floor.
-        for(int y=82;y<=90;y++)foreach(int x in new[]{67,84})campRims&=!clear[index(new Vector2(x+.5f,y+.5f))];
+        for(int y=79;y<=81;y++)for(int x=72;x<=74;x++)campStair&=clear[index(new Vector2(x+.5f,y+.5f))]==(y==89||state=="low");
+        for(int x=69;x<=82;x++)campRims&=blockedAcross(new Vector2(x+.5f,94),new Vector2(x+.5f,90));
+        // Narrow side shapes need to stop CROSSING the edge; cell-center
+        // occupancy would incorrectly require the retired full-cell side walls.
+        for(int y=82;y<=90;y++){
+            campRims&=blockedAcross(new Vector2(66.5f,y+.5f),new Vector2(69.5f,y+.5f));
+            campRims&=blockedAcross(new Vector2(82.5f,y+.5f),new Vector2(85.5f,y+.5f));
+        }
         check(campStair,state+": worksite stair is water-gated");
         check(campRims,state+": road and side rims prevent unmarked height changes");
         bool sluiceApronDry=true,sluiceDescentMatchesWater=true;
-        for(int y=67;y<=69;y++)for(int x=12;x<=16;x++)sluiceApronDry&=clear[index(new Vector2(x+.5f,y+.5f))];
-        for(int y=64;y<=66;y++)for(int x=14;x<=16;x++)sluiceDescentMatchesWater&=clear[index(new Vector2(x+.5f,y+.5f))]==(state=="low");
+        // The 4px side and 2px rear rim occupy the deck's edge. Check the
+        // usable apron with a full body, inset from that visible boundary.
+        for(int y=270;y<=277;y++)for(int x=50;x<=65;x++){
+            Physics2D.OverlapBox(new Vector2(x/4f,y/4f),new Vector2(.76f,.76f),0,filter,overlap);
+            sluiceApronDry&=!overlap.Any(solid);
+        }
+        for(int y=64;y<=66;y++)for(int x=14;x<=16;x++)sluiceDescentMatchesWater&=clear[index(new Vector2(x+.5f,y+.5f))]==(y==89||state=="low");
         check(sluiceApronDry,state+": sluice landing stays on the dry working deck");
         check(sluiceDescentMatchesWater,state+": south-facing sluice descent remains flooded until the pond lowers");
         var queue=new System.Collections.Generic.Queue<int>();queue.Enqueue(start);previous[start]=start;
@@ -360,7 +377,7 @@ try{
             }
         }
         // Body-clear combat footprints; not a substitute for fights with enemy telegraphs.
-        var arenas=new[]{new Vector4(84,32,24,16),new Vector4(116,88,18,12),new Vector4(137,49,12,10),new Vector4(6,-43,10,8),new Vector4(24,-22,12,8),new Vector4(76,86,12,6)};
+        var arenas=new[]{new Vector4(84,32,24,16),new Vector4(116,88,18,12),new Vector4(128,44,10,6),new Vector4(6,-43,10,8),new Vector4(24,-22,12,8),new Vector4(76.75f,85.75f,12,6)};
         foreach(var area in arenas){Physics2D.OverlapBox(new Vector2(area.x,area.y),new Vector2(area.z,area.w),0,filter,overlap);check(!overlap.Any(solid),state+": combat clearing "+area.x+","+area.y+" "+area.z+"x"+area.w);}
         var targets=new System.Collections.Generic.List<object>();
         foreach(var entry in anchors){
@@ -371,14 +388,14 @@ try{
             check(reachable==expected,state+": "+entry.Key+" reachability "+reachable);
             targets.Add(new{name=entry.Key,clear=clear[at],reachable=reachable,distance=reachable?distances[at]:-1});
         }
-        Physics2D.OverlapBox(new Vector2(131,77),new Vector2(.76f,.76f),0,filter,overlap);
+        Physics2D.OverlapBox(new Vector2(119.5f,45.5f),new Vector2(.76f,.76f),0,filter,overlap);
         check(!overlap.Any(solid),state+": upper rope landing body-clear");
         // Cache actual collision-safe paths for the live motor fixture, not authored waypoints.
-        foreach(string name in new[]{"BorderArrival","MillOverlook","Pasture","EastMeadow","Orchard","H1","NorthBank","RopeApproach","Distributor","MainBay","S3","H2","Storehouse","BarrowRoad","RoadLanding","RoadCampWest"}){
+        foreach(string name in new[]{"OutsideEast","BorderArrival","MillOverlook","Pasture","EastMeadow","Orchard","H1","NorthBank","RopeApproach","Distributor","MainBay","S3","H2","Storehouse","BarrowRoad","RoadLanding","RoadCampWest"}){
             var points=new System.Collections.Generic.List<Vector2>();int at=index(anchors[name]);
             if(previous[at]<0)continue;
             while(at!=start){points.Add(position(at));at=previous[at];}points.Add(position(start));points.Reverse();
-            if(state=="high"&&name=="Distributor")check(points.Any(p=>p.x>=12&&p.x<=15&&p.y>=94&&p.y<=96)&&points.Any(p=>p.x>=12&&p.x<=15&&p.y>=97),"High route descends the northwestern ridge staircase before the sluice");
+            if(state=="high"&&name=="Distributor")check(points.Any(p=>ridgeRect.Contains(p)),"High route descends the northwestern ridge staircase before the sluice");
             if(state=="low"&&name=="RoadLanding")check(points.Any(p=>p.x>=65&&p.x<=67&&p.y<=86),"Barrow threshold is reached along the drained basin road");
             if(state=="low"&&name=="Storehouse")check(points.Any(p=>p.x>=19&&p.x<=22&&p.y>=73&&p.y<=75),"Basin route climbs the storehouse bank stair");
             if(state=="low"&&name=="H2")check(points.Any(p=>p.x>=29&&p.x<=32&&p.y>=77&&p.y<=79),"Basin route climbs the lower reward shelf stair");
@@ -431,7 +448,7 @@ try{
   foreach(int next in new[]{cx>0?current-1:-1,cx<w-1?current+1:-1,cy>0?current-w:-1,cy<h-1?current+w:-1}){
    if(next<0||!clear[next]||withoutStair[next])continue;
    Vector2 a=position(current),b=position(next);
-   if(b.x>11.6f&&b.x<15.4f&&b.y>94.6f&&b.y<95.4f)continue;
+   if(ridgeRect.Contains(b))continue;
    Physics2D.BoxCast(a,new Vector2(.76f,.76f),0,(b-a).normalized,filter,sweep,step);
    if(sweep.Any(hit=>solid(hit.collider)))continue;withoutStair[next]=true;queue.Enqueue(next);
   }

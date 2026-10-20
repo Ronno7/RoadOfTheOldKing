@@ -1,0 +1,143 @@
+// Run in stopped Edit Mode after guide population/export. Reads the current scene, including unsaved work.
+// Read-only guide checks; native cliff painting is verified in LowlandsCliffKitChecks.
+if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling)
+    throw new System.InvalidOperationException("Stopped, compiled Edit Mode required.");
+var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+if (scene.path != "Assets/Scenes/GreenLowlands.unity")
+    throw new System.InvalidOperationException("Open GreenLowlands before checking its elevation guides.");
+bool dirtyBefore = scene.isDirty;
+var passed = new System.Collections.Generic.List<string>();
+var failed = new System.Collections.Generic.List<string>();
+System.Action<bool,string> check = (ok,label) => { if (ok) passed.Add(label); else failed.Add(label); };
+System.Func<BoundsInt,System.Collections.Generic.List<Vector3Int>> cells = bounds => {
+    var result = new System.Collections.Generic.List<Vector3Int>();
+    foreach (var p in bounds.allPositionsWithin) result.Add(p);
+    return result;
+};
+var maps = scene.GetRootGameObjects().SelectMany(go => go.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>(true)).ToArray();
+var elevations = maps.Where(m => m.name == RoadOfTheOldKing.EditorTools.LowlandsElevationAuthoring.ElevationName).ToArray();
+var transitionMaps = maps.Where(m => m.name == RoadOfTheOldKing.EditorTools.LowlandsElevationAuthoring.TransitionsName).ToArray();
+check(elevations.Length == 1 && transitionMaps.Length == 1, "Exactly one authoritative elevation guide and one transitions guide");
+if (elevations.Length != 1 || transitionMaps.Length != 1)
+    return new { passed = passed.Count, failed = failed.ToArray(), notes = "Scene guide prerequisites missing; no mutation performed." };
+var elevation = elevations[0];
+var transitions = transitionMaps[0];
+System.Func<Transform,bool> editorOnly = t => {
+    for (var owner = t; owner != null; owner = owner.parent) if (owner.CompareTag("EditorOnly")) return true;
+    return false;
+};
+foreach (var guide in new[] { elevation, transitions }) {
+    check(editorOnly(guide.transform), guide.name + " is excluded from player builds");
+    check(!guide.GetComponentsInChildren<Renderer>(true).Any(r => r.enabled), guide.name + " cannot render over gameplay");
+    check(guide.GetComponentsInChildren<Collider2D>(true).Length == 0 && guide.GetComponentsInChildren<Rigidbody2D>(true).Length == 0,
+        guide.name + " contributes no physics bodies or collision");
+}
+var guideTiles = new System.Collections.Generic.HashSet<UnityEngine.Tilemaps.TileBase>();
+foreach (var guide in new[] { elevation, transitions }) foreach (var p in guide.cellBounds.allPositionsWithin) {
+    var tile = guide.GetTile(p); if (tile != null) guideTiles.Add(tile);
+}
+check(guideTiles.OfType<UnityEngine.Tilemaps.Tile>().All(t => t.colliderType == UnityEngine.Tilemaps.Tile.ColliderType.None),
+    "Guide brush assets have no collision shapes");
+check(!maps.Where(m => m != elevation && m != transitions).Any(m => cells(m.cellBounds).Any(p => guideTiles.Contains(m.GetTile(p)))),
+    "Editor guide brushes do not leak into runtime terrain maps");
+var report = RoadOfTheOldKing.EditorTools.LowlandsElevationAuthoring.Validate(elevation, transitions, elevation.cellBounds);
+check(report.IsValid && report.unclassified == 0 && report.cells > 0, "Complete guide extent has valid classified cells and transitions");
+if (!report.IsValid) failed.AddRange(report.messages.Where(m => m.StartsWith("ERROR:")));
+var surfaceCounts = new System.Collections.Generic.Dictionary<int,int> { { -1,0 }, { 0,0 }, { 1,0 } };
+foreach (var p in elevation.cellBounds.allPositionsWithin) {
+    int height;
+    if (RoadOfTheOldKing.EditorTools.LowlandsElevationAuthoring.TryHeight(
+        RoadOfTheOldKing.EditorTools.LowlandsElevationAuthoring.ReadClassification(elevation,p), out height)) surfaceCounts[height]++;
+}
+check(surfaceCounts.All(pair => pair.Value > 0), "Lower, Normal and Upper all have explicit horizontal surfaces");
+
+var contract = Newtonsoft.Json.Linq.JObject.Parse(System.IO.File.ReadAllText("../ArtSource/GreenLowlands/ElevationLayout.json"));
+var surfaces = contract["surfaces"].ToDictionary(t => (string)t["id"], t => t);
+System.Func<Newtonsoft.Json.Linq.JToken,Vector3Int> cellOf = point => elevation.WorldToCell(new Vector3((float)point[0], (float)point[1], 0));
+System.Func<Vector3Int,int?> heightAt = p => {
+    int height; return RoadOfTheOldKing.EditorTools.LowlandsElevationAuthoring.TryHeight(
+        RoadOfTheOldKing.EditorTools.LowlandsElevationAuthoring.ReadClassification(elevation,p), out height) ? (int?)height : null;
+};
+foreach (var entry in surfaces)
+    check(heightAt(cellOf(entry.Value["sample"])) == (int)entry.Value["height"], "Named surface agrees with painted tier: " + entry.Key);
+var stairDefinitions = contract["stairs"].ToArray();
+check(stairDefinitions.Length == 9, "Eight retained connections and the painted Barrow threshold are declared");
+var declaredTreads = new System.Collections.Generic.HashSet<Vector3Int>();
+foreach (var stair in stairDefinitions) {
+    string name = (string)stair["name"], from = (string)stair["from"], to = (string)stair["to"];
+    int fromHeight = (int)surfaces[from]["height"], toHeight = (int)surfaces[to]["height"];
+    check(heightAt(cellOf(stair["fromLanding"])) == fromHeight && heightAt(cellOf(stair["toLanding"])) == toHeight,
+        name + " lands on its named source and destination tiers");
+    var low = cellOf(fromHeight < toHeight ? stair["fromLanding"] : stair["toLanding"]);
+    var high = cellOf(fromHeight < toHeight ? stair["toLanding"] : stair["fromLanding"]);
+    var delta = high - low;
+    var uphill = Mathf.Abs(delta.y) >= Mathf.Abs(delta.x) ? new Vector3Int(0,delta.y > 0 ? 1 : -1,0) : new Vector3Int(delta.x > 0 ? 1 : -1,0,0);
+    var rect = stair["rect"];
+    var area = new BoundsInt((int)rect[0],(int)rect[1],0,(int)rect[2],(int)rect[3],1);
+    bool arrows = true, occupied = true;
+    foreach (var p in area.allPositionsWithin) {
+        declaredTreads.Add(p); Vector3Int actual;
+        arrows &= RoadOfTheOldKing.EditorTools.LowlandsElevationAuthoring.ReadTransition(transitions,p,out actual) && actual == uphill;
+        occupied &= RoadOfTheOldKing.EditorTools.LowlandsElevationAuthoring.ReadClassification(elevation,p) == RoadOfTheOldKing.EditorTools.ElevationClass.Structure;
+    }
+    check(arrows && occupied, name + " has complete uphill arrows over structural tread cells");
+}
+check(!cells(transitions.cellBounds).Any(p => transitions.HasTile(p) && !declaredTreads.Contains(p)),
+    "Every painted stair arrow belongs to a declared connection");
+
+// The export must describe the actual guide, rather than being a second manually maintained height map.
+var exported = new System.Collections.Generic.Dictionary<Vector3Int,RoadOfTheOldKing.EditorTools.ElevationClass>();
+bool duplicateRunCells = false, invalidRun = false;
+foreach (string key in new[] { "surfaceRuns", "structureRuns", "voidRuns" }) {
+    var runs = contract[key] as Newtonsoft.Json.Linq.JArray;
+    check(runs != null, "Derived elevation export includes " + key);
+    if (runs == null) continue;
+    foreach (var run in runs) {
+        int y = (int)run["y"], x0 = (int)run["xMin"], x1 = (int)run["xMax"];
+        int height = key == "surfaceRuns" ? (int)run["height"] : 0;
+        if (x1 < x0 || x1-x0 > 1000 || (key == "surfaceRuns" && (height < -1 || height > 1))) { invalidRun = true; continue; }
+        var kind = key == "structureRuns" ? RoadOfTheOldKing.EditorTools.ElevationClass.Structure :
+            key == "voidRuns" ? RoadOfTheOldKing.EditorTools.ElevationClass.Void :
+            height == -1 ? RoadOfTheOldKing.EditorTools.ElevationClass.Lower :
+            height == 1 ? RoadOfTheOldKing.EditorTools.ElevationClass.Upper : RoadOfTheOldKing.EditorTools.ElevationClass.Normal;
+        for (int x = x0; x <= x1; x++) {
+            var p = new Vector3Int(x,y,0);
+            if (exported.ContainsKey(p)) duplicateRunCells = true; else exported.Add(p,kind);
+        }
+    }
+}
+check(!invalidRun && !duplicateRunCells && exported.Count == report.cells && exported.All(pair =>
+    elevation.cellBounds.Contains(pair.Key) && RoadOfTheOldKing.EditorTools.LowlandsElevationAuthoring.ReadClassification(elevation,pair.Key) == pair.Value),
+    "Exported surface/structure/void runs exactly match the scene guide without overlap or gaps");
+check((int?)contract["projectedRisePerTierCells"] == 1 && (int?)contract["unclassifiedCells"] == 0,
+    "Export records one cell per elevation level and complete classification");
+var exportedBounds = contract["guideBounds"];
+check(exportedBounds != null && (int)exportedBounds["x"] == elevation.cellBounds.xMin && (int)exportedBounds["y"] == elevation.cellBounds.yMin &&
+    (int)exportedBounds["width"] == elevation.cellBounds.size.x && (int)exportedBounds["height"] == elevation.cellBounds.size.y,
+    "Exported guide bounds describe the actual painted extent");
+var exportedArrows = new System.Collections.Generic.Dictionary<Vector3Int,Vector3Int>();
+bool invalidArrows = false;
+var arrowRuns = contract["transitionRuns"] as Newtonsoft.Json.Linq.JArray;
+if (arrowRuns == null) invalidArrows = true;
+else foreach (var run in arrowRuns) {
+    var p = new Vector3Int((int)run["x"],(int)run["y"],0);
+    var d = new Vector3Int((int)run["dx"],(int)run["dy"],0);
+    int length = (int)run["length"];
+    if (Mathf.Abs(d.x)+Mathf.Abs(d.y) != 1 || length <= 0 || length > 32) { invalidArrows = true; continue; }
+    for (int i = 0; i < length; i++, p += d) {
+        if (exportedArrows.ContainsKey(p)) invalidArrows = true; else exportedArrows.Add(p,d);
+    }
+}
+check(!invalidArrows && exportedArrows.Count == declaredTreads.Count && exportedArrows.All(pair => {
+    Vector3Int actual; return RoadOfTheOldKing.EditorTools.LowlandsElevationAuthoring.ReadTransition(transitions,pair.Key,out actual) && actual == pair.Value;
+}), "Exported transition runs exactly match the painted uphill connections");
+var obsoleteManual = maps.Where(m => !PrefabUtility.IsPartOfPrefabInstance(m.gameObject)).SelectMany(m =>
+    cells(m.cellBounds).Where(p => m.HasTile(p)).Select(p => new { map = m, cell = p, tile = m.GetTile(p) }))
+    .Where(v => v.tile.name.StartsWith("EarthCliff_") || v.tile.name.StartsWith("StoneCliff_") || v.tile.name.StartsWith("ShoreFace_")).ToArray();
+check(obsoleteManual.Length == 0, "Standalone terrain no longer contains independently painted obsolete cliff-face rows");
+
+check(UnityEngine.SceneManagement.SceneManager.GetActiveScene() == scene && scene.isDirty == dirtyBefore,
+    "Verification preserves the active scene and its prior dirty state");
+return new { passed = passed.Count, failed = failed.ToArray(), surfaceCounts = surfaceCounts,
+    guideCells = report.cells, guideWarnings = report.warnings, obsoleteManualFaceCells = obsoleteManual.Length,
+    notes = "Scene guide/export consistency only; route, gameplay and visual readability checks remain separate." };

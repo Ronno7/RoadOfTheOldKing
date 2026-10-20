@@ -1,0 +1,63 @@
+{
+  "recordStatus": "Mixed current and historical provenance. Obsolete source sheets and documentation previews were removed in October 2026; historical paths/prompts below are records, not a guarantee that those inputs remain available. Use the current ArtSource README and retained native recipes for reproduction.",
+  "source": "GrassLeaves_Source.png",
+  "editInput": "GrassLeaves_Initial.png",
+  "prompts": [
+    "GrassLeaves.prompt.txt",
+    "GrassLeaves.edit.prompt.txt"
+  ],
+  "tool": "built-in image_gen.imagegen",
+  "generated": "2026-10-05",
+  "useCase": "stylized-concept",
+  "transparentBackground": true,
+  "purpose": "Two intact grass leaves for independently phased continuous rotation around bottom roots.",
+  "importPreparation": "Each source half is cropped to alpha bounds, nearest sampled at 18px and 14px height with an eight-pixel minimum width to retain the narrow stem, and mapped to four accepted Tutorial greens with binary alpha. Bottom pivots are centered on the lowest opaque sampled row. Existing MeadowFlowers and Meadow_Reeds are copied pixel-for-pixel from their original atlases into this atlas with bottom pivots.",
+  "grassPalette": [
+    "#384B3C",
+    "#60724D",
+    "#8B9B5E",
+    "#BECA82"
+  ],
+  "pixelsPerUnit": 16,
+  "motion": "Rigid continuous quad rotation; no UV deformation, row displacement, pixel snapping or stepped time. Source art remains pixel art.",
+  "lowlandsRevision": {
+    "source": "LowlandsGrassLeaves_Source.png",
+    "editInput": "GrassLeaves_Source.png",
+    "prompt": "LowlandsGrassLeaves.prompt.txt",
+    "tool": "built-in image_gen.imagegen",
+    "generated": "2026-10-11",
+    "transparentBackground": true,
+    "direction": "Slightly shorter blades pointing more upright; Moonshire is inspiration, preserve original Ardan identity.",
+    "runtimeAtlas": "../../../RoadOfTheOldKing/Assets/Art/Vegetation/LowlandsGrassLeaves16.png",
+    "importBuilder": "GreenLowlandsVegetationBuilder.BuildLeafArt",
+    "refresh": "GreenLowlandsVegetationBuilder.RefreshSpecies",
+    "importPreparation": "Crop each half to alpha>=128 bounds; nearest sample at 16/12px heights with seven-pixel minimum width to retain the narrow bottom root; nearest palette mapping and binary alpha; lowest-row root pivots. Copy original flowers/reeds unchanged. Native 16 PPU.",
+    "paletteAuthority": "../Palettes/Meadow.json",
+    "paletteRoles": [
+      "deepgreen",
+      "leafshade",
+      "grasspatch",
+      "leaflight"
+    ],
+    "restAnglesDegrees": [
+      [
+        4,
+        -6
+      ],
+      [
+        3,
+        -5
+      ],
+      [
+        8,
+        -10
+      ]
+    ],
+    "retained": "Plant records/density, offsets/phases/flexibility, smooth rotation/cutting/depth and accepted copied flowers/reeds.",
+    "review": "Imported and agent-inspected at gameplay size; user visual approval pending.",
+    "currentScope": "Both Tutorial and Green Lowlands use this atlas. Shared > Refresh Grass Atlas imports it; each region's Refresh Vegetation Art updates its species metadata."
+  },
+  "status": "Original GrassLeaves_Source.png and GrassLeaves_Initial.png inputs are no longer retained; their paths and prompts remain historical provenance. The old runtime atlas was retired 16 October 2026. The retained Lowlands revision supplies the current shared grass atlas.",
+  "historicalRuntimeAtlas": "../../RoadOfTheOldKing/Assets/Art/Vegetation/GrassLeaves16.png",
+  "historicalImportBuilder": "TutorialVegetationBuilder.BuildLeafArt"
+}

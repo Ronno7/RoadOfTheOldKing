@@ -4,15 +4,15 @@ using UnityEngine;
 
 namespace RoadOfTheOldKing.World
 {
-    public enum ChestReward { SunShard, HeartFragment, BronzeCoins, Tool }
-
-    // Contents use the existing reward ID as the single source of truth for opening.
+    // Contents use the existing reward ID as the single source of truth for opening; the grant and its save
+    // record go through RewardService.TryGrant and RewardKeys like every world reward (17 Oct refactor).
+    // The reward field was the ChestReward enum; RewardKind keeps the same values.
     // Fixed contents are saved together with exhaustion; no separate open flag.
     [DisallowMultipleComponent]
     public sealed class RewardChest : WorldPickup, IProgressParticipant
     {
         [SerializeField] private string rewardId;
-        [SerializeField] private ChestReward reward;
+        [SerializeField] private RewardKind reward;
         [SerializeField, Min(1)] private int coinAmount = 25;
         [SerializeField] private WorldTool tool;
         [SerializeField] private string requiredMilestone;
@@ -36,13 +36,7 @@ namespace RoadOfTheOldKing.World
         {
             if (!CanCollect(player)) return false;
             var session = GameSession.Instance;
-            bool awarded = reward switch {
-                ChestReward.SunShard => session.Rewards.TryCollectShard(rewardId),
-                ChestReward.HeartFragment => session.Rewards.TryCollectHeartFragment(rewardId),
-                ChestReward.BronzeCoins => session.Rewards.TryCollectCoinCache(rewardId, coinAmount),
-                ChestReward.Tool => session.Rewards.TryCollectTool(rewardId, tool),
-                _ => false
-            };
+            bool awarded = session.Rewards.TryGrant(reward, rewardId, coinAmount, tool);
             if (awarded) PickupPresentation.Collected(gameObject, player);
             // Also reconcile a reward granted elsewhere under the same unique ID.
             RestoreProgress(session.Progress);
@@ -53,13 +47,7 @@ namespace RoadOfTheOldKing.World
         public void CaptureProgress(ProgressState state) { }
         public void RestoreProgress(ProgressState state)
         {
-            IsOpen = reward switch {
-                ChestReward.SunShard => state.Has("shard/collected/" + rewardId),
-                ChestReward.HeartFragment => HeartFragmentProgression.IsCollected(state, rewardId),
-                ChestReward.BronzeCoins => state.Has("coins/collected/" + rewardId),
-                ChestReward.Tool => state.OwnsTool(tool),
-                _ => false
-            };
+            IsOpen = RewardKeys.IsGranted(state, reward, rewardId, tool);
             if (closedVisual != null) closedVisual.SetActive(!IsOpen);
             if (openVisual != null) openVisual.SetActive(IsOpen);
             if (spriteView != null) spriteView.SetOpen(IsOpen);

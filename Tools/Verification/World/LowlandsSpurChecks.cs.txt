@@ -10,11 +10,11 @@ else if(phase==1||phase==3)check(game.Checkpoints.LeaveScene("Assets/Scenes/Gree
 else{
  var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
  var player=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();var body=player.GetComponent<Rigidbody2D>();
- var guards=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>(FindObjectsSortMode.None).Where(e=>e.name.StartsWith("Upper spur scavenger ")).OrderBy(e=>e.name).ToArray();
+ var guards=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Enemies.PursuitBrain>(FindObjectsSortMode.None).Where(e=>e.name.StartsWith("Upper spur scavenger ")).OrderBy(e=>e.name).ToArray();
  var drops=guards.Select(e=>e.GetComponent<RoadOfTheOldKing.World.EnemyCoinDrop>()).ToArray();
  var fragment=GameObject.Find("H1 fragment").GetComponent<RoadOfTheOldKing.World.HeartFragmentPickup>();
  System.Action<Vector2> move=at=>{player.transform.position=at;body.position=at;body.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();};
- System.Action<int> kill=i=>{var feedback=guards[i].GetComponent<RoadOfTheOldKing.Combat.EnemyImpactFeedback>();feedback.enabled=false;var random=UnityEngine.Random.state;try{int seed=0;for(;seed<10000;seed++){UnityEngine.Random.InitState(seed);float roll=UnityEngine.Random.value;if(roll>=.5f&&roll<.9f)break;}UnityEngine.Random.InitState(seed);guards[i].GetComponent<RoadOfTheOldKing.Combat.Damageable>().DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.up,0,0));}finally{UnityEngine.Random.state=random;feedback.enabled=true;}};
+ System.Action<int> kill=i=>{var feedback=guards[i].GetComponent<RoadOfTheOldKing.Enemies.EnemyImpactFeedback>();feedback.enabled=false;var random=UnityEngine.Random.state;try{int seed=0;for(;seed<10000;seed++){UnityEngine.Random.InitState(seed);float roll=UnityEngine.Random.value;if(roll>=.5f&&roll<.9f)break;}UnityEngine.Random.InitState(seed);guards[i].GetComponent<RoadOfTheOldKing.Combat.Damageable>().DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.up,0,0));}finally{UnityEngine.Random.state=random;feedback.enabled=true;}};
  if(phase==2){
   check(guards.Length==2&&guards.All(e=>!e.IsDefeated),"two living E6 guards");
   check(drops.All(d=>d!=null&&d.PendingCoins==0),"renewable drops start empty");
@@ -23,7 +23,7 @@ else{
   move(new Vector2(69,54));foreach(var e in guards)e.GetType().GetMethod("Tick",flags).Invoke(e,new object[]{.02f});
   check(guards.All(e=>!e.IsAware),"lower reward tease stays outside encounter");check(!fragment.TryCollect(player),"fragment remains out of reach from lower lookout");
   move(new Vector2(98,64));foreach(var e in guards)e.GetType().GetMethod("Tick",flags).Invoke(e,new object[]{.02f});
-  check(guards[1].IsAware&&guards[1].State==RoadOfTheOldKing.Combat.MeleeEnemyState.Pursuing&&!guards[0].IsAware,"eastern guard notices first; western guard is not forced into engagement");
+  check(guards[1].IsAware&&guards[1].State==RoadOfTheOldKing.Enemies.PursuitState.Pursuing&&!guards[0].IsAware,"eastern guard notices first; western guard is not forced into engagement");
   move(new Vector2(110,88));foreach(var e in guards)e.GetType().GetMethod("Tick",flags).Invoke(e,new object[]{.02f});check(guards.All(e=>!e.IsAware&&!e.Action.IsRunning),"disengagement clears pursuit");
   foreach(var e in guards)e.ResetOnRest();
   move((Vector2)fragment.transform.position+Vector2.right*.7f);check(fragment.CanCollect(player)&&game.Progress.ownedTools.Count==0,"H1 remains ordinary walking access without tool or kill gate");

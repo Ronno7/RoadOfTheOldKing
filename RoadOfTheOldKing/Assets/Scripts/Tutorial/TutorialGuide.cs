@@ -255,7 +255,7 @@ namespace RoadOfTheOldKing.Tutorial
             new TutorialStep("first-wolf", "A wolf guards the ruins. Dodge its lunge {dash}", TutorialCondition.Milestone) { milestone = "tutorial/enemy/first-wolf" },
             new TutorialStep("flask", "Drink a flask {heal}", TutorialCondition.DrankFlask),
             new TutorialStep("stone", "The stone seals the way\nThrow {throw}", TutorialCondition.RecallUnlocked),
-            new TutorialStep("first-shard", "Follow the trail north", TutorialCondition.Milestone) { milestone = "shard/collected/tutorial/first-enemy" },
+            new TutorialStep("first-shard", "Follow the trail north", TutorialCondition.Milestone) { milestone = RewardKeys.ShardCollected("tutorial/first-enemy") },
             new TutorialStep("rest", "", TutorialCondition.Rested),
             new TutorialStep("exit", "Take the road northeast", TutorialCondition.Milestone) { milestone = "tutorial/complete" },
         };

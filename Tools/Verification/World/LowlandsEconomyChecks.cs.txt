@@ -20,11 +20,11 @@ if(EditorApplication.isPlaying&&SessionState.GetBool("Lowlands.Economy.PickupArt
     if(stage==0){
         check(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name=="Tutorial","Tutorial pickup-art phase");
         var shard=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SunShardReward>();
-        var visual=(GameObject)shard.GetType().GetField("pickupVisual",flags).GetValue(shard);
+        var visual=(GameObject)shard.GetType().GetField("visual",flags).GetValue(shard);
         check(native(visual,"SunShard"),"Tutorial inherits native shared Sun Shard art");
         check(!shard.IsAvailable&&!visual.activeSelf,"pack reward artwork hidden until unlocked");
-        var first=(RoadOfTheOldKing.Combat.Damageable)shard.GetType().GetField("defeatSource",flags).GetValue(shard);
-        var rest=(RoadOfTheOldKing.Combat.Damageable[])shard.GetType().GetField("alsoDefeat",flags).GetValue(shard);
+        // 17 Oct refactor: the pack is the shard's EncounterUnlock (first guard, then the rest).
+        var guards=shard.Unlock.Guards.ToArray();var first=guards[0];var rest=guards.Skip(1).ToArray();
         first.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(hero.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.up,0,0));
         check(!shard.IsAvailable&&!visual.activeSelf,"first pack defeat does not reveal shard early");
         foreach(var enemy in rest)enemy.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(hero.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.up,0,0));
@@ -37,7 +37,7 @@ if(EditorApplication.isPlaying&&SessionState.GetBool("Lowlands.Economy.PickupArt
     }else if(stage==1){
         check(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name=="GreenLowlands","regional pickup-art phase");
         var shard=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SunShardReward>();
-        var visual=(GameObject)shard.GetType().GetField("pickupVisual",flags).GetValue(shard);
+        var visual=(GameObject)shard.GetType().GetField("visual",flags).GetValue(shard);
         check(native(visual,"SunShard")&&visual.activeSelf,"regional shard uses same visible native art");
         move(shard.transform.position);check(!shard.TryCollect(hero),"native shard still respects water-state gate");
         pg.Progress.Complete("green-lowlands/sluice/pond-low");
@@ -67,7 +67,7 @@ if(EditorApplication.isPlaying&&SessionState.GetBool("Lowlands.Economy.PickupArt
         SessionState.SetInt("Lowlands.Economy.PickupArtPhase",2);
     }else{
         var shard=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SunShardReward>();
-        check(shard.IsCollected&&!((GameObject)shard.GetType().GetField("pickupVisual",flags).GetValue(shard)).activeSelf,"reload keeps collected shard hidden");
+        check(shard.IsCollected&&!((GameObject)shard.GetType().GetField("visual",flags).GetValue(shard)).activeSelf,"reload keeps collected shard hidden");
         var heart=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.HeartFragmentPickup>(FindObjectsSortMode.None).First(h=>h.name=="H1 fragment");
         check(heart.IsCollected&&!((GameObject)heart.GetType().GetField("visual",flags).GetValue(heart)).activeSelf,"reload keeps collected heart hidden");
         var pendingSource=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.CoinSource>(FindObjectsSortMode.None).First(s=>s.SourceId=="green-lowlands/practice-pot");
@@ -183,9 +183,9 @@ if(phase==3){
     check(chest("orchard").IsOpen&&chest("basin-cache").IsOpen&&offer("trader-fragment").IsSold(game.Progress),"fresh-session chest and stock state");
     check(game.Progress.FindCoinSource("green-lowlands/pot-01").collected&&game.Progress.FindCoinSource("green-lowlands/pot-02").collected,"fresh-session empty and collected rolls");
     check(UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RecallSluice>().Stage==RoadOfTheOldKing.World.SluiceStage.PondLow,"fresh-session pond remains low");
-    var cache=(GameObject)UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/World/RewardChest_Placeholder.prefab"));cache.transform.position=new Vector3(68.8f,26);
-    var reward=cache.GetComponent<RoadOfTheOldKing.World.RewardChest>();reward.GetType().GetField("rewardId",flags).SetValue(reward,"verification/lantern");reward.GetType().GetField("reward",flags).SetValue(reward,RoadOfTheOldKing.World.ChestReward.Tool);reward.GetType().GetField("tool",flags).SetValue(reward,RoadOfTheOldKing.Progression.WorldTool.ProtectedLantern);
-    var coin=(GameObject)UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/World/CoinSource_Placeholder.prefab"));coin.transform.position=new Vector3(68.8f,26);var coins=coin.GetComponent<RoadOfTheOldKing.World.CoinSource>();coins.GetType().GetField("sourceId",flags).SetValue(coins,"verification/coin-wall");coins.GetType().GetField("guaranteedCoins",flags).SetValue(coins,9);
+    var cache=(GameObject)UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/World/Shared/RewardChest.prefab"));cache.transform.position=new Vector3(68.8f,26);
+    var reward=cache.GetComponent<RoadOfTheOldKing.World.RewardChest>();reward.GetType().GetField("rewardId",flags).SetValue(reward,"verification/lantern");reward.GetType().GetField("reward",flags).SetValue(reward,RoadOfTheOldKing.Progression.RewardKind.Tool);reward.GetType().GetField("tool",flags).SetValue(reward,RoadOfTheOldKing.Progression.WorldTool.ProtectedLantern);
+    var coin=(GameObject)UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/World/Shared/CoinSource.prefab"));coin.transform.position=new Vector3(68.8f,26);var coins=coin.GetComponent<RoadOfTheOldKing.World.CoinSource>();coins.GetType().GetField("sourceId",flags).SetValue(coins,"verification/coin-wall");coins.GetType().GetField("guaranteedCoins",flags).SetValue(coins,9);
     var wall=new GameObject("Verification wall");wall.transform.position=new Vector3(68.4f,26);wall.AddComponent<BoxCollider2D>().size=new Vector2(.1f,2);
     try{
         pose(new Vector2(68,26));check(!reward.TryCollect(player),"wall blocks tool chest");

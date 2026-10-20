@@ -3,7 +3,7 @@ using UnityEngine.Tilemaps;
 
 namespace RoadOfTheOldKing.World
 {
-    /// <summary>A native upper footprint with a complete three-cell front per tile.</summary>
+    /// <summary>A native cliff footprint or crest with a complete projected front per tile.</summary>
     public sealed class RaisedCliffTile : TileBase
     {
         // Canonical 8-neighbor mask * four horizontal texture phases.
@@ -12,6 +12,8 @@ namespace RoadOfTheOldKing.World
         // Retaining shores paint their crest line; the upper field is a separate
         // walkable surface. Reconstruct only the neighboring upper footprint.
         public bool crestLine;
+        [Min(1)] public int projectedRise = 3;
+        public string connectionGroup;
         static readonly Vector3Int[] Neighbors = {
             new Vector3Int(0,1), new Vector3Int(1,0), new Vector3Int(0,-1), new Vector3Int(-1,0),
             new Vector3Int(1,1), new Vector3Int(1,-1), new Vector3Int(-1,-1), new Vector3Int(-1,1)
@@ -35,8 +37,12 @@ namespace RoadOfTheOldKing.World
 
         bool Connected(Vector3Int position, ITilemap tilemap)
         {
-            for (int drop = 0; drop <= (crestLine ? 3 : 0); drop++)
-                if (tilemap.GetTile(position + Vector3Int.down * drop) == this) return true;
+            for (int drop = 0; drop <= (crestLine ? projectedRise : 0); drop++)
+            {
+                var neighbor = tilemap.GetTile(position + Vector3Int.down * drop) as RaisedCliffTile;
+                if (neighbor == this || neighbor != null && !string.IsNullOrEmpty(connectionGroup) &&
+                    neighbor.connectionGroup == connectionGroup) return true;
+            }
             return false;
         }
 
@@ -46,7 +52,7 @@ namespace RoadOfTheOldKing.World
             tilemap.RefreshTile(position);
             foreach (var offset in Neighbors) tilemap.RefreshTile(position + offset);
             if (crestLine)
-                for (int y = -4; y <= 4; y++) for (int x = -1; x <= 1; x++)
+                for (int y = -projectedRise-1; y <= projectedRise+1; y++) for (int x = -1; x <= 1; x++)
                     tilemap.RefreshTile(position + new Vector3Int(x, y, 0));
         }
     }

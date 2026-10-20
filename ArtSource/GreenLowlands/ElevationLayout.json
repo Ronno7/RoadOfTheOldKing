@@ -1,63 +1,110 @@
 {
-  "schema": 1,
+  "schema": 2,
   "scene": "Assets/Scenes/GreenLowlands.unity",
   "units": "relative terrain tiers; independent of screen Y",
-  "projection": "One tier uses a three-cell front-facing stair flight; ridge switchback includes a landing. Terrain faces, backs and side contacts must agree with the named surfaces.",
+  "projection": "One level equals one 16-pixel tile of front wall. A two-level drop has two front rows. Side edges are four pixels wide and rear rims two pixels; each has matching static collision. Stairs use one row per level. Height plan is user intent; implementation guides describe constructed surfaces.",
   "surfaces": [
     {
       "id": "Farm",
       "height": 0,
       "shoreNote": "The eastern pond strip remains H0 beside the H-1 basin and extends north to the headland at (65.5,68.5). Permanent banks separate it from the H1 upper grove and basin after drainage; opening the woodland does not create an upper-route shortcut.",
-      "sample": [15.5, 3]
+      "sample": [
+        15.5,
+        3
+      ]
     },
     {
       "id": "Ridge",
       "height": 1,
       "groveNote": "The cleared northern orchard and western spur groves remain H1. Permanent banks along the worksite's east side and southern basin approach retain the drainage gate; the worksite still requires its basin stair. The rocky headland remains inaccessible terrain.",
-      "sample": [117, 88]
+      "sample": [
+        117,
+        88
+      ]
     },
     {
       "id": "Basin",
       "height": -1,
-      "sample": [35, 26]
+      "sample": [
+        35,
+        26
+      ]
     },
     {
       "id": "ShardIsland",
       "height": 0,
-      "sample": [18.5, 26.5]
+      "sample": [
+        18.5,
+        26.5
+      ]
     },
     {
       "id": "SluiceDeck",
       "height": 0,
-      "sample": [5, 74],
-      "southEntranceApproach": [[13, 92], [13.5, 84.5], [5, 84.5], [5, 86.5]],
-      "approachNote": "Same-height porch from the ridge stair foot to the south-facing distributor doorway. Service water still gates the main bay; the former east entry is sealed."
+      "sample": [
+        5,
+        74
+      ],
+      "southEntranceApproach": [
+        [
+          13,
+          92
+        ],
+        [
+          13.5,
+          84.5
+        ],
+        [
+          5,
+          84.5
+        ],
+        [
+          5,
+          86.5
+        ]
+      ],
+      "approachNote": "Same-height dry porch from the ridge stair foot to the south-facing distributor doorway. Physical timber gates control the service passage and main exit; water remains in sluice channels. The former east entry is sealed."
     },
     {
       "id": "StorehouseThreshold",
       "height": 0,
-      "sample": [20.5, 76.5]
+      "sample": [
+        20.5,
+        76.5
+      ]
     },
     {
       "id": "FragmentShelf",
       "height": 0,
-      "sample": [30.5, 80.5]
+      "sample": [
+        30.5,
+        80.5
+      ]
     },
     {
       "id": "BarrowThreshold",
-      "height": -1,
-      "sample": [66, 88.7],
-      "note": "The drained old road enters a passage under the ridge. The former two stair flights are sealed; there is no dry upper-road bypass."
+      "height": 0,
+      "sample": [
+        66,
+        89.1
+      ],
+      "note": "The user's marked two-column stair rises one level from the drained basin to the doorway. The higher ridge remains sealed; no dry upper-road bypass."
     },
     {
       "id": "Worksite",
       "height": 0,
-      "sample": [73, 86]
+      "sample": [
+        73,
+        86
+      ]
     },
     {
       "id": "Workshop",
       "height": 0,
-      "sample": [133, 78]
+      "sample": [
+        123,
+        46
+      ]
     }
   ],
   "stairs": [
@@ -65,93 +112,10696 @@
       "name": "Orchard climb",
       "from": "Farm",
       "to": "Ridge",
-      "rect": [121, 78, 7, 3],
-      "fromLanding": [124, 77],
-      "toLanding": [124, 82],
-      "approachNote": "The three-tree grove southwest of this flight is open H0 ground. The adjoining x112..120 cliff occupies y78..80 to match the stair crest and base; its western return remains continuous.",
+      "rect": [
+        121,
+        80,
+        7,
+        1
+      ],
+      "fromLanding": [
+        124,
+        77
+      ],
+      "toLanding": [
+        124,
+        82
+      ],
+      "approachNote": "One level, one tile of rise; the retained upper landing connects through one stair row.",
       "nativeOrientation": true
     },
     {
       "name": "Ridge descent",
       "from": "Ridge",
       "to": "SluiceDeck",
-      "rect": [12, 93, 3, 4],
-      "fromLanding": [13, 97.5],
-      "toLanding": [13, 92],
-      "nativeOrientation": true
+      "rect": [
+        12,
+        96,
+        3,
+        1
+      ],
+      "fromLanding": [
+        13,
+        97.5
+      ],
+      "toLanding": [
+        13,
+        92
+      ],
+      "nativeOrientation": true,
+      "approachNote": "One level, one tile of rise; the retained upper landing connects through one stair row."
     },
     {
       "name": "Sluice descent",
       "from": "SluiceDeck",
       "to": "Basin",
-      "rect": [14, 64, 3, 3],
-      "fromLanding": [15, 68],
-      "toLanding": [15, 63],
-      "nativeOrientation": true
+      "rect": [
+        14,
+        66,
+        3,
+        1
+      ],
+      "fromLanding": [
+        15,
+        68
+      ],
+      "toLanding": [
+        15,
+        63
+      ],
+      "nativeOrientation": true,
+      "approachNote": "One level, one tile of rise; the retained upper landing connects through one stair row."
     },
     {
       "name": "Barn switchback",
       "from": "Farm",
       "to": "Basin",
-      "rect": [34, 27, 3, 3],
-      "fromLanding": [35, 31],
-      "toLanding": [35, 26],
-      "nativeOrientation": true
+      "rect": [
+        34,
+        29,
+        3,
+        1
+      ],
+      "fromLanding": [
+        35,
+        31
+      ],
+      "toLanding": [
+        35,
+        26
+      ],
+      "nativeOrientation": true,
+      "approachNote": "One level, one tile of rise; the retained upper landing connects through one stair row."
     },
     {
       "name": "Island stair",
       "from": "Basin",
       "to": "ShardIsland",
-      "rect": [17, 23, 3, 3],
-      "fromLanding": [18, 22],
-      "toLanding": [18.5, 26.5],
-      "nativeOrientation": true
+      "rect": [
+        17,
+        25,
+        3,
+        1
+      ],
+      "fromLanding": [
+        18,
+        22
+      ],
+      "toLanding": [
+        18.5,
+        26.5
+      ],
+      "nativeOrientation": true,
+      "approachNote": "One level, one tile of rise; the retained upper landing connects through one stair row."
     },
     {
       "name": "Storehouse stair",
       "from": "Basin",
       "to": "StorehouseThreshold",
-      "rect": [19, 73, 3, 3],
-      "fromLanding": [20.5, 72],
-      "toLanding": [20.5, 76.5],
-      "nativeOrientation": true
+      "rect": [
+        19,
+        75,
+        3,
+        1
+      ],
+      "fromLanding": [
+        20.5,
+        72
+      ],
+      "toLanding": [
+        20.5,
+        76.5
+      ],
+      "nativeOrientation": true,
+      "approachNote": "One level, one tile of rise; the retained upper landing connects through one stair row."
     },
     {
       "name": "Shelf stair",
       "from": "Basin",
       "to": "FragmentShelf",
-      "rect": [29, 77, 3, 3],
-      "fromLanding": [30.5, 76],
-      "toLanding": [30.5, 80.5],
-      "nativeOrientation": true
+      "rect": [
+        29,
+        79,
+        3,
+        1
+      ],
+      "fromLanding": [
+        30.5,
+        76
+      ],
+      "toLanding": [
+        30.5,
+        80.5
+      ],
+      "nativeOrientation": true,
+      "approachNote": "One level, one tile of rise; the retained upper landing connects through one stair row."
     },
     {
       "name": "Worksite stair",
       "from": "Basin",
       "to": "Worksite",
-      "rect": [72, 79, 3, 3],
-      "fromLanding": [73.5, 78],
-      "toLanding": [73.5, 82.5],
-      "nativeOrientation": true
+      "rect": [
+        72,
+        81,
+        3,
+        1
+      ],
+      "fromLanding": [
+        73.5,
+        78
+      ],
+      "toLanding": [
+        73.5,
+        82.5
+      ],
+      "nativeOrientation": true,
+      "approachNote": "One level, one tile of rise; the retained upper landing connects through one stair row."
+    },
+    {
+      "name": "Barrow threshold",
+      "from": "Basin",
+      "to": "BarrowThreshold",
+      "rect": [
+        65,
+        88,
+        2,
+        1
+      ],
+      "fromLanding": [
+        66,
+        86.5
+      ],
+      "toLanding": [
+        66,
+        89.1
+      ],
+      "nativeOrientation": true,
+      "approachNote": "One row from the drained road to the newly painted H0 threshold."
     }
   ],
   "rope": {
     "from": "Farm",
     "to": "Workshop",
-    "fromLanding": [127, 77],
-    "toLanding": [131, 77],
-    "note": "Crosses the break between isolated farm-height ledges; no additional terrain tier."
+    "fromLanding": [
+      110.5,
+      45.5
+    ],
+    "toLanding": [
+      119.5,
+      45.5
+    ],
+    "note": "The southeast bandit camp occupies a Farm-height clearing inside a wooded Ridge-height bank. The purchased rope crosses only the authored bank segment; walking around the outer loop never enters the camp."
   },
   "firstGlimpse": {
-    "from": [11, 26],
+    "from": [
+      11,
+      26
+    ],
     "target": "ShardIsland",
-    "reward": [18.5, 26.5]
+    "reward": [
+      18.5,
+      26.5
+    ]
   },
   "water": "High pond floods Basin and lower stair flights; permanent river stays wet. Surface heights do not change on drainage.",
   "outOfBoundsUplands": [
-    {"name": "Western approach upland", "height": 1, "relativeTo": "local H0 approach", "projectedBounds": [-30, -82, 46, 72], "note": "Inaccessible top; three-cell fronts and directional banks. Western overscan is render-only. Scene owns the exact footprint."},
-    {"name": "Southern pond bluff", "height": 1, "relativeTo": "Farm", "projectedBounds": [43, 25, 26, 11], "note": "Inaccessible raised land replaces a former dense thicket; no new stair, reward or route."},
-    {"name": "Pasture grove", "height": 1, "relativeTo": "Farm", "projectedBounds": [79, 43, 29, 14], "note": "Compact inaccessible wooded rise south of the orchard ridge. A clear H0 grassy passage separates the two H1 masses; the orchard stairs remain mandatory for the upper route. Scene owns the exact footprint."}
+    {
+      "name": "Western approach upland",
+      "height": 1,
+      "relativeTo": "local H0 approach",
+      "projectedBounds": [
+        -30,
+        -82,
+        46,
+        72
+      ],
+      "note": "Inaccessible top; three-cell fronts and directional banks. Western overscan is render-only. Scene owns the exact footprint."
+    },
+    {
+      "name": "Southern pond bluff",
+      "relativeTo": "Farm",
+      "projectedBounds": [
+        43,
+        25,
+        26,
+        11
+      ],
+      "note": "Unwalkable rock enclosure using accepted shared-palette stone. It has no horizontal floor tier, stair, reward or route. Scene guides own its exact footprint.",
+      "classification": "Structure"
+    },
+    {
+      "name": "Pasture grove",
+      "height": 1,
+      "relativeTo": "Farm",
+      "projectedBounds": [
+        79,
+        43,
+        29,
+        14
+      ],
+      "note": "Compact inaccessible wooded rise south of the orchard ridge. A clear H0 grassy passage separates the two H1 masses; the orchard stairs remain mandatory for the upper route. Scene owns the exact footprint."
+    }
   ],
-  "authoring": "Scene owns hand-painted tiles. This contract is consumed by the layout fixture; no runtime height simulation or scene regeneration."
+  "authoring": "The scene Elevation and Transitions Tilemaps own terrain classification and connection geometry. Surface/structure/void/transition runs are derived exports for the SVG and verification; named surface samples and route contracts remain explicit. No runtime height simulation or whole-scene generation.",
+  "geometrySource": "GreenLowlands scene editor-only Elevation and Transitions Tilemaps; exports are derived.",
+  "projectedRisePerTierCells": 1,
+  "guideBounds": {
+    "x": -30,
+    "y": -85,
+    "width": 196,
+    "height": 201
+  },
+  "unclassifiedCells": 0,
+  "surfaceRuns": [
+    {
+      "y": -82,
+      "xMin": -30,
+      "xMax": 36,
+      "height": 1
+    },
+    {
+      "y": -82,
+      "xMin": 40,
+      "xMax": 64,
+      "height": 1
+    },
+    {
+      "y": -81,
+      "xMin": -30,
+      "xMax": 36,
+      "height": 1
+    },
+    {
+      "y": -81,
+      "xMin": 40,
+      "xMax": 64,
+      "height": 1
+    },
+    {
+      "y": -80,
+      "xMin": -30,
+      "xMax": 36,
+      "height": 1
+    },
+    {
+      "y": -80,
+      "xMin": 40,
+      "xMax": 64,
+      "height": 1
+    },
+    {
+      "y": -79,
+      "xMin": -30,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -79,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -78,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -78,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -78,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -78,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -77,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -77,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -77,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -77,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -76,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -76,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -76,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -76,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -75,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -75,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -75,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -75,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -74,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -74,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -74,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -74,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -73,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -73,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -73,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -73,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -72,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -72,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -72,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -72,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -71,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -71,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -71,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -71,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -70,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -70,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -70,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -70,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -69,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -69,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -69,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -69,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -68,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -68,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -68,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -68,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -67,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -67,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -67,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -67,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -66,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -66,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -66,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -66,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -65,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -65,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -65,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -65,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -64,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -64,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -64,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -64,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -63,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -63,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -63,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -63,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -62,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -62,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -62,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -62,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -61,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -61,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -61,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -61,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -60,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -60,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -60,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -60,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -59,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -59,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -59,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -59,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -58,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -58,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -58,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -58,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -57,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -57,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -57,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -57,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -56,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -56,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -56,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -56,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -55,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -55,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -55,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -55,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -54,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -54,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -54,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -54,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -53,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -53,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -53,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -53,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -52,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -52,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -52,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -52,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -51,
+      "xMin": -30,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": -51,
+      "xMin": 2,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": -51,
+      "xMin": 10,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -51,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -50,
+      "xMin": -30,
+      "xMax": -2,
+      "height": 1
+    },
+    {
+      "y": -50,
+      "xMin": -1,
+      "xMax": 10,
+      "height": 0
+    },
+    {
+      "y": -50,
+      "xMin": 11,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -50,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -49,
+      "xMin": -30,
+      "xMax": -2,
+      "height": 1
+    },
+    {
+      "y": -49,
+      "xMin": -1,
+      "xMax": 12,
+      "height": 0
+    },
+    {
+      "y": -49,
+      "xMin": 13,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -49,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -48,
+      "xMin": -30,
+      "xMax": -2,
+      "height": 1
+    },
+    {
+      "y": -48,
+      "xMin": -1,
+      "xMax": 12,
+      "height": 0
+    },
+    {
+      "y": -48,
+      "xMin": 13,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -48,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -47,
+      "xMin": -30,
+      "xMax": -4,
+      "height": 1
+    },
+    {
+      "y": -47,
+      "xMin": -3,
+      "xMax": 13,
+      "height": 0
+    },
+    {
+      "y": -47,
+      "xMin": 14,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -47,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -46,
+      "xMin": -30,
+      "xMax": -4,
+      "height": 1
+    },
+    {
+      "y": -46,
+      "xMin": -3,
+      "xMax": 14,
+      "height": 0
+    },
+    {
+      "y": -46,
+      "xMin": 15,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -46,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -45,
+      "xMin": -30,
+      "xMax": -4,
+      "height": 1
+    },
+    {
+      "y": -45,
+      "xMin": -3,
+      "xMax": 14,
+      "height": 0
+    },
+    {
+      "y": -45,
+      "xMin": 15,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -45,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -44,
+      "xMin": -30,
+      "xMax": -4,
+      "height": 1
+    },
+    {
+      "y": -44,
+      "xMin": -3,
+      "xMax": 14,
+      "height": 0
+    },
+    {
+      "y": -44,
+      "xMin": 15,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -44,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -43,
+      "xMin": -30,
+      "xMax": -4,
+      "height": 1
+    },
+    {
+      "y": -43,
+      "xMin": -3,
+      "xMax": 14,
+      "height": 0
+    },
+    {
+      "y": -43,
+      "xMin": 15,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -43,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -42,
+      "xMin": -30,
+      "xMax": -4,
+      "height": 1
+    },
+    {
+      "y": -42,
+      "xMin": -3,
+      "xMax": 14,
+      "height": 0
+    },
+    {
+      "y": -42,
+      "xMin": 15,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -42,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -41,
+      "xMin": -30,
+      "xMax": -5,
+      "height": 1
+    },
+    {
+      "y": -41,
+      "xMin": -4,
+      "xMax": 14,
+      "height": 0
+    },
+    {
+      "y": -41,
+      "xMin": 15,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -41,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -40,
+      "xMin": -30,
+      "xMax": -6,
+      "height": 1
+    },
+    {
+      "y": -40,
+      "xMin": -5,
+      "xMax": 14,
+      "height": 0
+    },
+    {
+      "y": -40,
+      "xMin": 15,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": -40,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -39,
+      "xMin": -30,
+      "xMax": -6,
+      "height": 1
+    },
+    {
+      "y": -39,
+      "xMin": -5,
+      "xMax": 15,
+      "height": 0
+    },
+    {
+      "y": -39,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -38,
+      "xMin": -30,
+      "xMax": -6,
+      "height": 1
+    },
+    {
+      "y": -38,
+      "xMin": -5,
+      "xMax": 15,
+      "height": 0
+    },
+    {
+      "y": -38,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -37,
+      "xMin": -30,
+      "xMax": -6,
+      "height": 1
+    },
+    {
+      "y": -37,
+      "xMin": -5,
+      "xMax": 16,
+      "height": 0
+    },
+    {
+      "y": -37,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -36,
+      "xMin": -30,
+      "xMax": -6,
+      "height": 1
+    },
+    {
+      "y": -36,
+      "xMin": -5,
+      "xMax": 17,
+      "height": 0
+    },
+    {
+      "y": -36,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -35,
+      "xMin": -30,
+      "xMax": -6,
+      "height": 1
+    },
+    {
+      "y": -35,
+      "xMin": -5,
+      "xMax": 18,
+      "height": 0
+    },
+    {
+      "y": -35,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -34,
+      "xMin": -30,
+      "xMax": -6,
+      "height": 1
+    },
+    {
+      "y": -34,
+      "xMin": 0,
+      "xMax": 19,
+      "height": 0
+    },
+    {
+      "y": -34,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -33,
+      "xMin": -30,
+      "xMax": -1,
+      "height": 1
+    },
+    {
+      "y": -33,
+      "xMin": 1,
+      "xMax": 20,
+      "height": 0
+    },
+    {
+      "y": -33,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -32,
+      "xMin": -30,
+      "xMax": 0,
+      "height": 1
+    },
+    {
+      "y": -32,
+      "xMin": 1,
+      "xMax": 20,
+      "height": 0
+    },
+    {
+      "y": -32,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -31,
+      "xMin": -30,
+      "xMax": 0,
+      "height": 1
+    },
+    {
+      "y": -31,
+      "xMin": 8,
+      "xMax": 21,
+      "height": 0
+    },
+    {
+      "y": -31,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -30,
+      "xMin": -30,
+      "xMax": 7,
+      "height": 1
+    },
+    {
+      "y": -30,
+      "xMin": 9,
+      "xMax": 26,
+      "height": 0
+    },
+    {
+      "y": -30,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -29,
+      "xMin": -30,
+      "xMax": 8,
+      "height": 1
+    },
+    {
+      "y": -29,
+      "xMin": 9,
+      "xMax": 29,
+      "height": 0
+    },
+    {
+      "y": -29,
+      "xMin": 33,
+      "xMax": 36,
+      "height": 1
+    },
+    {
+      "y": -29,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -28,
+      "xMin": -30,
+      "xMax": 8,
+      "height": 1
+    },
+    {
+      "y": -28,
+      "xMin": 9,
+      "xMax": 30,
+      "height": 0
+    },
+    {
+      "y": -28,
+      "xMin": 33,
+      "xMax": 36,
+      "height": 1
+    },
+    {
+      "y": -28,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -27,
+      "xMin": -30,
+      "xMax": 8,
+      "height": 1
+    },
+    {
+      "y": -27,
+      "xMin": 13,
+      "xMax": 31,
+      "height": 0
+    },
+    {
+      "y": -27,
+      "xMin": 33,
+      "xMax": 36,
+      "height": 1
+    },
+    {
+      "y": -27,
+      "xMin": 37,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -26,
+      "xMin": -30,
+      "xMax": 12,
+      "height": 1
+    },
+    {
+      "y": -26,
+      "xMin": 13,
+      "xMax": 35,
+      "height": 0
+    },
+    {
+      "y": -26,
+      "xMin": 36,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -25,
+      "xMin": -30,
+      "xMax": 12,
+      "height": 1
+    },
+    {
+      "y": -25,
+      "xMin": 13,
+      "xMax": 35,
+      "height": 0
+    },
+    {
+      "y": -25,
+      "xMin": 36,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -24,
+      "xMin": -30,
+      "xMax": 12,
+      "height": 1
+    },
+    {
+      "y": -24,
+      "xMin": 14,
+      "xMax": 35,
+      "height": 0
+    },
+    {
+      "y": -24,
+      "xMin": 36,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -23,
+      "xMin": -30,
+      "xMax": 13,
+      "height": 1
+    },
+    {
+      "y": -23,
+      "xMin": 14,
+      "xMax": 34,
+      "height": 0
+    },
+    {
+      "y": -23,
+      "xMin": 35,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": -23,
+      "xMin": 40,
+      "xMax": 41,
+      "height": 1
+    },
+    {
+      "y": -22,
+      "xMin": -30,
+      "xMax": 13,
+      "height": 1
+    },
+    {
+      "y": -22,
+      "xMin": 14,
+      "xMax": 34,
+      "height": 0
+    },
+    {
+      "y": -22,
+      "xMin": 35,
+      "xMax": 38,
+      "height": -1
+    },
+    {
+      "y": -22,
+      "xMin": 40,
+      "xMax": 41,
+      "height": 1
+    },
+    {
+      "y": -21,
+      "xMin": -30,
+      "xMax": 13,
+      "height": 1
+    },
+    {
+      "y": -21,
+      "xMin": 14,
+      "xMax": 33,
+      "height": 0
+    },
+    {
+      "y": -21,
+      "xMin": 34,
+      "xMax": 37,
+      "height": -1
+    },
+    {
+      "y": -21,
+      "xMin": 40,
+      "xMax": 41,
+      "height": 1
+    },
+    {
+      "y": -20,
+      "xMin": -30,
+      "xMax": 13,
+      "height": 1
+    },
+    {
+      "y": -20,
+      "xMin": 14,
+      "xMax": 32,
+      "height": 0
+    },
+    {
+      "y": -20,
+      "xMin": 33,
+      "xMax": 37,
+      "height": -1
+    },
+    {
+      "y": -20,
+      "xMin": 39,
+      "xMax": 41,
+      "height": 1
+    },
+    {
+      "y": -19,
+      "xMin": -30,
+      "xMax": 13,
+      "height": 1
+    },
+    {
+      "y": -19,
+      "xMin": 14,
+      "xMax": 31,
+      "height": 0
+    },
+    {
+      "y": -19,
+      "xMin": 32,
+      "xMax": 36,
+      "height": -1
+    },
+    {
+      "y": -19,
+      "xMin": 38,
+      "xMax": 41,
+      "height": 1
+    },
+    {
+      "y": -18,
+      "xMin": -30,
+      "xMax": 13,
+      "height": 1
+    },
+    {
+      "y": -18,
+      "xMin": 14,
+      "xMax": 31,
+      "height": 0
+    },
+    {
+      "y": -18,
+      "xMin": 32,
+      "xMax": 35,
+      "height": -1
+    },
+    {
+      "y": -18,
+      "xMin": 38,
+      "xMax": 40,
+      "height": 1
+    },
+    {
+      "y": -17,
+      "xMin": -30,
+      "xMax": 13,
+      "height": 1
+    },
+    {
+      "y": -17,
+      "xMin": 14,
+      "xMax": 30,
+      "height": 0
+    },
+    {
+      "y": -17,
+      "xMin": 31,
+      "xMax": 35,
+      "height": -1
+    },
+    {
+      "y": -17,
+      "xMin": 37,
+      "xMax": 39,
+      "height": 1
+    },
+    {
+      "y": -16,
+      "xMin": -30,
+      "xMax": 13,
+      "height": 1
+    },
+    {
+      "y": -16,
+      "xMin": 14,
+      "xMax": 29,
+      "height": 0
+    },
+    {
+      "y": -16,
+      "xMin": 30,
+      "xMax": 34,
+      "height": -1
+    },
+    {
+      "y": -16,
+      "xMin": 36,
+      "xMax": 39,
+      "height": 1
+    },
+    {
+      "y": -15,
+      "xMin": -30,
+      "xMax": 13,
+      "height": 1
+    },
+    {
+      "y": -15,
+      "xMin": 14,
+      "xMax": 29,
+      "height": 0
+    },
+    {
+      "y": -15,
+      "xMin": 30,
+      "xMax": 34,
+      "height": -1
+    },
+    {
+      "y": -15,
+      "xMin": 36,
+      "xMax": 38,
+      "height": 1
+    },
+    {
+      "y": -14,
+      "xMin": -30,
+      "xMax": 13,
+      "height": 1
+    },
+    {
+      "y": -14,
+      "xMin": 14,
+      "xMax": 28,
+      "height": 0
+    },
+    {
+      "y": -14,
+      "xMin": 29,
+      "xMax": 33,
+      "height": -1
+    },
+    {
+      "y": -14,
+      "xMin": 35,
+      "xMax": 37,
+      "height": 1
+    },
+    {
+      "y": -13,
+      "xMin": -30,
+      "xMax": 13,
+      "height": 1
+    },
+    {
+      "y": -13,
+      "xMin": 14,
+      "xMax": 27,
+      "height": 0
+    },
+    {
+      "y": -13,
+      "xMin": 28,
+      "xMax": 32,
+      "height": -1
+    },
+    {
+      "y": -13,
+      "xMin": 35,
+      "xMax": 37,
+      "height": 1
+    },
+    {
+      "y": -12,
+      "xMin": -30,
+      "xMax": 13,
+      "height": 1
+    },
+    {
+      "y": -12,
+      "xMin": 14,
+      "xMax": 27,
+      "height": 0
+    },
+    {
+      "y": -12,
+      "xMin": 28,
+      "xMax": 32,
+      "height": -1
+    },
+    {
+      "y": -12,
+      "xMin": 34,
+      "xMax": 36,
+      "height": 1
+    },
+    {
+      "y": -11,
+      "xMin": -30,
+      "xMax": 13,
+      "height": 1
+    },
+    {
+      "y": -11,
+      "xMin": 14,
+      "xMax": 26,
+      "height": 0
+    },
+    {
+      "y": -11,
+      "xMin": 27,
+      "xMax": 31,
+      "height": -1
+    },
+    {
+      "y": -11,
+      "xMin": 33,
+      "xMax": 36,
+      "height": 1
+    },
+    {
+      "y": -10,
+      "xMin": -30,
+      "xMax": 13,
+      "height": 1
+    },
+    {
+      "y": -10,
+      "xMin": 14,
+      "xMax": 25,
+      "height": 0
+    },
+    {
+      "y": -10,
+      "xMin": 26,
+      "xMax": 30,
+      "height": -1
+    },
+    {
+      "y": -10,
+      "xMin": 33,
+      "xMax": 35,
+      "height": 1
+    },
+    {
+      "y": -9,
+      "xMin": -30,
+      "xMax": 13,
+      "height": 1
+    },
+    {
+      "y": -9,
+      "xMin": 14,
+      "xMax": 25,
+      "height": 0
+    },
+    {
+      "y": -9,
+      "xMin": 26,
+      "xMax": 30,
+      "height": -1
+    },
+    {
+      "y": -9,
+      "xMin": 32,
+      "xMax": 34,
+      "height": 1
+    },
+    {
+      "y": -8,
+      "xMin": -30,
+      "xMax": 13,
+      "height": 1
+    },
+    {
+      "y": -8,
+      "xMin": 14,
+      "xMax": 24,
+      "height": 0
+    },
+    {
+      "y": -8,
+      "xMin": 25,
+      "xMax": 29,
+      "height": -1
+    },
+    {
+      "y": -8,
+      "xMin": 31,
+      "xMax": 34,
+      "height": 1
+    },
+    {
+      "y": -7,
+      "xMin": -30,
+      "xMax": 13,
+      "height": 1
+    },
+    {
+      "y": -7,
+      "xMin": 14,
+      "xMax": 23,
+      "height": 0
+    },
+    {
+      "y": -7,
+      "xMin": 24,
+      "xMax": 28,
+      "height": -1
+    },
+    {
+      "y": -7,
+      "xMin": 31,
+      "xMax": 33,
+      "height": 1
+    },
+    {
+      "y": -6,
+      "xMin": -30,
+      "xMax": 13,
+      "height": 1
+    },
+    {
+      "y": -6,
+      "xMin": 14,
+      "xMax": 23,
+      "height": 0
+    },
+    {
+      "y": -6,
+      "xMin": 24,
+      "xMax": 28,
+      "height": -1
+    },
+    {
+      "y": -6,
+      "xMin": 30,
+      "xMax": 32,
+      "height": 1
+    },
+    {
+      "y": -5,
+      "xMin": -30,
+      "xMax": 13,
+      "height": 1
+    },
+    {
+      "y": -5,
+      "xMin": 14,
+      "xMax": 23,
+      "height": 0
+    },
+    {
+      "y": -5,
+      "xMin": 24,
+      "xMax": 27,
+      "height": -1
+    },
+    {
+      "y": -5,
+      "xMin": 29,
+      "xMax": 32,
+      "height": 1
+    },
+    {
+      "y": -4,
+      "xMin": -30,
+      "xMax": 13,
+      "height": 1
+    },
+    {
+      "y": -4,
+      "xMin": 14,
+      "xMax": 22,
+      "height": 0
+    },
+    {
+      "y": -4,
+      "xMin": 23,
+      "xMax": 26,
+      "height": -1
+    },
+    {
+      "y": -4,
+      "xMin": 29,
+      "xMax": 31,
+      "height": 1
+    },
+    {
+      "y": -3,
+      "xMin": -30,
+      "xMax": 12,
+      "height": 1
+    },
+    {
+      "y": -3,
+      "xMin": 13,
+      "xMax": 21,
+      "height": 0
+    },
+    {
+      "y": -3,
+      "xMin": 22,
+      "xMax": 26,
+      "height": -1
+    },
+    {
+      "y": -3,
+      "xMin": 28,
+      "xMax": 30,
+      "height": 1
+    },
+    {
+      "y": -3,
+      "xMin": 63,
+      "xMax": 165,
+      "height": 1
+    },
+    {
+      "y": -2,
+      "xMin": -30,
+      "xMax": 11,
+      "height": 1
+    },
+    {
+      "y": -2,
+      "xMin": 12,
+      "xMax": 20,
+      "height": 0
+    },
+    {
+      "y": -2,
+      "xMin": 21,
+      "xMax": 26,
+      "height": -1
+    },
+    {
+      "y": -2,
+      "xMin": 27,
+      "xMax": 30,
+      "height": 1
+    },
+    {
+      "y": -2,
+      "xMin": 63,
+      "xMax": 165,
+      "height": 1
+    },
+    {
+      "y": -1,
+      "xMin": -30,
+      "xMax": 11,
+      "height": 1
+    },
+    {
+      "y": -1,
+      "xMin": 12,
+      "xMax": 19,
+      "height": 0
+    },
+    {
+      "y": -1,
+      "xMin": 20,
+      "xMax": 25,
+      "height": -1
+    },
+    {
+      "y": -1,
+      "xMin": 27,
+      "xMax": 29,
+      "height": 1
+    },
+    {
+      "y": -1,
+      "xMin": 63,
+      "xMax": 65,
+      "height": 1
+    },
+    {
+      "y": -1,
+      "xMin": 123,
+      "xMax": 128,
+      "height": 1
+    },
+    {
+      "y": -1,
+      "xMin": 151,
+      "xMax": 165,
+      "height": 1
+    },
+    {
+      "y": 0,
+      "xMin": 8,
+      "xMax": 10,
+      "height": 1
+    },
+    {
+      "y": 0,
+      "xMin": 11,
+      "xMax": 19,
+      "height": 0
+    },
+    {
+      "y": 0,
+      "xMin": 20,
+      "xMax": 25,
+      "height": -1
+    },
+    {
+      "y": 0,
+      "xMin": 26,
+      "xMax": 29,
+      "height": 0
+    },
+    {
+      "y": 0,
+      "xMin": 34,
+      "xMax": 37,
+      "height": 0
+    },
+    {
+      "y": 0,
+      "xMin": 63,
+      "xMax": 65,
+      "height": 1
+    },
+    {
+      "y": 0,
+      "xMin": 151,
+      "xMax": 153,
+      "height": 1
+    },
+    {
+      "y": 1,
+      "xMin": -1,
+      "xMax": 19,
+      "height": 0
+    },
+    {
+      "y": 1,
+      "xMin": 20,
+      "xMax": 25,
+      "height": -1
+    },
+    {
+      "y": 1,
+      "xMin": 26,
+      "xMax": 42,
+      "height": 0
+    },
+    {
+      "y": 1,
+      "xMin": 63,
+      "xMax": 65,
+      "height": 1
+    },
+    {
+      "y": 1,
+      "xMin": 151,
+      "xMax": 153,
+      "height": 1
+    },
+    {
+      "y": 2,
+      "xMin": -1,
+      "xMax": 19,
+      "height": 0
+    },
+    {
+      "y": 2,
+      "xMin": 20,
+      "xMax": 25,
+      "height": -1
+    },
+    {
+      "y": 2,
+      "xMin": 26,
+      "xMax": 42,
+      "height": 0
+    },
+    {
+      "y": 2,
+      "xMin": 63,
+      "xMax": 65,
+      "height": 1
+    },
+    {
+      "y": 2,
+      "xMin": 151,
+      "xMax": 153,
+      "height": 1
+    },
+    {
+      "y": 3,
+      "xMin": -1,
+      "xMax": 18,
+      "height": 0
+    },
+    {
+      "y": 3,
+      "xMin": 19,
+      "xMax": 25,
+      "height": -1
+    },
+    {
+      "y": 3,
+      "xMin": 26,
+      "xMax": 42,
+      "height": 0
+    },
+    {
+      "y": 3,
+      "xMin": 63,
+      "xMax": 65,
+      "height": 1
+    },
+    {
+      "y": 3,
+      "xMin": 151,
+      "xMax": 153,
+      "height": 1
+    },
+    {
+      "y": 4,
+      "xMin": -1,
+      "xMax": 18,
+      "height": 0
+    },
+    {
+      "y": 4,
+      "xMin": 19,
+      "xMax": 24,
+      "height": -1
+    },
+    {
+      "y": 4,
+      "xMin": 26,
+      "xMax": 42,
+      "height": 0
+    },
+    {
+      "y": 4,
+      "xMin": 63,
+      "xMax": 65,
+      "height": 1
+    },
+    {
+      "y": 4,
+      "xMin": 149,
+      "xMax": 153,
+      "height": 1
+    },
+    {
+      "y": 5,
+      "xMin": -1,
+      "xMax": 18,
+      "height": 0
+    },
+    {
+      "y": 5,
+      "xMin": 25,
+      "xMax": 42,
+      "height": 0
+    },
+    {
+      "y": 5,
+      "xMin": 63,
+      "xMax": 65,
+      "height": 1
+    },
+    {
+      "y": 5,
+      "xMin": 147,
+      "xMax": 153,
+      "height": 1
+    },
+    {
+      "y": 6,
+      "xMin": -1,
+      "xMax": 42,
+      "height": 0
+    },
+    {
+      "y": 6,
+      "xMin": 63,
+      "xMax": 65,
+      "height": 1
+    },
+    {
+      "y": 6,
+      "xMin": 145,
+      "xMax": 153,
+      "height": 1
+    },
+    {
+      "y": 7,
+      "xMin": -1,
+      "xMax": 18,
+      "height": 0
+    },
+    {
+      "y": 7,
+      "xMin": 25,
+      "xMax": 42,
+      "height": 0
+    },
+    {
+      "y": 7,
+      "xMin": 63,
+      "xMax": 65,
+      "height": 1
+    },
+    {
+      "y": 7,
+      "xMin": 137,
+      "xMax": 151,
+      "height": 1
+    },
+    {
+      "y": 8,
+      "xMin": -1,
+      "xMax": 18,
+      "height": 0
+    },
+    {
+      "y": 8,
+      "xMin": 25,
+      "xMax": 42,
+      "height": 0
+    },
+    {
+      "y": 8,
+      "xMin": 63,
+      "xMax": 65,
+      "height": 1
+    },
+    {
+      "y": 8,
+      "xMin": 134,
+      "xMax": 149,
+      "height": 1
+    },
+    {
+      "y": 9,
+      "xMin": -1,
+      "xMax": 42,
+      "height": 0
+    },
+    {
+      "y": 9,
+      "xMin": 63,
+      "xMax": 65,
+      "height": 1
+    },
+    {
+      "y": 9,
+      "xMin": 132,
+      "xMax": 147,
+      "height": 1
+    },
+    {
+      "y": 10,
+      "xMin": -1,
+      "xMax": 18,
+      "height": 0
+    },
+    {
+      "y": 10,
+      "xMin": 19,
+      "xMax": 24,
+      "height": -1
+    },
+    {
+      "y": 10,
+      "xMin": 25,
+      "xMax": 42,
+      "height": 0
+    },
+    {
+      "y": 10,
+      "xMin": 63,
+      "xMax": 66,
+      "height": 1
+    },
+    {
+      "y": 10,
+      "xMin": 130,
+      "xMax": 139,
+      "height": 1
+    },
+    {
+      "y": 11,
+      "xMin": -1,
+      "xMax": 18,
+      "height": 0
+    },
+    {
+      "y": 11,
+      "xMin": 19,
+      "xMax": 24,
+      "height": -1
+    },
+    {
+      "y": 11,
+      "xMin": 25,
+      "xMax": 42,
+      "height": 0
+    },
+    {
+      "y": 11,
+      "xMin": 63,
+      "xMax": 68,
+      "height": 1
+    },
+    {
+      "y": 11,
+      "xMin": 128,
+      "xMax": 136,
+      "height": 1
+    },
+    {
+      "y": 12,
+      "xMin": -1,
+      "xMax": 18,
+      "height": 0
+    },
+    {
+      "y": 12,
+      "xMin": 19,
+      "xMax": 24,
+      "height": -1
+    },
+    {
+      "y": 12,
+      "xMin": 25,
+      "xMax": 42,
+      "height": 0
+    },
+    {
+      "y": 12,
+      "xMin": 63,
+      "xMax": 71,
+      "height": 1
+    },
+    {
+      "y": 12,
+      "xMin": 126,
+      "xMax": 134,
+      "height": 1
+    },
+    {
+      "y": 13,
+      "xMin": -1,
+      "xMax": 18,
+      "height": 0
+    },
+    {
+      "y": 13,
+      "xMin": 19,
+      "xMax": 24,
+      "height": -1
+    },
+    {
+      "y": 13,
+      "xMin": 25,
+      "xMax": 42,
+      "height": 0
+    },
+    {
+      "y": 13,
+      "xMin": 64,
+      "xMax": 73,
+      "height": 1
+    },
+    {
+      "y": 13,
+      "xMin": 124,
+      "xMax": 132,
+      "height": 1
+    },
+    {
+      "y": 14,
+      "xMin": -1,
+      "xMax": 18,
+      "height": 0
+    },
+    {
+      "y": 14,
+      "xMin": 19,
+      "xMax": 24,
+      "height": -1
+    },
+    {
+      "y": 14,
+      "xMin": 25,
+      "xMax": 43,
+      "height": 0
+    },
+    {
+      "y": 14,
+      "xMin": 66,
+      "xMax": 73,
+      "height": 1
+    },
+    {
+      "y": 14,
+      "xMin": 123,
+      "xMax": 130,
+      "height": 1
+    },
+    {
+      "y": 15,
+      "xMin": -1,
+      "xMax": 18,
+      "height": 0
+    },
+    {
+      "y": 15,
+      "xMin": 19,
+      "xMax": 24,
+      "height": -1
+    },
+    {
+      "y": 15,
+      "xMin": 25,
+      "xMax": 43,
+      "height": 0
+    },
+    {
+      "y": 15,
+      "xMin": 69,
+      "xMax": 74,
+      "height": 1
+    },
+    {
+      "y": 15,
+      "xMin": 119,
+      "xMax": 128,
+      "height": 1
+    },
+    {
+      "y": 16,
+      "xMin": -1,
+      "xMax": 18,
+      "height": 0
+    },
+    {
+      "y": 16,
+      "xMin": 19,
+      "xMax": 24,
+      "height": -1
+    },
+    {
+      "y": 16,
+      "xMin": 25,
+      "xMax": 43,
+      "height": 0
+    },
+    {
+      "y": 16,
+      "xMin": 71,
+      "xMax": 75,
+      "height": 1
+    },
+    {
+      "y": 16,
+      "xMin": 117,
+      "xMax": 126,
+      "height": 1
+    },
+    {
+      "y": 17,
+      "xMin": -1,
+      "xMax": 18,
+      "height": 0
+    },
+    {
+      "y": 17,
+      "xMin": 19,
+      "xMax": 24,
+      "height": -1
+    },
+    {
+      "y": 17,
+      "xMin": 25,
+      "xMax": 43,
+      "height": 0
+    },
+    {
+      "y": 17,
+      "xMin": 71,
+      "xMax": 76,
+      "height": 1
+    },
+    {
+      "y": 17,
+      "xMin": 115,
+      "xMax": 125,
+      "height": 1
+    },
+    {
+      "y": 18,
+      "xMin": -1,
+      "xMax": 18,
+      "height": 0
+    },
+    {
+      "y": 18,
+      "xMin": 19,
+      "xMax": 24,
+      "height": -1
+    },
+    {
+      "y": 18,
+      "xMin": 25,
+      "xMax": 43,
+      "height": 0
+    },
+    {
+      "y": 18,
+      "xMin": 46,
+      "xMax": 49,
+      "height": 0
+    },
+    {
+      "y": 18,
+      "xMin": 72,
+      "xMax": 77,
+      "height": 1
+    },
+    {
+      "y": 18,
+      "xMin": 84,
+      "xMax": 93,
+      "height": 1
+    },
+    {
+      "y": 18,
+      "xMin": 114,
+      "xMax": 121,
+      "height": 1
+    },
+    {
+      "y": 18,
+      "xMin": 125,
+      "xMax": 136,
+      "height": 1
+    },
+    {
+      "y": 19,
+      "xMin": -1,
+      "xMax": 18,
+      "height": 0
+    },
+    {
+      "y": 19,
+      "xMin": 19,
+      "xMax": 24,
+      "height": -1
+    },
+    {
+      "y": 19,
+      "xMin": 25,
+      "xMax": 43,
+      "height": 0
+    },
+    {
+      "y": 19,
+      "xMin": 46,
+      "xMax": 50,
+      "height": 0
+    },
+    {
+      "y": 19,
+      "xMin": 73,
+      "xMax": 96,
+      "height": 1
+    },
+    {
+      "y": 19,
+      "xMin": 113,
+      "xMax": 140,
+      "height": 1
+    },
+    {
+      "y": 20,
+      "xMin": 6,
+      "xMax": 15,
+      "height": 0
+    },
+    {
+      "y": 20,
+      "xMin": 16,
+      "xMax": 25,
+      "height": -1
+    },
+    {
+      "y": 20,
+      "xMin": 26,
+      "xMax": 43,
+      "height": 0
+    },
+    {
+      "y": 20,
+      "xMin": 45,
+      "xMax": 52,
+      "height": 0
+    },
+    {
+      "y": 20,
+      "xMin": 60,
+      "xMax": 65,
+      "height": 0
+    },
+    {
+      "y": 20,
+      "xMin": 74,
+      "xMax": 97,
+      "height": 1
+    },
+    {
+      "y": 20,
+      "xMin": 112,
+      "xMax": 144,
+      "height": 1
+    },
+    {
+      "y": 21,
+      "xMin": -1,
+      "xMax": 5,
+      "height": 1
+    },
+    {
+      "y": 21,
+      "xMin": 7,
+      "xMax": 11,
+      "height": 0
+    },
+    {
+      "y": 21,
+      "xMin": 12,
+      "xMax": 27,
+      "height": -1
+    },
+    {
+      "y": 21,
+      "xMin": 28,
+      "xMax": 53,
+      "height": 0
+    },
+    {
+      "y": 21,
+      "xMin": 57,
+      "xMax": 66,
+      "height": 0
+    },
+    {
+      "y": 21,
+      "xMin": 74,
+      "xMax": 93,
+      "height": 0
+    },
+    {
+      "y": 21,
+      "xMin": 94,
+      "xMax": 98,
+      "height": 1
+    },
+    {
+      "y": 21,
+      "xMin": 112,
+      "xMax": 127,
+      "height": 1
+    },
+    {
+      "y": 21,
+      "xMin": 128,
+      "xMax": 133,
+      "height": 0
+    },
+    {
+      "y": 21,
+      "xMin": 134,
+      "xMax": 148,
+      "height": 1
+    },
+    {
+      "y": 22,
+      "xMin": -1,
+      "xMax": 6,
+      "height": 1
+    },
+    {
+      "y": 22,
+      "xMin": 7,
+      "xMax": 11,
+      "height": 0
+    },
+    {
+      "y": 22,
+      "xMin": 12,
+      "xMax": 28,
+      "height": -1
+    },
+    {
+      "y": 22,
+      "xMin": 29,
+      "xMax": 67,
+      "height": 0
+    },
+    {
+      "y": 22,
+      "xMin": 72,
+      "xMax": 95,
+      "height": 0
+    },
+    {
+      "y": 22,
+      "xMin": 96,
+      "xMax": 99,
+      "height": 1
+    },
+    {
+      "y": 22,
+      "xMin": 111,
+      "xMax": 120,
+      "height": 1
+    },
+    {
+      "y": 22,
+      "xMin": 121,
+      "xMax": 137,
+      "height": 0
+    },
+    {
+      "y": 22,
+      "xMin": 138,
+      "xMax": 150,
+      "height": 1
+    },
+    {
+      "y": 23,
+      "xMin": 4,
+      "xMax": 6,
+      "height": 1
+    },
+    {
+      "y": 23,
+      "xMin": 7,
+      "xMax": 11,
+      "height": 0
+    },
+    {
+      "y": 23,
+      "xMin": 12,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": 23,
+      "xMin": 40,
+      "xMax": 67,
+      "height": 0
+    },
+    {
+      "y": 23,
+      "xMin": 71,
+      "xMax": 96,
+      "height": 0
+    },
+    {
+      "y": 23,
+      "xMin": 97,
+      "xMax": 99,
+      "height": 1
+    },
+    {
+      "y": 23,
+      "xMin": 111,
+      "xMax": 115,
+      "height": 1
+    },
+    {
+      "y": 23,
+      "xMin": 116,
+      "xMax": 141,
+      "height": 0
+    },
+    {
+      "y": 23,
+      "xMin": 142,
+      "xMax": 151,
+      "height": 1
+    },
+    {
+      "y": 24,
+      "xMin": 5,
+      "xMax": 6,
+      "height": 1
+    },
+    {
+      "y": 24,
+      "xMin": 8,
+      "xMax": 11,
+      "height": 0
+    },
+    {
+      "y": 24,
+      "xMin": 12,
+      "xMax": 40,
+      "height": -1
+    },
+    {
+      "y": 24,
+      "xMin": 41,
+      "xMax": 97,
+      "height": 0
+    },
+    {
+      "y": 24,
+      "xMin": 98,
+      "xMax": 100,
+      "height": 1
+    },
+    {
+      "y": 24,
+      "xMin": 110,
+      "xMax": 114,
+      "height": 1
+    },
+    {
+      "y": 24,
+      "xMin": 115,
+      "xMax": 145,
+      "height": 0
+    },
+    {
+      "y": 24,
+      "xMin": 146,
+      "xMax": 152,
+      "height": 1
+    },
+    {
+      "y": 25,
+      "xMin": 5,
+      "xMax": 7,
+      "height": 1
+    },
+    {
+      "y": 25,
+      "xMin": 8,
+      "xMax": 11,
+      "height": 0
+    },
+    {
+      "y": 25,
+      "xMin": 12,
+      "xMax": 15,
+      "height": -1
+    },
+    {
+      "y": 25,
+      "xMin": 21,
+      "xMax": 40,
+      "height": -1
+    },
+    {
+      "y": 25,
+      "xMin": 41,
+      "xMax": 98,
+      "height": 0
+    },
+    {
+      "y": 25,
+      "xMin": 99,
+      "xMax": 100,
+      "height": 1
+    },
+    {
+      "y": 25,
+      "xMin": 107,
+      "xMax": 113,
+      "height": 1
+    },
+    {
+      "y": 25,
+      "xMin": 114,
+      "xMax": 147,
+      "height": 0
+    },
+    {
+      "y": 25,
+      "xMin": 148,
+      "xMax": 152,
+      "height": 1
+    },
+    {
+      "y": 26,
+      "xMin": 5,
+      "xMax": 7,
+      "height": 1
+    },
+    {
+      "y": 26,
+      "xMin": 8,
+      "xMax": 11,
+      "height": 0
+    },
+    {
+      "y": 26,
+      "xMin": 12,
+      "xMax": 15,
+      "height": -1
+    },
+    {
+      "y": 26,
+      "xMin": 16,
+      "xMax": 20,
+      "height": 0
+    },
+    {
+      "y": 26,
+      "xMin": 21,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": 26,
+      "xMin": 41,
+      "xMax": 42,
+      "height": 0
+    },
+    {
+      "y": 26,
+      "xMin": 52,
+      "xMax": 98,
+      "height": 0
+    },
+    {
+      "y": 26,
+      "xMin": 99,
+      "xMax": 100,
+      "height": 1
+    },
+    {
+      "y": 26,
+      "xMin": 107,
+      "xMax": 112,
+      "height": 1
+    },
+    {
+      "y": 26,
+      "xMin": 113,
+      "xMax": 148,
+      "height": 0
+    },
+    {
+      "y": 26,
+      "xMin": 149,
+      "xMax": 153,
+      "height": 1
+    },
+    {
+      "y": 27,
+      "xMin": 5,
+      "xMax": 7,
+      "height": 1
+    },
+    {
+      "y": 27,
+      "xMin": 8,
+      "xMax": 10,
+      "height": 0
+    },
+    {
+      "y": 27,
+      "xMin": 11,
+      "xMax": 15,
+      "height": -1
+    },
+    {
+      "y": 27,
+      "xMin": 16,
+      "xMax": 20,
+      "height": 0
+    },
+    {
+      "y": 27,
+      "xMin": 21,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": 27,
+      "xMin": 40,
+      "xMax": 42,
+      "height": 0
+    },
+    {
+      "y": 27,
+      "xMin": 43,
+      "xMax": 51,
+      "height": 1
+    },
+    {
+      "y": 27,
+      "xMin": 52,
+      "xMax": 98,
+      "height": 0
+    },
+    {
+      "y": 27,
+      "xMin": 99,
+      "xMax": 100,
+      "height": 1
+    },
+    {
+      "y": 27,
+      "xMin": 107,
+      "xMax": 110,
+      "height": 1
+    },
+    {
+      "y": 27,
+      "xMin": 111,
+      "xMax": 149,
+      "height": 0
+    },
+    {
+      "y": 27,
+      "xMin": 150,
+      "xMax": 153,
+      "height": 1
+    },
+    {
+      "y": 28,
+      "xMin": 5,
+      "xMax": 7,
+      "height": 1
+    },
+    {
+      "y": 28,
+      "xMin": 8,
+      "xMax": 10,
+      "height": 0
+    },
+    {
+      "y": 28,
+      "xMin": 11,
+      "xMax": 15,
+      "height": -1
+    },
+    {
+      "y": 28,
+      "xMin": 16,
+      "xMax": 20,
+      "height": 0
+    },
+    {
+      "y": 28,
+      "xMin": 21,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": 28,
+      "xMin": 40,
+      "xMax": 42,
+      "height": 0
+    },
+    {
+      "y": 28,
+      "xMin": 43,
+      "xMax": 51,
+      "height": 1
+    },
+    {
+      "y": 28,
+      "xMin": 52,
+      "xMax": 98,
+      "height": 0
+    },
+    {
+      "y": 28,
+      "xMin": 99,
+      "xMax": 100,
+      "height": 1
+    },
+    {
+      "y": 28,
+      "xMin": 107,
+      "xMax": 109,
+      "height": 1
+    },
+    {
+      "y": 28,
+      "xMin": 110,
+      "xMax": 149,
+      "height": 0
+    },
+    {
+      "y": 28,
+      "xMin": 150,
+      "xMax": 154,
+      "height": 1
+    },
+    {
+      "y": 29,
+      "xMin": 5,
+      "xMax": 7,
+      "height": 1
+    },
+    {
+      "y": 29,
+      "xMin": 8,
+      "xMax": 9,
+      "height": 0
+    },
+    {
+      "y": 29,
+      "xMin": 10,
+      "xMax": 32,
+      "height": -1
+    },
+    {
+      "y": 29,
+      "xMin": 40,
+      "xMax": 42,
+      "height": 0
+    },
+    {
+      "y": 29,
+      "xMin": 64,
+      "xMax": 98,
+      "height": 0
+    },
+    {
+      "y": 29,
+      "xMin": 99,
+      "xMax": 101,
+      "height": 1
+    },
+    {
+      "y": 29,
+      "xMin": 107,
+      "xMax": 108,
+      "height": 1
+    },
+    {
+      "y": 29,
+      "xMin": 109,
+      "xMax": 150,
+      "height": 0
+    },
+    {
+      "y": 29,
+      "xMin": 151,
+      "xMax": 155,
+      "height": 1
+    },
+    {
+      "y": 30,
+      "xMin": 5,
+      "xMax": 7,
+      "height": 1
+    },
+    {
+      "y": 30,
+      "xMin": 8,
+      "xMax": 32,
+      "height": -1
+    },
+    {
+      "y": 30,
+      "xMin": 33,
+      "xMax": 42,
+      "height": 0
+    },
+    {
+      "y": 30,
+      "xMin": 52,
+      "xMax": 63,
+      "height": 1
+    },
+    {
+      "y": 30,
+      "xMin": 64,
+      "xMax": 98,
+      "height": 0
+    },
+    {
+      "y": 30,
+      "xMin": 99,
+      "xMax": 102,
+      "height": 1
+    },
+    {
+      "y": 30,
+      "xMin": 107,
+      "xMax": 107,
+      "height": 1
+    },
+    {
+      "y": 30,
+      "xMin": 108,
+      "xMax": 150,
+      "height": 0
+    },
+    {
+      "y": 30,
+      "xMin": 151,
+      "xMax": 155,
+      "height": 1
+    },
+    {
+      "y": 31,
+      "xMin": 5,
+      "xMax": 7,
+      "height": 1
+    },
+    {
+      "y": 31,
+      "xMin": 8,
+      "xMax": 32,
+      "height": -1
+    },
+    {
+      "y": 31,
+      "xMin": 33,
+      "xMax": 43,
+      "height": 0
+    },
+    {
+      "y": 31,
+      "xMin": 44,
+      "xMax": 46,
+      "height": 1
+    },
+    {
+      "y": 31,
+      "xMin": 52,
+      "xMax": 63,
+      "height": 1
+    },
+    {
+      "y": 31,
+      "xMin": 64,
+      "xMax": 99,
+      "height": 0
+    },
+    {
+      "y": 31,
+      "xMin": 100,
+      "xMax": 106,
+      "height": 1
+    },
+    {
+      "y": 31,
+      "xMin": 107,
+      "xMax": 123,
+      "height": 0
+    },
+    {
+      "y": 31,
+      "xMin": 131,
+      "xMax": 151,
+      "height": 0
+    },
+    {
+      "y": 31,
+      "xMin": 152,
+      "xMax": 156,
+      "height": 1
+    },
+    {
+      "y": 32,
+      "xMin": 5,
+      "xMax": 7,
+      "height": 1
+    },
+    {
+      "y": 32,
+      "xMin": 13,
+      "xMax": 32,
+      "height": -1
+    },
+    {
+      "y": 32,
+      "xMin": 33,
+      "xMax": 43,
+      "height": 0
+    },
+    {
+      "y": 32,
+      "xMin": 44,
+      "xMax": 46,
+      "height": 1
+    },
+    {
+      "y": 32,
+      "xMin": 64,
+      "xMax": 100,
+      "height": 0
+    },
+    {
+      "y": 32,
+      "xMin": 101,
+      "xMax": 106,
+      "height": 1
+    },
+    {
+      "y": 32,
+      "xMin": 107,
+      "xMax": 120,
+      "height": 0
+    },
+    {
+      "y": 32,
+      "xMin": 124,
+      "xMax": 130,
+      "height": 1
+    },
+    {
+      "y": 32,
+      "xMin": 138,
+      "xMax": 152,
+      "height": 0
+    },
+    {
+      "y": 32,
+      "xMin": 153,
+      "xMax": 157,
+      "height": 1
+    },
+    {
+      "y": 33,
+      "xMin": 5,
+      "xMax": 7,
+      "height": 1
+    },
+    {
+      "y": 33,
+      "xMin": 13,
+      "xMax": 34,
+      "height": -1
+    },
+    {
+      "y": 33,
+      "xMin": 35,
+      "xMax": 43,
+      "height": 0
+    },
+    {
+      "y": 33,
+      "xMin": 44,
+      "xMax": 46,
+      "height": -1
+    },
+    {
+      "y": 33,
+      "xMin": 64,
+      "xMax": 100,
+      "height": 0
+    },
+    {
+      "y": 33,
+      "xMin": 101,
+      "xMax": 105,
+      "height": 1
+    },
+    {
+      "y": 33,
+      "xMin": 106,
+      "xMax": 117,
+      "height": 0
+    },
+    {
+      "y": 33,
+      "xMin": 121,
+      "xMax": 137,
+      "height": 1
+    },
+    {
+      "y": 33,
+      "xMin": 139,
+      "xMax": 152,
+      "height": 0
+    },
+    {
+      "y": 33,
+      "xMin": 153,
+      "xMax": 157,
+      "height": 1
+    },
+    {
+      "y": 34,
+      "xMin": 13,
+      "xMax": 35,
+      "height": -1
+    },
+    {
+      "y": 34,
+      "xMin": 36,
+      "xMax": 41,
+      "height": 0
+    },
+    {
+      "y": 34,
+      "xMin": 42,
+      "xMax": 50,
+      "height": -1
+    },
+    {
+      "y": 34,
+      "xMin": 64,
+      "xMax": 101,
+      "height": 0
+    },
+    {
+      "y": 34,
+      "xMin": 102,
+      "xMax": 105,
+      "height": 1
+    },
+    {
+      "y": 34,
+      "xMin": 106,
+      "xMax": 116,
+      "height": 0
+    },
+    {
+      "y": 34,
+      "xMin": 118,
+      "xMax": 138,
+      "height": 1
+    },
+    {
+      "y": 34,
+      "xMin": 140,
+      "xMax": 153,
+      "height": 0
+    },
+    {
+      "y": 34,
+      "xMin": 154,
+      "xMax": 157,
+      "height": 1
+    },
+    {
+      "y": 35,
+      "xMin": 13,
+      "xMax": 53,
+      "height": -1
+    },
+    {
+      "y": 35,
+      "xMin": 64,
+      "xMax": 102,
+      "height": 0
+    },
+    {
+      "y": 35,
+      "xMin": 103,
+      "xMax": 105,
+      "height": 1
+    },
+    {
+      "y": 35,
+      "xMin": 106,
+      "xMax": 115,
+      "height": 0
+    },
+    {
+      "y": 35,
+      "xMin": 117,
+      "xMax": 139,
+      "height": 1
+    },
+    {
+      "y": 35,
+      "xMin": 141,
+      "xMax": 154,
+      "height": 0
+    },
+    {
+      "y": 35,
+      "xMin": 155,
+      "xMax": 157,
+      "height": 1
+    },
+    {
+      "y": 36,
+      "xMin": 13,
+      "xMax": 60,
+      "height": -1
+    },
+    {
+      "y": 36,
+      "xMin": 61,
+      "xMax": 103,
+      "height": 0
+    },
+    {
+      "y": 36,
+      "xMin": 104,
+      "xMax": 104,
+      "height": 1
+    },
+    {
+      "y": 36,
+      "xMin": 105,
+      "xMax": 114,
+      "height": 0
+    },
+    {
+      "y": 36,
+      "xMin": 116,
+      "xMax": 140,
+      "height": 1
+    },
+    {
+      "y": 36,
+      "xMin": 142,
+      "xMax": 154,
+      "height": 0
+    },
+    {
+      "y": 36,
+      "xMin": 155,
+      "xMax": 157,
+      "height": 1
+    },
+    {
+      "y": 37,
+      "xMin": 13,
+      "xMax": 62,
+      "height": -1
+    },
+    {
+      "y": 37,
+      "xMin": 63,
+      "xMax": 114,
+      "height": 0
+    },
+    {
+      "y": 37,
+      "xMin": 115,
+      "xMax": 122,
+      "height": 1
+    },
+    {
+      "y": 37,
+      "xMin": 123,
+      "xMax": 129,
+      "height": 0
+    },
+    {
+      "y": 37,
+      "xMin": 130,
+      "xMax": 141,
+      "height": 1
+    },
+    {
+      "y": 37,
+      "xMin": 143,
+      "xMax": 154,
+      "height": 0
+    },
+    {
+      "y": 37,
+      "xMin": 155,
+      "xMax": 157,
+      "height": 1
+    },
+    {
+      "y": 38,
+      "xMin": 13,
+      "xMax": 63,
+      "height": -1
+    },
+    {
+      "y": 38,
+      "xMin": 64,
+      "xMax": 113,
+      "height": 0
+    },
+    {
+      "y": 38,
+      "xMin": 115,
+      "xMax": 120,
+      "height": 1
+    },
+    {
+      "y": 38,
+      "xMin": 121,
+      "xMax": 135,
+      "height": 0
+    },
+    {
+      "y": 38,
+      "xMin": 136,
+      "xMax": 142,
+      "height": 1
+    },
+    {
+      "y": 38,
+      "xMin": 143,
+      "xMax": 154,
+      "height": 0
+    },
+    {
+      "y": 38,
+      "xMin": 155,
+      "xMax": 157,
+      "height": 1
+    },
+    {
+      "y": 39,
+      "xMin": 13,
+      "xMax": 63,
+      "height": -1
+    },
+    {
+      "y": 39,
+      "xMin": 64,
+      "xMax": 112,
+      "height": 0
+    },
+    {
+      "y": 39,
+      "xMin": 114,
+      "xMax": 119,
+      "height": 1
+    },
+    {
+      "y": 39,
+      "xMin": 120,
+      "xMax": 136,
+      "height": 0
+    },
+    {
+      "y": 39,
+      "xMin": 137,
+      "xMax": 142,
+      "height": 1
+    },
+    {
+      "y": 39,
+      "xMin": 144,
+      "xMax": 154,
+      "height": 0
+    },
+    {
+      "y": 39,
+      "xMin": 155,
+      "xMax": 157,
+      "height": 1
+    },
+    {
+      "y": 40,
+      "xMin": 13,
+      "xMax": 63,
+      "height": -1
+    },
+    {
+      "y": 40,
+      "xMin": 64,
+      "xMax": 112,
+      "height": 0
+    },
+    {
+      "y": 40,
+      "xMin": 113,
+      "xMax": 118,
+      "height": 1
+    },
+    {
+      "y": 40,
+      "xMin": 119,
+      "xMax": 136,
+      "height": 0
+    },
+    {
+      "y": 40,
+      "xMin": 137,
+      "xMax": 143,
+      "height": 1
+    },
+    {
+      "y": 40,
+      "xMin": 144,
+      "xMax": 154,
+      "height": 0
+    },
+    {
+      "y": 40,
+      "xMin": 155,
+      "xMax": 157,
+      "height": 1
+    },
+    {
+      "y": 41,
+      "xMin": 12,
+      "xMax": 64,
+      "height": -1
+    },
+    {
+      "y": 41,
+      "xMin": 65,
+      "xMax": 112,
+      "height": 0
+    },
+    {
+      "y": 41,
+      "xMin": 113,
+      "xMax": 117,
+      "height": 1
+    },
+    {
+      "y": 41,
+      "xMin": 118,
+      "xMax": 137,
+      "height": 0
+    },
+    {
+      "y": 41,
+      "xMin": 138,
+      "xMax": 143,
+      "height": 1
+    },
+    {
+      "y": 41,
+      "xMin": 144,
+      "xMax": 154,
+      "height": 0
+    },
+    {
+      "y": 41,
+      "xMin": 155,
+      "xMax": 157,
+      "height": 1
+    },
+    {
+      "y": 42,
+      "xMin": 11,
+      "xMax": 64,
+      "height": -1
+    },
+    {
+      "y": 42,
+      "xMin": 65,
+      "xMax": 112,
+      "height": 0
+    },
+    {
+      "y": 42,
+      "xMin": 113,
+      "xMax": 117,
+      "height": 1
+    },
+    {
+      "y": 42,
+      "xMin": 118,
+      "xMax": 138,
+      "height": 0
+    },
+    {
+      "y": 42,
+      "xMin": 139,
+      "xMax": 143,
+      "height": 1
+    },
+    {
+      "y": 42,
+      "xMin": 144,
+      "xMax": 154,
+      "height": 0
+    },
+    {
+      "y": 42,
+      "xMin": 155,
+      "xMax": 157,
+      "height": 1
+    },
+    {
+      "y": 43,
+      "xMin": 10,
+      "xMax": 65,
+      "height": -1
+    },
+    {
+      "y": 43,
+      "xMin": 66,
+      "xMax": 111,
+      "height": 0
+    },
+    {
+      "y": 43,
+      "xMin": 113,
+      "xMax": 117,
+      "height": 1
+    },
+    {
+      "y": 43,
+      "xMin": 118,
+      "xMax": 138,
+      "height": 0
+    },
+    {
+      "y": 43,
+      "xMin": 139,
+      "xMax": 143,
+      "height": 1
+    },
+    {
+      "y": 43,
+      "xMin": 145,
+      "xMax": 154,
+      "height": 0
+    },
+    {
+      "y": 43,
+      "xMin": 155,
+      "xMax": 157,
+      "height": 1
+    },
+    {
+      "y": 44,
+      "xMin": 10,
+      "xMax": 65,
+      "height": -1
+    },
+    {
+      "y": 44,
+      "xMin": 66,
+      "xMax": 111,
+      "height": 0
+    },
+    {
+      "y": 44,
+      "xMin": 112,
+      "xMax": 117,
+      "height": 1
+    },
+    {
+      "y": 44,
+      "xMin": 118,
+      "xMax": 138,
+      "height": 0
+    },
+    {
+      "y": 44,
+      "xMin": 139,
+      "xMax": 144,
+      "height": 1
+    },
+    {
+      "y": 44,
+      "xMin": 145,
+      "xMax": 154,
+      "height": 0
+    },
+    {
+      "y": 44,
+      "xMin": 155,
+      "xMax": 157,
+      "height": 1
+    },
+    {
+      "y": 45,
+      "xMin": 10,
+      "xMax": 65,
+      "height": -1
+    },
+    {
+      "y": 45,
+      "xMin": 66,
+      "xMax": 79,
+      "height": 0
+    },
+    {
+      "y": 45,
+      "xMin": 102,
+      "xMax": 111,
+      "height": 0
+    },
+    {
+      "y": 45,
+      "xMin": 112,
+      "xMax": 117,
+      "height": 1
+    },
+    {
+      "y": 45,
+      "xMin": 119,
+      "xMax": 137,
+      "height": 0
+    },
+    {
+      "y": 45,
+      "xMin": 139,
+      "xMax": 144,
+      "height": 1
+    },
+    {
+      "y": 45,
+      "xMin": 145,
+      "xMax": 154,
+      "height": 0
+    },
+    {
+      "y": 45,
+      "xMin": 155,
+      "xMax": 157,
+      "height": 1
+    },
+    {
+      "y": 46,
+      "xMin": 9,
+      "xMax": 66,
+      "height": -1
+    },
+    {
+      "y": 46,
+      "xMin": 67,
+      "xMax": 78,
+      "height": 0
+    },
+    {
+      "y": 46,
+      "xMin": 80,
+      "xMax": 101,
+      "height": 1
+    },
+    {
+      "y": 46,
+      "xMin": 104,
+      "xMax": 111,
+      "height": 0
+    },
+    {
+      "y": 46,
+      "xMin": 112,
+      "xMax": 118,
+      "height": 1
+    },
+    {
+      "y": 46,
+      "xMin": 119,
+      "xMax": 137,
+      "height": 0
+    },
+    {
+      "y": 46,
+      "xMin": 138,
+      "xMax": 144,
+      "height": 1
+    },
+    {
+      "y": 46,
+      "xMin": 145,
+      "xMax": 154,
+      "height": 0
+    },
+    {
+      "y": 46,
+      "xMin": 155,
+      "xMax": 157,
+      "height": 1
+    },
+    {
+      "y": 47,
+      "xMin": 9,
+      "xMax": 67,
+      "height": -1
+    },
+    {
+      "y": 47,
+      "xMin": 68,
+      "xMax": 78,
+      "height": 0
+    },
+    {
+      "y": 47,
+      "xMin": 79,
+      "xMax": 103,
+      "height": 1
+    },
+    {
+      "y": 47,
+      "xMin": 104,
+      "xMax": 111,
+      "height": 0
+    },
+    {
+      "y": 47,
+      "xMin": 112,
+      "xMax": 118,
+      "height": 1
+    },
+    {
+      "y": 47,
+      "xMin": 119,
+      "xMax": 137,
+      "height": 0
+    },
+    {
+      "y": 47,
+      "xMin": 138,
+      "xMax": 143,
+      "height": 1
+    },
+    {
+      "y": 47,
+      "xMin": 144,
+      "xMax": 154,
+      "height": 0
+    },
+    {
+      "y": 47,
+      "xMin": 155,
+      "xMax": 157,
+      "height": 1
+    },
+    {
+      "y": 48,
+      "xMin": 9,
+      "xMax": 67,
+      "height": -1
+    },
+    {
+      "y": 48,
+      "xMin": 68,
+      "xMax": 78,
+      "height": 0
+    },
+    {
+      "y": 48,
+      "xMin": 79,
+      "xMax": 103,
+      "height": 1
+    },
+    {
+      "y": 48,
+      "xMin": 104,
+      "xMax": 111,
+      "height": 0
+    },
+    {
+      "y": 48,
+      "xMin": 112,
+      "xMax": 118,
+      "height": 1
+    },
+    {
+      "y": 48,
+      "xMin": 120,
+      "xMax": 136,
+      "height": 0
+    },
+    {
+      "y": 48,
+      "xMin": 138,
+      "xMax": 143,
+      "height": 1
+    },
+    {
+      "y": 48,
+      "xMin": 144,
+      "xMax": 153,
+      "height": 0
+    },
+    {
+      "y": 48,
+      "xMin": 155,
+      "xMax": 157,
+      "height": 1
+    },
+    {
+      "y": 49,
+      "xMin": 9,
+      "xMax": 66,
+      "height": -1
+    },
+    {
+      "y": 49,
+      "xMin": 68,
+      "xMax": 78,
+      "height": 0
+    },
+    {
+      "y": 49,
+      "xMin": 79,
+      "xMax": 103,
+      "height": 1
+    },
+    {
+      "y": 49,
+      "xMin": 104,
+      "xMax": 112,
+      "height": 0
+    },
+    {
+      "y": 49,
+      "xMin": 113,
+      "xMax": 119,
+      "height": 1
+    },
+    {
+      "y": 49,
+      "xMin": 121,
+      "xMax": 135,
+      "height": 0
+    },
+    {
+      "y": 49,
+      "xMin": 137,
+      "xMax": 142,
+      "height": 1
+    },
+    {
+      "y": 49,
+      "xMin": 143,
+      "xMax": 152,
+      "height": 0
+    },
+    {
+      "y": 49,
+      "xMin": 154,
+      "xMax": 157,
+      "height": 1
+    },
+    {
+      "y": 50,
+      "xMin": 9,
+      "xMax": 65,
+      "height": -1
+    },
+    {
+      "y": 50,
+      "xMin": 67,
+      "xMax": 79,
+      "height": 0
+    },
+    {
+      "y": 50,
+      "xMin": 80,
+      "xMax": 103,
+      "height": 1
+    },
+    {
+      "y": 50,
+      "xMin": 105,
+      "xMax": 112,
+      "height": 0
+    },
+    {
+      "y": 50,
+      "xMin": 113,
+      "xMax": 120,
+      "height": 1
+    },
+    {
+      "y": 50,
+      "xMin": 122,
+      "xMax": 134,
+      "height": 0
+    },
+    {
+      "y": 50,
+      "xMin": 136,
+      "xMax": 142,
+      "height": 1
+    },
+    {
+      "y": 50,
+      "xMin": 143,
+      "xMax": 152,
+      "height": 0
+    },
+    {
+      "y": 50,
+      "xMin": 153,
+      "xMax": 157,
+      "height": 1
+    },
+    {
+      "y": 51,
+      "xMin": 9,
+      "xMax": 64,
+      "height": -1
+    },
+    {
+      "y": 51,
+      "xMin": 66,
+      "xMax": 82,
+      "height": 0
+    },
+    {
+      "y": 51,
+      "xMin": 83,
+      "xMax": 104,
+      "height": 1
+    },
+    {
+      "y": 51,
+      "xMin": 105,
+      "xMax": 112,
+      "height": 0
+    },
+    {
+      "y": 51,
+      "xMin": 113,
+      "xMax": 121,
+      "height": 1
+    },
+    {
+      "y": 51,
+      "xMin": 135,
+      "xMax": 142,
+      "height": 1
+    },
+    {
+      "y": 51,
+      "xMin": 143,
+      "xMax": 151,
+      "height": 0
+    },
+    {
+      "y": 51,
+      "xMin": 153,
+      "xMax": 157,
+      "height": 1
+    },
+    {
+      "y": 52,
+      "xMin": 9,
+      "xMax": 64,
+      "height": -1
+    },
+    {
+      "y": 52,
+      "xMin": 65,
+      "xMax": 88,
+      "height": 0
+    },
+    {
+      "y": 52,
+      "xMin": 89,
+      "xMax": 104,
+      "height": 1
+    },
+    {
+      "y": 52,
+      "xMin": 105,
+      "xMax": 113,
+      "height": 0
+    },
+    {
+      "y": 52,
+      "xMin": 114,
+      "xMax": 141,
+      "height": 1
+    },
+    {
+      "y": 52,
+      "xMin": 142,
+      "xMax": 150,
+      "height": 0
+    },
+    {
+      "y": 52,
+      "xMin": 152,
+      "xMax": 156,
+      "height": 1
+    },
+    {
+      "y": 53,
+      "xMin": 9,
+      "xMax": 64,
+      "height": -1
+    },
+    {
+      "y": 53,
+      "xMin": 65,
+      "xMax": 94,
+      "height": 0
+    },
+    {
+      "y": 53,
+      "xMin": 95,
+      "xMax": 104,
+      "height": 1
+    },
+    {
+      "y": 53,
+      "xMin": 106,
+      "xMax": 114,
+      "height": 0
+    },
+    {
+      "y": 53,
+      "xMin": 115,
+      "xMax": 140,
+      "height": 1
+    },
+    {
+      "y": 53,
+      "xMin": 141,
+      "xMax": 150,
+      "height": 0
+    },
+    {
+      "y": 53,
+      "xMin": 151,
+      "xMax": 165,
+      "height": 1
+    },
+    {
+      "y": 54,
+      "xMin": 9,
+      "xMax": 63,
+      "height": -1
+    },
+    {
+      "y": 54,
+      "xMin": 65,
+      "xMax": 70,
+      "height": 0
+    },
+    {
+      "y": 54,
+      "xMin": 72,
+      "xMax": 97,
+      "height": 0
+    },
+    {
+      "y": 54,
+      "xMin": 98,
+      "xMax": 105,
+      "height": 1
+    },
+    {
+      "y": 54,
+      "xMin": 106,
+      "xMax": 115,
+      "height": 0
+    },
+    {
+      "y": 54,
+      "xMin": 116,
+      "xMax": 139,
+      "height": 1
+    },
+    {
+      "y": 54,
+      "xMin": 140,
+      "xMax": 149,
+      "height": 0
+    },
+    {
+      "y": 54,
+      "xMin": 151,
+      "xMax": 165,
+      "height": 1
+    },
+    {
+      "y": 55,
+      "xMin": 9,
+      "xMax": 63,
+      "height": -1
+    },
+    {
+      "y": 55,
+      "xMin": 64,
+      "xMax": 98,
+      "height": 0
+    },
+    {
+      "y": 55,
+      "xMin": 99,
+      "xMax": 105,
+      "height": 1
+    },
+    {
+      "y": 55,
+      "xMin": 107,
+      "xMax": 117,
+      "height": 0
+    },
+    {
+      "y": 55,
+      "xMin": 118,
+      "xMax": 137,
+      "height": 1
+    },
+    {
+      "y": 55,
+      "xMin": 138,
+      "xMax": 149,
+      "height": 0
+    },
+    {
+      "y": 55,
+      "xMin": 150,
+      "xMax": 157,
+      "height": 1
+    },
+    {
+      "y": 56,
+      "xMin": 9,
+      "xMax": 63,
+      "height": -1
+    },
+    {
+      "y": 56,
+      "xMin": 64,
+      "xMax": 71,
+      "height": 0
+    },
+    {
+      "y": 56,
+      "xMin": 83,
+      "xMax": 99,
+      "height": 0
+    },
+    {
+      "y": 56,
+      "xMin": 100,
+      "xMax": 106,
+      "height": 1
+    },
+    {
+      "y": 56,
+      "xMin": 107,
+      "xMax": 118,
+      "height": 0
+    },
+    {
+      "y": 56,
+      "xMin": 119,
+      "xMax": 136,
+      "height": 1
+    },
+    {
+      "y": 56,
+      "xMin": 137,
+      "xMax": 148,
+      "height": 0
+    },
+    {
+      "y": 56,
+      "xMin": 150,
+      "xMax": 155,
+      "height": 1
+    },
+    {
+      "y": 57,
+      "xMin": 9,
+      "xMax": 63,
+      "height": -1
+    },
+    {
+      "y": 57,
+      "xMin": 64,
+      "xMax": 65,
+      "height": 0
+    },
+    {
+      "y": 57,
+      "xMin": 74,
+      "xMax": 82,
+      "height": 1
+    },
+    {
+      "y": 57,
+      "xMin": 89,
+      "xMax": 147,
+      "height": 0
+    },
+    {
+      "y": 57,
+      "xMin": 149,
+      "xMax": 153,
+      "height": 1
+    },
+    {
+      "y": 58,
+      "xMin": 9,
+      "xMax": 63,
+      "height": -1
+    },
+    {
+      "y": 58,
+      "xMin": 64,
+      "xMax": 65,
+      "height": 0
+    },
+    {
+      "y": 58,
+      "xMin": 67,
+      "xMax": 88,
+      "height": 1
+    },
+    {
+      "y": 58,
+      "xMin": 95,
+      "xMax": 146,
+      "height": 0
+    },
+    {
+      "y": 58,
+      "xMin": 148,
+      "xMax": 152,
+      "height": 1
+    },
+    {
+      "y": 59,
+      "xMin": 9,
+      "xMax": 63,
+      "height": -1
+    },
+    {
+      "y": 59,
+      "xMin": 64,
+      "xMax": 65,
+      "height": 0
+    },
+    {
+      "y": 59,
+      "xMin": 67,
+      "xMax": 94,
+      "height": 1
+    },
+    {
+      "y": 59,
+      "xMin": 98,
+      "xMax": 144,
+      "height": 0
+    },
+    {
+      "y": 59,
+      "xMin": 147,
+      "xMax": 150,
+      "height": 1
+    },
+    {
+      "y": 60,
+      "xMin": 12,
+      "xMax": 63,
+      "height": -1
+    },
+    {
+      "y": 60,
+      "xMin": 64,
+      "xMax": 65,
+      "height": 0
+    },
+    {
+      "y": 60,
+      "xMin": 67,
+      "xMax": 97,
+      "height": 1
+    },
+    {
+      "y": 60,
+      "xMin": 99,
+      "xMax": 141,
+      "height": 0
+    },
+    {
+      "y": 60,
+      "xMin": 145,
+      "xMax": 148,
+      "height": 1
+    },
+    {
+      "y": 61,
+      "xMin": 12,
+      "xMax": 63,
+      "height": -1
+    },
+    {
+      "y": 61,
+      "xMin": 64,
+      "xMax": 65,
+      "height": 0
+    },
+    {
+      "y": 61,
+      "xMin": 67,
+      "xMax": 98,
+      "height": 1
+    },
+    {
+      "y": 61,
+      "xMin": 100,
+      "xMax": 139,
+      "height": 0
+    },
+    {
+      "y": 61,
+      "xMin": 142,
+      "xMax": 146,
+      "height": 1
+    },
+    {
+      "y": 62,
+      "xMin": 10,
+      "xMax": 11,
+      "height": 1
+    },
+    {
+      "y": 62,
+      "xMin": 12,
+      "xMax": 63,
+      "height": -1
+    },
+    {
+      "y": 62,
+      "xMin": 64,
+      "xMax": 65,
+      "height": 0
+    },
+    {
+      "y": 62,
+      "xMin": 67,
+      "xMax": 99,
+      "height": 1
+    },
+    {
+      "y": 62,
+      "xMin": 101,
+      "xMax": 124,
+      "height": 0
+    },
+    {
+      "y": 62,
+      "xMin": 126,
+      "xMax": 137,
+      "height": 0
+    },
+    {
+      "y": 62,
+      "xMin": 140,
+      "xMax": 144,
+      "height": 1
+    },
+    {
+      "y": 63,
+      "xMin": 3,
+      "xMax": 11,
+      "height": 0
+    },
+    {
+      "y": 63,
+      "xMin": 12,
+      "xMax": 63,
+      "height": -1
+    },
+    {
+      "y": 63,
+      "xMin": 64,
+      "xMax": 65,
+      "height": 0
+    },
+    {
+      "y": 63,
+      "xMin": 67,
+      "xMax": 100,
+      "height": 1
+    },
+    {
+      "y": 63,
+      "xMin": 102,
+      "xMax": 123,
+      "height": 0
+    },
+    {
+      "y": 63,
+      "xMin": 125,
+      "xMax": 125,
+      "height": 1
+    },
+    {
+      "y": 63,
+      "xMin": 138,
+      "xMax": 143,
+      "height": 1
+    },
+    {
+      "y": 64,
+      "xMin": 3,
+      "xMax": 11,
+      "height": 0
+    },
+    {
+      "y": 64,
+      "xMin": 12,
+      "xMax": 64,
+      "height": -1
+    },
+    {
+      "y": 64,
+      "xMin": 65,
+      "xMax": 65,
+      "height": 0
+    },
+    {
+      "y": 64,
+      "xMin": 67,
+      "xMax": 101,
+      "height": 1
+    },
+    {
+      "y": 64,
+      "xMin": 103,
+      "xMax": 123,
+      "height": 0
+    },
+    {
+      "y": 64,
+      "xMin": 124,
+      "xMax": 142,
+      "height": 1
+    },
+    {
+      "y": 65,
+      "xMin": 3,
+      "xMax": 11,
+      "height": 0
+    },
+    {
+      "y": 65,
+      "xMin": 12,
+      "xMax": 64,
+      "height": -1
+    },
+    {
+      "y": 65,
+      "xMin": 65,
+      "xMax": 65,
+      "height": 0
+    },
+    {
+      "y": 65,
+      "xMin": 67,
+      "xMax": 102,
+      "height": 1
+    },
+    {
+      "y": 65,
+      "xMin": 105,
+      "xMax": 123,
+      "height": 0
+    },
+    {
+      "y": 65,
+      "xMin": 124,
+      "xMax": 128,
+      "height": 1
+    },
+    {
+      "y": 65,
+      "xMin": 133,
+      "xMax": 139,
+      "height": 1
+    },
+    {
+      "y": 66,
+      "xMin": 3,
+      "xMax": 11,
+      "height": 0
+    },
+    {
+      "y": 66,
+      "xMin": 17,
+      "xMax": 64,
+      "height": -1
+    },
+    {
+      "y": 66,
+      "xMin": 65,
+      "xMax": 65,
+      "height": 0
+    },
+    {
+      "y": 66,
+      "xMin": 67,
+      "xMax": 104,
+      "height": 1
+    },
+    {
+      "y": 66,
+      "xMin": 106,
+      "xMax": 124,
+      "height": 0
+    },
+    {
+      "y": 66,
+      "xMin": 125,
+      "xMax": 128,
+      "height": 1
+    },
+    {
+      "y": 67,
+      "xMin": 3,
+      "xMax": 16,
+      "height": 0
+    },
+    {
+      "y": 67,
+      "xMin": 17,
+      "xMax": 64,
+      "height": -1
+    },
+    {
+      "y": 67,
+      "xMin": 65,
+      "xMax": 65,
+      "height": 0
+    },
+    {
+      "y": 67,
+      "xMin": 67,
+      "xMax": 105,
+      "height": 1
+    },
+    {
+      "y": 67,
+      "xMin": 106,
+      "xMax": 125,
+      "height": 0
+    },
+    {
+      "y": 67,
+      "xMin": 126,
+      "xMax": 128,
+      "height": 1
+    },
+    {
+      "y": 68,
+      "xMin": 3,
+      "xMax": 16,
+      "height": 0
+    },
+    {
+      "y": 68,
+      "xMin": 18,
+      "xMax": 63,
+      "height": -1
+    },
+    {
+      "y": 68,
+      "xMin": 65,
+      "xMax": 65,
+      "height": 0
+    },
+    {
+      "y": 68,
+      "xMin": 67,
+      "xMax": 105,
+      "height": 1
+    },
+    {
+      "y": 68,
+      "xMin": 107,
+      "xMax": 125,
+      "height": 0
+    },
+    {
+      "y": 68,
+      "xMin": 126,
+      "xMax": 128,
+      "height": 1
+    },
+    {
+      "y": 69,
+      "xMin": 3,
+      "xMax": 16,
+      "height": 0
+    },
+    {
+      "y": 69,
+      "xMin": 18,
+      "xMax": 63,
+      "height": -1
+    },
+    {
+      "y": 69,
+      "xMin": 64,
+      "xMax": 65,
+      "height": 0
+    },
+    {
+      "y": 69,
+      "xMin": 66,
+      "xMax": 106,
+      "height": 1
+    },
+    {
+      "y": 69,
+      "xMin": 107,
+      "xMax": 126,
+      "height": 0
+    },
+    {
+      "y": 69,
+      "xMin": 127,
+      "xMax": 128,
+      "height": 1
+    },
+    {
+      "y": 70,
+      "xMin": 3,
+      "xMax": 11,
+      "height": 0
+    },
+    {
+      "y": 70,
+      "xMin": 18,
+      "xMax": 63,
+      "height": -1
+    },
+    {
+      "y": 70,
+      "xMin": 64,
+      "xMax": 65,
+      "height": 0
+    },
+    {
+      "y": 70,
+      "xMin": 66,
+      "xMax": 106,
+      "height": 1
+    },
+    {
+      "y": 70,
+      "xMin": 108,
+      "xMax": 127,
+      "height": 0
+    },
+    {
+      "y": 70,
+      "xMin": 128,
+      "xMax": 130,
+      "height": 1
+    },
+    {
+      "y": 71,
+      "xMin": -6,
+      "xMax": -4,
+      "height": 1
+    },
+    {
+      "y": 71,
+      "xMin": -1,
+      "xMax": 0,
+      "height": 0
+    },
+    {
+      "y": 71,
+      "xMin": 3,
+      "xMax": 11,
+      "height": 0
+    },
+    {
+      "y": 71,
+      "xMin": 12,
+      "xMax": 25,
+      "height": -1
+    },
+    {
+      "y": 71,
+      "xMin": 27,
+      "xMax": 44,
+      "height": -1
+    },
+    {
+      "y": 71,
+      "xMin": 46,
+      "xMax": 60,
+      "height": -1
+    },
+    {
+      "y": 71,
+      "xMin": 66,
+      "xMax": 107,
+      "height": 1
+    },
+    {
+      "y": 71,
+      "xMin": 108,
+      "xMax": 128,
+      "height": 0
+    },
+    {
+      "y": 71,
+      "xMin": 129,
+      "xMax": 130,
+      "height": 1
+    },
+    {
+      "y": 72,
+      "xMin": -6,
+      "xMax": -4,
+      "height": 1
+    },
+    {
+      "y": 72,
+      "xMin": -1,
+      "xMax": 0,
+      "height": 0
+    },
+    {
+      "y": 72,
+      "xMin": 3,
+      "xMax": 11,
+      "height": 0
+    },
+    {
+      "y": 72,
+      "xMin": 12,
+      "xMax": 25,
+      "height": -1
+    },
+    {
+      "y": 72,
+      "xMin": 28,
+      "xMax": 41,
+      "height": -1
+    },
+    {
+      "y": 72,
+      "xMin": 46,
+      "xMax": 59,
+      "height": -1
+    },
+    {
+      "y": 72,
+      "xMin": 67,
+      "xMax": 107,
+      "height": 1
+    },
+    {
+      "y": 72,
+      "xMin": 109,
+      "xMax": 128,
+      "height": 0
+    },
+    {
+      "y": 72,
+      "xMin": 129,
+      "xMax": 131,
+      "height": 1
+    },
+    {
+      "y": 73,
+      "xMin": -6,
+      "xMax": -4,
+      "height": 1
+    },
+    {
+      "y": 73,
+      "xMin": 3,
+      "xMax": 11,
+      "height": 0
+    },
+    {
+      "y": 73,
+      "xMin": 12,
+      "xMax": 25,
+      "height": -1
+    },
+    {
+      "y": 73,
+      "xMin": 27,
+      "xMax": 39,
+      "height": -1
+    },
+    {
+      "y": 73,
+      "xMin": 41,
+      "xMax": 41,
+      "height": -1
+    },
+    {
+      "y": 73,
+      "xMin": 46,
+      "xMax": 52,
+      "height": -1
+    },
+    {
+      "y": 73,
+      "xMin": 65,
+      "xMax": 108,
+      "height": 1
+    },
+    {
+      "y": 73,
+      "xMin": 109,
+      "xMax": 127,
+      "height": 0
+    },
+    {
+      "y": 73,
+      "xMin": 129,
+      "xMax": 131,
+      "height": 1
+    },
+    {
+      "y": 74,
+      "xMin": -6,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": 74,
+      "xMin": 3,
+      "xMax": 11,
+      "height": 0
+    },
+    {
+      "y": 74,
+      "xMin": 13,
+      "xMax": 41,
+      "height": -1
+    },
+    {
+      "y": 74,
+      "xMin": 46,
+      "xMax": 52,
+      "height": -1
+    },
+    {
+      "y": 74,
+      "xMin": 65,
+      "xMax": 108,
+      "height": 1
+    },
+    {
+      "y": 74,
+      "xMin": 110,
+      "xMax": 127,
+      "height": 0
+    },
+    {
+      "y": 74,
+      "xMin": 128,
+      "xMax": 130,
+      "height": 1
+    },
+    {
+      "y": 75,
+      "xMin": -6,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": 75,
+      "xMin": 3,
+      "xMax": 12,
+      "height": 0
+    },
+    {
+      "y": 75,
+      "xMin": 13,
+      "xMax": 18,
+      "height": -1
+    },
+    {
+      "y": 75,
+      "xMin": 22,
+      "xMax": 52,
+      "height": -1
+    },
+    {
+      "y": 75,
+      "xMin": 65,
+      "xMax": 109,
+      "height": 1
+    },
+    {
+      "y": 75,
+      "xMin": 110,
+      "xMax": 127,
+      "height": 0
+    },
+    {
+      "y": 75,
+      "xMin": 128,
+      "xMax": 130,
+      "height": 1
+    },
+    {
+      "y": 76,
+      "xMin": -6,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": 76,
+      "xMin": 3,
+      "xMax": 11,
+      "height": 0
+    },
+    {
+      "y": 76,
+      "xMin": 16,
+      "xMax": 18,
+      "height": -1
+    },
+    {
+      "y": 76,
+      "xMin": 19,
+      "xMax": 21,
+      "height": 0
+    },
+    {
+      "y": 76,
+      "xMin": 22,
+      "xMax": 58,
+      "height": -1
+    },
+    {
+      "y": 76,
+      "xMin": 84,
+      "xMax": 109,
+      "height": 1
+    },
+    {
+      "y": 76,
+      "xMin": 111,
+      "xMax": 127,
+      "height": 0
+    },
+    {
+      "y": 76,
+      "xMin": 128,
+      "xMax": 128,
+      "height": 1
+    },
+    {
+      "y": 77,
+      "xMin": -6,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": 77,
+      "xMin": 3,
+      "xMax": 11,
+      "height": 0
+    },
+    {
+      "y": 77,
+      "xMin": 16,
+      "xMax": 18,
+      "height": -1
+    },
+    {
+      "y": 77,
+      "xMin": 19,
+      "xMax": 21,
+      "height": 0
+    },
+    {
+      "y": 77,
+      "xMin": 22,
+      "xMax": 59,
+      "height": -1
+    },
+    {
+      "y": 77,
+      "xMin": 64,
+      "xMax": 83,
+      "height": -1
+    },
+    {
+      "y": 77,
+      "xMin": 84,
+      "xMax": 110,
+      "height": 1
+    },
+    {
+      "y": 77,
+      "xMin": 111,
+      "xMax": 127,
+      "height": 0
+    },
+    {
+      "y": 77,
+      "xMin": 128,
+      "xMax": 128,
+      "height": 1
+    },
+    {
+      "y": 78,
+      "xMin": -6,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": 78,
+      "xMin": 3,
+      "xMax": 11,
+      "height": 0
+    },
+    {
+      "y": 78,
+      "xMin": 12,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": 78,
+      "xMin": 16,
+      "xMax": 18,
+      "height": -1
+    },
+    {
+      "y": 78,
+      "xMin": 19,
+      "xMax": 19,
+      "height": 0
+    },
+    {
+      "y": 78,
+      "xMin": 20,
+      "xMax": 61,
+      "height": -1
+    },
+    {
+      "y": 78,
+      "xMin": 64,
+      "xMax": 83,
+      "height": -1
+    },
+    {
+      "y": 78,
+      "xMin": 84,
+      "xMax": 110,
+      "height": 1
+    },
+    {
+      "y": 78,
+      "xMin": 112,
+      "xMax": 127,
+      "height": 0
+    },
+    {
+      "y": 79,
+      "xMin": -6,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": 79,
+      "xMin": 3,
+      "xMax": 12,
+      "height": 0
+    },
+    {
+      "y": 79,
+      "xMin": 13,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": 79,
+      "xMin": 23,
+      "xMax": 28,
+      "height": -1
+    },
+    {
+      "y": 79,
+      "xMin": 32,
+      "xMax": 62,
+      "height": -1
+    },
+    {
+      "y": 79,
+      "xMin": 64,
+      "xMax": 83,
+      "height": -1
+    },
+    {
+      "y": 79,
+      "xMin": 84,
+      "xMax": 111,
+      "height": 1
+    },
+    {
+      "y": 79,
+      "xMin": 112,
+      "xMax": 127,
+      "height": 0
+    },
+    {
+      "y": 80,
+      "xMin": -6,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": 80,
+      "xMin": 3,
+      "xMax": 12,
+      "height": 0
+    },
+    {
+      "y": 80,
+      "xMin": 13,
+      "xMax": 15,
+      "height": 1
+    },
+    {
+      "y": 80,
+      "xMin": 23,
+      "xMax": 28,
+      "height": -1
+    },
+    {
+      "y": 80,
+      "xMin": 29,
+      "xMax": 31,
+      "height": 0
+    },
+    {
+      "y": 80,
+      "xMin": 32,
+      "xMax": 62,
+      "height": -1
+    },
+    {
+      "y": 80,
+      "xMin": 64,
+      "xMax": 83,
+      "height": -1
+    },
+    {
+      "y": 80,
+      "xMin": 84,
+      "xMax": 111,
+      "height": 1
+    },
+    {
+      "y": 81,
+      "xMin": -6,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": 81,
+      "xMin": 3,
+      "xMax": 12,
+      "height": 0
+    },
+    {
+      "y": 81,
+      "xMin": 13,
+      "xMax": 22,
+      "height": 1
+    },
+    {
+      "y": 81,
+      "xMin": 23,
+      "xMax": 28,
+      "height": -1
+    },
+    {
+      "y": 81,
+      "xMin": 29,
+      "xMax": 31,
+      "height": 0
+    },
+    {
+      "y": 81,
+      "xMin": 32,
+      "xMax": 66,
+      "height": -1
+    },
+    {
+      "y": 81,
+      "xMin": 84,
+      "xMax": 127,
+      "height": 1
+    },
+    {
+      "y": 82,
+      "xMin": -6,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": 82,
+      "xMin": 3,
+      "xMax": 12,
+      "height": 0
+    },
+    {
+      "y": 82,
+      "xMin": 13,
+      "xMax": 22,
+      "height": 1
+    },
+    {
+      "y": 82,
+      "xMin": 29,
+      "xMax": 31,
+      "height": 0
+    },
+    {
+      "y": 82,
+      "xMin": 36,
+      "xMax": 66,
+      "height": -1
+    },
+    {
+      "y": 82,
+      "xMin": 67,
+      "xMax": 83,
+      "height": 0
+    },
+    {
+      "y": 82,
+      "xMin": 84,
+      "xMax": 127,
+      "height": 1
+    },
+    {
+      "y": 83,
+      "xMin": -6,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": 83,
+      "xMin": 3,
+      "xMax": 15,
+      "height": 0
+    },
+    {
+      "y": 83,
+      "xMin": 16,
+      "xMax": 22,
+      "height": 1
+    },
+    {
+      "y": 83,
+      "xMin": 36,
+      "xMax": 66,
+      "height": -1
+    },
+    {
+      "y": 83,
+      "xMin": 67,
+      "xMax": 83,
+      "height": 0
+    },
+    {
+      "y": 83,
+      "xMin": 84,
+      "xMax": 127,
+      "height": 1
+    },
+    {
+      "y": 84,
+      "xMin": -6,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": 84,
+      "xMin": 3,
+      "xMax": 15,
+      "height": 0
+    },
+    {
+      "y": 84,
+      "xMin": 16,
+      "xMax": 35,
+      "height": 1
+    },
+    {
+      "y": 84,
+      "xMin": 36,
+      "xMax": 66,
+      "height": -1
+    },
+    {
+      "y": 84,
+      "xMin": 67,
+      "xMax": 83,
+      "height": 0
+    },
+    {
+      "y": 84,
+      "xMin": 84,
+      "xMax": 127,
+      "height": 1
+    },
+    {
+      "y": 85,
+      "xMin": -6,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": 85,
+      "xMin": 3,
+      "xMax": 15,
+      "height": 0
+    },
+    {
+      "y": 85,
+      "xMin": 16,
+      "xMax": 35,
+      "height": 1
+    },
+    {
+      "y": 85,
+      "xMin": 40,
+      "xMax": 66,
+      "height": -1
+    },
+    {
+      "y": 85,
+      "xMin": 67,
+      "xMax": 82,
+      "height": 0
+    },
+    {
+      "y": 85,
+      "xMin": 84,
+      "xMax": 127,
+      "height": 1
+    },
+    {
+      "y": 86,
+      "xMin": -20,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": 86,
+      "xMin": 3,
+      "xMax": 15,
+      "height": 0
+    },
+    {
+      "y": 86,
+      "xMin": 16,
+      "xMax": 35,
+      "height": 1
+    },
+    {
+      "y": 86,
+      "xMin": 40,
+      "xMax": 67,
+      "height": -1
+    },
+    {
+      "y": 86,
+      "xMin": 68,
+      "xMax": 83,
+      "height": 0
+    },
+    {
+      "y": 86,
+      "xMin": 84,
+      "xMax": 127,
+      "height": 1
+    },
+    {
+      "y": 87,
+      "xMin": -20,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": 87,
+      "xMin": 3,
+      "xMax": 15,
+      "height": 0
+    },
+    {
+      "y": 87,
+      "xMin": 16,
+      "xMax": 39,
+      "height": 1
+    },
+    {
+      "y": 87,
+      "xMin": 40,
+      "xMax": 68,
+      "height": -1
+    },
+    {
+      "y": 87,
+      "xMin": 69,
+      "xMax": 83,
+      "height": 0
+    },
+    {
+      "y": 87,
+      "xMin": 84,
+      "xMax": 127,
+      "height": 1
+    },
+    {
+      "y": 88,
+      "xMin": -20,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 88,
+      "xMin": -8,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": 88,
+      "xMin": 3,
+      "xMax": 10,
+      "height": 0
+    },
+    {
+      "y": 88,
+      "xMin": 12,
+      "xMax": 15,
+      "height": 0
+    },
+    {
+      "y": 88,
+      "xMin": 16,
+      "xMax": 39,
+      "height": 1
+    },
+    {
+      "y": 88,
+      "xMin": 45,
+      "xMax": 59,
+      "height": -1
+    },
+    {
+      "y": 88,
+      "xMin": 63,
+      "xMax": 63,
+      "height": -1
+    },
+    {
+      "y": 88,
+      "xMin": 68,
+      "xMax": 69,
+      "height": -1
+    },
+    {
+      "y": 88,
+      "xMin": 70,
+      "xMax": 83,
+      "height": 0
+    },
+    {
+      "y": 88,
+      "xMin": 84,
+      "xMax": 127,
+      "height": 1
+    },
+    {
+      "y": 89,
+      "xMin": -20,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 89,
+      "xMin": -7,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": 89,
+      "xMin": 3,
+      "xMax": 10,
+      "height": 0
+    },
+    {
+      "y": 89,
+      "xMin": 12,
+      "xMax": 15,
+      "height": 0
+    },
+    {
+      "y": 89,
+      "xMin": 16,
+      "xMax": 39,
+      "height": 1
+    },
+    {
+      "y": 89,
+      "xMin": 45,
+      "xMax": 59,
+      "height": -1
+    },
+    {
+      "y": 89,
+      "xMin": 63,
+      "xMax": 63,
+      "height": -1
+    },
+    {
+      "y": 89,
+      "xMin": 64,
+      "xMax": 67,
+      "height": 0
+    },
+    {
+      "y": 89,
+      "xMin": 68,
+      "xMax": 69,
+      "height": -1
+    },
+    {
+      "y": 89,
+      "xMin": 70,
+      "xMax": 83,
+      "height": 0
+    },
+    {
+      "y": 89,
+      "xMin": 84,
+      "xMax": 127,
+      "height": 1
+    },
+    {
+      "y": 90,
+      "xMin": -20,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 90,
+      "xMin": -7,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": 90,
+      "xMin": 3,
+      "xMax": 10,
+      "height": 0
+    },
+    {
+      "y": 90,
+      "xMin": 12,
+      "xMax": 15,
+      "height": 0
+    },
+    {
+      "y": 90,
+      "xMin": 16,
+      "xMax": 21,
+      "height": 1
+    },
+    {
+      "y": 90,
+      "xMin": 30,
+      "xMax": 44,
+      "height": 1
+    },
+    {
+      "y": 90,
+      "xMin": 45,
+      "xMax": 59,
+      "height": -1
+    },
+    {
+      "y": 90,
+      "xMin": 60,
+      "xMax": 62,
+      "height": 1
+    },
+    {
+      "y": 90,
+      "xMin": 64,
+      "xMax": 67,
+      "height": 0
+    },
+    {
+      "y": 90,
+      "xMin": 68,
+      "xMax": 70,
+      "height": -1
+    },
+    {
+      "y": 90,
+      "xMin": 71,
+      "xMax": 83,
+      "height": 0
+    },
+    {
+      "y": 90,
+      "xMin": 84,
+      "xMax": 127,
+      "height": 1
+    },
+    {
+      "y": 91,
+      "xMin": -20,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 91,
+      "xMin": -7,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": 91,
+      "xMin": 2,
+      "xMax": 10,
+      "height": 0
+    },
+    {
+      "y": 91,
+      "xMin": 12,
+      "xMax": 15,
+      "height": 0
+    },
+    {
+      "y": 91,
+      "xMin": 16,
+      "xMax": 19,
+      "height": 1
+    },
+    {
+      "y": 91,
+      "xMin": 31,
+      "xMax": 44,
+      "height": 1
+    },
+    {
+      "y": 91,
+      "xMin": 60,
+      "xMax": 62,
+      "height": 1
+    },
+    {
+      "y": 91,
+      "xMin": 64,
+      "xMax": 67,
+      "height": 0
+    },
+    {
+      "y": 91,
+      "xMin": 68,
+      "xMax": 70,
+      "height": -1
+    },
+    {
+      "y": 91,
+      "xMin": 71,
+      "xMax": 83,
+      "height": 0
+    },
+    {
+      "y": 91,
+      "xMin": 84,
+      "xMax": 127,
+      "height": 1
+    },
+    {
+      "y": 92,
+      "xMin": -20,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 92,
+      "xMin": -7,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": 92,
+      "xMin": 2,
+      "xMax": 15,
+      "height": 0
+    },
+    {
+      "y": 92,
+      "xMin": 16,
+      "xMax": 18,
+      "height": 1
+    },
+    {
+      "y": 92,
+      "xMin": 31,
+      "xMax": 44,
+      "height": 1
+    },
+    {
+      "y": 92,
+      "xMin": 60,
+      "xMax": 63,
+      "height": 1
+    },
+    {
+      "y": 92,
+      "xMin": 64,
+      "xMax": 67,
+      "height": 0
+    },
+    {
+      "y": 92,
+      "xMin": 71,
+      "xMax": 83,
+      "height": 0
+    },
+    {
+      "y": 92,
+      "xMin": 84,
+      "xMax": 127,
+      "height": 1
+    },
+    {
+      "y": 93,
+      "xMin": -20,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 93,
+      "xMin": -7,
+      "xMax": 1,
+      "height": 1
+    },
+    {
+      "y": 93,
+      "xMin": 3,
+      "xMax": 10,
+      "height": 0
+    },
+    {
+      "y": 93,
+      "xMin": 12,
+      "xMax": 15,
+      "height": 0
+    },
+    {
+      "y": 93,
+      "xMin": 16,
+      "xMax": 18,
+      "height": 1
+    },
+    {
+      "y": 93,
+      "xMin": 31,
+      "xMax": 63,
+      "height": 1
+    },
+    {
+      "y": 93,
+      "xMin": 84,
+      "xMax": 127,
+      "height": 1
+    },
+    {
+      "y": 94,
+      "xMin": -20,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 94,
+      "xMin": -7,
+      "xMax": 2,
+      "height": 1
+    },
+    {
+      "y": 94,
+      "xMin": 3,
+      "xMax": 14,
+      "height": 0
+    },
+    {
+      "y": 94,
+      "xMin": 16,
+      "xMax": 18,
+      "height": 1
+    },
+    {
+      "y": 94,
+      "xMin": 31,
+      "xMax": 127,
+      "height": 1
+    },
+    {
+      "y": 95,
+      "xMin": -20,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 95,
+      "xMin": 1,
+      "xMax": 2,
+      "height": 1
+    },
+    {
+      "y": 95,
+      "xMin": 9,
+      "xMax": 14,
+      "height": 0
+    },
+    {
+      "y": 95,
+      "xMin": 15,
+      "xMax": 18,
+      "height": 1
+    },
+    {
+      "y": 95,
+      "xMin": 32,
+      "xMax": 127,
+      "height": 1
+    },
+    {
+      "y": 96,
+      "xMin": -20,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 96,
+      "xMin": 15,
+      "xMax": 18,
+      "height": 1
+    },
+    {
+      "y": 96,
+      "xMin": 33,
+      "xMax": 127,
+      "height": 1
+    },
+    {
+      "y": 96,
+      "xMin": 131,
+      "xMax": 165,
+      "height": 1
+    },
+    {
+      "y": 97,
+      "xMin": -20,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 97,
+      "xMin": 12,
+      "xMax": 18,
+      "height": 1
+    },
+    {
+      "y": 97,
+      "xMin": 34,
+      "xMax": 127,
+      "height": 1
+    },
+    {
+      "y": 97,
+      "xMin": 131,
+      "xMax": 165,
+      "height": 1
+    },
+    {
+      "y": 98,
+      "xMin": -20,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 98,
+      "xMin": 12,
+      "xMax": 18,
+      "height": 1
+    },
+    {
+      "y": 98,
+      "xMin": 35,
+      "xMax": 165,
+      "height": 1
+    },
+    {
+      "y": 99,
+      "xMin": -20,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 99,
+      "xMin": 12,
+      "xMax": 18,
+      "height": 1
+    },
+    {
+      "y": 99,
+      "xMin": 36,
+      "xMax": 138,
+      "height": 1
+    },
+    {
+      "y": 100,
+      "xMin": -20,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 100,
+      "xMin": 37,
+      "xMax": 63,
+      "height": 1
+    },
+    {
+      "y": 100,
+      "xMin": 77,
+      "xMax": 92,
+      "height": 1
+    },
+    {
+      "y": 100,
+      "xMin": 97,
+      "xMax": 127,
+      "height": 1
+    },
+    {
+      "y": 100,
+      "xMin": 131,
+      "xMax": 138,
+      "height": 1
+    },
+    {
+      "y": 101,
+      "xMin": -20,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 101,
+      "xMin": 48,
+      "xMax": 61,
+      "height": 1
+    },
+    {
+      "y": 101,
+      "xMin": 78,
+      "xMax": 90,
+      "height": 1
+    },
+    {
+      "y": 101,
+      "xMin": 98,
+      "xMax": 108,
+      "height": 1
+    },
+    {
+      "y": 101,
+      "xMin": 111,
+      "xMax": 118,
+      "height": 1
+    },
+    {
+      "y": 101,
+      "xMin": 122,
+      "xMax": 127,
+      "height": 1
+    },
+    {
+      "y": 101,
+      "xMin": 128,
+      "xMax": 129,
+      "height": -1
+    },
+    {
+      "y": 101,
+      "xMin": 131,
+      "xMax": 137,
+      "height": 1
+    },
+    {
+      "y": 102,
+      "xMin": -20,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 102,
+      "xMin": 51,
+      "xMax": 58,
+      "height": 1
+    },
+    {
+      "y": 102,
+      "xMin": 80,
+      "xMax": 87,
+      "height": 1
+    },
+    {
+      "y": 102,
+      "xMin": 100,
+      "xMax": 107,
+      "height": 1
+    },
+    {
+      "y": 102,
+      "xMin": 131,
+      "xMax": 134,
+      "height": 1
+    },
+    {
+      "y": 103,
+      "xMin": -30,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 103,
+      "xMin": 53,
+      "xMax": 56,
+      "height": 1
+    },
+    {
+      "y": 103,
+      "xMin": 82,
+      "xMax": 85,
+      "height": 1
+    },
+    {
+      "y": 103,
+      "xMin": 102,
+      "xMax": 105,
+      "height": 1
+    },
+    {
+      "y": 103,
+      "xMin": 130,
+      "xMax": 130,
+      "height": 1
+    },
+    {
+      "y": 103,
+      "xMin": 132,
+      "xMax": 134,
+      "height": 1
+    },
+    {
+      "y": 104,
+      "xMin": -30,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 104,
+      "xMin": 128,
+      "xMax": 130,
+      "height": 1
+    },
+    {
+      "y": 104,
+      "xMin": 135,
+      "xMax": 140,
+      "height": 1
+    },
+    {
+      "y": 105,
+      "xMin": -30,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 105,
+      "xMin": 135,
+      "xMax": 140,
+      "height": 1
+    },
+    {
+      "y": 106,
+      "xMin": -30,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 106,
+      "xMin": 140,
+      "xMax": 140,
+      "height": 1
+    },
+    {
+      "y": 107,
+      "xMin": -30,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 107,
+      "xMin": 140,
+      "xMax": 140,
+      "height": 1
+    },
+    {
+      "y": 108,
+      "xMin": -30,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 108,
+      "xMin": 140,
+      "xMax": 140,
+      "height": 1
+    },
+    {
+      "y": 109,
+      "xMin": -30,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 109,
+      "xMin": 140,
+      "xMax": 140,
+      "height": 1
+    },
+    {
+      "y": 110,
+      "xMin": -20,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 110,
+      "xMin": 140,
+      "xMax": 140,
+      "height": 1
+    },
+    {
+      "y": 111,
+      "xMin": -20,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 111,
+      "xMin": 140,
+      "xMax": 140,
+      "height": 1
+    },
+    {
+      "y": 112,
+      "xMin": -20,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 112,
+      "xMin": 140,
+      "xMax": 140,
+      "height": 1
+    },
+    {
+      "y": 113,
+      "xMin": -20,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 113,
+      "xMin": 140,
+      "xMax": 140,
+      "height": 1
+    },
+    {
+      "y": 114,
+      "xMin": -20,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 114,
+      "xMin": 140,
+      "xMax": 140,
+      "height": 1
+    },
+    {
+      "y": 115,
+      "xMin": -20,
+      "xMax": -18,
+      "height": 1
+    },
+    {
+      "y": 115,
+      "xMin": 140,
+      "xMax": 140,
+      "height": 1
+    }
+  ],
+  "structureRuns": [
+    {
+      "y": -82,
+      "xMin": 37,
+      "xMax": 39
+    },
+    {
+      "y": -81,
+      "xMin": 37,
+      "xMax": 39
+    },
+    {
+      "y": -80,
+      "xMin": 37,
+      "xMax": 39
+    },
+    {
+      "y": -79,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -79,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -78,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -78,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -77,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -77,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -76,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -76,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -75,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -75,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -74,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -74,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -73,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -73,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -72,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -72,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -71,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -71,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -70,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -70,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -69,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -69,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -68,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -68,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -67,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -67,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -66,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -66,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -65,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -65,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -64,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -64,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -63,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -63,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -62,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -62,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -61,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -61,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -60,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -60,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -59,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -59,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -58,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -58,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -57,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -57,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -56,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -56,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -55,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -55,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -54,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -54,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -53,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -53,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -52,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -52,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -51,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -51,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -50,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -50,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -49,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -49,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -48,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -48,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -47,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -47,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -46,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -46,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -45,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -45,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -44,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -44,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -43,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -43,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -42,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -42,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -41,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -41,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -40,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -40,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -39,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -39,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -38,
+      "xMin": 16,
+      "xMax": 36
+    },
+    {
+      "y": -38,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -37,
+      "xMin": 17,
+      "xMax": 36
+    },
+    {
+      "y": -37,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -36,
+      "xMin": 18,
+      "xMax": 36
+    },
+    {
+      "y": -36,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -35,
+      "xMin": 19,
+      "xMax": 36
+    },
+    {
+      "y": -35,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -34,
+      "xMin": -5,
+      "xMax": -1
+    },
+    {
+      "y": -34,
+      "xMin": 20,
+      "xMax": 36
+    },
+    {
+      "y": -34,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -33,
+      "xMin": 0,
+      "xMax": 0
+    },
+    {
+      "y": -33,
+      "xMin": 21,
+      "xMax": 36
+    },
+    {
+      "y": -33,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -32,
+      "xMin": 21,
+      "xMax": 36
+    },
+    {
+      "y": -32,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -31,
+      "xMin": 1,
+      "xMax": 7
+    },
+    {
+      "y": -31,
+      "xMin": 22,
+      "xMax": 36
+    },
+    {
+      "y": -31,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -30,
+      "xMin": 8,
+      "xMax": 8
+    },
+    {
+      "y": -30,
+      "xMin": 27,
+      "xMax": 36
+    },
+    {
+      "y": -30,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -29,
+      "xMin": 30,
+      "xMax": 32
+    },
+    {
+      "y": -29,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -28,
+      "xMin": 31,
+      "xMax": 32
+    },
+    {
+      "y": -28,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -27,
+      "xMin": 9,
+      "xMax": 12
+    },
+    {
+      "y": -27,
+      "xMin": 32,
+      "xMax": 32
+    },
+    {
+      "y": -27,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -26,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -25,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -24,
+      "xMin": 13,
+      "xMax": 13
+    },
+    {
+      "y": -24,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -23,
+      "xMin": 42,
+      "xMax": 64
+    },
+    {
+      "y": -22,
+      "xMin": 39,
+      "xMax": 39
+    },
+    {
+      "y": -22,
+      "xMin": 42,
+      "xMax": 64
+    },
+    {
+      "y": -21,
+      "xMin": 38,
+      "xMax": 39
+    },
+    {
+      "y": -21,
+      "xMin": 42,
+      "xMax": 64
+    },
+    {
+      "y": -20,
+      "xMin": 38,
+      "xMax": 38
+    },
+    {
+      "y": -20,
+      "xMin": 42,
+      "xMax": 64
+    },
+    {
+      "y": -19,
+      "xMin": 37,
+      "xMax": 37
+    },
+    {
+      "y": -19,
+      "xMin": 42,
+      "xMax": 64
+    },
+    {
+      "y": -18,
+      "xMin": 36,
+      "xMax": 37
+    },
+    {
+      "y": -18,
+      "xMin": 41,
+      "xMax": 64
+    },
+    {
+      "y": -17,
+      "xMin": 36,
+      "xMax": 36
+    },
+    {
+      "y": -17,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -16,
+      "xMin": 35,
+      "xMax": 35
+    },
+    {
+      "y": -16,
+      "xMin": 40,
+      "xMax": 64
+    },
+    {
+      "y": -15,
+      "xMin": 35,
+      "xMax": 35
+    },
+    {
+      "y": -15,
+      "xMin": 39,
+      "xMax": 64
+    },
+    {
+      "y": -14,
+      "xMin": 34,
+      "xMax": 34
+    },
+    {
+      "y": -14,
+      "xMin": 38,
+      "xMax": 64
+    },
+    {
+      "y": -13,
+      "xMin": 33,
+      "xMax": 34
+    },
+    {
+      "y": -13,
+      "xMin": 38,
+      "xMax": 64
+    },
+    {
+      "y": -12,
+      "xMin": 33,
+      "xMax": 33
+    },
+    {
+      "y": -12,
+      "xMin": 37,
+      "xMax": 64
+    },
+    {
+      "y": -11,
+      "xMin": 32,
+      "xMax": 32
+    },
+    {
+      "y": -11,
+      "xMin": 37,
+      "xMax": 64
+    },
+    {
+      "y": -10,
+      "xMin": 31,
+      "xMax": 32
+    },
+    {
+      "y": -10,
+      "xMin": 36,
+      "xMax": 64
+    },
+    {
+      "y": -9,
+      "xMin": 31,
+      "xMax": 31
+    },
+    {
+      "y": -9,
+      "xMin": 35,
+      "xMax": 64
+    },
+    {
+      "y": -8,
+      "xMin": 30,
+      "xMax": 30
+    },
+    {
+      "y": -8,
+      "xMin": 35,
+      "xMax": 64
+    },
+    {
+      "y": -7,
+      "xMin": 29,
+      "xMax": 30
+    },
+    {
+      "y": -7,
+      "xMin": 34,
+      "xMax": 64
+    },
+    {
+      "y": -6,
+      "xMin": 29,
+      "xMax": 29
+    },
+    {
+      "y": -6,
+      "xMin": 33,
+      "xMax": 64
+    },
+    {
+      "y": -5,
+      "xMin": 28,
+      "xMax": 28
+    },
+    {
+      "y": -5,
+      "xMin": 33,
+      "xMax": 64
+    },
+    {
+      "y": -4,
+      "xMin": 27,
+      "xMax": 28
+    },
+    {
+      "y": -4,
+      "xMin": 32,
+      "xMax": 64
+    },
+    {
+      "y": -3,
+      "xMin": 27,
+      "xMax": 27
+    },
+    {
+      "y": -3,
+      "xMin": 31,
+      "xMax": 62
+    },
+    {
+      "y": -2,
+      "xMin": 31,
+      "xMax": 62
+    },
+    {
+      "y": -1,
+      "xMin": 26,
+      "xMax": 26
+    },
+    {
+      "y": -1,
+      "xMin": 30,
+      "xMax": 62
+    },
+    {
+      "y": -1,
+      "xMin": 66,
+      "xMax": 122
+    },
+    {
+      "y": -1,
+      "xMin": 129,
+      "xMax": 150
+    },
+    {
+      "y": 0,
+      "xMin": -30,
+      "xMax": 7
+    },
+    {
+      "y": 0,
+      "xMin": 30,
+      "xMax": 33
+    },
+    {
+      "y": 0,
+      "xMin": 38,
+      "xMax": 62
+    },
+    {
+      "y": 0,
+      "xMin": 66,
+      "xMax": 150
+    },
+    {
+      "y": 0,
+      "xMin": 154,
+      "xMax": 165
+    },
+    {
+      "y": 1,
+      "xMin": -30,
+      "xMax": -2
+    },
+    {
+      "y": 1,
+      "xMin": 43,
+      "xMax": 62
+    },
+    {
+      "y": 1,
+      "xMin": 66,
+      "xMax": 150
+    },
+    {
+      "y": 1,
+      "xMin": 154,
+      "xMax": 165
+    },
+    {
+      "y": 2,
+      "xMin": -30,
+      "xMax": -2
+    },
+    {
+      "y": 2,
+      "xMin": 43,
+      "xMax": 62
+    },
+    {
+      "y": 2,
+      "xMin": 66,
+      "xMax": 150
+    },
+    {
+      "y": 2,
+      "xMin": 154,
+      "xMax": 165
+    },
+    {
+      "y": 3,
+      "xMin": -30,
+      "xMax": -2
+    },
+    {
+      "y": 3,
+      "xMin": 43,
+      "xMax": 62
+    },
+    {
+      "y": 3,
+      "xMin": 66,
+      "xMax": 150
+    },
+    {
+      "y": 3,
+      "xMin": 154,
+      "xMax": 165
+    },
+    {
+      "y": 4,
+      "xMin": -30,
+      "xMax": -2
+    },
+    {
+      "y": 4,
+      "xMin": 25,
+      "xMax": 25
+    },
+    {
+      "y": 4,
+      "xMin": 43,
+      "xMax": 62
+    },
+    {
+      "y": 4,
+      "xMin": 66,
+      "xMax": 148
+    },
+    {
+      "y": 4,
+      "xMin": 154,
+      "xMax": 165
+    },
+    {
+      "y": 5,
+      "xMin": -30,
+      "xMax": -2
+    },
+    {
+      "y": 5,
+      "xMin": 19,
+      "xMax": 24
+    },
+    {
+      "y": 5,
+      "xMin": 43,
+      "xMax": 62
+    },
+    {
+      "y": 5,
+      "xMin": 66,
+      "xMax": 146
+    },
+    {
+      "y": 5,
+      "xMin": 154,
+      "xMax": 165
+    },
+    {
+      "y": 6,
+      "xMin": -30,
+      "xMax": -2
+    },
+    {
+      "y": 6,
+      "xMin": 43,
+      "xMax": 62
+    },
+    {
+      "y": 6,
+      "xMin": 66,
+      "xMax": 144
+    },
+    {
+      "y": 6,
+      "xMin": 154,
+      "xMax": 165
+    },
+    {
+      "y": 7,
+      "xMin": -30,
+      "xMax": -2
+    },
+    {
+      "y": 7,
+      "xMin": 19,
+      "xMax": 24
+    },
+    {
+      "y": 7,
+      "xMin": 43,
+      "xMax": 62
+    },
+    {
+      "y": 7,
+      "xMin": 66,
+      "xMax": 136
+    },
+    {
+      "y": 7,
+      "xMin": 152,
+      "xMax": 165
+    },
+    {
+      "y": 8,
+      "xMin": -30,
+      "xMax": -2
+    },
+    {
+      "y": 8,
+      "xMin": 19,
+      "xMax": 24
+    },
+    {
+      "y": 8,
+      "xMin": 43,
+      "xMax": 62
+    },
+    {
+      "y": 8,
+      "xMin": 66,
+      "xMax": 133
+    },
+    {
+      "y": 8,
+      "xMin": 150,
+      "xMax": 165
+    },
+    {
+      "y": 9,
+      "xMin": -30,
+      "xMax": -2
+    },
+    {
+      "y": 9,
+      "xMin": 43,
+      "xMax": 62
+    },
+    {
+      "y": 9,
+      "xMin": 66,
+      "xMax": 131
+    },
+    {
+      "y": 9,
+      "xMin": 148,
+      "xMax": 165
+    },
+    {
+      "y": 10,
+      "xMin": -30,
+      "xMax": -2
+    },
+    {
+      "y": 10,
+      "xMin": 43,
+      "xMax": 62
+    },
+    {
+      "y": 10,
+      "xMin": 67,
+      "xMax": 129
+    },
+    {
+      "y": 10,
+      "xMin": 140,
+      "xMax": 165
+    },
+    {
+      "y": 11,
+      "xMin": -30,
+      "xMax": -2
+    },
+    {
+      "y": 11,
+      "xMin": 43,
+      "xMax": 62
+    },
+    {
+      "y": 11,
+      "xMin": 69,
+      "xMax": 127
+    },
+    {
+      "y": 11,
+      "xMin": 137,
+      "xMax": 165
+    },
+    {
+      "y": 12,
+      "xMin": -30,
+      "xMax": -2
+    },
+    {
+      "y": 12,
+      "xMin": 43,
+      "xMax": 62
+    },
+    {
+      "y": 12,
+      "xMin": 72,
+      "xMax": 125
+    },
+    {
+      "y": 12,
+      "xMin": 135,
+      "xMax": 165
+    },
+    {
+      "y": 13,
+      "xMin": -30,
+      "xMax": -2
+    },
+    {
+      "y": 13,
+      "xMin": 43,
+      "xMax": 63
+    },
+    {
+      "y": 13,
+      "xMin": 74,
+      "xMax": 123
+    },
+    {
+      "y": 13,
+      "xMin": 133,
+      "xMax": 165
+    },
+    {
+      "y": 14,
+      "xMin": -30,
+      "xMax": -2
+    },
+    {
+      "y": 14,
+      "xMin": 44,
+      "xMax": 65
+    },
+    {
+      "y": 14,
+      "xMin": 74,
+      "xMax": 122
+    },
+    {
+      "y": 14,
+      "xMin": 131,
+      "xMax": 165
+    },
+    {
+      "y": 15,
+      "xMin": -30,
+      "xMax": -2
+    },
+    {
+      "y": 15,
+      "xMin": 44,
+      "xMax": 68
+    },
+    {
+      "y": 15,
+      "xMin": 75,
+      "xMax": 118
+    },
+    {
+      "y": 15,
+      "xMin": 129,
+      "xMax": 165
+    },
+    {
+      "y": 16,
+      "xMin": -30,
+      "xMax": -2
+    },
+    {
+      "y": 16,
+      "xMin": 44,
+      "xMax": 70
+    },
+    {
+      "y": 16,
+      "xMin": 76,
+      "xMax": 116
+    },
+    {
+      "y": 16,
+      "xMin": 127,
+      "xMax": 165
+    },
+    {
+      "y": 17,
+      "xMin": -30,
+      "xMax": -2
+    },
+    {
+      "y": 17,
+      "xMin": 44,
+      "xMax": 70
+    },
+    {
+      "y": 17,
+      "xMin": 77,
+      "xMax": 114
+    },
+    {
+      "y": 17,
+      "xMin": 126,
+      "xMax": 165
+    },
+    {
+      "y": 18,
+      "xMin": -30,
+      "xMax": -2
+    },
+    {
+      "y": 18,
+      "xMin": 44,
+      "xMax": 45
+    },
+    {
+      "y": 18,
+      "xMin": 50,
+      "xMax": 71
+    },
+    {
+      "y": 18,
+      "xMin": 78,
+      "xMax": 83
+    },
+    {
+      "y": 18,
+      "xMin": 94,
+      "xMax": 113
+    },
+    {
+      "y": 18,
+      "xMin": 122,
+      "xMax": 124
+    },
+    {
+      "y": 18,
+      "xMin": 137,
+      "xMax": 165
+    },
+    {
+      "y": 19,
+      "xMin": -30,
+      "xMax": -2
+    },
+    {
+      "y": 19,
+      "xMin": 44,
+      "xMax": 45
+    },
+    {
+      "y": 19,
+      "xMin": 51,
+      "xMax": 72
+    },
+    {
+      "y": 19,
+      "xMin": 97,
+      "xMax": 112
+    },
+    {
+      "y": 19,
+      "xMin": 141,
+      "xMax": 165
+    },
+    {
+      "y": 20,
+      "xMin": -30,
+      "xMax": 5
+    },
+    {
+      "y": 20,
+      "xMin": 44,
+      "xMax": 44
+    },
+    {
+      "y": 20,
+      "xMin": 53,
+      "xMax": 59
+    },
+    {
+      "y": 20,
+      "xMin": 66,
+      "xMax": 73
+    },
+    {
+      "y": 20,
+      "xMin": 98,
+      "xMax": 111
+    },
+    {
+      "y": 20,
+      "xMin": 145,
+      "xMax": 165
+    },
+    {
+      "y": 21,
+      "xMin": -30,
+      "xMax": -2
+    },
+    {
+      "y": 21,
+      "xMin": 6,
+      "xMax": 6
+    },
+    {
+      "y": 21,
+      "xMin": 54,
+      "xMax": 56
+    },
+    {
+      "y": 21,
+      "xMin": 67,
+      "xMax": 73
+    },
+    {
+      "y": 21,
+      "xMin": 99,
+      "xMax": 111
+    },
+    {
+      "y": 21,
+      "xMin": 149,
+      "xMax": 165
+    },
+    {
+      "y": 22,
+      "xMin": -30,
+      "xMax": -2
+    },
+    {
+      "y": 22,
+      "xMin": 68,
+      "xMax": 71
+    },
+    {
+      "y": 22,
+      "xMin": 100,
+      "xMax": 110
+    },
+    {
+      "y": 22,
+      "xMin": 151,
+      "xMax": 165
+    },
+    {
+      "y": 23,
+      "xMin": -30,
+      "xMax": 3
+    },
+    {
+      "y": 23,
+      "xMin": 68,
+      "xMax": 70
+    },
+    {
+      "y": 23,
+      "xMin": 100,
+      "xMax": 110
+    },
+    {
+      "y": 23,
+      "xMin": 152,
+      "xMax": 165
+    },
+    {
+      "y": 24,
+      "xMin": -30,
+      "xMax": 4
+    },
+    {
+      "y": 24,
+      "xMin": 7,
+      "xMax": 7
+    },
+    {
+      "y": 24,
+      "xMin": 101,
+      "xMax": 109
+    },
+    {
+      "y": 24,
+      "xMin": 153,
+      "xMax": 165
+    },
+    {
+      "y": 25,
+      "xMin": -30,
+      "xMax": 4
+    },
+    {
+      "y": 25,
+      "xMin": 16,
+      "xMax": 20
+    },
+    {
+      "y": 25,
+      "xMin": 101,
+      "xMax": 106
+    },
+    {
+      "y": 25,
+      "xMin": 153,
+      "xMax": 165
+    },
+    {
+      "y": 26,
+      "xMin": -30,
+      "xMax": 4
+    },
+    {
+      "y": 26,
+      "xMin": 40,
+      "xMax": 40
+    },
+    {
+      "y": 26,
+      "xMin": 43,
+      "xMax": 51
+    },
+    {
+      "y": 26,
+      "xMin": 101,
+      "xMax": 106
+    },
+    {
+      "y": 26,
+      "xMin": 154,
+      "xMax": 165
+    },
+    {
+      "y": 27,
+      "xMin": -30,
+      "xMax": 4
+    },
+    {
+      "y": 27,
+      "xMin": 101,
+      "xMax": 106
+    },
+    {
+      "y": 27,
+      "xMin": 154,
+      "xMax": 165
+    },
+    {
+      "y": 28,
+      "xMin": -30,
+      "xMax": 4
+    },
+    {
+      "y": 28,
+      "xMin": 101,
+      "xMax": 106
+    },
+    {
+      "y": 28,
+      "xMin": 155,
+      "xMax": 165
+    },
+    {
+      "y": 29,
+      "xMin": -30,
+      "xMax": 4
+    },
+    {
+      "y": 29,
+      "xMin": 33,
+      "xMax": 39
+    },
+    {
+      "y": 29,
+      "xMin": 43,
+      "xMax": 63
+    },
+    {
+      "y": 29,
+      "xMin": 102,
+      "xMax": 106
+    },
+    {
+      "y": 29,
+      "xMin": 156,
+      "xMax": 165
+    },
+    {
+      "y": 30,
+      "xMin": -30,
+      "xMax": 4
+    },
+    {
+      "y": 30,
+      "xMin": 43,
+      "xMax": 51
+    },
+    {
+      "y": 30,
+      "xMin": 103,
+      "xMax": 106
+    },
+    {
+      "y": 30,
+      "xMin": 156,
+      "xMax": 165
+    },
+    {
+      "y": 31,
+      "xMin": -30,
+      "xMax": 4
+    },
+    {
+      "y": 31,
+      "xMin": 47,
+      "xMax": 51
+    },
+    {
+      "y": 31,
+      "xMin": 124,
+      "xMax": 130
+    },
+    {
+      "y": 31,
+      "xMin": 157,
+      "xMax": 165
+    },
+    {
+      "y": 32,
+      "xMin": -30,
+      "xMax": 4
+    },
+    {
+      "y": 32,
+      "xMin": 8,
+      "xMax": 12
+    },
+    {
+      "y": 32,
+      "xMin": 47,
+      "xMax": 63
+    },
+    {
+      "y": 32,
+      "xMin": 121,
+      "xMax": 123
+    },
+    {
+      "y": 32,
+      "xMin": 131,
+      "xMax": 137
+    },
+    {
+      "y": 32,
+      "xMin": 158,
+      "xMax": 165
+    },
+    {
+      "y": 33,
+      "xMin": -30,
+      "xMax": 4
+    },
+    {
+      "y": 33,
+      "xMin": 8,
+      "xMax": 12
+    },
+    {
+      "y": 33,
+      "xMin": 47,
+      "xMax": 63
+    },
+    {
+      "y": 33,
+      "xMin": 118,
+      "xMax": 120
+    },
+    {
+      "y": 33,
+      "xMin": 138,
+      "xMax": 138
+    },
+    {
+      "y": 33,
+      "xMin": 158,
+      "xMax": 165
+    },
+    {
+      "y": 34,
+      "xMin": -30,
+      "xMax": 12
+    },
+    {
+      "y": 34,
+      "xMin": 51,
+      "xMax": 63
+    },
+    {
+      "y": 34,
+      "xMin": 117,
+      "xMax": 117
+    },
+    {
+      "y": 34,
+      "xMin": 139,
+      "xMax": 139
+    },
+    {
+      "y": 34,
+      "xMin": 158,
+      "xMax": 165
+    },
+    {
+      "y": 35,
+      "xMin": -30,
+      "xMax": 12
+    },
+    {
+      "y": 35,
+      "xMin": 54,
+      "xMax": 63
+    },
+    {
+      "y": 35,
+      "xMin": 116,
+      "xMax": 116
+    },
+    {
+      "y": 35,
+      "xMin": 140,
+      "xMax": 140
+    },
+    {
+      "y": 35,
+      "xMin": 158,
+      "xMax": 165
+    },
+    {
+      "y": 36,
+      "xMin": -30,
+      "xMax": 12
+    },
+    {
+      "y": 36,
+      "xMin": 115,
+      "xMax": 115
+    },
+    {
+      "y": 36,
+      "xMin": 141,
+      "xMax": 141
+    },
+    {
+      "y": 36,
+      "xMin": 158,
+      "xMax": 165
+    },
+    {
+      "y": 37,
+      "xMin": -30,
+      "xMax": 12
+    },
+    {
+      "y": 37,
+      "xMin": 142,
+      "xMax": 142
+    },
+    {
+      "y": 37,
+      "xMin": 158,
+      "xMax": 165
+    },
+    {
+      "y": 38,
+      "xMin": -30,
+      "xMax": 12
+    },
+    {
+      "y": 38,
+      "xMin": 114,
+      "xMax": 114
+    },
+    {
+      "y": 38,
+      "xMin": 158,
+      "xMax": 165
+    },
+    {
+      "y": 39,
+      "xMin": -30,
+      "xMax": 12
+    },
+    {
+      "y": 39,
+      "xMin": 113,
+      "xMax": 113
+    },
+    {
+      "y": 39,
+      "xMin": 143,
+      "xMax": 143
+    },
+    {
+      "y": 39,
+      "xMin": 158,
+      "xMax": 165
+    },
+    {
+      "y": 40,
+      "xMin": -30,
+      "xMax": 12
+    },
+    {
+      "y": 40,
+      "xMin": 158,
+      "xMax": 165
+    },
+    {
+      "y": 41,
+      "xMin": -30,
+      "xMax": 11
+    },
+    {
+      "y": 41,
+      "xMin": 158,
+      "xMax": 165
+    },
+    {
+      "y": 42,
+      "xMin": -30,
+      "xMax": 10
+    },
+    {
+      "y": 42,
+      "xMin": 158,
+      "xMax": 165
+    },
+    {
+      "y": 43,
+      "xMin": -30,
+      "xMax": 9
+    },
+    {
+      "y": 43,
+      "xMin": 112,
+      "xMax": 112
+    },
+    {
+      "y": 43,
+      "xMin": 144,
+      "xMax": 144
+    },
+    {
+      "y": 43,
+      "xMin": 158,
+      "xMax": 165
+    },
+    {
+      "y": 44,
+      "xMin": -30,
+      "xMax": 9
+    },
+    {
+      "y": 44,
+      "xMin": 158,
+      "xMax": 165
+    },
+    {
+      "y": 45,
+      "xMin": -30,
+      "xMax": 9
+    },
+    {
+      "y": 45,
+      "xMin": 80,
+      "xMax": 101
+    },
+    {
+      "y": 45,
+      "xMin": 118,
+      "xMax": 118
+    },
+    {
+      "y": 45,
+      "xMin": 138,
+      "xMax": 138
+    },
+    {
+      "y": 45,
+      "xMin": 158,
+      "xMax": 165
+    },
+    {
+      "y": 46,
+      "xMin": -30,
+      "xMax": 8
+    },
+    {
+      "y": 46,
+      "xMin": 79,
+      "xMax": 79
+    },
+    {
+      "y": 46,
+      "xMin": 102,
+      "xMax": 103
+    },
+    {
+      "y": 46,
+      "xMin": 158,
+      "xMax": 165
+    },
+    {
+      "y": 47,
+      "xMin": -30,
+      "xMax": 8
+    },
+    {
+      "y": 47,
+      "xMin": 158,
+      "xMax": 165
+    },
+    {
+      "y": 48,
+      "xMin": -30,
+      "xMax": 8
+    },
+    {
+      "y": 48,
+      "xMin": 119,
+      "xMax": 119
+    },
+    {
+      "y": 48,
+      "xMin": 137,
+      "xMax": 137
+    },
+    {
+      "y": 48,
+      "xMin": 154,
+      "xMax": 154
+    },
+    {
+      "y": 48,
+      "xMin": 158,
+      "xMax": 165
+    },
+    {
+      "y": 49,
+      "xMin": -30,
+      "xMax": 8
+    },
+    {
+      "y": 49,
+      "xMin": 67,
+      "xMax": 67
+    },
+    {
+      "y": 49,
+      "xMin": 120,
+      "xMax": 120
+    },
+    {
+      "y": 49,
+      "xMin": 136,
+      "xMax": 136
+    },
+    {
+      "y": 49,
+      "xMin": 153,
+      "xMax": 153
+    },
+    {
+      "y": 49,
+      "xMin": 158,
+      "xMax": 165
+    },
+    {
+      "y": 50,
+      "xMin": -30,
+      "xMax": 8
+    },
+    {
+      "y": 50,
+      "xMin": 66,
+      "xMax": 66
+    },
+    {
+      "y": 50,
+      "xMin": 104,
+      "xMax": 104
+    },
+    {
+      "y": 50,
+      "xMin": 121,
+      "xMax": 121
+    },
+    {
+      "y": 50,
+      "xMin": 135,
+      "xMax": 135
+    },
+    {
+      "y": 50,
+      "xMin": 158,
+      "xMax": 165
+    },
+    {
+      "y": 51,
+      "xMin": -30,
+      "xMax": 8
+    },
+    {
+      "y": 51,
+      "xMin": 65,
+      "xMax": 65
+    },
+    {
+      "y": 51,
+      "xMin": 122,
+      "xMax": 134
+    },
+    {
+      "y": 51,
+      "xMin": 152,
+      "xMax": 152
+    },
+    {
+      "y": 51,
+      "xMin": 158,
+      "xMax": 165
+    },
+    {
+      "y": 52,
+      "xMin": -30,
+      "xMax": 8
+    },
+    {
+      "y": 52,
+      "xMin": 151,
+      "xMax": 151
+    },
+    {
+      "y": 52,
+      "xMin": 157,
+      "xMax": 165
+    },
+    {
+      "y": 53,
+      "xMin": -30,
+      "xMax": 8
+    },
+    {
+      "y": 53,
+      "xMin": 105,
+      "xMax": 105
+    },
+    {
+      "y": 54,
+      "xMin": -30,
+      "xMax": 8
+    },
+    {
+      "y": 54,
+      "xMin": 64,
+      "xMax": 64
+    },
+    {
+      "y": 54,
+      "xMin": 71,
+      "xMax": 71
+    },
+    {
+      "y": 54,
+      "xMin": 150,
+      "xMax": 150
+    },
+    {
+      "y": 55,
+      "xMin": -30,
+      "xMax": 8
+    },
+    {
+      "y": 55,
+      "xMin": 106,
+      "xMax": 106
+    },
+    {
+      "y": 55,
+      "xMin": 158,
+      "xMax": 165
+    },
+    {
+      "y": 56,
+      "xMin": -30,
+      "xMax": 8
+    },
+    {
+      "y": 56,
+      "xMin": 72,
+      "xMax": 82
+    },
+    {
+      "y": 56,
+      "xMin": 149,
+      "xMax": 149
+    },
+    {
+      "y": 56,
+      "xMin": 156,
+      "xMax": 165
+    },
+    {
+      "y": 57,
+      "xMin": -30,
+      "xMax": 8
+    },
+    {
+      "y": 57,
+      "xMin": 66,
+      "xMax": 73
+    },
+    {
+      "y": 57,
+      "xMin": 83,
+      "xMax": 88
+    },
+    {
+      "y": 57,
+      "xMin": 148,
+      "xMax": 148
+    },
+    {
+      "y": 57,
+      "xMin": 154,
+      "xMax": 165
+    },
+    {
+      "y": 58,
+      "xMin": -30,
+      "xMax": 8
+    },
+    {
+      "y": 58,
+      "xMin": 66,
+      "xMax": 66
+    },
+    {
+      "y": 58,
+      "xMin": 89,
+      "xMax": 94
+    },
+    {
+      "y": 58,
+      "xMin": 147,
+      "xMax": 147
+    },
+    {
+      "y": 58,
+      "xMin": 153,
+      "xMax": 165
+    },
+    {
+      "y": 59,
+      "xMin": -30,
+      "xMax": 8
+    },
+    {
+      "y": 59,
+      "xMin": 66,
+      "xMax": 66
+    },
+    {
+      "y": 59,
+      "xMin": 95,
+      "xMax": 97
+    },
+    {
+      "y": 59,
+      "xMin": 145,
+      "xMax": 146
+    },
+    {
+      "y": 59,
+      "xMin": 151,
+      "xMax": 165
+    },
+    {
+      "y": 60,
+      "xMin": -30,
+      "xMax": 11
+    },
+    {
+      "y": 60,
+      "xMin": 66,
+      "xMax": 66
+    },
+    {
+      "y": 60,
+      "xMin": 98,
+      "xMax": 98
+    },
+    {
+      "y": 60,
+      "xMin": 142,
+      "xMax": 144
+    },
+    {
+      "y": 60,
+      "xMin": 149,
+      "xMax": 165
+    },
+    {
+      "y": 61,
+      "xMin": -30,
+      "xMax": 11
+    },
+    {
+      "y": 61,
+      "xMin": 66,
+      "xMax": 66
+    },
+    {
+      "y": 61,
+      "xMin": 99,
+      "xMax": 99
+    },
+    {
+      "y": 61,
+      "xMin": 140,
+      "xMax": 141
+    },
+    {
+      "y": 61,
+      "xMin": 147,
+      "xMax": 165
+    },
+    {
+      "y": 62,
+      "xMin": -30,
+      "xMax": 9
+    },
+    {
+      "y": 62,
+      "xMin": 66,
+      "xMax": 66
+    },
+    {
+      "y": 62,
+      "xMin": 100,
+      "xMax": 100
+    },
+    {
+      "y": 62,
+      "xMin": 125,
+      "xMax": 125
+    },
+    {
+      "y": 62,
+      "xMin": 138,
+      "xMax": 139
+    },
+    {
+      "y": 62,
+      "xMin": 145,
+      "xMax": 165
+    },
+    {
+      "y": 63,
+      "xMin": -30,
+      "xMax": 2
+    },
+    {
+      "y": 63,
+      "xMin": 66,
+      "xMax": 66
+    },
+    {
+      "y": 63,
+      "xMin": 101,
+      "xMax": 101
+    },
+    {
+      "y": 63,
+      "xMin": 124,
+      "xMax": 124
+    },
+    {
+      "y": 63,
+      "xMin": 126,
+      "xMax": 137
+    },
+    {
+      "y": 63,
+      "xMin": 144,
+      "xMax": 165
+    },
+    {
+      "y": 64,
+      "xMin": -30,
+      "xMax": 2
+    },
+    {
+      "y": 64,
+      "xMin": 66,
+      "xMax": 66
+    },
+    {
+      "y": 64,
+      "xMin": 102,
+      "xMax": 102
+    },
+    {
+      "y": 64,
+      "xMin": 143,
+      "xMax": 165
+    },
+    {
+      "y": 65,
+      "xMin": -30,
+      "xMax": 2
+    },
+    {
+      "y": 65,
+      "xMin": 66,
+      "xMax": 66
+    },
+    {
+      "y": 65,
+      "xMin": 103,
+      "xMax": 104
+    },
+    {
+      "y": 65,
+      "xMin": 129,
+      "xMax": 132
+    },
+    {
+      "y": 65,
+      "xMin": 140,
+      "xMax": 165
+    },
+    {
+      "y": 66,
+      "xMin": -30,
+      "xMax": 2
+    },
+    {
+      "y": 66,
+      "xMin": 12,
+      "xMax": 16
+    },
+    {
+      "y": 66,
+      "xMin": 66,
+      "xMax": 66
+    },
+    {
+      "y": 66,
+      "xMin": 105,
+      "xMax": 105
+    },
+    {
+      "y": 66,
+      "xMin": 129,
+      "xMax": 165
+    },
+    {
+      "y": 67,
+      "xMin": -30,
+      "xMax": 2
+    },
+    {
+      "y": 67,
+      "xMin": 66,
+      "xMax": 66
+    },
+    {
+      "y": 67,
+      "xMin": 129,
+      "xMax": 165
+    },
+    {
+      "y": 68,
+      "xMin": -30,
+      "xMax": 2
+    },
+    {
+      "y": 68,
+      "xMin": 17,
+      "xMax": 17
+    },
+    {
+      "y": 68,
+      "xMin": 64,
+      "xMax": 64
+    },
+    {
+      "y": 68,
+      "xMin": 66,
+      "xMax": 66
+    },
+    {
+      "y": 68,
+      "xMin": 106,
+      "xMax": 106
+    },
+    {
+      "y": 68,
+      "xMin": 129,
+      "xMax": 165
+    },
+    {
+      "y": 69,
+      "xMin": -30,
+      "xMax": 2
+    },
+    {
+      "y": 69,
+      "xMin": 17,
+      "xMax": 17
+    },
+    {
+      "y": 69,
+      "xMin": 129,
+      "xMax": 165
+    },
+    {
+      "y": 70,
+      "xMin": -30,
+      "xMax": 2
+    },
+    {
+      "y": 70,
+      "xMin": 12,
+      "xMax": 17
+    },
+    {
+      "y": 70,
+      "xMin": 107,
+      "xMax": 107
+    },
+    {
+      "y": 70,
+      "xMin": 131,
+      "xMax": 165
+    },
+    {
+      "y": 71,
+      "xMin": -30,
+      "xMax": -7
+    },
+    {
+      "y": 71,
+      "xMin": -3,
+      "xMax": -2
+    },
+    {
+      "y": 71,
+      "xMin": 1,
+      "xMax": 2
+    },
+    {
+      "y": 71,
+      "xMin": 26,
+      "xMax": 26
+    },
+    {
+      "y": 71,
+      "xMin": 45,
+      "xMax": 45
+    },
+    {
+      "y": 71,
+      "xMin": 61,
+      "xMax": 65
+    },
+    {
+      "y": 71,
+      "xMin": 131,
+      "xMax": 165
+    },
+    {
+      "y": 72,
+      "xMin": -30,
+      "xMax": -7
+    },
+    {
+      "y": 72,
+      "xMin": -3,
+      "xMax": -2
+    },
+    {
+      "y": 72,
+      "xMin": 1,
+      "xMax": 2
+    },
+    {
+      "y": 72,
+      "xMin": 26,
+      "xMax": 27
+    },
+    {
+      "y": 72,
+      "xMin": 42,
+      "xMax": 45
+    },
+    {
+      "y": 72,
+      "xMin": 60,
+      "xMax": 66
+    },
+    {
+      "y": 72,
+      "xMin": 108,
+      "xMax": 108
+    },
+    {
+      "y": 72,
+      "xMin": 132,
+      "xMax": 165
+    },
+    {
+      "y": 73,
+      "xMin": -30,
+      "xMax": -7
+    },
+    {
+      "y": 73,
+      "xMin": -3,
+      "xMax": 2
+    },
+    {
+      "y": 73,
+      "xMin": 26,
+      "xMax": 26
+    },
+    {
+      "y": 73,
+      "xMin": 40,
+      "xMax": 40
+    },
+    {
+      "y": 73,
+      "xMin": 42,
+      "xMax": 45
+    },
+    {
+      "y": 73,
+      "xMin": 53,
+      "xMax": 64
+    },
+    {
+      "y": 73,
+      "xMin": 128,
+      "xMax": 128
+    },
+    {
+      "y": 73,
+      "xMin": 132,
+      "xMax": 165
+    },
+    {
+      "y": 74,
+      "xMin": -30,
+      "xMax": -7
+    },
+    {
+      "y": 74,
+      "xMin": 2,
+      "xMax": 2
+    },
+    {
+      "y": 74,
+      "xMin": 12,
+      "xMax": 12
+    },
+    {
+      "y": 74,
+      "xMin": 42,
+      "xMax": 45
+    },
+    {
+      "y": 74,
+      "xMin": 53,
+      "xMax": 64
+    },
+    {
+      "y": 74,
+      "xMin": 109,
+      "xMax": 109
+    },
+    {
+      "y": 74,
+      "xMin": 131,
+      "xMax": 165
+    },
+    {
+      "y": 75,
+      "xMin": -30,
+      "xMax": -7
+    },
+    {
+      "y": 75,
+      "xMin": 2,
+      "xMax": 2
+    },
+    {
+      "y": 75,
+      "xMin": 19,
+      "xMax": 21
+    },
+    {
+      "y": 75,
+      "xMin": 53,
+      "xMax": 64
+    },
+    {
+      "y": 75,
+      "xMin": 131,
+      "xMax": 165
+    },
+    {
+      "y": 76,
+      "xMin": -30,
+      "xMax": -7
+    },
+    {
+      "y": 76,
+      "xMin": 2,
+      "xMax": 2
+    },
+    {
+      "y": 76,
+      "xMin": 12,
+      "xMax": 15
+    },
+    {
+      "y": 76,
+      "xMin": 59,
+      "xMax": 83
+    },
+    {
+      "y": 76,
+      "xMin": 110,
+      "xMax": 110
+    },
+    {
+      "y": 76,
+      "xMin": 129,
+      "xMax": 165
+    },
+    {
+      "y": 77,
+      "xMin": -30,
+      "xMax": -7
+    },
+    {
+      "y": 77,
+      "xMin": 2,
+      "xMax": 2
+    },
+    {
+      "y": 77,
+      "xMin": 12,
+      "xMax": 15
+    },
+    {
+      "y": 77,
+      "xMin": 60,
+      "xMax": 63
+    },
+    {
+      "y": 77,
+      "xMin": 129,
+      "xMax": 165
+    },
+    {
+      "y": 78,
+      "xMin": -30,
+      "xMax": -7
+    },
+    {
+      "y": 78,
+      "xMin": 2,
+      "xMax": 2
+    },
+    {
+      "y": 78,
+      "xMin": 62,
+      "xMax": 63
+    },
+    {
+      "y": 78,
+      "xMin": 111,
+      "xMax": 111
+    },
+    {
+      "y": 78,
+      "xMin": 128,
+      "xMax": 165
+    },
+    {
+      "y": 79,
+      "xMin": -30,
+      "xMax": -7
+    },
+    {
+      "y": 79,
+      "xMin": 2,
+      "xMax": 2
+    },
+    {
+      "y": 79,
+      "xMin": 16,
+      "xMax": 22
+    },
+    {
+      "y": 79,
+      "xMin": 29,
+      "xMax": 31
+    },
+    {
+      "y": 79,
+      "xMin": 63,
+      "xMax": 63
+    },
+    {
+      "y": 79,
+      "xMin": 128,
+      "xMax": 165
+    },
+    {
+      "y": 80,
+      "xMin": -30,
+      "xMax": -7
+    },
+    {
+      "y": 80,
+      "xMin": 2,
+      "xMax": 2
+    },
+    {
+      "y": 80,
+      "xMin": 16,
+      "xMax": 22
+    },
+    {
+      "y": 80,
+      "xMin": 63,
+      "xMax": 63
+    },
+    {
+      "y": 80,
+      "xMin": 112,
+      "xMax": 165
+    },
+    {
+      "y": 81,
+      "xMin": -30,
+      "xMax": -7
+    },
+    {
+      "y": 81,
+      "xMin": 2,
+      "xMax": 2
+    },
+    {
+      "y": 81,
+      "xMin": 67,
+      "xMax": 83
+    },
+    {
+      "y": 81,
+      "xMin": 128,
+      "xMax": 165
+    },
+    {
+      "y": 82,
+      "xMin": -30,
+      "xMax": -7
+    },
+    {
+      "y": 82,
+      "xMin": 2,
+      "xMax": 2
+    },
+    {
+      "y": 82,
+      "xMin": 23,
+      "xMax": 28
+    },
+    {
+      "y": 82,
+      "xMin": 32,
+      "xMax": 35
+    },
+    {
+      "y": 82,
+      "xMin": 128,
+      "xMax": 165
+    },
+    {
+      "y": 83,
+      "xMin": -30,
+      "xMax": -7
+    },
+    {
+      "y": 83,
+      "xMin": 2,
+      "xMax": 2
+    },
+    {
+      "y": 83,
+      "xMin": 23,
+      "xMax": 35
+    },
+    {
+      "y": 83,
+      "xMin": 128,
+      "xMax": 165
+    },
+    {
+      "y": 84,
+      "xMin": -30,
+      "xMax": -7
+    },
+    {
+      "y": 84,
+      "xMin": 2,
+      "xMax": 2
+    },
+    {
+      "y": 84,
+      "xMin": 128,
+      "xMax": 165
+    },
+    {
+      "y": 85,
+      "xMin": -30,
+      "xMax": -7
+    },
+    {
+      "y": 85,
+      "xMin": 2,
+      "xMax": 2
+    },
+    {
+      "y": 85,
+      "xMin": 36,
+      "xMax": 39
+    },
+    {
+      "y": 85,
+      "xMin": 83,
+      "xMax": 83
+    },
+    {
+      "y": 85,
+      "xMin": 128,
+      "xMax": 165
+    },
+    {
+      "y": 86,
+      "xMin": -30,
+      "xMax": -21
+    },
+    {
+      "y": 86,
+      "xMin": 2,
+      "xMax": 2
+    },
+    {
+      "y": 86,
+      "xMin": 36,
+      "xMax": 39
+    },
+    {
+      "y": 86,
+      "xMin": 128,
+      "xMax": 165
+    },
+    {
+      "y": 87,
+      "xMin": -30,
+      "xMax": -21
+    },
+    {
+      "y": 87,
+      "xMin": 2,
+      "xMax": 2
+    },
+    {
+      "y": 87,
+      "xMin": 128,
+      "xMax": 165
+    },
+    {
+      "y": 88,
+      "xMin": -30,
+      "xMax": -21
+    },
+    {
+      "y": 88,
+      "xMin": -17,
+      "xMax": -9
+    },
+    {
+      "y": 88,
+      "xMin": 2,
+      "xMax": 2
+    },
+    {
+      "y": 88,
+      "xMin": 11,
+      "xMax": 11
+    },
+    {
+      "y": 88,
+      "xMin": 40,
+      "xMax": 44
+    },
+    {
+      "y": 88,
+      "xMin": 60,
+      "xMax": 62
+    },
+    {
+      "y": 88,
+      "xMin": 64,
+      "xMax": 67
+    },
+    {
+      "y": 88,
+      "xMin": 128,
+      "xMax": 165
+    },
+    {
+      "y": 89,
+      "xMin": -30,
+      "xMax": -21
+    },
+    {
+      "y": 89,
+      "xMin": -17,
+      "xMax": -8
+    },
+    {
+      "y": 89,
+      "xMin": 2,
+      "xMax": 2
+    },
+    {
+      "y": 89,
+      "xMin": 11,
+      "xMax": 11
+    },
+    {
+      "y": 89,
+      "xMin": 40,
+      "xMax": 44
+    },
+    {
+      "y": 89,
+      "xMin": 60,
+      "xMax": 62
+    },
+    {
+      "y": 89,
+      "xMin": 128,
+      "xMax": 165
+    },
+    {
+      "y": 90,
+      "xMin": -30,
+      "xMax": -21
+    },
+    {
+      "y": 90,
+      "xMin": -17,
+      "xMax": -8
+    },
+    {
+      "y": 90,
+      "xMin": 2,
+      "xMax": 2
+    },
+    {
+      "y": 90,
+      "xMin": 11,
+      "xMax": 11
+    },
+    {
+      "y": 90,
+      "xMin": 22,
+      "xMax": 29
+    },
+    {
+      "y": 90,
+      "xMin": 63,
+      "xMax": 63
+    },
+    {
+      "y": 90,
+      "xMin": 128,
+      "xMax": 165
+    },
+    {
+      "y": 91,
+      "xMin": -30,
+      "xMax": -21
+    },
+    {
+      "y": 91,
+      "xMin": -17,
+      "xMax": -8
+    },
+    {
+      "y": 91,
+      "xMin": 11,
+      "xMax": 11
+    },
+    {
+      "y": 91,
+      "xMin": 20,
+      "xMax": 30
+    },
+    {
+      "y": 91,
+      "xMin": 45,
+      "xMax": 59
+    },
+    {
+      "y": 91,
+      "xMin": 63,
+      "xMax": 63
+    },
+    {
+      "y": 91,
+      "xMin": 128,
+      "xMax": 165
+    },
+    {
+      "y": 92,
+      "xMin": -30,
+      "xMax": -21
+    },
+    {
+      "y": 92,
+      "xMin": -17,
+      "xMax": -8
+    },
+    {
+      "y": 92,
+      "xMin": 19,
+      "xMax": 30
+    },
+    {
+      "y": 92,
+      "xMin": 45,
+      "xMax": 59
+    },
+    {
+      "y": 92,
+      "xMin": 68,
+      "xMax": 70
+    },
+    {
+      "y": 92,
+      "xMin": 128,
+      "xMax": 165
+    },
+    {
+      "y": 93,
+      "xMin": -30,
+      "xMax": -21
+    },
+    {
+      "y": 93,
+      "xMin": -17,
+      "xMax": -8
+    },
+    {
+      "y": 93,
+      "xMin": 2,
+      "xMax": 2
+    },
+    {
+      "y": 93,
+      "xMin": 11,
+      "xMax": 11
+    },
+    {
+      "y": 93,
+      "xMin": 19,
+      "xMax": 30
+    },
+    {
+      "y": 93,
+      "xMin": 64,
+      "xMax": 83
+    },
+    {
+      "y": 93,
+      "xMin": 128,
+      "xMax": 165
+    },
+    {
+      "y": 94,
+      "xMin": -30,
+      "xMax": -21
+    },
+    {
+      "y": 94,
+      "xMin": -17,
+      "xMax": -8
+    },
+    {
+      "y": 94,
+      "xMin": 15,
+      "xMax": 15
+    },
+    {
+      "y": 94,
+      "xMin": 19,
+      "xMax": 30
+    },
+    {
+      "y": 94,
+      "xMin": 128,
+      "xMax": 165
+    },
+    {
+      "y": 95,
+      "xMin": -30,
+      "xMax": -21
+    },
+    {
+      "y": 95,
+      "xMin": -17,
+      "xMax": 0
+    },
+    {
+      "y": 95,
+      "xMin": 3,
+      "xMax": 8
+    },
+    {
+      "y": 95,
+      "xMin": 19,
+      "xMax": 31
+    },
+    {
+      "y": 95,
+      "xMin": 128,
+      "xMax": 165
+    },
+    {
+      "y": 96,
+      "xMin": -30,
+      "xMax": -21
+    },
+    {
+      "y": 96,
+      "xMin": -17,
+      "xMax": 14
+    },
+    {
+      "y": 96,
+      "xMin": 19,
+      "xMax": 32
+    },
+    {
+      "y": 96,
+      "xMin": 128,
+      "xMax": 130
+    },
+    {
+      "y": 97,
+      "xMin": -30,
+      "xMax": -21
+    },
+    {
+      "y": 97,
+      "xMin": -17,
+      "xMax": 11
+    },
+    {
+      "y": 97,
+      "xMin": 19,
+      "xMax": 33
+    },
+    {
+      "y": 97,
+      "xMin": 128,
+      "xMax": 130
+    },
+    {
+      "y": 98,
+      "xMin": -30,
+      "xMax": -21
+    },
+    {
+      "y": 98,
+      "xMin": -17,
+      "xMax": 11
+    },
+    {
+      "y": 98,
+      "xMin": 19,
+      "xMax": 34
+    },
+    {
+      "y": 99,
+      "xMin": -30,
+      "xMax": -21
+    },
+    {
+      "y": 99,
+      "xMin": -17,
+      "xMax": 11
+    },
+    {
+      "y": 99,
+      "xMin": 19,
+      "xMax": 35
+    },
+    {
+      "y": 99,
+      "xMin": 139,
+      "xMax": 165
+    },
+    {
+      "y": 100,
+      "xMin": -30,
+      "xMax": -21
+    },
+    {
+      "y": 100,
+      "xMin": -17,
+      "xMax": 36
+    },
+    {
+      "y": 100,
+      "xMin": 64,
+      "xMax": 76
+    },
+    {
+      "y": 100,
+      "xMin": 93,
+      "xMax": 96
+    },
+    {
+      "y": 100,
+      "xMin": 128,
+      "xMax": 130
+    },
+    {
+      "y": 100,
+      "xMin": 139,
+      "xMax": 165
+    },
+    {
+      "y": 101,
+      "xMin": -30,
+      "xMax": -21
+    },
+    {
+      "y": 101,
+      "xMin": -17,
+      "xMax": 47
+    },
+    {
+      "y": 101,
+      "xMin": 62,
+      "xMax": 77
+    },
+    {
+      "y": 101,
+      "xMin": 91,
+      "xMax": 97
+    },
+    {
+      "y": 101,
+      "xMin": 109,
+      "xMax": 110
+    },
+    {
+      "y": 101,
+      "xMin": 119,
+      "xMax": 121
+    },
+    {
+      "y": 101,
+      "xMin": 130,
+      "xMax": 130
+    },
+    {
+      "y": 101,
+      "xMin": 138,
+      "xMax": 165
+    },
+    {
+      "y": 102,
+      "xMin": -30,
+      "xMax": -21
+    },
+    {
+      "y": 102,
+      "xMin": -17,
+      "xMax": 50
+    },
+    {
+      "y": 102,
+      "xMin": 59,
+      "xMax": 79
+    },
+    {
+      "y": 102,
+      "xMin": 88,
+      "xMax": 99
+    },
+    {
+      "y": 102,
+      "xMin": 108,
+      "xMax": 130
+    },
+    {
+      "y": 102,
+      "xMin": 135,
+      "xMax": 165
+    },
+    {
+      "y": 103,
+      "xMin": -17,
+      "xMax": 52
+    },
+    {
+      "y": 103,
+      "xMin": 57,
+      "xMax": 81
+    },
+    {
+      "y": 103,
+      "xMin": 86,
+      "xMax": 101
+    },
+    {
+      "y": 103,
+      "xMin": 106,
+      "xMax": 129
+    },
+    {
+      "y": 103,
+      "xMin": 131,
+      "xMax": 131
+    },
+    {
+      "y": 103,
+      "xMin": 135,
+      "xMax": 165
+    },
+    {
+      "y": 104,
+      "xMin": -17,
+      "xMax": 127
+    },
+    {
+      "y": 104,
+      "xMin": 131,
+      "xMax": 134
+    },
+    {
+      "y": 104,
+      "xMin": 141,
+      "xMax": 165
+    },
+    {
+      "y": 105,
+      "xMin": -17,
+      "xMax": 134
+    },
+    {
+      "y": 105,
+      "xMin": 141,
+      "xMax": 165
+    },
+    {
+      "y": 106,
+      "xMin": -17,
+      "xMax": 139
+    },
+    {
+      "y": 106,
+      "xMin": 141,
+      "xMax": 165
+    },
+    {
+      "y": 107,
+      "xMin": -17,
+      "xMax": 139
+    },
+    {
+      "y": 107,
+      "xMin": 141,
+      "xMax": 165
+    },
+    {
+      "y": 108,
+      "xMin": -17,
+      "xMax": 139
+    },
+    {
+      "y": 108,
+      "xMin": 141,
+      "xMax": 165
+    },
+    {
+      "y": 109,
+      "xMin": -17,
+      "xMax": 139
+    },
+    {
+      "y": 109,
+      "xMin": 141,
+      "xMax": 165
+    },
+    {
+      "y": 110,
+      "xMin": -30,
+      "xMax": -21
+    },
+    {
+      "y": 110,
+      "xMin": -17,
+      "xMax": 139
+    },
+    {
+      "y": 110,
+      "xMin": 141,
+      "xMax": 165
+    },
+    {
+      "y": 111,
+      "xMin": -30,
+      "xMax": -21
+    },
+    {
+      "y": 111,
+      "xMin": -17,
+      "xMax": 139
+    },
+    {
+      "y": 111,
+      "xMin": 141,
+      "xMax": 165
+    },
+    {
+      "y": 112,
+      "xMin": -30,
+      "xMax": -21
+    },
+    {
+      "y": 112,
+      "xMin": -17,
+      "xMax": 139
+    },
+    {
+      "y": 112,
+      "xMin": 141,
+      "xMax": 165
+    },
+    {
+      "y": 113,
+      "xMin": -30,
+      "xMax": -21
+    },
+    {
+      "y": 113,
+      "xMin": -17,
+      "xMax": 139
+    },
+    {
+      "y": 113,
+      "xMin": 141,
+      "xMax": 165
+    },
+    {
+      "y": 114,
+      "xMin": -30,
+      "xMax": -21
+    },
+    {
+      "y": 114,
+      "xMin": -17,
+      "xMax": 139
+    },
+    {
+      "y": 114,
+      "xMin": 141,
+      "xMax": 165
+    },
+    {
+      "y": 115,
+      "xMin": -30,
+      "xMax": -21
+    },
+    {
+      "y": 115,
+      "xMin": -17,
+      "xMax": 139
+    },
+    {
+      "y": 115,
+      "xMin": 141,
+      "xMax": 165
+    }
+  ],
+  "voidRuns": [
+    {
+      "y": -85,
+      "xMin": -30,
+      "xMax": 165
+    },
+    {
+      "y": -84,
+      "xMin": -30,
+      "xMax": 165
+    },
+    {
+      "y": -83,
+      "xMin": -30,
+      "xMax": 165
+    },
+    {
+      "y": -82,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -81,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -80,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -79,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -78,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -77,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -76,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -75,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -74,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -73,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -72,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -71,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -70,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -69,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -68,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -67,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -66,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -65,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -64,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -63,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -62,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -61,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -60,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -59,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -58,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -57,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -56,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -55,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -54,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -53,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -52,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -51,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -50,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -49,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -48,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -47,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -46,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -45,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -44,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -43,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -42,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -41,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -40,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -39,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -38,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -37,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -36,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -35,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -34,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -33,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -32,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -31,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -30,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -29,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -28,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -27,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -26,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -25,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -24,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -23,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -22,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -21,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -20,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -19,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -18,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -17,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -16,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -15,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -14,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -13,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -12,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -11,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -10,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -9,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -8,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -7,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -6,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -5,
+      "xMin": 65,
+      "xMax": 165
+    },
+    {
+      "y": -4,
+      "xMin": 65,
+      "xMax": 165
+    }
+  ],
+  "transitionRuns": [
+    {
+      "x": 17,
+      "y": 25,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 18,
+      "y": 25,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 19,
+      "y": 25,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 34,
+      "y": 29,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 35,
+      "y": 29,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 36,
+      "y": 29,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 14,
+      "y": 66,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 15,
+      "y": 66,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 16,
+      "y": 66,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 19,
+      "y": 75,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 20,
+      "y": 75,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 21,
+      "y": 75,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 29,
+      "y": 79,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 30,
+      "y": 79,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 31,
+      "y": 79,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 121,
+      "y": 80,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 122,
+      "y": 80,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 123,
+      "y": 80,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 124,
+      "y": 80,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 125,
+      "y": 80,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 126,
+      "y": 80,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 127,
+      "y": 80,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 72,
+      "y": 81,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 73,
+      "y": 81,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 74,
+      "y": 81,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 65,
+      "y": 88,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 66,
+      "y": 88,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 12,
+      "y": 96,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 13,
+      "y": 96,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    },
+    {
+      "x": 14,
+      "y": 96,
+      "dx": 0,
+      "dy": 1,
+      "length": 1
+    }
+  ]
 }

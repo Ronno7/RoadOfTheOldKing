@@ -1,64 +1,97 @@
-// Edit-only automatic cliff authoring checks. Scratch scene; no saves or production edits.
-if(EditorApplication.isPlayingOrWillChangePlaymode)throw new Exception("Stopped Edit Mode required.");
-string root="Assets/Art/Tiles/GreenLowlands/Terrain";
-var brush=AssetDatabase.LoadAssetAtPath<RoadOfTheOldKing.World.RaisedCliffTile>(root+"/Rules/Paint_RaisedEarth.asset");
-var sprites=AssetDatabase.LoadAllAssetsAtPath(root+"/GreenLowlandsCliffs16.png").OfType<Sprite>().ToArray();
-int passed=0;Action<bool,string> check=(ok,label)=>{if(!ok)throw new Exception(label);passed++;};
-check(brush!=null&&sprites.Length==188,"Complete automatic cliff asset");
-check(sprites.All(s=>s.rect.width==16&&s.rect.height==64&&s.pixelsPerUnit==16),"188 native complete columns");
-check(sprites.All(s=>s.pivot==new Vector2(8,56)&&Mathf.Abs(s.bounds.min.y+3.5f)<.001f),"Top-cell anchors and three-cell extension");
-var importer=(TextureImporter)AssetImporter.GetAtPath(root+"/GreenLowlandsCliffs16.png");
-check(importer.filterMode==FilterMode.Point&&!importer.mipmapEnabled&&importer.textureCompression==TextureImporterCompression.Uncompressed,"Native import settings");
-foreach(string name in new[]{"GreenLowlandsTerrain_Cliffs","GreenLowlandsTerrain_DepthManual"})
-    check(AssetDatabase.LoadAllAssetsAtPath(root+"/Palettes/"+name+".prefab").OfType<GridPalette>().Any(),"Registered palette "+name);
-var manual=AssetDatabase.LoadAssetAtPath<GameObject>(root+"/Palettes/GreenLowlandsTerrain_DepthManual.prefab");
-check(manual.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>().SelectMany(m=>m.GetTilesBlock(m.cellBounds)).Where(t=>t!=null).Distinct().Count()==47,"Current banks, doorway and wet corners accessible without obsolete face rows");
-var crest=AssetDatabase.LoadAssetAtPath<RoadOfTheOldKing.World.RaisedCliffTile>(root+"/Rules/Paint_CliffCrest.asset");
-check(crest!=null&&crest.crestLine&&!brush.crestLine&&crest.sprites.SequenceEqual(brush.sprites),"Retaining edges and full uplands share exactly the same native artwork");
-var template=AssetDatabase.LoadAssetAtPath<GameObject>(root+"/Templates/LowlandsCliffSurface.prefab");
-var renderer=template.GetComponentInChildren<UnityEngine.Tilemaps.TilemapRenderer>();
-check(renderer.mode==UnityEngine.Tilemaps.TilemapRenderer.Mode.Individual&&renderer.sortOrder==UnityEngine.Tilemaps.TilemapRenderer.SortOrder.TopRight,"Complete-column rendering order");
-check(template.GetComponentsInChildren<Collider2D>().Length==0,"Visual authoring does not add collision");
-var classify=typeof(RoadOfTheOldKing.EditorTools.GreenLowlandsVegetationBuilder).GetMethod("IsStructuralTile",System.Reflection.BindingFlags.Static|System.Reflection.BindingFlags.NonPublic);
-check((bool)classify.Invoke(null,new object[]{brush}),"Baker recognizes automatic cliffs as structure");
-var previous=UnityEngine.SceneManagement.SceneManager.GetActiveScene();bool dirty=previous.isDirty;
-var scratch=UnityEditor.SceneManagement.EditorSceneManager.NewScene(UnityEditor.SceneManagement.NewSceneSetup.EmptyScene,UnityEditor.SceneManagement.NewSceneMode.Additive);
+﻿// Stopped Edit Mode. Exercise normal native painting in a disposable preview.
+// These checks establish reusable tile behavior, not human visual acceptance.
+if(EditorApplication.isPlayingOrWillChangePlaymode||EditorApplication.isCompiling)throw new Exception("Stopped, compiled Edit Mode required.");
+var scene=UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+if(scene.path!="Assets/Scenes/GreenLowlands.unity")throw new Exception("Open GreenLowlands.");
+bool dirty=scene.isDirty;int passed=0;var failed=new List<string>();
+Action<bool,string> check=(ok,label)=>{if(ok)passed++;else failed.Add(label);};
+string root="Assets/Art/Tiles/Shared/Terrain/";
+var brushes=new[]{"EarthTop","EarthFace","StoneTop","StoneFace"}.Select(n=>AssetDatabase.LoadAssetAtPath<RuleTile>(root+"Rules/Paint_Cliff"+n+".asset")).ToArray();
+check(brushes.All(b=>b!=null),"Earth/stone top and face brushes exist");
+if(brushes.Any(b=>b==null))return new{passed=passed,failed=failed.ToArray()};
+var offsets=new[]{Vector3Int.up,Vector3Int.right,Vector3Int.down,Vector3Int.left,new Vector3Int(1,1),new Vector3Int(1,-1),new Vector3Int(-1,-1),new Vector3Int(-1,1)};
+var masks=new HashSet<int>();for(int raw=0;raw<256;raw++){int m=raw;for(int i=0;i<4;i++)if((m&(1<<i))==0||(m&(1<<((i+1)%4)))==0)m&=~(1<<(i+4));masks.Add(m);}
+var preview=UnityEditor.SceneManagement.EditorSceneManager.NewPreviewScene();
 try{
-    UnityEngine.SceneManagement.SceneManager.SetActiveScene(scratch);
-    var instance=(GameObject)PrefabUtility.InstantiatePrefab(template);
-    var map=instance.GetComponentInChildren<UnityEngine.Tilemaps.Tilemap>();
-    var offsets=new[]{new Vector3Int(0,1),new Vector3Int(1,0),new Vector3Int(0,-1),new Vector3Int(-1,0),new Vector3Int(1,1),new Vector3Int(1,-1),new Vector3Int(-1,-1),new Vector3Int(-1,1)};
-    var seen=new System.Collections.Generic.HashSet<Sprite>();bool populated=true,visualOnly=true;
-    for(int phase=-2;phase<2;phase++)for(int mask=0;mask<256;mask++){
-        map.ClearAllTiles();var c=new Vector3Int(phase,0,0);map.SetTile(c,brush);
-        for(int n=0;n<8;n++)if((mask&(1<<n))!=0)map.SetTile(c+offsets[n],brush);
-        var sprite=map.GetSprite(c);populated&=sprite!=null;if(sprite!=null)seen.Add(sprite);
-        visualOnly&=map.GetColliderType(c)==UnityEngine.Tilemaps.Tile.ColliderType.None;
+    var grid=new GameObject("Native painting check",typeof(Grid));UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(grid,preview);
+    var obj=new GameObject("Farm",typeof(UnityEngine.Tilemaps.Tilemap));UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(obj,preview);obj.transform.SetParent(grid.transform,false);
+    var other=new GameObject("Ridge",typeof(UnityEngine.Tilemaps.Tilemap));UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(other,preview);other.transform.SetParent(grid.transform,false);
+    var map=obj.GetComponent<UnityEngine.Tilemaps.Tilemap>();var upper=other.GetComponent<UnityEngine.Tilemaps.Tilemap>();
+    for(int brushIndex=0;brushIndex<brushes.Length;brushIndex++){
+        var brush=brushes[brushIndex];var alternate=brushes[(brushIndex+2)%4];
+        check(brush.m_DefaultColliderType==UnityEngine.Tilemaps.Tile.ColliderType.None,brush.name+" does not author hidden collision");
+        foreach(int mask in masks){
+            map.ClearAllTiles();map.SetTile(Vector3Int.zero,brush);
+            for(int i=0;i<8;i++)if((mask&(1<<i))!=0)map.SetTile(offsets[i],brush);
+            var original=map.GetSprite(Vector3Int.zero);
+            bool native=original&&original.rect.size==new Vector2(16,16)&&original.pixelsPerUnit==16;
+            // Keep the center material while replacing occupied neighbors. A
+            // material swap must not invent an exposed edge in this footprint.
+            for(int i=0;i<8;i++)if((mask&(1<<i))!=0)map.SetTile(offsets[i],alternate);
+            check(native&&map.GetSprite(Vector3Int.zero)==original,brush.name+" material swap preserves footprint "+mask);
+        }
+        map.ClearAllTiles();map.SetTile(Vector3Int.zero,brush);
+        var isolated=map.GetSprite(Vector3Int.zero);map.SetTile(Vector3Int.right,alternate);
+        var connected=map.GetSprite(Vector3Int.zero);map.SetTile(Vector3Int.right,null);
+        check(connected!=isolated&&map.GetSprite(Vector3Int.zero)==isolated,brush.name+" paints and erases mixed-material neighbors without a bake");
+        map.SetTile(Vector3Int.right,brushes[brushIndex^1]);
+        check(map.GetSprite(Vector3Int.zero)==isolated,brush.name+" does not join a different terrain part");
+        map.SetTile(Vector3Int.right,null);upper.ClearAllTiles();upper.SetTile(Vector3Int.right,alternate);
+        check(map.GetSprite(Vector3Int.zero)==isolated,brush.name+" does not join a different elevation Tilemap");
     }
-    check(populated&&seen.Count==188,"All 256 neighborhoods at four positive/negative phases resolve all 188 sprites");
-    check(visualOnly,"All neighborhoods remain collision-free");
-    map.ClearAllTiles();foreach(var p in offsets)map.SetTile(p,brush);map.SetTile(Vector3Int.zero,brush);
-    check(map.GetSprite(Vector3Int.zero).name=="RaisedEarth_255_0","Closed interior selects full top");
-    var before=offsets.Select(p=>map.GetSprite(p)).ToArray();map.SetTile(Vector3Int.zero,null);
-    check(offsets.Where((p,i)=>map.GetSprite(p)!=before[i]).Count()==8,"Erasing refreshes all eight surrounding corners");
-    map.SetTile(Vector3Int.zero,brush);
-    check(offsets.Select((p,i)=>map.GetSprite(p)==before[i]).All(v=>v),"Repainting restores all surrounding joins");
-    map.ClearAllTiles();map.SetTile(new Vector3Int(-1,0),brush);
-    check(map.GetSprite(new Vector3Int(-1,0)).name=="RaisedEarth_000_3","Isolated negative-column texture phase");
-    map.SetTile(new Vector3Int(0,0),brush);
-    check(map.GetSprite(new Vector3Int(-1,0)).name=="RaisedEarth_002_3"&&map.GetSprite(Vector3Int.zero).name=="RaisedEarth_008_0","Horizontal joining preserves spatial texture sequence");
-    map.ClearAllTiles();for(int x=-2;x<=2;x++)map.SetTile(new Vector3Int(x,0,0),crest);
-    check(map.GetSprite(Vector3Int.zero).name=="RaisedEarth_155_0","Retaining rim connects to open upper meadow and both adjacent crest columns");
-    map.SetTile(new Vector3Int(1,0,0),null);map.SetTile(new Vector3Int(1,-1,0),crest);
-    check(map.GetSprite(Vector3Int.zero).name=="RaisedEarth_155_0","Stepped retaining rim sees the lower neighboring column across cell rows");
-    var sentinel=new GameObject("Unsaved work sentinel");sentinel.transform.position=new Vector3(12,34,56);
-    UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(scratch);
-    RoadOfTheOldKing.EditorTools.GreenLowlandsTerrainKitBuilder.BuildCliffKit();
-    RoadOfTheOldKing.EditorTools.GreenLowlandsTerrainKitBuilder.BuildDepthEdges();
-    check(scratch.isLoaded&&scratch.isDirty&&sentinel!=null&&sentinel.transform.position==new Vector3(12,34,56)&&UnityEngine.SceneManagement.SceneManager.GetActiveScene()==scratch,"Both palette builders preserve an active untitled scene with unsaved work");
-}finally{
-    UnityEngine.SceneManagement.SceneManager.SetActiveScene(previous);
-    UnityEditor.SceneManagement.EditorSceneManager.CloseScene(scratch,true);
+}finally{UnityEditor.SceneManagement.EditorSceneManager.ClosePreviewScene(preview);}
+var maps=scene.GetRootGameObjects().SelectMany(g=>g.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>(true)).ToArray();
+var tiers=new[]{"Farm","Ridge","Enclosure"};
+var tops=tiers.Select(t=>maps.Single(m=>m.name=="Terrain - "+t+" tops")).ToArray();
+var faces=tiers.Select(t=>maps.Single(m=>m.name=="Terrain - "+t+" faces")).ToArray();
+int topCells=0,faceCells=0;bool nativeCells=true;
+foreach(var map in tops.Concat(faces)){
+    var renderer=map.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>();int cells=0;
+    check(renderer&&renderer.enabled&&renderer.mode==UnityEngine.Tilemaps.TilemapRenderer.Mode.Chunk&&map.GetComponent<Collider2D>()==null,map.name+" native renderer and separate collision");
+    foreach(var p in map.cellBounds.allPositionsWithin){
+        var tile=map.GetTile(p);if(!tile)continue;cells++;
+        var sprite=map.GetSprite(p);nativeCells&=sprite&&sprite.rect.size==new Vector2(16,16)&&sprite.pixelsPerUnit==16;
+        var matrix=map.GetTransformMatrix(p);nativeCells&=Vector3.Distance(matrix.MultiplyVector(Vector3.up),Vector3.up)<.001f&&Vector3.Distance(matrix.MultiplyVector(Vector3.right),Vector3.right)<.001f;
+    }
+    check(cells>0,map.name+" contains authored terrain");
+    if(tops.Contains(map))topCells+=cells;else faceCells+=cells;
 }
-check(previous.isDirty==dirty,"Original scene dirty state preserved");
-return new{passed,neighborhoods=1024,sprites=sprites.Length,note="Editor authoring checks; separate rendered order/translation comparison covers overlap."};
+check(nativeCells,"Every terrain cell has an unscaled, unrotated 16px sprite at 16 PPU");
+// Overlap is intentional: a higher tier covers the hidden lower rim. Requiring
+// globally disjoint footprints would recreate the rejected doubled seam.
+Func<UnityEngine.Tilemaps.Tilemap,int> order=m=>m.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().sortingOrder;
+for(int i=0;i<tiers.Length;i++){
+    check(order(faces[i])<order(tops[i]),tiers[i]+" surface covers its own wall join");
+    if(i>0)check(order(tops[i-1])<order(faces[i]),tiers[i]+" wall covers the lower tier rim");
+}
+var wet=maps.Single(m=>m.name=="Terrain - changing pond water").GetComponent<UnityEngine.Tilemaps.TilemapRenderer>();
+check(order(faces[0])<wet.sortingOrder&&order(tops[0])<wet.sortingOrder,"Farm shore and bank submerge beneath high water");
+check(wet.sortingOrder<order(faces[1])&&wet.sortingOrder<order(tops[1]),"Ridge remains above the high-water surface");
+check(!maps.Any(m=>m.name=="Terrain - cliff tops"||m.name=="Terrain - cliff faces"||m.name=="Terrain - boundary uplands"||m.name=="Terrain - joined cliff crests"),"Mixed-height and projection source maps are retired");
+check(!scene.GetRootGameObjects().SelectMany(g=>g.GetComponentsInChildren<SpriteRenderer>(true)).Any(r=>r.sprite&&AssetDatabase.GetAssetPath(r.sprite).StartsWith("Assets/Art/Generated/GreenLowlands/Cliffs/")),"No generated cliff sprites");
+check(new[]{new Vector3Int(65,87),new Vector3Int(66,87),new Vector3Int(65,88),new Vector3Int(66,88)}.All(p=>faces.All(m=>!m.HasTile(p))),"Lower Barrow passage remains open");
+check(RoadOfTheOldKing.EditorTools.LowlandsElevationAuthoring.RiseCells==1,"One level means one 16px cell of front wall");
+check(faces[1].HasTile(new Vector3Int(69,57,0))&&!faces.Any(m=>m.HasTile(new Vector3Int(69,56,0)))&&
+    tops[1].HasTile(new Vector3Int(69,58,0)),"Farm to Ridge has exactly one front row");
+check(faces[0].HasTile(new Vector3Int(50,91,0))&&faces[1].HasTile(new Vector3Int(50,92,0))&&
+    !faces.Any(m=>m.HasTile(new Vector3Int(50,90,0)))&&tops[1].HasTile(new Vector3Int(50,93,0)),
+    "Basin to Ridge has exactly two front rows");
+var pond=maps.Single(m=>m.name=="Terrain - changing pond water");
+check(pond.HasTile(new Vector3Int(50,90,0))&&pond.HasTile(new Vector3Int(50,91,0))&&!pond.HasTile(new Vector3Int(50,92,0)),
+    "High water covers reclaimed lower bed and the submerged row, but not the upper row");
+for(int mask=1;mask<8;mask++){
+    var collision=AssetDatabase.LoadAssetAtPath<UnityEngine.Tilemaps.Tile>("Assets/Art/Tiles/Shared/Collision/CliffCollision_"+mask+".asset");
+    var expected=new List<Rect>();
+    if((mask&1)!=0)expected.Add(Rect.MinMaxRect(-.5f,.375f,.5f,.5f));
+    if((mask&2)!=0)expected.Add(Rect.MinMaxRect(.25f,-.5f,.5f,.5f));
+    if((mask&4)!=0)expected.Add(Rect.MinMaxRect(-.5f,-.5f,-.25f,.5f));
+    bool shapes=collision&&collision.colliderType==UnityEngine.Tilemaps.Tile.ColliderType.Sprite&&collision.sprite&&collision.sprite.GetPhysicsShapeCount()==expected.Count;
+    if(shapes)for(int i=0;i<expected.Count;i++){
+        var points=new List<Vector2>();collision.sprite.GetPhysicsShape(i,points);
+        var rect=Rect.MinMaxRect(points.Min(p=>p.x),points.Min(p=>p.y),points.Max(p=>p.x),points.Max(p=>p.y));
+        shapes&=rect==expected[i];
+    }
+    check(shapes,"Native custom collision mask "+mask+" has exact 4px side / 2px rear outlines");
+}
+check(scene==UnityEngine.SceneManagement.SceneManager.GetActiveScene()&&scene.isDirty==dirty,"Scene and dirty state preserved");
+return new{passed=passed,failed=failed.ToArray(),topCells=topCells,faceCells=faceCells};

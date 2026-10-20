@@ -22,7 +22,7 @@ if(command=="setup"){
     var prefab=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Progression/GameSession.prefab");
     if(prefab==null)throw new System.Exception("GameSession prefab missing.");
     var configured=prefab.GetComponent<RoadOfTheOldKing.Progression.GameSession>();
-    var protectedKeys=new System.Collections.Generic.HashSet<string>{"RoadOfTheOldKing.Save","RoadOfTheOldKing.Tutorial.Save.v1"};
+    var protectedKeys=new System.Collections.Generic.HashSet<string>{"RoadOfTheOldKing.Save","RoadOfTheOldKing.Tutorial.Save.v1","TheLostShrine.PrototypeLoop.Save.v1"};
     var authored=Resources.FindObjectsOfTypeAll<RoadOfTheOldKing.Progression.GameSession>().Where(s=>s.gameObject.scene.IsValid()).Concat(new[]{configured});
     foreach(var s in authored){
         protectedKeys.Add((string)type.GetField("saveKey",flags).GetValue(s));
@@ -176,7 +176,9 @@ if(phase==1){
     var combat=player.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();
     check(combat.Weapon!=null&&combat.CanRecall,"Owned axe and Recall restored in Tutorial");
     var fire=session.Checkpoints.Fires.Single(f=>f.Id=="tutorial/roadside-fire");
-    move(fire.SpawnPosition);check(session.Checkpoints.Rest(fire),"Tutorial fire discovered for cross-scene travel");
+    move(fire.SpawnPosition);
+    check(fire.IsDiscovered||session.Checkpoints.Light(fire),"Tutorial fire lit for cross-scene travel");
+    check(session.Checkpoints.Rest(fire),"Tutorial fire rested for cross-scene travel");
     player.Health.SetHealth(42);player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().SetCharges(1);session.RecordResume();
     var exit=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SceneExit>(FindObjectsSortMode.None).Single(e=>(string)e.GetType().GetField("targetScene",flags).GetValue(e)==regionPath);
     string arrival=(string)exit.GetType().GetField("targetSpawnId",flags).GetValue(exit);
@@ -206,7 +208,7 @@ if(phase==2){
     var progress=saved.Load();
     check(progress.scenePath==regionPath&&progress.checkpointId==fire.Id&&progress.HasFire(fire.Id)&&progress.HasFire("tutorial/roadside-fire"),"Both fires and regional checkpoint are saved");
     check(!session.HasResumePoint&&!PlayerPrefs.HasKey(testKey+".Resume"),"Rest clears the stale resume immediately");
-    interaction.Close();check(!interaction.IsOpen&&!locks.IsLocked,"Closing fire releases its input lock");
+    interaction.Close();check(!interaction.IsOpen&&locks.IsLockedBy(interaction),"Closing fire keeps its input lease through the closing frame (released next frame)");
     check(session.Checkpoints.Travel(progress.FindFire("tutorial/roadside-fire"),fire),"Travel starts from Lowlands to Tutorial");
 }
 else if(phase==3){

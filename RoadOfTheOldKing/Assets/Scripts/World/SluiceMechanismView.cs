@@ -3,7 +3,8 @@ using RoadOfTheOldKing.UI;
 
 namespace RoadOfTheOldKing.World
 {
-    // Only visual transforms live here. Receiver colliders and the axe carriage remain gameplay-owned.
+    // Receiver colliders and the axe carriage remain gameplay-owned. Passage blockers
+    // clear only after their stage-owned water transition and visible gate motion finish.
     [DisallowMultipleComponent]
     public sealed class SluiceMechanismView : MonoBehaviour
     {
@@ -19,6 +20,9 @@ namespace RoadOfTheOldKing.World
         [SerializeField] private LineRenderer rightRod;
         [SerializeField] private Transform outletGate;
         [SerializeField] private Vector3 outletTravel = Vector3.up * 1.5f;
+        [Header("Pedestrian passage gates")]
+        [SerializeField] private PassageGate serviceGate = new PassageGate();
+        [SerializeField] private PassageGate mainGate = new PassageGate();
         [Header("Loaded fork confirmation")]
         [SerializeField] private SpriteRenderer distributorForkVisual;
         [SerializeField] private SpriteRenderer mainForkVisual;
@@ -34,6 +38,48 @@ namespace RoadOfTheOldKing.World
 
         // Exterior water/gate presentation shares the counterweight's actual stroke.
         public float Opening => weightAmount * weightAmount;
+
+        [System.Serializable]
+        private sealed class PassageGate
+        {
+            [SerializeField] private Transform leaf;
+            [SerializeField] private Vector3 travel = Vector3.right * 3.25f;
+            [SerializeField] private Collider2D blocker;
+            [SerializeField] private SluiceWaterReveal waterReveal;
+            [SerializeField, Min(.01f)] private float openingDuration = .55f;
+            private Vector3 rest;
+            private float amount;
+            private bool targetOpen, cached;
+
+            public void Present(bool open, bool animate)
+            {
+                if (!cached)
+                {
+                    if (leaf != null) rest = leaf.localPosition;
+                    cached = true;
+                }
+                targetOpen = open;
+                // Loads/rests apply the saved outcome immediately; a fresh stage
+                // waits for the separate water reveal before opening the passage.
+                if (!animate || !open) amount = open ? 1f : 0f;
+                Draw();
+            }
+
+            public void Advance(float seconds)
+            {
+                if (targetOpen && amount < 1f &&
+                    (waterReveal == null || !waterReveal.gameObject.activeInHierarchy))
+                    amount = Mathf.MoveTowards(amount, 1f, seconds / Mathf.Max(.01f, openingDuration));
+                Draw();
+            }
+
+            private void Draw()
+            {
+                if (leaf != null)
+                    leaf.localPosition = rest + travel * Mathf.SmoothStep(0f, 1f, amount);
+                if (blocker != null) blocker.enabled = amount < 1f;
+            }
+        }
 
         private void Awake()
         {
@@ -66,6 +112,8 @@ namespace RoadOfTheOldKing.World
             released = stage >= SluiceStage.DistributorReleased;
             dropped = stage == SluiceStage.PondLow;
             raised = brakeRaised || dropped;
+            serviceGate?.Present(stage >= SluiceStage.ServiceDiverted, animate);
+            mainGate?.Present(dropped, animate);
             if (!animate)
             {
                 boltAmount = released ? 1f : 0f;
@@ -92,8 +140,10 @@ namespace RoadOfTheOldKing.World
 
         private void Advance(float seconds)
         {
-            if (seconds <= 0f) return;
+            if (seconds <= 0f || float.IsNaN(seconds) || float.IsInfinity(seconds)) return;
             Cache();
+            serviceGate?.Advance(seconds);
+            mainGate?.Advance(seconds);
             boltAmount = Mathf.MoveTowards(boltAmount, released ? 1f : 0f, seconds / .24f);
             brakeAmount = Mathf.MoveTowards(brakeAmount, raised ? 1f : 0f, seconds / (raised ? .12f : .18f));
             weightAmount = Mathf.MoveTowards(weightAmount, dropped ? 1f : 0f, seconds / .48f);

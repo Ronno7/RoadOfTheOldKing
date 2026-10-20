@@ -17,28 +17,36 @@ try{
     System.Action<bool,string> check=(ok,name)=>{if(!ok)failed.Add(name);else logs.Add(name);};
     var filter=new ContactFilter2D{useTriggers=false};
     var overlap=new System.Collections.Generic.List<Collider2D>();
-    System.Func<Collider2D,bool> solid=c=>c!=null&&c.gameObject.scene==scene&&!c.isTrigger&&c.GetComponentInParent<RoadOfTheOldKing.Player.PlayerHealth>()==null&&c.GetComponentInParent<RoadOfTheOldKing.Combat.IEnemy>()==null;
+    System.Func<Collider2D,bool> solid=c=>c!=null&&c.gameObject.scene==scene&&!c.isTrigger&&c.GetComponentInParent<RoadOfTheOldKing.Player.PlayerHealth>()==null&&c.GetComponentInParent<RoadOfTheOldKing.Enemies.IEnemy>()==null;
     var progress=new RoadOfTheOldKing.Progression.ProgressState();progress.Complete("green-lowlands/sluice/pond-low");sluice.RestoreProgress(progress);
     foreach(var collider in scene.GetRootGameObjects().SelectMany(g=>g.GetComponentsInChildren<UnityEngine.Tilemaps.TilemapCollider2D>()))collider.ProcessTilemapChanges();
     Physics2D.SyncTransforms();
     var visualMaps=scene.GetRootGameObjects().SelectMany(r=>r.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>(true)).ToArray();
-    var faceMap=visualMaps.Single(m=>m.name=="Terrain - submerged stair supports");
-    var joinedMap=visualMaps.Single(m=>m.name=="Terrain - joined cliff crests");
-    System.Func<Vector3Int,bool> joinedFace=c=>!joinedMap.HasTile(c)&&Enumerable.Range(1,3).Any(d=>joinedMap.GetTile(c+Vector3Int.up*d) is RoadOfTheOldKing.World.RaisedCliffTile);
+    var faceMap=visualMaps.Single(m=>m.name=="Terrain - submerged height connectors");
+    var terrainTiers=new[]{"Farm","Ridge","Enclosure"};
+    var topMaps=terrainTiers.Select(t=>visualMaps.Single(m=>m.name=="Terrain - "+t+" tops")).ToArray();
+    var faceMaps=terrainTiers.Select(t=>visualMaps.Single(m=>m.name=="Terrain - "+t+" faces")).ToArray();
+    System.Func<UnityEngine.Tilemaps.Tilemap,int> drawOrder=m=>m.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().sortingOrder;
+    System.Func<Vector3Int,bool> joinedFace=c=>faceMaps.Any(m=>m.HasTile(c)&&!topMaps.Any(t=>drawOrder(t)>drawOrder(m)&&t.HasTile(c)));
+    System.Func<Vector3Int,bool> joinedVolume=c=>topMaps.Any(m=>m.HasTile(c))||faceMaps.Any(m=>m.HasTile(c));
+    System.Func<Vector3,bool> faceAtWorld=p=>joinedFace(faceMaps[0].WorldToCell(p));
+    var elevationGuide=visualMaps.Single(m=>m.name==RoadOfTheOldKing.EditorTools.LowlandsElevationAuthoring.ElevationName);
+    System.Func<Vector3Int,int?> tierAt=c=>{int h;return RoadOfTheOldKing.EditorTools.LowlandsElevationAuthoring.TryHeight(RoadOfTheOldKing.EditorTools.LowlandsElevationAuthoring.ReadClassification(elevationGuide,c),out h)?(int?)h:null;};
     var flatMap=visualMaps.SingleOrDefault(m=>m.name=="Terrain - wooded field banks");
-    var ascentMap=visualMaps.Single(m=>m.name=="Terrain - orchard ascent");
     var connectorMap=visualMaps.Single(m=>m.name=="Terrain - height connectors");
+    var ascentMap=connectorMap; // Orchard and ridge flights share one dry stair owner.
     var submergedConnectorMap=visualMaps.Single(m=>m.name=="Terrain - submerged height connectors");
     var changingWaterMap=visualMaps.Single(m=>m.name=="Terrain - changing pond water");
     var sourceCliff=visualMaps.Single(m=>m.name=="Cliffs and outer boundary");
     var sourceBank=visualMaps.Single(m=>m.name=="Woodland barriers");
-    var structureMap=visualMaps.Single(m=>m.name=="Terrain - structural bank edges");
+    var structureMap=visualMaps.SingleOrDefault(m=>m.name=="Terrain - structural bank edges");
     var hedgeMap=visualMaps.SingleOrDefault(m=>m.name=="Terrain - village hedgerows");
     var islandMap=visualMaps.Single(m=>m.name=="Terrain - shard island masonry");
     var borderFoliage=visualMaps.SingleOrDefault(m=>m.name=="Border foliage");
     var borderBanks=visualMaps.SingleOrDefault(m=>m.name=="Border banks");
     var borderCollision=visualMaps.Single(m=>m.name=="Border collision");
     var borderRiver=visualMaps.Single(m=>m.name=="Border river");
+    var permanentWater=visualMaps.SingleOrDefault(m=>m.name=="Terrain - permanent water");
     // One RuleTile neighborhood must span the former river-map join. The rendered
     // blob mask has north=1/south=4; missing either creates opposing banks at y=0.
     bool riverSeamOpen=true;UnityEngine.Tilemaps.TileBase seamRule=null;
@@ -47,8 +55,8 @@ try{
         var t=borderRiver.GetTile(c);var sprite=borderRiver.GetSprite(c);
         if(seamRule==null)seamRule=t;
         int mask=0;
-        if(sprite!=null&&sprite.name.StartsWith("MeadowWater_")){
-            if(sprite.name.StartsWith("MeadowWater_Center_"))mask=255;
+        if(sprite!=null&&sprite.name.StartsWith("DirtWater_")){
+            if(sprite.name.StartsWith("DirtWater_Center_"))mask=255;
             else int.TryParse(sprite.name.Substring(sprite.name.LastIndexOf('_')+1),out mask);
         }
         riverSeamOpen&=t is UnityEngine.RuleTile&&t==seamRule&&sprite!=null&&
@@ -58,17 +66,18 @@ try{
     check(riverSeamOpen,"Permanent river shares one RuleTile neighborhood across y=0, with no opposing shoreline banks");
     check(borderFoliage==null,"Obsolete Border foliage layer is removed");
     check(borderBanks==null,"Flat border woodland no longer uses false GrassLedge height strips");
-    check(new[]{structureMap,islandMap}.All(m=>m.GetComponent<Collider2D>()==null),"New terrain visuals add no hidden collision");
+    check(new[]{structureMap,islandMap}.Where(m=>m!=null).All(m=>m.GetComponent<Collider2D>()==null),"Terrain visuals add no hidden collision");
     bool shoreCorners=true,shoreSolid=true;
-    foreach(var x in new[]{15,21,32})for(int row=0;row<3;row++){
-        var c=new Vector3Int(x,(x==32?27:23)+row,0);var t=faceMap.GetTile(c);
-        shoreCorners&=joinedFace(c);
+    foreach(var c in new[]{new Vector3Int(16,25,0),new Vector3Int(20,25,0),new Vector3Int(33,29,0),new Vector3Int(37,29,0)}){
+        shoreCorners&=faceMaps[0].HasTile(c)&&topMaps[0].HasTile(c+Vector3Int.up)&&!faceMaps[0].HasTile(c+Vector3Int.down);
         Physics2D.OverlapBox(faceMap.GetCellCenterWorld(c),new Vector2(.25f,.25f),0,filter,overlap);
         shoreSolid&=overlap.Any(solid);
     }
-    check(shoreCorners&&shoreSolid,"Island and barn outer shoulders have complete fronts and permanent low-water blocking");
-    check(new[]{new Vector3Int(15,25),new Vector3Int(21,25),new Vector3Int(32,29),new Vector3Int(40,29)}.All(c=>structureMap.GetTile(c)!=null&&structureMap.GetTile(c).name.StartsWith("ShoreLip_")),"Four wet-shore lips connect front faces to side crests");
-    check(structureMap.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().sortingOrder>changingWaterMap.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().sortingOrder&&faceMap.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().sortingOrder<changingWaterMap.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().sortingOrder,"Wet crests remain above water while the full faces submerge");
+    check(shoreCorners&&shoreSolid,"Island and barn shoulders have exactly one front row and permanent low-water blocking");
+    var rejectedShoreLips=new[]{new Vector3Int(15,25),new Vector3Int(21,25),new Vector3Int(32,29),new Vector3Int(40,29)};
+    check(rejectedShoreLips.All(c=>structureMap==null||structureMap.GetTile(c)==null||!structureMap.GetTile(c).name.StartsWith("ShoreLip_")),"Flat Farm shores have no retained raised ShoreLip overlays");
+    check(drawOrder(topMaps[0])<drawOrder(changingWaterMap)&&drawOrder(faceMaps[0])<drawOrder(changingWaterMap),"Farm shore contacts and banks submerge below high water");
+    check(drawOrder(changingWaterMap)<drawOrder(faceMaps[1])&&drawOrder(changingWaterMap)<drawOrder(topMaps[1]),"The Ridge remains visibly higher than Farm-level water");
     check(new[]{16,20}.All(x=>Enumerable.Range(23,3).All(y=>!submergedConnectorMap.HasTile(new Vector3Int(x,y)))) ,"Island stair has no duplicate incompatible earth side overlays");
     var stairPlan=Newtonsoft.Json.Linq.JObject.Parse(System.IO.File.ReadAllText("../ArtSource/GreenLowlands/ElevationLayout.json"));
     foreach(var definition in stairPlan["stairs"]){
@@ -85,38 +94,98 @@ try{
     bool hedgeCoverage=true;
     foreach(var p in new[]{new Vector3(-2.5f,5.5f),new Vector3(44.5f,7.5f),new Vector3(8.5f,-2.5f),new Vector3(30.5f,-2.5f)}){
         Physics2D.OverlapBox(p,new Vector2(.76f,.76f),0,filter,overlap);
-        var boundaryVisual=visualMaps.Single(m=>m.name=="Terrain - boundary uplands");
-        hedgeCoverage&=overlap.Any(solid)&&boundaryVisual.HasTile(boundaryVisual.WorldToCell(p));
+        hedgeCoverage&=overlap.Any(solid)&&joinedVolume(topMaps[0].WorldToCell(p));
     }
     check(hedgeCoverage,"Village outer barriers have visible rebuilt uplands at their collision");
     check(hedgeMap==null,"Village hedge walls and the second false river crossing are fully removed");
     bool villageShoulders=true;
     foreach(var p in new[]{new Vector3(-1.5f,18.5f),new Vector3(6.5f,23.5f),new Vector3(44.5f,12.5f),new Vector3(50.5f,16.5f)}){
-        var terrainMap=visualMaps.Single(m=>m.name=="Terrain - boundary uplands");
         Physics2D.OverlapBox(p,new Vector2(.25f,.25f),0,filter,overlap);
-        villageShoulders&=terrainMap.HasTile(terrainMap.WorldToCell(p))&&overlap.Any(solid);
+        villageShoulders&=joinedVolume(topMaps[0].WorldToCell(p))&&overlap.Any(solid);
     }
     check(villageShoulders,"Western village rise and eastern woodland shoulder have visible solid terrain");
     bool millBankClear=true;
-    for(int y=20;y<=22;y++)for(int x=24;x<=26;x++){
-        Physics2D.OverlapBox(new Vector2(x+.5f,y+.5f),new Vector2(.76f,.76f),0,filter,overlap);
+    foreach(var point in new[]{new Vector2(26.6875f,20.375f),new Vector2(28.6875f,21.375f),new Vector2(29.6875f,22.375f)}){
+        Physics2D.OverlapBox(point,new Vector2(.76f,.76f),0,filter,overlap);
         millBankClear&=!overlap.Any(solid);
     }
-    check(millBankClear,"Dry mill-bank clearing has full-body space while the y=23 shore boundary remains intact");
+    check(millBankClear,"Redrawn mill-bank shore has full-body space on its dry side");
     var riverMeadow=visualMaps.Single(m=>m.name=="Ground - regional meadow");
     bool millRiverVisible=true;
     for(int y=20;y<=22;y++)for(int x=20;x<=23;x++){
         var c=new Vector3Int(x,y,0);millRiverVisible&=borderRiver.HasTile(c)&&!riverMeadow.HasTile(c);
     }
-    millRiverVisible&=structureMap.GetTile(new Vector3Int(22,23,0))!=null&&structureMap.GetTile(new Vector3Int(22,23,0)).name=="MeadowWater_Center_255"&&structureMap.GetTile(new Vector3Int(23,23,0))!=null&&structureMap.GetTile(new Vector3Int(23,23,0)).name=="MeadowWater_Edge_E_205";
+    // The river junction may now live on its ordinary water map. Require actual
+    // water coverage, not ownership by the retired bank-strip layer.
+    var basinWaterBrush=AssetDatabase.LoadAssetAtPath<UnityEngine.Tilemaps.TileBase>("Assets/Art/Tiles/Shared/Terrain/Rules/Paint_BasinWater.asset");
+    millRiverVisible&=new[]{new Vector3Int(22,23,0),new Vector3Int(23,23,0)}.All(c=>new[]{borderRiver,permanentWater,structureMap}.Where(m=>m!=null).Any(m=>m.GetTile(c)!=null&&(m.GetTile(c)==basinWaterBrush||m.GetTile(c).name=="Paint_DirtWater")));
     check(millRiverVisible,"Permanent mill river has no meadow cover or false shoreline across its pond junction");
     System.Func<UnityEngine.Tilemaps.Tilemap,Vector3,bool> tileAt=(m,p)=>m!=null&&m.HasTile(m.WorldToCell(p));
     System.Func<Vector3,bool> connectorAt=p=>tileAt(connectorMap,p)||tileAt(submergedConnectorMap,p);
+    // A bridge is built to span unsupported terrain. Its rails are supported by
+    // the owned deck, not natural ground; validate that assembly separately.
+    var highPass=root.GetComponentsInChildren<RoadOfTheOldKing.World.PermanentPassage>(true).Single(p=>p.ProgressId=="world/high-pass/open");
+    var highPassData=new SerializedObject(highPass);var openedObjects=highPassData.FindProperty("openedObjects");
+    var bridgeOwners=new System.Collections.Generic.List<GameObject>();
+    for(int i=0;i<openedObjects.arraySize;i++){
+        var owner=openedObjects.GetArrayElementAtIndex(i).objectReferenceValue as GameObject;
+        if(owner!=null)bridgeOwners.Add(owner);
+    }
+    var bridgeCollisions=visualMaps.Where(m=>m.name=="Collision"&&bridgeOwners.Any(g=>m.transform.IsChildOf(g.transform))).ToArray();
+    check(bridgeCollisions.Length>0,"High Pass owns its bridge collision through its opened state");
+    bool bridgeRailsSupported=bridgeCollisions.Length>0;
+    foreach(var m in bridgeCollisions){
+        var bridgeVisuals=m.transform.parent.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>(true).Where(t=>t.name=="Environment"||t.name=="Above Player").ToArray();
+        foreach(var c in m.cellBounds.allPositionsWithin)if(m.HasTile(c)){
+            var p=m.GetCellCenterWorld(c);
+            bridgeRailsSupported&=bridgeVisuals.Any(t=>tileAt(t,p)&&t.GetSprite(t.WorldToCell(p))!=null);
+        }
+    }
+    check(bridgeRailsSupported,"Bridge rails have their own visible timber support across the ravine");
+    bool noBridgeLand=true;
+    for(int x=128;x<=130;x++){
+        for(int y=98;y<=99;y++)noBridgeLand&=topMaps.All(m=>!m.HasTile(new Vector3Int(x,y,0)));
+        for(int y=96;y<=97;y++)noBridgeLand&=faceMaps.All(m=>!m.HasTile(new Vector3Int(x,y,0)));
+    }
+    check(noBridgeLand,"Bridge walking height does not create a false solid terrain volume across its water gap");
+    var bridgeOpen=new RoadOfTheOldKing.Progression.ProgressState();bridgeOpen.Complete(highPass.ProgressId);
+    try{
+        highPass.RestoreProgress(bridgeOpen);
+        foreach(var m in bridgeCollisions){var collider=m.GetComponent<UnityEngine.Tilemaps.TilemapCollider2D>();if(collider!=null)collider.ProcessTilemapChanges();}
+        Physics2D.SyncTransforms();bool deckClear=true,deckVisible=true,deckLevel=true;
+        var deckMaps=bridgeOwners.SelectMany(g=>g.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>(true)).Where(m=>m.name=="Environment").ToArray();
+        for(int y=98;y<=99;y++)for(int x=128;x<=133;x++){
+            var p=new Vector3(x+.5f,y+.5f,0);
+            deckVisible&=deckMaps.Any(m=>m.gameObject.activeInHierarchy&&tileAt(m,p));
+            deckLevel&=tierAt(new Vector3Int(x,y,0))==1;
+            Physics2D.OverlapBox(p,new Vector2(.76f,.76f),0,filter,overlap);deckClear&=!overlap.Any(solid);
+        }
+        check(highPass.IsOpen&&deckVisible&&deckClear,"Lowered High Pass deck has two visible, body-clear walking rows across the gap");
+        check(deckLevel,"High Pass bridge remains Ridge-height between both Ridge approaches without an invented elevation change");
+    }finally{highPass.RestoreProgress(progress);Physics2D.SyncTransforms();}
     var footingErrors=new System.Collections.Generic.List<string>();
-    foreach(var m in visualMaps.Where(m=>m.name=="Collision"&&m.transform.parent!=null)){
-        foreach(var c in m.cellBounds.allPositionsWithin)if(m.HasTile(c)&&tileAt(faceMap,m.GetCellCenterWorld(c)))footingErrors.Add(m.transform.parent.name+" "+m.GetCellCenterWorld(c));
+    foreach(var m in visualMaps.Where(m=>m.name=="Collision"&&m.transform.parent!=null&&!bridgeCollisions.Contains(m))){
+        foreach(var c in m.cellBounds.allPositionsWithin)if(m.HasTile(c)&&faceAtWorld(m.GetCellCenterWorld(c)))footingErrors.Add(m.transform.parent.name+" "+m.GetCellCenterWorld(c));
     }
     check(footingErrors.Count==0,"Prop feet have horizontal support: "+string.Join(";",footingErrors.ToArray()));
+    bool shelterPad=true;
+    for(int y=101;y<=103;y++)for(int x=135;x<=139;x++){
+        var c=new Vector3Int(x,y,0);
+        // Structure records blocked footing, not a different terrain height.
+        bool supportedGuide=tierAt(c)==1||RoadOfTheOldKing.EditorTools.LowlandsElevationAuthoring.ReadClassification(elevationGuide,c)==RoadOfTheOldKing.EditorTools.ElevationClass.Structure;
+        shelterPad&=supportedGuide&&topMaps[1].HasTile(c)&&!topMaps[2].HasTile(c)&&!joinedFace(c);
+    }
+    check(shelterPad,"Smiths shelter pillars and opening have one contiguous Ridge-height ground pad");
+    var heightPlan=visualMaps.Single(m=>m.name=="Height plan");
+    bool moundMatchesPlan=true;
+    for(int x=135;x<140;x++){
+        int crest=Enumerable.Range(104,12).First(y=>{
+            var tile=heightPlan.GetTile(new Vector3Int(x,y,0)) as RoadOfTheOldKing.EditorTools.HeightPlanTile;
+            return tile!=null&&tile.height==2;
+        });
+        moundMatchesPlan&=faceMaps[2].HasTile(new Vector3Int(x,crest-1,0))&&!faceMaps[2].HasTile(new Vector3Int(x,crest-2,0));
+    }
+    check(moundMatchesPlan,"Shelter mound follows the user's painted crest with exactly one front row");
     var thicketMaps=visualMaps.Where(m=>m.name=="Environment - woodland thickets"||m.name=="Environment - thicket understory").ToArray();
     check(thicketMaps.Length==0,"Obsolete thicket layers are removed");
     int invalidThicket=0;
@@ -140,181 +209,80 @@ try{
     var borderProps=new System.Collections.Generic.List<UnityEngine.Tilemaps.Tilemap>();
     foreach(var footing in propFootMaps)foreach(var c in footing.cellBounds.allPositionsWithin)if(footing.HasTile(c)&&footing.GetCellCenterWorld(c).y<1){borderProps.Add(footing);break;}
     check(borderProps.Count>0,"Border tree and boulder bases are included in the full-cell foliage clearing audit");
-    var uplandMap=visualMaps.Single(m=>m.name=="Terrain - boundary uplands");
-    check(uplandMap.GetComponent<Collider2D>()==null,"Boundary uplands keep rendering separate from collision");
-    bool nativeUplands=true;int uplandCells=0;
-    var cliffCoverage=new System.Collections.Generic.HashSet<Vector3Int>();
-    foreach(var c in uplandMap.cellBounds.allPositionsWithin)if(uplandMap.HasTile(c)){
-        uplandCells++;var sprite=uplandMap.GetSprite(c);
-        nativeUplands&=uplandMap.GetTile(c) is RoadOfTheOldKing.World.RaisedCliffTile&&sprite!=null&&Mathf.Abs(sprite.pixelsPerUnit-16)<.001f&&sprite.rect.size==new Vector2(16,64)&&sprite.pivot==new Vector2(8,56)&&!faceMap.HasTile(c)&&!(borderFoliage!=null&&borderFoliage.HasTile(c))&&!thicketMaps.Any(m=>m.HasTile(c));
-        for(int drop=0;drop<=3;drop++)cliffCoverage.Add(c+Vector3Int.down*drop);
+    var unexpectedFloors=new System.Collections.Generic.List<string>();
+    var unblockedFaces=new System.Collections.Generic.List<string>();int classifiedFaces=0,exposedBoundaries=0;
+    var faceCells=new System.Collections.Generic.HashSet<Vector3Int>();
+    foreach(var m in faceMaps)foreach(var c in m.cellBounds.allPositionsWithin)if(m.HasTile(c)&&joinedFace(c))faceCells.Add(c);
+    foreach(var c in faceCells){
+        var classification=RoadOfTheOldKing.EditorTools.LowlandsElevationAuthoring.ReadClassification(elevationGuide,c);
+        int height;if(RoadOfTheOldKing.EditorTools.LowlandsElevationAuthoring.TryHeight(classification,out height))unexpectedFloors.Add(c.ToString());
+        if(classification!=RoadOfTheOldKing.EditorTools.ElevationClass.Structure)continue;
+        classifiedFaces++;
+        // Outer backdrop cliffs extend beyond the playable enclosure. Test the
+        // faces adjoining a declared floor; deeper wall rows cannot be approached.
+        bool besideFloor=new[]{Vector3Int.up,Vector3Int.down,Vector3Int.left,Vector3Int.right}.Any(d=>tierAt(c+d).HasValue);
+        if(!besideFloor)continue;
+        // ElevationLayout explicitly marks western approach overscan as render-only.
+        if(c.y<0&&c.x<borderCollision.cellBounds.xMin)continue;
+        exposedBoundaries++;
+        Physics2D.OverlapBox(faceMaps[0].GetCellCenterWorld(c),new Vector2(.25f,.25f),0,filter,overlap);
+        if(!overlap.Any(solid))unblockedFaces.Add(c.ToString());
     }
-    check(uplandCells>0&&nativeUplands,"Automatic boundary cliffs have native top-cell pivots without overlapping bushes or manual fronts");
-    var cliffRenderer=uplandMap.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>();
-    check(cliffRenderer.mode==UnityEngine.Tilemaps.TilemapRenderer.Mode.Individual&&cliffRenderer.sortOrder==UnityEngine.Tilemaps.TilemapRenderer.SortOrder.TopRight,"Automatic cliff columns draw north before south");
-    check(cliffCoverage.All(c=>!faceMap.HasTile(c)&&!structureMap.HasTile(c)),"Automatic cliffs replace their whole manual face/edge assembly");
-    check(propFootMaps.All(m=>{foreach(var c in m.cellBounds.allPositionsWithin)if(m.HasTile(c)){var at=uplandMap.WorldToCell(m.GetCellCenterWorld(c));if(cliffCoverage.Contains(at)&&!uplandMap.HasTile(at))return false;}return true;}),"Prop feet remain on horizontal ground above or outside automatic fronts");
-    // The western pond bank has permanent visible volume, while the sluice tailrace
-    // retains its separate higher-order water/masonry ownership.
-    var oldCapMap=visualMaps.SingleOrDefault(m=>m.name=="Terrain - cliff caps");
-    var northBoundary=cliffCoverage.Where(c=>c.x>=-4&&c.x<=145&&c.y>=94&&c.y<=120).ToArray();
-    var permanentLips=visualMaps.Single(m=>m.name=="Sluice - basin stair masonry");
-    check(northBoundary.Length>0&&northBoundary.All(c=>sourceCliff.GetTile(c)!=null&&sourceCliff.GetTile(c).name=="Collision_Block"&&!(oldCapMap!=null&&oldCapMap.HasTile(c))&&!faceMap.HasTile(c)&&!permanentLips.HasTile(c)&&!changingWaterMap.HasTile(c)&&!connectorMap.HasTile(c)&&!submergedConnectorMap.HasTile(c)),"Northern rocky boundary has complete dry collision and no legacy cliff, water or stair overlap");
-    var northernTreeFeet=visualMaps.Where(m=>m.name=="Collision"&&m.transform.parent!=null&&m.transform.parent.name=="Apple_Tree"&&m.transform.position.y>=100).ToArray();
-    bool northernRoots=northernTreeFeet.Length==2;
-    foreach(var m in northernTreeFeet)foreach(var c in m.cellBounds.allPositionsWithin)if(m.HasTile(c)){
-        var p=uplandMap.WorldToCell(m.GetCellCenterWorld(c));
-        for(int dy=-1;dy<=1;dy++)for(int dx=-1;dx<=1;dx++)northernRoots&=uplandMap.HasTile(p+new Vector3Int(dx,dy,0));
-    }
-    check(northernRoots,"Both northern boundary apple trees have a full upper-cell margin around their roots");
-    bool westPondSolid=true,westPondDry=true,westPondNoOldArt=true;
-    foreach(var c in cliffCoverage.Where(c=>c.x>=2&&c.x<=12&&c.y>=35&&c.y<=62)){
-        Physics2D.OverlapBox(uplandMap.GetCellCenterWorld(c),new Vector2(.25f,.25f),0,filter,overlap);
-        westPondSolid&=overlap.Any(solid);
-        westPondDry&=!changingWaterMap.HasTile(c);
-        westPondNoOldArt&=!(oldCapMap!=null&&oldCapMap.HasTile(c))&&!faceMap.HasTile(c);
-    }
-    check(westPondSolid&&uplandMap.HasTile(new Vector3Int(8,50,0)),"Western pond cliff has visible permanent blocking through its entire projected volume");
-    check(westPondDry&&westPondNoOldArt,"Western pond cliff stays outside changing water without duplicate legacy ledges/faces");
-    bool westSpurClear=true;
-    foreach(var c in new[]{new Vector3Int(11,60,0),new Vector3Int(11,61,0),new Vector3Int(12,61,0),new Vector3Int(11,62,0)})
-        westSpurClear&=!sourceCliff.HasTile(c)&&!cliffCoverage.Contains(c);
-    check(westSpurClear,"Short northeastern bank spur has no leftover invisible cliff collision");
-    // Follow the connected outer mass, rather than an enclosing rectangle that
-    // also contains independent interior copses with their own collision owner.
-    var outerTopCells=new System.Collections.Generic.HashSet<Vector3Int>();
-    var outerTopQueue=new System.Collections.Generic.Queue<Vector3Int>();outerTopQueue.Enqueue(new Vector3Int(70,17,0));
-    while(outerTopQueue.Count>0){var c=outerTopQueue.Dequeue();if(!uplandMap.HasTile(c)||!outerTopCells.Add(c))continue;foreach(var d in new[]{Vector3Int.left,Vector3Int.right,Vector3Int.up,Vector3Int.down})outerTopQueue.Enqueue(c+d);}
-    var outerCliffCells=new System.Collections.Generic.HashSet<Vector3Int>();foreach(var c in outerTopCells)for(int d=0;d<=3;d++)outerCliffCells.Add(c+Vector3Int.down*d);
-    bool outerWoodSolid=outerTopCells.Count>0,outerWoodClear=true;
-    foreach(var c in outerCliffCells.Where(c=>c.x>=65&&c.x<=(c.y<=70?157:145)&&c.y>=-3&&c.y<=104)){
-        var t=sourceCliff.GetTile(c);outerWoodSolid&=t!=null&&t.name=="Collision_Block";
-        outerWoodClear&=!(oldCapMap!=null&&oldCapMap.HasTile(c))&&!faceMap.HasTile(c)&&!(flatMap!=null&&flatMap.HasTile(c))&&!thicketMaps.Any(m=>m.HasTile(c))&&!sourceBank.HasTile(c);
-    }
-    check(outerWoodSolid,"Southern/eastern wooded rise has full permanent collision through its projected fronts");
-    check(outerWoodClear,"Converted outer woodland has one terrain owner without old leaves, caps, faces or duplicate woodland collision");
-    var oldWoodWall=visualMaps.SingleOrDefault(m=>m.name=="Terrain - low woodland walls");
-    check(oldWoodWall==null,"Obsolete low woodland wall layer is removed");
-    check(new[]{18,19}.All(y=>uplandMap.HasTile(new Vector3Int(65,y,0))&&sourceCliff.HasTile(new Vector3Int(65,y,0))),"Village and pasture rises join without a narrow construction notch");
-    var hollowTops=new System.Collections.Generic.HashSet<Vector3Int>();var hollowQueue=new System.Collections.Generic.Queue<Vector3Int>();hollowQueue.Enqueue(new Vector3Int(120,45,0));
-    while(hollowQueue.Count>0){var c=hollowQueue.Dequeue();if(!uplandMap.HasTile(c)||!hollowTops.Add(c))continue;foreach(var d in new[]{Vector3Int.left,Vector3Int.right,Vector3Int.up,Vector3Int.down})hollowQueue.Enqueue(c+d);}
-    var hollowVolume=new System.Collections.Generic.HashSet<Vector3Int>();foreach(var c in hollowTops)for(int d=0;d<=3;d++)hollowVolume.Add(c+Vector3Int.down*d);
-    bool hollowSolid=hollowTops.Count>0,hollowClean=true;
-    foreach(var c in hollowVolume){var t=sourceBank.GetTile(c);hollowSolid&=t!=null&&t.name=="Collision_Block";hollowClean&=!sourceCliff.HasTile(c)&&!(flatMap!=null&&flatMap.HasTile(c))&&!thicketMaps.Any(m=>m.HasTile(c));}
-    check(hollowSolid&&hollowClean,"Birch hollow has complete visible volume and one woodland collision owner without old leaf carpet");
-    var hollowFeet=visualMaps.Where(m=>m.name=="Collision"&&m.transform.parent!=null&&m.transform.position.x>=111&&m.transform.position.x<=141&&m.transform.position.y>=31&&m.transform.position.y<=53).ToArray();
-    bool hollowSupported=hollowFeet.Length==12;
-    foreach(var m in hollowFeet)foreach(var c in m.cellBounds.allPositionsWithin)if(m.HasTile(c)){
-        var p=uplandMap.WorldToCell(m.GetCellCenterWorld(c));for(int dy=-1;dy<=1;dy++)for(int dx=-1;dx<=1;dx++)hollowSupported&=hollowTops.Contains(p+new Vector3Int(dx,dy,0));
-    }
-    check(hollowSupported,"All eleven hollow trees and the boulder retain a full upper-cell margin from rocky sides and fronts");
-    var pastureTops=new System.Collections.Generic.HashSet<Vector3Int>();
-    for(int y=43;y<=61;y++)for(int x=74;x<=109;x++){var c=new Vector3Int(x,y,0);if(uplandMap.HasTile(c))pastureTops.Add(c);}
-    var pastureVolume=new System.Collections.Generic.HashSet<Vector3Int>();foreach(var c in pastureTops)for(int d=0;d<=3;d++)pastureVolume.Add(c+Vector3Int.down*d);
-    check(pastureTops.Count>0&&pastureVolume.All(c=>sourceBank.GetTile(c)!=null&&sourceBank.GetTile(c).name=="Collision_Block"&&!sourceCliff.HasTile(c)&&!(flatMap!=null&&flatMap.HasTile(c))&&!thicketMaps.Any(m=>m.HasTile(c))),"Pasture grove has complete visible volume with one permanent collision owner");
-    var pastureTrees=visualMaps.Where(m=>m.name=="Collision"&&m.transform.parent!=null&&new[]{"Oak","Birch"}.Contains(m.transform.parent.name)&&m.transform.position.x>=77&&m.transform.position.x<=105&&m.transform.position.y>=46&&(m.transform.position.y<=56||m.transform.position.x==105&&m.transform.position.y==59)).ToArray();
-    bool pastureSupported=pastureTrees.Length==13;
-    foreach(var m in pastureTrees)foreach(var c in m.cellBounds.allPositionsWithin)if(m.HasTile(c)){
-        var p=uplandMap.WorldToCell(m.GetCellCenterWorld(c));for(int dy=-1;dy<=1;dy++)for(int dx=-1;dx<=1;dx++){var n=p+new Vector3Int(dx,dy,0);pastureSupported&=pastureTops.Contains(p)?pastureTops.Contains(n):!pastureVolume.Contains(n);}
-    }
-    check(pastureSupported,"All thirteen pasture trees stand wholly above or outside the rocky grove with a full-cell margin");
-    bool litterSupported=true;foreach(var m in visualMaps.Where(m=>m.name.StartsWith("Detail -")))foreach(var c in m.cellBounds.allPositionsWithin)if(m.HasTile(c)&&cliffCoverage.Contains(c)&&!uplandMap.HasTile(c))litterSupported=false;
-    check(litterSupported,"Ground decoration never floats over automatic vertical faces");
-    check(Enumerable.Range(112,9).All(x=>Enumerable.Range(78,3).All(y=>{var c=new Vector3Int(x,y,0);return joinedFace(c)&&sourceCliff.HasTile(c);})&&!joinedFace(new Vector3Int(x,77,0))&&!sourceCliff.HasTile(new Vector3Int(x,77,0))&&!sourceBank.HasTile(new Vector3Int(x,77,0)))&&joinedFace(new Vector3Int(105,66,0))&&joinedFace(new Vector3Int(106,66,0)),"Orchard cliff matches the stair flight at y=78..80 with a joined western return and clear lower foot");
-    var upperPaint=visualMaps.Single(m=>m.name=="Terrain - upper meadow terraces");var upperMask=visualMaps.Single(m=>m.name=="Upper terrace mask");
-    check(new[]{new Vector3Int(110,66,0),new Vector3Int(113,72,0),new Vector3Int(117,73,0),new Vector3Int(117,68,0),new Vector3Int(118,63,0),new Vector3Int(121,74,0)}.All(c=>riverMeadow.HasTile(c)&&!upperPaint.HasTile(c)&&!upperMask.HasTile(c)&&!sourceCliff.HasTile(c)&&!sourceBank.HasTile(c)&&!(flatMap!=null&&flatMap.HasTile(c))&&!thicketMaps.Any(m=>m.HasTile(c))),"Lower orchard grove has H0 footing without stale upper-terrace paint or foliage-wall blockers");
-    bool joinedArrival=true,solidArrival=true,clearArrivalEdge=true;
-    for(int y=-10;y<=0;y++)for(int x=-14;x<=13;x++){
-        var c=new Vector3Int(x,y,0);
-        joinedArrival&=uplandMap.HasTile(c)&&!(borderFoliage!=null&&borderFoliage.HasTile(c))&&!(hedgeMap!=null&&hedgeMap.HasTile(c));
-        var block=borderCollision.GetTile(c);
-        solidArrival&=block!=null&&block.name=="Collision_Block";
-    }
-    for(float y=-11;y<=1;y+=.5f){
-        Physics2D.OverlapBox(new Vector2(14.5f,y),new Vector2(.75f,.75f),0,filter,overlap);
-        clearArrivalEdge&=!overlap.Any(solid);
-    }
-    check(joinedArrival,"Western arrival woodland joins the cliff through the village mouth without old leaf walls");
-    check(solidArrival,"New arrival upland replaces former leaf insets and tree-glade holes with visible solid terrain");
-    check(clearArrivalEdge,"Full player body clears the rebuilt eastern edge into the village");
-    bool easternRidgeSolid=true,easternRidgePresent=false,clearRiverArt=true,riverStillSolid=true;
-    foreach(var c in cliffCoverage)if(c.x>=10&&c.x<=36&&c.y>=-82&&c.y<=-27){
-        easternRidgePresent=true;var block=borderCollision.GetTile(c);
-        easternRidgeSolid&=block!=null&&block.name=="Collision_Block"&&!(borderFoliage!=null&&borderFoliage.HasTile(c));
-    }
-    for(int y=-26;y<=0;y++){
-        int left=999,right=-999;
-        for(int x=15;x<=46;x++){var c=new Vector3Int(x,y,0);if(!borderRiver.HasTile(c))continue;left=Mathf.Min(left,x);right=x;clearRiverArt&=!(borderFoliage!=null&&borderFoliage.HasTile(c))&&!(hedgeMap!=null&&hedgeMap.HasTile(c));}
-        if(left==999){riverStillSolid=false;continue;}
-        Physics2D.OverlapBox(new Vector2((left+right+1)*.5f,y+.5f),new Vector2(.2f,.2f),0,filter,overlap);
-        riverStillSolid&=overlap.Any(solid);
-        for(int x=15;x<left;x++){var c=new Vector3Int(x,y,0);clearRiverArt&=!(borderFoliage!=null&&borderFoliage.HasTile(c))&&!(hedgeMap!=null&&hedgeMap.HasTile(c));}
-    }
-    check(easternRidgePresent&&easternRidgeSolid,"Eastern arrival ridge has complete visible full-cell blocking through its projected fronts");
-    check(clearRiverArt,"The narrow arrival riverbank and river channel are free of old wall foliage");
-    check(riverStillSolid,"Continuous permanent river collision remains after clearing the false hedge bridge");
-    bool farBankDry=true,farBankSolid=true,capSolid=true;
-    for(int y=-82;y<=0;y++){
-        int right=-999;
-        for(int x=15;x<=46;x++){var c=new Vector3Int(x,y,0);if(borderRiver.HasTile(c)){right=x;farBankDry&=!cliffCoverage.Contains(c);}}
-        if(right<0){farBankSolid=false;continue;}
-        for(int x=right+1;x<=46;x++){var c=new Vector3Int(x,y,0);if(!cliffCoverage.Contains(c))continue;var tile=borderCollision.GetTile(c);farBankSolid&=tile!=null&&tile.name=="Collision_Block";}
-    }
-    for(int x=2;x<=9;x++){
-        capSolid&=uplandMap.HasTile(new Vector3Int(x,-79,0));
-        for(int y=-82;y<=-79;y++){var tile=borderCollision.GetTile(new Vector3Int(x,y,0));capSolid&=tile!=null&&tile.name=="Collision_Block";}
-    }
-    check(farBankDry,"Far-bank cliff columns keep their entire projected volume outside the river");
-    check(farBankSolid&&uplandMap.HasTile(new Vector3Int(40,-79,0))&&uplandMap.HasTile(new Vector3Int(30,-3,0)),"Far-bank ridge has matching blocking within the authored boundary");
-    check(capSolid,"Connected terrain closes the camera backdrop behind the unchanged return exit");
-    foreach(var p in new[]{new Vector3Int(15,29),new Vector3Int(21,29),new Vector3Int(32,35),new Vector3Int(44,35),new Vector3Int(18,78),new Vector3Int(22,78)})
-        check(structureMap.GetTile(p)!=null&&structureMap.GetTile(p).name.EndsWith("BackOuter"),"Convex bank corner uses outside geometry at "+p);
-    var supportedBoundaryMaps=thicketMaps.Concat(new[]{borderFoliage,hedgeMap,structureMap,faceMap,uplandMap,joinedMap,permanentLips}).ToArray();
-    var visiblePropFeet=propFootMaps.Where(m=>m.transform.parent.GetComponentsInChildren<Renderer>(true).Any(r=>r.enabled&&r.gameObject.activeInHierarchy)).ToArray();
-    var hiddenBorderCells=new System.Collections.Generic.List<string>();bool foliageOnRiver=false;
-    foreach(var c in borderCollision.cellBounds.allPositionsWithin)if(borderCollision.HasTile(c)){
-        Vector3 p=borderCollision.GetCellCenterWorld(c);
-        if(tileAt(borderRiver,p)){foliageOnRiver|=tileAt(borderFoliage,p);continue;}
-        if(!cliffCoverage.Contains(uplandMap.WorldToCell(p))&&!supportedBoundaryMaps.Any(m=>tileAt(m,p))&&!visiblePropFeet.Any(m=>tileAt(m,p)))hiddenBorderCells.Add(p.ToString());
-    }
-    check(hiddenBorderCells.Count==0,"Border solids remain visibly covered by foliage or supported prop/bank geometry: "+string.Join(";",hiddenBorderCells.Take(16).ToArray()));
-    check(!foliageOnRiver,"Permanent border river remains uncovered by the new foliage");
-    check(thicketMaps.Length==0,"Detached woodland crown stamps are removed");
-    var nativeFaces=joinedMap;
-    var wetShore=new System.Collections.Generic.List<Vector3Int>();
-    for(int x=16;x<=62;x++){var ys=Enumerable.Range(70,25).Where(y=>nativeFaces.HasTile(new Vector3Int(x,y,0))).ToArray();if(ys.Length>0)for(int drop=1;drop<=3;drop++)wetShore.Add(new Vector3Int(x,ys.Min()-drop,0));}
-    check(wetShore.Count==141&&wetShore.GroupBy(c=>c.x).All(g=>g.Count()==3&&g.Max(c=>c.y)-g.Min(c=>c.y)==2)&&wetShore.All(c=>sourceCliff.GetTile(c)!=null&&sourceCliff.GetTile(c).name=="Collision_Block"&&!(oldCapMap!=null&&oldCapMap.HasTile(c))&&!faceMap.HasTile(c)),"Northern pond shore has complete three-row faces with permanent blocking and one visual owner");
-    check(Enumerable.Range(88,3).All(y=>{var c=new Vector3Int(62,y,0);return structureMap.GetTile(c)!=null&&structureMap.GetTile(c).name=="Bank_West"&&sourceCliff.GetTile(c)!=null&&sourceCliff.GetTile(c).name=="Collision_Block";}),"Northern pond side return closes the upper-shore bypass into the road-cut");
-    var shoreOakFeet=propFootMaps.Where(m=>m.transform.parent.name=="Oak"&&m.transform.position.x>=45&&m.transform.position.x<=64&&m.transform.position.y>=89&&m.transform.position.y<=95).ToArray();
+    check(unexpectedFloors.Count==0,"Cliff faces never cover a classified walkable floor: "+string.Join(";",unexpectedFloors.Take(12).ToArray()));
+    check(classifiedFaces>0&&exposedBoundaries>0&&unblockedFaces.Count==0,"Visible cliff faces adjoining declared floors have permanent blocking: "+string.Join(";",unblockedFaces.Take(12).ToArray()));
+    check(propFootMaps.All(m=>{foreach(var c in m.cellBounds.allPositionsWithin)if(m.HasTile(c)&&faceAtWorld(m.GetCellCenterWorld(c)))return false;return true;}),"Tree and boulder feet remain off visible vertical faces");
+    check(topMaps.Concat(faceMaps).All(m=>m.GetComponent<Collider2D>()==null&&m.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().enabled),"Cliff layers use visible Tilemaps with separate collision");
+    var upperPaint=topMaps[1];
+    var upperMask=visualMaps.Single(m=>m.name=="Upper terrace mask");
+    var shoreOakFeet=propFootMaps.Where(m=>m.transform.parent.name=="Oak"&&m.transform.position.x>=42&&m.transform.position.x<=64&&m.transform.position.y>=89&&m.transform.position.y<=99).ToArray();
     bool shoreRootSupport=shoreOakFeet.Length==4;
     foreach(var m in shoreOakFeet)foreach(var c in m.cellBounds.allPositionsWithin)if(m.HasTile(c)){
         var p=upperPaint.WorldToCell(m.GetCellCenterWorld(c));
         for(int dy=-1;dy<=1;dy++)for(int dx=-1;dx<=1;dx++){var q=p+new Vector3Int(dx,dy,0);shoreRootSupport&=upperPaint.HasTile(q)&&upperMask.HasTile(q)&&!joinedFace(q)&&!sourceCliff.HasTile(q);}
     }
     check(shoreRootSupport,"Four northern shore oaks retain full-cell dry upper-ground margins clear of cliff faces");
-    check(nativeFaces.gameObject.activeInHierarchy&&new[]{new Vector3Int(27,81,0),new Vector3Int(28,81,0)}.All(c=>!changingWaterMap.HasTile(c)&&joinedFace(c)&&sourceCliff.HasTile(c))&&!structureMap.HasTile(new Vector3Int(28,80,0)),"Heart landing joins the solid recess wall without stale water notches or a protruding bank tile");
+    check(faceMaps.All(m=>m.gameObject.activeInHierarchy)&&new[]{27,28}.All(x=>
+        faceMaps[0].HasTile(new Vector3Int(x,82,0))&&faceMaps[1].HasTile(new Vector3Int(x,83,0))&&
+        changingWaterMap.HasTile(new Vector3Int(x,82,0))&&!changingWaterMap.HasTile(new Vector3Int(x,83,0)))&&
+        (structureMap==null||!structureMap.HasTile(new Vector3Int(28,80,0))),
+        "Recess wall has two rows: its lower row submerges and its upper row stays above water");
     bool heartFaceComplete=true,heartFaceSolid=true;
-    for(int y=55;y<=57;y++)for(int x=67;x<=73;x++){
-        var c=new Vector3Int(x,y,0);var t=nativeFaces.GetTile(c);
-        heartFaceComplete&=joinedFace(c);
+    for(int x=67;x<=73;x++){
+        int crest=Enumerable.Range(55,5).First(candidateY=>topMaps[1].HasTile(new Vector3Int(x,candidateY,0)));
+        int y=crest-1;
+        var c=new Vector3Int(x,y,0);
+        heartFaceComplete&=faceMaps[1].HasTile(c)&&!faceMaps[1].HasTile(c+Vector3Int.down);
         Physics2D.OverlapBox(new Vector2(x+.5f,y+.5f),new Vector2(.2f,.2f),0,filter,overlap);
         heartFaceSolid&=overlap.Any(solid);
     }
-    check(heartFaceComplete&&heartFaceSolid,"Heart overlook face has complete native art and matching solid footprint");
+    check(heartFaceComplete&&heartFaceSolid&&tierAt(new Vector3Int(69,54,0))==0&&tierAt(new Vector3Int(69,58,0))==1,"Heart overlook has a solid connected native cliff between Normal lookout and Upper reward ground");
     check(new[]{faceMap,ascentMap}.All(m=>m.GetComponent<Collider2D>()==null),"Faces and ascent remain visual only");
     check(new[]{connectorMap,submergedConnectorMap}.All(m=>m.GetComponent<Collider2D>()==null),"Height-connector art does not add hidden collision");
     check(submergedConnectorMap.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().sortingOrder<changingWaterMap.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().sortingOrder,"Submerged treads draw beneath the high-water surface");
-    var connectorNames=new[]{"ridge descent","sluice basin descent","barn shore descent","storehouse stair","H2 shelf stair","plinth stair","lower road flight","upper road flight"};
-    var connectorRects=new[]{new RectInt(12,93,3,4),new RectInt(14,64,3,3),new RectInt(34,27,3,3),new RectInt(19,73,3,3),new RectInt(29,77,3,3),new RectInt(17,23,3,3),new RectInt(65,87,2,3),new RectInt(65,91,2,3)};
+    var connectorNames=stairPlan["stairs"].Select(t=>(string)t["name"]).ToArray();
+    var connectorRects=stairPlan["stairs"].Select(t=>new RectInt((int)t["rect"][0],(int)t["rect"][1],(int)t["rect"][2],(int)t["rect"][3])).ToArray();
     for(int i=0;i<connectorRects.Length;i++){
         var rect=connectorRects[i];bool complete=true,clear=true;
         for(int y=rect.yMin;y<rect.yMax;y++)for(int x=rect.xMin;x<rect.xMax;x++){
-            var p=new Vector3(x+.5f,y+.5f,0);complete&=connectorAt(p);
+            var p=new Vector3(x+.5f,y+.5f,0);complete&=connectorAt(p)&&!faceAtWorld(p);
             Physics2D.OverlapBox(p,new Vector2(.76f,.76f),0,filter,overlap);clear&=!overlap.Any(solid);
         }
         check(complete,"Visible treads span the "+connectorNames[i]);
         check(clear,"Low-water body clearance through the "+connectorNames[i]);
     }
+    bool lowerRoadPassage=true,sealedUpperRoad=true;
+    for(int y=87;y<=89;y++)for(int x=65;x<=66;x++){
+        var p=new Vector3(x+.5f,y+.5f,0);Physics2D.OverlapBox(p,new Vector2(.76f,.76f),0,filter,overlap);
+        lowerRoadPassage&=!overlap.Any(solid)&&connectorAt(p)==(y==88)&&(y==88||tierAt(new Vector3Int(x,y,0))==(y==89?0:-1));
+    }
+    for(int x=65;x<=66;x++){
+        int crest=Enumerable.Range(90,8).First(candidateY=>topMaps[1].HasTile(new Vector3Int(x,candidateY,0)));
+        var p=new Vector3(x+.5f,crest-.5f,0);Physics2D.OverlapBox(p,new Vector2(.76f,.76f),0,filter,overlap);
+        sealedUpperRoad&=overlap.Any(solid)&&!connectorAt(p)&&faceMaps[1].HasTile(new Vector3Int(x,crest-1,0))&&
+            topMaps[0].HasTile(new Vector3Int(x,crest-2,0));
+    }
+    check(lowerRoadPassage,"Barrow approach has one stair row from Lower road to Normal doorway, matching the transition paint");
+    check(sealedUpperRoad,"Raised Barrow surround has a solid one-level front onto the newly painted Farm tier");
     bool sluiceNative=true;
     for(int y=64;y<=66;y++)for(int x=14;x<=16;x++){
         var p=new Vector3(x+.5f,y+.5f,0);var m=tileAt(connectorMap,p)?connectorMap:submergedConnectorMap;
@@ -322,75 +290,99 @@ try{
         sluiceNative&=Mathf.Abs(up.x)<.001f&&up.y>.999f&&Mathf.Abs(right.y)<.001f&&right.x>.999f;
     }
     check(sluiceNative,"Sluice descent keeps native north-up stair artwork");
-    var heightBoundary=visualMaps.Single(m=>m.name=="Height boundaries");
-    bool terminalFaces=true,terminalBanks=true;
-    foreach(int x in new[]{12,13,14,15,63,64}){
-        int lip=x==12?75:x==13||x==14?76:x==15?77:x==63?91:93;
-        for(int row=0;row<3;row++){var c=new Vector3Int(x,lip-2+row,0);terminalFaces&=joinedFace(c)&&sourceCliff.HasTile(c)&&!(oldCapMap!=null&&oldCapMap.HasTile(c))&&!faceMap.HasTile(c);}
+    // Visible ownership, not just tile existence: these caught the arrival regression.
+    var permanentRiver=visualMaps.Single(m=>m.name=="Border river");
+    var meadow=visualMaps.Single(m=>m.name=="Ground - regional meadow");
+    var silt=visualMaps.Single(m=>m.name=="Ground - exposed basin silt");
+    bool riverVisible=true;
+    foreach(var cell in permanentRiver.cellBounds.allPositionsWithin)
+        if(permanentRiver.HasTile(cell))riverVisible&=drawOrder(permanentRiver)>drawOrder(meadow)&&drawOrder(permanentRiver)>drawOrder(silt)&&!topMaps.Any(m=>m.HasTile(cell))&&!faceMaps.Any(m=>m.HasTile(cell));
+    check(riverVisible,"Permanent entrance river draws above its dirt bed without cliff volumes covering it");
+    foreach(string name in new[]{"Footpath","DirtLane","Border lane"}){
+        var pathMap=visualMaps.Single(m=>m.name==name);
+        check(pathMap.GetUsedTilesCount()>0&&pathMap.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().sortingOrder>meadow.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().sortingOrder,
+            name+" remains visible above the meadow");
     }
-    for(int y=76;y<=83;y++){var c=new Vector3Int(12,y,0);terminalBanks&=structureMap.HasTile(c)&&sourceCliff.HasTile(c);}
-    for(int x=13;x<=15;x++){var c=new Vector3Int(x,83,0);terminalBanks&=structureMap.HasTile(c)&&sourceCliff.HasTile(c);}
-    check(terminalFaces&&terminalBanks,"Sluice and road shore terminals have complete three-row faces and permanent side/back returns");
-    bool worksiteFaces=true,worksiteSides=true;
-    for(int x=68;x<=83;x++)for(int row=0;row<3;row++)foreach(int foot in new[]{79,91}){
-        if(foot==79&&x>=72&&x<=74)continue;
-        var c=new Vector3Int(x,foot+row,0);var t=nativeFaces.GetTile(c);
-        worksiteFaces&=joinedFace(c)&&heightBoundary.HasTile(c)&&!(oldCapMap!=null&&oldCapMap.HasTile(c))&&!faceMap.HasTile(c);
+    var campChest=root.GetComponentsInChildren<RoadOfTheOldKing.World.RewardChest>(true).Single(c=>c.RewardId=="green-lowlands/workshop-cache");
+    check(Vector2.Distance(campChest.transform.position,new Vector2(133,48))<.01f,"Camp chest moved with its existing reward identity");
+    var campProps=root.transform.Find("Scenery/Southeast camp - supplies and shelter");
+    check(campProps!=null&&campProps.childCount==11,"Camp has shelter, cart, timber and supply props");
+    // Check complete solid-prop artwork, including the cart shafts, against the
+    // height footprint. Checking only collider-cell centers missed rim overlaps.
+    foreach(string propName in new[]{"Stolen supply cart","Stacked firewood"}){
+        var prop=campProps.Find(propName);bool supported=prop!=null;
+        foreach(var map in prop.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>(true).Where(m=>m.name!="Collision"))
+            foreach(var c in map.cellBounds.allPositionsWithin)if(map.HasTile(c)){
+                var center=map.GetCellCenterWorld(c);
+                foreach(var offset in new[]{new Vector3(-.49f,-.49f),new Vector3(.49f,-.49f),new Vector3(-.49f,.49f),new Vector3(.49f,.49f)}){
+                    var p=center+offset;var cell=heightPlan.WorldToCell(p);var tile=heightPlan.GetTile<RoadOfTheOldKing.EditorTools.HeightPlanTile>(cell);
+                    supported&=tile!=null&&tile.height==0&&!faceAtWorld(p);
+                }
+            }
+        check(supported,propName+" entire painted footprint stays inside the flat camp yard");
     }
-    for(int y=82;y<=90;y++){
-        foreach(int x in new[]{67,84}){var c=new Vector3Int(x,y,0);worksiteSides&=structureMap.HasTile(c)&&heightBoundary.HasTile(c);}
-        foreach(int x in new[]{68,83}){var c=new Vector3Int(x,y,0);worksiteSides&=!(oldCapMap!=null&&oldCapMap.HasTile(c))&&!heightBoundary.HasTile(c);Physics2D.OverlapBox(new Vector2(x+.5f,y+.5f),new Vector2(.76f,.76f),0,filter,overlap);worksiteSides&=!overlap.Any(solid);}
+    bool grassRise=true;int grassRiseCells=0;
+    foreach(var c in heightPlan.cellBounds.allPositionsWithin){
+        var tile=heightPlan.GetTile<RoadOfTheOldKing.EditorTools.HeightPlanTile>(c);
+        if(tile==null||tile.height!=2||c.y>=70)continue;
+        grassRiseCells++;grassRise&=topMaps[2].HasTile(c)&&topMaps[2].GetTile(c).name=="Paint_CliffEarthTop";
     }
-    check(worksiteFaces&&worksiteSides,"Worksite retains complete fronts and outer side banks around clear same-height inner margins");
-    check(Enumerable.Range(0,3).All(row=>{var c=new Vector3Int(67,79+row,0);return joinedFace(c)&&heightBoundary.HasTile(c)&&changingWaterMap.HasTile(c);}),"Worksite southwest shoulder stays permanently blocked beneath changing water");
-    check(!visualMaps.Any(m=>m.GetTilesBlock(m.cellBounds).Any(t=>t!=null&&t.name.StartsWith("StoneCliff_"))),"Last legacy stone cliff face fragments are removed from regional visual maps");
-    var ropeTops=new System.Collections.Generic.List<Vector3Int>();var ropeVolume=new System.Collections.Generic.HashSet<Vector3Int>();
-    for(int x=128;x<=133;x++)for(int y=75;y<=87;y++){var c=new Vector3Int(x,y,0);if(!uplandMap.HasTile(c))continue;ropeTops.Add(c);for(int row=0;row<=3;row++)ropeVolume.Add(c+Vector3Int.down*row);}
-    check(ropeTops.Count==35&&ropeVolume.Count==56&&ropeVolume.All(c=>sourceCliff.GetTile(c)!=null&&sourceCliff.GetTile(c).name=="Collision_Block")&&oldCapMap==null,"Rope shelf has complete automatic rock volume and the regional legacy cap map is removed");
-    var manualColumns=new System.Collections.Generic.Dictionary<string,System.Collections.Generic.HashSet<int>>();bool nativeColumnNames=true;
-    foreach(var c in faceMap.cellBounds.allPositionsWithin){var tile=faceMap.GetTile(c);if(tile==null||!tile.name.StartsWith("Shore"))continue;string n=tile.name;int split=n.LastIndexOf('_'),row; if(split<0||!int.TryParse(n.Substring(split+1),out row)||row<0||row>2){nativeColumnNames=false;continue;}string key=c.x+","+(c.y-row)+":"+n.Substring(0,split);if(!manualColumns.ContainsKey(key))manualColumns[key]=new System.Collections.Generic.HashSet<int>();manualColumns[key].Add(row);}
-    check(nativeColumnNames&&manualColumns.Count>0&&manualColumns.All(g=>g.Value.Count==3),"Remaining manual cliff columns all contain matching foot, middle and lip pieces");
-    check(!visualMaps.Any(m=>m.GetTilesBlock(m.cellBounds).Any(t=>t!=null&&(t.name.StartsWith("ShoreFace_")||t.name=="Paint_GrassLedge"||t.name=="Paint_StoneLedge"))),"Scene has no obsolete separate face rows or legacy grass/stone ledges");
-    check(joinedMap.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().mode==UnityEngine.Tilemaps.TilemapRenderer.Mode.Individual&&joinedMap.GetUsedTilesCount()==1&&joinedMap.GetComponent<Collider2D>()==null,"Joined cliffs share one native brush, correct overlapping sprite order and separate collision");
+    check(grassRise&&grassRiseCells>100,"New southern +2 paint has grassy Enclosure-tier tops");
+    var basinData=new SerializedObject(changingWaterMap.GetComponentInParent<RoadOfTheOldKing.World.SluiceWaterReveal>(true));
+    var depth=basinData.FindProperty("basinDepth").objectReferenceValue as Texture2D;var depthBounds=basinData.FindProperty("basinBounds").vector4Value;
+    check(depth!=null&&depth.width==(int)depthBounds.z*16&&depth.height==(int)depthBounds.w*16,"Extended basin depth retains all sixteen pixels per world cell");
+    bool riverFlooded=true;
+    foreach(var c in permanentRiver.cellBounds.allPositionsWithin)if(permanentRiver.HasTile(c))
+        riverFlooded&=changingWaterMap.HasTile(c)&&permanentRiver.GetTile(c).name=="Paint_DirtWater"&&silt.HasTile(c);
+    check(riverFlooded&&drawOrder(changingWaterMap)>drawOrder(permanentRiver),"Raised pond covers the complete dirt-edged southern river with an exposed bed underneath");
+    check(changingWaterMap.gameObject.activeSelf,"Water renderer remains enabled for sluice-owned activation");
     var ropeRoute=root.GetComponentInChildren<RoadOfTheOldKing.World.RopeRoute>(true);var ropeSerialized=new SerializedObject(ropeRoute);
     var lowerRope=ropeSerialized.FindProperty("lowerAnchor").objectReferenceValue as RoadOfTheOldKing.World.RopeAnchor;
     var upperRope=ropeSerialized.FindProperty("upperAnchor").objectReferenceValue as RoadOfTheOldKing.World.RopeAnchor;
     var crossedCliff=ropeSerialized.FindProperty("traversedCliff").objectReferenceValue as Collider2D;
-    check(ropeRoute.IsConfigured&&lowerRope!=null&&upperRope!=null&&crossedCliff!=null&&crossedCliff.gameObject==sourceCliff.gameObject&&Vector2.Distance(lowerRope.transform.position,new Vector2(127,77))<.01f&&Vector2.Distance(upperRope.transform.position,new Vector2(131,77))<.01f,"Rope anchors and traversable collider remain attached to the rebuilt shelf at their authored positions");
-    check(thicketMaps.Length==0&&flatMap==null,"Legacy regional foliage walls and their flat-bank underpaint are fully cleared");
-    bool roadBank=true,roadCorner=true;
-    for(int y=82;y<=86;y++){
-        var c=new Vector3Int(67,y,0);
-        roadBank&=structureMap.GetTile(c)!=null&&structureMap.GetTile(c).name=="Bank_East"&&heightBoundary.GetTile(c)!=null&&heightBoundary.GetTile(c).name=="Collision_Block"&&!changingWaterMap.HasTile(c);
+    check(ropeRoute.IsConfigured&&lowerRope!=null&&upperRope!=null&&crossedCliff!=null&&crossedCliff.gameObject==visualMaps.Single(m=>m.name=="Height boundaries").gameObject&&Vector2.Distance(lowerRope.transform.position,new Vector2(110.5f,45.5f))<.01f&&Vector2.Distance(upperRope.transform.position,new Vector2(119.5f,45.5f))<.01f,"Rope anchors and traversable collider remain attached to the southeast camp at their authored positions");
+    var campGuards=root.transform.Find("Encounters/Workshop scavengers").GetComponentsInChildren<MonoBehaviour>(true).OfType<RoadOfTheOldKing.Enemies.IEnemy>();
+    check(campGuards.All(g=>Vector2.Distance(((Component)g).transform.position,upperRope.transform.position)>8),"Camp guards leave a safe rope arrival apron");
+    var loopPoints=new[]{new Vector2(107,43),new Vector2(109,49),new Vector2(112,55),new Vector2(117,59),new Vector2(128,61),new Vector2(139,60),new Vector2(148,54),new Vector2(151,44),new Vector2(149,35),new Vector2(143,29),new Vector2(133,26),new Vector2(123,27),new Vector2(115,31),new Vector2(109,37),new Vector2(107,43)};
+    var loopHits=new System.Collections.Generic.List<RaycastHit2D>();bool loopClear=true;
+    for(int i=1;i<loopPoints.Length;i++){
+        var delta=loopPoints[i]-loopPoints[i-1];
+        Physics2D.BoxCast(loopPoints[i-1],new Vector2(.76f,.76f),0,delta.normalized,filter,loopHits,delta.magnitude);
+        loopClear&=!loopHits.Any(hit=>solid(hit.collider));
     }
-    for(int y=91;y<=93;y++){
-        var c=new Vector3Int(67,y,0);
-        roadCorner&=structureMap.GetTile(c)!=null&&structureMap.GetTile(c).name=="ShoreInside_W_"+(y-91)&&heightBoundary.GetTile(c)!=null&&heightBoundary.GetTile(c).name=="Collision_Block";
-    }
-    check(roadBank,"Road-cut bank retains permanent visible collision after its foliage strip is removed");
-    check(roadCorner,"Full three-row corner joins the worksite front beside the upper road flight");
-    check(new[]{new Vector3Int(127,81,0),new Vector3Int(127,82,0)}.All(c=>upperPaint.HasTile(c)&&upperMask.HasTile(c)&&!sourceCliff.HasTile(c)&&!sourceBank.HasTile(c)),"Cleared orchard stair shoulder has supported upper footing without old foliage blockers");
-    var headlandVolume=cliffCoverage.Where(c=>c.x>=41&&c.x<=66&&c.y>=67&&c.y<=80).ToArray();
-    check(headlandVolume.Length>0&&headlandVolume.All(c=>sourceCliff.GetTile(c)!=null&&sourceCliff.GetTile(c).name=="Collision_Block"&&!changingWaterMap.HasTile(c)&&!(oldCapMap!=null&&oldCapMap.HasTile(c))&&!faceMap.HasTile(c)),"Rocky spur headland has complete automatic terrain and matching dry solid volume, with its legacy assembly removed");
-    var spurBanks=new System.Collections.Generic.List<Vector3Int>();
-    for(int y=61;y<=76;y++)for(int x=63;x<=83;x++){var c=new Vector3Int(x,y,0);if(structureMap.HasTile(c))spurBanks.Add(c);}
-    check(spurBanks.Count>0&&spurBanks.All(c=>heightBoundary.GetTile(c)!=null&&heightBoundary.GetTile(c).name=="Collision_Block"&&!changingWaterMap.HasTile(c)&&!(flatMap!=null&&flatMap.HasTile(c))&&!thicketMaps.Any(m=>m.HasTile(c))),"Western spur banks replace the foliage barrier and retain permanent blocking between upper grove, lower shore and basin approach");
-    bool worksiteBankSupported=true;
-    for(int y=76;y<=93;y++){
-        var c=new Vector3Int(84,y,0);var tile=structureMap.GetTile(c);
-        worksiteBankSupported&=tile!=null&&(tile.name.StartsWith("Bank_")||tile.name.StartsWith("ShoreInside_E_"))&&heightBoundary.GetTile(c)!=null&&heightBoundary.GetTile(c).name=="Collision_Block"&&upperPaint.HasTile(c)&&!changingWaterMap.HasTile(c)&&!(flatMap!=null&&flatMap.HasTile(c))&&!thicketMaps.Any(m=>m.HasTile(c));
-    }
-    check(worksiteBankSupported,"Open upper grove has a visible permanently blocked bank beside the lower worksite, with supported native corner pieces");
-    var eastPondBanks=new System.Collections.Generic.List<Vector3Int>();
-    for(int y=36;y<=60;y++)for(int x=57;x<=63;x++){
-        var c=new Vector3Int(x,y,0);var tile=structureMap.GetTile(c);
-        if(tile!=null&&tile.name.StartsWith("Bank_"))eastPondBanks.Add(c);
-    }
-    check(eastPondBanks.Count>0&&eastPondBanks.All(c=>heightBoundary.GetTile(c)!=null&&heightBoundary.GetTile(c).name=="Collision_Block"&&!changingWaterMap.HasTile(c)&&!cliffCoverage.Contains(c)&&structureMap.GetSprite(c)!=null&&Mathf.Abs(structureMap.GetSprite(c).pixelsPerUnit-16)<.001f),"Native east pond bank occupies dry ground with permanent full-cell blocking after drainage");
-    var stairCenters=new System.Collections.Generic.List<Vector3>();
-    foreach(var c in ascentMap.cellBounds.allPositionsWithin)if(ascentMap.HasTile(c))stairCenters.Add(ascentMap.GetCellCenterWorld(c));
-    check(stairCenters.Count>0&&stairCenters.All(p=>!tileAt(sourceCliff,p)&&!tileAt(sourceBank,p)),"Ascent lies on the walkable route");
+    check(loopClear,"All fourteen legs of the outer camp loop admit a full player body");
+    var sideShadow=root.GetComponentsInChildren<SpriteRenderer>(true).Single(r=>r.name=="Ground-3-1");
+    var shadowPixels=new Texture2D(2,2);bool eastShadow=true;
+    try{
+        shadowPixels.LoadImage(System.IO.File.ReadAllBytes(AssetDatabase.GetAssetPath(sideShadow.sprite)));
+        for(int i=0;i<3;i++){
+            var p=sideShadow.transform.InverseTransformPoint(new Vector3(118+(i+.5f)/16,44.375f,0));
+            eastShadow&=shadowPixels.GetPixel(Mathf.FloorToInt(p.x*16),Mathf.FloorToInt(p.y*16)).a>0;
+        }
+    }finally{UnityEngine.Object.DestroyImmediate(shadowPixels);}
+    check(eastShadow,"Exposed east rim casts three native shadow pixels onto the lower camp floor");
     var regionalField=scene.GetRootGameObjects().SelectMany(r=>r.GetComponentsInChildren<RoadOfTheOldKing.World.InteractiveVegetation>(true)).Single();
-    check(regionalField.layout.plants.All(p=>!tileAt(ascentMap,p.position)&&!connectorAt(p.position)),"No vegetation roots on ascent or connecting steps");
-    return new{passed=logs.Count,failed=failed.ToArray(),notes="Temporary low-water presentation audit; run Layout for all-state connectivity and Live for motor evidence."};
+    check(regionalField.layout.plants.All(p=>!tileAt(ascentMap,p.position)&&!connectorAt(p.position)&&!faceAtWorld(p.position)),"Vegetation roots stay off visible faces and steps");
+    // Stage the real reveal in this disposable scene. Intermediate draining is
+    // not the stable ServiceDiverted state tested by the connectivity fixture.
+    var waterReveal=changingWaterMap.GetComponentInParent<RoadOfTheOldKing.World.SluiceWaterReveal>(true);
+    check(waterReveal!=null,"Changing pond water owns the production drainage reveal");
+    if(waterReveal!=null){
+        var waterSolids=waterReveal.GetComponentsInChildren<Collider2D>(true).Where(c=>!c.isTrigger).ToArray();
+        var waterRenderer=changingWaterMap.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>();
+        var waterProperties=new MaterialPropertyBlock();
+        var revealData=new SerializedObject(waterReveal);float duration=revealData.FindProperty("duration").floatValue;
+        var advance=waterReveal.GetType().GetMethod("Advance",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic);
+        waterReveal.SetVisible(true,false);Physics2D.SyncTransforms();
+        check(!waterReveal.IsDraining&&waterReveal.gameObject.activeInHierarchy&&waterSolids.Any(c=>c.enabled&&c.gameObject.activeInHierarchy),"High water keeps its physical basin barrier");
+        waterReveal.SetVisible(false,true);
+        foreach(float fraction in new[]{.25f,.5f,.75f}){
+            advance.Invoke(waterReveal,new object[]{duration*.25f});waterRenderer.GetPropertyBlock(waterProperties);Physics2D.SyncTransforms();
+            check(waterReveal.IsDraining&&Mathf.Abs(waterReveal.Progress-fraction)<.001f&&waterReveal.gameObject.activeInHierarchy&&waterSolids.Any(c=>c.enabled&&c.gameObject.activeInHierarchy),"Water barrier persists at drainage "+fraction);
+            check(Mathf.Abs(waterProperties.GetFloat("_WaterLevel")-(1f-Mathf.SmoothStep(0f,1f,fraction)))<.001f,"Production water shader receives intermediate level "+fraction);
+        }
+        advance.Invoke(waterReveal,new object[]{duration});Physics2D.SyncTransforms();
+        check(!waterReveal.IsDraining&&!waterReveal.gameObject.activeInHierarchy&&waterSolids.All(c=>!c.enabled||!c.gameObject.activeInHierarchy),"Fully drained water releases only its own basin barrier");
+    }
+    return new{passed=logs.Count,failed=failed.ToArray(),classifiedFaces=classifiedFaces,exposedBoundaries=exposedBoundaries,notes="Per-elevation face/guide/collider agreement, prop footing, low-water stairs/passages and production intermediate reveal lifecycle. Layout owns high/service/low connectivity; rendered occlusion, actual motor travel and human readability remain separate."};
 }finally{UnityEditor.SceneManagement.EditorSceneManager.CloseScene(scene,true);UnityEditor.SceneManagement.EditorSceneManager.RestoreSceneManagerSetup(originalSetup);}

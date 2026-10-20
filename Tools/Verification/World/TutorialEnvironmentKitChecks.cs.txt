@@ -1,44 +1,24 @@
 // Run in Edit Mode through Unity MCP execute_code. Does not modify gameplay or saves.
 if(EditorApplication.isPlaying)throw new System.Exception("Edit Mode required.");
-string root=RoadOfTheOldKing.EditorTools.TutorialEnvironmentKitBuilder.Root;
-var props=RoadOfTheOldKing.EditorTools.TutorialEnvironmentKitBuilder.ReadCatalog();
+string root=RoadOfTheOldKing.EditorTools.EnvironmentArtCatalog.Root;
+var props=RoadOfTheOldKing.EditorTools.EnvironmentArtCatalog.ReadCatalog();
 var failures=new System.Collections.Generic.List<string>();int count=0;
 System.Action<bool,string> check=(ok,label)=>{count++;if(!ok)failures.Add(label);};
-var sprites=AssetDatabase.LoadAllAssetsAtPath(root+"/TutorialEnvironment16.png").OfType<Sprite>().ToDictionary(s=>s.name);
-var importer=(TextureImporter)AssetImporter.GetAtPath(root+"/TutorialEnvironment16.png");
-check(importer.filterMode==FilterMode.Point&&!importer.mipmapEnabled&&importer.textureCompression==TextureImporterCompression.Uncompressed&&importer.spritePixelsPerUnit==16,"Native crisp import");
-check(props.Length==31&&props.Select(p=>p.name).Distinct().Count()==31,"31 unique objects");
+check(props.Length==26&&props.Select(p=>p.name).Distinct().Count()==26,"26 named placement entries");
 int expectedTiles=props.Where(p=>!p.interactiveArt).Sum(p=>p.width/16*(p.height/16));
-check(AssetDatabase.FindAssets("t:Tile",new[]{root+"/Tiles"}).Length==expectedTiles,"No missing or obsolete tile pieces");
-var colors=System.IO.File.ReadAllLines("../Docs/Art/Palettes/tutorial-hearth-and-meadow-v1.gpl").Select(l=>l.Split((char[])null,System.StringSplitOptions.RemoveEmptyEntries)).Where(p=>p.Length>=3&&char.IsDigit(p[0][0])).Select(p=>new Color32(byte.Parse(p[0]),byte.Parse(p[1]),byte.Parse(p[2]),255)).ToArray();
-var atlas=new Texture2D(2,2);atlas.LoadImage(System.IO.File.ReadAllBytes(root+"/TutorialEnvironment16.png"));
-check(atlas.GetPixels32().All(p=>p.a==0||(p.a==255&&colors.Contains(p))),"Exact Tutorial palette and binary alpha");
-var approved=new Texture2D(2,2);approved.LoadImage(System.IO.File.ReadAllBytes("../ArtSource/Tutorial/Environment/ApprovedSample16.png"));
-foreach(var prop in props.Where(p=>p.native))
-{
-    var r=sprites[prop.name].rect;var a=prop.sourceRect;
-    check(atlas.GetPixels((int)r.x,(int)r.y,prop.width,prop.height).SequenceEqual(approved.GetPixels(a.x,approved.height-a.y-a.height,a.width,a.height)),"Approved pixels preserved "+prop.name);
-}
-var gateRect=sprites["Gate_Open"].rect;
-check(atlas.GetPixels((int)gateRect.x+18,(int)gateRect.y,12,32).All(p=>p.a==0),"Gate art leaves a player-wide visible opening");
-UnityEngine.Object.DestroyImmediate(atlas);UnityEngine.Object.DestroyImmediate(approved);
+var sprites=AssetDatabase.LoadAllAssetsAtPath(RoadOfTheOldKing.EditorTools.TutorialArtAssets.Root+"/TutorialStructures16.png").OfType<Sprite>().ToDictionary(s=>s.name);
 foreach(var prop in props)
 {
-    check(sprites.ContainsKey(prop.name)&&sprites[prop.name].rect.width==prop.width&&sprites[prop.name].rect.height==prop.height,"Whole sprite "+prop.name);
-    string path=(prop.interactiveArt?RoadOfTheOldKing.EditorTools.TutorialEnvironmentKitBuilder.VisualRoot:RoadOfTheOldKing.EditorTools.TutorialEnvironmentKitBuilder.PrefabRoot)+"/"+prop.name+(prop.interactiveArt?"_Visual":"")+".prefab";
+    string path=prop.interactiveArt?"Assets/Prefabs/Tutorial/"+(prop.name=="Target_New"?"PracticeStand_New":prop.name=="Target_Worn"?"PracticeStand_Worn":"TutorialPracticeDummy")+".prefab":RoadOfTheOldKing.EditorTools.EnvironmentArtCatalog.PrefabPath(prop.name);
     var prefab=AssetDatabase.LoadAssetAtPath<GameObject>(path);
-    check(prefab!=null,"Prefab "+prop.name);if(!prefab)continue;
-    check(prefab.GetComponentsInChildren<MonoBehaviour>(true).Length==0,"Art-only prefab "+prop.name);
+    check(prefab!=null,"Current prefab "+prop.name);if(!prefab)continue;
     check(prefab.GetComponentsInChildren<Transform>(true).All(t=>GameObjectUtility.GetMonoBehavioursWithMissingScriptCount(t.gameObject)==0),"Valid components "+prop.name);
     if(prop.interactiveArt)
     {
-        var foot=prefab.GetComponent<BoxCollider2D>();
-        bool target=prop.name=="Target_New"||prop.name=="Target_Worn";
-        check(prefab.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>().Length==0&&
-            (target?foot!=null&&!foot.isTrigger&&foot.size==new Vector2(1.125f,.5f)&&foot.offset==new Vector2(0,.3125f):prefab.GetComponentsInChildren<Collider2D>().Length==0),
-            "Practice art preserves authored target footing / dummy visual "+prop.name);
-        check(prefab.GetComponentInChildren<SpriteRenderer>().sprite==sprites[prop.name],"Practice sprite assigned "+prop.name);continue;
+        check(prefab.GetComponentsInChildren<SpriteRenderer>(true).Any(r=>r.sprite==sprites[prop.name]),"Current teaching sprite "+prop.name);
+        continue;
     }
+    check(prefab.GetComponentsInChildren<MonoBehaviour>(true).Length==0,"Art-only environment "+prop.name);
     var maps=prefab.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>().ToDictionary(m=>m.name);
     var bases=maps["Environment"];var upper=maps["Above Player"];var block=maps["Collision"];
     if(prop.name.StartsWith("Cottage_"))
@@ -58,7 +38,7 @@ foreach(var prop in props)
         check(block.HasTile(p)==expected,"Collision footprint "+prop.name+" "+p);
     }
     if(prop.name=="Stone_Bridge")for(int x=0;x<10;x++)foreach(int y in new[]{1,2})check(!block.HasTile(new Vector3Int(x,y,0)),"Traversable bridge deck");
-    if(prop.name=="Gate_Open"||prop.name=="Old_Arch")check(!block.HasTile(new Vector3Int(1,0,0)),"Open passage "+prop.name);
+    if(prop.name=="Old_Arch")check(!block.HasTile(new Vector3Int(1,0,0)),"Open passage "+prop.name);
     if(prop.name=="Gate_Closed")check(block.HasTile(new Vector3Int(1,0,0)),"Closed gate footprint");
     if(prop.kind=="tree")
     {
@@ -66,48 +46,29 @@ foreach(var prop in props)
         check(upper.HasTile(new Vector3Int(1,2,0))&&!block.HasTile(new Vector3Int(1,2,0)),"Walkable overhead canopy "+prop.name);
     }
 }
-string palette=root+"/Palettes/TutorialEnvironment.prefab";
-check(AssetDatabase.LoadAllAssetsAtPath(palette).OfType<GridPalette>().Any(),"Registered painting palette");
+check(AssetDatabase.FindAssets("t:Prefab",new[]{root+"/Palettes"}).Length==1,"One Tutorial environment palette");
 check(AssetDatabase.FindAssets("t:Prefab",new[]{"Assets/Art/Tiles/Tutorial/Templates"}).Length==1,"One shared template");
-check(AssetDatabase.FindAssets("t:Scene",new[]{root}).Length==0,"No extra demonstration scenes");
 var player=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Player/Player.prefab").GetComponentsInChildren<SpriteRenderer>().First(r=>r.name=="Body");
-var oak=AssetDatabase.LoadAssetAtPath<GameObject>(RoadOfTheOldKing.EditorTools.TutorialEnvironmentKitBuilder.PrefabRoot+"/Oak.prefab").transform.Find("Above Player").GetComponent<UnityEngine.Tilemaps.TilemapRenderer>();
+var oak=AssetDatabase.LoadAssetAtPath<GameObject>(RoadOfTheOldKing.EditorTools.EnvironmentArtCatalog.PrefabPath("Oak")).transform.Find("Above Player").GetComponent<UnityEngine.Tilemaps.TilemapRenderer>();
 check(oak.sortingLayerID==player.sortingLayerID&&oak.sortingOrder>player.sortingOrder,"Canopy draws over actual player renderer");
-// Current authoring is scoped: new placements use the rebuilt art while shared sources remain intact.
-string current=RoadOfTheOldKing.EditorTools.TutorialCurrentKitBuilder.Root;
-var currentPrefabs=AssetDatabase.FindAssets("t:Prefab",new[]{RoadOfTheOldKing.EditorTools.TutorialCurrentKitBuilder.PrefabRoot,
-    "Assets/Prefabs/Tutorial/Current","Assets/Prefabs/WorldArt/Tutorial/Current"}).Select(AssetDatabase.GUIDToAssetPath).ToArray();
-check(currentPrefabs.Length==19,"19 scoped current variants");
+// Current prefabs are independent; migration checks separately compare every serialized scene component.
+var currentPrefabs=props.Select(p=>p.interactiveArt?"Assets/Prefabs/Tutorial/"+(p.name=="Target_New"?"PracticeStand_New":p.name=="Target_Worn"?"PracticeStand_Worn":"TutorialPracticeDummy")+".prefab":RoadOfTheOldKing.EditorTools.EnvironmentArtCatalog.PrefabPath(p.name)).Distinct().ToArray();
+check(currentPrefabs.Length==26,"26 canonical placement prefabs");
 foreach(string path in currentPrefabs)
 {
-    var variant=AssetDatabase.LoadAssetAtPath<GameObject>(path);
-    var original=PrefabUtility.GetCorrespondingObjectFromSource(variant);
-    check(original!=null&&PrefabUtility.GetPrefabAssetType(variant)==PrefabAssetType.Variant,"Inherited source "+path);
-    if(original==null)continue;
-    check(variant.GetComponentsInChildren<Transform>(true).Length==original.GetComponentsInChildren<Transform>(true).Length,"Same hierarchy "+path);
-    var colliders=variant.GetComponentsInChildren<Collider2D>(true);var originalColliders=original.GetComponentsInChildren<Collider2D>(true);
-    check(colliders.Length==originalColliders.Length&&colliders.Select(c=>EditorJsonUtility.ToJson(c)).SequenceEqual(originalColliders.Select(c=>EditorJsonUtility.ToJson(c))),"Original collider configuration "+path);
-    check(variant.GetComponentsInChildren<MonoBehaviour>(true).Select(c=>c.GetType()).SequenceEqual(original.GetComponentsInChildren<MonoBehaviour>(true).Select(c=>c.GetType())),"Original gameplay components "+path);
-    var oldMaps=original.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>(true).ToDictionary(m=>m.name);
-    foreach(var map in variant.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>(true))
-    {
-        var old=oldMaps[map.name];var r=map.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>();var oldR=old.GetComponent<UnityEngine.Tilemaps.TilemapRenderer>();
-        check(EditorJsonUtility.ToJson(r)==EditorJsonUtility.ToJson(oldR),"Original renderer/depth "+path+"/"+map.name);
-        bool footprint=true,collision=true;
-        foreach(var c in old.cellBounds.allPositionsWithin){footprint&=old.HasTile(c)==map.HasTile(c);if(map.name=="Collision")collision&=old.GetTile(c)==map.GetTile(c);}
-        check(footprint&&collision,"Original painted footprint/collision tiles "+path+"/"+map.name);
-    }
+    var prefab=AssetDatabase.LoadAssetAtPath<GameObject>(path);
+    check(PrefabUtility.GetPrefabAssetType(prefab)==PrefabAssetType.Regular&&PrefabUtility.GetCorrespondingObjectFromSource(prefab)==null,"Independent current prefab "+path);
 }
-foreach(var entry in new[]{new{n="GroundPaths",tiles=10},new{n="Terrain",tiles=19},new{n="Environment",tiles=expectedTiles}})
+foreach(var entry in new[]{new{n="GroundPaths",layer="Paths",tiles=10},new{n="Terrain",layer="Terrain",tiles=19},new{n="Environment",layer="Environment",tiles=expectedTiles}})
 {
-    string path=current+"/Palettes/TutorialCurrent_"+entry.n+".prefab";
+    string path="Assets/Art/Tiles/Tutorial/"+entry.layer+"/Palettes/Tutorial"+entry.n+".prefab";
     check(AssetDatabase.LoadAllAssetsAtPath(path).OfType<GridPalette>().Any(),"Registered current palette "+entry.n);
     var map=AssetDatabase.LoadAssetAtPath<GameObject>(path).GetComponentInChildren<UnityEngine.Tilemaps.Tilemap>();
     check(map.GetUsedTilesCount()==entry.tiles,"Complete current palette "+entry.n);
     if(entry.n!="Environment")
     {
         var tiles=new UnityEngine.Tilemaps.TileBase[map.GetUsedTilesCount()];map.GetUsedTilesNonAlloc(tiles);
-        check(tiles.All(t=>AssetDatabase.GetAssetPath(t).StartsWith("Assets/Art/Tiles/GreenLowlands/")||AssetDatabase.GetAssetPath(t).StartsWith(current+"/")||AssetDatabase.GetAssetPath(t)==RoadOfTheOldKing.EditorTools.TutorialGroundKitBuilder.CollisionPath),"Current/reused brush references "+entry.n);
+        check(tiles.All(t=>AssetDatabase.GetAssetPath(t).StartsWith("Assets/Art/Tiles/Shared/")||AssetDatabase.GetAssetPath(t).StartsWith(RoadOfTheOldKing.EditorTools.TutorialArtAssets.TerrainRoot+"/")||AssetDatabase.GetAssetPath(t)==RoadOfTheOldKing.EditorTools.GroundKitBuilder.CollisionPath),"Shared and Tutorial terrain brush references "+entry.n);
     }
 }
 return (failures.Count==0?"PASS ":"FAILED ")+count+" Environment assertions; "+props.Length+" objects, "+expectedTiles+" tile pieces\n"+string.Join("\n",failures.ToArray());

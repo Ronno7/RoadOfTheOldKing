@@ -1,4 +1,4 @@
-// Read-only Edit Mode regression checks. Run after the regional density bake.
+// Read-only Edit Mode regression checks for the existing authored plant layout.
 if(EditorApplication.isPlayingOrWillChangePlaymode)throw new System.Exception("Stopped Edit Mode required.");
 if(UnityEngine.SceneManagement.SceneManager.GetActiveScene().path!="Assets/Scenes/GreenLowlands.unity")throw new System.Exception("Open GreenLowlands.");
 var flags=System.Reflection.BindingFlags.Static|System.Reflection.BindingFlags.NonPublic;
@@ -9,14 +9,28 @@ var readMask=builder.GetMethod("ReadMask",flags);
 int checks=0;
 System.Action<bool,string> require=(ok,message)=>{if(!ok)throw new System.Exception(message);checks++;};
 System.Func<string,UnityEngine.Tilemaps.TileBase> tile=path=>AssetDatabase.LoadAssetAtPath<UnityEngine.Tilemaps.TileBase>(path);
-string terrain="Assets/Art/Tiles/GreenLowlands/Terrain/";
-foreach(string path in new[]{terrain+"Tiles/EarthCliff_Top_Center.asset",terrain+"Tiles/EarthCliff_Foot_Left.asset",terrain+"Rules/Paint_CliffCrest.asset",terrain+"Tiles/ShoreReturn_W_0.asset",terrain+"Tiles/ShoreInside_W_0.asset",terrain+"Tiles/ShoreLip_E.asset",terrain+"Tiles/Bank_East.asset",terrain+"Rules/Paint_GrassLedge.asset",terrain+"Rules/Paint_StoneLedge.asset",terrain+"Rules/Paint_RaisedEarth.asset","Assets/Art/Tiles/GreenLowlands/Architecture/Tiles/Foundation_Foot.asset"})
+string terrain="Assets/Art/Tiles/Shared/Terrain/";
+foreach(string path in new[]{terrain+"Tiles/EarthCliff_Top_Center.asset",terrain+"Tiles/EarthCliff_Foot_Left.asset",terrain+"Rules/Paint_CliffEarthFace.asset",terrain+"Rules/Paint_CliffStoneFace.asset",terrain+"Rules/Paint_CliffStoneTop.asset",terrain+"Tiles/ShoreReturn_W_0.asset",terrain+"Tiles/ShoreInside_W_0.asset",terrain+"Tiles/ShoreLip_E.asset",terrain+"Tiles/Bank_East.asset",terrain+"Rules/Paint_GrassLedge.asset",terrain+"Rules/Paint_StoneLedge.asset",terrain+"Rules/Paint_RaisedEarth.asset","Assets/Art/Tiles/GreenLowlands/Environment/Architecture/Tiles/Foundation_Foot.asset"})
 {
  var t=tile(path);require(t!=null,"Fixture source missing: "+path);
  require((bool)classify.Invoke(null,new object[]{t}),"Structural tile family missed: "+path);
 }
-var grassTile=tile("Assets/Art/Tiles/GreenLowlands/Ground/Rules/Paint_Grass.asset");
+var grassTile=tile("Assets/Art/Tiles/Shared/Ground/Rules/Paint_Grass.asset");
 require(grassTile!=null&&!(bool)classify.Invoke(null,new object[]{grassTile}),"Ordinary meadow is not a structural face.");
+var earthTop=tile(terrain+"Rules/Paint_CliffEarthTop.asset");
+require(earthTop!=null&&!(bool)classify.Invoke(null,new object[]{earthTop}),"A walkable earth top is not a structural face.");
+// Face ownership survives an asset rename; deriving from TerrainRuleTile alone
+// must never make a same-height top or a flat shore into a wall.
+var renamed=ScriptableObject.CreateInstance<RoadOfTheOldKing.World.TerrainRuleTile>();
+try
+{
+ renamed.name="Placement fixture renamed tile";
+ renamed.part=RoadOfTheOldKing.World.TerrainRuleTile.Part.Face;
+ require((bool)classify.Invoke(null,new object[]{renamed}),"A renamed native face must remain structural.");
+ renamed.part=RoadOfTheOldKing.World.TerrainRuleTile.Part.Top;
+ require(!(bool)classify.Invoke(null,new object[]{renamed}),"The native top part must not be classified as a face.");
+}
+finally{UnityEngine.Object.DestroyImmediate(renamed);}
 var layout=AssetDatabase.LoadAssetAtPath<RoadOfTheOldKing.World.VegetationLayout>(RoadOfTheOldKing.EditorTools.GreenLowlandsVegetationBuilder.LayoutPath);
 require(layout!=null&&layout.species.Length==5,"Expected accepted five-species field.");
 foreach(var species in layout.species)
@@ -54,33 +68,40 @@ var actual=readMask.Invoke(null,null);
 var actualStructure=(System.Collections.Generic.HashSet<Vector2Int>)maskType.GetField("structure").GetValue(actual);
 var actualGrass=(System.Collections.Generic.HashSet<Vector2Int>)maskType.GetField("grass").GetValue(actual);
 var actualExcluded=(System.Collections.Generic.HashSet<Vector2Int>)maskType.GetField("excluded").GetValue(actual);
-int facesOnCaps=0,newFaces=0,raisedColumns=0;
+int newFaces=0;
 var repairedH1Faces=new System.Collections.Generic.HashSet<Vector2Int>();
-foreach(var m in UnityEngine.Object.FindObjectsByType<UnityEngine.Tilemaps.Tilemap>(FindObjectsInactive.Include,FindObjectsSortMode.None))
+var scene=UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+var maps=scene.GetRootGameObjects().SelectMany(g=>g.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>(true)).ToArray();
+var nativeFaceMaps=new System.Collections.Generic.HashSet<UnityEngine.Tilemaps.Tilemap>();
+foreach(string tier in new[]{"Farm","Ridge","Enclosure"})
 {
- if(m.gameObject.scene!=UnityEngine.SceneManagement.SceneManager.GetActiveScene()||m.name=="Meadow Backdrop")continue;
+ var tops=maps.Where(m=>m.name=="Terrain - "+tier+" tops").ToArray();
+ var faces=maps.Where(m=>m.name=="Terrain - "+tier+" faces").ToArray();
+ require(tops.Length==1&&faces.Length==1,"Expected one top and face map for "+tier+".");
+ bool hasFace=false;foreach(var c in faces[0].cellBounds.allPositionsWithin)if(faces[0].HasTile(c)){hasFace=true;break;}
+ require(hasFace,tier+" must have authored faces to exercise placement clearance.");
+ nativeFaceMaps.Add(faces[0]);
+}
+foreach(var m in maps)
+{
+ if(m.name=="Meadow Backdrop")continue;
+ bool nativeFace=nativeFaceMaps.Contains(m);
  foreach(var cell in m.cellBounds.allPositionsWithin)
  {
-  var t=m.GetTile(cell);if(t==null||!(bool)classify.Invoke(null,new object[]{t}))continue;
+  var t=m.GetTile(cell);if(t==null||!nativeFace&&!(bool)classify.Invoke(null,new object[]{t}))continue;
   var p=m.GetCellCenterWorld(cell);var c=new Vector2Int(Mathf.FloorToInt(p.x),Mathf.FloorToInt(p.y));
   if(!actualStructure.Contains(c)||!actualExcluded.Contains(c))throw new System.Exception("Authored structure not excluded: "+m.name+" "+cell);
-  if(t is RoadOfTheOldKing.World.RaisedCliffTile){
-   raisedColumns++;
-   for(int drop=1;drop<=3;drop++)if(!actualStructure.Contains(c+Vector2Int.down*drop)||!actualExcluded.Contains(c+Vector2Int.down*drop))throw new System.Exception("Automatic cliff extension not excluded: "+cell+" drop "+drop);
-  }
-  if(m.name=="Terrain - cliff caps"&&t.name.StartsWith("EarthCliff_"))facesOnCaps++;
-  if(t is RoadOfTheOldKing.World.RaisedCliffTile && ((RoadOfTheOldKing.World.RaisedCliffTile)t).crestLine)
-  {
+  if(nativeFace){
    newFaces++;
-   for(int drop=1;drop<=3;drop++){var face=c+Vector2Int.down*drop;if(face.x>=67&&face.x<=73&&face.y>=55&&face.y<=57)repairedH1Faces.Add(face);}
+   if(c.x>=67&&c.x<=73&&c.y>=55&&c.y<=57)repairedH1Faces.Add(c);
   }
  }
 }
-// The old duplicate cap-map faces were deliberately removed by the H1 repair. Asset-family
-// checks above retain that regression coverage without requiring the bad assembly to persist.
-require(repairedH1Faces.Count==21,"All 21 repaired H1 face cells must remain structural exclusions.");
-require(newFaces>0,"Regression requires the rebuilt northern shore overlay.");
-require(raisedColumns>0,"Production automatic cliffs include all three cells below each painted top in the vegetation exclusion.");
+// H1 retains its actual wall exclusion; the former 21-cell rectangle mixed real
+// faces with an inferred cap rim. Requiring that whole rectangle would preserve
+// the rejected false-edge construction. Every actual face is checked above.
+require(repairedH1Faces.Count>0,"The H1 height transition must retain authored face clearance.");
+require(newFaces>0,"Every explicit face on all three elevations was checked for root and canopy exclusion.");
 // The old (-30,120) sample now belongs to the rebuilt northern cliff.
 var outside=new Vector2Int(-35,130);
 var backdropOwner=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.MeadowBackdrop>(FindObjectsInactive.Include,FindObjectsSortMode.None).Single(m=>m.gameObject.scene==UnityEngine.SceneManagement.SceneManager.GetActiveScene());
@@ -88,4 +109,4 @@ var backdrop=backdropOwner.GetComponentInChildren<UnityEngine.Tilemaps.Tilemap>(
 require(backdrop.HasTile(backdrop.WorldToCell(new Vector3(outside.x+.5f,outside.y+.5f,0)))&&!actualGrass.Contains(outside)&&!actualExcluded.Contains(outside)&&!actualStructure.Contains(outside),"Render-only meadow backdrop must not become a placement or exclusion mask.");
 string validation=RoadOfTheOldKing.EditorTools.GreenLowlandsVegetationBuilder.ValidateLayout();
 require(validation=="0 invalid roots, 0 spacing violations.",validation);
-return checks+" Lowlands vegetation placement checks passed; "+repairedH1Faces.Count+" repaired H1 faces, "+facesOnCaps+" cap-map faces and "+newFaces+" shore overlays covered. "+layout.plants.Length+" plants; "+validation;
+return checks+" Lowlands vegetation placement checks passed; "+repairedH1Faces.Count+" H1 faces and "+newFaces+" native face cells across three elevations covered. "+layout.plants.Length+" plants; "+validation;

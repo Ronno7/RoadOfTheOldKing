@@ -4,7 +4,7 @@ using UnityEngine.Tilemaps;
 namespace RoadOfTheOldKing.World
 {
     // A visual cutaway only: the room, its interactions and its collision remain live.
-    // Each roof/facade renderer belongs to one cutaway; leave outdoor machinery outside it.
+    // Each renderer belongs to one group in one cutaway; leave outdoor machinery outside it.
     [DisallowMultipleComponent]
     public sealed class BuildingCutaway : MonoBehaviour
     {
@@ -13,6 +13,8 @@ namespace RoadOfTheOldKing.World
         [SerializeField] private Rect[] revealAreas = System.Array.Empty<Rect>();
         [Tooltip("Roof/facade renderers only. Sprite and Tilemap colors fade; other renderer types switch visibility.")]
         [SerializeField] private Renderer[] coveringRenderers = System.Array.Empty<Renderer>();
+        [Tooltip("Interior artwork revealed as the covers fade. Use renderers whose visibility is owned by this cutaway, not another animation/state component.")]
+        [SerializeField] private Renderer[] interiorRenderers = System.Array.Empty<Renderer>();
         [SerializeField, Min(.01f)] private float fadeSeconds = .2f;
         [Tooltip("Keep the roof open this far beyond the interior boundary to avoid flickering at a doorway.")]
         [SerializeField, Min(0f)] private float exitHysteresis = .25f;
@@ -24,6 +26,7 @@ namespace RoadOfTheOldKing.World
             public Tilemap Tiles;
             public Color Color;
             public bool Enabled;
+            public bool Interior;
         }
 
         private Cover[] covers;
@@ -34,11 +37,13 @@ namespace RoadOfTheOldKing.World
         private void Cache()
         {
             if (covers != null) return;
-            int count = coveringRenderers != null ? coveringRenderers.Length : 0;
+            int coverCount = coveringRenderers != null ? coveringRenderers.Length : 0;
+            int count = coverCount + (interiorRenderers != null ? interiorRenderers.Length : 0);
             covers = new Cover[count];
             for (int i = 0; i < count; i++)
             {
-                Renderer renderer = coveringRenderers[i];
+                bool interior = i >= coverCount;
+                Renderer renderer = interior ? interiorRenderers[i - coverCount] : coveringRenderers[i];
                 if (renderer == null) continue;
                 var sprite = renderer as SpriteRenderer;
                 var tiles = renderer is TilemapRenderer ? renderer.GetComponent<Tilemap>() : null;
@@ -48,7 +53,8 @@ namespace RoadOfTheOldKing.World
                     Sprite = sprite,
                     Tiles = tiles,
                     Color = sprite != null ? sprite.color : tiles != null ? tiles.color : Color.white,
-                    Enabled = renderer.enabled
+                    Enabled = renderer.enabled,
+                    Interior = interior
                 };
             }
         }
@@ -127,15 +133,18 @@ namespace RoadOfTheOldKing.World
             {
                 Cover cover = covers[i];
                 if (cover.Renderer == null) continue;
+                float visibility = cover.Interior ? 1f - Coverage : Coverage;
                 Color color = cover.Color;
-                color.a *= Coverage;
+                color.a *= visibility;
                 if (cover.Sprite != null) cover.Sprite.color = color;
                 else if (cover.Tiles != null) cover.Tiles.color = color;
-                cover.Renderer.enabled = cover.Enabled && Coverage > 0f;
+                cover.Renderer.enabled = cover.Enabled && visibility > 0f;
             }
         }
 
-        private void OnDisable()
+        // Ends an authoring preview before rebuilding artwork or renderer bindings.
+        // Also restores the complete authored state when the component is disabled.
+        public void RestoreAuthoredVisuals()
         {
             if (covers == null) return;
             for (int i = 0; i < covers.Length; i++)
@@ -150,5 +159,7 @@ namespace RoadOfTheOldKing.World
             IsRevealed = false;
             Coverage = 1f;
         }
+
+        private void OnDisable() => RestoreAuthoredVisuals();
     }
 }

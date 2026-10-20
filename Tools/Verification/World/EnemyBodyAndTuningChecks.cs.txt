@@ -14,9 +14,9 @@ try{
  foreach(string name in new[]{"RoadScavenger","MossbackBoar","Wolf"}){
   root=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Combat/"+name+".prefab"),new Vector3(1000,1000),Quaternion.identity);
   var health=root.GetComponent<RoadOfTheOldKing.Combat.Damageable>();var feet=root.GetComponent<CircleCollider2D>();
-  var body=root.GetComponentInChildren<RoadOfTheOldKing.Combat.EnemyHurtbox>();var shape=body.GetComponent<CapsuleCollider2D>();
-  var brain=(MonoBehaviour)root.GetComponent<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>()??root.GetComponent<RoadOfTheOldKing.Combat.WolfAI>();
-  brain.enabled=false;var feedback=root.GetComponent<RoadOfTheOldKing.Combat.EnemyImpactFeedback>();if(feedback!=null)feedback.enabled=false;
+  var body=root.GetComponentInChildren<RoadOfTheOldKing.Enemies.EnemyHurtbox>();var shape=body.GetComponent<CapsuleCollider2D>();
+  var brain=(MonoBehaviour)root.GetComponent<RoadOfTheOldKing.Enemies.PursuitBrain>()??root.GetComponent<RoadOfTheOldKing.Enemies.PredatorBrain>();
+  brain.enabled=false;var feedback=root.GetComponent<RoadOfTheOldKing.Enemies.EnemyImpactFeedback>();if(feedback!=null)feedback.enabled=false;
   var render=body.GetType().GetMethod("LateUpdate",flags);
   check(shape.isTrigger&&!feet.isTrigger&&Mathf.Abs(feet.offset.y)<=.2f&&feet.radius<=.65f,name+" separates body hits from foot collision");
   var authored=new SerializedObject(body);var sizes=authored.FindProperty("sizes");var offsets=authored.FindProperty("offsets");
@@ -53,13 +53,13 @@ try{
  }
  // Run the authored bandit's actual brain: approach, longer commitment and delivery.
  root=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Combat/RoadScavenger.prefab"),new Vector3(1000,1000),Quaternion.identity);
- var bandit=root.GetComponent<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>();var rigid=root.GetComponent<Rigidbody2D>();
+ var bandit=root.GetComponent<RoadOfTheOldKing.Enemies.PursuitBrain>();var rigid=root.GetComponent<Rigidbody2D>();
  bandit.GetType().GetField("target",flags).SetValue(bandit,player);var tick=bandit.GetType().GetMethod("Tick",flags);
  Action<Vector2> move=p=>{playerBody.position=p;player.transform.position=p;playerBody.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();};
  move(new Vector2(1004,1000));tick.Invoke(bandit,new object[]{.02f});
- check(bandit.State==RoadOfTheOldKing.Combat.MeleeEnemyState.Pursuing&&Mathf.Abs(rigid.linearVelocity.magnitude-3.3f)<.001f,"bandit pursues at 3.3 units/sec");
+ check(bandit.State==RoadOfTheOldKing.Enemies.PursuitState.Pursuing&&Mathf.Abs(rigid.linearVelocity.magnitude-3.3f)<.001f,"bandit pursues at 3.3 units/sec");
  move(new Vector2(1001.8f,1000));tick.Invoke(bandit,new object[]{.02f});
- check(bandit.State==RoadOfTheOldKing.Combat.MeleeEnemyState.Windup,"bandit commits from 1.8 units");
+ check(bandit.State==RoadOfTheOldKing.Enemies.PursuitState.Windup,"bandit commits from 1.8 units");
  player.Health.RestoreHealth();player.DebugGodMode=false;player.GetType().GetField("invulnerableUntil",flags).SetValue(player,-1f);
  move(new Vector2(1002.3f,1000));tick.Invoke(bandit,new object[]{.5f});tick.Invoke(bandit,new object[]{.02f});
  check(player.Health.Health==player.Health.MaxHealth-18&&bandit.AttackReach==2.25f,"bandit extended arc lands after readable half-second windup");

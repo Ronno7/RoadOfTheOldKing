@@ -1,0 +1,244 @@
+{
+  "pixelsPerUnit": 16,
+  "filterMode": "Point",
+  "alpha": "binary",
+  "atlas": "WaterworksInterior16.png",
+  "coordinateOrigin": "bottom-left",
+  "buildingDepthRecipe": "ArtSource/GreenLowlands/Environment/Buildings/NativeRecipe.json",
+  "placementNotes": "Native 16 PPU, unit scale. Back wall is 9 by 2.5 units; its nine 1-unit-wide slices permit authored widths without scaling. The compact main sluice roof registers the accepted wing source to a 10 by 8 unit canvas so the porch stays clear. Solid masonry and returns describe wall thickness. Half-unit curbs stay separate from full-height walls. No collision or cast shadows are baked into these sprites; the scene owns doorway, puzzle apertures, cutaways and height boundaries.",
+  "entries": [
+    {
+      "name": "Sluice_BackWall",
+      "x": 0,
+      "y": 88,
+      "width": 144,
+      "height": 40,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "pixelsPerUnit": 16,
+      "colors": 12
+    },
+    {
+      "name": "Sluice_BackWall_0",
+      "x": 0,
+      "y": 88,
+      "width": 16,
+      "height": 40,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "pixelsPerUnit": 16
+    },
+    {
+      "name": "Sluice_BackWall_1",
+      "x": 16,
+      "y": 88,
+      "width": 16,
+      "height": 40,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "pixelsPerUnit": 16
+    },
+    {
+      "name": "Sluice_BackWall_2",
+      "x": 32,
+      "y": 88,
+      "width": 16,
+      "height": 40,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "pixelsPerUnit": 16
+    },
+    {
+      "name": "Sluice_BackWall_3",
+      "x": 48,
+      "y": 88,
+      "width": 16,
+      "height": 40,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "pixelsPerUnit": 16
+    },
+    {
+      "name": "Sluice_BackWall_4",
+      "x": 64,
+      "y": 88,
+      "width": 16,
+      "height": 40,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "pixelsPerUnit": 16
+    },
+    {
+      "name": "Sluice_BackWall_5",
+      "x": 80,
+      "y": 88,
+      "width": 16,
+      "height": 40,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "pixelsPerUnit": 16
+    },
+    {
+      "name": "Sluice_BackWall_6",
+      "x": 96,
+      "y": 88,
+      "width": 16,
+      "height": 40,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "pixelsPerUnit": 16
+    },
+    {
+      "name": "Sluice_BackWall_7",
+      "x": 112,
+      "y": 88,
+      "width": 16,
+      "height": 40,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "pixelsPerUnit": 16
+    },
+    {
+      "name": "Sluice_BackWall_8",
+      "x": 128,
+      "y": 88,
+      "width": 16,
+      "height": 40,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "pixelsPerUnit": 16
+    },
+    {
+      "name": "Masonry_Face_0",
+      "x": 0,
+      "y": 64,
+      "width": 16,
+      "height": 16,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "pixelsPerUnit": 16,
+      "colors": 3
+    },
+    {
+      "name": "Masonry_Face_1",
+      "x": 16,
+      "y": 64,
+      "width": 16,
+      "height": 16,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "pixelsPerUnit": 16,
+      "colors": 3
+    },
+    {
+      "name": "Masonry_Face_2",
+      "x": 32,
+      "y": 64,
+      "width": 16,
+      "height": 16,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "pixelsPerUnit": 16,
+      "colors": 3
+    },
+    {
+      "name": "Masonry_Cap",
+      "x": 48,
+      "y": 72,
+      "width": 16,
+      "height": 8,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "pixelsPerUnit": 16,
+      "colors": 4
+    },
+    {
+      "name": "Masonry_Foot",
+      "x": 64,
+      "y": 72,
+      "width": 16,
+      "height": 8,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "pixelsPerUnit": 16,
+      "colors": 4
+    },
+    {
+      "name": "Wall_Return_W",
+      "x": 80,
+      "y": 64,
+      "width": 8,
+      "height": 16,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "pixelsPerUnit": 16,
+      "colors": 3
+    },
+    {
+      "name": "Wall_Return_E",
+      "x": 88,
+      "y": 64,
+      "width": 8,
+      "height": 16,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "pixelsPerUnit": 16,
+      "colors": 3
+    },
+    {
+      "name": "Machine_Curb_H",
+      "x": 96,
+      "y": 72,
+      "width": 16,
+      "height": 8,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "pixelsPerUnit": 16,
+      "colors": 4
+    },
+    {
+      "name": "Machine_Curb_V",
+      "x": 112,
+      "y": 64,
+      "width": 8,
+      "height": 16,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "pixelsPerUnit": 16,
+      "colors": 4
+    },
+    {
+      "name": "Threshold",
+      "x": 120,
+      "y": 72,
+      "width": 16,
+      "height": 8,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "pixelsPerUnit": 16,
+      "colors": 3
+    },
+    {
+      "name": "Timber_Jamb",
+      "x": 136,
+      "y": 64,
+      "width": 8,
+      "height": 16,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "pixelsPerUnit": 16,
+      "colors": 4
+    },
+    {
+      "name": "Roof_Sluice_Compact",
+      "x": 0,
+      "y": 128,
+      "width": 160,
+      "height": 128,
+      "pivotX": 0.5,
+      "pivotY": 0.5,
+      "pixelsPerUnit": 16,
+      "colors": 12
+    }
+  ]
+}

@@ -7,61 +7,61 @@ var checks=new System.Collections.Generic.List<string>();System.Action<bool,stri
 var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
 var player=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
 var playerBody=player.GetComponent<Rigidbody2D>();Vector2 savedPosition=playerBody.position;
-var authored=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>(FindObjectsSortMode.None).Single(e=>e.name=="Lower pasture boar");
+var authored=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Enemies.PursuitBrain>(FindObjectsSortMode.None).Single(e=>e.name=="Lower pasture boar");
 check(Vector2.Distance(authored.transform.position,new Vector2(84,32))<.1f,"one E1 boar at authored pasture home");
-var definition=AssetDatabase.LoadAssetAtPath<RoadOfTheOldKing.Combat.EnemyAttackDefinition>("Assets/Settings/Enemies/MossbackCharge.asset");
+var definition=AssetDatabase.LoadAssetAtPath<RoadOfTheOldKing.Enemies.EnemyAttackDefinition>("Assets/Settings/Enemies/MossbackCharge.asset");
 var spec=definition.settings;
 check(spec.damage==24&&spec.windup==.85f&&spec.recovery==1.1f&&spec.chargeSpeed==10&&spec.reach==1.05f,"authored charge tuning");
 var root=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Combat/MossbackBoar.prefab"),new Vector3(1000,1000),Quaternion.identity);
 GameObject wall=null;var oldSimulation=Physics2D.simulationMode;
 try{
  Physics2D.simulationMode=SimulationMode2D.Script;
- var brain=root.GetComponent<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>();var body=root.GetComponent<Rigidbody2D>();var shape=root.GetComponent<CircleCollider2D>();var hp=root.GetComponent<RoadOfTheOldKing.Combat.Damageable>();var reaction=root.GetComponent<RoadOfTheOldKing.Combat.HitReaction>();
+ var brain=root.GetComponent<RoadOfTheOldKing.Enemies.PursuitBrain>();var body=root.GetComponent<Rigidbody2D>();var shape=root.GetComponent<CircleCollider2D>();var hp=root.GetComponent<RoadOfTheOldKing.Combat.Damageable>();var reaction=root.GetComponent<RoadOfTheOldKing.Combat.HitReaction>();
  var action=brain.Action;brain.GetType().GetField("target",flags).SetValue(brain,player);
- var feedback=root.GetComponent<RoadOfTheOldKing.Combat.EnemyImpactFeedback>();feedback.enabled=false;
+ var feedback=root.GetComponent<RoadOfTheOldKing.Enemies.EnemyImpactFeedback>();feedback.enabled=false;
  var brainTick=brain.GetType().GetMethod("Tick",flags);
  System.Action<Vector2> move=p=>{playerBody.position=p;player.transform.position=p;playerBody.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();};
  System.Action reset=()=>{action.Cancel();brain.ResetOnRest();player.Health.RestoreHealth();player.DebugGodMode=false;player.GetComponent<RoadOfTheOldKing.Combat.HitReaction>().Clear();player.GetType().GetField("invulnerableUntil",flags).SetValue(player,-1f);Physics2D.SyncTransforms();};
  Vector2 home=body.position;
  check(hp.MaxHealth==90&&shape.radius==.5f&&body.collisionDetectionMode==CollisionDetectionMode2D.Continuous,"boar health and swept body");
  reset();move(home+Vector2.right*5);
- check(action.Begin(spec,player,Vector2.right),"commit first action");
- check(!action.Begin(spec,player,Vector2.up),"cannot overlap actions");
+ check(brain.TryBeginAttack(spec,player,Vector2.right),"commit first action");
+ check(!brain.TryBeginAttack(spec,player,Vector2.up),"cannot overlap actions");
  action.Tick(0);check(action.Progress==0&&body.linearVelocity==Vector2.zero,"paused tick advances neither clock nor movement");
  move(home+new Vector2(4,2));action.Tick(.2f);Vector2 tracked=action.Direction;
  check(Vector2.Dot(tracked,new Vector2(4,2).normalized)>.999f&&!action.IsLocked,"early windup tracks player");
  action.Tick(.21f);move(home+new Vector2(4,-3));action.Tick(.2f);
  check(action.IsLocked&&Vector2.Dot(action.Direction,tracked)>.999f,"late windup locks before sidestep");
- action.Tick(spec.windup - .61f + .001f);check(action.Phase==RoadOfTheOldKing.Combat.EnemyAttackPhase.Active,"full windup enters active charge");
+ action.Tick(spec.windup - .61f + .001f);check(action.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Active,"full windup enters active charge");
  action.Tick(.02f);Physics2D.Simulate(.02f);
  check(Vector2.Distance(body.position,home)>.1f&&Vector2.Dot(body.linearVelocity.normalized,tracked)>.999f,"real physics follows committed lane");
- for(int i=0;i<40&&action.Phase==RoadOfTheOldKing.Combat.EnemyAttackPhase.Active;i++){action.Tick(.02f);Physics2D.Simulate(.02f);}
+ for(int i=0;i<40&&action.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Active;i++){action.Tick(.02f);Physics2D.Simulate(.02f);}
  float travel=Vector2.Distance(body.position,home);
- check(action.Phase==RoadOfTheOldKing.Combat.EnemyAttackPhase.Recovery&&travel>6&&travel<=8.01f,"miss has bounded travel and recovery");
+ check(action.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Recovery&&travel>6&&travel<=8.01f,"miss has bounded travel and recovery");
  check(player.Health.Health==player.Health.MaxHealth,"sidestep escapes damage");
  action.Tick(spec.recovery - .01f);check(action.IsRunning&&body.linearVelocity==Vector2.zero,"recovery holds movement and next action");
  action.Tick(.02f);check(!action.IsRunning,"recovery releases action");
- reset();move(home+Vector2.right*4);var copy=spec;action.Begin(copy,player,Vector2.right);copy.windup=100;action.Tick(spec.windup);
- check(action.Phase==RoadOfTheOldKing.Combat.EnemyAttackPhase.Active&&definition.settings.windup==.85f,"runtime settings snapshot leaves shared asset immutable");
- reset();move(home+Vector2.right*3);action.Begin(spec,player,Vector2.right);action.Tick(spec.windup);
- for(int i=0;i<40&&action.Phase==RoadOfTheOldKing.Combat.EnemyAttackPhase.Active;i++){action.Tick(.02f);Physics2D.Simulate(.02f);}
+ reset();move(home+Vector2.right*4);var copy=spec;brain.TryBeginAttack(copy,player,Vector2.right);copy.windup=100;action.Tick(spec.windup);
+ check(action.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Active&&definition.settings.windup==.85f,"runtime settings snapshot leaves shared asset immutable");
+ reset();move(home+Vector2.right*3);brain.TryBeginAttack(spec,player,Vector2.right);action.Tick(spec.windup);
+ for(int i=0;i<40&&action.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Active;i++){action.Tick(.02f);Physics2D.Simulate(.02f);}
  check(action.HasContact&&player.Health.Health==player.Health.MaxHealth-24,"charge reaches player and deals one authored hit");
  int afterHit=player.Health.Health;action.Tick(.5f);check(player.Health.Health==afterHit,"recovery cannot repeat contact");
- reset();move(home+Vector2.right);player.DebugGodMode=true;action.Begin(spec,player,Vector2.right);action.Tick(spec.windup);action.Tick(.02f);
- check(action.HasContact&&action.Phase==RoadOfTheOldKing.Combat.EnemyAttackPhase.Recovery&&player.Health.Health==player.Health.MaxHealth,"protected contact consumes charge");
+ reset();move(home+Vector2.right);player.DebugGodMode=true;brain.TryBeginAttack(spec,player,Vector2.right);action.Tick(spec.windup);action.Tick(.02f);
+ check(action.HasContact&&action.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Recovery&&player.Health.Health==player.Health.MaxHealth,"protected contact consumes charge");
  reset();move(home+Vector2.right*4);
  wall=new GameObject("Temporary charge wall");wall.transform.position=home+Vector2.right*2;wall.AddComponent<BoxCollider2D>().size=new Vector2(.05f,4);Physics2D.SyncTransforms();
- action.Begin(spec,player,Vector2.right);action.Tick(spec.windup);
- for(int i=0;i<40&&action.Phase==RoadOfTheOldKing.Combat.EnemyAttackPhase.Active;i++){action.Tick(.02f);Physics2D.Simulate(.02f);}
- check(action.Phase==RoadOfTheOldKing.Combat.EnemyAttackPhase.Recovery&&body.position.x<home.x+1.5f&&body.position.x>home.x+.5f,"thin wall stops charge before body overlap");
+ brain.TryBeginAttack(spec,player,Vector2.right);action.Tick(spec.windup);
+ for(int i=0;i<40&&action.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Active;i++){action.Tick(.02f);Physics2D.Simulate(.02f);}
+ check(action.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Recovery&&body.position.x<home.x+1.5f&&body.position.x>home.x+.5f,"thin wall stops charge before body overlap");
  check(player.Health.Health==player.Health.MaxHealth&&!action.HasContact,"no damage through wall");UnityEngine.Object.DestroyImmediate(wall);wall=null;
  reset();move(home+Vector2.right*4);brainTick.Invoke(brain,new object[]{.02f});
- check(brain.State==RoadOfTheOldKing.Combat.MeleeEnemyState.Windup&&action.IsRunning,"brain chooses charge inside commitment range");
+ check(brain.State==RoadOfTheOldKing.Enemies.PursuitState.Windup&&action.IsRunning,"brain chooses charge inside commitment range");
  hp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.left,3,.3f));
- check(!action.IsRunning&&reaction.IsStaggered&&brain.State==RoadOfTheOldKing.Combat.MeleeEnemyState.Recovering,"weapon stagger interrupts windup");
+ check(!action.IsRunning&&reaction.IsStaggered&&brain.State==RoadOfTheOldKing.Enemies.PursuitState.Recovering,"weapon stagger interrupts windup");
  float impulse=body.linearVelocity.x;brainTick.Invoke(brain,new object[]{.02f});check(impulse<0&&body.linearVelocity.x==impulse,"interruption preserves real weapon knockback");
  reset();move(home+Vector2.right*4);brainTick.Invoke(brain,new object[]{.02f});brainTick.Invoke(brain,new object[]{spec.windup});
- check(brain.State==RoadOfTheOldKing.Combat.MeleeEnemyState.Striking,"brain maps active phase");
+ check(brain.State==RoadOfTheOldKing.Enemies.PursuitState.Striking,"brain maps active phase");
  hp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.left,3,.3f));check(!action.IsRunning&&reaction.IsStaggered,"weapon stagger interrupts active charge");
  reset();move(home+Vector2.right*4);brainTick.Invoke(brain,new object[]{.02f});reaction.Armored=true;
  hp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.left,3,.3f));
@@ -75,7 +75,7 @@ try{
  var snapshot=brain.CaptureVisitState();brain.ResetOnRest();check(!brain.IsDefeated&&!action.IsRunning&&hp.Health==90&&shape.enabled&&body.position==home,"rest restores boar at home without stale action");
  brain.RestoreVisitState(snapshot);check(brain.IsDefeated&&!action.IsRunning&&!shape.enabled,"visit restore preserves defeated boar");
  reset();move(home+Vector2.right*4);brainTick.Invoke(brain,new object[]{.02f});
- var view=root.GetComponent<RoadOfTheOldKing.Combat.MeleeEnemySpriteView>();var render=view.GetType().GetMethod("LateUpdate",flags);var line=(LineRenderer)view.GetType().GetField("attackOutline",flags).GetValue(view);var sprite=(SpriteRenderer)view.GetType().GetField("bodyVisual",flags).GetValue(view);
+ var view=root.GetComponent<RoadOfTheOldKing.Enemies.MeleeSpriteView>();var render=view.GetType().GetMethod("LateUpdate",flags);var line=(LineRenderer)view.GetType().GetField("attackOutline",flags).GetValue(view);var sprite=(SpriteRenderer)view.GetType().GetField("bodyVisual",flags).GetValue(view);
  brainTick.Invoke(brain,new object[]{.41f});render.Invoke(view,null);Vector3 end=line.GetPosition(1);
  move(home+new Vector2(4,3));brainTick.Invoke(brain,new object[]{.2f});render.Invoke(view,null);
  check(line.enabled&&line.positionCount==5&&line.GetPosition(1)==end,"rendered lane stays fixed after lock");

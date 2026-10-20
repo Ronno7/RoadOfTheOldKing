@@ -1,8 +1,9 @@
-"""Native 16-PPU Ardan architecture, drawn directly as reusable pixel clusters.
+"""Native 16-PPU Ardan architecture and registered building-depth sources.
 
 The kit shares the approved Lowlands stone/timber ramps. Broad cardinal roofs,
 short stone courses and functional bronze sluice hardware establish a quieter
-regional building grammar. No existing art, import metadata or scene is changed.
+regional building grammar. Exports update only this kit's artwork/manifests;
+import metadata, placed geometry and scene ownership remain separate.
 
 Run with the project's Pillow environment:
     $env:PYTHONPATH='tmp/art-python'; python Tools/Art/World/build_lowlands_architecture.py
@@ -13,15 +14,47 @@ from PIL import Image, ImageDraw
 
 
 ROOT = Path(__file__).resolve().parents[3]
-OUT = ROOT / 'RoadOfTheOldKing/Assets/Art/Tiles/GreenLowlands/Architecture'
+OUT = ROOT / 'RoadOfTheOldKing/Assets/Art/Tiles/GreenLowlands/Environment/Architecture'
 PPU = 16
+BUILDING_SOURCE = ROOT / 'ArtSource/GreenLowlands/Environment/Buildings'
+
+
+def building_source(name):
+    """Register depth artwork without changing established sprite rectangles.
+
+    The bank doorway also uses this recipe through the terrain/depth exporter.
+    Alpha, native bounds and the shared palette are explicit authoring contracts.
+    """
+    recipe = json.loads((BUILDING_SOURCE / 'NativeRecipe.json').read_text(encoding='utf-8'))
+    spec = recipe['pieces'][name]
+    colors = zone.ramp(*spec.get('colors', recipe['buildingColors']))
+    source = Image.open(BUILDING_SOURCE / spec['source']).convert('RGBA')
+    alpha = source.getchannel('A').point(lambda a: 255 if a >= 128 else 0)
+    source.putalpha(alpha)
+    left, top, right, bottom = spec['bounds']
+    source = source.crop(spec.get('sourceBounds', alpha.getbbox())).resize(
+        (right-left, bottom-top), Image.Resampling.NEAREST)
+    cache = {}
+    mapped = []
+    for pixel in pixels(source):
+        if not pixel[3]:
+            mapped.append((0, 0, 0, 0))
+            continue
+        if pixel not in cache:
+            cache[pixel] = min(colors, key=lambda c: sum((pixel[i]-c[i])**2 for i in range(3)))
+        mapped.append(cache[pixel])
+    source.putdata(mapped)
+    native = blank(*spec['canvas'])
+    native.paste(source, (left, top))
+    assert zone.validate(native) <= zone.SPEC['pieceBudgets']['building']
+    return native
 
 
 def rgb(value):
     return tuple(bytes.fromhex(value)) + (255,)
 
 
-import lowlands_palette as zone
+import shared_palette as zone
 
 STONE = zone.ramp('rockshadow', 'stonejoint', 'stoneshade', 'stone', 'stonelight')
 TIMBER = zone.ramp('deepsoil', 'soilmid', 'soillight')
@@ -382,6 +415,8 @@ def south_roof(height, wing=False):
     footprint. The lowest pixels are eave brackets; a separate facade below
     them can place its doorway over the actual walking approach.
     """
+    if wing:
+        return building_source('Roof_Wing_South')
     im = blank(160, height)
     d = ImageDraw.Draw(im)
     front = height-12
@@ -549,6 +584,8 @@ def low_wall(kind):
 
 def south_facade(width=160, door=True):
     """Two-and-a-half unit wall mass under a south gable, separate for cutaway."""
+    if width == 160 and door:
+        return building_source('Facade_Main_South')
     im=blank(width,48);d=ImageDraw.Draw(im)
     d.rectangle((3,0,width-4,46),fill=STONE[0])
     d.rectangle((5,1,width-6,43),fill=STONE[2]);d.rectangle((5,1,width-6,24),fill=STONE[3])
@@ -575,271 +612,13 @@ def south_facade(width=160, door=True):
 
 
 def farm_building(kind):
-    """Original farm silhouettes in the existing native architecture grammar.
-
-    Preserve the established 8x6 cottage, 6x5 barn and 4x3 drying shed canvases.
-    Their lower two/two/one rows remain the physical facade, respectively.
-    Outline the whole object; quiet material planes carry only sparse wear.
-    Ground shadows are intentionally left to the later scene-wide pass.
-    """
-    ink = zone.COLORS['ink']
-    wood = zone.ramp('deepsoil', 'soil', 'soilmid', 'soillight')
-    masonry = zone.ramp('stonejoint', 'stoneshade', 'stone', 'stonelight')
-    width, height = {'Cottage': (128, 96), 'Barn': (96, 80),
-                     'DryingShed': (64, 48)}[kind]
-    im = blank(width, height)
-    d = ImageDraw.Draw(im)
-
-    def post(x, top, bottom, wide=3):
-        d.rectangle((x, top, x+wide-1, bottom), fill=wood[0])
-        d.line((x, top+1, x, bottom-1), fill=wood[2])
-
-    def footing(left, top, right, bottom):
-        d.rectangle((left, top, right, bottom), fill=ink)
-        d.rectangle((left+1, top, right-1, bottom-1), fill=masonry[1])
-        d.line((left+1, top, right-1, top), fill=masonry[2])
-        # Staggered broad blocks; no moss/noise scattered over the courses.
-        for x in range(left+10, right-3, 17):
-            d.line((x, top+1, x, bottom-1), fill=masonry[0])
-        d.line((left+2, bottom-1, right-1, bottom-1), fill=masonry[0])
-
-    def closed_door(left, top, right, bottom, double=False):
-        d.rectangle((left-2, top-2, right+2, bottom), fill=wood[0])
-        d.rectangle((left, top, right, bottom), fill=ROOF[0])
-        # Two-pixel recess shows the door set behind the front wall.
-        d.rectangle((left+2, top+2, right-2, bottom-1), fill=wood[1])
-        d.line((left+2, top+2, left+2, bottom-1), fill=wood[2])
-        for x in range(left+9, right-3, 8):
-            d.line((x, top+3, x, bottom-2), fill=wood[0])
-        if double:
-            mid=(left+right)//2
-            d.line((mid, top+2, mid, bottom), fill=ROOF[0])
-            for y in (top+8, bottom-7):
-                d.line((left+3, y, mid-2, y), fill=wood[2])
-                d.line((mid+2, y, right-3, y), fill=wood[0])
-        else:
-            d.rectangle((right-6, top+13, right-4, top+14), fill=ROOF[0])
-        d.line((left-2, bottom, right+2, bottom), fill=masonry[2])
-
-    if kind == 'Cottage':
-        # Broad front, shuttered domestic window and the retained right porch.
-        d.rectangle((7, 55, 120, 94), fill=ink)
-        d.rectangle((9, 58, 118, 88), fill=masonry[2])
-        d.rectangle((9, 59, 118, 64), fill=masonry[1])
-        footing(7, 89, 120, 95)
-        for x in (9, 35, 76, 116):
-            post(x, 59, 88)
-        d.line((12, 78, 32, 78), fill=wood[0])
-        # A single paired shutter leaves a clear, quiet wall panel around it.
-        d.rectangle((45, 68, 65, 83), fill=wood[0])
-        d.rectangle((47, 70, 63, 81), fill=wood[2])
-        d.line((55, 70, 55, 82), fill=wood[0])
-        for x in (50, 60):
-            d.line((x, 71, x, 80), fill=wood[1])
-        d.line((47, 73, 53, 73), fill=wood[0])
-        d.line((57, 79, 63, 79), fill=wood[0])
-        d.rectangle((80, 63, 115, 88), fill=ROOF[0])
-        closed_door(91, 66, 110, 89)
-        d.polygon([(80, 63), (89, 63), (80, 73)], fill=wood[0])
-        d.line((81, 64, 81, 70), fill=wood[2])
-        # Short capped chimney interrupts the roof without decorative clutter.
-        d.rectangle((85, 1, 95, 20), fill=ink)
-        d.rectangle((86, 3, 94, 18), fill=masonry[1])
-        d.rectangle((84, 0, 96, 4), fill=ink)
-        d.line((85, 1, 95, 1), fill=masonry[2])
-        d.line((87, 8, 94, 8), fill=masonry[0])
-        d.line((90, 9, 90, 13), fill=masonry[0])
-        # Hipped roof: long ridge, two short end hips, large lower slate plane.
-        d.polygon([(38, 13), (91, 13), (127, 57), (127, 62),
-                   (0, 62), (0, 57)], fill=ink)
-        d.polygon([(39, 15), (90, 15), (122, 55), (5, 55)], fill=ROOF[1])
-        d.polygon([(40, 15), (89, 15), (107, 37), (22, 37)], fill=ROOF[2])
-        d.polygon([(39, 16), (22, 37), (6, 55), (27, 55), (48, 16)], fill=ROOF[1])
-        d.polygon([(89, 16), (108, 37), (122, 55), (102, 55), (82, 16)], fill=ROOF[0])
-        d.line((47, 16, 27, 55), fill=ROOF[0])
-        d.line((81, 16, 102, 55), fill=ROOF[1])
-        d.line((40, 15, 88, 15), fill=ROOF[2])
-        for x,y,n in ((49, 27, 14), (68, 34, 10), (37, 45, 16), (76, 50, 13)):
-            d.line((x, y, x+n, y), fill=ROOF[1] if y<38 else ROOF[2])
-            d.point((x+n, y-1), fill=ROOF[1] if y<38 else ROOF[2])
-        d.rectangle((2, 57, 125, 60), fill=wood[0])
-        d.line((3, 57, 124, 57), fill=wood[2])
-        d.line((6, 61, 121, 61), fill=wood[1])
-    elif kind == 'Barn':
-        # The threshing barn keeps its stepped gambrel and wide double doors.
-        d.rectangle((5, 40, 90, 78), fill=ink)
-        d.rectangle((7, 43, 88, 74), fill=wood[1])
-        d.rectangle((7, 44, 88, 49), fill=wood[0])
-        footing(5, 74, 90, 79)
-        for x in (8, 27, 66, 85):
-            post(x, 47, 74)
-        for x in (17, 76):
-            d.line((x, 51, x, 70), fill=wood[0])
-        closed_door(33, 49, 62, 75, True)
-        d.line((11, 53, 24, 65), fill=wood[2])
-        d.line((71, 65, 83, 53), fill=wood[0])
-        d.polygon([(36, 2), (59, 2), (85, 20), (95, 43),
-                   (95, 48), (0, 48), (0, 43), (10, 20)], fill=ink)
-        d.polygon([(36, 4), (59, 4), (83, 21), (12, 21)], fill=ROOF[2])
-        d.polygon([(12, 23), (83, 23), (92, 43), (3, 43)], fill=ROOF[1])
-        d.polygon([(59, 5), (83, 22), (92, 43), (82, 43), (73, 23), (53, 5)], fill=ROOF[0])
-        d.line((13, 22, 82, 22), fill=ROOF[0])
-        d.line((34, 6, 14, 20), fill=ROOF[1])
-        for x,y,n in ((37, 14, 10), (24, 31, 12), (48, 37, 14)):
-            d.line((x, y, x+n, y), fill=ROOF[1] if y<23 else ROOF[2])
-        d.rectangle((2, 44, 93, 46), fill=wood[0])
-        d.line((3, 44, 92, 44), fill=wood[2])
-    else:
-        # Low asymmetric mono-pitch roof distinguishes the open two-bay shed.
-        d.rectangle((4, 23, 59, 46), fill=ink)
-        d.rectangle((6, 26, 57, 44), fill=ROOF[0])
-        d.rectangle((7, 31, 56, 42), fill=wood[0])
-        # Large stored boards and bundled timber read at the normal camera.
-        for x,y in ((9, 35), (14, 34), (19, 36)):
-            d.rectangle((x, y, x+3, 43), fill=wood[1])
-            d.line((x, y, x+2, y), fill=wood[2])
-        for x,y in ((36, 40), (45, 40), (40, 36)):
-            d.rectangle((x, y, x+7, y+3), fill=wood[1])
-            d.line((x+1, y, x+6, y), fill=wood[2])
-        for x in (5, 29, 56):
-            post(x, 24, 45)
-            d.rectangle((x-1, 44, x+3, 47), fill=ink)
-            d.line((x, 45, x+2, 45), fill=masonry[1])
-        d.polygon([(11, 3), (57, 3), (63, 24), (63, 28),
-                   (0, 28), (0, 23)], fill=ink)
-        d.polygon([(12, 5), (55, 5), (60, 23), (3, 23)], fill=ROOF[1])
-        d.polygon([(12, 5), (55, 5), (57, 11), (9, 11)], fill=ROOF[2])
-        d.line((13, 6, 4, 23), fill=ROOF[2])
-        d.line((54, 6, 59, 23), fill=ROOF[0])
-        d.line((17, 16, 29, 16), fill=ROOF[2])
-        d.line((40, 20, 50, 20), fill=ROOF[2])
-        d.rectangle((1, 25, 62, 26), fill=wood[0])
-        d.line((2, 25, 61, 25), fill=wood[2])
-    return im
+    """Same 8x6 cottage, 6x5 barn and 4x3 shed registrations and row splits."""
+    return building_source('Farm_'+kind)
 
 
 def watermill():
-    """Retain the regional mill's porch gable and eight-spoke right wheel.
-
-    Native 9x6 canvas; two facade rows plus the existing 2x3 wheel collision
-    stay owned by the scene. The abandoned wheel is static and its open spokes
-    reveal the actual permanent river, never painted blue inside this asset.
-    """
-    im=blank(144,96); d=ImageDraw.Draw(im)
-    ink=zone.COLORS['ink']
-    wood=zone.ramp('deepsoil','soilmid','soillight')
-    stone=zone.ramp('stonejoint','stoneshade','stone','stonelight')
-
-    # Low plaster/timber volume; the right edge houses the wheel's bearing.
-    d.rectangle((6,49,109,94),fill=ink)
-    d.rectangle((8,52,107,88),fill=stone[2])
-    d.rectangle((8,53,107,60),fill=stone[1])
-    d.rectangle((99,55,108,89),fill=wood[0])
-    d.line((99,57,99,87),fill=wood[1])
-    for x in (9,28,65):
-        d.rectangle((x,56,x+2,88),fill=wood[0])
-        d.line((x,58,x,87),fill=wood[1])
-    # One broad stone course, with a sill that does not pretend to be stairs.
-    d.rectangle((6,88,109,95),fill=ink)
-    d.rectangle((7,88,108,93),fill=stone[1])
-    d.line((8,88,107,88),fill=stone[2])
-    for x in (22,39,70,87,102):
-        d.line((x,89,x,93),fill=stone[0])
-    d.line((8,93,107,93),fill=stone[0])
-    # Closed, slightly offset shutter; one worn slat, no all-over hatching.
-    d.rectangle((77,68,92,81),fill=wood[0])
-    d.rectangle((79,70,89,79),fill=wood[1])
-    d.line((84,71,84,79),fill=wood[0])
-    d.line((80,72,89,72),fill=wood[2])
-    d.rectangle((78,81,93,82),fill=stone[1])
-    # The door is visibly closed, inset behind stout porch jambs.
-    d.rectangle((39,58,63,91),fill=wood[0])
-    d.rectangle((42,61,60,90),fill=ROOF[0])
-    d.rectangle((44,63,58,90),fill=wood[1])
-    d.line((44,64,44,89),fill=wood[2])
-    for x in (49,55):d.line((x,64,x,89),fill=wood[0])
-    d.rectangle((45,79,47,80),fill=ROOF[0])
-    d.rectangle((38,91,64,94),fill=stone[1])
-    d.line((38,91,64,91),fill=stone[3])
-
-    # Wide east/west roof with a short back slope and quiet broad front plane.
-    d.polygon([(25,17),(88,17),(111,47),(111,54),(0,54),(0,48)],fill=ink)
-    d.polygon([(26,19),(87,19),(107,46),(4,46)],fill=ROOF[1])
-    d.polygon([(26,19),(87,19),(93,26),(20,26)],fill=ROOF[2])
-    d.line((20,27,94,27),fill=ROOF[0])
-    d.line((26,20,5,46),fill=ROOF[2])
-    d.polygon([(87,20),(107,46),(102,46),(83,20)],fill=ROOF[0])
-    for x,y,n in ((25,35,13),(74,35,12),(12,43,13),(82,44,12)):
-        d.line((x,y,x+n,y),fill=ROOF[2])
-    d.rectangle((2,48,109,52),fill=wood[0])
-    d.line((3,48,108,48),fill=wood[1])
-    d.line((4,53,107,53),fill=wood[1])
-
-    # Familiar small south-facing porch gable, integrated with the main eave.
-    d.polygon([(31,56),(31,52),(49,32),(53,32),(72,52),(72,58),
-               (65,58),(51,42),(38,58)],fill=ink)
-    d.polygon([(34,53),(51,35),(69,54),(65,54),(51,40),(38,54)],fill=ROOF[0])
-    d.line((35,52,50,36),fill=ROOF[2])
-    d.line((52,36,68,53),fill=ROOF[1])
-    d.polygon([(39,54),(51,41),(63,54)],fill=wood[0])
-    d.polygon([(44,51),(51,44),(57,51)],fill=stone[2])
-    d.rectangle((37,56,40,90),fill=wood[0])
-    d.line((38,57,38,89),fill=wood[1])
-    d.rectangle((62,56,65,90),fill=wood[0])
-    d.line((62,57,62,89),fill=wood[1])
-
-    # Bearing and short shaft tie the wheel to the wall without new machinery.
-    d.rectangle((101,66,121,76),fill=ink)
-    d.rectangle((102,67,120,74),fill=wood[0])
-    d.line((103,68,119,68),fill=wood[1])
-    d.rectangle((101,75,106,88),fill=wood[0])
-
-    # Build the wheel on its own native plane so real water shows through holes.
-    wheel=blank(144,96); w=ImageDraw.Draw(wheel)
-    # Broad paddle ends distinguish the mill from a plain cart wheel. All stay
-    # inside the original 144x96 canvas and its existing wheel footprint.
-    paddles=[[(114,49),(126,49),(126,54),(114,54)],
-             [(138,66),(143,66),(143,78),(138,78)],
-             [(114,90),(126,90),(126,95),(114,95)],
-             [(97,66),(102,66),(102,78),(97,78)],
-             [(100,56),(105,51),(110,56),(105,61)],
-             [(130,56),(135,51),(140,56),(135,61)],
-             [(130,88),(135,83),(140,88),(135,93)],
-             [(100,88),(105,83),(110,88),(105,93)]]
-    for shape in paddles:w.polygon(shape,fill=ink)
-    w.ellipse((97,49,143,95),fill=ink)
-    w.ellipse((98,50,142,94),fill=wood[1])
-    w.ellipse((101,53,139,91),fill=wood[0])
-    w.ellipse((103,55,137,89),fill=(0,0,0,0))
-    # Eight broad spokes join the rim; upper edges receive one quiet highlight.
-    for dx,dy in ((0,-18),(13,-13),(18,0),(13,13),(0,18),(-13,13),(-18,0),(-13,-13)):
-        w.line((120,72,120+dx,72+dy),fill=wood[0],width=4)
-        w.line((120,71,120+dx,71+dy),fill=wood[1],width=2)
-    # A handful of broad rim highlights and paddle divisions, not tiny teeth.
-    w.line((112,51,125,51),fill=wood[2],width=2)
-    w.line((101,59,99,66),fill=wood[2],width=2)
-    w.line((98,72,98,78),fill=wood[2])
-    for box in ((115,50,125,52),(140,67,142,77),
-                (115,92,125,94),(98,67,100,77)):
-        w.rectangle(box,fill=wood[1])
-    for xy in ((102,56,105,53),(135,53,138,56),
-               (138,88,135,91),(105,91,102,88)):
-        w.line(xy,fill=wood[1],width=2)
-    for xy in ((119,50,119,54),(135,56,132,59),(140,71,137,71),
-               (135,87,132,84),(120,94,120,90),(104,88,107,85),
-               (98,73,102,73),(104,56,107,59)):
-        w.line(xy,fill=wood[0])
-    w.rectangle((115,67,125,77),fill=ink)
-    w.rectangle((116,68,124,76),fill=wood[0])
-    w.line((117,68,123,68),fill=wood[2])
-    w.rectangle((119,71,121,73),fill=wood[1])
-    im.alpha_composite(wheel)
-    # A small attached ivy cluster keeps the lightly reclaimed farm character.
-    d=ImageDraw.Draw(im); leaf=zone.COLORS['leafshade']
-    d.line((8,93,8,84),fill=leaf)
-    for x,y in ((5,87),(9,83),(6,91)):
-        d.rectangle((x,y,x+2,y+1),fill=leaf)
-    return im
+    """Native 9x6 mill, including the open eight-spoke wheel over the river."""
+    return building_source('Farm_Watermill')
 
 
 def courtyard_prop(kind):
@@ -980,7 +759,121 @@ def courtyard_prop(kind):
         d.line((11,8,11,26),fill=stone[0])
         d.line((6,12,9,12),fill=stone[0])
         d.line((8,13,8,17),fill=stone[0])
+    if kind == 'Well':
+        # One-pixel exterior trim; the dark cavity remains an opening.
+        original = im.copy()
+        for y in range(25, im.height-1):
+            for x in range(1, im.width-1):
+                if 6 <= x <= 25 and 30 <= y <= 35:
+                    continue
+                if original.getpixel((x,y)) == ink and all(
+                    original.getpixel((x+dx,y+dy))[3] == 255
+                    for dx,dy in ((-1,0),(1,0),(0,-1),(0,1))
+                ):
+                    im.putpixel((x,y), stone[1])
     return im
+
+
+def waterworks_masonry(variant):
+    """Solid wall courses: no hollow corner pixels or freestanding slab edges."""
+    im=blank();d=ImageDraw.Draw(im)
+    d.rectangle((0,0,15,15),fill=STONE[2])
+    d.line((0,7,15,7),fill=STONE[1])
+    for y,x in ((0,(3+variant*5)%16),(8,(11+variant*5)%16)):
+        d.line((x,y,x,y+6),fill=STONE[1])
+        d.line((x+2,y+1,min(15,x+7),y+1),fill=STONE[3])
+        if x>5:d.line((1,y+1,x-3,y+1),fill=STONE[3])
+    if variant==1:d.line((4,13,7,13),fill=STONE[1])
+    if variant==2:d.point((12,4),fill=STONE[3])
+    return im
+
+
+def waterworks_trim(kind):
+    """Native solid wall thickness, low machinery curbs and entrance joinery."""
+    vertical=kind in ('Wall_Return_W','Wall_Return_E','Machine_Curb_V','Timber_Jamb')
+    im=blank(8,16) if vertical else blank(16,8)
+    d=ImageDraw.Draw(im)
+    d.rectangle((0,0,im.width-1,im.height-1),fill=STONE[2])
+    if kind=='Masonry_Cap':
+        d.rectangle((0,0,15,1),fill=STONE[3])
+        d.line((2,0,10,0),fill=STONE[4])
+        d.rectangle((0,5,15,7),fill=STONE[1])
+        d.line((11,2,13,2),fill=STONE[1])
+    elif kind=='Masonry_Foot':
+        d.rectangle((0,4,15,5),fill=STONE[1])
+        d.rectangle((0,6,15,7),fill=STONE[0])
+        d.line((3,1,7,1),fill=STONE[3])
+    elif kind.startswith('Wall_Return_'):
+        # Both orientations share upper-left illumination; only the course joins differ.
+        d.line((0,0,0,15),fill=STONE[1])
+        d.line((1,0,1,15),fill=STONE[3])
+        d.rectangle((6,0,7,15),fill=STONE[1])
+        y=7 if kind.endswith('_W') else 11
+        d.line((2,y,5,y),fill=STONE[1])
+        d.line((2,y+1,4,y+1),fill=STONE[3])
+    elif kind=='Machine_Curb_H':
+        d.line((0,0,15,0),fill=STONE[3])
+        d.line((0,3,15,3),fill=STONE[1])
+        d.rectangle((0,4,15,7),fill=STONE[0])
+        d.line((3,2,6,2),fill=STONE[1])
+    elif kind=='Machine_Curb_V':
+        d.line((0,0,0,15),fill=STONE[3])
+        d.rectangle((4,0,5,15),fill=STONE[1])
+        d.rectangle((6,0,7,15),fill=STONE[0])
+        d.line((1,10,2,10),fill=STONE[1])
+    elif kind=='Threshold':
+        d.line((0,0,15,0),fill=STONE[3])
+        d.line((0,7,15,7),fill=STONE[1])
+        d.line((3,4,7,4),fill=STONE[3])
+        d.line((11,2,13,2),fill=STONE[1])
+    else: # Timber_Jamb
+        d.rectangle((0,0,7,15),fill=TIMBER[0])
+        d.rectangle((1,0,5,15),fill=TIMBER[1])
+        d.line((1,0,1,15),fill=TIMBER[2])
+        d.line((4,3,4,9),fill=TIMBER[0])
+        d.line((6,0,6,15),fill=STONE[0])
+    return im
+
+
+def export_waterworks_interior():
+    """Independent extension: existing architecture pixels and sprite IDs stay fixed."""
+    atlas=blank(256,256);entries=[]
+
+    def append(name,im,x,top):
+        count=zone.validate(im)
+        assert count<=12
+        assert set(pixels(im.getchannel('A'))) <= {0,255}
+        atlas.alpha_composite(im,(x,top))
+        entries.append(dict(name=name,x=x,y=256-top-im.height,width=im.width,
+                            height=im.height,pivotX=.5,pivotY=.5,
+                            pixelsPerUnit=PPU,colors=count))
+
+    back=building_source('Sluice_BackWall')
+    assert back.size==(144,40)
+    # Grow above the original sheet, preserving all bottom-left sprite rectangles.
+    append('Sluice_BackWall',back,0,128)
+    # Slices share the whole wall's pixels, including its original end returns.
+    for column in range(9):
+        entries.append(dict(name=f'Sluice_BackWall_{column}',x=column*16,y=88,
+                            width=16,height=40,pivotX=.5,pivotY=.5,pixelsPerUnit=PPU))
+    for variant in range(3):
+        append(f'Masonry_Face_{variant}',waterworks_masonry(variant),variant*16,176)
+    for name,x in (('Masonry_Cap',48),('Masonry_Foot',64),('Wall_Return_W',80),
+                   ('Wall_Return_E',88),('Machine_Curb_H',96),('Machine_Curb_V',112),
+                   ('Threshold',120),('Timber_Jamb',136)):
+        append(name,waterworks_trim(name),x,176)
+    compact_roof=building_source('Roof_Sluice_Compact')
+    assert compact_roof.size==(160,128)
+    append('Roof_Sluice_Compact',compact_roof,0,0)
+    zone.validate(atlas)
+    atlas.save(OUT/'WaterworksInterior16.png')
+    manifest=dict(pixelsPerUnit=PPU,filterMode='Point',alpha='binary',
+                  atlas='WaterworksInterior16.png',coordinateOrigin='bottom-left',
+                  buildingDepthRecipe='ArtSource/GreenLowlands/Environment/Buildings/NativeRecipe.json',
+                  placementNotes='Native 16 PPU, unit scale. Back wall is 9 by 2.5 units; its nine 1-unit-wide slices permit authored widths without scaling. The compact main sluice roof registers the accepted wing source to a 10 by 8 unit canvas so the porch stays clear. Solid masonry and returns describe wall thickness. Half-unit curbs stay separate from full-height walls. No collision or cast shadows are baked into these sprites; the scene owns doorway, puzzle apertures, cutaways and height boundaries.',
+                  entries=entries)
+    (OUT/'WaterworksInteriorManifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
+    return len(entries)
 
 
 def main():
@@ -1079,6 +972,14 @@ def main():
                 entries.append(dict(name=f'{name}_{col}_{y}',
                                     x=x+16*col,y=entry['y']+16*y,
                                     width=16,height=16,pivotX=.5,pivotY=.5,pixelsPerUnit=PPU))
+    # Native registrations of the existing shutter artwork. Pedestrian gates
+    # slide only the waist-high timber leaf; their guides stay fixed in the scene.
+    for name,x,y,w,h in (
+        ('Passage_Gate_Leaf',327,464,50,16),
+        ('Passage_Gate_Guide_W',320,464,8,16),
+        ('Passage_Gate_Guide_E',377,464,7,16)):
+        entries.append(dict(name=name,x=x,y=y,width=w,height=h,
+                            pivotX=.5,pivotY=.5,pixelsPerUnit=PPU))
     zone.validate(atlas)
     atlas.save(OUT/'LowlandsArchitecture16.png')
     manifest = dict(pixelsPerUnit=PPU, filterMode='Point', alpha='binary',
@@ -1087,7 +988,8 @@ def main():
                                     'Roof_Main_South':[10,10], 'Roof_Wing_South':[10,7]},
                     farmCanvases={'Farm_Cottage':[128,96], 'Farm_Barn':[96,80],
                                   'Farm_DryingShed':[64,48], 'Farm_Watermill':[144,96]},
-                    farmPlacementNotes='Whole original farm sprites and exact 16x16 slices share the existing canvases. Keep the lower 2/2/1/2 rows on Environment for Cottage/Barn/DryingShed/Watermill and upper rows on Above Player. Collision remains separately authored in the original prefab instance; these tiles never add colliders. The mill keeps its original 7x2 house plus 2x3 wheel footprint, static wheel and permanent river placement. Ground shadows are deferred to the coordinated scene pass.',
+                    buildingDepthRecipe='ArtSource/GreenLowlands/Environment/Buildings/NativeRecipe.json',
+                    farmPlacementNotes='Whole depth-rebuilt farm sprites and exact 16x16 slices share the existing canvases. Keep the lower 2/2/1/2 rows on Environment for Cottage/Barn/DryingShed/Watermill and upper rows on Above Player. Collision remains separately authored in the original prefab instance; these tiles never add colliders. The mill keeps its original 7x2 house plus 2x3 wheel footprint, static wheel and permanent river placement. Rebake coordinated ground shadows after silhouette changes.',
                     courtyardCanvases={'Farm_Well':[32,48],'Farm_Cart':[64,48],
                                        'Farm_Bridge':[96,64],'Farm_Fence':[48,32],
                                        'Farm_StonePost':[32,32]},
@@ -1150,7 +1052,10 @@ def main():
     assert len({p[:3] for key in ('Roof_Main','Wall_Face_1','Timber_Post')
                 for p in pixels(sources[key]) if p[3]}) <= 12
     assert all(len({p[:3] for p in pixels(im) if p[3]})<=12 for im in sources.values())
+    interior_entries=export_waterworks_interior()
     print(json.dumps({'atlas':[512,512], 'entries':len(entries),
+                      'waterworksInteriorAtlas':[256,256],
+                      'waterworksInteriorEntries':interior_entries,
                       'standaloneSprites':len(sources),
                       'roofColors':len({p[:3] for p in pixels(sources['Roof_Main']) if p[3]}),
                       'gateColors':len({p[:3] for p in pixels(sources['Sluice_Gate']) if p[3]}),
