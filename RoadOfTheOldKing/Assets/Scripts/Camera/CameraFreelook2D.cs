@@ -45,7 +45,9 @@ namespace RoadOfTheOldKing.Cameras
             if (!allowed) ResetLook();
             if (!frame.Held) requireRelease = false;
             IsLooking = allowed && frame.Held && !requireRelease;
-            LookOffset = IsLooking ? PointerOffset(frame.PointerPosition, view.pixelRect, view.orthographicSize, view.aspect, MaxDistance) : Vector2.zero;
+            LookOffset = !IsLooking ? Vector2.zero : frame.UseStick
+                ? Vector2.ClampMagnitude(frame.Stick, 1f) * MaxDistance
+                : PointerOffset(frame.PointerPosition, view.pixelRect, view.orthographicSize, view.aspect, MaxDistance);
             return LookOffset;
         }
 

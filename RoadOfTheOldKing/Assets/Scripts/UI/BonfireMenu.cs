@@ -71,7 +71,12 @@ namespace RoadOfTheOldKing.UI
         {
             if (!Build()) return;
             fire = opened;
+            // Regional skin: the same layout and kit rows inside this fire's frame.
+            var panel = overlay.Q("bonfire-panel");
+            foreach (var skin in panel.GetClasses().Where(c => c.StartsWith("skin-")).ToList()) panel.RemoveFromClassList(skin);
+            panel.AddToClassList("skin-" + fire.MenuSkin);
             overlay.style.display = DisplayStyle.Flex;
+            ControlLabels.Bind(overlay.Q<Label>("hint"), "Esc Back · F Leave", "B Back");
             MenuStack.Push(this);
             FrameCamera(true);
             Show(Page.Main);
@@ -123,15 +128,29 @@ namespace RoadOfTheOldKing.UI
             var session = GameSession.Instance;
             if (session == null || fire == null) { interaction.Close(); return; }
             page = next;
-            shards.text = "Sun Shards " + session.Progress.sunShards;
+            // Shards against the next tier's cost, red while short; the choices stay browsable but locked
+            // until the shards are there and the fire allows purchases (user, 17 Oct: make that apparent).
+            var nextTier = session.Rewards.Upgrades.NextTier;
+            int have = session.Progress.sunShards;
+            bool lacking = nextTier != null && have < nextTier.shardCost;
+            bool locked = nextTier != null && (lacking || !fire.AllowsUpgrades);
+            string requirement = nextTier == null ? "All chosen." :
+                !fire.AllowsUpgrades ? "Choose upgrades at an upgrade bonfire." :
+                lacking ? "Need " + nextTier.shardCost + " Sun Shards." :
+                "Choose one for " + nextTier.shardCost + " shards.";
+            shards.text = "Sun Shards " + have + (nextTier != null ? " / " + nextTier.shardCost : "");
+            shards.EnableInClassList("lacking", lacking);
+            status.EnableInClassList("warning", false);
             var items = new List<PauseMenuAction>();
             switch (next)
             {
                 case Page.Main:
                     heading.text = fire.DisplayName.ToUpperInvariant();
+                    // Sitting down already rested (PlayerBonfireInteraction.Open), as at a Souls bonfire,
+                    // so the menu offers only what resting unlocks.
                     status.text = session.Status;
-                    items.Add(new PauseMenuAction("Rest", "Heal, refill flasks, save.", () => { session.Checkpoints.Rest(fire); Show(Page.Main); }));
-                    items.Add(new PauseMenuAction("Upgrades", "View the next choices.", () => Show(Page.Upgrades)));
+                    items.Add(new PauseMenuAction("Upgrades", locked ? requirement : "View the next choices.",
+                        () => Show(Page.Upgrades), locked: locked));
                     bool travel = false;
                     // Every discovered fire, including those in other scenes; names refresh when rested at.
                     foreach (var destination in session.Progress.fires.OrderBy(f => f.displayOrder))
@@ -159,13 +178,14 @@ namespace RoadOfTheOldKing.UI
                     }
                     else
                     {
-                        status.text = "Choose one for " + tier.shardCost + " shards.";
+                        status.text = requirement;
+                        status.EnableInClassList("warning", locked);
                         foreach (var choice in tier.choices)
                         {
                             if (choice == null) continue;
                             var picked = choice;
                             items.Add(new PauseMenuAction(choice.displayName,
-                                choice.description, () => { pending = picked; Show(Page.Confirm); }));
+                                choice.description, () => { pending = picked; Show(Page.Confirm); }, locked: locked));
                         }
                     }
                     items.Add(new PauseMenuAction("Back", "", () => Show(Page.Main)));
@@ -178,6 +198,7 @@ namespace RoadOfTheOldKing.UI
                         (!fire.AllowsUpgrades ? "Purchase at an upgrade bonfire." :
                         session.Progress.sunShards < current.shardCost ? "Need " + current.shardCost + " shards." :
                         "Spend " + current.shardCost + " shards? The others are lost.");
+                    status.EnableInClassList("warning", locked);
                     // The safe choice comes first so Enter never buys by accident.
                     items.Add(new PauseMenuAction("Back", "Keep your shards.", () => Show(Page.Upgrades)));
                     if (current != null && pending != null)

@@ -10,6 +10,8 @@ namespace RoadOfTheOldKing.Input
         private InputAction move;
         private InputAction sprint;
         private InputAction dash;
+        private InputAction sprintToggle;
+        private bool sprintLatched;
         private float dashQueuedUntil = -1f;
         private bool hasFocus = true;
         private bool paused;
@@ -18,10 +20,12 @@ namespace RoadOfTheOldKing.Input
         public bool SprintHeld { get; private set; }
         public bool IsActive => isActiveAndEnabled && hasFocus && !paused && Time.timeScale > 0f && (locks == null || !locks.IsLocked);
         private RoadOfTheOldKing.Player.PlayerControlLocks locks;
+        private RoadOfTheOldKing.Player.PlayerStamina stamina;
 
         private void Awake()
         {
             locks = GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>();
+            stamina = GetComponent<RoadOfTheOldKing.Player.PlayerStamina>();
             actions = new InputActionMap("Player Movement");
             move = actions.AddAction("Move", InputActionType.Value, expectedControlLayout: "Vector2");
 
@@ -36,11 +40,15 @@ namespace RoadOfTheOldKing.Input
                 .With("Left", "<Keyboard>/leftArrow")
                 .With("Right", "<Keyboard>/d")
                 .With("Right", "<Keyboard>/rightArrow");
+            // The stick shares the action; Update reduces its tilt to the same unit direction.
+            move.AddBinding(GamepadLayout.Move).WithProcessor(GamepadLayout.MoveProcessors);
 
             sprint = actions.AddAction("Sprint", InputActionType.Button);
             sprint.AddBinding("<Keyboard>/leftShift");
             sprint.AddBinding("<Keyboard>/rightShift");
+            sprintToggle = actions.AddAction("Sprint Toggle", InputActionType.Button, GamepadLayout.Sprint);
             dash = actions.AddAction("Dash", InputActionType.Button, "<Keyboard>/space");
+            dash.AddBinding(GamepadLayout.Dash);
         }
 
         private void OnEnable() => actions.Enable();
@@ -53,8 +61,13 @@ namespace RoadOfTheOldKing.Input
                 return;
             }
 
-            MoveDirection = move.ReadValue<Vector2>();
-            SprintHeld = sprint.IsPressed();
+            Vector2 value = move.ReadValue<Vector2>();
+            MoveDirection = value.sqrMagnitude > 0.0001f ? value.normalized : Vector2.zero;
+            // L3 latches sprint the way holding Shift sustains it; stopping or a second click ends it.
+            if (sprintToggle.WasPressedThisFrame()) sprintLatched = !sprintLatched;
+            // Running out of stamina also ends it: a latched sprint must not restart on its own once stamina refills.
+            if (MoveDirection == Vector2.zero || (stamina != null && stamina.Current <= 0f)) sprintLatched = false;
+            SprintHeld = sprint.IsPressed() || sprintLatched;
             if (dash.WasPressedThisFrame())
                 dashQueuedUntil = Time.time + 0.12f;
         }
@@ -91,6 +104,7 @@ namespace RoadOfTheOldKing.Input
         {
             MoveDirection = Vector2.zero;
             SprintHeld = false;
+            sprintLatched = false;
             dashQueuedUntil = -1f;
         }
     }

@@ -57,6 +57,10 @@ namespace RoadOfTheOldKing.UI
             knowledge = overlay.Q<Label>("knowledge");
             closeButton = overlay.Q<Button>("close");
             closeButton.clicked += Close;
+            // MenuStack owns keyboard/controller submit; stop UI Toolkit's own copy before the button sees it,
+            // so the press that opened the reader cannot also activate Leave.
+            overlay.RegisterCallback<NavigationSubmitEvent>(e => e.StopImmediatePropagation(), TrickleDown.TrickleDown);
+            overlay.RegisterCallback<NavigationMoveEvent>(e => e.StopImmediatePropagation(), TrickleDown.TrickleDown);
             return true;
         }
 
@@ -73,6 +77,7 @@ namespace RoadOfTheOldKing.UI
             knowledge.text = (known ? "Remembered" : "Knowledge gained") + " · " + count +
                 (count == 1 ? " inscription" : " inscriptions");
             overlay.style.display = DisplayStyle.Flex;
+            ControlLabels.Bind(overlay.Q<Label>("hint"), "Esc / Enter Leave", "A / B Leave");
             locks.Lock(this);
             pause = SimulationPause.Acquire();
             MenuStack.Push(this);

@@ -31,17 +31,34 @@ namespace RoadOfTheOldKing.UI
         private Coroutine restoring;
         private int stockSelection;
         private bool trading;
+        private InputActionMap padActions;
+        private InputAction padToggle, padLeft, padRight;
         public bool IsOpen => pause != null;
         public bool CanOpen => isActiveAndEnabled && !IsOpen && restoring == null &&
             player != null && player.IsAlive && locks != null && !locks.IsLocked && !MenuStack.IsAnyOpen &&
             Time.timeScale > 0 && GameSession.Instance != null && !GameSession.Instance.IsLoading &&
             combat != null && combat.CanStartAttack && !combat.IsAttacking && combat.Weapon?.IsAway != true;
+        // A conversation handing over to the shop: the player was talking, not fighting, and the conversation's
+        // control lease has just made the combat controller report inactive, so its attack check would refuse.
+        private bool CanOpenFromConversation => isActiveAndEnabled && !IsOpen && restoring == null &&
+            player != null && player.IsAlive && locks != null && !locks.IsLocked && !MenuStack.IsAnyOpen &&
+            Time.timeScale > 0 && GameSession.Instance != null && !GameSession.Instance.IsLoading &&
+            combat != null && combat.Weapon?.IsAway != true;
 
         private void Awake()
         {
             player = GetComponent<PlayerHealth>(); combat = GetComponent<PlayerCombatController>();
             locks = GetComponent<PlayerControlLocks>();
+            // Up/down arrive through MenuStack (PauseMenuInput); the grid's left/right and the toggle live here.
+            padActions = new InputActionMap("Collection controller");
+            padToggle = padActions.AddAction("Inventory", InputActionType.Button, RoadOfTheOldKing.Input.GamepadLayout.Inventory);
+            padLeft = padActions.AddAction("Left", InputActionType.Button, RoadOfTheOldKing.Input.GamepadLayout.MenuLeft);
+            padLeft.AddBinding(RoadOfTheOldKing.Input.GamepadLayout.MenuStickLeft);
+            padRight = padActions.AddAction("Right", InputActionType.Button, RoadOfTheOldKing.Input.GamepadLayout.MenuRight);
+            padRight.AddBinding(RoadOfTheOldKing.Input.GamepadLayout.MenuStickRight);
         }
+
+        private void OnEnable() => padActions.Enable();
 
         private void Update()
         {
@@ -50,17 +67,17 @@ namespace RoadOfTheOldKing.UI
 #if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
             if (DevToolsPanel.CapturesInput) return;
 #endif
-            if (!Application.isFocused || Keyboard.current == null) return;
+            if (!Application.isFocused) return;
             var keyboard = Keyboard.current;
-            if (keyboard.tabKey.wasPressedThisFrame)
+            if ((keyboard != null && keyboard.tabKey.wasPressedThisFrame) || padToggle.WasPressedThisFrame())
             {
                 if (IsOpen) { if (trader == null) Close(); }
                 else OpenInventory();
                 return;
             }
             if (!IsOpen || trading || !ReferenceEquals(MenuStack.Top, this)) return;
-            if (keyboard.leftArrowKey.wasPressedThisFrame) inventory.Navigate(-1, 0);
-            if (keyboard.rightArrowKey.wasPressedThisFrame) inventory.Navigate(1, 0);
+            if ((keyboard != null && keyboard.leftArrowKey.wasPressedThisFrame) || padLeft.WasPressedThisFrame()) inventory.Navigate(-1, 0);
+            if ((keyboard != null && keyboard.rightArrowKey.wasPressedThisFrame) || padRight.WasPressedThisFrame()) inventory.Navigate(1, 0);
         }
 
         private bool Build()
@@ -80,16 +97,19 @@ namespace RoadOfTheOldKing.UI
             context = overlay.Q<Label>("context"); hint = overlay.Q<Label>("hint");
             list = new MenuList(overlay.Q("entries"), overlay.Q<Label>("description"), action => { if (IsOpen) action.Execute(); });
             inventory = new InventoryGridView(overlay, CreateIcon);
-            overlay.Q<Button>("collection-close").clicked += Back;
-            overlay.Q<Image>("coin-icon").sprite = coinIcon;
-            overlay.Q<Image>("shard-icon").sprite = shardIcon;
-            overlay.Q<Image>("heart-icon").sprite = heartIcon;
+            var closeButton = overlay.Q<Button>("collection-close");
+            closeButton.clicked += Back;
+            // Mouse only; built-in focus navigation must not park a second highlight on it.
+            closeButton.focusable = false;
+            SizeIcon(overlay.Q<Image>("coin-icon"), coinIcon);
+            SizeIcon(overlay.Q<Image>("shard-icon"), shardIcon);
+            SizeIcon(overlay.Q<Image>("heart-icon"), heartIcon);
             return true;
         }
 
-        private bool Begin(Trader source)
+        private bool Begin(Trader source, bool fromConversation = false)
         {
-            if (!CanOpen || !Build()) return false;
+            if (!(fromConversation ? CanOpenFromConversation : CanOpen) || !Build()) return false;
             trader = source; trading = source != null; confirming = null; stockSelection = 0;
             overlay.EnableInClassList("trading", trading);
             overlay.Q<Button>("collection-close").text = trading ? "Leave" : "Close";
@@ -105,9 +125,9 @@ namespace RoadOfTheOldKing.UI
             ShowInventory(); return true;
         }
 
-        public bool OpenTrader(Trader source)
+        public bool OpenTrader(Trader source, bool fromConversation = false)
         {
-            if (source == null || !source.CanTradeFrom(player) || !Begin(source)) return false;
+            if (source == null || !source.CanTradeFrom(player) || !Begin(source, fromConversation)) return false;
             ShowStock(); return true;
         }
 
@@ -126,24 +146,41 @@ namespace RoadOfTheOldKing.UI
         {
             heading.text = "INVENTORY"; RefreshBalances();
             context.text = "";
-            hint.text = "Tab / Esc";
+            ControlLabels.Bind(hint, "Tab / Esc", "View / B");
             inventory.Show(player);
         }
 
         private VisualElement CreateIcon(string id)
         {
             VisualElement icon;
-            if (id == "rope" || id == "lantern") icon = new InventoryToolGlyph(id == "lantern");
+            if (id == "rope" || id == "lantern")
+            {
+                // 24-pixel glyphs drawn at 2 px each, the kit's UI pixel.
+                icon = new InventoryToolGlyph(id == "lantern");
+                icon.style.width = 48; icon.style.height = 48;
+            }
             else
             {
                 Sprite sprite = id switch {
                     "axe" => axeIcon, "flask" => flaskIcon, "crank" => crankIcon,
                     "knowledge" => knowledgeIcon, _ => heartIcon
                 };
-                icon = new Image { sprite = sprite, scaleMode = ScaleMode.ScaleToFit, pickingMode = PickingMode.Ignore };
+                var image = new Image { pickingMode = PickingMode.Ignore };
+                SizeIcon(image, sprite);
+                icon = image;
             }
             icon.AddToClassList("pack-icon");
             return icon;
+        }
+
+        // Icons show their own pixels at exactly 2 reference px each (one kit UI pixel), never scaled to fit.
+        private static void SizeIcon(Image image, Sprite sprite)
+        {
+            if (image == null) return;
+            image.sprite = sprite;
+            image.scaleMode = ScaleMode.StretchToFill;
+            image.style.width = sprite != null ? sprite.rect.width * 2 : 0;
+            image.style.height = sprite != null ? sprite.rect.height * 2 : 0;
         }
 
         private static string ToolDescription(WorldTool tool)
@@ -158,25 +195,23 @@ namespace RoadOfTheOldKing.UI
         }
 
         private string OfferDescription(ShopOffer offer) => offer.Reward == ShopReward.Tool ? ToolDescription(offer.Tool) :
-            "One heart fragment. Three fragments increase maximum health by 20. Only one is available here.";
+            "One heart fragment. Three fragments increase maximum health by 20.";
 
         private void ShowStock(string receipt = null)
         {
             confirming = null; heading.text = "TRAVELING TRADER"; RefreshBalances();
             overlay.Q<Button>("collection-close").text = "Leave";
-            context.text = receipt ?? "A little rope can make a long road shorter.";
-            hint.text = "↑ ↓ Browse    Enter Select    Esc Leave";
+            ControlLabels.Bind(hint, "↑ ↓ Browse    Enter Select    Esc Leave", "D-pad Browse    A Select    B Leave");
             var rows = new List<PauseMenuAction>();
+            // Finite stock: a bought offer leaves the list (user, 17 Oct) rather than staying as "sold out".
             foreach (var offer in trader.Offers)
             {
-                if (offer == null || offer.Merchant != trader) continue;
+                if (offer == null || offer.Merchant != trader || offer.IsSold(GameSession.Instance.Progress)) continue;
                 int row = rows.Count;
-                bool sold = offer.IsSold(GameSession.Instance.Progress);
-                string label = offer.ItemName + (sold ? "  ·  Sold out" : "  ·  " + offer.Price + " coins");
-                string detail = OfferDescription(offer);
-                if (sold) detail += "\nSold out.";
-                rows.Add(new PauseMenuAction(label, detail, () => { stockSelection = row; ShowConfirmation(offer); }));
+                rows.Add(new PauseMenuAction(offer.ItemName + "  ·  " + offer.Price + " coins", OfferDescription(offer),
+                    () => { stockSelection = row; ShowConfirmation(offer); }));
             }
+            context.text = receipt ?? (rows.Count == 0 ? "Nothing left to sell." : "A little rope can make a long road shorter.");
             rows.Add(new PauseMenuAction("Leave", "Safe travels.", Close)); list.Show(rows, stockSelection);
         }
 
@@ -189,7 +224,7 @@ namespace RoadOfTheOldKing.UI
             bool affordable = state.bronzeCoins >= offer.Price;
             context.text = sold ? "Sold out." : affordable ? "Purchase for " + offer.Price + " Bronze Coins?"
                 : "You need " + (offer.Price - state.bronzeCoins) + " more Bronze Coins.";
-            hint.text = "↑ ↓ Choose    Enter Select    Esc Back";
+            ControlLabels.Bind(hint, "↑ ↓ Choose    Enter Select    Esc Back", "D-pad Choose    A Select    B Back");
             list.Show(new[]{
                 new PauseMenuAction("Back", OfferDescription(offer), () => ShowStock()),
                 new PauseMenuAction("Buy  ·  " + offer.Price + " coins", OfferDescription(offer), () => Buy(offer),
@@ -210,6 +245,7 @@ namespace RoadOfTheOldKing.UI
         public void Close()
         {
             if (!IsOpen) return;
+            var leaving = trader;
             Hide(); restoring = StartCoroutine(UnlockNextFrame());
         }
         private IEnumerator UnlockNextFrame() { yield return null; locks?.Unlock(this); restoring = null; }
@@ -221,8 +257,10 @@ namespace RoadOfTheOldKing.UI
         private void OnDisable()
         {
             if (restoring != null) { StopCoroutine(restoring); restoring = null; }
+            var leaving = IsOpen ? trader : null;
             Hide(); locks?.Unlock(this);
+            padActions?.Disable();
         }
-        private void OnDestroy() { if (document != null) Destroy(document.gameObject); }
+        private void OnDestroy() { padActions?.Dispose(); if (document != null) Destroy(document.gameObject); }
     }
 }

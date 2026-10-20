@@ -5,9 +5,10 @@ using UnityEngine.UIElements;
 namespace RoadOfTheOldKing.UI
 {
     // A vertical list of menu buttons built from PauseMenuAction commands: mouse hover/click and
-    // keyboard selection share one highlighted entry, and the selected entry's description shows in a
-    // label. Keyboard navigation comes from MenuStack's input routing, so UI Toolkit's own navigation
-    // events are stopped here to avoid double moves.
+    // keyboard/controller selection share one highlighted entry, and the selected entry's description
+    // shows in a label. Navigation and submit come from MenuStack's input routing, so UI Toolkit's own
+    // navigation events are intercepted while trickling down, before a button's built-in handler can
+    // move focus or activate it a second time.
     public sealed class MenuList
     {
         private readonly VisualElement container;
@@ -22,6 +23,8 @@ namespace RoadOfTheOldKing.UI
             this.container = container;
             this.description = description;
             this.invoke = invoke;
+            container.RegisterCallback<NavigationSubmitEvent>(e => e.StopImmediatePropagation(), TrickleDown.TrickleDown);
+            container.RegisterCallback<NavigationMoveEvent>(e => e.StopImmediatePropagation(), TrickleDown.TrickleDown);
         }
 
         public void Show(IReadOnlyList<PauseMenuAction> items, int select = 0)
@@ -33,31 +36,29 @@ namespace RoadOfTheOldKing.UI
             {
                 int index = i;
                 var button = new Button(() => invoke(actions[index])) { text = actions[i].Label };
-                button.AddToClassList("menu-button");
-                // Hidden by default (MenuTheme.uss); styles such as Hearth show it beside the selected entry.
+                // Shared kit row (Kit.uss); "menu-button" stays for per-screen adjustments.
+                button.AddToClassList("menu-button"); button.AddToClassList("kit-row");
+                // The kit shows this cursor beside the selected row only.
                 var cursor = new VisualElement { pickingMode = PickingMode.Ignore };
-                cursor.AddToClassList("menu-cursor");
+                cursor.AddToClassList("menu-cursor"); cursor.AddToClassList("kit-cursor");
                 button.Add(cursor);
                 button.SetEnabled(actions[i].Enabled);
-                button.RegisterCallback<FocusInEvent>(_ => Select(index));
+                button.EnableInClassList("locked", actions[i].Locked);
+                // Not focusable: UI Toolkit's built-in controller/keyboard navigation moves focus even when its
+                // events are stopped, which would step a second row. The "selected" class is the highlight.
+                button.focusable = false;
                 button.RegisterCallback<PointerEnterEvent>(_ => Select(index));
-                button.RegisterCallback<NavigationSubmitEvent>(e => e.StopPropagation());
-                button.RegisterCallback<NavigationMoveEvent>(e => e.StopPropagation());
                 buttons.Add(button);
                 container.Add(button);
             }
             if (buttons.Count == 0) { if (description != null) description.text = ""; return; }
             Select(Math.Max(0, Math.Min(select, buttons.Count - 1)));
-            container.schedule.Execute(Focus);
         }
-
-        public void Focus() { if (buttons.Count > 0 && selected < buttons.Count) buttons[selected].Focus(); }
 
         public void Navigate(int direction)
         {
             if (buttons.Count == 0) return;
             Select((selected + direction + buttons.Count) % buttons.Count);
-            Focus();
         }
 
         public void Submit() { if (buttons.Count > 0 && actions[selected].Enabled) invoke(actions[selected]); }

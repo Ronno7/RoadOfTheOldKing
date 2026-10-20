@@ -1,68 +1,78 @@
-/* HUD in the game's pixel style: the RotOK Pixel font (Tools/Art/UI/pixel_font.py) at sizes in steps of 10
-   (one font pixel = size/10 reference px, so text stays on whole pixels) and the notched 9-slice Panel frame
-   (Tools/Art/UI/hud_icons.py, 3 reference px per pixel). Warm ivory text, sun-gold keys. Keep text short. */
+/* HUD on the Ardan UI kit (Kit.uss): RotOK Pixel at 20 px and the kit chips. Corner vitals are pixel art drawn at
+   2 reference px per art pixel, the kit's UI pixel, so every size below is a multiple of 2. Keep text short. */
+@import url("Kit.uss");
+
 #hud-root {
     position: absolute; left: 0; right: 0; top: 0; bottom: 0;
-    color: rgb(242, 229, 193); -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKPixel.asset"); font-size: 20px;
+    color: var(--kit-text); font-size: 20px; -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKPixel.asset");
 }
-.panel { background-image: url("project://database/Assets/Art/Sprites/UI/Panel.png"); -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2; }
-.chip { flex-direction: row; align-items: center; padding: 6px 12px; }
 Label { margin: 0; padding: 0; -unity-font-style: normal; }
 
 /* Vitals and weapon-away, upper left */
-#top-left { position: absolute; left: 10px; top: 10px; flex-direction: row; align-items: flex-start; }
-/* Corner vitals: pixel art drawn at 3 px per art pixel (the world's density at camera size 5.5), so every
-   size below is a multiple of 3. Icons and the notched 9-slice frame come from Tools/Art/UI/hud_icons.py.
-   Code sets each bar's width from its maximum (bars grow with max health and stamina). No backing panel:
-   the charcoal outlines carry the contrast. */
+#top-left { position: absolute; left: 12px; top: 12px; flex-direction: row; align-items: flex-start; }
+/* Icons and the notched 9-slice bar frame come from Tools/Art/UI/hud_icons.py. Code sets each bar's width from its
+   maximum (GameHud.HudPixel), so bars grow with max health and stamina. No backing panel: the outlines carry the contrast. */
 #vitals { flex-direction: column; align-items: flex-start; }
-.vital-row { flex-direction: row; align-items: center; margin-bottom: 3px; }
+.vital-row { flex-direction: row; align-items: center; margin-bottom: 2px; }
 .hud-icon { -unity-background-scale-mode: stretch-to-fill; flex-shrink: 0; }
-.heart-icon { width: 27px; height: 24px; margin-right: 3px; background-image: url("project://database/Assets/Art/Sprites/UI/Heart.png"); }
-.stamina-icon { width: 21px; height: 21px; margin-left: 3px; margin-right: 6px; background-image: url("project://database/Assets/Art/Sprites/UI/Stamina.png"); }
+.heart-icon { width: 18px; height: 16px; margin-right: 2px; background-image: url("project://database/Assets/Art/Sprites/UI/HUD/Heart.png"); }
+.stamina-icon { width: 14px; height: 14px; margin-left: 2px; margin-right: 4px; background-image: url("project://database/Assets/Art/Sprites/UI/HUD/Stamina.png"); }
 .pixel-bar {
-    height: 21px; padding: 3px; flex-shrink: 0;
-    background-image: url("project://database/Assets/Art/Sprites/UI/BarFrame.png");
-    /* 9-slice from the sprite's 2 px border; the sprite imports at 33.33 PPU so 1 px = 3 reference px. */
+    height: 14px; padding: 2px; flex-shrink: 0;
+    background-image: url("project://database/Assets/Art/Sprites/UI/HUD/BarFrame.png");
+    /* 9-slice from the sprite's 2 px border; the sprite imports at 50 PPU so 1 px = 2 reference px. */
     -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2;
 }
-.pixel-bar.thin { height: 15px; }
+.pixel-bar.thin { height: 10px; }
 .bar-track { flex-grow: 1; flex-direction: row; overflow: hidden; }
 .bar-fill { height: 100%; flex-shrink: 0; }
 /* Two-tone fills: a light top row and a dark bottom row around the base colour. */
 .health-track { background-color: rgb(58, 37, 38); }
-.health-fill { background-color: rgb(178, 72, 64); border-top-width: 3px; border-top-color: rgb(214, 112, 96); border-bottom-width: 3px; border-bottom-color: rgb(126, 43, 43); }
+.health-fill { background-color: rgb(178, 72, 64); border-top-width: 2px; border-top-color: rgb(214, 112, 96); border-bottom-width: 2px; border-bottom-color: rgb(126, 43, 43); }
 /* Stamina: ochre-gold (user, 2 Oct), matching the arc over the hero. */
 .stamina-track { background-color: rgb(59, 51, 38); }
-.stamina-fill { background-color: rgb(207, 149, 53); border-top-width: 3px; border-top-color: rgb(235, 195, 95); border-bottom-width: 3px; border-bottom-color: rgb(147, 97, 31); }
+.stamina-fill { background-color: rgb(207, 149, 53); border-top-width: 2px; border-top-color: rgb(235, 195, 95); border-bottom-width: 2px; border-bottom-color: rgb(147, 97, 31); }
 /* Below zero (Souls-style deficit): the track turns dark red and the debt drains from the left. */
 #stamina-bar.exhausted .stamina-track { background-color: rgb(92, 34, 30); }
 .stamina-debt { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background-color: rgb(168, 58, 46); }
 /* A refused action: the frame flashes ivory. */
 #stamina-bar.rejected { -unity-background-image-tint-color: rgb(246, 230, 181); }
-#flask-row { flex-direction: row; align-items: flex-end; margin-left: 3px; margin-top: 3px; }
-.flask-icon { width: 27px; height: 33px; margin-right: 3px; background-image: url("project://database/Assets/Art/Sprites/UI/Flask.png"); }
-.flask-icon.empty { background-image: url("project://database/Assets/Art/Sprites/UI/FlaskEmpty.png"); }
-#weapon-away { margin-left: 9px; }
-.axe-icon { width: 7px; height: 12px; margin-right: 6px; background-color: rgb(186, 140, 72); border-width: 1px; border-color: rgb(20, 20, 18); }
-#weapon-away-text { font-size: 20px; }
+#flask-row { flex-direction: row; align-items: flex-end; margin-left: 2px; margin-top: 2px; }
+.flask-icon { width: 18px; height: 22px; margin-right: 2px; background-image: url("project://database/Assets/Art/Sprites/UI/HUD/Flask.png"); }
+.flask-icon.empty { background-image: url("project://database/Assets/Art/Sprites/UI/HUD/FlaskEmpty.png"); }
+#weapon-away { margin-left: 8px; }
+.axe-icon { width: 8px; height: 14px; margin-right: 8px; background-color: var(--kit-trim); border-width: 2px; border-color: var(--kit-ink); }
 
-/* The interaction prompt and charge bar are world-space documents: WorldUI.uss */
+/* The interaction prompt and tutorial cue: kit chips GameHud places over world points (bottom centre on the point).
+   The charge bar and stamina arc stay world-space meters: WorldUI.uss. */
+.anchored-chip { position: absolute; translate: -50% -100%; margin-top: -4px; }
+.anchored-chip Label { white-space: nowrap; -unity-text-align: middle-center; }
+#cue-chip Label { white-space: normal; max-width: 320px; }
+#cue-chip.completed Label { color: var(--kit-gold); }
+/* A spoken line over a speaker's head: the chip with the bronze ledge, gold like a key name. */
+#speech-chip { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/ChipEdge.png"); }
+#speech-chip Label { color: var(--kit-gold); }
 
 /* Reward receipts, lower left */
-#receipts { position: absolute; left: 10px; bottom: 12px; flex-direction: column-reverse; align-items: flex-start; }
-.receipt { font-size: 20px; margin-top: 3px; padding: 6px 12px; white-space: nowrap; background-image: url("project://database/Assets/Art/Sprites/UI/Panel.png"); -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2; }
-
-/* One teaching hint, lower centre */
-#hint {
-    position: absolute; bottom: 15px; left: 0; right: 0; align-items: center;
-    background-image: none;
+#receipts { position: absolute; left: 12px; bottom: 12px; flex-direction: column-reverse; align-items: flex-start; }
+.receipt {
+    margin-top: 4px; padding: 4px 12px; white-space: nowrap;
+    background-image: url("project://database/Assets/Art/Sprites/UI/Kit/Chip.png");
+    -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2;
 }
+
+/* One teaching hint, lower centre: the chip with the bronze ledge. */
+#hint { position: absolute; bottom: 16px; left: 0; right: 0; align-items: center; }
 #hint-text {
     /* One line: the label sizes to its measured text and then wrapped the last word (UI Toolkit rounding). Keep hints short. */
-    font-size: 20px; white-space: nowrap; -unity-text-align: middle-center;
-    padding: 9px 15px; background-image: url("project://database/Assets/Art/Sprites/UI/Panel.png"); -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2;
+    white-space: nowrap; -unity-text-align: middle-center; padding: 8px 16px;
 }
-#hint.completed #hint-text { color: rgb(231, 184, 92); }
+#hint.completed #hint-text { color: var(--kit-gold); }
 
-.divider { height: 3px; background-color: rgb(82, 83, 65); margin-top: 6px; margin-bottom: 9px; }
+/* Milestone banner ("BONFIRE LIT"): a dark band across the screen with bronze edges and display-size text
+   (40 px = 4 reference px per font pixel). It sits in the upper third: the hero and the fire are at screen centre. */
+#banner {
+    position: absolute; left: 0; right: 0; top: 18%; height: 64px; align-items: center; justify-content: center;
+    background-color: rgba(23, 28, 27, 0.78); border-top-width: 2px; border-bottom-width: 2px; border-color: var(--kit-trim);
+}
+#banner-text { font-size: 40px; margin: 0; padding: 0; color: var(--kit-gold); -unity-text-align: middle-center; white-space: nowrap; }

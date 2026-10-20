@@ -2,14 +2,17 @@
     <ui:Style src="MenuTheme.uss" />
     <ui:Style src="TitleScreen.uss" />
     <ui:VisualElement name="title-root" class="menu-overlay">
+        <ui:Label name="title" text="ROAD OF THE&#10;OLD KING" class="title-logo" />
+        <ui:Label name="press" class="title-press" />
         <ui:VisualElement name="title-panel" class="menu-panel">
-            <ui:Label name="title" text="ROAD OF THE&#10;OLD KING" class="menu-heading" />
-            <ui:VisualElement class="menu-divider">
-            </ui:VisualElement>
             <ui:VisualElement name="actions" />
             <ui:Label name="description" class="menu-description" />
-            <ui:Label text="↑↓ Choose · Enter Select" class="menu-hint" />
+            <ui:Label name="hint" text="↑↓ Choose · Enter Select" class="menu-hint" />
         </ui:VisualElement>
         <ui:Label name="version" class="title-version" />
+        <ui:VisualElement name="prologue">
+            <ui:Label name="prologue-text" class="prologue-text" />
+            <ui:Label name="prologue-hint" class="prologue-hint" />
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

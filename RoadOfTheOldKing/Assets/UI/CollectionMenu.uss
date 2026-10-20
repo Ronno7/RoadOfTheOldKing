@@ -1,36 +1,64 @@
-/* Compact charcoal pack. Ornate bronze/hearth art belongs only to bonfires. */
+/* Inventory and trader on the Ardan UI kit (Kit.uss): the shared panel, divider, inset slots and kit rows.
+   Body text 20 px; sizes are multiples of the 2 px UI pixel. Item and wallet icons are sized in code to exactly
+   twice their native pixels (CollectionMenu.SizeIcon). */
+@import url("Kit.uss");
+
 #collection-overlay {
     display: none; position: absolute; left: 0; right: 0; top: 0; bottom: 0;
-    align-items: center; justify-content: center; background-color: rgba(12, 20, 18, .48);
-    color: rgb(215, 220, 200); -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKPixel.asset"); font-size: 20px;
+    align-items: center; justify-content: center; background-color: rgba(15, 19, 18, 0.48);
+    color: var(--kit-text); font-size: 20px;
+    -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKPixel.asset");
 }
 Label { margin: 0; padding: 0; -unity-font-style: normal; white-space: normal; }
 #collection-overlay Button { border-radius: 0; -unity-font-style: normal; -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKPixel.asset"); }
-#collection-panel { width: 400px; max-width: 94%; max-height: 94%; padding: 18px; background-color: rgb(35, 46, 41); border-width: 2px; border-color: rgb(82, 105, 88); }
-#heading { font-size: 20px; margin-bottom: 14px; }
-#context { display: none; font-size: 10px; color: rgb(164, 183, 159); }
-#wallet { flex-direction: row; justify-content: space-between; margin-bottom: 16px; padding-bottom: 12px; border-bottom-width: 1px; border-bottom-color: rgb(66, 84, 70); }
-.resource { width: 100px; height: 24px; flex-direction: row; align-items: center; }
-.resource Image { width: 22px; height: 24px; margin-right: 8px; flex-shrink: 0; }
-.resource Label { font-size: 20px; white-space: nowrap; }
-#item-grid { flex-direction: row; flex-wrap: wrap; }
-.pack-item { width: 60px; height: 66px; margin: 0 4px 8px; padding: 4px; border-width: 1px; border-color: rgb(61, 80, 66); background-color: rgb(29, 39, 35); align-items: center; justify-content: center; color: rgb(221, 225, 204); }
-.pack-item.selected, .pack-item:hover, .pack-item:focus { border-color: rgb(156, 184, 145); background-color: rgb(59, 83, 65); }
-.pack-icon { width: 48px; height: 48px; flex-shrink: 0; }
-.item-count { position: absolute; right: 3px; bottom: 2px; font-size: 10px; white-space: nowrap; background-color: rgb(29, 39, 35); padding: 1px 2px; }
-#item-name { height: 18px; font-size: 10px; -unity-text-align: middle-center; color: rgb(185, 202, 175); }
-#pack-footer { flex-direction: row; align-items: center; justify-content: space-between; height: 24px; margin-top: 12px; }
-#hint { font-size: 10px; white-space: nowrap; color: rgb(143, 163, 141); }
-#collection-close { width: 60px; height: 24px; margin: 0; font-size: 10px; color: rgb(205, 218, 188); background-color: rgb(45, 62, 50); border-width: 1px; border-color: rgb(90, 116, 91); }
-#collection-close:hover, #collection-close:focus { background-color: rgb(65, 88, 67); border-color: rgb(156, 184, 145); }
-#trade-body { display: none; flex-direction: row; min-height: 154px; }
-#entry-scroll { width: 55%; margin-right: 16px; }
-#description { flex-grow: 1; flex-shrink: 1; width: 40%; font-size: 10px; padding: 12px; background-color: rgb(29, 39, 35); }
-#entries .menu-button { height: auto; min-height: 36px; padding: 8px; margin-bottom: 6px; font-size: 10px; white-space: normal; color: rgb(215, 220, 200); background-color: rgb(29, 39, 35); border-width: 1px; border-color: rgb(61, 80, 66); }
-#entries .menu-button.selected, #entries .menu-button:hover, #entries .menu-button:focus { background-color: rgb(59, 83, 65); border-color: rgb(156, 184, 145); }
-#entries .menu-button:disabled { opacity: .45; }
-.menu-cursor { display: none; }
-.trading #collection-panel { width: 540px; }
+#collection-panel {
+    width: 440px; max-width: 94%; max-height: 94%; padding: 24px 28px 20px 28px;
+    background-image: url("project://database/Assets/Art/Sprites/UI/Kit/Panel.png");
+    -unity-slice-left: 6; -unity-slice-right: 6; -unity-slice-top: 6; -unity-slice-bottom: 6;
+}
+#heading { font-size: 20px; color: var(--kit-gold); -unity-text-align: middle-center; }
+#context { display: none; color: var(--kit-muted); -unity-text-align: upper-center; }
+#wallet { flex-direction: row; justify-content: space-around; margin-bottom: 12px; }
+.resource { height: 28px; flex-direction: row; align-items: center; }
+.resource Image { margin-right: 8px; flex-shrink: 0; }
+.resource Label { white-space: nowrap; }
+#item-grid { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+.pack-item {
+    width: 64px; height: 64px; margin: 0 4px 8px 4px; padding: 0; border-width: 0; border-radius: 0;
+    align-items: center; justify-content: center; background-color: rgba(0, 0, 0, 0);
+    background-image: url("project://database/Assets/Art/Sprites/UI/Kit/Inset.png");
+    -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2;
+}
+.pack-item.selected, .pack-item:hover {
+    background-image: url("project://database/Assets/Art/Sprites/UI/Kit/Selected.png");
+}
+.pack-icon { flex-shrink: 0; }
+/* A counted slot lifts its icon to the top and centres the count beneath it, so the two never overlap. */
+.pack-item.counted { justify-content: flex-start; padding-top: 8px; }
+.item-count { position: absolute; left: 0; right: 0; bottom: 4px; white-space: nowrap; -unity-text-align: lower-center; color: var(--kit-text); }
+#item-name { height: 20px; color: var(--kit-gold); -unity-text-align: middle-center; margin-top: 4px; }
+#pack-footer { flex-direction: row; align-items: center; justify-content: space-between; height: 28px; margin-top: 12px; }
+#hint { white-space: nowrap; color: var(--kit-muted); }
+#collection-close {
+    height: 28px; margin: 0; padding: 0 12px; border-width: 0; background-color: rgba(0, 0, 0, 0);
+    color: var(--kit-text); font-size: 20px;
+    background-image: url("project://database/Assets/Art/Sprites/UI/Kit/Chip.png");
+    -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2;
+}
+#collection-close:hover {
+    background-image: url("project://database/Assets/Art/Sprites/UI/Kit/Selected.png"); color: var(--kit-gold);
+}
+#trade-body { display: none; flex-direction: row; min-height: 160px; }
+#entry-scroll { width: 55%; margin-right: 12px; }
+/* Room on the left for the row cursor: the scroll view clips anything outside its content. */
+#entries { padding-left: 20px; }
+#entries .menu-button { height: auto; min-height: 28px; padding: 4px 8px; white-space: normal; }
+#description {
+    flex-grow: 1; flex-shrink: 1; width: 40%; padding: 8px 12px; color: var(--kit-muted);
+    background-image: url("project://database/Assets/Art/Sprites/UI/Kit/Inset.png");
+    -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2;
+}
+.trading #collection-panel { width: 600px; }
 .trading #context { display: flex; margin-bottom: 12px; }
 .trading #inventory-body { display: none; }
 .trading #trade-body { display: flex; }

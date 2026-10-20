@@ -1,8 +1,3 @@
-/* Defeat retains its red veil and title typography, with the plain shared frame. */
+/* Defeat: a red veil and a display-size heading on the shared panel. */
 #defeat-overlay { background-color: rgba(38, 8, 6, 0.55); }
-#defeat-panel { width: 340px; padding-top: 22px; }
-#defeat-panel #heading {
-    color: rgb(214, 106, 92); font-size: 48px; margin-top: 2px;
-    -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKTitle32.asset");
-}
-#defeat-panel .menu-button { height: 36px; font-size: 20px; }
+#defeat-panel #heading { color: var(--kit-red); font-size: 40px; margin-top: 4px; }

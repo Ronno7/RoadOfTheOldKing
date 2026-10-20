@@ -15,17 +15,18 @@ namespace RoadOfTheOldKing.UI
     //  Corner vitals (pixel art: health, flasks; stamina too with HudSettings.AlwaysShowVitals) appear on
     //  damage, healing or combat and hide after a hold once full and safe.
     //  Stamina otherwise is a pixel arc over the hero, shown only in combat.
-    //  One interaction prompt beside the object the interaction selector actually chose.
+    //  One interaction prompt above the object the interaction selector actually chose.
     //  Weapon-away chip, charge bar near the player, reward receipts, one Tutorial hint. Inventory lives in CollectionMenu.
-    // The prompt, charge bar and stamina arc are world-space documents (WorldUIDocument); the rest is a screen panel.
-    [DisallowMultipleComponent, RequireComponent(typeof(PlayerHealth))]
+    // The charge bar and stamina arc are world-space documents (WorldUIDocument); the rest is a screen panel. The prompt
+    // and the tutorial cue are screen chips anchored to world points, so they keep the kit's UI pixel size at every zoom
+    // (user, 17 Oct); LateUpdate places them after the camera has moved (CameraFollow2D), hence the late execution order.
+    [DisallowMultipleComponent, RequireComponent(typeof(PlayerHealth)), DefaultExecutionOrder(1000)]
     public sealed class GameHud : MonoBehaviour
     {
         [SerializeField] private VisualTreeAsset layout;
         [SerializeField] private PanelSettings panelSettings;
         [Header("World space")]
         [SerializeField] private PanelSettings worldPanel;
-        [SerializeField] private VisualTreeAsset promptLayout;
         [SerializeField] private VisualTreeAsset chargeLayout;
         [SerializeField] private VisualTreeAsset staminaArcLayout;
         [Tooltip("Height above the player's pivot of the stamina arc's lowest pixel (world units). 44 px clears " +
@@ -54,12 +55,18 @@ namespace RoadOfTheOldKing.UI
         public static GameHud Active { get; private set; }
 
         private UIDocument document;
-        // Corner art is authored in art pixels and drawn at 3 reference px each: the world's density at camera size 5.5.
-        private const float HudPixel = 3f;
+        // Corner art is authored in art pixels and drawn at 2 reference px each: the kit's UI pixel (Kit.uss).
+        private const float HudPixel = 2f;
         private VisualElement root, vignette, vitals, healthBar, healthFill, staminaRow, staminaBar, staminaFill, staminaDebt, flaskRow;
-        private VisualElement weaponAway, chargeFill, receipts, hint;
+        private VisualElement weaponAway, chargeFill, receipts, hint, banner;
+        private Label bannerText;
+        // Milestone banner timing in seconds (unscaled: lighting a fire does not pause the world).
+        private const float BannerIn = .3f, BannerHold = 1.6f, BannerOut = .7f;
         private readonly List<VisualElement> flaskIcons = new List<VisualElement>();
-        private WorldUIDocument prompt, charge, staminaArc, tutorialCue;
+        private WorldUIDocument charge, staminaArc;
+        private VisualElement promptChip, cueChip, speechChip;
+        private Label speechText;
+        private Vector3? promptAnchor, cueAnchor;
         private Label tutorialText;
         private bool promptVisible;
         private PixelArc arc;
@@ -106,9 +113,8 @@ namespace RoadOfTheOldKing.UI
             if (flask != null) flask.DrinkRefused -= OnFlaskEmpty;
             Unsubscribe();
             if (root != null) root.style.display = DisplayStyle.None;
-            if (prompt != null) prompt.Show(false);
             if (charge != null) charge.Show(false);
-            if (tutorialCue != null) tutorialCue.Show(false);
+            promptAnchor = cueAnchor = null;
             if (staminaArc != null) staminaArc.Show(false);
             arcAlpha = 0f;
         }
@@ -122,7 +128,7 @@ namespace RoadOfTheOldKing.UI
         private bool Build()
         {
             if (document != null) { root.style.display = DisplayStyle.Flex; return true; }
-            if (layout == null || panelSettings == null || worldPanel == null || promptLayout == null || chargeLayout == null || staminaArcLayout == null)
+            if (layout == null || panelSettings == null || worldPanel == null || chargeLayout == null || staminaArcLayout == null)
             { Debug.LogError("GameHud needs its layouts and panel settings.", this); return false; }
             var child = new GameObject("HUD UI"); child.SetActive(false); child.transform.SetParent(transform, false);
             document = child.AddComponent<UIDocument>(); document.panelSettings = panelSettings; document.visualTreeAsset = layout;
@@ -132,27 +138,59 @@ namespace RoadOfTheOldKing.UI
             staminaRow = root.Q("stamina-row"); staminaBar = root.Q("stamina-bar"); staminaFill = root.Q("stamina-fill"); staminaDebt = root.Q("stamina-debt");
             flaskRow = root.Q("flask-row");
             weaponAway = root.Q("weapon-away"); weaponAwayText = root.Q<Label>("weapon-away-text");
-            prompt = WorldUIDocument.Create("Interaction prompt", transform, worldPanel, promptLayout, 30010, Pivot.BottomCenter);
-            promptText = prompt.Q<Label>("prompt-text");
-            tutorialCue = WorldUIDocument.Create("Tutorial cue", transform, worldPanel, promptLayout, 30012, Pivot.BottomCenter);
-            tutorialText = tutorialCue.Q<Label>("prompt-text");
-            tutorialText.style.whiteSpace = WhiteSpace.Normal;
-            tutorialText.style.width = 160;
-            tutorialText.style.fontSize = 10;
-            tutorialText.style.unityTextAlign = TextAnchor.MiddleCenter;
-            tutorialText.enableRichText = true;
-            tutorialCue.Show(false);
             charge = WorldUIDocument.Create("Charge bar", transform, worldPanel, chargeLayout, 30005, Pivot.TopCenter);
             chargeFill = charge.Q<VisualElement>("charge-fill");
             staminaArc = WorldUIDocument.Create("Stamina arc", transform, worldPanel, staminaArcLayout, 30008, Pivot.BottomCenter);
             arc = staminaArc.Q<PixelArc>("stamina-arc");
             receipts = root.Q("receipts");
             hint = root.Q("hint"); hintText = root.Q<Label>("hint-text");
-            foreach (var label in new[] { weaponAwayText, promptText, hintText }) label.enableRichText = true;
-            prompt.Show(false); charge.Show(false); staminaArc.Show(false); SetVisible(hint, false);
-            SetVisible(weaponAway, false);
+            foreach (var label in new[] { weaponAwayText, hintText }) label.enableRichText = true;
+            banner = new VisualElement { name = "banner", pickingMode = PickingMode.Ignore };
+            bannerText = new Label { name = "banner-text", pickingMode = PickingMode.Ignore };
+            banner.Add(bannerText); root.Add(banner);
+            promptChip = AnchoredChip("prompt-chip", out promptText);
+            cueChip = AnchoredChip("cue-chip", out tutorialText);
+            speechChip = AnchoredChip("speech-chip", out speechText);
+            charge.Show(false); staminaArc.Show(false); SetVisible(hint, false);
+            SetVisible(weaponAway, false); SetVisible(banner, false);
             BuildVignette();
             return true;
+        }
+
+        // A screen chip for a world-anchored label (prompt, tutorial cue): kit art at UI pixel size; LateUpdate places it.
+        private VisualElement AnchoredChip(string chipName, out Label label)
+        {
+            var chip = new VisualElement { name = chipName, pickingMode = PickingMode.Ignore };
+            chip.AddToClassList("kit-chip"); chip.AddToClassList("anchored-chip");
+            label = new Label { pickingMode = PickingMode.Ignore, enableRichText = true };
+            chip.Add(label); root.Add(chip); SetVisible(chip, false);
+            return chip;
+        }
+
+        // After the camera moved and the body's interpolation was applied: the hero's meters follow the drawn
+        // sprite, and each chip's bottom centre (USS translate) goes on its world point.
+        private void LateUpdate()
+        {
+            if (document == null) return;
+            if (arcAlpha > 0f) staminaArc.Place(transform.position + Vector3.up * arcBottomHeight);
+            charge.Place(transform.position + Vector3.up * chargeOffset);
+            var view = Camera.main;
+            if (root?.panel == null || view == null) return;
+            PlaceAnchored(promptChip, promptAnchor, view);
+            PlaceAnchored(cueChip, cueAnchor, view);
+            if (HudNotifications.Speaker != null)
+                PlaceAnchored(speechChip, HudNotifications.Speaker.position + Vector3.up * HudNotifications.SpeechHeight, view);
+        }
+
+        private void PlaceAnchored(VisualElement chip, Vector3? anchor, Camera view)
+        {
+            if (chip == null || !anchor.HasValue) return;
+            Vector2 point = RuntimePanelUtils.CameraTransformWorldToPanel(root.panel, anchor.Value, view);
+            // Whole screen pixels, not the 2 px UI grid: the camera glides, so the world moves a screen pixel at a
+            // time and a chip stepping 2 reference px (4 screen px at 1080p) visibly vibrates against it.
+            float screenPerPanel = Screen.height / Mathf.Max(1f, root.panel.visualTree.layout.height);
+            chip.style.left = Mathf.Round(point.x * screenPerPanel) / screenPerPanel;
+            chip.style.top = Mathf.Round(point.y * screenPerPanel) / screenPerPanel;
         }
 
         private void Subscribe()
@@ -201,11 +239,34 @@ namespace RoadOfTheOldKing.UI
             UpdateVignette(alive);
             bool scripted = GetComponent<PlayerControlLocks>()?.IsLocked == true && !menuOpen;
             UpdateWeaponAway(alive && !menuOpen && !scripted && !HudNotifications.HintCompleted && !HudNotifications.HintWorldPosition.HasValue);
-            UpdatePrompt(alive && !menuOpen && !scripted);
+            // The banner owns the moment: the next prompt (Rest after lighting) waits until it has faded.
+            UpdatePrompt(alive && !menuOpen && !scripted && !BannerShowing());
             UpdateCharge(alive && !menuOpen);
             UpdateReceipts();
             SetVisible(receipts, alive && !menuOpen && !scripted && !EncounterState.InCombat && !HudNotifications.HintCompleted);
             UpdateHint(alive && !menuOpen && !scripted);
+            UpdateSpeech(alive && !menuOpen && !scripted);
+            UpdateBanner(alive);
+        }
+
+        private static bool BannerShowing()
+        {
+            float t = Time.unscaledTime - HudNotifications.BannerStartedAt;
+            return !string.IsNullOrEmpty(HudNotifications.Banner) && t >= 0f && t <= BannerIn + BannerHold + BannerOut;
+        }
+
+        // Milestone banner: fade in, hold, fade out. A newer banner replaces the current one.
+        private void UpdateBanner(bool alive)
+        {
+            float t = Time.unscaledTime - HudNotifications.BannerStartedAt;
+            float alpha = !alive || !BannerShowing() ? 0f
+                : t < BannerIn ? t / BannerIn
+                : t < BannerIn + BannerHold ? 1f
+                : 1f - (t - BannerIn - BannerHold) / BannerOut;
+            SetVisible(banner, alpha > 0f);
+            if (alpha <= 0f) return;
+            bannerText.text = HudNotifications.Banner;
+            banner.style.opacity = alpha;
         }
 
         // Corner cluster: health, then stamina (only with the always-visible setting; otherwise stamina is
@@ -275,7 +336,6 @@ namespace RoadOfTheOldKing.UI
             staminaArc.Show(arcAlpha > 0f);
             if (arcAlpha <= 0f) return;
             staminaArc.Root.style.opacity = arcAlpha;
-            staminaArc.Place(transform.position + Vector3.up * arcBottomHeight);
             arc.SetValue(stamina.Normalized, Debt(), stamina.WasSpendRejected);
         }
 
@@ -339,14 +399,19 @@ namespace RoadOfTheOldKing.UI
             if (allowed && interaction != null && !string.IsNullOrEmpty(interaction.Prompt))
             {
                 if (interaction.NearbyPickup != null) { target = interaction.NearbyPickup.transform; verb = interaction.NearbyPickup.Prompt; }
-                else if (interaction.Nearby != null) { target = interaction.Nearby.transform; verb = "Rest"; }
+                else if (interaction.Nearby != null)
+                {
+                    // Souls-style: the first interaction only lights the fire; resting is a separate one.
+                    target = interaction.Nearby.transform;
+                    verb = interaction.Nearby.IsDiscovered ? "Rest" : "Light Bonfire";
+                }
             }
             promptVisible = target != null;
-            if (target == null) { prompt.Show(false); return; }
+            SetVisible(promptChip, promptVisible);
+            if (target == null) { promptAnchor = null; return; }
             var fireView = interaction.NearbyPickup == null ? target.GetComponent<BonfireSpriteView>() : null;
-            prompt.Place(fireView != null ? fireView.PromptPosition : target.position + Vector3.up * promptHeight);
+            promptAnchor = fireView != null ? fireView.PromptPosition : target.position + Vector3.up * promptHeight;
             promptText.text = ControlLabels.Format("{interact} ") + verb;
-            prompt.Show(true);
         }
 
         private void UpdateCharge(bool allowed)
@@ -354,7 +419,6 @@ namespace RoadOfTheOldKing.UI
             var weapon = combat != null ? combat.Weapon : null;
             bool charging = allowed && weapon != null && weapon.State == AxeState.Charging;
             if (!charging) { charge.Show(false); return; }
-            charge.Place(transform.position + Vector3.up * chargeOffset);
             chargeFill.style.width = Length.Percent(weapon.Charge01 * 100f);
             chargeFill.EnableInClassList("ready", weapon.Charge01 >= 1f);
             charge.Show(true);
@@ -385,18 +449,26 @@ namespace RoadOfTheOldKing.UI
                 Vector3 viewport = Camera.main.WorldToViewportPoint(anchor.Value);
                 spatial = viewport.z > 0 && viewport.x > .2f && viewport.x < .8f && viewport.y > .15f && viewport.y < .86f;
             }
-            tutorialCue.Show(spatial);
+            SetVisible(cueChip, spatial);
+            cueAnchor = spatial ? anchor : null;
             SetVisible(hint, show && !spatial);
             if (!show) return;
             if (spatial)
             {
-                tutorialCue.Place(anchor.Value);
                 tutorialText.text = HudNotifications.Hint;
-                tutorialText.style.color = HudNotifications.HintCompleted ? new Color(.91f, .72f, .36f) : new Color(.95f, .9f, .76f);
+                cueChip.EnableInClassList("completed", HudNotifications.HintCompleted);
             }
             hint.EnableInClassList("completed", HudNotifications.HintCompleted);
             hintText.text = HudNotifications.Hint;
 
+        }
+
+        // Someone in the world speaking a short line (the trader's barks), over their head.
+        private void UpdateSpeech(bool allowed)
+        {
+            bool show = allowed && HudNotifications.SpeechShowing;
+            SetVisible(speechChip, show);
+            if (show) speechText.text = HudNotifications.Speech;
         }
 
         private static void SetVisible(VisualElement element, bool visible)

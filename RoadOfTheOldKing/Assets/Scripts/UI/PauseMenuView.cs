@@ -31,7 +31,8 @@ namespace RoadOfTheOldKing.UI
             invoke = onAction;
             overlay.style.display = DisplayStyle.Flex;
             overlay.Q<Label>("heading").text = title;
-            overlay.Q<Label>("hint").text = title == "PAUSED" ? "Esc Resume" : "Esc Back";
+            bool paused = title == "PAUSED";
+            ControlLabels.Bind(overlay.Q<Label>("hint"), paused ? "Esc Resume" : "Esc Back", paused ? "B Resume" : "B Back");
             list.Show(commands, selected);
             return true;
         }

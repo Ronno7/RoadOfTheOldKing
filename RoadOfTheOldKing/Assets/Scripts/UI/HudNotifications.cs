@@ -7,6 +7,8 @@ namespace RoadOfTheOldKing.UI
     // reads or writes gameplay state.
     //  Receipts: short, queued confirmations (rewards, unlocks, lessons); bounded, oldest dropped.
     //  Hint: the single current teaching hint owned by the Tutorial guide.
+    //  Banner: one large, brief milestone line across the screen (for example "BONFIRE LIT").
+    //  Speech: one short line spoken by someone in the world, shown over their head (the trader's barks).
     public static class HudNotifications
     {
         public const int MaxReceipts = 3;
@@ -25,8 +27,40 @@ namespace RoadOfTheOldKing.UI
         public static bool HintCompleted { get; private set; }
         public static int HintVersion { get; private set; }
 
+        public static string Banner { get; private set; }
+        public static float BannerStartedAt { get; private set; } = float.NegativeInfinity;
+        public static int BannerVersion { get; private set; }
+
+        public static Transform Speaker { get; private set; }
+        public static string Speech { get; private set; }
+        public static float SpeechHeight { get; private set; }
+        public static float SpeechUntil { get; private set; } = float.NegativeInfinity;
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void Reset() { receipts.Clear(); HintWorldPosition = null; Hint = null; HintCompleted = false; Version++; HintVersion++; }
+        private static void Reset()
+        {
+            receipts.Clear(); HintWorldPosition = null; Hint = null; HintCompleted = false; Version++; HintVersion++;
+            Banner = null; BannerStartedAt = float.NegativeInfinity; BannerVersion++;
+            Speaker = null; Speech = null; SpeechUntil = float.NegativeInfinity;
+        }
+
+        // A line over a speaker's head for a few seconds (real time); a newer line replaces it.
+        public static void Say(Transform speaker, string text, float height = 2.35f, float seconds = 2.75f)
+        {
+            if (speaker == null || string.IsNullOrEmpty(text)) return;
+            Speaker = speaker; Speech = text; SpeechHeight = height; SpeechUntil = Time.unscaledTime + seconds;
+        }
+
+        public static bool SpeechShowing => Speaker != null && !string.IsNullOrEmpty(Speech) && Time.unscaledTime < SpeechUntil;
+
+        public static void ClearSpeech(Transform speaker) { if (Speaker == speaker) SpeechUntil = float.NegativeInfinity; }
+
+        // Replaces any banner already showing; the HUD fades it in, holds and fades it out on unscaled time.
+        public static void ShowBanner(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return;
+            Banner = text; BannerStartedAt = Time.unscaledTime; BannerVersion++;
+        }
 
         public static void Post(string text, float seconds = 3.5f)
         {

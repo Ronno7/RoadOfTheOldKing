@@ -11,6 +11,9 @@ namespace RoadOfTheOldKing.World
         [SerializeField] private int displayOrder;
         [SerializeField] private bool allowsUpgrades;
         public bool AllowsUpgrades => allowsUpgrades;
+        [Tooltip("Regional bonfire menu skin: BonfireMenu puts skin-<name> on its panel (UI/BonfireMenu.uss). Same layout everywhere; only the frame changes.")]
+        [SerializeField] private string menuSkin = "hearth";
+        public string MenuSkin => string.IsNullOrEmpty(menuSkin) ? "hearth" : menuSkin;
         [SerializeField] private Transform spawnPoint;
         [SerializeField, Min(0.1f)] private float interactionRadius = 1.7f;
         public string Id => id;

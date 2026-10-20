@@ -1,0 +1,79 @@
+/* Ardan UI kit (user, 17 Oct): one style for every panel, menu, HUD chip and prompt.
+   One UI pixel = 2 reference px on the 960x540 reference canvas (4 screen px at 1080p), so every size here is a
+   multiple of 2. Kit sprites (Assets/Art/Sprites/UI/Kit, drawn by Tools/Art/UI/ui_kit.py) import at 50 PPU, so one
+   sprite pixel is one UI pixel; 9-slice values below are in sprite pixels. Text is RotOK Pixel at 20 px (body: one
+   font pixel per UI pixel) or 40 px (display). Colors: zone palette plus the sun-gold accent.
+   Screens import this sheet first and build on the shared pieces. */
+:root {
+    --kit-ink: rgb(23, 28, 27);          /* ink */
+    --kit-fill: rgb(66, 72, 63);         /* rockshadow: panel body */
+    --kit-inset: rgb(50, 63, 62);        /* slatedark: descriptions, slots, selected rows */
+    --kit-trim: rgb(163, 130, 94);       /* soilmid: bronze trim */
+    --kit-trim-dark: rgb(130, 102, 76);  /* soil */
+    --kit-text: rgb(210, 204, 171);      /* stonelight */
+    --kit-muted: rgb(177, 180, 150);     /* stone */
+    --kit-disabled: rgb(140, 146, 118);  /* stoneshade */
+    --kit-gold: rgb(231, 184, 92);       /* sun gold: selection, headings, key names */
+    --kit-red: rgb(202, 110, 87);        /* danger */
+}
+
+.kit-type {
+    color: var(--kit-text); font-size: 20px;
+    -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKPixel.asset"); -unity-font-style: normal;
+}
+
+/* Main frame: ink outline, bronze trim lit from the upper left, corner rivets. */
+.kit-panel {
+    background-image: url("project://database/Assets/Art/Sprites/UI/Kit/Panel.png");
+    -unity-slice-left: 6; -unity-slice-right: 6; -unity-slice-top: 6; -unity-slice-bottom: 6;
+    padding: 24px 28px 20px 28px;
+}
+
+/* Recessed areas: descriptions, item slots. */
+.kit-inset {
+    background-image: url("project://database/Assets/Art/Sprites/UI/Kit/Inset.png");
+    -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2;
+}
+
+/* Small framed labels: receipts, prompts, the axe-away chip; the hint variant adds a bronze ledge. */
+.kit-chip {
+    flex-direction: row; align-items: center; padding: 4px 12px;
+    background-image: url("project://database/Assets/Art/Sprites/UI/Kit/Chip.png");
+    -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2;
+}
+.kit-chip-edge {
+    background-image: url("project://database/Assets/Art/Sprites/UI/Kit/ChipEdge.png");
+    -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2;
+}
+
+/* Heading divider: a bronze line over ink, with the sun-gold gem at its centre. */
+.kit-divider {
+    height: 4px; margin: 8px 0 12px 0; overflow: visible; flex-shrink: 0;
+    background-color: var(--kit-ink); border-top-width: 2px; border-top-color: var(--kit-trim-dark);
+}
+.kit-gem {
+    position: absolute; width: 10px; height: 10px; left: 50%; margin-left: -4px; top: -4px;
+    background-image: url("project://database/Assets/Art/Sprites/UI/Kit/DividerGem.png");
+}
+
+/* A list row: plain text; the selected row sits in the bronze bar with gold text and the cursor beside it. */
+.kit-row {
+    height: 28px; margin: 0 0 4px 0; padding: 0 8px; overflow: visible;
+    background-color: rgba(0, 0, 0, 0); background-image: none; border-width: 0; border-radius: 0;
+    color: var(--kit-text); font-size: 20px; -unity-font-style: normal; -unity-text-align: middle-center;
+    -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKPixel.asset");
+}
+.kit-row.selected, .kit-row:hover {
+    background-image: url("project://database/Assets/Art/Sprites/UI/Kit/Selected.png");
+    -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2;
+    color: var(--kit-gold);
+}
+.kit-row:disabled { color: var(--kit-disabled); opacity: 1; }
+/* Locked: still selectable for browsing, but not yet within reach (an upgrade without the shards). */
+.kit-row.locked { color: var(--kit-disabled); }
+.kit-row.locked.selected, .kit-row.locked:hover { color: var(--kit-muted); }
+.kit-cursor {
+    display: none; position: absolute; width: 10px; height: 14px; left: -16px; top: 7px;
+    background-image: url("project://database/Assets/Art/Sprites/UI/Kit/Cursor.png");
+}
+.kit-row.selected > .kit-cursor { display: flex; }

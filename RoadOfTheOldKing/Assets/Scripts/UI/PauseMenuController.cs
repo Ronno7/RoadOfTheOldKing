@@ -35,6 +35,7 @@ namespace RoadOfTheOldKing.UI
         private void OnEnable()
         {
             input.ToggleRequested += Toggle; input.NavigationRequested += RouteNavigate; input.SubmitRequested += RouteSubmit;
+            input.BackRequested += RouteBack;
         }
 
         // Composition seam for additional commands and save-free verification.
@@ -54,6 +55,8 @@ namespace RoadOfTheOldKing.UI
             Open();
         }
 
+        // Controller B: step back in the top menu; with nothing open it is a dodge, never pause.
+        private void RouteBack() { if (restoring == null) MenuStack.Top?.Back(); }
         private void RouteNavigate(int direction) => MenuStack.Top?.Navigate(direction);
         private void RouteSubmit() => MenuStack.Top?.Submit();
 
@@ -127,6 +130,7 @@ namespace RoadOfTheOldKing.UI
         private void OnDisable()
         {
             input.ToggleRequested -= Toggle; input.NavigationRequested -= RouteNavigate; input.SubmitRequested -= RouteSubmit;
+            input.BackRequested -= RouteBack;
             if (restoring != null) { StopCoroutine(restoring); restoring = null; }
             MenuStack.Remove(this);
             view.Hide(); pause?.Dispose(); pause = null;

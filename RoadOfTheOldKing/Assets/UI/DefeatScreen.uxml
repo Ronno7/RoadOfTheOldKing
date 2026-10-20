@@ -4,8 +4,7 @@
     <ui:VisualElement name="defeat-overlay" class="menu-overlay">
         <ui:VisualElement name="defeat-panel" class="menu-panel">
             <ui:Label text="DEFEATED" name="heading" class="menu-heading" />
-            <ui:VisualElement class="menu-divider">
-            </ui:VisualElement>
+            <ui:VisualElement class="menu-divider"><ui:VisualElement class="kit-gem" picking-mode="Ignore" /></ui:VisualElement>
             <ui:VisualElement name="actions" />
         </ui:VisualElement>
     </ui:VisualElement>

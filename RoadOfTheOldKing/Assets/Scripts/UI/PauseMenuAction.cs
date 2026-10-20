@@ -11,39 +11,28 @@ namespace RoadOfTheOldKing.UI
         public string Description { get; }
         public bool Enabled { get; }
         public bool CloseOnExecute { get; }
+        // Shown dimmed but still selectable, to browse something not yet within reach (e.g. upgrades without shards).
+        public bool Locked { get; }
         private readonly Action execute;
-        public PauseMenuAction(string label, string description, Action execute, bool enabled = true, bool closeOnExecute = true)
-        { Label = label; Description = description; this.execute = execute; Enabled = enabled; CloseOnExecute = closeOnExecute; }
+        public PauseMenuAction(string label, string description, Action execute, bool enabled = true, bool closeOnExecute = true, bool locked = false)
+        { Label = label; Description = description; this.execute = execute; Enabled = enabled; CloseOnExecute = closeOnExecute; Locked = locked; }
         public void Execute() { if (Enabled) execute?.Invoke(); }
     }
 
     public static class PauseMenuCommands
     {
-        // New Game lives on the title screen; settings have their own page (user, 4 Oct).
+        // New Game lives on the title screen; settings have their own page (user, 4 Oct). Resume replaced
+        // Return to bonfire (user, 17 Oct): death is the way back to the last rest.
         public static PauseMenuAction[] CreateDefault(Action openSettings = null) => new[]
         {
-            ReturnToRest(),
+            new PauseMenuAction("Resume", "Back to the road.", null),
             new PauseMenuAction("Settings", "Display and HUD options.", openSettings, openSettings != null, closeOnExecute: false),
-            new PauseMenuAction("Main Menu", "Save and return to the title.\nContinue resumes at your last rest.",
+            new PauseMenuAction("Main Menu", "Save and return to the title.\nContinue resumes here.",
                 () => GameSession.Instance?.ReturnToTitle(), GameSession.Instance != null && GameSession.Instance.CanReturnToTitle),
             new PauseMenuAction("Quit", Application.platform == RuntimePlatform.WebGLPlayer
                 ? "Close the browser tab to quit." : "Leave the game.", Quit,
                 Application.platform != RuntimePlatform.WebGLPlayer)
         };
-
-        private static PauseMenuAction ReturnToRest()
-        {
-            bool checkpoint = GameSession.Instance != null && GameSession.Instance.Checkpoints.HasCheckpoint;
-            return checkpoint
-                ? new PauseMenuAction("Return to bonfire", "Return to your last rest.\nProgress is kept.", Restart)
-                : new PauseMenuAction("Return to start", "Return to where you began.\nProgress is kept.", Restart);
-        }
-
-        private static void Restart()
-        {
-            if (GameSession.Instance != null) GameSession.Instance.Checkpoints.RestartFromCheckpoint();
-            else SceneLoader.ReloadActive();
-        }
 
         private static void Quit()
         {

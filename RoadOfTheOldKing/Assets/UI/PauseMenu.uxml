@@ -4,7 +4,7 @@
     <ui:VisualElement name="pause-overlay" class="menu-overlay">
         <ui:VisualElement name="pause-panel" class="menu-panel">
             <ui:Label text="PAUSED" name="heading" class="menu-heading" />
-            <ui:VisualElement name="divider" class="menu-divider" />
+            <ui:VisualElement name="divider" class="menu-divider"><ui:VisualElement class="kit-gem" picking-mode="Ignore" /></ui:VisualElement>
             <ui:VisualElement name="actions" />
             <ui:Label name="description" class="menu-description" />
             <ui:Label text="Esc Resume" name="hint" class="menu-hint" />

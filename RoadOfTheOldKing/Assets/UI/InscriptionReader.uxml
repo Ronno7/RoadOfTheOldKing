@@ -4,11 +4,11 @@
     <ui:VisualElement name="inscription-overlay" class="menu-overlay">
         <ui:VisualElement name="inscription-panel" class="menu-panel">
             <ui:Label name="heading" class="menu-heading" />
-            <ui:VisualElement class="menu-divider" />
+            <ui:VisualElement class="menu-divider"><ui:VisualElement class="kit-gem" picking-mode="Ignore" /></ui:VisualElement>
             <ui:Label name="body" class="menu-text" />
             <ui:Label name="knowledge" class="menu-meta" />
-            <ui:Button name="close" text="Leave" class="menu-button selected" />
-            <ui:Label text="Esc / Enter Leave" class="menu-hint" />
+            <ui:Button name="close" text="Leave" class="menu-button kit-row selected"><ui:VisualElement class="kit-cursor" picking-mode="Ignore" /></ui:Button>
+            <ui:Label name="hint" text="Esc / Enter Leave" class="menu-hint" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

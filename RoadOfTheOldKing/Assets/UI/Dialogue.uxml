@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="MenuTheme.uss" />
+    <ui:Style src="Dialogue.uss" />
+    <ui:VisualElement name="dialogue-overlay" class="menu-overlay" picking-mode="Ignore">
+        <ui:VisualElement name="dialogue-panel" class="kit-panel">
+            <ui:Label name="speaker" class="kit-chip dialogue-speaker" />
+            <ui:Label name="line" class="dialogue-line" />
+            <ui:VisualElement name="choices" class="dialogue-choices" />
+            <ui:Label name="dialogue-hint" class="dialogue-hint" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

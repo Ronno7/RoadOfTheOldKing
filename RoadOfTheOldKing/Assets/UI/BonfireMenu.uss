@@ -1,11 +1,19 @@
-/* The world stays visible at a bonfire (it is not paused): a light veil and the Hearth panel on the right,
-   while the camera zooms in and frames the resting hero on the left third (BonfireMenu). Hearth frame,
-   326 px wide (the 201 px half-size panel grown about 35%, then 20%; user, 3 Oct). Frame and ornaments: OrnateMenu.uss. */
+/* Bonfire menu: the shared menu layout and kit rows inside a regional skin (user, 17 Oct). The world stays visible
+   (a bonfire does not pause): a light veil, the panel on the right while the camera frames the resting hero on the
+   left third (BonfireMenu). BonfireMenu puts skin-<name> on the panel from Bonfire.MenuSkin; a new region adds its
+   skin class and kit sprites here, with no other changes. */
 #bonfire-overlay { align-items: flex-end; padding-right: 8%; background-color: rgba(15, 19, 18, 0.2); }
-#bonfire-panel { width: 326px; }
-#bonfire-panel .menu-heading { font-size: 20px; }
-#bonfire-panel .menu-text, #bonfire-panel .menu-meta, #bonfire-panel .menu-description { font-size: 10px; }
-#bonfire-panel .menu-meta { margin-bottom: 8px; }
-#bonfire-panel .menu-description { min-height: 12px; margin-top: 4px; }
-#bonfire-panel .menu-hint { margin-top: 6px; }
-#bonfire-panel .menu-button { height: 28px; margin-bottom: 5px; }
+#bonfire-panel { width: 384px; }
+/* Short of the next upgrade's shards (or at a fire that cannot sell them): the count and requirement turn red. */
+#shards.lacking, #status.warning { color: var(--kit-red); }
+
+/* Green Lowlands and the Tutorial: squared oak beams lashed with rope, with a flame crest on the top beam. */
+.skin-hearth {
+    background-image: url("project://database/Assets/Art/Sprites/UI/Kit/HearthPanel.png");
+    -unity-slice-left: 12; -unity-slice-right: 12; -unity-slice-top: 12; -unity-slice-bottom: 12; -unity-slice-type: tiled;
+    padding: 36px 40px 28px 40px;
+}
+.skin-hearth > .menu-crest {
+    display: flex; width: 42px; height: 42px; margin-left: -20px; top: -20px;
+    background-image: url("project://database/Assets/Art/Sprites/UI/Kit/HearthCrest.png");
+}

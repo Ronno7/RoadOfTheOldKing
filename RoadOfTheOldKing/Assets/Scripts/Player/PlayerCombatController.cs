@@ -80,7 +80,7 @@ namespace RoadOfTheOldKing.Player
                 return;
             }
 
-            UpdateAim(frame.PointerPosition);
+            UpdateAim(frame);
             if (Weapon == null)
                 return;
             Weapon.SetAim(AimDirection);
@@ -145,8 +145,15 @@ namespace RoadOfTheOldKing.Player
                 queuedLightUntil = -1f;
         }
 
-        private void UpdateAim(Vector2 pointer)
+        private void UpdateAim(CombatInputFrame frame)
         {
+            if (frame.Aim == AimSource.Hold) return;
+            if (frame.Aim == AimSource.Direction)
+            {
+                if (frame.AimDirection.sqrMagnitude > 0.0001f) AimDirection = frame.AimDirection.normalized;
+                return;
+            }
+            Vector2 pointer = frame.PointerPosition;
             if (aimCamera == null)
                 aimCamera = Camera.main;
             if (aimCamera == null)

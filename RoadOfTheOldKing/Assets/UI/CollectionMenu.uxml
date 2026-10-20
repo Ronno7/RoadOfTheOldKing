@@ -5,6 +5,7 @@
             <ui:VisualElement name="pack-header">
                 <ui:VisualElement name="pack-title">
                     <ui:Label name="heading" text="INVENTORY" />
+                    <ui:VisualElement class="kit-divider"><ui:VisualElement class="kit-gem" picking-mode="Ignore" /></ui:VisualElement>
                     <ui:Label name="context" />
                 </ui:VisualElement>
                 <ui:VisualElement name="wallet">

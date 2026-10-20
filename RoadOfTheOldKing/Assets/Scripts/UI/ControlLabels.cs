@@ -1,23 +1,57 @@
 using System.Collections.Generic;
 using System.Text;
+using RoadOfTheOldKing.Input;
+using UnityEngine.UIElements;
 
 namespace RoadOfTheOldKing.UI
 {
     // One place for the key names shown in prompts and hints. Text uses {tokens} such as
-    // "Press {interact}". The labels mirror the current fixed bindings (PlayerMovementInput,
-    // PlayerCombatInput, PlayerBonfireInteraction); when rebinding arrives, update Set() from the
-    // actions instead of editing hint text.
+    // "Press {interact}". Labels follow the last-used device (ActiveInput): keyboard/mouse names mirror
+    // the adapters' keyboard bindings, controller names mirror GamepadLayout (Xbox names). When
+    // rebinding arrives, update Set() from the actions instead of editing hint text.
     public static class ControlLabels
     {
-        private static readonly Dictionary<string, string> labels = new Dictionary<string, string>
+        private static readonly Dictionary<string, string> keyboard = new Dictionary<string, string>
         {
             { "move", "WASD" }, { "sprint", "Shift" }, { "dash", "Space" }, { "interact", "F" },
             { "attack", "LMB" }, { "cleave", "RMB" }, { "throw", "E" },
             { "recall", "E" }, { "pause", "Esc" }, { "status", "Tab" }, { "look", "Alt" }, { "heal", "Q" },
         };
+        private static readonly Dictionary<string, string> gamepad = new Dictionary<string, string>
+        {
+            { "move", "LS" }, { "sprint", "L3" }, { "dash", "B" }, { "interact", "A" },
+            { "attack", "RB" }, { "cleave", "RT" }, { "throw", "LT" },
+            { "recall", "LT" }, { "pause", "Start" }, { "status", "View" }, { "look", "LB + RS" }, { "heal", "X" },
+        };
+        private static readonly List<(Label label, string keys, string pad)> bound = new List<(Label, string, string)>();
+        private static bool subscribed;
 
-        public static string Get(string token) => labels.TryGetValue(token, out var label) ? label : token;
-        public static void Set(string token, string label) => labels[token] = label;
+        private static Dictionary<string, string> Active => ActiveInput.UsingGamepad ? gamepad : keyboard;
+
+        public static string Get(string token) => Active.TryGetValue(token, out var label) ? label : token;
+        public static void Set(string token, string label) => Active[token] = label;
+
+        // Plain menu hint lines (user rule, 4 Oct: key names stay out of buttons) for each device.
+        public static string Pick(string keyboardText, string gamepadText) => ActiveInput.UsingGamepad ? gamepadText : keyboardText;
+
+        // Shows the matching hint now and whenever the active device changes; rebinding a label replaces it.
+        public static void Bind(Label label, string keyboardText, string gamepadText)
+        {
+            if (label == null) return;
+            if (!subscribed) { ActiveInput.Changed += Refresh; subscribed = true; }
+            bound.RemoveAll(entry => entry.label == label || entry.label.panel == null);
+            bound.Add((label, keyboardText, gamepadText));
+            label.text = Pick(keyboardText, gamepadText);
+        }
+
+        private static void Refresh()
+        {
+            bound.RemoveAll(entry => entry.label.panel == null);
+            foreach (var entry in bound) entry.label.text = Pick(entry.keys, entry.pad);
+        }
+
+        [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void Reset() { bound.Clear(); subscribed = false; }
 
         // Replaces {token} with a gold [key] in UI Toolkit rich text; unknown tokens stay readable. No bold:
         // the pixel font has one weight.

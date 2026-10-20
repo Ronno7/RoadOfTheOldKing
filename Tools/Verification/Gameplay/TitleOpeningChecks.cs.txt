@@ -1,0 +1,77 @@
+// Title opening: "press any button" gate and the New Game prologue (17 Oct).
+// Run the shared GreenLowlandsGameplayChecks SETUP, enter Play in its bootstrap, set SessionState "Opening.Step" to 0,
+// then execute between real frames until it returns "done". Stop and run the shared cleanup. Only the isolated
+// save is touched; step 8 checks that New Game reset it only after the prologue. Steps 3–4 queue a real-frame Enter.
+var game=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(game==null||game.StorageKey!=SessionState.GetString("GreenLowlands.Gameplay.Key","")||!game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new System.Exception("Isolated Play session required");
+Application.runInBackground=true;
+if(game.IsLoading)return "WAIT";
+var sf=System.Reflection.BindingFlags.Static|System.Reflection.BindingFlags.NonPublic;
+var f=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var tt=typeof(RoadOfTheOldKing.UI.TitleScreen);
+int step=SessionState.GetInt("Opening.Step",0);
+var checks=new System.Collections.Generic.List<string>();
+System.Action<bool,string> check=(ok,s)=>{if(!ok)throw new System.Exception("FAIL step "+step+": "+s);checks.Add(s);};
+var title=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.UI.TitleScreen>();
+System.Func<string> pageName=()=>tt.GetField("page",f).GetValue(title).ToString();
+System.Func<string,UnityEngine.UIElements.VisualElement> q=n=>UnityEngine.UIElements.UQueryExtensions.Q(title.GetComponent<UnityEngine.UIElements.UIDocument>().rootVisualElement,n,(string)null);
+if(step==0)check(game.Continue(),"Continue into Tutorial");
+else if(step==1){
+ check(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name=="Tutorial","Tutorial loaded");
+ // Stage the title as the boot scene: the gate only shows when the game started on the title.
+ tt.GetField("bootScene",sf).SetValue(null,"Assets/Scenes/Title.unity");tt.GetField("pressed",sf).SetValue(null,false);
+ check(game.ReturnToTitle(),"Return to title (staged as the boot scene)");
+}
+else if(step==2){
+ check(title!=null&&pageName()=="Press","Boot title waits for a button");
+ check(q("press").resolvedStyle.display==UnityEngine.UIElements.DisplayStyle.Flex&&q("title-panel").resolvedStyle.visibility==UnityEngine.UIElements.Visibility.Hidden,"Press line shown; menu hidden but laid out");
+ SessionState.SetFloat("Opening.LogoY",q("title").worldBound.y);
+ title.Submit();check(pageName()=="Press"&&!game.IsLoading,"Submit alone does not choose while waiting");
+}
+else if(step==3){
+ var kb=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();SessionState.SetInt("Opening.Keyboard",kb.deviceId);
+ UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb,new UnityEngine.InputSystem.LowLevel.KeyboardState(UnityEngine.InputSystem.Key.Enter));
+ checks.Add("Queued a real-frame Enter");
+}
+else if(step==4){
+ var kb=UnityEngine.InputSystem.InputSystem.GetDeviceById(SessionState.GetInt("Opening.Keyboard",0));
+ UnityEngine.InputSystem.InputSystem.QueueStateEvent(kb,new UnityEngine.InputSystem.LowLevel.KeyboardState());
+ check(pageName()=="Main","Any button reveals the menu");
+ check(!game.IsLoading&&UnityEngine.SceneManagement.SceneManager.GetActiveScene().name=="Title","The revealing Enter did not also choose Continue");
+ check(q("title-panel").resolvedStyle.visibility==UnityEngine.UIElements.Visibility.Visible&&q("press").resolvedStyle.display==UnityEngine.UIElements.DisplayStyle.None,"Menu visible, press line gone");
+ check(Mathf.Abs(q("title").worldBound.y-SessionState.GetFloat("Opening.LogoY",-1))<.5f,"Logo does not move when the menu appears");
+}
+else if(step==5){
+ var kb=UnityEngine.InputSystem.InputSystem.GetDeviceById(SessionState.GetInt("Opening.Keyboard",0));if(kb!=null)UnityEngine.InputSystem.InputSystem.RemoveDevice(kb);
+ title.Navigate(1);title.Submit();check(pageName()=="Confirm","New Game asks to confirm over a save");
+ title.Navigate(1);title.Submit();check(pageName()=="Prologue","Erase and begin opens the prologue");
+ check(game.HasSave&&!game.IsLoading,"Prologue has not erased the save or started loading");
+ var pages=(string[])tt.GetField("pages",f).GetValue(title);
+ check(pages.Length==12&&pages[0].StartsWith("When I was young")&&pages[11].EndsWith("remember him again."),"Twelve pages from the text asset");
+ check(((UnityEngine.UIElements.Label)q("prologue-text")).text==pages[0],"First page shown");
+}
+else if(step==6){
+ var pages=(string[])tt.GetField("pages",f).GetValue(title);
+ var text=(UnityEngine.UIElements.Label)q("prologue-text");
+ var leaving=tt.GetField("leavingAt",f);
+ tt.GetMethod("OnToggle",f).Invoke(title,null);check((float)leaving.GetValue(title)>=0f,"Esc/Start skip starts the fade-out");
+ leaving.SetValue(title,-1f); // undo the skip (no frame has passed) to walk the pages
+ tt.GetField("pageShownAt",f).SetValue(title,Time.unscaledTime); // as if the page had just appeared
+ title.Submit();check(text.text==pages[0],"A/Enter during a fade completes it on the same page");
+ for(int i=1;i<pages.Length;i++){
+  title.Submit();check(text.text==pages[i],"Page "+(i+1)+" turns");
+  title.Submit();check(text.text==pages[i],"Page "+(i+1)+" completes its fade before turning");
+ }
+ check((float)leaving.GetValue(title)<0f&&game.HasSave&&!game.IsLoading,"Last page waits; save intact while reading");
+}
+else if(step==7){
+ title.Submit();check((float)tt.GetField("leavingAt",f).GetValue(title)>=0f,"A/Enter on the last page fades out");
+ check(game.HasSave&&!game.IsLoading,"The run starts only after the fade");
+}
+else if(step==8){
+ check(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name=="Tutorial","Run started in the Tutorial after the prologue");
+ check(!game.Progress.hasAxe&&!game.Progress.Has("verification/green-lowlands"),"Isolated save reset only when the run started");
+}
+else return "done";
+SessionState.SetInt("Opening.Step",step+1);
+return new{step,checks=checks.ToArray()};

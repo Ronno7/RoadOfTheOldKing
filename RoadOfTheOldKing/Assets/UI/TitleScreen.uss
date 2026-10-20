@@ -1,11 +1,22 @@
-/* Title uses the plain shared menu theme; ornate bronze/hearth styling is reserved for bonfires. */
-#title-root { background-color: rgb(24, 22, 20); }
-#title-panel { width: 300px; }
-/* The game's name in RotOK Title 32 at 32 px, one font pixel per reference px (user, 4 Oct). */
-#title-panel .menu-heading {
-    font-size: 32px; margin-top: 4px;
-    -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKTitle32.asset");
+/* Title: the game's logo above the shared menu panel. The logo keeps RotOK Title 32 (the only use of a second
+   face) at 64 px, so one font pixel is one 2 px UI pixel like the rest of the kit. */
+#title-root { background-color: var(--kit-ink); flex-direction: column; }
+.title-logo {
+    font-size: 64px; color: var(--kit-gold); -unity-text-align: middle-center; white-space: normal;
+    margin: 0 0 32px 0; -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKTitle32.asset");
 }
-#title-panel .menu-description { font-size: 10px; min-height: 12px; margin-top: 4px; }
-#title-panel .menu-hint { margin-top: 6px; }
-.title-version { position: absolute; right: 12px; bottom: 8px; font-size: 10px; color: rgb(120, 116, 100); }
+/* Two description lines are reserved so the hint stays put while the selection moves. */
+#title-panel .menu-description { min-height: 40px; }
+.title-version { position: absolute; right: 12px; bottom: 8px; font-size: 20px; color: var(--kit-disabled); }
+/* "Press Enter / Press A" over the menu's place (the hidden panel keeps its space, so the logo never moves),
+   shown once when the game boots here; TitleScreen blinks it. */
+.title-press { display: none; position: absolute; left: 0; right: 0; top: 66%; color: var(--kit-text); -unity-text-align: middle-center; }
+
+/* Prologue after New Game: body text on the ink field, a left-aligned block centred on screen, one page at a time.
+   It covers the menu (and takes its clicks) until the run starts. */
+#prologue {
+    display: none; position: absolute; left: 0; right: 0; top: 0; bottom: 0;
+    align-items: center; justify-content: center; background-color: var(--kit-ink);
+}
+.prologue-text { width: 600px; max-width: 90%; white-space: normal; color: var(--kit-text); -unity-text-align: middle-left; }
+.prologue-hint { position: absolute; left: 0; right: 0; bottom: 24px; color: var(--kit-disabled); -unity-text-align: middle-center; }

@@ -1,5 +1,5 @@
+/* Inscription reader: the shared panel, wide enough for carved text read left-aligned. */
 #inscription-overlay { display: none; background-color: rgba(15, 19, 18, 0.3); }
-#inscription-panel { width: 390px; }
-#inscription-panel .menu-heading { font-size: 20px; }
-#inscription-panel .menu-text { font-size: 10px; -unity-text-align: upper-left; margin-bottom: 16px; }
-#inscription-panel .menu-meta { font-size: 10px; margin-bottom: 12px; }
+#inscription-panel { width: 440px; }
+#inscription-panel .menu-text { -unity-text-align: upper-left; margin-bottom: 16px; }
+#inscription-panel #close { margin: 0 48px; }

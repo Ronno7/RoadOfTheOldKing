@@ -1,0 +1,11 @@
+/* Conversation box on the Ardan UI kit: the world stays visible, the box sits low on the screen with the speaker's
+   name on a chip across its top edge. Lines type out at body size; choices are kit rows, left aligned. */
+#dialogue-overlay { display: none; justify-content: flex-end; padding-bottom: 24px; }
+#dialogue-panel { width: 600px; max-width: 94%; padding: 28px 32px 16px 32px; overflow: visible; }
+.dialogue-speaker {
+    position: absolute; left: 24px; top: -14px; padding: 2px 12px; color: var(--kit-gold); -unity-text-align: middle-left;
+}
+.dialogue-line { min-height: 60px; white-space: normal; color: var(--kit-text); -unity-text-align: upper-left; }
+.dialogue-choices { margin: 8px 0 0 24px; overflow: visible; }
+.dialogue-choices .kit-row { -unity-text-align: middle-left; padding-left: 12px; margin-right: 160px; }
+.dialogue-hint { margin-top: 4px; color: var(--kit-disabled); -unity-text-align: middle-right; height: 20px; }
