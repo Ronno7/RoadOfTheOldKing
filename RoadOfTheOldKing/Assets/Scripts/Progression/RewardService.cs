@@ -75,12 +75,26 @@ namespace RoadOfTheOldKing.Progression
             return true;
         }
 
+        // One entry point for authored world rewards (pickups and chests); the specific methods remain for callers
+        // that know their kind. Coins use coinAmount; tools use tool.
+        public bool TryGrant(RewardKind kind, string rewardId, int coinAmount = 0, WorldTool tool = WorldTool.None)
+        {
+            switch (kind)
+            {
+                case RewardKind.SunShard: return TryCollectShard(rewardId);
+                case RewardKind.HeartFragment: return TryCollectHeartFragment(rewardId);
+                case RewardKind.BronzeCoins: return TryCollectCoinCache(rewardId, coinAmount);
+                case RewardKind.Tool: return TryCollectTool(rewardId, tool);
+                default: return false;
+            }
+        }
+
         public bool TryCollectCoinCache(string rewardId, int amount)
         {
             var progress = session.Progress;
             if (!CanAward || string.IsNullOrWhiteSpace(rewardId) || amount <= 0 ||
-                progress.Has("coins/collected/" + rewardId) || progress.bronzeCoins > int.MaxValue - amount) return false;
-            progress.Complete("coins/collected/" + rewardId);
+                progress.Has(RewardKeys.CoinCache(rewardId)) || progress.bronzeCoins > int.MaxValue - amount) return false;
+            progress.Complete(RewardKeys.CoinCache(rewardId));
             progress.bronzeCoins += amount;
             session.CaptureAndSave("Bronze Coins +" + amount);
             CoinsCollected?.Invoke(amount, progress.bronzeCoins);
@@ -93,7 +107,7 @@ namespace RoadOfTheOldKing.Progression
             if (!CanAward || string.IsNullOrWhiteSpace(rewardId) || tool == WorldTool.None ||
                 !Enum.IsDefined(typeof(WorldTool), tool) || progress.OwnsTool(tool)) return false;
             progress.ownedTools.Add(tool);
-            progress.Complete("tool/collected/" + rewardId);
+            progress.Complete(RewardKeys.ToolCollected(rewardId));
             session.CaptureAndSave(WorldToolNames.Display(tool) + " acquired.");
             ToolCollected?.Invoke(tool);
             return true;
@@ -112,7 +126,7 @@ namespace RoadOfTheOldKing.Progression
             }
             else if (!HeartFragmentProgression.TryCollect(progress, offer.RewardId)) return false;
             progress.bronzeCoins -= offer.Price;
-            progress.Complete("shop/purchased/" + offer.OfferId);
+            progress.Complete(RewardKeys.Purchased(offer.OfferId));
             if (offer.Reward == ShopReward.HeartFragment) player.RestoreProgress(progress);
             session.CaptureAndSave("Purchased " + offer.ItemName + ".");
             if (offer.Reward == ShopReward.Tool) ToolCollected?.Invoke(offer.Tool);
@@ -168,9 +182,9 @@ namespace RoadOfTheOldKing.Progression
         public bool TryCollectShard(string rewardId)
         {
             var progress = session.Progress;
-            if (session.IsLoading || string.IsNullOrEmpty(rewardId) || progress.Has("shard/collected/" + rewardId))
+            if (session.IsLoading || string.IsNullOrEmpty(rewardId) || progress.Has(RewardKeys.ShardCollected(rewardId)))
                 return false;
-            progress.Complete("shard/collected/" + rewardId);
+            progress.Complete(RewardKeys.ShardCollected(rewardId));
             progress.sunShards++;
             session.CaptureAndSave("Sun Shard +1");
             ShardCollected?.Invoke(progress.sunShards);
