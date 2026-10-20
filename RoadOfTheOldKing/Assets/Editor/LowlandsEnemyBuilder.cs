@@ -1,6 +1,8 @@
+using RoadOfTheOldKing.Enemies;
 using System;
 using RoadOfTheOldKing.Combat;
-using RoadOfTheOldKing.Prototype;
+using RoadOfTheOldKing.Editor;
+using RoadOfTheOldKing.Tutorial;
 using RoadOfTheOldKing.World;
 using UnityEditor;
 using UnityEngine;
@@ -32,12 +34,12 @@ namespace RoadOfTheOldKing.EditorTools
             {
                 root.name = "Mossback Boar";
                 var set = AssetDatabase.LoadAssetAtPath<EnemyAnimationSet>("Assets/Animations/Enemies/MossbackBoar/AnimationSet.asset");
-                var view = new SerializedObject(root.GetComponent<MeleeEnemySpriteView>());
+                var view = new SerializedObject(root.GetComponent<MeleeSpriteView>());
                 view.FindProperty("animations").objectReferenceValue = set;
                 var sprite = (SpriteRenderer)view.FindProperty("bodyVisual").objectReferenceValue;
                 sprite.sprite = set.rotations.Frame(6, 0);
                 view.ApplyModifiedPropertiesWithoutUndo();
-                var brain = new SerializedObject(root.GetComponent<SimpleMeleeEnemy>());
+                var brain = new SerializedObject(root.GetComponent<PursuitBrain>());
                 brain.FindProperty("attack").objectReferenceValue = charge;
                 brain.FindProperty("moveSpeed").floatValue = 2.8f;
                 brain.FindProperty("noticeRadius").floatValue = 8f;
@@ -70,7 +72,7 @@ namespace RoadOfTheOldKing.EditorTools
             try
             {
                 root.name = "Road Scavenger";
-                var oldView = root.GetComponent<MeleeEnemyView>();
+                var oldView = root.GetComponent<DebugEnemyView>();
                 var old = new SerializedObject(oldView);
                 var body = (SpriteRenderer)old.FindProperty("bodyVisual").objectReferenceValue;
                 var outline = (LineRenderer)old.FindProperty("attackOutline").objectReferenceValue;
@@ -79,14 +81,14 @@ namespace RoadOfTheOldKing.EditorTools
                 UnityEngine.Object.DestroyImmediate(oldView);
                 body.transform.localScale = Vector3.one; body.transform.localPosition = Vector3.zero;
                 body.sprite = set.rotations.Frame(6, 0); body.color = Color.white;
-                var view = new SerializedObject(root.AddComponent<MeleeEnemySpriteView>());
+                var view = new SerializedObject(root.AddComponent<MeleeSpriteView>());
                 view.FindProperty("animations").objectReferenceValue = set;
                 view.FindProperty("bodyVisual").objectReferenceValue = body;
                 view.FindProperty("attackOutline").objectReferenceValue = outline;
                 view.ApplyModifiedPropertiesWithoutUndo();
                 var health = new SerializedObject(root.GetComponent<Damageable>());
                 health.FindProperty("maxHealth").intValue = 75; health.ApplyModifiedPropertiesWithoutUndo();
-                var brain = new SerializedObject(root.GetComponent<SimpleMeleeEnemy>());
+                var brain = new SerializedObject(root.GetComponent<PursuitBrain>());
                 brain.FindProperty("moveSpeed").floatValue = 3.3f;
                 brain.FindProperty("noticeRadius").floatValue = 7f;
                 brain.FindProperty("leashRadius").floatValue = 10f;
@@ -117,7 +119,7 @@ namespace RoadOfTheOldKing.EditorTools
             if (shape == null) shape = body.AddComponent<CapsuleCollider2D>();
             shape.isTrigger = true; shape.size = size; shape.offset = offset;
             if (existing == null) existing = body.AddComponent<EnemyHurtbox>();
-            var view = (Component)root.GetComponent<MeleeEnemySpriteView>() ?? root.GetComponent<WolfView>();
+            var view = (Component)root.GetComponent<MeleeSpriteView>() ?? root.GetComponent<PredatorSpriteView>();
             if (view == null) return;
             var animationSet = new SerializedObject(view).FindProperty("animations").objectReferenceValue;
             var rotations = (RoadOfTheOldKing.Player.DirectionalSpriteAnimation)

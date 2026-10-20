@@ -1,3 +1,4 @@
+using RoadOfTheOldKing.Enemies;
 using System;
 using System.Linq;
 using RoadOfTheOldKing.Combat;

@@ -1,3 +1,4 @@
+using RoadOfTheOldKing.Enemies;
 using System.Collections.Generic;
 using RoadOfTheOldKing.Combat;
 using RoadOfTheOldKing.Player;
@@ -40,7 +41,7 @@ namespace RoadOfTheOldKing.EditorTools
         {
             Name = "Wolf", ArtRoot = "Assets/Art/Sprites/Enemies/Wolf", AnimationRoot = "Assets/Animations/Enemies/Wolf",
             // The set keeps its original path so Wolf.prefab's reference survives.
-            SetPath = "Assets/Animations/Enemies/Wolf.asset", SetType = typeof(WolfAnimationSet), GroundFromRotations = true,
+            SetPath = "Assets/Animations/Enemies/Wolf.asset", SetType = typeof(PredatorAnimationSet), GroundFromRotations = true,
             Aliases = new Dictionary<string, string>
             {
                 { "fastwalk", "walk" }, { "running", "run" }, { "running8frames", "run" }, { "sneaking", "stalk" }

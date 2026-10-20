@@ -1,0 +1,19 @@
+// Runs a large .cs.txt fixture through the Editor bridge without pasting it (17 Oct). Set SessionState
+// "Runner.File" to the fixture's absolute path and "Runner.Skip" to the 0-based line where its method body starts
+// (for example 225 for GreenLowlandsLayoutChecks' Edit branch), then execute this with compiler=codedom and replay
+// it between frames. It compiles the file fresh on every call, so fixture edits apply immediately.
+var all=System.IO.File.ReadAllLines(SessionState.GetString("Runner.File",""));
+string body=string.Join("\n",all.Skip(SessionState.GetInt("Runner.Skip",0)).ToArray());
+string src="using System;using System.Linq;using System.Collections.Generic;using UnityEngine;using UnityEditor;\npublic static class FixtureRunner{public static object Run(){\n"+body+"\n}}";
+var provider=new Microsoft.CSharp.CSharpCodeProvider();
+var p=new System.CodeDom.Compiler.CompilerParameters{GenerateInMemory=true};
+// Only these references: adding every loaded assembly duplicates the facade types.
+foreach(var a in AppDomain.CurrentDomain.GetAssemblies()){try{if(a.IsDynamic||string.IsNullOrEmpty(a.Location))continue;string n=a.GetName().Name;if(n.StartsWith("UnityEngine")||n.StartsWith("UnityEditor")||n.StartsWith("Unity.")||n.StartsWith("Assembly-CSharp")||n=="System"||n=="System.Core"||n=="netstandard"||n=="Newtonsoft.Json")p.ReferencedAssemblies.Add(a.Location);}catch{}}
+var res=provider.CompileAssemblyFromSource(p,src);
+if(res.Errors.HasErrors){var e=new System.Text.StringBuilder();foreach(System.CodeDom.Compiler.CompilerError er in res.Errors)if(!er.IsWarning)e.Append(er.Line+": "+er.ErrorText+"\n");return "COMPILE: "+e.ToString().Substring(0,Math.Min(1200,e.Length));}
+object result;
+try{result=res.CompiledAssembly.GetType("FixtureRunner").GetMethod("Run").Invoke(null,null);}catch(System.Reflection.TargetInvocationException ex){return "FAIL: "+ex.InnerException.Message;}
+if(result==null)return "null"; if(result is string)return (string)result;
+var sb=new System.Text.StringBuilder();
+foreach(var pr in result.GetType().GetProperties()){var v=pr.GetValue(result,null);var en=v as System.Collections.IEnumerable;if(en!=null&&!(v is string)){var items=new System.Collections.Generic.List<string>();foreach(var x in en)items.Add(x.ToString());sb.Append(pr.Name+"=["+items.Count+"] "+(items.Count<=30?string.Join("; ",items.ToArray()):"")+" ");}else sb.Append(pr.Name+"="+v+" ");}
+return sb.ToString();

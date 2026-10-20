@@ -1,6 +1,7 @@
 using RoadOfTheOldKing.Input;
 using RoadOfTheOldKing.Player;
-using RoadOfTheOldKing.Prototype;
+using RoadOfTheOldKing.Editor;
+using RoadOfTheOldKing.Tutorial;
 using RoadOfTheOldKing.Weapons;
 using UnityEditor;
 using UnityEditor.SceneManagement;

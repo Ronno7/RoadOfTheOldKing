@@ -10,7 +10,7 @@ try {
  var weapon=spawn("Assets/Prefabs/Weapons/Axe.prefab").GetComponent<RoadOfTheOldKing.Weapons.AxeWeapon>();
  player.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>().TryEquip(weapon);
  var wolf=spawn("Assets/Prefabs/Combat/Wolf.prefab");wolf.transform.position=new Vector3(1.5f,0,0);wolf.GetComponent<Rigidbody2D>().position=wolf.transform.position;
- var health=wolf.GetComponent<RoadOfTheOldKing.Combat.Damageable>();var feedback=wolf.GetComponent<RoadOfTheOldKing.Combat.EnemyImpactFeedback>();
+ var health=wolf.GetComponent<RoadOfTheOldKing.Combat.Damageable>();var feedback=wolf.GetComponent<RoadOfTheOldKing.Enemies.EnemyImpactFeedback>();
  var ps=wolf.GetComponentInChildren<ParticleSystem>();var sound=wolf.GetComponentInChildren<AudioSource>();
  Action update=()=>feedback.GetType().GetMethod("LateUpdate",flags).Invoke(feedback,null);
  Physics2D.SyncTransforms();
@@ -23,7 +23,7 @@ try {
  check(weapon.IsImpactPaused,"Existing light-chop action pause activates");
  check(wolf.GetComponent<RoadOfTheOldKing.Combat.HitReaction>().IsStaggered,"Existing stagger activates");
  check(wolf.GetComponent<Rigidbody2D>().linearVelocity.x>0,"Existing knockback impulse activates");
- var view=wolf.GetComponent<RoadOfTheOldKing.Combat.WolfView>();view.GetType().GetMethod("LateUpdate",flags).Invoke(view,null);
+ var view=wolf.GetComponent<RoadOfTheOldKing.Enemies.PredatorSpriteView>();view.GetType().GetMethod("LateUpdate",flags).Invoke(view,null);
  var body=(SpriteRenderer)new SerializedObject(view).FindProperty("bodyVisual").objectReferenceValue;
  var flash=new MaterialPropertyBlock();body.GetPropertyBlock(flash);
  check(flash.GetFloat("_FlashAmount")==1f,"Wolf ivory flash activates");
@@ -32,7 +32,7 @@ try {
  check(particles.Take(count).All(p=>p.position.x<1.5f&&p.position.y>.3f),"Burst uses collider contact plus visual height");
  check(particles.Take(count).All(p=>p.startSize>=2f/16f-.001f),"Flecks are at least two world pixels");
  weapon.GetType().GetMethod("Simulate",flags).Invoke(weapon,new object[]{.01f});check(ps.particleCount==count,"Same swing cannot repeat impact burst");
- wolf.GetComponent<RoadOfTheOldKing.Combat.SimpleMeleeEnemy>().ResetOnRest();update();
+ wolf.GetComponent<RoadOfTheOldKing.Progression.IResetOnRest>().ResetOnRest();update();
  check(ps.particleCount==0&&!sound.isPlaying,"Rest clears transient feedback");
  health.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player,RoadOfTheOldKing.Combat.AttackKind.Recall,999,Vector2.left,0,0,false,wolf.transform.position));
  check(ps.particleCount>0&&sound.isPlaying,"Lethal hit still produces feedback");
@@ -41,12 +41,15 @@ try {
  count=ps.particleCount;health.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.right,0,0));
  check(ps.particleCount==count,"Dead target cannot repeat feedback");
  feedback.enabled=false;check(ps.particleCount==0&&!sound.isPlaying,"Disable clears sound and particles");
- var shield=spawn("Assets/Prefabs/Combat/ShieldPracticeDummy.prefab");
+ // Add protection before activation so Damageable discovers it during Awake.
+ var shieldHolder=new GameObject("Shield impact check");shieldHolder.SetActive(false);created.Add(shieldHolder);
+ var shield=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Tutorial/TutorialPracticeDummy.prefab"),shieldHolder.transform);
+ shield.AddComponent<RoadOfTheOldKing.Combat.ShieldProtection>();shieldHolder.SetActive(true);
  bool accepted=shield.GetComponent<RoadOfTheOldKing.Combat.Damageable>().ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player,RoadOfTheOldKing.Combat.AttackKind.LightChop,10,Vector2.up,0,0));
  check(!accepted&&shield.GetComponentInChildren<ParticleSystem>().particleCount==0&&!shield.GetComponentInChildren<AudioSource>().isPlaying,"Blocked hit has no flesh impact feedback");
- foreach(var path in new[]{"Wolf","MeleeSentinel","PracticeDummy","TutorialPracticeDummy","ShieldPracticeDummy"}) {
-  var prefab=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Combat/"+path+".prefab");var data=new SerializedObject(prefab.GetComponent<RoadOfTheOldKing.Combat.EnemyImpactFeedback>());
-  check(data.FindProperty("body").objectReferenceValue!=null&&data.FindProperty("impactSound").objectReferenceValue!=null,"Bound feedback "+path);
+ foreach(var path in new[]{"Assets/Prefabs/Combat/Wolf.prefab","Assets/Prefabs/Combat/RoadScavenger.prefab","Assets/Prefabs/Combat/MossbackBoar.prefab","Assets/Prefabs/Tutorial/TutorialPracticeDummy.prefab"}) {
+  var prefab=AssetDatabase.LoadAssetAtPath<GameObject>(path);var data=new SerializedObject(prefab.GetComponent<RoadOfTheOldKing.Enemies.EnemyImpactFeedback>());
+  check(data.FindProperty("body").objectReferenceValue!=null&&data.FindProperty("impactSound").objectReferenceValue!=null,"Bound feedback "+prefab.name);
  }
 } finally {foreach(var go in created)if(go!=null)UnityEngine.Object.DestroyImmediate(go);Time.timeScale=1f;}
 return string.Join("\n",results.ToArray());
