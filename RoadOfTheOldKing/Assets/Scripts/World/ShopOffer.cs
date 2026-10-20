@@ -24,7 +24,7 @@ namespace RoadOfTheOldKing.World
         public WorldTool Tool => tool;
         public int Price => price;
         public string ItemName => reward == ShopReward.Tool ? WorldToolNames.Display(tool) : "Heart fragment";
-        public bool IsSold(ProgressState state) => state.Has("shop/purchased/" + offerId) ||
+        public bool IsSold(ProgressState state) => state.Has(RewardKeys.Purchased(offerId)) ||
             (reward == ShopReward.Tool ? state.OwnsTool(tool) : HeartFragmentProgression.IsCollected(state, rewardId));
         public override string Prompt => "Buy " + (reward == ShopReward.Tool ? ItemName.ToLowerInvariant() : "fragment") +
             " · " + price + " coins";
@@ -54,6 +54,8 @@ namespace RoadOfTheOldKing.World
         protected override void OnEnable() { if (merchant == null) base.OnEnable(); }
         public void RestoreProgress(ProgressState state)
         {
+            // A merchant presents its offers in conversation and the shop; the old placeholder stand stays hidden.
+            if (merchant != null) return;
             bool sold = IsSold(state);
             if (stockVisual != null) stockVisual.SetActive(!sold);
             if (soldVisual != null) soldVisual.SetActive(sold);

@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d5ae7fe7a0f64c40a9cc09e7092171e, type: 3}
+  m_Name: AnimationSet
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.NpcAnimationSet
+  rotations: {fileID: 11400000, guid: cec94dfa7f7fb2d40a029d7700bdb865, type: 2}
+  idle: {fileID: 11400000, guid: d510997701dd6d941b176eeb638847ff, type: 2}
+  walk: {fileID: 11400000, guid: 2327b668cb0fed54a9c204d512e57c53, type: 2}

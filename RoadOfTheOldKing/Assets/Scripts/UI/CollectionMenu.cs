@@ -247,6 +247,7 @@ namespace RoadOfTheOldKing.UI
             if (!IsOpen) return;
             var leaving = trader;
             Hide(); restoring = StartCoroutine(UnlockNextFrame());
+            if (leaving != null) leaving.OnShopClosed();
         }
         private IEnumerator UnlockNextFrame() { yield return null; locks?.Unlock(this); restoring = null; }
         private void Hide()
@@ -259,6 +260,7 @@ namespace RoadOfTheOldKing.UI
             if (restoring != null) { StopCoroutine(restoring); restoring = null; }
             var leaving = IsOpen ? trader : null;
             Hide(); locks?.Unlock(this);
+            if (leaving != null) leaving.OnShopClosed();
             padActions?.Disable();
         }
         private void OnDestroy() { padActions?.Dispose(); if (document != null) Destroy(document.gameObject); }
