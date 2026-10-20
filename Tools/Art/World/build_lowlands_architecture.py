@@ -512,57 +512,28 @@ def track(kind):
 
 
 def machine(kind):
-    sizes={'Fork':(16,24),'Crank':(24,24),'Brake':(16,16),
-           'Catch':(16,20),'Counterweight':(16,24),'Axle':(16,16)}
-    im=blank(*sizes[kind]);d=ImageDraw.Draw(im)
-    if kind=='Fork':
-        # Open U is recognizable at the same scale as the player's axe head.
-        d.rectangle((2,16,13,22),fill=IRON[0]);d.rectangle((3,16,12,20),fill=IRON[2])
-        d.line((3,16,12,16),fill=IRON[3]);d.rectangle((6,9,9,18),fill=BRONZE[0])
-        d.rectangle((7,9,8,17),fill=BRONZE[1])
-        d.polygon([(1,2),(4,2),(4,10),(11,10),(11,2),(14,2),(14,12),
-                   (11,15),(4,15),(1,12)],fill=IRON[0])
-        d.polygon([(2,2),(4,2),(4,11),(11,11),(11,2),(13,2),(13,12),
-                   (10,14),(5,14),(2,11)],fill=BRONZE[1])
-        d.line((2,2,2,10),fill=BRONZE[2]);d.line((12,2,12,10),fill=BRONZE[2])
-        d.line((4,12,10,12),fill=BRONZE[2])
-    elif kind=='Crank':
-        # A real wheel, spoke and projecting wooden grip: the only round input.
-        d.rectangle((8,17,17,22),fill=IRON[0]);d.rectangle((9,17,16,20),fill=IRON[1])
-        d.ellipse((2,1,20,19),fill=IRON[0]);d.ellipse((3,2,19,18),fill=BRONZE[1])
-        d.ellipse((5,4,17,16),fill=IRON[0]);d.ellipse((6,5,16,15),fill=(0,0,0,0))
-        d.arc((3,2,19,18),180,300,fill=BRONZE[2],width=2)
-        d.line((11,4,11,16),fill=BRONZE[0],width=2)
-        d.line((5,10,17,10),fill=BRONZE[1],width=2)
-        d.rectangle((9,8,13,12),fill=IRON[0]);d.rectangle((10,9,12,11),fill=BRONZE[2])
-        d.line((12,10,18,6),fill=BRONZE[1],width=2)
-        d.rectangle((17,2,22,7),fill=IRON[0]);d.rectangle((18,3,21,5),fill=TIMBER[2])
-        d.line((18,3,21,3),fill=BRONZE[2])
-    elif kind=='Brake':
-        # Sliding horizontal shoe; flat visible grip differs from wheel/fork.
-        d.rectangle((1,1,14,14),fill=IRON[0]);d.rectangle((2,2,13,12),fill=IRON[1])
-        d.line((2,2,13,2),fill=IRON[2]);d.rectangle((6,0,9,15),fill=IRON[0])
-        d.line((6,0,6,15),fill=IRON[2]);d.rectangle((3,5,12,10),fill=BRONZE[0])
-        d.rectangle((3,5,11,8),fill=BRONZE[1]);d.line((3,5,11,5),fill=BRONZE[2])
-        d.rectangle((5,7,9,8),fill=IRON[0])
-    elif kind=='Catch':
-        # A hooked pawl visibly bears against its toothed rack.
-        d.rectangle((5,0,10,18),fill=IRON[0]);d.rectangle((6,0,9,17),fill=IRON[1])
-        for y in (1,5,9,13):d.rectangle((10,y,12,y+1),fill=IRON[2])
-        d.polygon([(2,4),(5,4),(5,10),(10,10),(10,8),(14,8),(14,13),(9,15),(3,13),(2,10)],fill=IRON[0])
-        d.polygon([(3,5),(4,5),(4,11),(10,11),(10,9),(13,9),(13,12),(9,14),(4,12),(3,10)],fill=BRONZE[1])
-        d.line((3,5,3,10,5,12,9,13),fill=BRONZE[2])
-        d.rectangle((1,15,14,19),fill=IRON[0]);d.line((2,15,13,15),fill=IRON[2])
-    elif kind=='Counterweight':
-        # Dense iron weight, kept cooler/darker than interactive bronze inputs.
-        d.rectangle((6,0,9,5),fill=IRON[0]);d.line((7,0,7,4),fill=IRON[3])
-        d.polygon([(3,4),(12,4),(14,7),(14,21),(12,23),(3,23),(1,21),(1,7)],fill=IRON[0])
-        d.rectangle((3,6,12,20),fill=IRON[1]);d.line((3,6,12,6),fill=IRON[3])
-        d.line((3,7,3,20),fill=IRON[2]);d.rectangle((6,7,9,19),fill=IRON[0])
-        for y in (10,17):d.line((2,y,13,y),fill=IRON[0])
-    else:
-        d.ellipse((1,1,14,14),fill=IRON[0]);d.ellipse((3,3,12,12),fill=IRON[2])
-        d.ellipse((5,5,10,10),fill=IRON[0]);d.rectangle((7,6,8,9),fill=IRON[3])
+    # Registered imagegen fittings; keep original canvas/atlas identities.
+    folder = ROOT / 'ArtSource/GreenLowlands/Interactive'
+    recipe = json.loads((folder / 'WaterworksFittings.recipe.json').read_text())
+    spec = recipe['pieces'][kind]
+    source = Image.open(folder / recipe['source']).convert('RGBA').crop(spec['crop'])
+    source.putalpha(source.getchannel('A').point(lambda a: 255 if a >= 128 else 0))
+    source = source.crop(source.getchannel('A').getbbox())
+    w, h = spec['canvas']
+    scale = min((w-2)/source.width, (h-2)/source.height)
+    source = source.resize((round(source.width*scale), round(source.height*scale)), Image.Resampling.NEAREST)
+    colors = zone.ramp(*recipe['palette'])
+    source.putdata([min(colors, key=lambda c: sum((pixel[i]-c[i])**2 for i in range(3)))
+                    if pixel[3] else (0,0,0,0) for pixel in pixels(source)])
+    im = blank(w,h)
+    im.paste(source, ((w-source.width)//2, h-1-source.height))
+    alpha = im.getchannel('A')
+    # A single native-pixel ink edge, including negative spaces, never an enlarged outline.
+    for y in range(h):
+        for x in range(w):
+            if alpha.getpixel((x,y)) and any(nx<0 or ny<0 or nx>=w or ny>=h or not alpha.getpixel((nx,ny))
+                    for nx,ny in ((x-1,y),(x+1,y),(x,y-1),(x,y+1))):
+                im.putpixel((x,y), zone.COLORS['ink'])
     return im
 
 

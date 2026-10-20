@@ -1,0 +1,14 @@
+{
+  "source": "WaterworksFittings_Source.png",
+  "prompt": "WaterworksFittings.prompt.txt",
+  "palette": ["ink", "slatedark", "slate", "slatelight", "soil", "soillight", "soilshine"],
+  "processing": "Crop column to opaque bounds, threshold alpha, nearest sample inside original native canvas, exact palette mapping; silhouette boundary uses shared near-black ink. Original sprite rectangles and pivots retained.",
+  "pieces": {
+    "Fork": {"crop": [0, 0, 345, 724], "canvas": [16, 24]},
+    "Crank": {"crop": [345, 0, 765, 724], "canvas": [24, 24]},
+    "Brake": {"crop": [765, 0, 1100, 724], "canvas": [16, 16]},
+    "Catch": {"crop": [1100, 0, 1450, 724], "canvas": [16, 20]},
+    "Counterweight": {"crop": [1450, 0, 1810, 724], "canvas": [16, 24]},
+    "Axle": {"crop": [1810, 0, 2172, 724], "canvas": [16, 16]}
+  }
+}

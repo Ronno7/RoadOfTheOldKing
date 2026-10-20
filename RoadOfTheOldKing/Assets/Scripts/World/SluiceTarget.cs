@@ -18,6 +18,11 @@ namespace RoadOfTheOldKing.World
         {
             if (!isActiveAndEnabled || sluice == null) return false;
             bool accepted = sluice.ReceiveVane(part, hit);
+            // A fork's outbound contact is confirmed after the axe has genuinely lodged.
+            bool lodging = hit.Kind == AttackKind.Throw &&
+                (part == SluicePart.DistributorFork || part == SluicePart.MainFork);
+            if (!lodging && hit.Kind != AttackKind.EnemyMelee)
+                sluice.Respond(accepted ? SluiceResponse.Accepted : SluiceResponse.Rejected, transform);
             if (accepted) HitReceived?.Invoke(hit);
             return accepted;
         }
@@ -26,7 +31,10 @@ namespace RoadOfTheOldKing.World
         {
             if (isActiveAndEnabled && sluice != null &&
                 (part == SluicePart.DistributorFork || part == SluicePart.MainFork))
+            {
                 sluice.Lodge(part, weapon);
+                sluice.Respond(sluice.IsForkArmed(part) ? SluiceResponse.Loaded : SluiceResponse.Rejected, transform);
+            }
         }
     }
 }

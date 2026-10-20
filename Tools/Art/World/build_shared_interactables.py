@@ -1,6 +1,6 @@
 """Accepted shared interaction art with a deliberate near-black silhouette.
 
-Native drawings. Exports the shared
+Native drawings plus registered waterworks source art. Exports the shared
 outlined sprites used by pots, chests, rewards and regional fittings. Preserve
 registered canvases and centered pivots; scene wiring, gameplay IDs and prefabs
 are maintained separately.
@@ -107,15 +107,9 @@ def pot():
 
 
 def machine(kind):
-    # Re-render our existing native hardware shapes with the new interaction
-    # contour. No historical atlas pixels are inputs, and architecture exports
-    # stay untouched. The open fork notch and each part's canvas remain fixed.
-    old_iron = architecture.IRON
-    try:
-        architecture.IRON = [INK] + old_iron[1:]
-        return silhouette(architecture.machine(kind))
-    finally:
-        architecture.IRON = old_iron
+    # Both catalogs reproduce the same registered waterworks source; neither
+    # samples a historical atlas. Original native canvases remain fixed.
+    return silhouette(architecture.machine(kind))
 
 
 def anchor():
@@ -203,7 +197,7 @@ def main():
     (OUT/'InteractableManifest.json').write_text(json.dumps(dict(
         entries=entries, outline='#171C1B', nativePPU=16,
         recipe='Original native silhouettes; centered pivots and prior canvases retained. '
-               'Machine fittings preserve their registered native drawings.'),
+               'Machine fittings use ArtSource/GreenLowlands/Interactive/WaterworksFittings.recipe.json.'),
         indent=2)+'\n')
     print('Exported 15 regional interaction sprites; native canvases, 3-8 colors, '
           'binary alpha, complete near-black contours and stable chest base verified.')

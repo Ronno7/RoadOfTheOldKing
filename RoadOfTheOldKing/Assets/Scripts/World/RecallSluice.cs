@@ -28,6 +28,7 @@ namespace RoadOfTheOldKing.World
         private SluicePart attemptFork;
         private bool drawing;
         private bool brakeLifted;
+        private SluiceFeedback actionFeedback;
 
         public SluiceStage Stage { get; private set; }
         public bool IsDrawing => drawing && !IsMoving;
@@ -44,8 +45,14 @@ namespace RoadOfTheOldKing.World
 
         private void Awake()
         {
+            actionFeedback = GetComponent<SluiceFeedback>();
             if (brake != null) brakeRest = brake.localPosition;
             ApplyState();
+        }
+
+        public void Respond(SluiceResponse response, Transform source)
+        {
+            if (actionFeedback != null) actionFeedback.Respond(response, source);
         }
 
         private void FixedUpdate()
@@ -198,9 +205,14 @@ namespace RoadOfTheOldKing.World
             if (carriage != null) carriage.localPosition = drawing ? drawingPosition : loadingPosition;
             Feedback = "";
             ApplyState();
+            if (actionFeedback != null) actionFeedback.ResetPresentation();
             Changed?.Invoke();
         }
 
-        private void OnDisable() => ClearAttempt();
+        private void OnDisable()
+        {
+            ClearAttempt();
+            if (actionFeedback != null) actionFeedback.ResetPresentation();
+        }
     }
 }

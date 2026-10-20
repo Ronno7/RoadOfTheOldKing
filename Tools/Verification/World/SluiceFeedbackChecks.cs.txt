@@ -1,0 +1,73 @@
+// Run in the shared GreenLowlandsGameplayChecks isolated Play bootstrap, after
+// SluiceMechanismViewChecks. This checks feedback through real receiver/crank entry points.
+var game=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(!Application.isPlaying||game==null||game.IsLoading||game.StorageKey!=SessionState.GetString("GreenLowlands.Gameplay.Key","")||!game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new Exception("Isolated settled Play required");
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+var s=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RecallSluice>();
+var fx=s.GetComponent<RoadOfTheOldKing.World.SluiceFeedback>();
+var player=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
+var body=player.GetComponent<Rigidbody2D>();
+var origin=body.position;
+var camera=Camera.main;var cameraPosition=camera.transform.position;
+var savedIds=game.Progress.completedIds.ToArray();var savedTools=game.Progress.ownedTools.ToArray();
+var savedStore=PlayerPrefs.GetString(game.StorageKey,"");bool existed=PlayerPrefs.HasKey(game.StorageKey);
+float savedTime=Time.timeScale,savedFlash=RoadOfTheOldKing.UI.FeedbackSettings.FlashScale;
+var count=0;Action<bool,string> check=(ok,label)=>{if(!ok)throw new Exception(label);count++;};
+Func<object,string,object> field=(obj,name)=>obj.GetType().GetField(name,flags|System.Reflection.BindingFlags.Public).GetValue(obj);
+var fittings=(System.Array)field(fx,"fittings");
+Action<float> advance=dt=>fx.GetType().GetMethod("Advance",flags).Invoke(fx,new object[]{dt});
+Action<Vector2> pose=pos=>{body.position=pos;player.transform.position=pos;body.linearVelocity=Vector2.zero;camera.transform.position=new Vector3(pos.x,pos.y,-10);Physics2D.SyncTransforms();};
+var target=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SluiceTarget>(FindObjectsSortMode.None).First(t=>t.Part==RoadOfTheOldKing.World.SluicePart.DistributorVane);
+var crank=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SluiceCrank>(FindObjectsSortMode.None).First(t=>t.name=="Distributor crank");
+var targetFitting=fittings.Cast<object>().First(f=>(Transform)field(f,"receiver")==target.transform);
+var crankFitting=fittings.Cast<object>().First(f=>(Transform)field(f,"receiver")==crank.transform);
+var art=(SpriteRenderer)field(targetFitting,"visual");var artRest=art.transform.localPosition;var rootPosition=target.transform.position;
+try{
+ check(fittings.Length==7,"All five targets and two cranks are bound");
+ foreach(string name in new[]{"latchSound","blockedSound","ratchetSound","weightSound","waterSound","gateSound"}){
+  var clip=(AudioClip)field(fx,name);check(clip!=null&&clip.length>.1f&&clip.channels==1,"Playable mono clip: "+name);
+ }
+ game.Progress.completedIds.RemoveAll(id=>id.StartsWith("green-lowlands/sluice/"));
+ s.RestoreProgress(game.Progress);pose(new Vector2(6,88));
+ var stage=s.Stage;
+ var wrong=new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,10,Vector2.right,0,0);
+ check(!target.ReceiveHit(wrong)&&s.Stage==stage,"Wrong chop cannot advance puzzle");
+ check((RoadOfTheOldKing.World.SluiceResponse)field(targetFitting,"response")==RoadOfTheOldKing.World.SluiceResponse.Rejected,"Wrong chop produces blocked response");
+ advance(.04f);check(art.transform.localPosition!=artRest,"Rejected fitting visibly recoils");
+ check(target.transform.position==rootPosition,"Recoil never moves the receiver");
+ check(((SpriteRenderer[])field(targetFitting,"sparks")).All(r=>!r.enabled),"Rejected hit has no success spark");
+ float age=(float)field(targetFitting,"age");target.ReceiveHit(wrong);
+ check((float)field(targetFitting,"age")==age,"Duplicate blocked contact is throttled");
+ check(crank.CanCollect(player)&&!crank.TryCollect(player)&&s.Stage==stage,"Reachable locked crank responds without advancing");
+ check((RoadOfTheOldKing.World.SluiceResponse)field(crankFitting,"response")==RoadOfTheOldKing.World.SluiceResponse.Rejected,"Locked crank feedback");
+ game.Progress.Complete("green-lowlands/sluice/distributor");s.RestoreProgress(game.Progress);
+ game.Progress.ownedTools.Remove(RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank);
+ check(!crank.TryCollect(player)&&s.Stage==RoadOfTheOldKing.World.SluiceStage.DistributorReleased,"Missing crank still blocks action");
+ game.Progress.ownedTools.Add(RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank);
+ check(crank.TryCollect(player)&&s.Stage==RoadOfTheOldKing.World.SluiceStage.ServiceDiverted,"Owned crank completes service step");
+ check((RoadOfTheOldKing.World.SluiceResponse)field(crankFitting,"response")==RoadOfTheOldKing.World.SluiceResponse.Turned,"Accepted turn feedback");
+ advance(.12f);
+ var crankArt=(SpriteRenderer)field(crankFitting,"visual");
+ check(Quaternion.Angle(crankArt.transform.localRotation,(Quaternion)field(crankFitting,"rotation"))>1,"Crank artwork turns");
+ check(((AudioSource)field(fx,"machinery")).isPlaying,"Machinery loop plays during turn");
+ check(((AudioSource)field(fx,"water")).isPlaying,"Water loop follows active drain");
+ RoadOfTheOldKing.UI.FeedbackSettings.FlashScale=0;
+ advance(.01f);check(fittings.Cast<object>().SelectMany(f=>(SpriteRenderer[])field(f,"sparks")).All(r=>!r.enabled),"Flash-off removes sparks");
+ Time.timeScale=0;fx.GetType().GetMethod("LateUpdate",flags).Invoke(fx,null);
+ check(!((AudioSource)field(fx,"water")).isPlaying&&!((AudioSource)field(fx,"machinery")).isPlaying,"Pause silences loops");
+ Time.timeScale=1;fx.GetType().GetMethod("LateUpdate",flags).Invoke(fx,null);
+ check(((AudioSource)field(fx,"water")).isPlaying,"Resume restores running flow");
+ game.Progress.Complete("green-lowlands/sluice/pond-low");s.RestoreProgress(game.Progress);advance(.02f);
+ check(fx.GetComponentsInChildren<AudioSource>().All(a=>!a.isPlaying),"Saved completed state is silent");
+ check(fittings.Cast<object>().All(f=>((SpriteRenderer)field(f,"visual")).transform.localPosition==(Vector3)field(f,"rest")),"Restore settles all art");
+ s.Respond(RoadOfTheOldKing.World.SluiceResponse.Accepted,target.transform);advance(.02f);
+ fx.enabled=false;check(fx.GetComponentsInChildren<AudioSource>().All(a=>!a.isPlaying),"Disable stops all sound");
+ check(fittings.Cast<object>().SelectMany(f=>(SpriteRenderer[])field(f,"sparks")).All(r=>!r.enabled),"Disable clears sparks");fx.enabled=true;
+ return new{passed=count};
+}finally{
+ Time.timeScale=savedTime;RoadOfTheOldKing.UI.FeedbackSettings.FlashScale=savedFlash;
+ game.Progress.completedIds.Clear();game.Progress.completedIds.AddRange(savedIds);
+ game.Progress.ownedTools.Clear();game.Progress.ownedTools.AddRange(savedTools);s.RestoreProgress(game.Progress);
+ if(existed)PlayerPrefs.SetString(game.StorageKey,savedStore);else PlayerPrefs.DeleteKey(game.StorageKey);
+ pose(origin);camera.transform.position=cameraPosition;fx.enabled=true;fx.ResetPresentation();
+}

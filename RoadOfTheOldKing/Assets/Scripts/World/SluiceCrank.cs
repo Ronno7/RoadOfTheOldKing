@@ -13,9 +13,18 @@ namespace RoadOfTheOldKing.World
         private bool HasCrank => !requiresOwnedCrank || (GameSession.Instance != null &&
             GameSession.Instance.Progress.OwnsTool(WorldTool.MaintenanceCrank));
         public override string Prompt => !HasCrank ? "Requires maintenance crank" :
+            sluice != null && !sluice.CanTurn(carriage) ? (sluice.IsMoving ? "Carriage moving" : "Crank locked") :
             carriage ? "Turn carriage crank" : "Turn distributor crank";
         public override bool CanCollect(PlayerHealth player) => base.CanCollect(player) &&
-            sluice != null && sluice.CanTurn(carriage) && HasClearAccess(player);
-        public override bool TryCollect(PlayerHealth player) => CanCollect(player) && HasCrank && sluice.Turn(carriage);
+            sluice != null && sluice.isActiveAndEnabled && GameSession.Instance != null &&
+            !GameSession.Instance.IsLoading &&
+            sluice.Stage < (carriage ? SluiceStage.PondLow : SluiceStage.ServiceDiverted) && HasClearAccess(player);
+        public override bool TryCollect(PlayerHealth player)
+        {
+            if (!CanCollect(player)) return false;
+            bool turned = HasCrank && sluice.Turn(carriage);
+            sluice.Respond(turned ? SluiceResponse.Turned : SluiceResponse.Rejected, transform);
+            return turned;
+        }
     }
 }
