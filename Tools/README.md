@@ -1,6 +1,6 @@
 # Development tooling
 
-These tools support asset generation and focused verification. They are not required by the running game. Player sprites are imported inside Unity by **Road of the Old King > Art > Import Player Animations**.
+These tools support asset generation and focused verification. They are not required by the running game. Player sprites are imported inside Unity by **Road of the Old King > Animation Import > Player**.
 
 | Directory | Responsibility |
 | --- | --- |

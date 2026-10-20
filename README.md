@@ -12,6 +12,6 @@ A top-down 2D action RPG built in Unity 6.3.
   <img width="100%" alt="Game loop: explore, fight or solve, progress, and repeat. Axe: throw, reposition, recall. Planned progression: Tutorial, three trials, dungeon, boss." src="Docs/Diagrams/GameLoop.svg" />
 </p>
 
-Browser build plays the Tutorial, the opening area of the game. First overworld region currently in development.
+The current source includes the Tutorial and Green Lowlands opening slice, with exploration, combat, a Recall puzzle and the first weapon upgrade. Later regions remain in development.
 
 <img width="100%" alt="Road of the Old King bottom banner" src="Docs/Branding/Banner-Bottom.png" />

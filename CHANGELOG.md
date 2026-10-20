@@ -1,5 +1,27 @@
 # Changelog
 
+## Unreleased
+
+**Added**
+- A prologue that tells the Old King's story when you start a New Game, and a "Press Enter" title screen on launch.
+- Xbox controller support: Souls-style shoulder attacks, right-stick aiming that falls back to movement, controller menus and prompts that switch with the device you use.
+- The traveling trader walks about, greets you and talks before trading.
+- More natural detail across Green Lowlands: flowers, leaf litter, reeds, stones and fallen logs.
+
+**Changed**
+- Player-facing menus, windows and HUD elements share one pixel-art style, with a rope-and-oak frame at Tutorial and Lowlands bonfires; interaction prompts stay the same size at any zoom.
+- Lighting a bonfire shows a "BONFIRE LIT" banner and the first prompt reads Light Bonfire; sitting at a lit fire rests, so its menu offers upgrades, travel and Leave.
+- The pause menu offers Resume instead of a return to the last bonfire.
+- Bonfire upgrades show how many Sun Shards you still need, and bought trader stock leaves the shop.
+- The camera starts a little wider and keeps your zoom as you move between areas.
+- Green Lowlands terrain reads as three clear heights, with connected cliff faces and shadows that follow them.
+- Farm buildings, the waterworks and the storehouse entrance gain thicker roofs, recessed openings and stone footings.
+- The waterworks have enclosed rooms, and timber gates slide open as the water drains.
+
+**Fixed**
+- Choosing Trade in the trader conversation reliably opens the shop.
+- Steadier interaction prompts and player meters while moving.
+
 ## 0.4 — Vertical slice
 
 ### 0.4.8 — 2026-10-16 · Green Lowlands, exploration and economy

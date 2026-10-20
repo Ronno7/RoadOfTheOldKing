@@ -18,7 +18,7 @@ Currently implemented: the standing views, an eight-frame walk and run, a four-f
 | --- | --- | --- |
 | Rotations | Any state without its own animation | Single standing view per direction |
 | Idle | Standing | Time, looping |
-| Walk / Run | Moving / sprinting | Distance travelled; cycle lengths tuned on the player prefab (walk 1.8 / run 4 units) |
+| Walk / Run | Moving / sprinting | Distance travelled; cycle lengths tuned on the player prefab (currently walk 2 / run 3 units) |
 | Dash | Dodge dash | Dash progress |
 | Light attack 1, 2, finisher | Three-hit combo | Weapon action progress, contact frame aligned with the damage window |
 | Charge / Cleave | Charged spin attack | Time while charging, action progress while cleaving |
@@ -36,7 +36,7 @@ Each animation can mark a contact frame. Attack frames before it fill the wind-u
 
 ## Assets and import
 
-Each slot has a folder under `Assets/Art/Sprites/Player/<Slot>/`, containing either `<direction>.png` single frames or `<direction>/` folders of numbered frames, the layout PixelLab exports. Original exports are kept as delivered under `ArtSource/Player`. **Road of the Old King > Art > Import Player Animations** then:
+Each slot has a folder under `Assets/Art/Sprites/Player/<Slot>/`, containing either `<direction>.png` single frames or `<direction>/` folders of numbered frames, the layout PixelLab exports. Original exports are kept as delivered under `ArtSource/Player`. **Road of the Old King > Animation Import > Player** then:
 
 - imports every frame as a single point-filtered, uncompressed sprite at 16 pixels per unit;
 - measures the lowest opaque row across each direction's frames and pins the pivot there, so feet stay on the ground line while bobbing or jumping frames keep their motion;
@@ -53,12 +53,10 @@ The hero has no arms, so the weapon, an aged bronze halberd drawn at the same 16
 
 The light combo uses a procedural sweep, reverse sweep and thrust, synchronized to the same geometry and phases as damage and ground feedback. The finisher has a longer windup and a physics-driven lunge; dedicated body attack art remains pending. During throws the weapon is placed procedurally along the aim; a combat presentation that brings it to the ready, following the cursor, is planned. The weapon starts planted upright in the Tutorial's chopping stump.
 
-During a successful Recall, `AxeView` applies the shared `SpectralRecall` material after posing the accepted sprite. Three cyan/pale tones and 72% opacity preserve its crisp silhouette, with a narrow 0.10-second cyan trail. Manual, automatic and scripted returns share this treatment; refused inputs leave the weapon solid. Catch, cancellation and disable restore the original material and clear the trail. Flight geometry, combat, sorting and catch recovery are unchanged. The effect casts no light; future lantern darkness integration remains pending.
-
-![Spectral Recall during live flight](Art/GreenLowlands/spectral-recall-live.png)
+During a successful Recall, `AxeView` applies the shared `SpectralRecall` material after posing the accepted sprite. Three cyan/pale tones and 72% opacity preserve its crisp silhouette, with a narrow 0.10-second cyan trail. Manual, automatic and scripted returns share this treatment; refused inputs leave the weapon solid. Catch, cancellation and disable restore the original material and clear the trail. Flight geometry, combat, sorting and catch recovery are unchanged. The effect casts no light; the storehouse darkness cover masks the weapon and trail with the rest of the world. A separate wall-only visibility treatment remains unimplemented.
 
 A confirmed light hit pauses only the swing's action clock. The pause belongs to `AxeWeapon` and is tuned on `AxeSettings` (`lightHitPause`, `finisherHitPauseMultiplier`); animation frames freeze with it because they sample that clock.
 
 ## Previous character art
 
-Until 28 September 2026 the player used a hand-assembled four-direction set at 128 pixels per unit, with separately registered body and axe layers. It was retired in favor of the native-density PixelLab hero. A few samples remain for reference: the [original character sheet](Art/Player/Legacy/PlayerSheet.png), [reference board](Art/Player/Legacy/Original-Reference.png), [walk cycle](Art/Player/Legacy/Locomotion.gif) and [combat loop](Art/Player/Legacy/Live-Action-Loop.gif). The complete sources, exporters and captures remain in the repository history.
+Until 28 September 2026 the player used a hand-assembled four-direction set at 128 pixels per unit, with separately registered body and axe layers. It was retired in favor of the native-density PixelLab hero. The original sources, exporters and captures are available in repository history.

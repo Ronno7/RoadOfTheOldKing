@@ -1,7 +1,5 @@
-# Tutorial environment sources
+# Tutorial art sources
 
-Environment and decoration sheets feed the editor asset builders. Their manifests define source rectangles, output sizes and palette constraints; native reference samples preserve the original pixels.
+`Buildings/` contains the current longhouse, workshop and woodshed sources, exact prompts and `NativeRecipe.json`. `../Shared/Decoration/Meadow/` retains the native sample and expansion sheet used by the decoration importer. Original Environment generation sheets were retired; `Provenance.json` preserves their historical briefs, not a runnable rebuild recipe.
 
-[Provenance.json](Provenance.json) records the original generation/edit briefs. Runtime tilemaps and prefabs use the generated Unity assets.
-
-See [world and tilemaps](../../Docs/World.md) for the resulting environment, RuleTiles and animated water.
+Environment exports use `Shared/Palettes/Meadow.json` with the Tutorial building recipe. Shared ground, paths, terrain, trees and props are owned by Shared folders; Tutorial keeps its buildings, teaching objects and terrain variants. Retained scenery still uses its installed artwork. Unity palettes reference the complete prefabs directly. [World and tilemaps](../../Docs/World.md) describes runtime use.
