@@ -136,8 +136,25 @@ var obsoleteManual = maps.Where(m => !PrefabUtility.IsPartOfPrefabInstance(m.gam
     .Where(v => v.tile.name.StartsWith("EarthCliff_") || v.tile.name.StartsWith("StoneCliff_") || v.tile.name.StartsWith("ShoreFace_")).ToArray();
 check(obsoleteManual.Length == 0, "Standalone terrain no longer contains independently painted obsolete cliff-face rows");
 
+// Full legacy terrain blocks must not extend onto painted flat base/basin floors.
+// Visible faces, permanent water and deliberate stair structure remain separate owners.
+var heightPlan = maps.Single(m => m.name == "Height plan");
+var faces = maps.Where(m => m.name.StartsWith("Terrain - ") && m.name.EndsWith(" faces")).ToArray();
+var permanentWater = maps.Where(m => m.name == "Border river" || m.name == "Terrain - permanent water").ToArray();
+var staleBlocks = new List<string>();
+foreach (var map in maps.Where(m => new[] { "Cliffs and outer boundary", "Woodland barriers", "Border collision", "Arrival collision" }.Contains(m.name)))
+    foreach (var cell in map.cellBounds.allPositionsWithin) {
+        if (!map.HasTile(cell)) continue;
+        var intent = heightPlan.GetTile(cell) as RoadOfTheOldKing.EditorTools.HeightPlanTile;
+        if (intent == null || intent.height > 0 || faces.Any(m => m.HasTile(cell)) ||
+            permanentWater.Any(m => m.HasTile(cell)) || declaredTreads.Contains(cell)) continue;
+        staleBlocks.Add(map.name + " " + cell);
+    }
+check(staleBlocks.Count == 0, "No legacy terrain blocks remain on painted flat base/basin floors");
+if (staleBlocks.Count > 0) failed.AddRange(staleBlocks.Take(12));
+
 check(UnityEngine.SceneManagement.SceneManager.GetActiveScene() == scene && scene.isDirty == dirtyBefore,
     "Verification preserves the active scene and its prior dirty state");
 return new { passed = passed.Count, failed = failed.ToArray(), surfaceCounts = surfaceCounts,
     guideCells = report.cells, guideWarnings = report.warnings, obsoleteManualFaceCells = obsoleteManual.Length,
-    notes = "Scene guide/export consistency only; route, gameplay and visual readability checks remain separate." };
+    notes = "Scene guide/export and obsolete terrain-block checks; motor and visual checks remain separate." };

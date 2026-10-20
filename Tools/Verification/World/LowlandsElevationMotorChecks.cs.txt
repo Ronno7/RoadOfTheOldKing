@@ -118,6 +118,16 @@ try{
   reach(corner,name+" reverse actual motor traversal");
   if(Vector2.Distance(a,corner)>.01f)reach(a,name+" return alignment");
  }
+ // Regression: these flat strips retained collision from the former taller cliffs.
+ // Traverse the real cleared ground in both directions without bypassing the motor.
+ var clearedRoutes=new[]{
+  new {name="Drained basin paving",a=new Vector2(21.5f,72.5f),b=new Vector2(28.5f,72.5f)},
+  new {name="Drained basin isolated remnant",a=new Vector2(39.5f,73.5f),b=new Vector2(41.5f,73.5f)},
+  new {name="Woodland front clearance",a=new Vector2(82.5f,44.5f),b=new Vector2(96.5f,44.5f)},
+  new {name="Orchard lower path clearance",a=new Vector2(76.5f,54.5f),b=new Vector2(88.5f,54.5f)},
+  new {name="Village approach clearance",a=new Vector2(12.5f,-1.5f),b=new Vector2(14.5f,-1.5f)}
+ };
+ foreach(var route in clearedRoutes){stage(route.a);reach(route.b,route.name+" forward");reach(route.a,route.name+" reverse");}
  // North shore: upper floor y93, TWO non-walkable face rows y91..92.
  // Ordinary walking must stop on BOTH sides of that two-level drop.
  foreach(bool below in new[]{true,false}){
