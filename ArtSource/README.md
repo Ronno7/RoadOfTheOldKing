@@ -2,7 +2,7 @@
 
 Source artwork and reconstruction inputs are kept outside Unity's imported runtime assets.
 
-The superseded image-sampled chest, pot, coin, shard and heart source PNGs were removed on 19 October. Their historical prompts/recipes remain in Green Lowlands provenance. Accepted outlined interaction sprites are drawn by `Tools/Art/World/build_shared_interactables.py`; bonfire and rope sources remain in Shared.
+Accepted outlined interaction sprites are drawn by `Tools/Art/World/build_shared_interactables.py`; bonfire and rope sources remain in Shared. Historical prompts in Green Lowlands provenance are records, not dependencies for rebuilding retired art.
 
 - [Player](Player/README.md): accepted PixelLab exports for the current hero, kept as delivered before copying into the runtime import folders.
 - [Traveling trader](NPCs/TravelingTrader/Manifest.json): the selected eight-direction merchant and source record; approved idle/walk exports are retained in `NPCs/TravelingTrader/Animations`.

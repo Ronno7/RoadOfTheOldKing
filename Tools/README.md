@@ -8,4 +8,6 @@ These tools support asset generation and focused verification. They are not requ
 | [Art/UI](Art/UI) | Pixel font, HUD icons and panel art |
 | [Verification](Verification) | Gameplay, player animation, progression and world-asset checks |
 
+Verification `.cs.txt` files are focused Unity Editor snippets, not an automatically discovered test suite. Check their assumptions against the current code and use isolated saves for gameplay checks.
+
 The implementation is described in the [systems overview](../Docs/SystemsOverview.md), [player animation](../Docs/PlayerAnimation.md) and [world documentation](../Docs/World.md).
