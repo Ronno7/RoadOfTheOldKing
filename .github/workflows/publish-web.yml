@@ -1,0 +1,68 @@
+name: Publish Web game
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Published release containing webgl.zip (for example v0.4.9)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out packaging tool
+        uses: actions/checkout@v7.0.1
+        with:
+          # Old release tags predate this tool; use the current publishing code.
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+          filter: blob:none
+          sparse-checkout: Tools/Release
+
+      - name: Download and validate the user-built release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$ ]]; then
+            echo "Expected a version tag such as v0.4.9" >&2
+            exit 1
+          fi
+          if [[ "$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)" != "false" ]]; then
+            echo "Publish the release after attaching webgl.zip." >&2
+            exit 1
+          fi
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --pattern webgl.zip --dir "$RUNNER_TEMP/webgl-download"
+          python3 Tools/Release/webgl.py unpack "$RUNNER_TEMP/webgl-download/webgl.zip" "$RUNNER_TEMP/webgl-site" --version "${RELEASE_TAG#v}"
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5.0.0
+        with:
+          path: ${{ runner.temp }}/webgl-site
+
+  deploy:
+    needs: prepare
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to the existing Pages site
+        id: deployment
+        uses: actions/deploy-pages@v5.0.1
