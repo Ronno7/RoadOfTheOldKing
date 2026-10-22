@@ -54,8 +54,17 @@ namespace RoadOfTheOldKing.UI
             new PauseMenuAction(HudSettings.AlwaysShowVitals ? "Vitals: always shown" : "Vitals: when needed",
                 HudSettings.AlwaysShowVitals ? "Show vitals only when needed." : "Show vitals all the time.",
                 ToggleVitals, closeOnExecute: false),
+            new PauseMenuAction(AtmosphereSettings.Cinematic ? "Atmosphere: cinematic" : "Atmosphere: restrained",
+                AtmosphereSettings.Cinematic ? "Return to the quieter, pixel-crisp atmosphere." : "Stronger light, haze and weather.",
+                ToggleAtmosphere, closeOnExecute: false),
             new PauseMenuAction("Back", "", back, closeOnExecute: false)
         };
+
+        private static void ToggleAtmosphere()
+        {
+            AtmosphereSettings.Cinematic = !AtmosphereSettings.Cinematic;
+            HudNotifications.Post(AtmosphereSettings.Cinematic ? "Cinematic atmosphere" : "Restrained atmosphere");
+        }
 
         private static void ToggleVitals()
         {

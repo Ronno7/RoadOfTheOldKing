@@ -2,8 +2,8 @@ using UnityEngine;
 
 namespace RoadOfTheOldKing.World
 {
-    // Presentation owned by BonfireSpriteView. One bounded emitter per fire, no particle objects
-    // or per-frame allocations. The existing flame/material remain unchanged.
+    // One bounded smoke emitter, no particle objects or per-frame allocations. Owned by BonfireSpriteView for fires
+    // and by ChimneySmoke for lived-in houses (22 Oct); the flame/material remain unchanged.
     internal sealed class BonfireSmoke
     {
         private readonly GameObject root;
@@ -11,12 +11,14 @@ namespace RoadOfTheOldKing.World
         private readonly ParticleSystemRenderer renderer;
         private bool emitting;
 
-        public BonfireSmoke(Transform parent, Material material)
+        public BonfireSmoke(Transform parent, Material material) : this(parent, material, "Bonfire smoke", new Vector3(0f, 1.5f, 0f)) { }
+
+        public BonfireSmoke(Transform parent, Material material, string name, Vector3 localPosition)
         {
-            root = new GameObject("Bonfire smoke") { hideFlags = HideFlags.DontSave };
+            root = new GameObject(name) { hideFlags = HideFlags.DontSave };
             root.layer = parent.gameObject.layer;
             root.transform.SetParent(parent, false);
-            root.transform.localPosition = new Vector3(0f, 1.5f, 0f);
+            root.transform.localPosition = localPosition;
             particles = root.AddComponent<ParticleSystem>();
             particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             var main = particles.main;
@@ -54,10 +56,12 @@ namespace RoadOfTheOldKing.World
             renderer.receiveShadows = false;
         }
 
-        public void Refresh(bool lit, SpriteRenderer flame)
+        public void Refresh(bool lit, SpriteRenderer flame) => Refresh(lit, flame.sortingLayerID, flame.sortingOrder);
+
+        public void Refresh(bool lit, int sortingLayerID, int sortingOrder)
         {
-            renderer.sortingLayerID = flame.sortingLayerID;
-            renderer.sortingOrder = flame.sortingOrder;
+            renderer.sortingLayerID = sortingLayerID;
+            renderer.sortingOrder = sortingOrder;
             if (emitting == lit) return;
             emitting = lit;
             if (lit) particles.Play();

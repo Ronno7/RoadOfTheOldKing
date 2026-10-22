@@ -191,10 +191,11 @@ namespace RoadOfTheOldKing.Weapons
         {
             if (!isActiveAndEnabled || State != AxeState.Held || IsThrowing || IsCatching || !owner.CanStartAttack)
                 return false;
-            // Pay once on commitment. Holding or cancelling cannot generate a free cleave.
-            if (!owner.Stamina.TrySpend(settings.cleaveStaminaCost))
+            // Starting needs stamina above zero but costs nothing; the cleave pays on release (user, 22 Oct), so
+            // taps shorter than the minimum charge no longer drain stamina. Only a release makes a cleave, and
+            // charging pauses recovery, so holding or cancelling still cannot earn anything.
+            if (!owner.Stamina.TrySpend(0f))
                 return false;
-            exhaustedAttack = owner.Stamina.IsExhausted;
             comboRemaining = 0f;
             SetState(AxeState.Charging);
             return true;
@@ -204,11 +205,12 @@ namespace RoadOfTheOldKing.Weapons
         {
             if (State != AxeState.Charging)
                 return false;
-            if (elapsed < settings.minimumCharge)
+            if (elapsed < settings.minimumCharge || !owner.Stamina.TrySpend(settings.cleaveStaminaCost))
             {
                 CancelCharge();
                 return false;
             }
+            exhaustedAttack = owner.Stamina.IsExhausted;
             SetAim(direction);
             attackDirection = AimDirection;
             cleaveStrength = Charge01;

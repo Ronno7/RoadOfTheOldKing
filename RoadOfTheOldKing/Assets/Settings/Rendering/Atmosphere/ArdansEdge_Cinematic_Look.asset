@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f44aeba2ceddee0458773f288d982025, type: 3}
+  m_Name: ArdansEdge_Cinematic_Look
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.AtmosphereLook
+  grade: {fileID: 11400000, guid: e6a8457c034bd5d4899a1ab3346d84f7, type: 2}
+  overlay: {fileID: 2100000, guid: 9a2eecf367f7b144393f62f6b7f62177, type: 2}
+  motes:
+  - name: Light dust
+    material: {fileID: 2100000, guid: 3cc21f124f8a2fd43bacea3513cb3d98, type: 2}
+    maxParticles: 60
+    perSecond: 7
+    lifetime: {x: 5, y: 9}
+    size: {x: 0.1, y: 0.18}
+    colorA: {r: 1, g: 0.88, b: 0.6, a: 0.8}
+    colorB: {r: 1, g: 0.95, b: 0.8, a: 0.5}
+    drift: {x: 0.05, y: 0.03}
+    wander: 0.3

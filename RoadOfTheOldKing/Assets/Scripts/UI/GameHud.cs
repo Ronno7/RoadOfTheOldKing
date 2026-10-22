@@ -51,8 +51,13 @@ namespace RoadOfTheOldKing.UI
         [SerializeField, Range(0f, 1f)] private float lowHealth = .3f;
         [SerializeField, Range(0f, 1f)] private float lowHealthPulse = .3f;
         [SerializeField, Min(.2f)] private float heartbeatPeriod = 1.1f;
+        [Header("Rewards")]
+        [Tooltip("Very quiet clink for every bronze coin gain (user, 22 Oct).")]
+        [SerializeField] private AudioClip coinSound;
+        [SerializeField, Range(0f, 1f)] private float coinVolume = .3f;
 
         public static GameHud Active { get; private set; }
+        private AudioSource coinSpeaker;
 
         private UIDocument document;
         // Corner art is authored in art pixels and drawn at 2 reference px each: the kit's UI pixel (Kit.uss).
@@ -257,7 +262,18 @@ namespace RoadOfTheOldKing.UI
         }
 
         private void OnPlayerHit(CombatHit hit) { EncounterState.ReportThreat(); Reveal(); if (hit.Damage > 0) hurtAmount = 1f; }
-        private void OnCoins(int amount, int total) => HudNotifications.Post("Bronze Coins +" + amount + " · " + total);
+        private void OnCoins(int amount, int total)
+        {
+            HudNotifications.Post("Bronze Coins +" + amount + " · " + total);
+            if (coinSound == null) return;
+            if (coinSpeaker == null)
+            {
+                coinSpeaker = gameObject.AddComponent<AudioSource>();
+                coinSpeaker.playOnAwake = false;
+                coinSpeaker.spatialBlend = 0f;
+            }
+            coinSpeaker.PlayOneShot(coinSound, coinVolume);
+        }
         private void OnTool(WorldTool tool) => HudNotifications.Post(WorldToolNames.Display(tool) + " acquired", 4.5f);
         private void OnShard(int total) => HudNotifications.Post("Sun Shard +1 · " + total);
         private void OnFragment(int total, bool completedHeart) => HudNotifications.Post(completedHeart

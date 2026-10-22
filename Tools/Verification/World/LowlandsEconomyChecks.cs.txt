@@ -271,7 +271,13 @@ if(phase==0){
     }finally{UnityEngine.Object.DestroyImmediate(group);}
     pose(new Vector2(117,87.3f));int shards=game.Progress.sunShards;check(interaction.TryInteract()&&chest("orchard").IsOpen&&game.Progress.sunShards==shards+1,"F opens unlocked shard chest");
     check(!chest("orchard").TryCollect(player),"opened shard chest cannot repeat");
-    pose(new Vector2(119,89));check(source("orchard-coins").TryCollect(player)&&game.Progress.bronzeCoins==20,"separate orchard bundle is ten fixed coins");
+    // 22 Oct: the orchard's ten fixed coins are now first-defeat bonuses on its three real guards (3+3+4).
+    {int bonusesPaid=0;var dropField=typeof(RoadOfTheOldKing.World.EnemyCoinDrop).GetField("dropPosition",flags);
+     foreach(var drop in UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.EnemyCoinDrop>(FindObjectsSortMode.None).Where(d=>d.name.StartsWith("Orchard scavenger "))){
+      var health=drop.GetComponent<RoadOfTheOldKing.Combat.Damageable>();for(int i=0;i<5&&health.Health>0;i++)health.ReceiveHit(hit);
+      int before=game.Progress.bronzeCoins,pending=drop.PendingCoins;pose((Vector2)dropField.GetValue(drop));
+      if(drop.TryCollect(player)){bonusesPaid++;game.Progress.bronzeCoins-=pending;}} // keep the fixed budget: drop only the random part
+     check(bonusesPaid==3&&game.Progress.bronzeCoins==20,"orchard guards' bonuses are ten fixed coins, paid once");}
     pose(new Vector2(33,30.2f));check(interaction.TryInteract()&&chest("basin-cache").IsOpen&&game.Progress.bronzeCoins==45,"basin coin chest completes fixed 45 budget");
     check(!chest("basin-cache").TryCollect(player)&&game.Progress.bronzeCoins==45,"coin chest cannot repeat");
     pose(new Vector2(10,2.2f));check(offer("rope-kit").TryCollect(player)&&game.Progress.bronzeCoins==15&&game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.RopeKit),"Regional trader transaction buys rope for thirty");

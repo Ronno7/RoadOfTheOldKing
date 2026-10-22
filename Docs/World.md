@@ -45,7 +45,7 @@ Tutorial's forest scenery extends beyond the playable area to cover the widest 2
 | Detail / Decoration | Sparse ground accents and small props |
 | Collision | Invisible solid boundaries and object footprints |
 | Above Player | Canopies, roofs and other overhead portions |
-| Interactive Objects | GameObjects for pickups, targets, enemies, puzzles and bonfires |
+| Gameplay / Encounters | GameObject containers: pickups, targets, puzzles, bonfires and transitions under Gameplay; enemies under Encounters |
 
 Trees and buildings use separate base, overhead and collision elements. Trunk-sized footprints allow movement behind canopies, while solid lower building footprints remain blocked. Independent object instances preserve overlapping silhouettes. Elevation is visual: ramps and terraces share the same 2D physics plane. Green Lowlands uses joined terrain and spaced trees for its rebuilt boundaries, with native stone steps marking the orchard ascent. Prop feet are checked against painted cliff faces.
 

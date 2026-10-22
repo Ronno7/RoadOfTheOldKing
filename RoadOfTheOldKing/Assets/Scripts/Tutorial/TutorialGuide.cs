@@ -245,7 +245,7 @@ namespace RoadOfTheOldKing.Tutorial
         public static List<TutorialStep> DefaultSteps() => new List<TutorialStep>
         {
             new TutorialStep("move", "Head into the village {move}", TutorialCondition.Moved) { amount = 3f },
-            new TutorialStep("take-axe", "Take your axe from the stump {interact}", TutorialCondition.HasAxe),
+            new TutorialStep("take-axe", "It's dangerous to go alone! Take this. {interact}", TutorialCondition.HasAxe),
             new TutorialStep("throw", "Throw at a target {throw}, then pick it up", TutorialCondition.Milestone) { milestone = "tutorial/lesson/throw-retrieve" },
             new TutorialStep("melee", "Strike the dummy {attack}", TutorialCondition.Milestone) { milestone = "tutorial/lesson/melee" },
             new TutorialStep("dodge", "Dodge {dash}", TutorialCondition.Dodged),

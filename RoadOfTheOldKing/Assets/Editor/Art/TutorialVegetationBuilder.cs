@@ -50,15 +50,15 @@ namespace RoadOfTheOldKing.EditorTools
             EditorUtility.SetDirty(layout);
             AssetDatabase.SaveAssetIfDirty(layout);
 
-            var parent = mask.zone.Find("Interactive Objects");
+            var parent = mask.zone.Find("Scenery");
             if (parent == null)
             {
-                var container = new GameObject("Interactive Objects");
+                var container = new GameObject("Scenery");
                 Undo.RegisterCreatedObjectUndo(container, "Create vegetation container");
                 container.transform.SetParent(mask.zone, false);
                 parent = container.transform;
             }
-            var fields = parent.GetComponentsInChildren<InteractiveVegetation>(true);
+            var fields = mask.zone.GetComponentsInChildren<InteractiveVegetation>(true);
             var field = fields.FirstOrDefault(f => f.layout == layout || f.name == "Interactive Vegetation");
             if (field == null)
             {
@@ -404,7 +404,7 @@ namespace RoadOfTheOldKing.EditorTools
                 string relative = AnimationUtility.CalculateTransformPath(map.transform, zone.transform);
                 if (relative.StartsWith("Ground/", StringComparison.Ordinal) || relative.StartsWith("Paths/", StringComparison.Ordinal) ||
                     relative.StartsWith("Terrain/", StringComparison.Ordinal) || relative == "Paths" || relative == "Terrain" ||
-                    relative == "Detail Decoration" || relative.StartsWith("Detail Decoration/", StringComparison.Ordinal))
+                    map.name == "Detail Decoration")
                 {
                     bool water = relative.IndexOf("Water", StringComparison.OrdinalIgnoreCase) >= 0;
                     foreach (var cell in map.cellBounds.allPositionsWithin)

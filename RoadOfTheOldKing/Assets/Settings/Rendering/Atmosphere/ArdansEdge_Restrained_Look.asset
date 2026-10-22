@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f44aeba2ceddee0458773f288d982025, type: 3}
+  m_Name: ArdansEdge_Restrained_Look
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.AtmosphereLook
+  grade: {fileID: 11400000, guid: aa8bd839ce090324a8c803b68c6d8fea, type: 2}
+  overlay: {fileID: 2100000, guid: b1a9e9303c0c9304e9631217dfcc2df6, type: 2}
+  motes:
+  - name: Pollen
+    material: {fileID: 2100000, guid: 06e646c0c6633c346b8f45311f3d4200, type: 2}
+    maxParticles: 60
+    perSecond: 7
+    lifetime: {x: 6, y: 10}
+    size: {x: 0.0625, y: 0.0625}
+    colorA: {r: 1, g: 0.93, b: 0.6, a: 0.95}
+    colorB: {r: 1, g: 0.98, b: 0.85, a: 0.7}
+    drift: {x: 0.08, y: 0.04}
+    wander: 0.25

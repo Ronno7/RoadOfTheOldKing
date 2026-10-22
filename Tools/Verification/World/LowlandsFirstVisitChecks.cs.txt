@@ -56,8 +56,12 @@ if(!EditorApplication.isPlaying)throw new System.Exception("Isolated Play requir
    foreach(var guard in orchardGuards)fkill(guard.GetComponent<RoadOfTheOldKing.Combat.Damageable>());
    check(fg.Progress.Has("green-lowlands/orchard-cleared")&&orchardGuards.All(e=>e.GetComponent<RoadOfTheOldKing.World.EnemyCoinDrop>().PendingCoins==0),"real orchard defeats unlock stash with zero random income");
    check(fi.TryInteract()&&orchardChest.IsOpen&&fg.Progress.sunShards==2,"F earns S2 from unlocked chest");
-   var orchardMoney=fsource("orchard-coins");fpose(orchardMoney.transform.position);
-   check(orchardMoney.TryCollect(fp)&&fg.Progress.bronzeCoins==20,"separate orchard bundle brings fixed income to twenty");
+   // 22 Oct: the orchard's locked coin pile became one-time first-defeat bonuses on its three guards (3+3+4).
+   check(!UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.CoinSource>(FindObjectsSortMode.None).Any(x=>x.SourceId=="green-lowlands/orchard-coins"),"no locked orchard coin pile remains");
+   int bonusesPaid=0;foreach(var guard in orchardGuards){var drop=guard.GetComponent<RoadOfTheOldKing.World.EnemyCoinDrop>();
+    fpose((Vector2)drop.GetType().GetField("dropPosition",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).GetValue(drop));
+    if(drop.TryCollect(fp))bonusesPaid++;}
+   check(bonusesPaid==3&&fg.Progress.bronzeCoins==20,"orchard guards' first-defeat bonuses bring fixed income to twenty");
    var lowShard=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SunShardReward>();
    fpose(lowShard.transform.position);check(!lowShard.TryCollect(fp),"S3 remains locked before drainage");fpose(new Vector2(15.5f,3));
   }else if(fvPhase==3){

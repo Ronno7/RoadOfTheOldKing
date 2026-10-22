@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f44aeba2ceddee0458773f288d982025, type: 3}
+  m_Name: GreenLowlands_Restrained_Look
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.AtmosphereLook
+  grade: {fileID: 11400000, guid: f2218cd8024ed194593cd2e67d0cae31, type: 2}
+  overlay: {fileID: 2100000, guid: 9d51285057a7b7f469f72d0cb44d695d, type: 2}
+  motes:
+  - name: Seeds
+    material: {fileID: 2100000, guid: 06e646c0c6633c346b8f45311f3d4200, type: 2}
+    maxParticles: 44
+    perSecond: 7
+    lifetime: {x: 4, y: 7}
+    size: {x: 0.0625, y: 0.0625}
+    colorA: {r: 0.97, g: 0.97, b: 0.9, a: 0.95}
+    colorB: {r: 0.85, g: 0.88, b: 0.8, a: 0.6}
+    drift: {x: 0.9, y: 0.1}
+    wander: 0.35

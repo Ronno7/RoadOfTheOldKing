@@ -2,16 +2,33 @@
 
 ## Unreleased
 
+## 0.5 — Full production
+
+### 0.5.0-dev.1 — 2026-10-22 · Development build: atmosphere, light and feedback
+
+**Development build** for playtesting. A pre-release of work in progress toward 0.5.0, not the finished update.
+
+**Browser build**
+
 **Added**
 - Place names appear as you enter regions, with smaller names for landmarks within them.
+- Each region has its own atmosphere: Ardan's Edge feels warm and sheltered; the Green Lowlands are cooler and more exposed, with cloud shadows drifting across the land and seeds on the wind.
+- A Cinematic atmosphere option in Settings adds softer light, mist and glowing dust.
+- Bonfires cast a warm, flickering light on the ground, grass and anyone standing near them.
+- Smoke rises from the chimneys of Ardan's Edge.
+- Picking up bronze coins makes a soft clink.
 
 **Changed**
 - Sun Shards and heart fragments arrive with a falling light and a soft glint, and shimmer while they wait to be collected.
 - The charged cleave now spins the hero with the axe and steps into the swing; a full charge flashes and rings.
 - Several coins dropped together now look like a small pile.
 - The Tutorial points out its first Sun Shard once it appears.
+- The orchard's coins are now carried by its scavengers instead of lying out of reach until they are defeated.
 
 **Fixed**
+- Scavengers and boars now flash when hit, like wolves.
+- Tapping the charged attack no longer drains stamina; a cleave costs stamina only when it is released.
+- Sounds no longer cause a brief hitch the first time they play.
 - Continue returns you exactly where you left off in places your progress has changed, instead of at the bonfire.
 
 ## 0.4 — Vertical slice
@@ -230,15 +247,15 @@
 
 ## Versioning
 
-The minor number is the development phase; the patch number is each notable update within it. **Browser build** marks updates published to the [playable web version](https://ronno7.github.io/RoadOfTheOldKing/).
+The minor number is the development phase; the patch number is each notable update within it. **Browser build** marks updates published to the [playable web version](https://ronno7.github.io/RoadOfTheOldKing/). **Development builds** (`x.y.z-dev.N`, published as GitHub pre-releases) are playtest snapshots of work in progress toward the next version; that version's final entry supersedes them.
 
 | Version | Phase |
 | --- | --- |
 | 0.1 | Pre-production |
 | 0.2 | Core prototype |
 | 0.3 | Gameplay loop prototype |
-| **0.4** | **Vertical slice (current)** |
-| 0.5–0.6 | Full production |
+| 0.4 | Vertical slice |
+| **0.5–0.6** | **Full production (current)** |
 | 0.7 | Alpha |
 | 0.8 | Beta |
 | 0.9 | Release candidate |

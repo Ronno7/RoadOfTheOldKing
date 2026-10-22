@@ -12,12 +12,15 @@ Shader "RoadOfTheOldKing/InteractiveVegetation"
         Cull Off ZWrite Off Blend SrcAlpha OneMinusSrcAlpha
         Pass
         {
-            Tags { "LightMode"="SRPDefaultUnlit" }
+            // Lit by URP 2D lights like the tiles beneath it (22 Oct).
+            Tags { "LightMode"="Universal2D" }
             HLSLPROGRAM
             #pragma vertex Vert
             #pragma fragment Frag
             #pragma target 3.0
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include_with_pragmas "Packages/com.unity.render-pipelines.universal/Shaders/2D/Include/ShapeLightShared.hlsl"
+            #include "Light2D.hlsl"
             TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
             CBUFFER_START(UnityPerMaterial)
                 float _PlantClock;
@@ -37,7 +40,7 @@ Shader "RoadOfTheOldKing/InteractiveVegetation"
             struct Varyings
             {
                 float4 vertex:SV_POSITION; float2 uv:TEXCOORD0; float depthSide:TEXCOORD1;
-                float mote:TEXCOORD2; half4 color:COLOR;
+                float mote:TEXCOORD2; half2 lightingUV:TEXCOORD3; half4 color:COLOR;
             };
             Varyings Vert(Attributes v)
             {
@@ -45,6 +48,7 @@ Shader "RoadOfTheOldKing/InteractiveVegetation"
                 if(_CutDebris>.5)
                 {
                     o.vertex=TransformObjectToHClip(v.vertex);o.uv=v.uv;o.color=v.color;o.mote=v.plant.z;
+                    o.lightingUV=LightingUV(o.vertex);
                     o.depthSide=(v.plant.y<_PlantDepthWindow.w?1:-1)*_PlantDepthSide;
                     return o;
                 }
@@ -75,6 +79,7 @@ Shader "RoadOfTheOldKing/InteractiveVegetation"
                 v.vertex.xy=v.plant.xy+rotated;
                 o.vertex=TransformObjectToHClip(v.vertex);
                 o.uv=v.uv;
+                o.lightingUV=LightingUV(o.vertex);
                 // Classify the whole leaf by its stationary root, never by its waving tip.
                 bool inFront=v.plant.x>=_PlantDepthWindow.x && v.plant.x<=_PlantDepthWindow.z
                     && v.plant.y>=_PlantDepthWindow.y && v.plant.y<_PlantDepthWindow.w;
@@ -94,11 +99,12 @@ Shader "RoadOfTheOldKing/InteractiveVegetation"
                     }
                     else debris*=SAMPLE_TEXTURE2D(_MainTex,sampler_MainTex,i.uv);
                     clip(debris.a-.005);
+                    debris.rgb=ApplyLight2D(debris.rgb,i.lightingUV);
                     return debris;
                 }
                 half4 color=SAMPLE_TEXTURE2D(_MainTex,sampler_MainTex,i.uv);
                 clip(color.a-.5);
-                return half4(color.rgb,1);
+                return half4(ApplyLight2D(color.rgb,i.lightingUV),1);
             }
             ENDHLSL
         }

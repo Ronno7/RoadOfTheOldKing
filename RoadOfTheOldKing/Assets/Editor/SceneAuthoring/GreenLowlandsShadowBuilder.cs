@@ -104,6 +104,17 @@ namespace RoadOfTheOldKing.EditorTools
             }
 
             static string PathOf(Transform t) => AnimationUtility.CalculateTransformPath(t, null);
+            // Region groups are found by name anywhere under the region root, so the hierarchy can be reorganized.
+            static Transform Deep(Transform root, string name) =>
+                root.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == name);
+            static Transform Scenery(Transform world)
+            {
+                var scenery = world.Find("Scenery");
+                if (scenery != null) return scenery;
+                var go = new GameObject("Scenery"); Undo.RegisterCreatedObjectUndo(go, "Create Scenery group");
+                go.transform.SetParent(world, false);
+                return go.transform;
+            }
             static Vector3Int Cell(Vector2Int p) => new Vector3Int(Mathf.FloorToInt(p.x / 16f), Mathf.FloorToInt(p.y / 16f), 0);
             static Vector2Int Pixel(Vector3 p) => new Vector2Int(Mathf.FloorToInt(p.x * Ppu), Mathf.FloorToInt(p.y * Ppu));
             static void Max(Dictionary<Vector2Int, byte> mask, Vector2Int p, byte alpha)
@@ -129,6 +140,9 @@ namespace RoadOfTheOldKing.EditorTools
                     string n = map.name;
                     int layerHeight = 0; bool layerTop = false;
                     bool nativeLayer = !tutorial && !barrow && TryTerrainLayer(map, out layerHeight, out layerTop);
+                    // Barrow's uplands are one terrain map holding both grassy tops and cliff faces; its tops receive
+                    // shadows (sampled per pixel by colour in Receiver), its faces never do.
+                    if (barrow && n == "Terrain - boundary uplands") { nativeLayer = true; layerTop = true; layerHeight = 1; }
                     bool isGround = n != "Meadow Backdrop" && (n.StartsWith("Ground -") || n == "Border grass" || n == "Border lane" ||
                         PathOf(map.transform).Contains("/Arrival/Ground/") || n.StartsWith("Paths -"));
                     bool isUpper = n == "Terrain - upper meadow terraces";
@@ -595,13 +609,13 @@ namespace RoadOfTheOldKing.EditorTools
             {
                 Directory.CreateDirectory(assetFolder);
                 Transform world = scene.GetRootGameObjects().Single(r => r.name == "Barrow approach").transform;
-                var old = world.Find(RootName);
+                var old = Deep(world, RootName);
                 if (old != null) Undo.DestroyObjectImmediate(old.gameObject);
                 foreach (var r in world.GetComponentsInChildren<SpriteRenderer>(true).Where(r => r.sprite != null &&
                     AssetDatabase.GetAssetPath(r.sprite).StartsWith(assetFolder + "/")).ToArray()) Undo.DestroyObjectImmediate(r.gameObject);
                 var root = new GameObject(RootName); Undo.RegisterCreatedObjectUndo(root, "Bake Barrow shadows");
-                root.transform.SetParent(world, false); output = root.transform;
-                foreach (Transform t in world.Find("Trees and old masonry")) Project(PathOf(t), Shape(t));
+                root.transform.SetParent(Scenery(world), false); output = root.transform;
+                foreach (Transform t in Deep(world, "Trees and old masonry")) Project(PathOf(t), Shape(t));
                 foreach (var r in world.GetComponentsInChildren<SpriteRenderer>(true))
                 {
                     if (!r.enabled || !r.gameObject.activeInHierarchy || r.sprite == null) continue;
@@ -622,12 +636,12 @@ namespace RoadOfTheOldKing.EditorTools
             {
                 Directory.CreateDirectory(assetFolder);
                 Transform world = scene.GetRootGameObjects().Single(r => r.name == "Tutorial Zone").transform;
-                var old = world.Find(RootName);
+                var old = Deep(world, RootName);
                 if (old != null) Undo.DestroyObjectImmediate(old.gameObject);
                 foreach (var r in world.GetComponentsInChildren<SpriteRenderer>(true).Where(r => r.sprite != null &&
                     AssetDatabase.GetAssetPath(r.sprite).StartsWith(assetFolder + "/")).ToArray()) Undo.DestroyObjectImmediate(r.gameObject);
                 var root = new GameObject(RootName); Undo.RegisterCreatedObjectUndo(root, "Bake Tutorial shadows");
-                root.transform.SetParent(world, false); output = root.transform;
+                root.transform.SetParent(Scenery(world), false); output = root.transform;
                 // Flat clutter and living actors retain their existing presentation. These are the
                 // standing environment families; their lower/overhead tiles form one silhouette.
                 string[] families = { "Oak", "Birch", "Apple_Tree", "Cottage_Thatch", "Cottage_Clay", "Village_Well", "Woodshed",
@@ -660,8 +674,8 @@ namespace RoadOfTheOldKing.EditorTools
                     .OfType<Sprite>().Where(s => s.name == "Oak" || s.name == "Birch").ToDictionary(s => s.name);
                 treeSprites["Hedgerow"] = AssetDatabase.LoadAllAssetsAtPath("Assets/Art/Tiles/Tutorial/Environment/TutorialStructures16.png")
                     .OfType<Sprite>().Single(s => s.name == "Hedgerow");
-                foreach (var map in maps.Where(m => m.transform.parent == world.Find("Boundary Woodland") ||
-                    m.transform.parent == world.Find("Camera Backdrop - scenery only")))
+                Transform woodland = Deep(world, "Boundary Woodland"), backdrop = Deep(world, "Camera Backdrop - scenery only");
+                foreach (var map in maps.Where(m => m.transform.parent == woodland || m.transform.parent == backdrop))
                     foreach (var c in map.cellBounds.allPositionsWithin)
                     {
                         var slice = map.GetSprite(c);
@@ -672,13 +686,12 @@ namespace RoadOfTheOldKing.EditorTools
                             map.CellToLocal(c) + map.tileAnchor + new Vector3((sprite.pivot.x - 24) / Ppu, (sprite.pivot.y - 8) / Ppu)));
                         Project(PathOf(map.transform) + " " + c, shape);
                     }
-                var interactive = world.Find("Interactive Objects");
-                foreach (var r in interactive.GetComponentsInChildren<SpriteRenderer>(true))
+                foreach (var r in world.GetComponentsInChildren<SpriteRenderer>(true))
                     if (r.enabled && r.gameObject.activeInHierarchy && r.sprite != null &&
                         (r.sprite.name == "Target_New" || r.sprite.name == "Target_Worn" || r.sprite.name == "Practice_Dummy"))
                         Project(PathOf(r.transform), Shape(r.transform));
-                Project("Recall stone", Shape(interactive.Find("Recall Stone")));
-                var gate = interactive.Find("Recall Seal Gate");
+                Project("Recall stone", Shape(Deep(world, "Recall Stone")));
+                var gate = Deep(world, "Recall Seal Gate");
                 var arch = Shape(gate.Find("Seal arch - Environment"));
                 arch.UnionWith(Shape(gate.Find("Seal arch - Above Player")));
                 Project("Seal arch", arch);

@@ -24,7 +24,7 @@ var oldPaused=input.GetType().GetField("paused",flags).GetValue(input);
 var oldFacing=movement.GetType().GetProperty("FacingDirection").GetValue(movement,null);
 var world=GameObject.Find("Tutorial Zone");
 var collision=world.transform.Find("Collision").GetComponent<UnityEngine.Tilemaps.Tilemap>();
-var anchors=world.transform.Find("Layout Anchors (editor only)").Cast<Transform>().OrderBy(t=>t.name=="08 Overworld Exit"?1:0).ToArray();
+var anchors=world.transform.Find("Authoring/Layout Anchors (editor only)").Cast<Transform>().OrderBy(t=>t.name=="08 Overworld Exit"?1:0).ToArray();
 var visited=new System.Collections.Generic.Dictionary<Vector2Int,Vector2Int>();
 var queue=new System.Collections.Generic.Queue<Vector2Int>();
 var origin=new Vector2Int(15,13);visited[origin]=origin;queue.Enqueue(origin);

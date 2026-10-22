@@ -4,6 +4,7 @@ Run: python Tools/Audio/build_feedback_audio.py
 Outputs mono 22.05 kHz PCM:
   World/Rewards/RewardReveal.wav  - a reward appears: one soft, short bronze glint (user rejected the long chime, 21 Oct).
   Combat/ChargeReady.wav          - the charged cleave reaches full strength: a tiny bright metal ring.
+  World/Rewards/CoinPickup.wav    - a bronze coin is picked up: two tiny, soft clinks (user, 22 Oct: very subtle).
 Both stay quiet and brief so they sit under combat and ambience rather than announcing themselves.
 """
 from pathlib import Path
@@ -65,6 +66,22 @@ def charge_ready():
     return render(.2, voice)
 
 
+def coin_pickup():
+    def clink(t, f, gain):
+        # A small struck bronze disc: a soft partial and a faint inharmonic overtone, gone in ~60 ms.
+        if t < 0:
+            return 0.0
+        v = math.sin(2 * math.pi * f * t) * math.exp(-t * 55)
+        v += math.sin(2 * math.pi * f * 2.71 * t) * .25 * math.exp(-t * 90)
+        return v * gain
+
+    def voice(t, i):
+        # Two clinks, the second softer and slightly lower, like a coin settling into a purse.
+        return clink(t, 2350, .5) + clink(t - .055, 2110, .3)
+    return render(.17, voice)
+
+
 if __name__ == "__main__":
     write(AUDIO / "World/Rewards/RewardReveal.wav", reveal(), .45)
     write(AUDIO / "Combat/ChargeReady.wav", charge_ready(), .4)
+    write(AUDIO / "World/Rewards/CoinPickup.wav", coin_pickup(), .3)

@@ -330732,6 +330732,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: Orchard scavenger 2
       objectReference: {fileID: 0}
+    - target: {fileID: 1072501595478793125, guid: 032c1995335209b419b178faba981fde, type: 3}
+      propertyPath: firstDefeatCoins
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1072501595478793125, guid: 032c1995335209b419b178faba981fde, type: 3}
+      propertyPath: replacesCoinSource
+      value: green-lowlands/orchard-coins
+      objectReference: {fileID: 0}
+    - target: {fileID: 1072501595478793125, guid: 032c1995335209b419b178faba981fde, type: 3}
+      propertyPath: firstDefeatRewardId
+      value: green-lowlands/orchard-scavenger-2
+      objectReference: {fileID: 0}
     - target: {fileID: 3433685440186722923, guid: 032c1995335209b419b178faba981fde, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -341782,6 +341794,57 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1 &337553463
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 337553464}
+  - component: {fileID: 337553465}
+  m_Layer: 0
+  m_Name: Region atmosphere
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &337553464
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 337553463}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 454344242}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &337553465
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 337553463}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce3988422b762ad40b9ef60acd6f053f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.RegionAtmosphere
+  restrained: {fileID: 11400000, guid: ec63aefecca76f947af541038e864d1e, type: 2}
+  cinematic: {fileID: 11400000, guid: 889451b239365344eb4df0cd4291044c, type: 2}
+  preview: 0
+  sortingLayer: Player
+  overlayOrder: 1000
+  combatEase: 0.5
+  easeSeconds: 1
 --- !u!1 &340213047
 GameObject:
   m_ObjectHideFlags: 0
@@ -628255,8 +628318,10 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1466319567}
   - {fileID: 2047715757}
   - {fileID: 776345067}
+  - {fileID: 337553464}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &457661960
@@ -628871,7 +628936,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -775041,7 +775106,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1169851,7 +1169916,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1218386,84 +1218451,6 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 0.5}
   m_EdgeRadius: 0
---- !u!1001 &738315925
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 1806462767}
-    m_Modifications:
-    - target: {fileID: 937407160735899396, guid: d3590f1532e3b8440a9c658de48410d6, type: 3}
-      propertyPath: m_Sprite
-      value: 
-      objectReference: {fileID: -542859086, guid: e239aee09e432fc4485ba79d78f0430b, type: 3}
-    - target: {fileID: 2058697016699460576, guid: d3590f1532e3b8440a9c658de48410d6, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 119
-      objectReference: {fileID: 0}
-    - target: {fileID: 2058697016699460576, guid: d3590f1532e3b8440a9c658de48410d6, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 89
-      objectReference: {fileID: 0}
-    - target: {fileID: 2058697016699460576, guid: d3590f1532e3b8440a9c658de48410d6, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2058697016699460576, guid: d3590f1532e3b8440a9c658de48410d6, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2058697016699460576, guid: d3590f1532e3b8440a9c658de48410d6, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2058697016699460576, guid: d3590f1532e3b8440a9c658de48410d6, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2058697016699460576, guid: d3590f1532e3b8440a9c658de48410d6, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2058697016699460576, guid: d3590f1532e3b8440a9c658de48410d6, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2058697016699460576, guid: d3590f1532e3b8440a9c658de48410d6, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2058697016699460576, guid: d3590f1532e3b8440a9c658de48410d6, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3123175585467670992, guid: d3590f1532e3b8440a9c658de48410d6, type: 3}
-      propertyPath: m_Name
-      value: green-lowlands/orchard-coins
-      objectReference: {fileID: 0}
-    - target: {fileID: 7654757356932919924, guid: d3590f1532e3b8440a9c658de48410d6, type: 3}
-      propertyPath: sourceId
-      value: green-lowlands/orchard-coins
-      objectReference: {fileID: 0}
-    - target: {fileID: 7654757356932919924, guid: d3590f1532e3b8440a9c658de48410d6, type: 3}
-      propertyPath: guaranteedCoins
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 7654757356932919924, guid: d3590f1532e3b8440a9c658de48410d6, type: 3}
-      propertyPath: requiredMilestone
-      value: green-lowlands/orchard-cleared
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: d3590f1532e3b8440a9c658de48410d6, type: 3}
---- !u!4 &738315926 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 2058697016699460576, guid: d3590f1532e3b8440a9c658de48410d6, type: 3}
-  m_PrefabInstance: {fileID: 738315925}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &738358826
 GameObject:
   m_ObjectHideFlags: 0
@@ -1295042,6 +1295029,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: Orchard scavenger 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1072501595478793125, guid: 032c1995335209b419b178faba981fde, type: 3}
+      propertyPath: firstDefeatCoins
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1072501595478793125, guid: 032c1995335209b419b178faba981fde, type: 3}
+      propertyPath: replacesCoinSource
+      value: green-lowlands/orchard-coins
+      objectReference: {fileID: 0}
+    - target: {fileID: 1072501595478793125, guid: 032c1995335209b419b178faba981fde, type: 3}
+      propertyPath: firstDefeatRewardId
+      value: green-lowlands/orchard-scavenger-1
+      objectReference: {fileID: 0}
     - target: {fileID: 3433685440186722923, guid: 032c1995335209b419b178faba981fde, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -1335338,6 +1335337,90 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 646699f2df81e4844a5c581b020fb641, type: 3}
+--- !u!1 &1466319566
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1466319567}
+  - component: {fileID: 1466319568}
+  m_Layer: 0
+  m_Name: Global 2D light
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1466319567
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1466319566}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 454344242}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1466319568
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1466319566}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 073797afb82c5a1438f328866b10b3f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.2D.Runtime::UnityEngine.Rendering.Universal.Light2D
+  m_ComponentVersion: 3
+  m_LightType: 4
+  m_BlendStyleIndex: 0
+  m_FalloffIntensity: 0.5
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Intensity: 0.5
+  m_LightVolumeIntensity: 1
+  m_LightVolumeEnabled: 0
+  m_ApplyToSortingLayers: 0000000064000000c80000002c010000
+  m_LightCookieSprite: {fileID: 0}
+  m_DeprecatedPointLightCookieSprite: {fileID: 0}
+  m_LightOrder: 0
+  m_AlphaBlendOnOverlap: 0
+  m_OverlapOperation: 0
+  m_NormalMapDistance: 3
+  m_NormalMapQuality: 2
+  m_UseNormalMap: 0
+  m_ShadowsEnabled: 1
+  m_ShadowIntensity: 0.75
+  m_ShadowSoftness: 0.3
+  m_ShadowSoftnessFalloffIntensity: 0.5
+  m_ShadowVolumeIntensityEnabled: 0
+  m_ShadowVolumeIntensity: 0.75
+  m_LocalBounds:
+    m_Center: {x: 0, y: -0.00000011920929, z: 0}
+    m_Extent: {x: 0.9985302, y: 0.99853027, z: 0}
+  m_PointLightInnerAngle: 360
+  m_PointLightOuterAngle: 360
+  m_PointLightInnerRadius: 0
+  m_PointLightOuterRadius: 1
+  m_ShapeLightParametricSides: 5
+  m_ShapeLightParametricAngleOffset: 0
+  m_ShapeLightParametricRadius: 1
+  m_ShapeLightFalloffSize: 0.5
+  m_ShapeLightFalloffOffset: {x: 0, y: 0}
+  m_ShapePath:
+  - {x: -0.5, y: -0.5, z: 0}
+  - {x: 0.5, y: -0.5, z: 0}
+  - {x: 0.5, y: 0.5, z: 0}
+  - {x: -0.5, y: 0.5, z: 0}
 --- !u!1001 &1469029841
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1735308,6 +1735391,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: Orchard scavenger 3
       objectReference: {fileID: 0}
+    - target: {fileID: 1072501595478793125, guid: 032c1995335209b419b178faba981fde, type: 3}
+      propertyPath: firstDefeatCoins
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 1072501595478793125, guid: 032c1995335209b419b178faba981fde, type: 3}
+      propertyPath: replacesCoinSource
+      value: green-lowlands/orchard-coins
+      objectReference: {fileID: 0}
+    - target: {fileID: 1072501595478793125, guid: 032c1995335209b419b178faba981fde, type: 3}
+      propertyPath: firstDefeatRewardId
+      value: green-lowlands/orchard-scavenger-3
+      objectReference: {fileID: 0}
     - target: {fileID: 3433685440186722923, guid: 032c1995335209b419b178faba981fde, type: 3}
       propertyPath: m_Sprite
       value: 
@@ -2035354,7 +2035449,6 @@ Transform:
   - {fileID: 1342996654}
   - {fileID: 199610435}
   - {fileID: 1197018437}
-  - {fileID: 738315926}
   - {fileID: 853173896}
   m_Father: {fileID: 1813564179}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2167892,7 +2167986,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2168440,7 +2168534,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2170906,7 +2171000,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2170967,7 +2171061,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2179099,7 +2179193,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2179155,7 +2179249,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2180896,7 +2180990,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2181609,7 +2181703,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

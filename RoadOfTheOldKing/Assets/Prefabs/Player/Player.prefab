@@ -468,6 +468,8 @@ MonoBehaviour:
   lowHealth: 0.3
   lowHealthPulse: 0.3
   heartbeatPeriod: 1.1
+  coinSound: {fileID: 8300000, guid: 3a26ee7855d130f4f8de7aa355d03de6, type: 3}
+  coinVolume: 0.3
 --- !u!114 &5573167816240498612
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -485,6 +487,8 @@ MonoBehaviour:
   healFlashColor: {r: 1, g: 0.84, b: 0.45, a: 1}
   healFlashDuration: 0.18
   flashDuration: 0.1
+  chargeFlashColor: {r: 1, g: 0.93, b: 0.7, a: 1}
+  chargeFlashDuration: 0.07
   hitStop: 0.06
   cameraKick: 0.22
   blinkInterval: 0.07

@@ -39,7 +39,7 @@ else if(phase==1){
   input.GetType().GetProperty("SprintHeld").SetValue(input,true,null);
   pose(new Vector2(1000,1000));weapon.CancelAction();stamina.Restore();
   check(weapon.TryBeginCharge(),"charge starts");
-  check(Mathf.Abs(stamina.Current-65)<.001f,"charge pays 35 once");
+  check(stamina.Current==100,"starting a charge costs nothing (pays on release, 22 Oct)");
   float previousSpeed=1,previousCharge=0;
   foreach(float portion in new[]{0f,.25f,.5f,.75f,1f}){
    if(portion>0)tick(weapon.Settings.fullCharge*.25f);
@@ -51,11 +51,17 @@ else if(phase==1){
    previousCharge=weapon.Charge01;previousSpeed=weapon.ActionMovementScale;
   }
   check(weapon.Charge01==1&&Mathf.Abs(weapon.ActionMovementScale-.08f)<.001f,"full charge crawls at 8 percent");
-  tick(2f);check(weapon.Charge01==1&&Mathf.Abs(stamina.Current-65)<.001f,"overholding neither overcharges nor repays stamina");
+  tick(2f);check(weapon.Charge01==1&&stamina.Current==100,"overholding neither overcharges nor regains stamina");
   weapon.CancelCharge();check(!weapon.ControlsMovement&&weapon.ActionMovementScale==1,"cancel releases movement constraint");
-  check(stamina.Current==65,"cancel does not refund charge");
+  check(stamina.Current==100,"cancel costs nothing");
   stamina.Restore();check(weapon.TryBeginCharge(),"early charge starts");tick(.1f);
-  check(!weapon.TryReleaseCharge(Vector2.right)&&!weapon.IsAttacking,"early release cancels before minimum");
+  check(!weapon.TryReleaseCharge(Vector2.right)&&!weapon.IsAttacking&&stamina.Current==100,"early release cancels before minimum and costs nothing");
+  for(int tap=0;tap<5;tap++){weapon.TryBeginCharge();tick(.05f);weapon.TryReleaseCharge(Vector2.right);}
+  check(stamina.Current==100&&!weapon.IsAttacking,"spamming short taps no longer drains stamina");
+  check(weapon.TryBeginCharge(),"charge for paid release");tick(weapon.Settings.minimumCharge+.05f);
+  check(weapon.TryReleaseCharge(Vector2.right)&&Mathf.Abs(stamina.Current-65)<.001f,"a real cleave pays 35 on release");
+  weapon.CancelAction();stamina.Restore();stamina.TrySpend(100);
+  check(!weapon.TryBeginCharge(),"no charge without stamina");
   foreach(float seconds in new[]{.4f,.79999f,.8f,1.2f}){
    weapon.CancelAction();stamina.Restore();pose(new Vector2(1000,1000));
    target=new GameObject("Isolated hard obstacle");target.transform.position=new Vector2(1001,1000);target.AddComponent<CircleCollider2D>().radius=.1f;
