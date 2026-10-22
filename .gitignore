@@ -17,6 +17,11 @@ __pycache__/
 [Tt]emp/
 [Oo]bj/
 [Bb]uilds/
+# Generated Web hosting output is published from a release ZIP, not source control.
+/Build/
+/TemplateData/
+/StreamingAssets/
+/index.html
 [Ll]ogs/
 [Uu]ser[Ss]ettings/
 *.log
