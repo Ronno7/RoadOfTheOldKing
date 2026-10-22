@@ -69,12 +69,12 @@ try {
     tick(.119f); check(!weapon.IsAway && near(stamina.Current,75), "Same-sample down/up preserves quick tap wind-up");
     tick(.001f); check(weapon.IsAway, "Same-sample tap launches at 120 ms");
     reset(); weapon.TryThrow(Vector2.right); tick(.5f);
-    check(near(weapon.transform.position.x,104.56f), "Large step advances only post-marker flight distance");
+    check(near(weapon.transform.position.x,100.00f+.38f*weapon.Settings.throwSpeed), "Large step advances only post-marker flight distance");
     reset(); weapon.TryThrow(Vector2.right); for(int i=0;i<25;i++) tick(.02f);
-    check(near(weapon.transform.position.x,104.56f), "Partitioned physics steps match large-step flight");
+    check(near(weapon.transform.position.x,100.00f+.38f*weapon.Settings.throwSpeed), "Partitioned physics steps match large-step flight");
 
     reset(); press(); tick(.08f); release(); move(new Vector2(101,100)); weapon.SetAim(Vector2.up); tick(.14f);
-    check(weapon.AttackDirection == Vector2.right && near(weapon.transform.position.x,102.2f) && near(weapon.transform.position.y,100),
+    check(weapon.AttackDirection == Vector2.right && near(weapon.transform.position.x,101f+.1f*weapon.Settings.throwSpeed) && near(weapon.transform.position.y,100),
         "Aim locks at key-up; launch origin follows player until marker");
     reset(); stamina.TrySpend(90); press(); tick(.08f); release(); tick(.5f);
     check(!weapon.IsThrowing && !weapon.IsAway && near(stamina.Current,10), "Unaffordable release returns to ready without launch");

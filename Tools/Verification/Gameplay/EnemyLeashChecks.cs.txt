@@ -1,0 +1,46 @@
+// Empty, save-free Play Mode only (22 Oct). PursuitBrain chase/leash/re-engage contract from playtest feedback:
+// chases past its notice radius, gives up at its own leash, ignores the player near the leash edge, re-engages
+// when followed back inside 60% of the leash or when hit, and otherwise walks home and idles.
+if (!EditorApplication.isPlaying || UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Progression.GameSession>() != null)
+    throw new Exception("Use an empty Play Mode scene without GameSession.");
+var passed=new List<string>(); var created=new List<GameObject>();
+Action<bool,string> check=(ok,l)=>{ if(!ok) throw new Exception("FAIL: "+l+" after "+passed.Count); passed.Add(l); };
+var sim=Physics2D.simulationMode;
+var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+try{
+ Physics2D.simulationMode=SimulationMode2D.Script;
+ var victim=new GameObject("Leash target"); created.Add(victim); victim.SetActive(false);
+ var pb=victim.AddComponent<Rigidbody2D>(); pb.gravityScale=0; pb.bodyType=RigidbodyType2D.Kinematic;
+ victim.AddComponent<CircleCollider2D>().radius=.375f;
+ var player=victim.AddComponent<RoadOfTheOldKing.Player.PlayerHealth>(); victim.SetActive(true);
+ var home=new Vector2(2000,2000);
+ var obj=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Combat/RoadScavenger.prefab"),home,Quaternion.identity); created.Add(obj);
+ var brain=obj.GetComponent<RoadOfTheOldKing.Enemies.PursuitBrain>(); var body=obj.GetComponent<Rigidbody2D>();
+ var t=brain.GetType(); t.GetField("target",flags).SetValue(brain,player);
+ float notice=(float)t.GetField("noticeRadius",flags).GetValue(brain), leash=(float)t.GetField("leashRadius",flags).GetValue(brain);
+ var tick=t.GetMethod("Tick",flags);
+ Action<int> run=n=>{for(int i=0;i<n;i++){tick.Invoke(brain,new object[]{.02f});Physics2D.Simulate(.02f);}};
+ Action<Vector2> put=pos=>{victim.transform.position=pos;pb.position=pos;};
+ put(home+Vector2.right*(notice-1)); run(2);
+ check(brain.IsAware,"notices inside radius");
+ put(home+Vector2.right*(notice+2)); run(10);
+ check(brain.IsAware&&brain.State==RoadOfTheOldKing.Enemies.PursuitState.Pursuing,"keeps chasing past notice radius");
+ for(int i=0;i<400&&brain.IsAware;i++){ put(body.position+Vector2.right*3f); run(1);}
+ float out1=Vector2.Distance(body.position,home);
+ check(!brain.IsAware&&out1>leash-.5f,"gives up at its own leash ("+out1.ToString("0.0")+" of "+leash+")");
+ check(brain.State==RoadOfTheOldKing.Enemies.PursuitState.Returning,"walks home");
+ put(body.position+Vector2.right*2); run(5);
+ check(!brain.IsAware,"ignores player near the leash edge");
+ for(int i=0;i<600&&!brain.IsAware;i++){ put(body.position+Vector2.right*2); run(1);}
+ float d2=Vector2.Distance(body.position,home);
+ check(brain.IsAware&&d2<=leash*.6f+.2f,"re-engages when followed back in ("+d2.ToString("0.0")+")");
+ brain.ResetOnRest(); put(home+Vector2.right*(notice+20)); body.position=home+Vector2.right*(leash*.5f); run(1);
+ check(brain.State==RoadOfTheOldKing.Enemies.PursuitState.Returning&&!brain.IsAware,"unaware away from home returns");
+ obj.GetComponent<RoadOfTheOldKing.Combat.Damageable>().DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.left,0,0));
+ for(int i=0;i<40&&!brain.IsAware;i++) run(1);
+ check(brain.IsAware,"a hit while returning re-engages");
+ brain.ResetOnRest(); put(home+Vector2.right*200); body.position=home+Vector2.right*3; run(1);
+ for(int i=0;i<200&&brain.State!=RoadOfTheOldKing.Enemies.PursuitState.Idle;i++) run(1);
+ check(brain.State==RoadOfTheOldKing.Enemies.PursuitState.Idle&&Vector2.Distance(body.position,home)<.3f,"returns to home and idles");
+ return "PASS "+passed.Count+"\n"+string.Join("\n",passed.ToArray());
+} finally { foreach(var g in created) if(g!=null) UnityEngine.Object.Destroy(g); Physics2D.simulationMode=sim; }

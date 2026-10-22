@@ -14,7 +14,7 @@ namespace RoadOfTheOldKing.UI
     // presents: it reads gameplay components and events and never edits gameplay or save state.
     //  Corner vitals (pixel art: health, flasks; stamina too with HudSettings.AlwaysShowVitals) appear on
     //  damage, healing or combat and hide after a hold once full and safe.
-    //  Stamina otherwise is a pixel arc over the hero, shown only in combat.
+    //  Stamina otherwise is a pixel arc over the hero, shown in combat or while below full.
     //  One interaction prompt above the object the interaction selector actually chose.
     //  Weapon-away chip, charge bar near the player, reward receipts, one Tutorial hint. Inventory lives in CollectionMenu.
     // The charge bar and stamina arc are world-space documents (WorldUIDocument); the rest is a screen panel. The prompt
@@ -405,13 +405,14 @@ namespace RoadOfTheOldKing.UI
             if (flask.IsDrinking) Reveal();
         }
 
-        // Spatial stamina: an arc over the hero, only while in combat; red while in deficit, and its
+        // Spatial stamina: an arc over the hero while in combat or while stamina is below full (so sprint
+        // reserves read outside fights, playtest 22 Oct); red while in deficit, and its
         // outline flashes when an action is refused. Fades in and out (real time, so hit-stop and pause
         // don't freeze it) and keeps tracking the hero while it fades.
         private void UpdateStaminaArc(bool allowed)
         {
             if (stamina == null || arc == null) return;
-            bool wanted = allowed && EncounterState.InCombat;
+            bool wanted = allowed && (EncounterState.InCombat || stamina.Normalized < 1f || stamina.IsExhausted);
             float fade = wanted ? arcFade.x : arcFade.y;
             arcAlpha = Mathf.MoveTowards(arcAlpha, wanted ? 1f : 0f, Time.unscaledDeltaTime / Mathf.Max(.01f, fade));
             staminaArc.Show(arcAlpha > 0f);

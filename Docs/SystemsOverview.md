@@ -266,7 +266,8 @@ stateDiagram-v2
   Reposition --> Stalk
   note right of Stalk
     Breaking poise outside armored attacks staggers it, then it repositions
-    or counter-snaps. Leaving the leash or losing sight returns it home.
+    or counter-snaps. Straying past its own leash or losing sight returns it home;
+    a hit, or being followed back well inside the leash, takes the player up again.
   end note
 ```
 
@@ -279,7 +280,7 @@ stateDiagram-v2
 
 `PredatorSpriteView` samples the AI: circling, repositioning and chasing use stalk, walk and run animations driven by distance travelled; the bite's frames follow the windup clock so the jaws open on the leap; death plays once and holds as the corpse. The wolf also carries `EnemyHealthIndicator`, `EnemyAwarenessIndicator` and `EnemyImpactFeedback`. `EnemyCorpseSorting` on both enemy prefabs moves defeated sprites below the player and restores each original sorting layer/order when rest revives them. `EncounterState` is the shared "in combat" signal: true while any registered enemy is aware of the player or the player was just hit, plus 3 s of grace.
 
-`PursuitBrain` chooses approach/attack/return for the sentinel, Road Scavenger and Mossback Boar. `MeleeAttackAction` implements stationary melee or a charge, including early tracking, locked direction, active contact and recovery. Per-component melee tuning remains valid when no definition is assigned. A swept collider stops charges at solids; one contact ends the Boar charge. The Boar has no authored armor and can be interrupted. `PredatorAttackAction` preserves the wolf's single-attempt snap, moving bite, late lane lock and committed-lunge armor; the policy selects feints and follow-ups. `EvadeAction` supplies retreat and lateral sidestep. Pack ownership remains reserved across the attack/recovery sequence.
+`PursuitBrain` chooses approach/attack/return for the sentinel, Road Scavenger and Mossback Boar. `MeleeAttackAction` implements stationary melee or a charge, including early tracking, locked direction, active contact and recovery. Per-component melee tuning remains valid when no definition is assigned. A swept collider stops charges at solids; one contact ends the Boar charge. The Boar has no authored armor and can be interrupted. `PredatorAttackAction` preserves the wolf's single-attempt snap, moving bite, late lane lock and committed-lunge armor; the policy selects feints and follow-ups. `EvadeAction` supplies retreat and lateral sidestep. Pack ownership remains reserved across the attack/recovery sequence. Wolves hop back when a strike begins (a light chop or a released cleave), not while a cleave is still charging. Both brains leash on the enemy's own distance from home: an aware enemy keeps chasing past its notice radius until it strays past the leash or loses sight, then walks home and re-engages if hit or followed back inside 60% of the leash.
 
 ## Progression and saving
 
@@ -409,7 +410,7 @@ flowchart LR
   G -->|"tutorial/step/id"| S[GameSession]
 ```
 
-- **Progress-aware:** conditions are tracked from scene start, so early actions count. Usually the first incomplete step supplies the hint; the ready stone takes priority nearby. The guide itself places no barriers, but the stone waits for the recovery milestone and the seal physically gates the northern route.
+- **Progress-aware:** conditions are tracked from scene start, so early actions count. The hint is the first incomplete step after the furthest route landmark reached (the bridge, the awakened stone, a rest), so skipped lessons stop following the player but still complete if done later; the ready stone takes priority nearby. The guide itself places no barriers, but the stone waits for the recovery milestone and the seal physically gates the northern route.
 - **Out of the way:** hints hide during combat, menus, pause and death.
 - **Extensible:** lessons are independent components that only record milestones, so a new lesson needs no guide code; a Milestone step can watch any progress ID.
 
@@ -437,7 +438,7 @@ Presentation components read gameplay state and never change it, so art can be r
 **HUD.** `GameHud` (UI Toolkit, `UI/GameHud.uxml` and `.uss`) is contextual: quiet exploration shows almost nothing.
 
 - **Vitals:** pixel-art health bar and one flask icon per charge in the corner, shown on damage, healing or combat and hidden 3 s after health is full and no threat remains. Bars grow with their maximum. The *Vitals* option on the Settings page keeps them always visible and adds a stamina bar (`HudSettings`).
-- **Stamina arc:** in combat, stamina is a pixel arc over the hero (`PixelArc`, a world-space document) that fades in and out and sits just above the carried halberd: ochre-gold, red while in deficit, and its outline flashes when an action is refused.
+- **Stamina arc:** in combat, or whenever stamina is below full (so sprint reserves read outside fights), stamina is a pixel arc over the hero (`PixelArc`, a world-space document) that fades in and out and sits just above the carried halberd: ochre-gold, red while in deficit, and its outline flashes when an action is refused.
 - **Prompt:** one `[F] <verb>` kit chip above whatever the interaction selector chose ("Light Bonfire" at an unlit fire, "Rest" at a lit one). It waits while a banner shows.
 - **Contextual pieces:** a weapon-away chip, the cleave charge bar, up to three reward receipts and the single guide hint (at the bottom of the screen, or as a chip over its world point when it has one).
 - **Inventory:** Tab opens a compact kit panel in `CollectionMenu`: resource counts, icons for flasks/owned tools/discovered knowledge and the selected item's name. `InventoryGridView` supports mouse, arrow-key and D-pad/left-stick browsing; no axe, upgrade list, categories or description pane. Browsing never equips, consumes or spends. Tab/Escape, View/B or Close dismisses with a one-frame input shield.

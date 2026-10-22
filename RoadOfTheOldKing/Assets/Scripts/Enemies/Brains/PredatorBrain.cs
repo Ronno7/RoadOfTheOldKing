@@ -126,7 +126,7 @@ namespace RoadOfTheOldKing.Enemies
         private Vector2 home, previousPosition, repositionPoint, evadeDirection;
         private float elapsed, duration, stalkFor, lastSeen, blockedTime, actualSpeed, evadeReadyAt;
         private int circleSign = 1;
-        private bool feint, hitPending, playerWasSwinging, playerWasExposed;
+        private bool feint, hitPending, playerWasStriking, playerWasExposed;
         private uint lastFlightSequence;
 
         public PredatorState State { get; private set; }
@@ -149,7 +149,9 @@ namespace RoadOfTheOldKing.Enemies
         public int ResetVersion { get; private set; }
         public event Action PlayerDetected;
 
-        private AxeWeapon PlayerWeapon => combat != null ? combat.Weapon : null;
+        private const float ReengageFraction = .6f;
+
+        private AxeWeapon PlayerWeapon =>combat != null ? combat.Weapon : null;
 
         // A swing that can still hit: light windup/active, charging or cleaving.
         private bool PlayerSwinging
@@ -159,6 +161,18 @@ namespace RoadOfTheOldKing.Enemies
                 var w = PlayerWeapon;
                 return w != null && ((w.State == AxeState.LightChop && w.LightPhase != MeleePhase.Recovery) ||
                     w.State == AxeState.Charging || w.State == AxeState.Cleaving);
+            }
+        }
+
+        // A blow actually coming: a light chop or a released cleave. Holding a charge is not one, so
+        // evasion keys on the release rather than the charge start (playtest, 22 Oct).
+        private bool PlayerStriking
+        {
+            get
+            {
+                var w = PlayerWeapon;
+                return w != null && ((w.State == AxeState.LightChop && w.LightPhase != MeleePhase.Recovery) ||
+                    w.State == AxeState.Cleaving);
             }
         }
 
@@ -247,8 +261,9 @@ namespace RoadOfTheOldKing.Enemies
 
             // Read the player once per tick; reactions trigger on the moment a swing or an opening begins.
             bool swinging = targetAlive && PlayerSwinging, exposed = targetAlive && PlayerExposed;
-            bool swingStarted = swinging && !playerWasSwinging, openingStarted = exposed && !playerWasExposed;
-            playerWasSwinging = swinging;
+            bool striking = targetAlive && PlayerStriking;
+            bool swingStarted = striking && !playerWasStriking, openingStarted = exposed && !playerWasExposed;
+            playerWasStriking = striking;
             playerWasExposed = exposed;
             bool wasHit = hitPending;
             hitPending = false;
@@ -310,7 +325,9 @@ namespace RoadOfTheOldKing.Enemies
                     break;
                 case PredatorState.Return:
                     Vector2 toHome = home - body.position;
-                    if (toHome.magnitude <= .15f) { Brake(dt); Enter(PredatorState.Idle); }
+                    // Followed back into its ground: take the player up again (well inside the leash, so it doesn't flicker at the edge).
+                    if (sees && distance <= noticeRadius && toHome.magnitude <= leashRadius * ReengageFraction) Notice();
+                    else if (toHome.magnitude <= .15f) { Brake(dt); Enter(PredatorState.Idle); }
                     else Move(toHome.normalized, trotSpeed, dt);
                     break;
             }
@@ -474,8 +491,8 @@ namespace RoadOfTheOldKing.Enemies
             AttackTokens.Release(this);
         }
 
-        private bool OutsideLeash() => target != null &&
-            (Vector2.Distance(target.transform.position, home) > leashRadius || Vector2.Distance(body.position, home) > leashRadius);
+        // Only its own distance counts, so stepping away from its home doesn't shake it off (playtest, 22 Oct).
+        private bool OutsideLeash() => Vector2.Distance(body.position, home) > leashRadius;
 
         // Terrain and static props block sight; characters (dynamic bodies) do not.
         private bool HasLineOfSight(Vector2 point) => actor.CanSee(point, target != null ? target.transform : null, true);
@@ -570,7 +587,7 @@ namespace RoadOfTheOldKing.Enemies
             actor.Reset();
             previousPosition = home;
             body.linearVelocity = Vector2.zero;
-            hitPending = playerWasSwinging = playerWasExposed = false;
+            hitPending = playerWasStriking = playerWasExposed = false;
             Enter(PredatorState.Idle);
         }
     }

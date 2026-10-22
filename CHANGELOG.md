@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+**Changed**
+- The thrown axe flies half again as fast.
+- Your stamina shows above the hero whenever it isn't full, not only in fights, so you can see whether you can sprint.
+- Enemies keep chasing you farther before giving up, and once they turn for home, hitting them or following them back draws them into the fight again.
+- Tutorial hints no longer keep pointing back to a lesson you skipped once you've moved on.
+
+**Fixed**
+- Wolves no longer dodge as soon as you start charging a cleave; they react when you release it.
+
 ## 0.5 — Full production
 
 ### 0.5.0-dev.1 — 2026-10-22 · Development build: atmosphere, light and feedback

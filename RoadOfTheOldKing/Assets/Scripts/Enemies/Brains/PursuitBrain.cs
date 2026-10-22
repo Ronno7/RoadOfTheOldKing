@@ -16,7 +16,10 @@ namespace RoadOfTheOldKing.Enemies
         [SerializeField] private EnemyAttackDefinition attack;
         [SerializeField, Min(0.1f)] private float moveSpeed = 2.1f;
         [SerializeField, Min(0.1f)] private float noticeRadius = 5f;
+        [Tooltip("Gives up and walks home when it strays this far from home.")]
         [SerializeField, Min(0.1f)] private float leashRadius = 5.5f;
+        [Tooltip("Seconds without line of sight before it gives up the chase.")]
+        [SerializeField, Min(0f)] private float loseSightTime = 2f;
         [SerializeField, Min(0.1f)] private float attackDistance = 1.25f;
         [SerializeField, Min(0.1f)] private float attackReach = 1.65f;
         [SerializeField, Range(1f, 180f)] private float attackArc = 85f;
@@ -31,8 +34,10 @@ namespace RoadOfTheOldKing.Enemies
         private HitReaction reaction;
         private Rigidbody2D body;
         private Collider2D bodyCollider;
+        private const float ReengageFraction = 0.6f;
         private Vector2 home;
-        private float remaining;
+        private float remaining, lastSeen;
+        private bool provoked;
         private float stateDuration;
         private EnemyActionRunner action;
         private bool knockedBack;
@@ -75,6 +80,7 @@ namespace RoadOfTheOldKing.Enemies
         {
             EnemyRegistry.Register(this);
             reaction.Staggered += OnHit;
+            health.HitReceived += OnProvoked;
             health.Defeated += OnDefeated;
         }
 
@@ -83,6 +89,7 @@ namespace RoadOfTheOldKing.Enemies
             EnemyRegistry.Unregister(this);
             IsAware = false;
             reaction.Staggered -= OnHit;
+            health.HitReceived -= OnProvoked;
             health.Defeated -= OnDefeated;
             action.Cancel();
             if (!IsDefeated) SetState(PursuitState.Idle);
@@ -133,30 +140,42 @@ namespace RoadOfTheOldKing.Enemies
                 SetState(PursuitState.Idle);
             }
 
+            // Once aware it keeps chasing until the player is out of sight for a while or it strays past its
+            // own leash; then it walks home, and takes the player up again if struck or followed back in.
             Vector2 toTarget = (Vector2)target.transform.position - body.position;
-            bool outsideHome = Vector2.Distance(target.transform.position, home) > leashRadius ||
-                Vector2.Distance(body.position, home) > leashRadius;
-            if (State == PursuitState.Returning || outsideHome)
+            float fromHome = Vector2.Distance(body.position, home);
+            bool sees = toTarget.magnitude <= noticeRadius * 1.5f && HasLineOfSight(target.transform.position);
+            if (sees) lastSeen = Time.time;
+            if (provoked && fromHome <= leashRadius) Engage();
+            provoked = false;
+            if (State == PursuitState.Returning)
+            {
+                if (sees && toTarget.magnitude <= noticeRadius && fromHome <= leashRadius * ReengageFraction)
+                    Engage();
+                else
+                {
+                    Vector2 toHome = home - body.position;
+                    if (toHome.magnitude <= 0.15f) SetState(PursuitState.Idle);
+                    else Move(toHome);
+                    return;
+                }
+            }
+            if (IsAware && (fromHome > leashRadius || Time.time - lastSeen > loseSightTime))
             {
                 IsAware = false;
                 State = PursuitState.Returning;
-                Vector2 toHome = home - body.position;
-                if (toHome.magnitude <= 0.15f)
-                    SetState(PursuitState.Idle);
-                else
-                    Move(toHome);
-                return;
-            }
-            if (toTarget.magnitude > noticeRadius || !HasLineOfSight(target.transform.position))
-            {
-                IsAware = false;
-                SetState(PursuitState.Idle);
                 return;
             }
             if (!IsAware)
             {
-                IsAware = true;
-                PlayerDetected?.Invoke();
+                if (!sees || toTarget.magnitude > noticeRadius)
+                {
+                    // Idle away from home (e.g. after a stagger): head back.
+                    if (fromHome > 0.15f) State = PursuitState.Returning;
+                    else SetState(PursuitState.Idle);
+                    return;
+                }
+                Engage();
             }
             if (toTarget.magnitude <= attackDistance)
             {
@@ -168,6 +187,15 @@ namespace RoadOfTheOldKing.Enemies
                 State = PursuitState.Pursuing;
                 Move(toTarget);
             }
+        }
+
+        private void Engage()
+        {
+            if (State == PursuitState.Returning) State = PursuitState.Idle;
+            lastSeen = Time.time;
+            if (IsAware) return;
+            IsAware = true;
+            PlayerDetected?.Invoke();
         }
 
         private void Move(Vector2 direction)
@@ -189,6 +217,12 @@ namespace RoadOfTheOldKing.Enemies
                 action.Cancel(false);
                 knockedBack = true;
             }
+        }
+
+        // Any hit, staggering or not, makes it take the player up again (within its leash).
+        private void OnProvoked(CombatHit hit)
+        {
+            if (health.IsAlive) provoked = true;
         }
 
         private void OnDefeated()
@@ -215,7 +249,7 @@ namespace RoadOfTheOldKing.Enemies
 
         public void ResetOnRest()
         {
-            IsAware = false;
+            IsAware = provoked = false;
             ResetVersion++;
             actor.Reset();
             SetState(PursuitState.Idle);

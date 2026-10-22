@@ -86,6 +86,24 @@ namespace RoadOfTheOldKing.Tutorial
         public bool IsFinished => steps.Count > 0 && CurrentIndex < 0;
         public int CurrentIndex { get { for (int i = 0; i < steps.Count; i++) if (!done.Contains(steps[i].id)) return i; return -1; } }
         public bool IsDone(string stepId) => done.Contains(stepId);
+
+        // The step the hint teaches: the first incomplete one after the furthest route landmark reached.
+        // Lessons skipped before a landmark stay incomplete but stop following the player into later
+        // areas (playtest, 22 Oct); they still complete if done later.
+        public int HintIndex
+        {
+            get
+            {
+                int passed = -1;
+                for (int i = 0; i < steps.Count; i++)
+                    if (done.Contains(steps[i].id) && IsLandmark(steps[i].condition)) passed = i;
+                for (int i = passed + 1; i < steps.Count; i++) if (!done.Contains(steps[i].id)) return i;
+                return -1;
+            }
+        }
+
+        private static bool IsLandmark(TutorialCondition condition) =>
+            condition == TutorialCondition.ReachArea || condition == TutorialCondition.RecallUnlocked || condition == TutorialCondition.Rested;
         public event Action<TutorialStep> StepCompleted;
 
         private void Awake()
@@ -179,7 +197,7 @@ namespace RoadOfTheOldKing.Tutorial
 
         private void Complete(TutorialStep step)
         {
-            bool wasCurrent = CurrentIndex >= 0 && steps[CurrentIndex] == step;
+            bool wasCurrent = HintIndex >= 0 && steps[HintIndex] == step;
             done.Add(step.id);
             GameSession.Instance?.Progress.Complete(StepPrefix + step.id);
             // Persist quietly with the next save; lessons and rewards already save their own milestones.
@@ -205,7 +223,7 @@ namespace RoadOfTheOldKing.Tutorial
                 HudNotifications.SetHint(ControlLabels.Format(completedHint), true, completedPosition);
                 return;
             }
-            int index = CurrentIndex;
+            int index = HintIndex;
             // Local stone teaching takes precedence over skipped optional lessons in the courtyard.
             if (stone != null && stone.IsReady && !stone.IsAwakened &&
                 Vector2.Distance(player.transform.position, stone.transform.position) < 12f)
