@@ -10,25 +10,28 @@ namespace RoadOfTheOldKing.Progression
     {
         private readonly string key;
         private readonly string[] legacyKeys;
+        private readonly IPrefsBackend prefs;
 
-        public PlayerPrefsProgressStore(string key, string[] legacyKeys = null)
+        // prefs: PlayerPrefs unless verification substitutes a backend with separate cached and durable state.
+        public PlayerPrefsProgressStore(string key, string[] legacyKeys = null, IPrefsBackend prefs = null)
         {
             this.key = key;
             this.legacyKeys = legacyKeys ?? Array.Empty<string>();
+            this.prefs = prefs ?? UnityPrefs.Instance;
         }
 
         public ProgressState Load()
         {
-            if (PlayerPrefs.HasKey(key))
+            if (prefs.HasKey(key))
             {
-                var state = ProgressMigrations.Read(PlayerPrefs.GetString(key), out bool migrated);
+                var state = ProgressMigrations.Read(prefs.GetString(key), out bool migrated);
                 if (migrated) Save(state);
                 return state;
             }
             foreach (var legacy in legacyKeys)
             {
-                if (string.IsNullOrEmpty(legacy) || legacy == key || !PlayerPrefs.HasKey(legacy)) continue;
-                var state = ProgressMigrations.Read(PlayerPrefs.GetString(legacy), out _);
+                if (string.IsNullOrEmpty(legacy) || legacy == key || !prefs.HasKey(legacy)) continue;
+                var state = ProgressMigrations.Read(prefs.GetString(legacy), out _);
                 Save(state);
                 return state;
             }
@@ -38,17 +41,17 @@ namespace RoadOfTheOldKing.Progression
         public void Save(ProgressState state)
         {
             state.version = ProgressState.CurrentVersion;
-            PlayerPrefs.SetString(key, JsonUtility.ToJson(state));
-            PlayerPrefs.Save();
+            prefs.SetString(key, JsonUtility.ToJson(state));
+            prefs.Save();
         }
 
         public void Clear()
         {
-            PlayerPrefs.DeleteKey(key);
-            PlayerPrefs.DeleteKey(ResumeKey);
+            prefs.DeleteKey(key);
+            prefs.DeleteKey(ResumeKey);
             foreach (var legacy in legacyKeys)
-                if (!string.IsNullOrEmpty(legacy)) PlayerPrefs.DeleteKey(legacy);
-            PlayerPrefs.Save();
+                if (!string.IsNullOrEmpty(legacy)) prefs.DeleteKey(legacy);
+            prefs.Save();
         }
 
         // The resume point is its own small record beside the save, written often without touching the save.
@@ -56,22 +59,44 @@ namespace RoadOfTheOldKing.Progression
 
         public ResumePoint LoadResume()
         {
-            if (!PlayerPrefs.HasKey(ResumeKey)) return null;
-            var resume = JsonUtility.FromJson<ResumePoint>(PlayerPrefs.GetString(ResumeKey));
+            if (!prefs.HasKey(ResumeKey)) return null;
+            var resume = JsonUtility.FromJson<ResumePoint>(prefs.GetString(ResumeKey));
             return resume != null && !string.IsNullOrEmpty(resume.scenePath) ? resume : null;
         }
 
         public void SaveResume(ResumePoint resume)
         {
-            PlayerPrefs.SetString(ResumeKey, JsonUtility.ToJson(resume));
-            PlayerPrefs.Save();
+            prefs.SetString(ResumeKey, JsonUtility.ToJson(resume));
+            prefs.Save();
         }
 
+        // Always delete and flush, even when the cached key is already gone: an earlier attempt may have removed it
+        // from the cache and then failed to write that to disk, and only a new flush finishes the clear.
         public void ClearResume()
         {
-            if (!PlayerPrefs.HasKey(ResumeKey)) return;
-            PlayerPrefs.DeleteKey(ResumeKey);
-            PlayerPrefs.Save();
+            prefs.DeleteKey(ResumeKey);
+            prefs.Save();
         }
+    }
+
+    // The PlayerPrefs calls the store makes. PlayerPrefs keeps a cache that Save() flushes to disk, so a failure can
+    // leave the two different; verification models that with its own backend.
+    public interface IPrefsBackend
+    {
+        bool HasKey(string key);
+        string GetString(string key);
+        void SetString(string key, string value);
+        void DeleteKey(string key);
+        void Save();
+    }
+
+    internal sealed class UnityPrefs : IPrefsBackend
+    {
+        public static readonly UnityPrefs Instance = new UnityPrefs();
+        public bool HasKey(string key) => PlayerPrefs.HasKey(key);
+        public string GetString(string key) => PlayerPrefs.GetString(key);
+        public void SetString(string key, string value) => PlayerPrefs.SetString(key, value);
+        public void DeleteKey(string key) => PlayerPrefs.DeleteKey(key);
+        public void Save() => PlayerPrefs.Save();
     }
 }

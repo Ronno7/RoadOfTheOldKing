@@ -1,4 +1,3 @@
-using System.Linq;
 using RoadOfTheOldKing.Input;
 using RoadOfTheOldKing.Progression;
 using RoadOfTheOldKing.World;
@@ -70,8 +69,16 @@ namespace RoadOfTheOldKing.Player
             if (health == null || !health.IsAlive) return;
             var session = GameSession.Instance;
             if (session != null)
-                Nearby = session.Checkpoints.Fires.Where(f => f != null && f.CanUse(transform))
-                    .OrderBy(f => Vector2.SqrMagnitude(f.transform.position - transform.position)).FirstOrDefault();
+            {
+                // Nearest usable fire; ties keep list order. A plain loop: this runs every frame.
+                float nearestFire = float.PositiveInfinity;
+                foreach (var fire in session.Checkpoints.Fires)
+                {
+                    if (fire == null || !fire.CanUse(transform)) continue;
+                    float distance = Vector2.SqrMagnitude(fire.transform.position - transform.position);
+                    if (distance < nearestFire) { nearestFire = distance; Nearby = fire; }
+                }
+            }
             if (IsOpen || !CanInteract) return;
             float nearest = float.PositiveInfinity;
             foreach (var pickup in WorldPickup.Active)

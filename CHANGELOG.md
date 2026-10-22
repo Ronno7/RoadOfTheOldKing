@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+**Added**
+- Place names appear as you enter regions, with smaller names for landmarks within them.
+
+**Changed**
+- Sun Shards and heart fragments arrive with a falling light and a soft glint, and shimmer while they wait to be collected.
+- The charged cleave now spins the hero with the axe and steps into the swing; a full charge flashes and rings.
+- Several coins dropped together now look like a small pile.
+- The Tutorial points out its first Sun Shard once it appears.
+
+**Fixed**
+- Continue returns you exactly where you left off in places your progress has changed, instead of at the bonfire.
+
 ## 0.4 — Vertical slice
 
 ### 0.4.9 — 2026-10-20 · Controller support and world polish

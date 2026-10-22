@@ -35,6 +35,15 @@ namespace RoadOfTheOldKing.Progression
         private IProgressStore store;
         private ResumePoint resume, pendingResume;
         private float nextResumeCheck;
+        // Resume persistence (21 Oct). `resume` is the in-memory truth Continue uses; these track whether the store
+        // still has to catch up. Only the newest change is pending: a write supersedes an older failed clear (it
+        // overwrites the stored record) and a clear supersedes an older failed write. Automatic retries ride the
+        // autosave tick with a small budget per change; quit, focus loss and Main Menu always try once more.
+        private bool resumeWritePending, resumeClearPending;
+        private int resumeRetriesLeft;
+        private const int ResumeRetryBudget = 4;
+        internal bool ResumeWritePending => resumeWritePending;
+        internal bool ResumeClearPending => resumeClearPending;
         private SceneTransitions transitions;
         private bool loading;
         private bool loadFailed;
@@ -110,13 +119,6 @@ namespace RoadOfTheOldKing.Progression
             }
 
             Checkpoints.PlaceArrivingPlayer(scene, transitions.ArrivalId);
-            // Continue from a resume point: the exact spot, with the health and flasks the player left with.
-            if (pendingResume != null && pendingResume.scenePath == scene.path)
-            {
-                Checkpoints.TryResumeAt(new Vector2(pendingResume.x, pendingResume.y));
-                Checkpoints.Carry(pendingResume.health, pendingResume.flasks);
-            }
-            pendingResume = null;
             // Dying returns to the fire, so a death clears the resume point at once (even if the game is closed
             // on the defeat screen).
             Player.Health.Defeated += ClearResume;
@@ -128,6 +130,15 @@ namespace RoadOfTheOldKing.Progression
                 Combat.UnlockRecall();
             foreach (var participant in Participants<IProgressParticipant>())
                 participant.RestoreProgress(Progress);
+            // Continue from a resume point: the exact spot, with the health and flasks the player left with.
+            // Validate only after saved geometry (drained water, opened passages, cleared obstacles) is restored;
+            // scene objects start in their authored state, which would wrongly reject such a spot.
+            if (pendingResume != null && pendingResume.scenePath == scene.path)
+            {
+                Checkpoints.TryResumeAt(new Vector2(pendingResume.x, pendingResume.y));
+                Checkpoints.Carry(pendingResume.health, pendingResume.flasks);
+            }
+            pendingResume = null;
             Visits.Restore();
             Rewards.ApplyUpgrades();
             Checkpoints.ApplyCarriedVitals();
@@ -180,6 +191,7 @@ namespace RoadOfTheOldKing.Progression
             Progress = new ProgressState();
             Visits.Clear();
             resume = pendingResume = null;
+            resumeWritePending = resumeClearPending = false; // store.Clear removed the stored resume too.
             Rewards.OnProgressReplaced();
             Checkpoints.Forget();
             Status = "";
@@ -209,6 +221,7 @@ namespace RoadOfTheOldKing.Progression
         {
             if (loading || !CanReturnToTitle) return false;
             if (Player != null && Player.IsAlive) { CaptureAndSave("Progress saved."); RecordResume(); }
+            FlushResume(); // One more attempt at anything still pending, such as a death's failed clear.
             return Load(titleScene, null);
         }
 
@@ -216,14 +229,17 @@ namespace RoadOfTheOldKing.Progression
         // checked every few seconds and written only when something changed (see the fields' tooltips).
         private void Update()
         {
-            if (Player == null || loading || Time.unscaledTime < nextResumeCheck) return;
+            if (Time.unscaledTime < nextResumeCheck) return;
             nextResumeCheck = Time.unscaledTime + resumeInterval;
+            // A failed write or clear is retried even without a player (for example on the title after a death).
+            RetryResumePersistence();
+            if (Player == null || loading) return;
             if (!EncounterState.InCombat) RecordResume(force: false);
         }
 
         // Moments a player may be leaving: the window or browser tab loses focus, or the application quits.
-        private void OnApplicationFocus(bool focused) { if (!focused) RecordResume(); }
-        private void OnApplicationQuit() => RecordResume();
+        private void OnApplicationFocus(bool focused) { if (!focused) { RecordResume(); FlushResume(); } }
+        private void OnApplicationQuit() { RecordResume(); FlushResume(); }
 
         // Records where Continue resumes. Called directly by the pause menu, Main Menu and Quit.
         public void RecordResume() => RecordResume(force: true);
@@ -239,21 +255,46 @@ namespace RoadOfTheOldKing.Progression
                 scenePath = SceneLoader.ActivePath, x = position.x, y = position.y,
                 health = Player.Health.Health, flasks = flask != null ? flask.Charges : -1
             };
-            if (!force && resume != null && resume.scenePath == next.scenePath && resume.health == next.health &&
-                resume.flasks == next.flasks &&
+            // An unchanged snapshot needs no new write; if the last one failed, Update's bounded retry repeats it.
+            if (!force && resume != null && resume.scenePath == next.scenePath &&
+                resume.health == next.health && resume.flasks == next.flasks &&
                 (new Vector2(resume.x, resume.y) - position).sqrMagnitude < resumeMinDistance * resumeMinDistance)
                 return;
             resume = next;
-            try { store.SaveResume(resume); }
-            catch (Exception) { }
+            resumeClearPending = false; // Writing overwrites any stale stored record.
+            resumeWritePending = true;
+            resumeRetriesLeft = ResumeRetryBudget;
+            FlushResume();
         }
 
         internal void ClearResume()
         {
-            if (resume == null) return;
+            // A clear that failed earlier is not forgotten: later deaths/rests/travel try it again.
+            if (resume == null && !resumeClearPending) return;
             resume = null;
-            try { store.ClearResume(); }
+            resumeWritePending = false;
+            resumeClearPending = true;
+            resumeRetriesLeft = ResumeRetryBudget;
+            FlushResume();
+        }
+
+        // One attempt at whatever is pending. Success settles the state; failure keeps it for a later retry.
+        internal void FlushResume()
+        {
+            try
+            {
+                if (resumeWritePending) { store.SaveResume(resume); resumeWritePending = false; }
+                else if (resumeClearPending) { store.ClearResume(); resumeClearPending = false; }
+            }
             catch (Exception) { }
+        }
+
+        // The autosave tick's bounded retry; a new change refills the budget.
+        internal void RetryResumePersistence()
+        {
+            if ((!resumeWritePending && !resumeClearPending) || resumeRetriesLeft <= 0) return;
+            resumeRetriesLeft--;
+            FlushResume();
         }
 
         internal bool Load(string scenePath, string arrival)

@@ -9,6 +9,7 @@ namespace RoadOfTheOldKing.UI
     //  Hint: the single current teaching hint owned by the Tutorial guide.
     //  Banner: one large, brief milestone line across the screen (for example "BONFIRE LIT").
     //  Speech: one short line spoken by someone in the world, shown over their head (the trader's barks).
+    //  Area: the name of a place the player just entered, shown large and quiet (AreaName zones).
     public static class HudNotifications
     {
         public const int MaxReceipts = 3;
@@ -31,6 +32,10 @@ namespace RoadOfTheOldKing.UI
         public static float BannerStartedAt { get; private set; } = float.NegativeInfinity;
         public static int BannerVersion { get; private set; }
 
+        public static string Area { get; private set; }
+        public static bool AreaIsLandmark { get; private set; }
+        public static int AreaVersion { get; private set; }
+
         public static Transform Speaker { get; private set; }
         public static string Speech { get; private set; }
         public static float SpeechHeight { get; private set; }
@@ -41,6 +46,7 @@ namespace RoadOfTheOldKing.UI
         {
             receipts.Clear(); HintWorldPosition = null; Hint = null; HintCompleted = false; Version++; HintVersion++;
             Banner = null; BannerStartedAt = float.NegativeInfinity; BannerVersion++;
+            Area = null; AreaVersion++;
             Speaker = null; Speech = null; SpeechUntil = float.NegativeInfinity;
         }
 
@@ -60,6 +66,14 @@ namespace RoadOfTheOldKing.UI
         {
             if (string.IsNullOrEmpty(text)) return;
             Banner = text; BannerStartedAt = Time.unscaledTime; BannerVersion++;
+        }
+
+        // The HUD starts the place name once nothing covers it (a milestone banner, a menu, a scene fade).
+        // Regions use the title face; a landmark within a region is announced a tier smaller.
+        public static void ShowArea(string name, bool landmark = false)
+        {
+            if (string.IsNullOrEmpty(name)) return;
+            Area = name; AreaIsLandmark = landmark; AreaVersion++;
         }
 
         public static void Post(string text, float seconds = 3.5f)

@@ -62,6 +62,14 @@ namespace RoadOfTheOldKing.UI
         private Label bannerText;
         // Milestone banner timing in seconds (unscaled: lighting a fire does not pause the world).
         private const float BannerIn = .3f, BannerHold = 1.6f, BannerOut = .7f;
+        // Place names (AreaName): slower and quieter than a milestone, in the title face. The name waits until
+        // nothing covers it, then runs on unscaled time; a newer name replaces it.
+        private const float AreaIn = .8f, AreaHold = 2.6f, AreaOut = 1.2f;
+        private VisualElement areaBanner;
+        private readonly List<Label> areaLabels = new List<Label>();
+        private int areaVersion;
+        private float areaStartedAt = float.NegativeInfinity;
+        private bool areaPending;
         private readonly List<VisualElement> flaskIcons = new List<VisualElement>();
         private WorldUIDocument charge, staminaArc;
         private VisualElement promptChip, cueChip, speechChip;
@@ -148,13 +156,48 @@ namespace RoadOfTheOldKing.UI
             banner = new VisualElement { name = "banner", pickingMode = PickingMode.Ignore };
             bannerText = new Label { name = "banner-text", pickingMode = PickingMode.Ignore };
             banner.Add(bannerText); root.Add(banner);
+            BuildAreaBanner();
             promptChip = AnchoredChip("prompt-chip", out promptText);
             cueChip = AnchoredChip("cue-chip", out tutorialText);
             speechChip = AnchoredChip("speech-chip", out speechText);
             charge.Show(false); staminaArc.Show(false); SetVisible(hint, false);
-            SetVisible(weaponAway, false); SetVisible(banner, false);
+            SetVisible(weaponAway, false); SetVisible(banner, false); SetVisible(areaBanner, false);
             BuildVignette();
             return true;
+        }
+
+        // The place name: a soft ink band in stepped layers (no blur) behind eight ink copies one UI pixel out,
+        // which form the outline (a raster font has no outline pass), over the stone-light name, with the kit
+        // divider beneath sized to the name. The band keeps the name readable over bright paths and water.
+        private void BuildAreaBanner()
+        {
+            areaBanner = new VisualElement { name = "area-banner", pickingMode = PickingMode.Ignore };
+            var column = new VisualElement { name = "area-column", pickingMode = PickingMode.Ignore };
+            for (int step = 0; step < 4; step++)
+            {
+                var band = new VisualElement { pickingMode = PickingMode.Ignore };
+                band.AddToClassList("area-band");
+                band.AddToClassList("area-band-" + step);
+                column.Add(band);
+            }
+            var title = new VisualElement { name = "area-title", pickingMode = PickingMode.Ignore };
+            for (int dx = -1; dx <= 1; dx++)
+                for (int dy = -1; dy <= 1; dy++)
+                {
+                    if (dx == 0 && dy == 0) continue;
+                    var outline = new Label { pickingMode = PickingMode.Ignore };
+                    outline.AddToClassList("area-outline");
+                    outline.style.left = dx * HudPixel; outline.style.top = dy * HudPixel;
+                    title.Add(outline); areaLabels.Add(outline);
+                }
+            var text = new Label { name = "area-text", pickingMode = PickingMode.Ignore };
+            title.Add(text); areaLabels.Add(text);
+            var rule = new VisualElement { name = "area-rule", pickingMode = PickingMode.Ignore };
+            rule.AddToClassList("kit-divider");
+            var gem = new VisualElement { pickingMode = PickingMode.Ignore };
+            gem.AddToClassList("kit-gem");
+            rule.Add(gem);
+            column.Add(title); column.Add(rule); areaBanner.Add(column); root.Add(areaBanner);
         }
 
         // A screen chip for a world-anchored label (prompt, tutorial cue): kit art at UI pixel size; LateUpdate places it.
@@ -247,6 +290,28 @@ namespace RoadOfTheOldKing.UI
             UpdateHint(alive && !menuOpen && !scripted);
             UpdateSpeech(alive && !menuOpen && !scripted);
             UpdateBanner(alive);
+            var game = GameSession.Instance;
+            UpdateArea(alive && !menuOpen && !scripted && !BannerShowing() && (game == null || !game.IsLoading));
+        }
+
+        private void UpdateArea(bool clear)
+        {
+            if (HudNotifications.AreaVersion != areaVersion)
+            {
+                areaVersion = HudNotifications.AreaVersion;
+                areaPending = !string.IsNullOrEmpty(HudNotifications.Area);
+                areaStartedAt = float.NegativeInfinity;
+                foreach (var label in areaLabels) label.text = HudNotifications.Area;
+                areaBanner.EnableInClassList("landmark", HudNotifications.AreaIsLandmark);
+            }
+            if (areaPending && clear) { areaPending = false; areaStartedAt = Time.unscaledTime; }
+            float t = Time.unscaledTime - areaStartedAt;
+            float alpha = !clear || t < 0f || t > AreaIn + AreaHold + AreaOut ? 0f
+                : t < AreaIn ? t / AreaIn
+                : t < AreaIn + AreaHold ? 1f
+                : 1f - (t - AreaIn - AreaHold) / AreaOut;
+            SetVisible(areaBanner, alpha > 0f);
+            if (alpha > 0f) areaBanner.style.opacity = alpha;
         }
 
         private static bool BannerShowing()

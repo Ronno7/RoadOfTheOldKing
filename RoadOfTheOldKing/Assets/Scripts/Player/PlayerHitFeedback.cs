@@ -8,6 +8,7 @@ namespace RoadOfTheOldKing.Player
     // Presentation only: makes taking a hit unmistakable. A red flash on the sprite, a tiny global
     // hit-stop, a capped camera kick along the blow, then the classic 16-bit blink for the rest of the
     // post-hit invulnerability. The HUD adds the screen-edge vignette; the animator plays the flinch.
+    // As the body's only flash writer it also shows the heal and the full-charge moment.
     [DisallowMultipleComponent, RequireComponent(typeof(PlayerHealth))]
     [DefaultExecutionOrder(150)] // after PlayerSpriteAnimator, before PlayerWeaponCarry copies the body colour
     public sealed class PlayerHitFeedback : MonoBehaviour
@@ -18,6 +19,9 @@ namespace RoadOfTheOldKing.Player
         [SerializeField] private Color healFlashColor = new Color(1f, .84f, .45f, 1f);
         [SerializeField, Min(0f)] private float healFlashDuration = .18f;
         [SerializeField, Min(0f)] private float flashDuration = .1f;
+        [Tooltip("Brief flash the moment a charged cleave reaches full strength (the only charge that breaks guards).")]
+        [SerializeField] private Color chargeFlashColor = new Color(1f, .93f, .7f, 1f);
+        [SerializeField, Min(0f)] private float chargeFlashDuration = .07f;
         [Tooltip("Global freeze on taking damage (only from normal speed).")]
         [SerializeField, Min(0f)] private float hitStop = .06f;
         [Tooltip("Camera kick distance along the blow, in world units (capped by the camera).")]
@@ -31,9 +35,12 @@ namespace RoadOfTheOldKing.Player
         private float flashUntil;
         private Color currentFlash;
         private PlayerFlask flask;
+        private PlayerCombatController combat;
+        private bool chargeFull;
 
         private void Awake()
         {
+            combat = GetComponent<PlayerCombatController>();
             player = GetComponent<PlayerHealth>();
             health = GetComponent<Damageable>();
             flask = GetComponent<PlayerFlask>();
@@ -69,6 +76,10 @@ namespace RoadOfTheOldKing.Player
 
         private void LateUpdate()
         {
+            var weapon = combat != null ? combat.Weapon : null;
+            bool full = weapon != null && weapon.State == RoadOfTheOldKing.Weapons.AxeState.Charging && weapon.Charge01 >= 1f;
+            if (full && !chargeFull) { currentFlash = chargeFlashColor; flashUntil = Time.unscaledTime + chargeFlashDuration; }
+            chargeFull = full;
             float flash = Time.unscaledTime < flashUntil ? Mathf.Clamp01(FeedbackSettings.FlashScale) : 0f;
             bool blink = player.IsAlive && player.IsRecoveringFromHit && Mathf.Repeat(Time.time / blinkInterval, 2f) >= 1f;
             Apply(flash, blink ? blinkAlpha : 1f);

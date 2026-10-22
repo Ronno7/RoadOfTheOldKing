@@ -76,3 +76,27 @@ Label { margin: 0; padding: 0; -unity-font-style: normal; }
     background-color: rgba(23, 28, 27, 0.78); border-top-width: 2px; border-bottom-width: 2px; border-color: var(--kit-trim);
 }
 #banner-text { font-size: 40px; margin: 0; padding: 0; color: var(--kit-gold); -unity-text-align: middle-center; white-space: nowrap; }
+
+/* Place names (AreaName), Dark Souls style. Regions: RotOK Title32 at 64 px (one font pixel = one UI pixel) with the
+   kit divider. Landmarks within a region: RotOK Heading16 at 32 px, no divider. Both are stone-light with a one-UI-pixel
+   ink outline (eight offset copies) over a soft ink band: four stacked layers, each 16 UI px narrower, compose to
+   about 12/25/41/62% opacity from the ends inwards, a stepped pixel-art falloff instead of a blur. */
+#area-banner { position: absolute; left: 0; right: 0; top: 20%; align-items: center; }
+#area-column { align-items: stretch; }
+.area-band { position: absolute; top: -12px; bottom: -12px; background-color: rgb(23, 28, 27); }
+.area-band-0 { left: -116px; right: -116px; opacity: .124; }
+.area-band-1 { left: -84px; right: -84px; opacity: .141; }
+.area-band-2 { left: -52px; right: -52px; opacity: .214; }
+.area-band-3 { left: -20px; right: -20px; opacity: .357; }
+#area-title Label {
+    font-size: 64px; margin: 0; padding: 0; white-space: nowrap; -unity-text-align: middle-center;
+    -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKTitle32.asset");
+}
+#area-text { color: var(--kit-text); }
+.area-outline { position: absolute; color: var(--kit-ink); }
+#area-rule { margin: 6px -24px 0 -24px; }
+#area-banner.landmark .area-band { top: -8px; bottom: -8px; }
+#area-banner.landmark #area-title Label {
+    font-size: 32px; -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKHeading16.asset");
+}
+#area-banner.landmark #area-rule { display: none; }

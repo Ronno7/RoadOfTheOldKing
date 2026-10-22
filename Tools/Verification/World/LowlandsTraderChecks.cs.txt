@@ -73,6 +73,11 @@ try{
   var walker=trader.GetComponent<RoadOfTheOldKing.World.TraderWalker>();check(walker!=null&&dialogue!=null,"Trader walks and the player can talk");
   game.Progress.bronzeCoins=20;atTrader();check(p.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>().TryInteract(),"Actual F selector talks to the trader");
   check(dialogue.IsOpen&&!menu.IsOpen&&walker.Engaged&&spoken().Contains("Ho there"),"Talking opens the greeting, not the shop, and holds the trader");
+  // 21 Oct: the typing label is rebuilt only when the visible count changes (no per-frame string), keeps the
+  // transparent remainder while typing, and shows the plain line once finished.
+  var refresh=dialogue.GetType().GetMethod("Refresh",f);var typed=spoken();refresh.Invoke(dialogue,null);
+  check(ReferenceEquals(typed,spoken())&&typed.Contains("<alpha=#00>"),"Unchanged visible count reuses the label text; remainder laid out transparently");
+  dialogue.Submit();check(!spoken().Contains("<alpha=#00>")&&spoken().Contains("Ho there"),"Finishing the line shows it whole");
   toChoices();check(atChoices(),"Greeting ends at its choices");
   dialogue.Navigate(1);dialogue.Submit();check(dialogue.IsOpen&&spoken().Contains("highlands"),"The road question answers with lore");
   // As in play: the conversation's lease has made the combat controller inactive (17 Oct regression: Trade closed without a shop).

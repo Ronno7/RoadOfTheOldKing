@@ -95,8 +95,12 @@ if(command=="resume-safety"){
  int stage=SessionState.GetInt(prefix+"ResumeSafetyPhase",0);
  var checks=new System.Collections.Generic.List<string>();
  System.Action<bool,string> resumeCheck=(ok,label)=>{if(!ok)throw new System.Exception(label);checks.Add(label);};
- if(stage==1||stage==3){
+ if(stage==1||stage==3||stage==5||stage==7||stage==9){
   resumeCheck(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name=="Title","Title reached with saved resume");
+  // The title screen is itself a MenuStack modal; nothing from the departed scene may remain beneath it.
+  if(stage==9)resumeCheck(!RoadOfTheOldKing.UI.SimulationPause.IsPaused&&Time.timeScale==1&&!AudioListener.pause&&RoadOfTheOldKing.UI.MenuStack.Top is RoadOfTheOldKing.UI.TitleScreen&&
+   UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.UI.PauseMenuController>(FindObjectsInactive.Include,FindObjectsSortMode.None).Length==0,
+   "Leaving through the pause menu's Main Menu leaves no pause lease, muted audio or stale modal under the title");
   resumeCheck(game.Continue(),"Continue starts real scene load");
  }else{
   var resumePlayer=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
@@ -105,7 +109,7 @@ if(command=="resume-safety"){
   System.Action<Vector2> pose=at=>{resumePlayer.transform.position=at;body.position=at;body.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();};
   var fire=game.Checkpoints.Fires.First(fireItem=>fireItem.Id=="green-lowlands/arrival-fire");
   if(stage==0){
-   pose(new Vector2(15.5f,3));resumeCheck(game.Checkpoints.Rest(fire),"Checkpoint established before resume checks");
+   pose(new Vector2(15.5f,3));resumeCheck((game.Progress.HasFire(fire.Id)||game.Checkpoints.Light(fire))&&game.Checkpoints.Rest(fire),"Checkpoint established before resume checks (light, then rest)");
    var method=game.Checkpoints.GetType().GetMethod("TryResumeAt",flags);
    resumeCheck((bool)method.Invoke(game.Checkpoints,new object[]{new Vector2(127,77)}),"Clear body-size resume accepted");
    Vector2 original=body.position;
@@ -121,9 +125,55 @@ if(command=="resume-safety"){
    resumeCheck(resumePlayer.Health.Health==55&&flask.Charges==1,"Fallback preserves saved health and flasks");
    resumeCheck(game.Progress.checkpointId==fire.Id,"Fallback does not change checkpoint identity");
    pose(new Vector2(64,27));resumeCheck(game.ReturnToTitle(),"Clear resume staged through Main Menu");
-  }else if(stage==4){
-   resumeCheck(Vector2.Distance(body.position,new Vector2(64,27))<.1f,"Clear exact resume remains exact");
-   resumeCheck(resumePlayer.Health.Health==55&&flask.Charges==1,"Exact resume carries vitals");
+  }else if(stage==4||stage==6||stage==8){
+   // Saved geometry (21 Oct): a resume on ground that only restorable collision blocks (the high-water flood group,
+   // a closed passage) must be validated after RestoreProgress applies the saved state, not against Awake's default.
+   var shape=resumePlayer.GetComponent<BoxCollider2D>();var hits=new System.Collections.Generic.List<Collider2D>(8);
+   System.Func<Vector2,System.Collections.Generic.List<Collider2D>> overlap=at=>{hits.Clear();Physics2D.SyncTransforms();
+    Physics2D.OverlapBox(at+(Vector2)resumePlayer.transform.TransformVector(shape.offset),shape.size,0,new ContactFilter2D{useTriggers=false},hits);
+    hits.RemoveAll(h=>h==null||h.transform.IsChildOf(resumePlayer.transform));return hits;};
+   // Grid points blocked only by the given colliders, restricted to what the saved state then clears.
+   System.Func<Collider2D[],System.Action,Vector2?> find=(blockers,apply)=>{
+    var set=new System.Collections.Generic.HashSet<Collider2D>(blockers);var candidates=new System.Collections.Generic.List<Vector2>();
+    foreach(var c in blockers){var b=c.bounds;for(float x=Mathf.Ceil(b.min.x)+.5f;x<b.max.x;x+=1f)for(float y=Mathf.Ceil(b.min.y)+.5f;y<b.max.y;y+=1f){
+     var o=overlap(new Vector2(x,y));if(o.Count>0&&o.All(h=>set.Contains(h)))candidates.Add(new Vector2(x,y));}}
+    apply();foreach(var p in candidates)if(overlap(p).Count==0)return p;return null;};
+   if(stage==4){
+    resumeCheck(Vector2.Distance(body.position,new Vector2(64,27))<.1f,"Clear exact resume remains exact");
+    resumeCheck(resumePlayer.Health.Health==55&&flask.Charges==1,"Exact resume carries vitals");
+    var sluice=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RecallSluice>();Transform flood=null;
+    foreach(var t in UnityEngine.Object.FindObjectsByType<Transform>(FindObjectsInactive.Include,FindObjectsSortMode.None))if(t.name=="Pond high water")flood=t;
+    resumeCheck(sluice!=null&&flood!=null&&flood.gameObject.activeInHierarchy&&sluice.Stage!=RoadOfTheOldKing.World.SluiceStage.PondLow,"Isolated save starts with high-water collision");
+    var spot=find(flood.GetComponentsInChildren<Collider2D>().Where(c=>!c.isTrigger&&c.enabled).ToArray(),()=>{game.Progress.Complete(sluice.LowWaterId);sluice.RestoreProgress(game.Progress);});
+    resumeCheck(spot.HasValue&&sluice.Stage==RoadOfTheOldKing.World.SluiceStage.PondLow,"Found drained floor blocked only by the high-water group");
+    SessionState.SetFloat(prefix+"ResumeX",spot.Value.x);SessionState.SetFloat(prefix+"ResumeY",spot.Value.y);
+    pose(spot.Value);resumeCheck(game.ReturnToTitle(),"Drained-ground resume saved with pond-low");
+   }else{
+    var expected=new Vector2(SessionState.GetFloat(prefix+"ResumeX",0),SessionState.GetFloat(prefix+"ResumeY",0));
+    resumeCheck(Vector2.Distance(body.position,expected)<.1f,(stage==6?"Drained-ground":"Opened-passage")+" resume is exact, not the fire fallback");
+    resumeCheck(resumePlayer.Health.Health==55&&flask.Charges==1,"Saved-geometry resume carries vitals");
+    if(stage==6){
+     var passage=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.PermanentPassage>(FindObjectsSortMode.None).FirstOrDefault(p=>p.ProgressId=="world/high-pass/open");
+     resumeCheck(passage!=null&&!passage.IsOpen,"High Pass bridge closed in the isolated save");
+     var closed=((GameObject[])typeof(RoadOfTheOldKing.World.PermanentPassage).GetField("closedObjects",flags).GetValue(passage)).Where(g=>g!=null&&g.activeInHierarchy)
+      .SelectMany(g=>g.GetComponentsInChildren<Collider2D>()).Where(c=>!c.isTrigger&&c.enabled).ToArray();
+     var spot=find(closed,()=>{game.Progress.Complete(passage.ProgressId);passage.RestoreProgress(game.Progress);});
+     resumeCheck(spot.HasValue&&passage.IsOpen,"Found opened-passage footing blocked only by its closed state");
+     SessionState.SetFloat(prefix+"ResumeX",spot.Value.x);SessionState.SetFloat(prefix+"ResumeY",spot.Value.y);
+     pose(spot.Value);resumeCheck(game.ReturnToTitle(),"Opened-passage resume saved");
+    }else{
+     // Scene transition with a modal open (21 Oct): leave through the real pause menu's Main Menu row, so the
+     // menu, its pause/audio lease and its control lease are all live while the scene unloads.
+     var pauseMenu=resumePlayer.GetComponent<RoadOfTheOldKing.UI.PauseMenuController>();
+     resumeCheck(pauseMenu.Open()&&RoadOfTheOldKing.UI.MenuStack.Top==(RoadOfTheOldKing.UI.IModalMenu)pauseMenu,"Pause menu open before leaving");
+     pauseMenu.Navigate(1);pauseMenu.Navigate(1);pauseMenu.Submit(); // Resume, Settings, Main Menu
+     resumeCheck(game.IsLoading,"Main Menu row starts the real title load");
+    }
+   }
+  }else if(stage==10){
+   var arrived=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
+   resumeCheck(arrived!=null&&!arrived.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>().IsLocked,"Continue after the menu exit arrives with no leftover control lock");
+   resumeCheck(!RoadOfTheOldKing.UI.SimulationPause.IsPaused&&Time.timeScale==1&&!RoadOfTheOldKing.UI.MenuStack.IsAnyOpen,"Arrival has no leftover pause or modal");
   }else return "Resume safety complete";
  }
  SessionState.SetInt(prefix+"ResumeSafetyPhase",stage+1);

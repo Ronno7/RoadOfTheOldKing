@@ -168,6 +168,27 @@ def pickup(kind):
     return silhouette(im)
 
 
+def coin_pile():
+    """Three overlapping coins: the world pickup for more than one coin. Each coin keeps its own ink rim so the
+    pile reads as separate pieces; same bronze ramp and face mark as the single BronzeCoin."""
+    im = blank(16, 16); d = ImageDraw.Draw(im)
+
+    def coin(ox, oy):
+        ring = [(ox+2, oy), (ox+6, oy), (ox+8, oy+2), (ox+8, oy+6), (ox+6, oy+8),
+                (ox+2, oy+8), (ox, oy+6), (ox, oy+2)]
+        d.polygon(ring, fill=INK)
+        d.polygon([(ox+2, oy+1), (ox+6, oy+1), (ox+7, oy+2), (ox+7, oy+6), (ox+6, oy+7),
+                   (ox+2, oy+7), (ox+1, oy+6), (ox+1, oy+2)], fill=BRONZE[1])
+        d.line((ox+3, oy+1, ox+5, oy+1), fill=BRONZE[3])
+        d.line((ox+1, oy+3, ox+1, oy+4), fill=BRONZE[3])
+        d.rectangle((ox+4, oy+3, ox+4, oy+5), fill=BRONZE[0])
+        d.line((ox+7, oy+3, ox+7, oy+5), fill=BRONZE[2])
+
+    for ox, oy in ((1, 3), (7, 2), (4, 6)):  # Back to front.
+        coin(ox, oy)
+    return silhouette(im)
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     sources = {'TimberChest_Closed': chest(0), 'TimberChest_HalfOpen': chest(1),
@@ -176,11 +197,12 @@ def main():
                     ('Fork', 'Crank', 'Brake', 'Catch', 'Counterweight', 'Axle')})
     sources.update({'RopeAnchor': anchor(), 'ForgeCarving': carving()})
     sources.update({kind: pickup(kind) for kind in ('SunShard', 'BronzeCoin', 'HeartFragment')})
+    sources['BronzeCoinPile'] = coin_pile()
     atlas = blank(256, 64); entries = []
     # Fixed explicit slots keep named rectangles stable as this catalog grows.
     slots = [(0, 0), (24, 0), (48, 0), (72, 0),
              (0, 24), (16, 24), (40, 24), (56, 24), (72, 24), (88, 24),
-             (96, 0), (112, 0), (144, 0), (160, 0), (176, 0)]
+             (96, 0), (112, 0), (144, 0), (160, 0), (176, 0), (192, 0)]
     for (name, im), (x, y) in zip(sources.items(), slots):
         w, h = im.size
         atlas.alpha_composite(im, (x, atlas.height-y-h))
@@ -199,7 +221,7 @@ def main():
         recipe='Original native silhouettes; centered pivots and prior canvases retained. '
                'Machine fittings use ArtSource/GreenLowlands/Interactive/WaterworksFittings.recipe.json.'),
         indent=2)+'\n')
-    print('Exported 15 regional interaction sprites; native canvases, 3-8 colors, '
+    print(f'Exported {len(entries)} regional interaction sprites; native canvases, 3-8 colors, '
           'binary alpha, complete near-black contours and stable chest base verified.')
 
 

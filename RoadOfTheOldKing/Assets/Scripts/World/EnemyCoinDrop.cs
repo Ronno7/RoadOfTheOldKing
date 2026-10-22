@@ -40,6 +40,7 @@ namespace RoadOfTheOldKing.World
             if (coinVisual == null) return;
             coinVisual.transform.position = dropPosition;
             coinVisual.SetActive(amount > 0);
+            PickupPresentation.ShowCoinAmount(coinVisual, amount);
         }
         public bool TryCollect(PlayerHealth player)
         {

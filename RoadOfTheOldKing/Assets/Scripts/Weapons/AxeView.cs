@@ -29,6 +29,11 @@ namespace RoadOfTheOldKing.Weapons
         [SerializeField] private Material recallMaterial;
         [SerializeField, Min(0f)] private float recallTrailTime = .10f;
         [SerializeField, Range(0f, 1f)] private float recallTrailWidth = .65f;
+        [Tooltip("Played once when a held charge reaches full strength, with the ring turning gold.")]
+        [SerializeField] private AudioClip chargeReadySound;
+        [SerializeField, Range(0f, 1f)] private float chargeReadyVolume = .5f;
+        private AudioSource speaker;
+        private bool chargeWasFull;
         private Vector3 originalBladePosition;
         private Vector3 groundModelPosition;
         private Quaternion groundModelRotation;
@@ -52,6 +57,12 @@ namespace RoadOfTheOldKing.Weapons
         private void Awake()
         {
             weapon = GetComponent<AxeWeapon>();
+            if (chargeReadySound != null)
+            {
+                speaker = gameObject.AddComponent<AudioSource>();
+                speaker.playOnAwake = false;
+                speaker.spatialBlend = 0f;
+            }
             if (trail != null)
             {
                 originalTrailColor = trail.colorGradient;
@@ -95,6 +106,9 @@ namespace RoadOfTheOldKing.Weapons
 
         private void LateUpdate()
         {
+            bool full = weapon.State == AxeState.Charging && weapon.Charge01 >= 1f;
+            if (full && !chargeWasFull && speaker != null) speaker.PlayOneShot(chargeReadySound, chargeReadyVolume);
+            chargeWasFull = full;
             DrawPose();
             // Compose after every pose path, including detached and side-carry early returns.
             if (blade != null)

@@ -58,6 +58,8 @@ namespace RoadOfTheOldKing.World
             if (appearWhereLastFell && source.LastFallen.HasValue) transform.position = source.LastFallen.Value;
             if (awardImmediately) Grant(null);
             Refresh();
+            // Only a live unlock announces itself; RestoreProgress shows the reward quietly.
+            if (!awardImmediately && !IsCollected) PickupPresentation.Revealed(visual);
         }
 
         public override bool CanCollect(PlayerHealth player)

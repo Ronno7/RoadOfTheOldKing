@@ -13,8 +13,19 @@ namespace RoadOfTheOldKing.World
     {
         [SerializeField] private PickupStyle style;
         [SerializeField] private Sprite sparkSprite;
-        private SpriteRenderer source, art;
+        [Tooltip("Coin style: shown instead of the single coin when the pickup holds more than one.")]
+        [SerializeField] private Sprite pileSprite;
+        [Tooltip("Played once when the reward first appears (an encounter unlock), never on load.")]
+        [SerializeField] private AudioClip revealSound;
+        private SpriteRenderer source, art, column;
         private readonly SpriteRenderer[] glint = new SpriteRenderer[2];
+        // Shards and hearts keep a slow rise of pixel motes while uncollected: a Souls-style item glow that reads
+        // past grass and from a distance without a continuous flash.
+        private readonly SpriteRenderer[] beacon = new SpriteRenderer[3];
+        private Sprite singleSprite;
+        private bool pile;
+        private float reveal = -1f;
+        private const float RevealDrop = .45f, RevealSettle = .2f, RevealLight = 1.1f, BeaconCycle = 1.8f;
         private WorldPickup owner;
         private RewardChest chest;
         private PlayerBonfireInteraction interaction;
@@ -36,6 +47,14 @@ namespace RoadOfTheOldKing.World
                 glint[i] = MakeSprite("Pickup glint", art.transform, sparkSprite, source);
                 BindSolidTexture(glint[i]);
             }
+            if (sparkSprite == null || (style != PickupStyle.SunShard && style != PickupStyle.Heart)) return;
+            for (int i = 0; i < beacon.Length; i++)
+            {
+                beacon[i] = MakeSprite("Pickup beacon", transform, sparkSprite, source);
+                BindSolidTexture(beacon[i]);
+            }
+            column = MakeSprite("Reveal light", transform, sparkSprite, source);
+            BindSolidTexture(column);
         }
 
         private void OnEnable()
@@ -82,10 +101,18 @@ namespace RoadOfTheOldKing.World
                     lift = (1f + Mathf.Sin(t * 2.4f)) / 32f;
                     // A brief turn, then hold the readable face; never continuously strobe.
                     float turn = Mathf.Repeat(t, 3.4f);
-                    if (turn < .55f) width = Mathf.Max(.25f, Mathf.Round(Mathf.Abs(Mathf.Cos(turn / .55f * Mathf.PI)) * 4f) / 4f);
+                    if (turn < .55f && !pile) width = Mathf.Max(.25f, Mathf.Round(Mathf.Abs(Mathf.Cos(turn / .55f * Mathf.PI)) * 4f) / 4f);
                     if (age < .45f) lift += Mathf.Sin(age / .45f * Mathf.PI) * .5f;
                 }
                 if (style != PickupStyle.Grounded) lift += focus / 16f;
+            }
+            if (reveal >= 0f)
+            {
+                // Appearance: fall in from above, one small bounce, while the light column fades.
+                reveal += elapsed;
+                if (reveal < RevealDrop) { float k = reveal / RevealDrop; lift += 1.25f * (1f - k * k); }
+                else if (reveal < RevealDrop + RevealSettle) lift += Mathf.Sin((reveal - RevealDrop) / RevealSettle * Mathf.PI) * 2f / 16f;
+                if (reveal > RevealLight) reveal = -1f;
             }
             art.transform.localPosition = Vector3.up * (Mathf.Round(lift * 16f) / 16f);
             art.transform.localScale = new Vector3(width, height, 1f);
@@ -111,6 +138,47 @@ namespace RoadOfTheOldKing.World
                 Size(mark, size / 16f);
                 mark.color = accent;
             }
+            UpdateBeacon(readable, inkAlpha, t);
+        }
+
+        private void UpdateBeacon(bool readable, float flash, float t)
+        {
+            Color accent = style == PickupStyle.Heart ? Heart : Warm;
+            if (column != null)
+            {
+                bool lit = readable && reveal >= 0f && flash > 0f;
+                column.enabled = lit;
+                if (lit)
+                {
+                    float k = reveal / RevealLight;
+                    float height = Mathf.Round(Mathf.Lerp(.5f, 3f, Mathf.Min(1f, k * 4f)) * 16f) / 16f;
+                    column.sortingLayerID = art.sortingLayerID;
+                    column.sortingOrder = art.sortingOrder - 1;
+                    column.transform.localPosition = new Vector3(0f, Mathf.Round(height * 8f) / 16f, 0f);
+                    Size(column, new Vector2(k < .25f ? 4f : 2f, height * 16f) / 16f);
+                    Color light = accent;
+                    light.a = (1f - k) * .75f * flash;
+                    column.color = light;
+                }
+            }
+            for (int i = 0; i < beacon.Length; i++)
+            {
+                var mote = beacon[i];
+                if (mote == null) continue;
+                mote.enabled = readable && flash > 0f;
+                if (!mote.enabled) continue;
+                float cycle = t + i * BeaconCycle / beacon.Length;
+                float p = Mathf.Repeat(cycle, BeaconCycle) / BeaconCycle;
+                // Each rise starts at a new deterministic offset across the item's width.
+                float jitter = Mathf.Repeat(Mathf.Sin(Mathf.Floor(cycle / BeaconCycle) * 12.9898f + i * 78.233f) * 43758.5453f, 1f);
+                mote.transform.localPosition = new Vector3(Mathf.Round((jitter - .5f) * 8f) / 16f, Mathf.Round(2f + p * 14f) / 16f, 0f);
+                mote.sortingLayerID = art.sortingLayerID;
+                mote.sortingOrder = art.sortingOrder + 1;
+                Size(mote, Vector2.one * (i == 0 ? 2f : 1f) / 16f);
+                Color glow = accent;
+                glow.a = Mathf.Sin(p * Mathf.PI) * .9f * flash;
+                mote.color = glow;
+            }
         }
 
         private void OnDisable()
@@ -118,6 +186,47 @@ namespace RoadOfTheOldKing.World
             if (source != null) source.forceRenderingOff = previousForceOff;
             if (art != null) art.enabled = false;
             foreach (var mark in glint) if (mark != null) mark.enabled = false;
+            foreach (var mote in beacon) if (mote != null) mote.enabled = false;
+            if (column != null) column.enabled = false;
+            reveal = -1f;
+        }
+
+        // Call when a reward first appears in play (not on load or restore): it falls in under a brief light
+        // with a chime, so a drop that appears where the last guard fell is noticed.
+        public static void Revealed(GameObject visual)
+        {
+            if (visual == null) return;
+            foreach (var view in visual.GetComponentsInChildren<PickupPresentation>(true))
+            {
+                if (!view.isActiveAndEnabled) continue;
+                view.reveal = 0f;
+                if (view.revealSound != null && DarkInterior.CanRead(view.transform.position)) PlayOnce(view.revealSound, view.transform.position);
+            }
+        }
+
+        // Coin pickups: a pile for more than one coin, the single coin otherwise.
+        public static void ShowCoinAmount(GameObject visual, int amount)
+        {
+            if (visual == null) return;
+            foreach (var view in visual.GetComponentsInChildren<PickupPresentation>(true))
+            {
+                if (view.style != PickupStyle.Coin || view.pileSprite == null) continue;
+                var renderer = view.GetComponent<SpriteRenderer>();
+                if (view.singleSprite == null) view.singleSprite = renderer.sprite;
+                view.pile = amount > 1;
+                renderer.sprite = view.pile ? view.pileSprite : view.singleSprite;
+            }
+        }
+
+        private static void PlayOnce(AudioClip clip, Vector3 at)
+        {
+            var go = new GameObject("Reward reveal sound");
+            go.transform.position = at;
+            var audio = go.AddComponent<AudioSource>();
+            audio.spatialBlend = 0f;
+            audio.volume = .5f;
+            audio.PlayOneShot(clip);
+            Destroy(go, clip.length + .1f);
         }
 
         private void OnDestroy()

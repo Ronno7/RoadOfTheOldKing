@@ -56,6 +56,8 @@ namespace RoadOfTheOldKing.Weapons
         [Min(0f)] public float cleaveStaminaCost = 35f;
         [Min(0f)] public float cleaveKnockback = 6f;
         [Min(0f)] public float cleaveStagger = 0.7f;
+        [Tooltip("Small step along the aim as the spin starts, over its first 30%; walls stop it like any movement.")]
+        [Min(0f)] public float cleaveStepDistance = 0.35f;
         [Header("Throw action (seconds per drawn cel)")]
         public ThrowActionTiming throwAction = new ThrowActionTiming();
         [Header("Flight")]

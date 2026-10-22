@@ -34,7 +34,13 @@ namespace RoadOfTheOldKing.Progression
         }
 
         public bool HasFire(string id) => FindFire(id) != null;
-        public FireRecord FindFire(string id) => string.IsNullOrEmpty(id) ? null : fires.Find(f => f != null && f.id == id);
+        // A plain loop: bonfire presentation asks every frame, and a capturing predicate allocates per call.
+        public FireRecord FindFire(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return null;
+            foreach (var fire in fires) if (fire != null && fire.id == id) return fire;
+            return null;
+        }
 
         // Records (or refreshes) a lit fire so travel can list it from any scene.
         public void DiscoverFire(string id, string scene, string displayName, int displayOrder)

@@ -36,6 +36,9 @@ namespace RoadOfTheOldKing.UI
         private Action closed;
         private Coroutine releasing;
         private int hintState = -1;
+        // The last line/count written to the label: the partial string is rebuilt only when either changes.
+        private string shownLine;
+        private int shownCount = -1;
 
         public bool IsOpen { get; private set; }
         public bool CanOpen => isActiveAndEnabled && !IsOpen && releasing == null && player != null && player.IsAlive &&
@@ -124,6 +127,7 @@ namespace RoadOfTheOldKing.UI
         {
             lineStartedAt = Time.unscaledTime;
             hintState = -1;
+            shownCount = -1;
             SetVisible(choicesRoot, false);
             list.Show(Array.Empty<PauseMenuAction>());
             Refresh();
@@ -148,7 +152,11 @@ namespace RoadOfTheOldKing.UI
         {
             string text = lineIndex < lines.Count ? lines[lineIndex] : "";
             int shown = Visible(text);
-            line.text = shown >= text.Length ? text : text.Substring(0, shown) + "<alpha=#00>" + text.Substring(shown);
+            if (shown != shownCount || !ReferenceEquals(text, shownLine))
+            {
+                line.text = shown >= text.Length ? text : text.Substring(0, shown) + "<alpha=#00>" + text.Substring(shown);
+                shownLine = text; shownCount = shown;
+            }
             bool showChoices = AtChoices;
             if (showChoices && choicesRoot.resolvedStyle.display == DisplayStyle.None)
             {

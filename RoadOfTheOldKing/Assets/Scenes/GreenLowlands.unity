@@ -319256,6 +319256,53 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1 &157152203
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 157152204}
+  - component: {fileID: 157152205}
+  m_Layer: 0
+  m_Name: Area - High Pass
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &157152204
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 157152203}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 134.5, y: 99.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1225250838}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &157152205
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 157152203}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7b8d156ea8c00f4ab02c5d3966e451b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.AreaName
+  displayName: High Pass
+  size: {x: 13, y: 9}
+  landmark: 1
 --- !u!1 &157634833
 GameObject:
   m_ObjectHideFlags: 0
@@ -331118,6 +331165,53 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1 &286294655
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 286294656}
+  - component: {fileID: 286294657}
+  m_Layer: 0
+  m_Name: Area - Sluice House
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &286294656
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 286294655}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 8.25, y: 82, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1225250838}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &286294657
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 286294655}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7b8d156ea8c00f4ab02c5d3966e451b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.AreaName
+  displayName: Sluice House
+  size: {x: 12.5, y: 24}
+  landmark: 1
 --- !u!1001 &288659838
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1245067,6 +1245161,53 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 741516124790637780, guid: 81a287ef246080642863e6109dddf022, type: 3}
   m_PrefabInstance: {fileID: 823970727}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &826532104
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 826532105}
+  - component: {fileID: 826532106}
+  m_Layer: 0
+  m_Name: Area - The Old Mill
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &826532105
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 826532104}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 19, y: 10.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1225250838}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &826532106
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 826532104}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7b8d156ea8c00f4ab02c5d3966e451b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.AreaName
+  displayName: The Old Mill
+  size: {x: 42, y: 27}
+  landmark: 1
 --- !u!1001 &828140746
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1290492,6 +1290633,53 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1 &1168865931
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1168865932}
+  - component: {fileID: 1168865933}
+  m_Layer: 0
+  m_Name: Area - Old Orchard
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1168865932
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1168865931}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 117, y: 90, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1225250838}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1168865933
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1168865931}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7b8d156ea8c00f4ab02c5d3966e451b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.AreaName
+  displayName: Old Orchard
+  size: {x: 26, y: 18}
+  landmark: 1
 --- !u!1001 &1170254555
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1292771,6 +1292959,42 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7827584473503402727, guid: 624810b62d2c8cd45ba34e680063e301, type: 3}
   m_PrefabInstance: {fileID: 1224160356}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1225250837
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1225250838}
+  m_Layer: 0
+  m_Name: Area names
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1225250838
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1225250837}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1474727745}
+  - {fileID: 826532105}
+  - {fileID: 286294656}
+  - {fileID: 1168865932}
+  - {fileID: 157152204}
+  m_Father: {fileID: 1813564179}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1229363747
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1334243,13 +1334467,9 @@ Tilemap:
   m_TileAssetArray:
   - m_RefCount: 3567
     m_Data: {fileID: 11400000, guid: 9e1d7255d01ec2843ab900ab09515994, type: 2}
-  - m_RefCount: 0
-    m_Data: {fileID: 0}
   m_TileSpriteArray:
   - m_RefCount: 3567
     m_Data: {fileID: -451862896, guid: e9a38b2e5aba49947aa65518b9684704, type: 3}
-  - m_RefCount: 0
-    m_Data: {fileID: 0}
   m_TileMatrixArray:
   - m_RefCount: 3567
     m_Data:
@@ -1334272,13 +1334492,11 @@ Tilemap:
   m_TileColorArray:
   - m_RefCount: 3567
     m_Data: {r: 1, g: 0.15, b: 0.2, a: 0.7}
-  - m_RefCount: 0
-    m_Data: {r: 5e-44, g: 5e-44, b: 5e-44, a: 5e-44}
   m_TileObjectToInstantiateArray: []
   m_AnimationFrameRate: 1
   m_Color: {r: 0.2, g: 0.42, b: 0.47, a: 1}
   m_Origin: {x: 8, y: -82, z: 0}
-  m_Size: {x: 123, y: 186, z: 1}
+  m_Size: {x: 123, y: 185, z: 1}
   m_TileAnchor: {x: 0.5, y: 0.5, z: 0}
   m_TileOrientation: 0
   m_TileOrientationMatrix:
@@ -1335291,6 +1335509,53 @@ MonoBehaviour:
   vegetationShader: {fileID: 4800000, guid: 99859955a658d564280fa94eb6032061, type: 3}
   groundSortingOrder: 55
   interactor: {fileID: 257731886}
+--- !u!1 &1474727744
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1474727745}
+  - component: {fileID: 1474727746}
+  m_Layer: 0
+  m_Name: Area - Green Lowlands
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1474727745
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1474727744}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 77.5, y: 19.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1225250838}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1474727746
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1474727744}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7b8d156ea8c00f4ab02c5d3966e451b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.AreaName
+  displayName: Green Lowlands
+  size: {x: 235, y: 231}
+  landmark: 0
 --- !u!1 &1475208917
 GameObject:
   m_ObjectHideFlags: 0
@@ -2035486,6 +2035751,7 @@ Transform:
   - {fileID: 1766109213}
   - {fileID: 2035002030}
   - {fileID: 1872865062}
+  - {fileID: 1225250838}
   m_Father: {fileID: 5749107823343980722}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1816787059
@@ -2094954,6 +2095220,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.PickupPresentation
   style: 3
   sparkSprite: {fileID: 21300000, guid: ab6058c4ddee5c148cd9d34a78a0a92e, type: 3}
+  pileSprite: {fileID: 0}
+  revealSound: {fileID: 0}
 --- !u!1 &1911353824
 GameObject:
   m_ObjectHideFlags: 0
@@ -2126955,7 +2127223,7 @@ Tilemap:
     second:
       serializedVersion: 2
       m_TileIndex: 0
-      m_TileSpriteIndex: 20
+      m_TileSpriteIndex: 18
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -2126965,7 +2127233,7 @@ Tilemap:
     second:
       serializedVersion: 2
       m_TileIndex: 0
-      m_TileSpriteIndex: 19
+      m_TileSpriteIndex: 17
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -2126975,7 +2127243,7 @@ Tilemap:
     second:
       serializedVersion: 2
       m_TileIndex: 0
-      m_TileSpriteIndex: 18
+      m_TileSpriteIndex: 16
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -2130895,7 +2131163,7 @@ Tilemap:
     second:
       serializedVersion: 2
       m_TileIndex: 0
-      m_TileSpriteIndex: 21
+      m_TileSpriteIndex: 19
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -2130945,7 +2131213,7 @@ Tilemap:
     second:
       serializedVersion: 2
       m_TileIndex: 0
-      m_TileSpriteIndex: 23
+      m_TileSpriteIndex: 21
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -2131115,7 +2131383,7 @@ Tilemap:
     second:
       serializedVersion: 2
       m_TileIndex: 0
-      m_TileSpriteIndex: 22
+      m_TileSpriteIndex: 20
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -2131295,7 +2131563,7 @@ Tilemap:
     second:
       serializedVersion: 2
       m_TileIndex: 0
-      m_TileSpriteIndex: 24
+      m_TileSpriteIndex: 22
       m_TileMatrixIndex: 0
       m_TileColorIndex: 0
       m_TileObjectToInstantiateIndex: 65535
@@ -2131718,10 +2131986,6 @@ Tilemap:
     m_Data: {fileID: -1677066868, guid: e60537814efa18f47bbb15c709e63af4, type: 3}
   - m_RefCount: 30
     m_Data: {fileID: 795592126, guid: e60537814efa18f47bbb15c709e63af4, type: 3}
-  - m_RefCount: 0
-    m_Data: {fileID: 0}
-  - m_RefCount: 0
-    m_Data: {fileID: 0}
   - m_RefCount: 1
     m_Data: {fileID: -2113971122, guid: e60537814efa18f47bbb15c709e63af4, type: 3}
   - m_RefCount: 1
@@ -2131762,7 +2132026,7 @@ Tilemap:
   m_AnimationFrameRate: 1
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Origin: {x: 8, y: -82, z: 0}
-  m_Size: {x: 123, y: 186, z: 1}
+  m_Size: {x: 123, y: 185, z: 1}
   m_TileAnchor: {x: 0.5, y: 0.5, z: 0}
   m_TileOrientation: 0
   m_TileOrientationMatrix:

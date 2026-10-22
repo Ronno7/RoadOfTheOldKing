@@ -66,6 +66,7 @@ namespace RoadOfTheOldKing.World
         {
             var record = state.FindCoinSource(sourceId);
             if (coinVisual != null) coinVisual.SetActive(record == null ? IsRevealed : !record.collected && record.amount > 0);
+            PickupPresentation.ShowCoinAmount(coinVisual, record != null ? record.amount : guaranteedCoins);
         }
         public void CaptureProgress(ProgressState state) { }
         public void ResetOnRest()

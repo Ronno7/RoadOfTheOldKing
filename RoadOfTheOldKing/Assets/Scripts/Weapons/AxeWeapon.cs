@@ -379,6 +379,12 @@ namespace RoadOfTheOldKing.Weapons
                     break;
                 case AxeState.Cleaving:
                     transform.position = owner.transform.position;
+                    {
+                        // Same displacement path as the finisher lunge: the motor applies it with collision.
+                        float stepEnd = CleaveDuration * 0.3f;
+                        float stepSeconds = Mathf.Max(0f, Mathf.Min(elapsed, stepEnd) - previousElapsed);
+                        pendingActionDisplacement += attackDirection * (settings.cleaveStepDistance * stepSeconds / stepEnd);
+                    }
                     if (elapsed >= CleaveDuration * 0.15f && previousElapsed <= CleaveDuration * 0.8f)
                         hits.Melee(owner.transform.position, attackDirection, CleaveRadius, 360f,
                             new CombatHit(owner.gameObject, AttackKind.ChargedCleave,

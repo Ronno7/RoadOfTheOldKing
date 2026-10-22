@@ -40,15 +40,21 @@ else{
    var wolf=wolfRoot.GetComponent<RoadOfTheOldKing.Enemies.PredatorBrain>();var melee=testRoot.GetComponent<RoadOfTheOldKing.Enemies.PursuitBrain>();
    foreach(var brain in new MonoBehaviour[]{wolf,melee}){
     var t=brain.GetType();t.GetField("target",flags).SetValue(brain,player);
-    t.GetProperty(brain==wolf?"AttackDirection":"FacingDirection").SetValue(brain,Vector2.right,null);
-    Vector2 origin=brain.transform.position;
-    System.Action strike=()=>{if(brain==wolf)t.GetMethod("TrySnap",flags).Invoke(brain,null);else {melee.Action.Begin(new RoadOfTheOldKing.Enemies.EnemyAttackSpec{windup=.7f,active=.12f,recovery=.95f,reach=1.65f,arc=85,damage=18,knockback=2.4f,stagger=.18f},player,Vector2.right);melee.Action.Tick(.7f);melee.Action.Tick(.02f);}};
-    System.Action clear=()=>{player.Health.RestoreHealth();player.DebugGodMode=false;player.GetType().GetField("invulnerableUntil",flags).SetValue(player,-1f);if(brain==wolf)t.GetField("struck",flags).SetValue(brain,false);else melee.Action.Cancel();};
+    // Current enemy-action API (16 Oct): the wolf's private BeginAttack(snap) and the pursuit runner, each ticked
+    // through windup into its active window. Damage comes from the authored values, not copied constants.
+    var runner=brain==wolf?wolf.Action:melee.Action;Vector2 origin=brain.transform.position;
+    var meleeSpec=(RoadOfTheOldKing.Enemies.EnemyAttackSpec)melee.GetType().GetProperty("Settings",flags).GetValue(melee,null);
+    int damage=brain==wolf?(int)t.GetField("snapDamage",flags).GetValue(brain):meleeSpec.damage;
+    System.Action strike=()=>{
+     if(brain==wolf){RoadOfTheOldKing.Enemies.AttackTokens.TryAcquire(wolf);t.GetMethod("BeginAttack",flags).Invoke(brain,new object[]{false,Vector2.right,false});}
+     else melee.TryBeginAttack(meleeSpec,player,Vector2.right);
+     for(int i=0;i<200&&runner.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Windup;i++)runner.Tick(.02f);runner.Tick(.02f);};
+    System.Action clear=()=>{player.Health.RestoreHealth();player.DebugGodMode=false;player.GetType().GetField("invulnerableUntil",flags).SetValue(player,-1f);runner.Cancel();RoadOfTheOldKing.Enemies.AttackTokens.Release(brain);};
     move(origin+Vector2.right);clear();strike();int hp=player.Health.Health;
-    check(hp==player.Health.MaxHealth-(brain==wolf?15:18),brain.name+" arc deals unchanged damage");
+    check(runner.Current!=null&&!runner.IsCharge&&hp==player.Health.MaxHealth-damage,brain.name+" arc deals its authored damage");
     move(origin-Vector2.right);clear();strike();check(player.Health.Health==player.Health.MaxHealth,brain.name+" rear arc misses");
     move(origin+Vector2.right*4);clear();strike();check(player.Health.Health==player.Health.MaxHealth,brain.name+" distant arc misses");
-    move(origin+Vector2.right);clear();player.DebugGodMode=true;strike();check(player.Health.Health==player.Health.MaxHealth&&(brain==wolf?(bool)t.GetField("struck",flags).GetValue(brain):melee.Action.HasContact),brain.name+" protected contact consumes attempt");player.DebugGodMode=false;
+    move(origin+Vector2.right);clear();player.DebugGodMode=true;strike();check(player.Health.Health==player.Health.MaxHealth&&runner.HasContact,brain.name+" protected contact consumes attempt");player.DebugGodMode=false;
     wall=new GameObject("Temporary strike wall");wall.transform.position=origin+Vector2.right*.45f;wall.AddComponent<BoxCollider2D>().size=new Vector2(.1f,2);Physics2D.SyncTransforms();clear();strike();
     check(player.Health.Health==player.Health.MaxHealth,brain.name+" wall blocks strike");UnityEngine.Object.DestroyImmediate(wall);wall=null;
    }
@@ -56,7 +62,7 @@ else{
    var render=view.GetType().GetMethod("LateUpdate",flags);
    for(int o=0;o<8;o++){float a=o*45*Mathf.Deg2Rad;melee.GetType().GetProperty("FacingDirection").SetValue(melee,new Vector2(Mathf.Cos(a),Mathf.Sin(a)),null);render.Invoke(view,null);check(body.sprite==set.rotations.Frame(o,0)&&body.transform.lossyScale==Vector3.one,"scavenger standing direction "+o);}
    testRoot.transform.position+=Vector3.right*.3f;render.Invoke(view,null);check(Enumerable.Range(0,8).Any(f=>set.walk.Frame(7,f)==body.sprite),"movement selects approved walking art");
-  }finally{player.DebugGodMode=false;if(wall!=null)UnityEngine.Object.DestroyImmediate(wall);UnityEngine.Object.DestroyImmediate(wolfRoot);UnityEngine.Object.DestroyImmediate(testRoot);player.Health.RestoreHealth();move(new Vector2(15.5f,3));}
+  }finally{player.DebugGodMode=false;RoadOfTheOldKing.Enemies.AttackTokens.Release(wolfRoot.GetComponent<RoadOfTheOldKing.Enemies.PredatorBrain>());if(wall!=null)UnityEngine.Object.DestroyImmediate(wall);UnityEngine.Object.DestroyImmediate(wolfRoot);UnityEngine.Object.DestroyImmediate(testRoot);player.Health.RestoreHealth();move(new Vector2(15.5f,3));}
   var chest=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.RewardChest>(FindObjectsSortMode.None).First(c=>c.RewardId=="green-lowlands/orchard");
   move((Vector2)chest.transform.position-Vector2.up*.5f);check(!chest.TryCollect(player),"orchard chest locked before combat");move(new Vector2(15.5f,3));
   for(int i=0;i<3;i++){

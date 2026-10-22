@@ -176,10 +176,14 @@ namespace RoadOfTheOldKing.Player
                         : weapon.ComboIndex == 1 ? animations.lightAttack2 : animations.finisher;
                     return Play(AttackStates[Mathf.Clamp(weapon.ComboIndex, 0, 2)], attack, octant,
                         weapon.AttackProgress, true, weapon.LightWindupFraction);
+                // Until dedicated art exists: the charge coils one octant clockwise, against the spin, and the
+                // cleave turns the standing views counter-clockwise with the axe's orbit, from the aim back to it.
                 case AxeState.Charging:
-                    return PlayTimed("Charge", animations.charge, octant);
+                    return PlayTimed("Charge", animations.charge, octant) ||
+                        Play("Charge", animations.rotations, (octant + 7) % 8, 0f);
                 case AxeState.Cleaving:
-                    return Play("Cleave", animations.cleave, octant, weapon.AttackProgress, true);
+                    return Play("Cleave", animations.cleave, octant, weapon.AttackProgress, true) ||
+                        Play("Cleave", animations.rotations, (octant + Mathf.FloorToInt(weapon.AttackProgress * 8f + .5f)) % 8, 0f);
             }
             if (!weapon.IsThrowing)
                 return false;
