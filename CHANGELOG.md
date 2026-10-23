@@ -3,13 +3,13 @@
 ## Unreleased
 
 **Changed**
-- The thrown axe flies half again as fast.
-- Your stamina shows above the hero whenever it isn't full, not only in fights, so you can see whether you can sprint.
-- Enemies keep chasing you farther before giving up, and once they turn for home, hitting them or following them back draws them into the fight again.
-- Tutorial hints no longer keep pointing back to a lesson you skipped once you've moved on.
+- Thrown axe flies 50% faster (full range in 0.39 s, was 0.58 s).
+- Stamina arc shows whenever stamina is below full, not only in combat.
+- Enemies chase until they're a set distance from home (wolves 20, scavengers 10–11, boar 12), not just until you're out of their notice range; hitting them or following them back re-engages.
+- Tutorial hints stop pointing to skipped lessons once you reach the bridge, the Recall stone or a bonfire.
 
 **Fixed**
-- Wolves no longer dodge as soon as you start charging a cleave; they react when you release it.
+- Wolves dodged when a cleave started charging; they now dodge on release.
 
 ## 0.5 — Full production
 
