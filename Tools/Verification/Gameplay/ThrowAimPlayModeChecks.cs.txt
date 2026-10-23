@@ -3,7 +3,8 @@
 if (!Application.isPlaying || UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Progression.GameSession>() != null)
     throw new Exception("Use an empty Play Mode scene without a checkpoint session.");
 var results = new System.Collections.Generic.List<string>();
-System.Action<bool,string> check = (ok,name) => results.Add((ok ? "PASS " : "FAIL ") + name);
+System.Func<float> currentStamina = () => float.NaN;
+System.Action<bool,string> check = (ok,name) => results.Add(ok ? "PASS " + name : "FAIL " + name + " (stamina " + currentStamina() + ")");
 System.Func<float,float,bool> near = (a,b) => Mathf.Abs(a-b) < .001f;
 var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
 var created = new System.Collections.Generic.List<GameObject>();
@@ -15,6 +16,10 @@ var player = goPlayer.GetComponent<RoadOfTheOldKing.Player.PlayerCombatControlle
 var weapon = spawn("Assets/Prefabs/Weapons/Axe.prefab").GetComponent<RoadOfTheOldKing.Weapons.AxeWeapon>();
 var stamina = player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>();
 var dash = player.GetComponent<RoadOfTheOldKing.Player.PlayerDash>();
+// Costs come from the current tuning, not literals (22 Oct: throw 20, dash 18, light 16).
+float throwCost = weapon.Settings.throwStaminaCost, lightCost = weapon.Settings.lightStaminaCost, recallCost = weapon.Settings.recallStaminaCost;
+currentStamina = () => stamina.Current;
+float dashCost = (float)dash.GetType().GetField("staminaCost", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(dash);
 var reaction = player.GetComponent<RoadOfTheOldKing.Combat.HitReaction>();
 var body = player.GetComponent<Rigidbody2D>();
 var combatInput = player.GetComponent<RoadOfTheOldKing.Input.PlayerCombatInput>();
@@ -58,15 +63,15 @@ try {
     stamina.TrySpend(60); recover.Invoke(stamina,new object[]{1f});
     check(stamina.Current > 40f, "Aiming permits stamina recovery");
     check(!weapon.TryLightChop(Vector2.right) && !weapon.TryBeginCharge(), "Aim excludes melee and cleave");
-    release(); float paid = stamina.Current;
-    check(near(paid,20f) && weapon.ThrowCelIndex == 4, "Key-up spends throw cost once and starts release cels");
+    float beforeRelease = stamina.Current; release(); float paid = stamina.Current;
+    check(near(paid,beforeRelease-throwCost) && weapon.ThrowCelIndex == 4, "Key-up spends throw cost once and starts release cels");
     release(); tick(.039f);
     check(!weapon.IsAway && near(stamina.Current,paid), "Duplicate key-up cannot spend again or launch early");
     tick(.001f);
     check(weapon.State == RoadOfTheOldKing.Weapons.AxeState.Flying && weapon.ThrowCelIndex == 5, "Physical launch shares cel-6 marker");
 
     reset(); send(new RoadOfTheOldKing.Input.CombatInputFrame { Active=true, ThrowPressed=true, ThrowReleased=true });
-    tick(.119f); check(!weapon.IsAway && near(stamina.Current,75), "Same-sample down/up preserves quick tap wind-up");
+    tick(.119f); check(!weapon.IsAway && near(stamina.Current,100-throwCost), "Same-sample down/up preserves quick tap wind-up");
     tick(.001f); check(weapon.IsAway, "Same-sample tap launches at 120 ms");
     reset(); weapon.TryThrow(Vector2.right); tick(.5f);
     check(near(weapon.transform.position.x,100.00f+.38f*weapon.Settings.throwSpeed), "Large step advances only post-marker flight distance");
@@ -76,23 +81,23 @@ try {
     reset(); press(); tick(.08f); release(); move(new Vector2(101,100)); weapon.SetAim(Vector2.up); tick(.14f);
     check(weapon.AttackDirection == Vector2.right && near(weapon.transform.position.x,101f+.1f*weapon.Settings.throwSpeed) && near(weapon.transform.position.y,100),
         "Aim locks at key-up; launch origin follows player until marker");
-    reset(); stamina.TrySpend(90); press(); tick(.08f); release(); tick(.5f);
-    check(!weapon.IsThrowing && !weapon.IsAway && near(stamina.Current,10), "Unaffordable release returns to ready without launch");
+    reset(); stamina.TrySpend(100); press(); tick(.08f); release(); tick(.5f); // any positive stamina can act; zero cannot
+    check(!weapon.IsThrowing && !weapon.IsAway && near(stamina.Current,0), "Unaffordable release returns to ready without launch");
 
     reset(); press(); tick(.08f);
     send(new RoadOfTheOldKing.Input.CombatInputFrame { Active=true, ThrowHeld=true, ChargePressed=true, ChargeHeld=true });
     send(new RoadOfTheOldKing.Input.CombatInputFrame { Active=true, ThrowReleased=true, ChargeReleased=true }); tick(.5f);
     check(!weapon.IsThrowing && weapon.State == RoadOfTheOldKing.Weapons.AxeState.Held && near(stamina.Current,100),
         "RMB cancels aim and consumes both stale release edges without cleave cost");
-    reset(); press(); stamina.TrySpend(80);
+    reset(); press(); stamina.TrySpend(100);
     check(!dash.TryStart(Vector2.left) && weapon.CanCancelThrowAim, "Unaffordable dash leaves aim intact");
-    stamina.Restore(); check(dash.TryStart(Vector2.left) && !weapon.IsThrowing && near(stamina.Current,75), "Accepted dash cancels aim and pays only dash cost");
+    stamina.Restore(); check(dash.TryStart(Vector2.left) && !weapon.IsThrowing && near(stamina.Current,100-dashCost), "Accepted dash cancels aim and pays only dash cost");
     dash.ResetAtRest(); release(); tick(.5f);
-    check(!weapon.IsAway && near(stamina.Current,75), "Key-up after dash cannot throw");
+    check(!weapon.IsAway && near(stamina.Current,100-dashCost), "Key-up after dash cannot throw");
     reset(); press(); release(); check(!dash.TryStart(Vector2.left), "Committed release cannot be dash-cancelled");
 
     reset(); weapon.TryLightChop(Vector2.right); press(); tick(1f); release(); tick(.5f);
-    check(!weapon.IsAway && !weapon.IsThrowing && near(stamina.Current,82), "Rejected E during swing cannot become a queued throw");
+    check(!weapon.IsAway && !weapon.IsThrowing && near(stamina.Current,100-lightCost), "Rejected E during swing cannot become a queued throw");
     reset(); weapon.TryBeginCharge(); tick(.3f);
     send(new RoadOfTheOldKing.Input.CombatInputFrame { Active=true, ThrowPressed=true, ThrowHeld=true, ChargeReleased=true });
     check(weapon.State == RoadOfTheOldKing.Weapons.AxeState.Cleaving, "Rejected E does not swallow ongoing cleave release");
@@ -100,9 +105,9 @@ try {
     reset(); press(); tick(.08f); send(default(RoadOfTheOldKing.Input.CombatInputFrame)); release(); tick(.5f);
     check(!weapon.IsAway && !weapon.IsThrowing && near(stamina.Current,100), "Control loss cancels held aim and ignores stale release");
     reset(); press(); release(); send(default(RoadOfTheOldKing.Input.CombatInputFrame)); tick(.5f);
-    check(!weapon.IsAway && near(stamina.Current,75), "Interrupted committed throw retains cost but never spawns");
+    check(!weapon.IsAway && near(stamina.Current,100-throwCost), "Interrupted committed throw retains cost but never spawns");
     reset(); press(); release(); reaction.GetType().GetField("staggerUntil",flags).SetValue(reaction,Time.time+1f); tick(.5f);
-    check(!weapon.IsAway && !weapon.IsThrowing && near(stamina.Current,75), "Stagger before marker prevents launch even without an Update");
+    check(!weapon.IsAway && !weapon.IsThrowing && near(stamina.Current,100-throwCost), "Stagger before marker prevents launch even without an Update");
     reset(); press(); combatInput.enabled=false; tick(.5f); combatInput.enabled=true; neutral(); release();
     check(!weapon.IsThrowing && !weapon.IsAway, "Disabled input cancels aim before the physics marker");
     reset(); press(); release(); player.enabled=false; tick(.5f); player.enabled=true; neutral();
@@ -115,7 +120,7 @@ try {
     reset(); player.UnlockRecall(); weapon.TryThrow(Vector2.right); tick(.22f); press(); tick(.2f);
     check(weapon.State == RoadOfTheOldKing.Weapons.AxeState.Held, "E press recalls an away weapon during throw recovery");
     release(); tick(.5f);
-    check(!weapon.IsThrowing && !weapon.IsAway && near(stamina.Current,75), "Holding Recall through catch then key-up never rethrows");
+    check(!weapon.IsThrowing && !weapon.IsAway && near(stamina.Current,100-throwCost-recallCost), "Holding Recall through catch then key-up never rethrows");
 
     reset();
     UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState());
@@ -130,7 +135,7 @@ try {
     check(Vector2.Dot(movement.FacingDirection,Vector2.right)>.999f, "Aim facing stays independent of world-relative travel");
     UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState());
     UnityEngine.InputSystem.InputSystem.Update(); var up=combatInput.Read(); send(up);
-    check(up.ThrowReleased && !up.ThrowHeld && near(stamina.Current,75), "Actual E key-up commits once");
+    check(up.ThrowReleased && !up.ThrowHeld && near(stamina.Current,100-throwCost), "Actual E key-up commits once");
 
     reset(); var wall=new GameObject("Throw verification wall"); created.Add(wall); wall.transform.position=new Vector3(100.6f,100,0);
     wall.AddComponent<BoxCollider2D>().size=new Vector2(.1f,1f); Physics2D.SyncTransforms(); press(); tick(.08f); viewTick.Invoke(view,null);

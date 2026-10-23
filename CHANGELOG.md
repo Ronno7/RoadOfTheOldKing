@@ -2,7 +2,11 @@
 
 ## Unreleased
 
+**Added**
+- Scavengers and boars have idle animations; boars play a run cycle when they charge.
+
 **Changed**
+- The lantern is now real light: a warm, gently flickering glow with soft shadows behind walls, instead of a hard-edged cut-out of the dark.
 - Thrown axe flies 50% faster (full range in 0.39 s, was 0.58 s).
 - Stamina arc shows whenever stamina is below full, not only in combat.
 - Enemies chase until they're a set distance from home (wolves 20, scavengers 10–11, boar 12), not just until you're out of their notice range; hitting them or following them back re-engages.
