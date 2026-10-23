@@ -52,7 +52,13 @@ namespace RoadOfTheOldKing.Enemies
                 bodyVisual.sprite = clip.Frame(octant, Mathf.Clamp(frame, 0, clip.FrameCount(octant) - 1));
                 clip = null;
             }
-            else if (distance > .0001f && Has(animations.walk)) { gait = Mathf.Repeat(gait + distance / animations.walkCycleLength, 1); clip = animations.walk; progress = gait; }
+            else if (distance > .0001f && (Has(animations.walk) || Has(animations.run)))
+            {
+                // Run above the threshold (a charge) or whenever there's no walk; one gait phase across both.
+                bool run = Has(animations.run) && (!Has(animations.walk) || distance / Mathf.Max(Time.deltaTime, .0001f) >= animations.runAnimationSpeed);
+                clip = run ? animations.run : animations.walk;
+                gait = Mathf.Repeat(gait + distance / (run ? animations.runCycleLength : animations.walkCycleLength), 1); progress = gait;
+            }
             else if (Has(animations.idle)) { idleTime += Time.deltaTime; clip = animations.idle; progress = idleTime / clip.Duration(octant); }
             if (clip != null) bodyVisual.sprite = clip.Sample(octant, progress, out _);
             float alpha = health.IsAlive || Has(animations.death) ? 1 : 1 - Mathf.Clamp01(deathTime / animations.deathFadeDuration);
