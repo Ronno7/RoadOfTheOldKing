@@ -6,19 +6,22 @@ using UnityEngine.Rendering.Universal;
 namespace RoadOfTheOldKing.World
 {
     // Lantern-lit interior (reworked 22 Oct). Light is real URP 2D light: a warm, gently flickering lantern on the
-    // player whose shadows come from the walls' ShadowCaster2Ds, and a daylight pool at the entrance. The scene's
+    // player whose shadows come from the drawn wall faces' ShadowCaster2Ds, and a daylight pool at the entrance. The scene's
     // global light stays near zero, and one cover quad drawn over the world (InteriorDarkness) turns black wherever
     // that light doesn't reach, so unlit content (world UI, effects) never shows through the dark.
-    // Gameplay reads visibility analytically (VisibilityAt / CanRead): the same falloff, clipped by the walls.
+    // Gameplay uses a stable analytical falloff and the rendered lantern origin/wall faces. It is a reading gate,
+    // not a pixel-exact reproduction of URP's falloff, soft shadows, flicker or the cover shader.
     [DisallowMultipleComponent, DefaultExecutionOrder(300)]
     public sealed class DarkInterior : MonoBehaviour
     {
         [SerializeField] private Shader darknessShader;
-        [Tooltip("Masonry blockers: they cast the lantern's shadows (ShadowCaster2D) and clip gameplay visibility.")]
+        [Tooltip("Masonry blockers: they clip gameplay visibility.")]
         [SerializeField] private BoxCollider2D[] walls = System.Array.Empty<BoxCollider2D>();
-        [Tooltip("How far light reaches into a wall's edge, so its stone face reads lit instead of a void. Shadow shapes " +
-            "are inset by this much (rebuild with the context menu after changing it).")]
-        [SerializeField, Min(0f)] private float wallFaceReveal = .45f;
+        [Tooltip("The drawn wall faces (room-facing brick strips). Each casts the lantern's shadow without shadowing " +
+            "itself, so the bricks catch the light and everything behind them goes dark. Rebuild with the context menu.")]
+        [SerializeField] private SpriteRenderer[] wallFaces = System.Array.Empty<SpriteRenderer>();
+        [Tooltip("How far gameplay visibility reaches into a wall: the drawn face strip's depth.")]
+        [SerializeField, Min(0f)] private float wallFaceReveal = .5f;
 
         [Header("Daylight at the entrance")]
         [SerializeField] private Vector2 daylightCenter = new Vector2(0, -.5f);
@@ -48,6 +51,8 @@ namespace RoadOfTheOldKing.World
         private Vector2 origin;
         private bool hasLantern;
         private const float CoverSize = 512f;
+        // Two native art pixels keep reading inside the lit side of soft shadow edges.
+        private const float ShadowReadInset = .125f;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatic() => active = null;
@@ -76,9 +81,9 @@ namespace RoadOfTheOldKing.World
             if (darknessShader == null) return;
             // Editor reloads keep some references and not others: rebuild the whole set if any part is missing.
             if (cover == null || lantern == null || daylight == null) { Release(); Build(); }
-            origin = position; hasLantern = lanternOwned;
+            origin = position + Vector2.up * lanternHeight; hasLantern = lanternOwned;
             lantern.enabled = lanternOwned;
-            lantern.transform.position = new Vector3(position.x, position.y + lanternHeight, 0);
+            lantern.transform.position = origin;
             float t = Application.isPlaying ? Time.time * flickerSpeed : 0f;
             // Two slow noise bands: a breathing flame, never a strobe.
             float wave = (Mathf.PerlinNoise(t, .37f) - .5f) * 2f * .7f + (Mathf.PerlinNoise(t * 2.3f, 1.91f) - .5f) * 2f * .3f;
@@ -98,7 +103,9 @@ namespace RoadOfTheOldKing.World
             var renderer = cover.GetComponent<MeshRenderer>();
             renderer.sharedMaterial = material;
             renderer.sortingLayerName = "Player";
-            renderer.sortingOrder = 32760;
+            // Above enemy world UI (health 30000, "!" 30001) so it stays hidden in the dark; below the player's own
+            // charge bar (30005) and stamina arc (30008) so those always read.
+            renderer.sortingOrder = 30003;
 
             lantern = NewLight("Lantern light", Light2D.LightType.Point);
             lantern.color = lanternColor;
@@ -126,8 +133,8 @@ namespace RoadOfTheOldKing.World
             return light;
         }
 
-        // Gameplay visibility (reading inscriptions, revealing pickups): daylight rectangle plus the lantern's falloff,
-        // stopped a shallow masonry face into the first wall along the ray, as the shadows draw it.
+        // Stable reading gate: ignore cosmetic flicker, but cast from the actual lantern height against the same
+        // face strips as its shadows. Collider bounds alone miss the strips projecting around masonry corners.
         public float VisibilityAt(Vector2 point)
         {
             float edge = Mathf.Max(Mathf.Abs(point.x - daylightCenter.x) - daylightHalfSize.x,
@@ -144,6 +151,21 @@ namespace RoadOfTheOldKing.World
         private float Reach(Vector2 direction)
         {
             float nearest = outerRadius;
+            if (wallFaces.Length > 0)
+            {
+                foreach (var face in wallFaces)
+                {
+                    if (face == null || !face.enabled || !face.gameObject.activeInHierarchy) continue;
+                    var b = face.bounds;
+                    b.Expand(new Vector3(ShadowReadInset * 2f, ShadowReadInset * 2f, 0));
+                    float enter = 0, exit = outerRadius;
+                    if (Slab(origin.x, direction.x, b.min.x, b.max.x, ref enter, ref exit) &&
+                        Slab(origin.y, direction.y, b.min.y, b.max.y, ref enter, ref exit))
+                        nearest = Mathf.Min(nearest, enter);
+                }
+                return nearest;
+            }
+            // Older rooms without authored face strips retain their masonry fallback.
             foreach (var wall in walls)
             {
                 if (wall == null || !wall.enabled || !wall.gameObject.activeInHierarchy) continue;
@@ -164,19 +186,27 @@ namespace RoadOfTheOldKing.World
         }
 
 #if UNITY_EDITOR
-        // One ShadowCaster2D per wall: the collider's rectangle inset by the face reveal (thin walls keep a sliver,
-        // so they still block). Explicit shapes, not the Collider2D provider, which failed to build in this URP.
+        // One ShadowCaster2D per drawn wall face: the strip's rectangle, cast-only, on the strip's own SpriteRenderer so
+        // URP leaves those pixels unshadowed. Explicit shapes: the Collider2D provider failed to build in this URP, and
+        // collider-box casters (no renderer) shadowed their own walls into voids.
         [ContextMenu("Rebuild wall shadows")]
         private void RebuildWallShadows()
         {
             foreach (var wall in walls)
+                if (wall != null && wall.TryGetComponent(out ShadowCaster2D old)) UnityEditor.Undo.DestroyObjectImmediate(old);
+            foreach (var face in wallFaces)
             {
-                if (wall == null) continue;
-                var caster = wall.GetComponent<ShadowCaster2D>();
-                if (caster == null) caster = UnityEditor.Undo.AddComponent<ShadowCaster2D>(wall.gameObject);
+                if (face == null) continue;
+                // One composite group per parent: a group never shadows its own members, so neighbouring strips
+                // don't cut diagonal wedges across each other at corners and caps.
+                var parent = face.transform.parent;
+                if (parent != null && parent.GetComponent<CompositeShadowCaster2D>() == null)
+                    UnityEditor.Undo.AddComponent<CompositeShadowCaster2D>(parent.gameObject);
+                var caster = face.GetComponent<ShadowCaster2D>();
+                if (caster == null) caster = UnityEditor.Undo.AddComponent<ShadowCaster2D>(face.gameObject);
                 var so = new UnityEditor.SerializedObject(caster);
-                Vector2 o = wall.offset, h = wall.size * .5f;
-                h = new Vector2(Mathf.Max(.05f, h.x - wallFaceReveal), Mathf.Max(.05f, h.y - wallFaceReveal));
+                var bounds = face.localBounds;
+                Vector2 o = bounds.center, h = bounds.extents;
                 var path = so.FindProperty("m_ShapePath");
                 path.arraySize = 4;
                 path.GetArrayElementAtIndex(0).vector3Value = new Vector3(o.x - h.x, o.y - h.y);
@@ -184,7 +214,7 @@ namespace RoadOfTheOldKing.World
                 path.GetArrayElementAtIndex(2).vector3Value = new Vector3(o.x + h.x, o.y + h.y);
                 path.GetArrayElementAtIndex(3).vector3Value = new Vector3(o.x - h.x, o.y + h.y);
                 // URP rebuilds the shadow mesh when this hash changes, so derive it from the new corners.
-                so.FindProperty("m_ShapePathHash").intValue = (o, h, wallFaceReveal).GetHashCode() | 1;
+                so.FindProperty("m_ShapePathHash").intValue = (o, h).GetHashCode() | 1;
                 so.FindProperty("m_ShadowCastingSource").enumValueIndex = 1; // Shape editor
                 so.FindProperty("m_CastingOption").enumValueIndex = 1; // Cast only, never self-shadow
                 so.ApplyModifiedProperties();

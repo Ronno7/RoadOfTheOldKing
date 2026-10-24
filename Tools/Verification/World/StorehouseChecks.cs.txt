@@ -124,7 +124,8 @@ else if(phase==4){
  check(dark.VisibilityAt(new Vector2(10,11))>.99f,"lantern core readable");
  float mid=dark.VisibilityAt(new Vector2(13,11));check(mid>.1f&&mid<.9f,"soft gradient before outer radius");
  check(dark.VisibilityAt(new Vector2(16,12))==0,"beyond radius fully black");
- check(dark.VisibilityAt(new Vector2(5.5f,11))==0,"wall blocks nearby light");
+ check(dark.VisibilityAt(new Vector2(5f,11))==0,"wall interior blocks nearby light");
+ check(!RoadOfTheOldKing.World.DarkInterior.CanRead(new Vector2(5.5f,9.7f)),"wall-face corner shadow blocks reading from elevated lantern");
  var camera=Camera.main;var cameraPosition=camera.transform.position;camera.transform.position+=Vector3.right*2;
  check(dark.VisibilityAt(new Vector2(9,11))>.99f,"camera offset does not shift visibility");camera.transform.position=cameraPosition;
  // Render probes use actual world sorting: cyan sprite and a line under the cover.
@@ -138,7 +139,8 @@ else if(phase==4){
   var unlit=sample(new Vector2(10,11),false);check(unlit.maxColorComponent<.015f,"rendered world sprite and line hidden without lantern");
   var core=sample(new Vector2(10,11),true);check(core.g>.4f&&core.b>.4f,"rendered world visible in core");
   var falloff=sample(new Vector2(13,11),true);check(falloff.g>.05f&&falloff.g<core.g-.05f,"rendered gradient dims world");
-  var blocked=sample(new Vector2(5.5f,11),true);check(blocked.maxColorComponent<.015f,"rendered wall shadow hides world effects");
+  var blocked=sample(new Vector2(5f,11),true);check(blocked.maxColorComponent<.015f,"rendered wall shadow hides world effects");
+  var corner=sample(new Vector2(5.5f,9.7f),true);check(corner.maxColorComponent<.03f&&!RoadOfTheOldKing.World.DarkInterior.CanRead(new Vector2(5.5f,9.7f)),"rendered corner shadow and reading gate agree");
   var outside=sample(new Vector2(16,12),true);check(outside.maxColorComponent<.015f,"rendered outside radius is black");
  }finally{camera.targetTexture=previousTarget;camera.transform.position=cameraPosition;camera.orthographicSize=size;camera.aspect=aspect;RenderTexture.active=previous;rt.Release();UnityEngine.Object.Destroy(rt);UnityEngine.Object.Destroy(tex);UnityEngine.Object.Destroy(probe);}
  // Body-sized samples through the complete ring (not a player-motor playthrough).
@@ -231,9 +233,12 @@ else if(phase==13){
  check(slabRenderer.sortingOrder<playerRenderer.sortingOrder,"player in front of slab at its south side");
  pose((Vector2)carving.transform.position+Vector2.up);typeof(RoadOfTheOldKing.World.WorldPropDepth).GetMethod("LateUpdate",flags).Invoke(slab,null);
  check(slabRenderer.sortingOrder>playerRenderer.sortingOrder,"slab covers player behind its north side");
- doorway("Return to Lowlands");
+ // Closing the reader shields this frame from gameplay input; depart on the next real frame.
 }
-else if(phase==14){check(game.Progress.Has("forge/inscription/2"),"knowledge retained outside");doorway("Enter storehouse");}
+else if(phase==14){
+ if(scene.path==interior){doorway("Return to Lowlands");return "WAIT: doorway departure after reader close";}
+ check(scene.path==region&&game.Progress.Has("forge/inscription/2"),"knowledge retained outside");doorway("Enter storehouse");
+}
 else if(phase==15){
  var sources=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.CoinSource>(FindObjectsSortMode.None).OrderBy(s=>s.SourceId).ToArray();
  check(sources.All(s=>s.IsRevealed),"all broken pottery restored after round trip");

@@ -29,7 +29,7 @@ else{
    check(set!=null&&Enumerable.Range(0,8).All(o=>set.rotations.ResolveOctant(o)==o&&set.rotations.FrameCount(o)==1),name+" has eight native standing directions");
    check(set.attack==null&&set.death==null,name+" preserves pending attack/death slots");
    check(Enumerable.Range(0,8).All(o=>set.rotations.Frame(o,0).pixelsPerUnit==16),name+" uses 16 PPU");
-   bool walking=name=="RoadScavenger"||name=="MossbackBoar"||name=="BrokenWatcher";
+   bool walking=name!="ThornRat";
    check(walking?set.walk!=null&&Enumerable.Range(0,8).All(o=>set.walk.ResolveOctant(o)==o&&set.walk.FrameCount(o)==8):set.walk==null,name+" imports complete locomotion only");
   }
   // Original wolf snap and the scavenger's shared runner use the same delivery contract.
@@ -45,23 +45,27 @@ else{
     var runner=brain==wolf?wolf.Action:melee.Action;Vector2 origin=brain.transform.position;
     var meleeSpec=(RoadOfTheOldKing.Enemies.EnemyAttackSpec)melee.GetType().GetProperty("Settings",flags).GetValue(melee,null);
     int damage=brain==wolf?(int)t.GetField("snapDamage",flags).GetValue(brain):meleeSpec.damage;
-    System.Action strike=()=>{
+    System.Action<Vector2?> strike=afterWindup=>{
      if(brain==wolf){RoadOfTheOldKing.Enemies.AttackTokens.TryAcquire(wolf);t.GetMethod("BeginAttack",flags).Invoke(brain,new object[]{false,Vector2.right,false});}
      else melee.TryBeginAttack(meleeSpec,player,Vector2.right);
-     for(int i=0;i<200&&runner.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Windup;i++)runner.Tick(.02f);runner.Tick(.02f);};
+     for(int i=0;i<200&&runner.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Windup;i++)runner.Tick(.02f);
+     // The wolf tracks through windup. Test the rear arc after that tracking commits.
+     if(afterWindup.HasValue)move(afterWindup.Value);runner.Tick(.02f);};
     System.Action clear=()=>{player.Health.RestoreHealth();player.DebugGodMode=false;player.GetType().GetField("invulnerableUntil",flags).SetValue(player,-1f);runner.Cancel();RoadOfTheOldKing.Enemies.AttackTokens.Release(brain);};
-    move(origin+Vector2.right);clear();strike();int hp=player.Health.Health;
+    move(origin+Vector2.right);clear();strike(null);int hp=player.Health.Health;
     check(runner.Current!=null&&!runner.IsCharge&&hp==player.Health.MaxHealth-damage,brain.name+" arc deals its authored damage");
-    move(origin-Vector2.right);clear();strike();check(player.Health.Health==player.Health.MaxHealth,brain.name+" rear arc misses");
-    move(origin+Vector2.right*4);clear();strike();check(player.Health.Health==player.Health.MaxHealth,brain.name+" distant arc misses");
-    move(origin+Vector2.right);clear();player.DebugGodMode=true;strike();check(player.Health.Health==player.Health.MaxHealth&&runner.HasContact,brain.name+" protected contact consumes attempt");player.DebugGodMode=false;
-    wall=new GameObject("Temporary strike wall");wall.transform.position=origin+Vector2.right*.45f;wall.AddComponent<BoxCollider2D>().size=new Vector2(.1f,2);Physics2D.SyncTransforms();clear();strike();
+    move(origin+Vector2.right);clear();strike(origin-Vector2.right);check(player.Health.Health==player.Health.MaxHealth,brain.name+" rear arc misses after commitment");
+    move(origin+Vector2.right*4);clear();strike(null);check(player.Health.Health==player.Health.MaxHealth,brain.name+" distant arc misses");
+    move(origin+Vector2.right);clear();player.DebugGodMode=true;strike(null);check(player.Health.Health==player.Health.MaxHealth&&runner.HasContact,brain.name+" protected contact consumes attempt");player.DebugGodMode=false;
+    wall=new GameObject("Temporary strike wall");wall.transform.position=origin+Vector2.right*.45f;wall.AddComponent<BoxCollider2D>().size=new Vector2(.1f,2);Physics2D.SyncTransforms();clear();strike(null);
     check(player.Health.Health==player.Health.MaxHealth,brain.name+" wall blocks strike");UnityEngine.Object.DestroyImmediate(wall);wall=null;
    }
    var view=testRoot.GetComponent<RoadOfTheOldKing.Enemies.MeleeSpriteView>();var body=(SpriteRenderer)view.GetType().GetField("bodyVisual",flags).GetValue(view);var set=(RoadOfTheOldKing.Enemies.EnemyAnimationSet)view.GetType().GetField("animations",flags).GetValue(view);
    var render=view.GetType().GetMethod("LateUpdate",flags);
-   for(int o=0;o<8;o++){float a=o*45*Mathf.Deg2Rad;melee.GetType().GetProperty("FacingDirection").SetValue(melee,new Vector2(Mathf.Cos(a),Mathf.Sin(a)),null);render.Invoke(view,null);check(body.sprite==set.rotations.Frame(o,0)&&body.transform.lossyScale==Vector3.one,"scavenger standing direction "+o);}
-   testRoot.transform.position+=Vector3.right*.3f;render.Invoke(view,null);check(Enumerable.Range(0,8).Any(f=>set.walk.Frame(7,f)==body.sprite),"movement selects approved walking art");
+   for(int o=0;o<8;o++){float a=o*45*Mathf.Deg2Rad;melee.GetType().GetProperty("FacingDirection").SetValue(melee,new Vector2(Mathf.Cos(a),Mathf.Sin(a)),null);render.Invoke(view,null);check(Enumerable.Range(0,set.idle.FrameCount(o)).Any(f=>body.sprite==set.idle.Frame(o,f))&&body.transform.lossyScale==Vector3.one,"scavenger idle direction "+o);}
+   melee.GetType().GetProperty("FacingDirection").SetValue(melee,Vector2.right,null);
+   testRoot.transform.position+=Vector3.right*(set.runAnimationSpeed*Mathf.Max(Time.deltaTime,.0001f)*.5f);render.Invoke(view,null);check(Enumerable.Range(0,set.walk.FrameCount(0)).Any(f=>set.walk.Frame(0,f)==body.sprite),"walking speed selects approved walking art");
+   testRoot.transform.position+=Vector3.right*(set.runAnimationSpeed*Mathf.Max(Time.deltaTime,.0001f)*1.2f);render.Invoke(view,null);check(Enumerable.Range(0,set.run.FrameCount(0)).Any(f=>set.run.Frame(0,f)==body.sprite),"running speed selects approved running art");
   }finally{player.DebugGodMode=false;RoadOfTheOldKing.Enemies.AttackTokens.Release(wolfRoot.GetComponent<RoadOfTheOldKing.Enemies.PredatorBrain>());if(wall!=null)UnityEngine.Object.DestroyImmediate(wall);UnityEngine.Object.DestroyImmediate(wolfRoot);UnityEngine.Object.DestroyImmediate(testRoot);player.Health.RestoreHealth();move(new Vector2(15.5f,3));}
   var chest=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.RewardChest>(FindObjectsSortMode.None).First(c=>c.RewardId=="green-lowlands/orchard");
   move((Vector2)chest.transform.position-Vector2.up*.5f);check(!chest.TryCollect(player),"orchard chest locked before combat");move(new Vector2(15.5f,3));
@@ -74,14 +78,15 @@ else{
    check(!enemies[i].GetComponent<RoadOfTheOldKing.Combat.Damageable>().DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.up,0,0)),"corpse cannot award "+i);
   }
   check(!drops[2].TryCollect(player),"distant enemy drop rejects collection");
-  move(enemies[1].transform.position);check(drops[1].TryCollect(player)&&game.Progress.bronzeCoins==1,"enemy coin credits on pickup");check(!drops[1].TryCollect(player),"enemy pickup pays once");
+  move(enemies[0].transform.position);check(drops[0].TryCollect(player)&&game.Progress.bronzeCoins==3,"empty renewable roll still pays first-defeat bonus");
+  move(enemies[1].transform.position);check(drops[1].TryCollect(player)&&game.Progress.bronzeCoins==7,"enemy coin and first-defeat bonus credit on pickup");check(!drops[1].TryCollect(player),"enemy pickup pays once");
   move((Vector2)chest.transform.position-Vector2.up*.5f);check(chest.TryCollect(player)&&game.Progress.sunShards==1,"all three defeats release existing shard chest");
   check(!chest.TryCollect(player),"shard chest cannot duplicate");move(new Vector2(15.5f,3));
   check(game.Checkpoints.LeaveScene("Assets/Scenes/Tutorial.unity","from-green-lowlands"),"ordinary departure with pending drop");
  }else if(phase==4){
   check(enemies.All(e=>e.IsDefeated),"ordinary visit retains all corpses");
   check(drops[0].PendingCoins==0&&drops[1].PendingCoins==0&&drops[2].PendingCoins==5,"ordinary visit retains empty/collected/pending outcomes");
-  move(enemies[2].transform.position);check(drops[2].TryCollect(player)&&game.Progress.bronzeCoins==6,"pending drop remains collectible after revisit");
+  move(enemies[2].transform.position);check(drops[2].TryCollect(player)&&game.Progress.bronzeCoins==16,"pending roll and first-defeat bonus remain collectible after revisit");
   move(new Vector2(15.5f,3));var fire=game.Checkpoints.Fires.First(f=>f.Id=="green-lowlands/arrival-fire");check(game.Checkpoints.Light(fire)&&game.Checkpoints.Rest(fire),"light then rest");
   check(enemies.All(e=>!e.IsDefeated)&&drops.All(d=>d.PendingCoins==0),"rest renews enemies and clears old drops");
   check(game.Progress.Has("green-lowlands/orchard-cleared"),"revived guards cannot relock stash");
@@ -89,7 +94,7 @@ else{
   player.Health.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(null,RoadOfTheOldKing.Combat.AttackKind.EnemyMelee,999,Vector2.up,0,0));check(!player.IsAlive,"real player death");game.Checkpoints.Respawn();
  }else{
   check(enemies.All(e=>!e.IsDefeated)&&drops.All(d=>d.PendingCoins==0),"fresh lifecycle clears pending loot and revives enemies");
-  check(game.Progress.bronzeCoins==6&&game.Progress.sunShards==1&&game.Progress.Has("green-lowlands/orchard-cleared"),"collected wallet and permanent stash survive lifecycle");
+  check(game.Progress.bronzeCoins==16&&game.Progress.sunShards==1&&game.Progress.Has("green-lowlands/orchard-cleared"),"collected wallet and permanent stash survive lifecycle");
   check(game.Progress.coinSources.Count==0,"renewable defeats add no permanent source records");
   if(phase==5)check(game.ReturnToTitle(),"Main Menu stores wallet");
  }

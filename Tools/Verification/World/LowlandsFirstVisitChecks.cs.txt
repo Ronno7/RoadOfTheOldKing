@@ -108,11 +108,15 @@ if(!EditorApplication.isPlaying)throw new System.Exception("Isolated Play requir
    check(fg.Progress.bronzeCoins==15,"sold rope cannot charge twice");stockMenu.Close();
   }else if(fvPhase==6){
    var ropeRoute=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RopeRoute>();
-   fpose(new Vector2(127,77));check(fi.TryInteract()&&ropeRoute.IsSecured,"purchased kit secures actual workshop route");
+   var lower=(RoadOfTheOldKing.World.RopeAnchor)ropeRoute.GetType().GetField("lowerAnchor",flags).GetValue(ropeRoute);
+   var upper=(RoadOfTheOldKing.World.RopeAnchor)ropeRoute.GetType().GetField("upperAnchor",flags).GetValue(ropeRoute);
+   float speed=(float)ropeRoute.GetType().GetField("climbSpeed",flags).GetValue(ropeRoute);
+   fpose(lower.transform.position);check(fi.TryInteract()&&ropeRoute.IsSecured,"purchased kit secures actual workshop route");
    var fm=fp.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>();var priorSimulation=Physics2D.simulationMode;
-   try{Physics2D.simulationMode=SimulationMode2D.Script;for(int i=0;i<110;i++){fm.GetType().GetMethod("FixedUpdate",flags).Invoke(fm,null);Physics2D.Simulate(.02f);}}
+   int steps=Mathf.CeilToInt(Vector2.Distance(lower.transform.position,upper.transform.position)/(speed*Time.fixedDeltaTime))+20;
+   try{Physics2D.simulationMode=SimulationMode2D.Script;for(int i=0;i<steps;i++){fm.GetType().GetMethod("FixedUpdate",flags).Invoke(fm,null);Physics2D.Simulate(Time.fixedDeltaTime);}}
    finally{Physics2D.simulationMode=priorSimulation;}
-   check(!fm.IsTraversingRope&&Vector2.Distance(fb.position,new Vector2(131,77))<.05f,"real motor completes purchased rope climb");
+   check(!fm.IsTraversingRope&&Vector2.Distance(fb.position,upper.transform.position)<.05f,"real motor completes purchased rope climb");
    fpose(new Vector2(15.5f,3));check(fg.ReturnToTitle(),"save completed first-visit progression");
   }else if(fvPhase==8){
    check(fg.Progress.sunShards==0&&fg.Progress.upgrades.Count==1&&fg.Progress.upgrades[0].upgradeId=="hatchet/deep-notch","Continue retains purchased upgrade and spent shards");

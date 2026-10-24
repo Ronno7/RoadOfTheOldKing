@@ -1,7 +1,8 @@
 // Trader-menu input is covered by LowlandsTraderChecks; purchase phases here call original transactions at merchant reach.
 // Run stopped first for migration/geometry-independent checks. Live phases require the existing
 // GreenLowlandsGameplayChecks unsaved isolated bootstrap, Continued into GreenLowlands.
-// Execute phase 0, allow its real reload, then phase 1, allow death/respawn, then phase 2.
+// Execute phase 0, allow drainage, then phase 10, allow its real reload, then phase 1,
+// allow death/respawn, then phase 2. Each call advances automatically; WAIT preserves its phase.
 // Stop/re-enter that same bootstrap and Continue for phase 3 (fresh-session and access/feedback checks).
 // Finally stop and use the bootstrap fixture's cleanup; never save the bootstrap.
 var checks=new System.Collections.Generic.List<string>();
@@ -113,6 +114,7 @@ System.Action<Vector2> stand=p=>{body.position=p;player.transform.position=p;bod
 System.Func<string,RoadOfTheOldKing.World.CoinSource> source=id=>UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.CoinSource>(FindObjectsSortMode.None).First(c=>c.SourceId=="green-lowlands/"+id);
 System.Func<string,RoadOfTheOldKing.World.RewardChest> chest=id=>UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.RewardChest>(FindObjectsSortMode.None).First(c=>c.RewardId=="green-lowlands/"+id);
 System.Func<string,RoadOfTheOldKing.World.ShopOffer> offer=id=>UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.ShopOffer>(FindObjectsSortMode.None).First(c=>c.OfferId=="green-lowlands/"+id);
+System.Action approachTrader=()=>{var walker=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.TraderWalker>();walker.ReturnHome();pose(walker.Home+Vector2.down*.7f);};
 var fire=game.Checkpoints.Fires.First(f=>f.Id=="green-lowlands/arrival-fire");
 int phase=SessionState.GetInt("Lowlands.Economy.Phase",0);
 
@@ -176,7 +178,7 @@ if(SessionState.GetBool("Lowlands.Economy.Art",false)){
     return new{passed=checks.Count,total=SessionState.GetInt("Lowlands.Economy.ArtAssertions",0)+checks.Count,checks=checks.ToArray(),next="Stop and bootstrap cleanup."};
 }
 
-if(phase>=4)return new{total=SessionState.GetInt("Lowlands.Economy.Assertions",0),next="Checks complete; inspect UI or clean up."};
+if(phase==4)return new{total=SessionState.GetInt("Lowlands.Economy.Assertions",0),next="Checks complete; inspect UI or clean up."};
 if(phase==3){
     if(game.transform.Find("Economy verification session marker")!=null)throw new System.Exception("Stop/re-enter Play and Continue before the cold phase.");
     check(game.Progress.version==3&&game.Progress.bronzeCoins==60&&game.Progress.ownedTools.Count==2,"fresh-session v3 wallet/tools load");
@@ -209,7 +211,8 @@ if(phase==3){
     return new{passed=checks.Count,total=SessionState.GetInt("Lowlands.Economy.Assertions",0),checks=checks.ToArray(),next="Inspect UI, optional New Game clear, then stop and bootstrap cleanup."};
 }
 
-if(phase==0){
+if(phase==0||phase==10){
+  if(phase==0){
     new GameObject("Economy verification session marker").transform.SetParent(game.transform);
     check(game.Progress.bronzeCoins==0&&game.Progress.coinSources.Count==0,"fresh isolated wallet");
     var practice=source("practice-pot");var pot=practice.GetComponentInChildren<RoadOfTheOldKing.Combat.Breakable>(true);
@@ -275,31 +278,36 @@ if(phase==0){
     {int bonusesPaid=0;var dropField=typeof(RoadOfTheOldKing.World.EnemyCoinDrop).GetField("dropPosition",flags);
      foreach(var drop in UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.EnemyCoinDrop>(FindObjectsSortMode.None).Where(d=>d.name.StartsWith("Orchard scavenger "))){
       var health=drop.GetComponent<RoadOfTheOldKing.Combat.Damageable>();for(int i=0;i<5&&health.Health>0;i++)health.ReceiveHit(hit);
-      int before=game.Progress.bronzeCoins,pending=drop.PendingCoins;pose((Vector2)dropField.GetValue(drop));
-      if(drop.TryCollect(player)){bonusesPaid++;game.Progress.bronzeCoins-=pending;}} // keep the fixed budget: drop only the random part
+      int renewable=drop.PendingCoins;pose((Vector2)dropField.GetValue(drop));
+      if(drop.TryCollect(player)){bonusesPaid++;game.Progress.bronzeCoins-=renewable;}} // keep the fixed budget: drop only the random part
      check(bonusesPaid==3&&game.Progress.bronzeCoins==20,"orchard guards' bonuses are ten fixed coins, paid once");}
-    pose(new Vector2(33,30.2f));check(interaction.TryInteract()&&chest("basin-cache").IsOpen&&game.Progress.bronzeCoins==45,"basin coin chest completes fixed 45 budget");
+    SessionState.SetInt("Lowlands.Economy.Phase",10);SessionState.SetInt("Lowlands.Economy.Assertions",checks.Count);
+    pose(fire.SpawnPosition);
+    return new{passed=checks.Count,checks=checks.ToArray(),next="Wait for real drainage, then run phase 10."};
+  }
+    if(UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SluiceWaterReveal>(FindObjectsSortMode.None).Any(w=>w.IsDraining))return "WAIT: pond still draining";
+    pose((Vector2)chest("basin-cache").transform.position+Vector2.down*.7f);check(interaction.TryInteract()&&chest("basin-cache").IsOpen&&game.Progress.bronzeCoins==45,"basin coin chest completes fixed 45 budget");
     check(!chest("basin-cache").TryCollect(player)&&game.Progress.bronzeCoins==45,"coin chest cannot repeat");
-    pose(new Vector2(10,2.2f));check(offer("rope-kit").TryCollect(player)&&game.Progress.bronzeCoins==15&&game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.RopeKit),"Regional trader transaction buys rope for thirty");
+    approachTrader();check(offer("rope-kit").TryCollect(player)&&game.Progress.bronzeCoins==15&&game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.RopeKit),"Regional trader transaction buys rope for thirty");
     check(!offer("rope-kit").TryCollect(player)&&game.Progress.bronzeCoins==15,"owned finite tool cannot charge again");
-    pose(new Vector2(10,2.2f));check(!offer("trader-fragment").TryCollect(player)&&game.Progress.bronzeCoins==15,"unaffordable fragment changes nothing");
+    approachTrader();check(!offer("trader-fragment").TryCollect(player)&&game.Progress.bronzeCoins==15,"unaffordable fragment changes nothing");
     check(!game.Rewards.TryCollectCoinCache("invalid",0)&&!game.Rewards.TryCollectCoinCache("invalid",-1),"nonpositive coin awards rejected");
     int balance=game.Progress.bronzeCoins;game.Progress.bronzeCoins=int.MaxValue-1;check(!game.Rewards.TryCollectCoinCache("overflow",5)&&!game.Progress.Has("coins/collected/overflow"),"overflow does not consume reward");game.Progress.bronzeCoins=balance;
     check(game.Rewards.TryCollectCoinCache("verification/trader-funding",100),"isolated test funding");
     foreach(var heart in UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.HeartFragmentPickup>(FindObjectsSortMode.None)){pose(heart.transform.position);check(heart.TryCollect(player),"collect reachable authored fragment "+heart.RewardId);}
-    pose(new Vector2(10,2.2f));int oldMax=player.Health.MaxHealth;
+    approachTrader();int oldMax=player.Health.MaxHealth;
     check(offer("trader-fragment").TryCollect(player)&&game.Progress.bronzeCoins==55&&player.Health.MaxHealth==oldMax+20,"finite shop fragment completes heart and debits once");
     check(!offer("trader-fragment").TryCollect(player)&&game.Progress.bronzeCoins==55,"sold fragment cannot charge or grant twice");
-    stored=new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(game.StorageKey).Load();
-    check(stored.bronzeCoins==55&&stored.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.RopeKit)&&stored.Has("shop/purchased/green-lowlands/trader-fragment")&&RoadOfTheOldKing.Progression.HeartFragmentProgression.Count(stored)==3,"purchase wallet/reward/stock persisted together");
+    var purchased=new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(game.StorageKey).Load();
+    check(purchased.bronzeCoins==55&&purchased.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.RopeKit)&&purchased.Has("shop/purchased/green-lowlands/trader-fragment")&&RoadOfTheOldKing.Progression.HeartFragmentProgression.Count(purchased)==3,"purchase wallet/reward/stock persisted together");
     var collection=player.GetComponent<RoadOfTheOldKing.UI.CollectionMenu>();check(collection.OpenInventory(),"Inventory opens with earned items");
     var balances=(UnityEngine.UIElements.Label)collection.GetType().GetField("coins",flags).GetValue(collection);
     check(balances.text=="55"&&game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.RopeKit)&&game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank),"Inventory uses shared wallet/tool state");
     collection.enabled=false;collection.enabled=true;
-    pose(fire.SpawnPosition);check(game.Checkpoints.Rest(fire),"rest accepted");
+    pose(fire.SpawnPosition);check(game.Checkpoints.Light(fire),"light before first rest");check(game.Checkpoints.Rest(fire),"rest accepted");
     check(source("pot-01").GetComponentInChildren<RoadOfTheOldKing.Combat.Breakable>(true).IsBroken&&game.Progress.FindCoinSource(source("pot-01").SourceId).collected,"rest retains broken empty pot");
     check(!game.Progress.FindCoinSource(source("pot-02").SourceId).collected,"rest retains uncollected five coins");
-    SessionState.SetInt("Lowlands.Economy.Phase",1);SessionState.SetInt("Lowlands.Economy.Assertions",checks.Count);
+    SessionState.SetInt("Lowlands.Economy.Phase",1);SessionState.SetInt("Lowlands.Economy.Assertions",SessionState.GetInt("Lowlands.Economy.Assertions",0)+checks.Count);
     game.Checkpoints.RestartFromCheckpoint();
     return new{passed=checks.Count,checks=checks.ToArray(),next="Wait for reload; run phase 1."};
 }

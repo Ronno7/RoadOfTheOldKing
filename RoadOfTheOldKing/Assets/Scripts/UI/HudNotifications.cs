@@ -48,6 +48,15 @@ namespace RoadOfTheOldKing.UI
             Banner = null; BannerStartedAt = float.NegativeInfinity; BannerVersion++;
             Area = null; AreaVersion++;
             Speaker = null; Speech = null; SpeechUntil = float.NegativeInfinity;
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
+            UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+
+        // A place name belongs to the scene that announced it: a new scene's HUD must not replay the last region
+        // entered elsewhere (the storehouse showed "Green Lowlands"). Its own zones announce after this.
+        private static void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
+        {
+            if (mode == UnityEngine.SceneManagement.LoadSceneMode.Single) { Area = null; AreaVersion++; }
         }
 
         // A line over a speaker's head for a few seconds (real time); a newer line replaces it.
