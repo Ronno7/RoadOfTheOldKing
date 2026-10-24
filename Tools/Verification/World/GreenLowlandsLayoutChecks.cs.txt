@@ -8,7 +8,7 @@
 // Confirm setup success before Play. GameSession.Continue(), wait until settled,
 // then load GreenLowlands within that isolated session.
 // Run here after arrival. Stop and use that fixture's cleanup afterwards.
-// Border walks test terrain with virtual input: the two border wolves' solid colliders
+// Border walks test terrain with virtual input: the arrival encounters' solid colliders
 // are temporarily suppressed and restored exactly. They are not combat/playthrough evidence.
 if(EditorApplication.isPlaying){
     var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
@@ -56,7 +56,8 @@ if(EditorApplication.isPlaying){
     var oldDevices=actions.devices;var oldRouting=UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode;
     var oldFocus=(bool)input.GetType().GetField("hasFocus",flags).GetValue(input);var oldPaused=(bool)input.GetType().GetField("paused",flags).GetValue(input);
     var oldSimulation=Physics2D.simulationMode;Vector2 original=body.position;var keyboard=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
-    var borderWolves=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Enemies.PredatorBrain>(FindObjectsSortMode.None).Where(w=>w.name=="Border wolf 1"||w.name=="Border wolf 2").ToArray();
+    // Arrival encounters (two wolves, rat stand-in among them, and the cart scavenger) live under one group.
+    var borderWolves=GameObject.Find("Green Lowlands").transform.Find("Encounters/Border wolves").Cast<Transform>().ToArray();
     var borderWolfColliders=borderWolves.SelectMany(w=>w.GetComponentsInChildren<Collider2D>(true)).Where(c=>!c.isTrigger).ToArray();
     var borderColliderStates=borderWolfColliders.Select(c=>c.enabled).ToArray();
     bool borderWalked=false;
@@ -95,9 +96,10 @@ if(EditorApplication.isPlaying){
             SessionState.SetString(prefix+"NorthernShoreWalk",northernShoreWalk);
         }
         SessionState.SetString("Lowlands.Layout.Path.high.VillageEast","34,7.5;38,7.5;41,10;41,16;41,20;42,23;47,23");
-        SessionState.SetString("Lowlands.Layout.Path.high.ArrivalUplandEdge","14.5,-11;14.5,1;17,1");
-        SessionState.SetString("Lowlands.Layout.Path.ArrivalUplandEdge","14.5,-11;14.5,1;17,1");
-        const string riverbankWalk="36.5,-25;35,-22;33,-20;31,-17.5;29,-15.5;26.5,-13.5;25.5,-10.5;23,-8;21.5,-5.5;21,-2.5;19,1";
+        // 23 Oct arrival road: the raised path and ledge, and the east-bank lane from the stone bridge to the farm.
+        SessionState.SetString("Lowlands.Layout.Path.high.ArrivalUplandEdge","-10.5,-46;-10.5,-27.5;0,-27.5;9.5,-27.5");
+        SessionState.SetString("Lowlands.Layout.Path.ArrivalUplandEdge","-10.5,-46;-10.5,-27.5;0,-27.5;9.5,-27.5");
+        const string riverbankWalk="43.5,-21;43,-15;35.5,-10.5;31.5,-4.5;29.5,-1.5;29.5,2";
         SessionState.SetString("Lowlands.Layout.Path.high.ArrivalRiverbank",riverbankWalk);
         SessionState.SetString("Lowlands.Layout.Path.ArrivalRiverbank",riverbankWalk);
         const string villageBankWalk="25.5,1.5;25.5,0.5;29.5,0.5;29.5,1.5;34.5,1.5;34.5,0.5;37.5,0.5;37.5,1.5;41,1.5";
@@ -115,7 +117,7 @@ if(EditorApplication.isPlaying){
         foreach(string name in destinations.Concat(new[]{"ArrivalUplandEdge","ArrivalRiverbank","VillageBank","FarmRim","MillBank","PastureGap","OrchardGrove","EastPondBank","NorthernGrove","WesternSpurGrove","SpurLowerShore","NorthernRidgeClearing","UpperOrchardClearing","NorthernShoreWalk"}).Concat(highWalkOnly?new string[0]:new[]{"WorksiteMargins"})){
             string route=SessionState.GetString("Lowlands.Layout.Path."+(highWalkOnly?"high.":"")+name,"");if(route=="")throw new System.Exception("Run Edit geometry fixture to cache paths first.");
             bool borderRoute=name=="BorderOutward"||name=="BorderReturn"||name=="ArrivalRiverbank";
-            if(borderRoute&&borderWolves.Length!=2)throw new System.Exception("Expected the two authored border wolves for terrain-only motor checks.");
+            if(borderRoute&&borderWolves.Length!=3)throw new System.Exception("Expected the three authored arrival encounters for terrain-only motor checks.");
             for(int i=0;i<borderWolfColliders.Length;i++)borderWolfColliders[i].enabled=borderRoute?false:borderColliderStates[i];
             Physics2D.SyncTransforms();
             var points=route.Split(';').Select(s=>s.Split(',')).Select(a=>new Vector2(float.Parse(a[0],System.Globalization.CultureInfo.InvariantCulture),float.Parse(a[1],System.Globalization.CultureInfo.InvariantCulture))).ToArray();
@@ -249,7 +251,7 @@ try{
     System.Func<int,Vector2> position=i=>new Vector2(originX+(i%w)*step,originY+(i/w)*step);
     System.Func<Vector2,int> index=v=>Mathf.RoundToInt((v.x-originX)/step)+Mathf.RoundToInt((v.y-originY)/step)*w;
     var anchors=new System.Collections.Generic.Dictionary<string,Vector2>{
-        {"OutsideSouth",new Vector2(6,-83)}, {"OutsideSouthEast",new Vector2(72,10)}, {"OutsideEast",new Vector2(159,45)}, {"BorderArrival",new Vector2(6,-58)}, {"BorderFight1",new Vector2(6,-43)}, {"BorderFight2",new Vector2(24,-22)}, {"Fire",new Vector2(15.5f,3)}, {"MillOverlook",new Vector2(11,26)},
+        {"OutsideSouth",new Vector2(6,-83)}, {"OutsideSouthEast",new Vector2(72,10)}, {"OutsideEast",new Vector2(159,45)}, {"BorderArrival",new Vector2(6,-58)}, {"BorderFight1",new Vector2(3.5f,-39)}, {"BorderFight2",new Vector2(20.5f,-21)}, {"BorderFight3",new Vector2(41,-14)}, {"Fire",new Vector2(15.5f,3)}, {"MillOverlook",new Vector2(11,26)},
         {"Pasture",new Vector2(84,32)}, {"EastMeadow",new Vector2(149,44)}, {"Orchard",new Vector2(117,88)},
         {"H1",new Vector2(69,58.5f)}, {"NorthBank",new Vector2(27,85)},
         {"Distributor",new Vector2(5,86)}, {"MainBay",new Vector2(5,74)},
@@ -377,7 +379,7 @@ try{
             }
         }
         // Body-clear combat footprints; not a substitute for fights with enemy telegraphs.
-        var arenas=new[]{new Vector4(84,32,24,16),new Vector4(116,88,18,12),new Vector4(128,44,10,6),new Vector4(6,-43,10,8),new Vector4(24,-22,12,8),new Vector4(76.75f,85.75f,12,6)};
+        var arenas=new[]{new Vector4(84,32,24,16),new Vector4(116,88,18,12),new Vector4(128,44,10,6),new Vector4(3.5f,-39,8,9),new Vector4(20.5f,-20.5f,8,6),new Vector4(42,-13.5f,9,8),new Vector4(76.75f,85.75f,12,6)};
         foreach(var area in arenas){Physics2D.OverlapBox(new Vector2(area.x,area.y),new Vector2(area.z,area.w),0,filter,overlap);check(!overlap.Any(solid),state+": combat clearing "+area.x+","+area.y+" "+area.z+"x"+area.w);}
         var targets=new System.Collections.Generic.List<object>();
         foreach(var entry in anchors){
@@ -407,7 +409,7 @@ try{
         }
         // Join the collision graph's parent chains at their nearest common ancestor. This walks
         // through both actual fight anchors without returning to the fire between route legs.
-        var borderStops=new[]{"BorderArrival","BorderFight1","BorderFight2","Fire"};
+        var borderStops=new[]{"BorderArrival","BorderFight1","BorderFight2","BorderFight3","Fire"};
         var borderPath=new System.Collections.Generic.List<int>();bool borderComplete=true;
         for(int leg=1;leg<borderStops.Length;leg++){
             int a=index(anchors[borderStops[leg-1]]),b=index(anchors[borderStops[leg]]);
@@ -419,7 +421,7 @@ try{
             var segment=left.TakeWhile(node=>node!=join).Concat(new[]{join}).Concat(right.TakeWhile(node=>node!=join).Reverse()).ToArray();
             borderPath.AddRange(borderPath.Count==0?segment:segment.Skip(1));
         }
-        check(borderComplete&&borderPath.Count>0,state+": continuous border route includes both encounter clearings");
+        check(borderComplete&&borderPath.Count>0,state+": continuous border route includes all three encounter clearings");
         foreach(bool reverse in new[]{false,true}){
             string name=reverse?"BorderReturn":"BorderOutward";
             var nodes=reverse?borderPath.AsEnumerable().Reverse():borderPath.AsEnumerable();

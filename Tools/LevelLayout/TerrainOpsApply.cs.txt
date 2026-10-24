@@ -1,0 +1,50 @@
+// Terrain ops apply (23 Oct). Edit Mode. Applies [map, x, y, tileName|null] ops from arrival_layout.py to the open
+// GreenLowlands scene with Undo recorded per tilemap. Does not save. SessionState "Layout.Ops" = ops JSON path.
+if (EditorApplication.isPlayingOrWillChangePlaymode) return "Stop Play first.";
+var root = GameObject.Find("Green Lowlands").transform;
+var maps = new Dictionary<string, string> {
+    { "ridgeTop", "Terrain/Landforms and rock enclosure/Terrain - Ridge tops" },
+    { "ridgeFace", "Terrain/Landforms and rock enclosure/Terrain - Ridge faces" },
+    { "connector", "Terrain/Transitions/Terrain - height connectors" },
+    { "heightColl", "Collision/Height boundaries" },
+    { "borderColl", "Collision/Border collision" },
+    { "lane", "Ground and Paths/Border road surfaces/Border lane" },
+    { "dirtLane", "Ground and Paths/Arrival/Paths/DirtLane" },
+    { "plan", "Authoring/Authoring - elevation guides/Height plan" },
+    { "marks", "Authoring/Authoring - elevation guides/Height plan markings" },
+    { "elev", "Authoring/Authoring - elevation guides/Elevation - Lower Normal Upper" },
+    { "trans", "Authoring/Authoring - elevation guides/Transitions - arrows point uphill" },
+};
+var tms = new Dictionary<string, UnityEngine.Tilemaps.Tilemap>();
+foreach (var kv in maps) { var t = root.Find(kv.Value); if (t == null) return "Missing " + kv.Value; tms[kv.Key] = t.GetComponent<UnityEngine.Tilemaps.Tilemap>(); }
+// Resolve tile names to the assets the scene already uses (any map in the region), then the asset database.
+var byName = new Dictionary<string, UnityEngine.Tilemaps.TileBase>();
+foreach (var tm in root.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>(true))
+{
+    var used = new UnityEngine.Tilemaps.TileBase[tm.GetUsedTilesCount()]; tm.GetUsedTilesNonAlloc(used);
+    foreach (var t in used) if (t != null && !byName.ContainsKey(t.name)) byName[t.name] = t;
+}
+string json = System.IO.File.ReadAllText(SessionState.GetString("Layout.Ops", ""));
+var ops = new List<string[]>();
+foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(json, "\\[\\s*\"(\\w+)\",\\s*(-?\\d+),\\s*(-?\\d+),\\s*(null|\"[^\"]*\")\\s*\\]"))
+    ops.Add(new[] { m.Groups[1].Value, m.Groups[2].Value, m.Groups[3].Value, m.Groups[4].Value.Trim('"') });
+var unresolved = new HashSet<string>();
+foreach (var op in ops)
+{
+    if (op[3] == "null" || byName.ContainsKey(op[3])) continue;
+    var guid = AssetDatabase.FindAssets(op[3] + " t:TileBase").Select(AssetDatabase.GUIDToAssetPath)
+        .Select(p => AssetDatabase.LoadAssetAtPath<UnityEngine.Tilemaps.TileBase>(p)).FirstOrDefault(t => t != null && t.name == op[3]);
+    if (guid != null) byName[op[3]] = guid; else unresolved.Add(op[3]);
+}
+if (unresolved.Count > 0) return "Unresolved tiles: " + string.Join(",", unresolved.ToArray());
+foreach (var tm in tms.Values) Undo.RegisterCompleteObjectUndo(tm, "Arrival road terrain");
+var counts = new Dictionary<string, int>();
+foreach (var op in ops)
+{
+    var tm = tms[op[0]]; var c = new Vector3Int(int.Parse(op[1]), int.Parse(op[2]), 0);
+    tm.SetTile(c, op[3] == "null" ? null : byName[op[3]]);
+    counts[op[0]] = counts.ContainsKey(op[0]) ? counts[op[0]] + 1 : 1;
+}
+foreach (var tm in tms.Values) { tm.CompressBounds(); var col = tm.GetComponent<UnityEngine.Tilemaps.TilemapCollider2D>(); if (col != null) col.ProcessTilemapChanges(); }
+UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(root.gameObject.scene);
+return "applied " + ops.Count + ": " + string.Join(", ", counts.Select(kv => kv.Key + " " + kv.Value).ToArray());

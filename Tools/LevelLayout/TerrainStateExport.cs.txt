@@ -1,0 +1,44 @@
+// Terrain state export (23 Oct). Edit Mode, read-only. Writes, per cell of a region, the terrain/collision/guide tiles
+// that the arrival layout generator (Tools/LevelLayout/arrival_layout.py) derives, so it can verify its rules against
+// the current scene before anything changes. SessionState "Layout.Out" = output path; region below.
+var root = GameObject.Find("Green Lowlands").transform;
+string outPath = SessionState.GetString("Layout.Out", "");
+if (string.IsNullOrEmpty(outPath)) return "Set SessionState Layout.Out.";
+int x0 = -30, x1 = 48, y0 = -82, y1 = 4;
+Func<string, UnityEngine.Tilemaps.Tilemap> T = m => { var t = root.Find(m); return t != null ? t.GetComponent<UnityEngine.Tilemaps.Tilemap>() : null; };
+var maps = new Dictionary<string, UnityEngine.Tilemaps.Tilemap> {
+    { "ridgeTop", T("Terrain/Landforms and rock enclosure/Terrain - Ridge tops") },
+    { "ridgeFace", T("Terrain/Landforms and rock enclosure/Terrain - Ridge faces") },
+    { "farmTop", T("Terrain/Landforms and rock enclosure/Terrain - Farm tops") },
+    { "farmFace", T("Terrain/Landforms and rock enclosure/Terrain - Farm faces") },
+    { "connector", T("Terrain/Transitions/Terrain - height connectors") },
+    { "heightColl", T("Collision/Height boundaries") },
+    { "borderColl", T("Collision/Border collision") },
+    { "outerColl", T("Collision/Cliffs and outer boundary") },
+    { "arrivalColl", T("Collision/Arrival collision") },
+    { "grass", T("Ground and Paths/Border road surfaces/Border grass") },
+    { "lane", T("Ground and Paths/Border road surfaces/Border lane") },
+    { "dirtLane", T("Ground and Paths/Arrival/Paths/DirtLane") },
+    { "river", T("Ground and Paths/Border road surfaces/Border river") },
+    { "plan", T("Authoring/Authoring - elevation guides/Height plan") },
+    { "marks", T("Authoring/Authoring - elevation guides/Height plan markings") },
+    { "elev", T("Authoring/Authoring - elevation guides/Elevation - Lower Normal Upper") },
+    { "trans", T("Authoring/Authoring - elevation guides/Transitions - arrows point uphill") },
+};
+var missing = maps.Where(kv => kv.Value == null).Select(kv => kv.Key).ToArray();
+if (missing.Length > 0) return "Missing maps: " + string.Join(",", missing);
+// Any water map counts as river for the generator (cells it must leave alone).
+var water = root.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>(true).Where(t => t.name.ToLower().Contains("water") || t.name.ToLower().Contains("river")).ToArray();
+var rows = new List<string>();
+var tileNames = new HashSet<string>();
+for (int y = y1; y >= y0; y--)
+    for (int x = x0; x <= x1; x++)
+    {
+        var c = new Vector3Int(x, y, 0);
+        var parts = new List<string>();
+        foreach (var kv in maps) { var t = kv.Value.GetTile(c); if (t != null) { parts.Add("\"" + kv.Key + "\":\"" + t.name + "\""); tileNames.Add(kv.Key + "=" + t.name); } }
+        if (water.Any(w => w.HasTile(c))) parts.Add("\"water\":true");
+        rows.Add("\"" + x + "," + y + "\":{" + string.Join(",", parts.ToArray()) + "}");
+    }
+System.IO.File.WriteAllText(outPath, "{\"region\":[" + x0 + "," + x1 + "," + y0 + "," + y1 + "],\"cells\":{" + string.Join(",", rows.ToArray()) + "}}");
+return "cells " + rows.Count + " -> " + outPath + "\n" + string.Join("\n", tileNames.OrderBy(s => s).ToArray());

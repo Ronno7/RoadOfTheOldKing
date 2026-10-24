@@ -29,6 +29,7 @@ namespace RoadOfTheOldKing.Cameras
         // One size override at a time (e.g. the bonfire menu); the player's own zoom returns afterwards.
         private object overrideOwner;
         private float overrideSize;
+        private float overrideSmoothing;
         private float easeUntil;
         private InputAction zoomIn;
         private InputAction zoomOut;
@@ -43,23 +44,27 @@ namespace RoadOfTheOldKing.Cameras
             viewCamera = GetComponent<Camera>();
             zoomIn = new InputAction("Zoom In", InputActionType.Button, RoadOfTheOldKing.Input.GamepadLayout.ZoomIn);
             zoomOut = new InputAction("Zoom Out", InputActionType.Button, RoadOfTheOldKing.Input.GamepadLayout.ZoomOut);
+            overrideSmoothing = overrideSmoothTime;
         }
 
         private void OnDisable() { zoomIn?.Disable(); zoomOut?.Disable(); }
         private void OnDestroy() { zoomIn?.Dispose(); zoomOut?.Dispose(); }
 
-        public void SetOverride(object owner, float size)
+        // An override may go past maxSize (a vista); smoothing below zero uses overrideSmoothTime, and the same
+        // smoothing eases back out when the owner clears it.
+        public void SetOverride(object owner, float size, float smoothing = -1f)
         {
             overrideOwner = owner;
             overrideSize = size;
-            easeUntil = Time.unscaledTime + overrideSmoothTime * 3f;
+            overrideSmoothing = smoothing >= 0f ? smoothing : overrideSmoothTime;
+            easeUntil = Time.unscaledTime + overrideSmoothing * 3f;
         }
 
         public void ClearOverride(object owner)
         {
             if (overrideOwner != owner) return;
             overrideOwner = null;
-            easeUntil = Time.unscaledTime + overrideSmoothTime * 3f;
+            easeUntil = Time.unscaledTime + overrideSmoothing * 3f;
         }
 
         private void OnEnable()
@@ -101,12 +106,15 @@ namespace RoadOfTheOldKing.Cameras
 
             targetSize = Mathf.Clamp(targetSize, minSize, maxSize);
             float goal = overrideOwner != null ? overrideSize : targetSize;
-            float smoothing = Time.unscaledTime < easeUntil ? overrideSmoothTime : smoothTime;
+            bool easing = Time.unscaledTime < easeUntil;
+            float smoothing = easing ? overrideSmoothing : smoothTime;
             float size = smoothing <= 0f
                 ? goal
                 : Mathf.SmoothDamp(viewCamera.orthographicSize, goal, ref zoomVelocity,
                     smoothing, Mathf.Infinity, Time.deltaTime);
-            viewCamera.orthographicSize = Mathf.Clamp(size, minSize, maxSize);
+            // Wider than the player's limit only while an override holds or eases back.
+            float widest = Mathf.Max(maxSize, overrideOwner != null ? overrideSize : easing ? viewCamera.orthographicSize : maxSize);
+            viewCamera.orthographicSize = Mathf.Clamp(size, minSize, widest);
         }
 
         private void OnValidate()

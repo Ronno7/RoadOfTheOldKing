@@ -291,8 +291,8 @@ namespace RoadOfTheOldKing.EditorTools
         internal static bool CombatInterior(Vector2 p)
         {
             return new Rect(74,26,20,12).Contains(p)||new Rect(109,84,14,8).Contains(p)||
-                new Rect(133,46,8,6).Contains(p)||new Rect(3,-45,6,4).Contains(p)||
-                new Rect(20,-24,8,4).Contains(p);
+                new Rect(133,46,8,6).Contains(p)||new Rect(-5,-43,17,11).Contains(p)||
+                new Rect(16,-23,17,8).Contains(p)||new Rect(40,-24,7,9).Contains(p);
         }
 
 

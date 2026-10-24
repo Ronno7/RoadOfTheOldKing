@@ -29,6 +29,7 @@ namespace RoadOfTheOldKing.Cameras
         private object framingOwner;
         private Vector2 framingPoint;
         private float framingBlend;
+        private float framingTime;
 
         private void Awake()
         {
@@ -38,6 +39,7 @@ namespace RoadOfTheOldKing.Cameras
             // Compose the feature at runtime without rewriting their authored scene state.
             if (freelook == null) freelook = gameObject.AddComponent<CameraFreelook2D>();
             basePosition = transform.position;
+            framingTime = framingSmoothTime;
         }
 
         private void OnEnable() => velocity = Vector3.zero;
@@ -51,11 +53,12 @@ namespace RoadOfTheOldKing.Cameras
         }
 
         // Puts the target at a viewport point (0..1, e.g. (1/3, 0.5) for the left third) until cleared by the
-        // same owner. Freelook is ignored meanwhile.
-        public void SetFraming(object owner, Vector2 viewportPoint)
+        // same owner. Freelook is ignored meanwhile. A blend time below zero uses framingSmoothTime, in and out.
+        public void SetFraming(object owner, Vector2 viewportPoint, float blendTime = -1f)
         {
             framingOwner = owner;
             framingPoint = viewportPoint;
+            framingTime = blendTime >= 0f ? blendTime : framingSmoothTime;
         }
 
         public void ClearFraming(object owner)
@@ -77,7 +80,7 @@ namespace RoadOfTheOldKing.Cameras
             Vector2 lookOffset = freelook != null ? freelook.Evaluate(target, Time.deltaTime) : Vector2.zero;
             // Real time: the bonfire doesn't pause the world, but menus may.
             framingBlend = Mathf.MoveTowards(framingBlend, framingOwner != null ? 1f : 0f,
-                Time.unscaledDeltaTime / Mathf.Max(.01f, framingSmoothTime));
+                Time.unscaledDeltaTime / Mathf.Max(.01f, framingTime));
             if (framingOwner != null) lookOffset = Vector2.zero;
             if (target == null || Time.deltaTime <= 0f)
             {
@@ -85,9 +88,11 @@ namespace RoadOfTheOldKing.Cameras
                 return;
             }
 
-            Vector3 followCenter = target.position + offset;
-            Vector3 destination = followCenter + (Vector3)lookOffset + FramingOffset();
-            float smoothing = framingBlend > 0f && framingBlend < 1f ? Mathf.Max(smoothTime, framingSmoothTime * .5f) : smoothTime;
+            // Freelook and lag are limited around the framed centre, so a large framing request (a vista) is not
+            // cut short by the freelook distance.
+            Vector3 followCenter = target.position + offset + FramingOffset();
+            Vector3 destination = followCenter + (Vector3)lookOffset;
+            float smoothing = framingBlend > 0f && framingBlend < 1f ? Mathf.Max(smoothTime, framingTime * .5f) : smoothTime;
             basePosition = smoothing <= 0f
                 ? destination
                 : Vector3.SmoothDamp(basePosition, destination, ref velocity,

@@ -1,0 +1,113 @@
+// Shared GreenLowlandsGameplayChecks isolated setup/cleanup required. Reset Arrival.Phase/Passed to 0.
+// Run between real frames. Staged Tutorial health/flasks, actual scene loads and motor/physics.
+// Arrival encounters are temporarily inactive during clearance walks: this is not combat/feel coverage.
+if(!EditorApplication.isPlaying)throw new Exception("Isolated Play required");
+var game=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(game==null||game.StorageKey!=SessionState.GetString("GreenLowlands.Gameplay.Key","")||
+   !game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new Exception("Save isolation mismatch");
+Application.runInBackground=true;EditorApplication.QueuePlayerLoopUpdate();
+if(game.IsLoading)return "WAIT for scene transition";
+int phase=SessionState.GetInt("Arrival.Phase",0);
+if(phase>4)return "DONE: "+SessionState.GetInt("Arrival.Passed",0);
+var checks=new List<string>();Action<bool,string> check=(ok,label)=>{if(!ok)throw new Exception(label);checks.Add(label);};
+if(phase==0)check(game.Continue(),"Continue isolated Tutorial");
+else {
+ var player=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
+ var flask=player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>();
+ var body=player.GetComponent<Rigidbody2D>();
+ if(phase==1){
+  check(player.gameObject.scene.name=="Tutorial","Tutorial loaded");
+  var fire=game.Checkpoints.Fires.Single(f=>f.Id=="tutorial/roadside-fire");
+  body.position=(Vector2)fire.transform.position+Vector2.down*.7f;player.transform.position=body.position;
+  body.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();
+  check((fire.IsDiscovered||game.Checkpoints.Light(fire))&&game.Checkpoints.Rest(fire),"Tutorial checkpoint established");
+  player.Health.SetHealth(60);flask.SetCharges(1);
+  SessionState.SetString("Arrival.Checkpoint",game.Progress.checkpointId);
+  check(game.Checkpoints.LeaveScene("Assets/Scenes/GreenLowlands.unity","from-tutorial"),"Real outward scene transition");
+ }else if(phase==4){
+  check(player.gameObject.scene.name=="Tutorial","Real reverse trigger returned to Tutorial");
+  check(player.Health.Health==60&&flask.Charges==1,"Reverse travel preserves carried health and flask");
+  check(game.Progress.checkpointId==SessionState.GetString("Arrival.Checkpoint",""),"Return did not change checkpoint");
+ }else{
+  check(player.gameObject.scene.name=="GreenLowlands","Lowlands loaded");
+  check(player.Health.Health==60&&flask.Charges==1,"Arrival/walk did not heal or refill");
+  var movement=player.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>();
+  var input=player.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();
+  var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+  var step=movement.GetType().GetMethod("FixedUpdate",flags);
+  var direction=input.GetType().GetProperty("MoveDirection");
+  var sprint=input.GetType().GetProperty("SprintHeld");
+  var focus=input.GetType().GetField("hasFocus",flags);var paused=input.GetType().GetField("paused",flags);
+  object oldFocus=focus.GetValue(input),oldPaused=paused.GetValue(input),oldSprint=sprint.GetValue(input,null);
+  var oldMode=Physics2D.simulationMode;var oldInterpolation=body.interpolation;
+  // Every arrival encounter (wolves, rat stand-in, cart scavenger) lives under this group.
+  var enemies=GameObject.Find("Green Lowlands").transform.Find("Encounters/Border wolves").Cast<Transform>().Select(t=>t.gameObject).ToArray();
+  var active=enemies.Select(e=>e.activeSelf).ToArray();int steps=0;
+  Action<Vector2> walk=target=>{
+   int attempts=0;
+   while(Vector2.Distance(body.position,target)>.025f && attempts++<600){
+    direction.SetValue(input,Vector2.ClampMagnitude((target-body.position)*6f/movement.MoveSpeed,1),null);
+    step.Invoke(movement,null);Physics2D.Simulate(Time.fixedDeltaTime);steps++;
+    if(game.IsLoading)return;
+   }
+   if(Vector2.Distance(body.position,target)>.025f)throw new Exception("Motor blocked at "+body.position+" toward "+target);
+  };
+  try{
+   Physics2D.simulationMode=SimulationMode2D.Script;body.interpolation=RigidbodyInterpolation2D.None;
+   focus.SetValue(input,true);paused.SetValue(input,false);sprint.SetValue(input,false,null);
+   foreach(var enemy in enemies)enemy.SetActive(false);Physics2D.SyncTransforms();
+   if(phase==2){
+    check(Vector2.Distance(body.position,new Vector2(6,-58))<.1f,"Named arrival stays at (6,-58)");
+    var markers=GameObject.Find("Green Lowlands").transform.Find("Authoring/Arrival route (editor only)");
+    check(markers!=null&&markers.childCount==24,"Authored route markers available");
+    var route=markers.Cast<Transform>().OrderBy(t=>t.name).Select(t=>(Vector2)t.position).ToArray();
+    int samples=0;float length=0;
+    for(int j=0;j<route.Length-1;j++){
+     length+=Vector2.Distance(route[j],route[j+1]);int n=Mathf.CeilToInt(Vector2.Distance(route[j],route[j+1])*4);
+     for(int i=0;i<=n;i++){
+      var p=Vector2.Lerp(route[j],route[j+1],i/(float)n);samples++;
+      // The two-row bridge decks and the farm yard by the fire set the narrowest points.
+      if(Physics2D.OverlapCircleAll(p,.7f).Any(c=>!c.isTrigger&&c.attachedRigidbody==null))throw new Exception("1.4-unit corridor obstructed at "+p);
+     }
+    }
+    check(samples>650&&length>160&&length<195,"Continuous 1.4-unit corridor over the approved 160-190 unit road ("+length.ToString("F0")+")");
+    var vistas=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Cameras.CameraVista>(FindObjectsSortMode.None);
+    check(vistas.Length==2&&vistas.All(v=>route.Any(p=>v.Bounds.Contains(p))),"Both camera vistas sit on the route");
+    int coins=game.Progress.bronzeCoins,shards=game.Progress.sunShards;
+    foreach(var p in route)walk(p);
+    check(!game.IsLoading&&Vector2.Distance(body.position,route.Last())<.05f,"Motor traverses arrival to farm without teleporting");
+    var fire=game.Checkpoints.Fires.Single(f=>f.Id=="green-lowlands/arrival-fire");
+    check(!fire.IsDiscovered&&game.Progress.checkpointId==SessionState.GetString("Arrival.Checkpoint",""),"Reaching farm neither lights fire nor changes checkpoint");
+    // Waystation floor (rat swarm), looted cart (lone scavenger), riverside meadow (wolf + rats).
+    foreach(var space in new[]{new Vector3(3.5f,-39,4.5f),new Vector3(20.5f,-21,3.5f),new Vector3(41,-14,4.5f)}){
+     var centre=(Vector2)space;float radius=space.z;
+     check(!Physics2D.OverlapCircleAll(centre,radius).Any(c=>!c.isTrigger&&c.attachedRigidbody==null),(radius*2)+"-unit combat clearing at "+centre);
+     // Stage the loop start; traverse the complete circumference with the actual motor.
+     float loop=radius-.75f;
+     body.position=centre+Vector2.right*loop;player.transform.position=body.position;body.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();
+     for(int i=1;i<=24;i++){float angle=i*Mathf.PI*2/24;walk(centre+new Vector2(Mathf.Cos(angle),Mathf.Sin(angle))*loop);}
+     check(true,"Motor circles combat space at "+centre);
+    }
+    body.position=route.Last();player.transform.position=body.position;body.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();
+    foreach(var p in route.Reverse())walk(p);
+    check(!game.IsLoading&&Vector2.Distance(body.position,route.First())<.05f,"Motor traverses farm to arrival");
+    check(player.Health.Health==60&&flask.Charges==1,"Both walks preserve depleted vitals");
+    check(game.Progress.bronzeCoins==coins&&game.Progress.sunShards==shards,"Route adds no currency or shard reward");
+   }else{
+    walk(new Vector2(6,-64));
+    check(game.IsLoading,"Actual motor crosses unchanged return trigger");
+   }
+  }finally{
+   direction.SetValue(input,Vector2.zero,null);body.linearVelocity=Vector2.zero;
+   body.interpolation=oldInterpolation;Physics2D.simulationMode=oldMode;
+   focus.SetValue(input,oldFocus);paused.SetValue(input,oldPaused);sprint.SetValue(input,oldSprint,null);
+   for(int i=0;i<enemies.Length;i++)if(enemies[i]!=null)enemies[i].SetActive(active[i]);
+   Physics2D.SyncTransforms();
+   var follow=Camera.main!=null?Camera.main.GetComponent<RoadOfTheOldKing.Cameras.CameraFollow2D>():null;
+   if(follow!=null)follow.SnapToTarget();
+  }
+  SessionState.SetInt("Arrival.MotorSteps",SessionState.GetInt("Arrival.MotorSteps",0)+steps);
+ }
+}
+SessionState.SetInt("Arrival.Phase",phase+1);SessionState.SetInt("Arrival.Passed",SessionState.GetInt("Arrival.Passed",0)+checks.Count);
+return "PASS phase "+phase+": "+checks.Count+" assertions; total "+SessionState.GetInt("Arrival.Passed",0)+"; motor steps "+SessionState.GetInt("Arrival.MotorSteps",0);

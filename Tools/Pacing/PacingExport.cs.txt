@@ -1,0 +1,101 @@
+// Pacing export (23 Oct). Edit Mode only, read-only: writes the open scene's gameplay beats and a walkability grid to
+// JSON for Tools/Pacing/pacing_sim.py. Run through the FixtureRunner pattern with SessionState "Pacing.Out" set to an
+// absolute output path. Never saves or modifies the scene.
+if (EditorApplication.isPlayingOrWillChangePlaymode) return "Stop Play first.";
+var scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+string outPath = SessionState.GetString("Pacing.Out", "");
+if (string.IsNullOrEmpty(outPath)) return "Set SessionState Pacing.Out.";
+var inv = System.Globalization.CultureInfo.InvariantCulture;
+Func<float, string> F = v => v.ToString("0.###", inv);
+Func<Vector3, string> V = v => "[" + F(v.x) + "," + F(v.y) + "]";
+Func<string, string> Q = s => "\"" + (s ?? "").Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
+var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public;
+Func<object, string, object> Field = (o, n) => { var f = o.GetType().GetField(n, flags); return f != null ? f.GetValue(o) : null; };
+var items = new List<string>();
+Action<string, Component, string> Add = (kind, c, extra) =>
+    items.Add("{\"kind\":" + Q(kind) + ",\"name\":" + Q(c.gameObject.name) + ",\"pos\":" + V(c.transform.position) +
+              ",\"active\":" + (c.gameObject.activeInHierarchy ? "true" : "false") + (extra ?? "") + "}");
+foreach (var mb in UnityEngine.Object.FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+{
+    if (mb == null || mb.gameObject.scene != scene) continue;
+    string t = mb.GetType().Name;
+    if (t == "PursuitBrain" || t == "PredatorBrain")
+    {
+        var hp = mb.GetComponent<RoadOfTheOldKing.Combat.Damageable>();
+        var so = new SerializedObject(mb);
+        Func<string, float> S = n => { var pr = so.FindProperty(n); return pr != null && pr.propertyType == SerializedPropertyType.Float ? pr.floatValue : -1f; };
+        Func<string, int> I = n => { var pr = so.FindProperty(n); return pr != null && pr.propertyType == SerializedPropertyType.Integer ? pr.intValue : -1; };
+        string extra = ",\"brain\":" + Q(t) + ",\"hp\":" + (hp != null ? F(hp.MaxHealth) : "0") +
+            ",\"notice\":" + F(S("noticeRadius")) + ",\"leash\":" + F(S("leashRadius")) + ",\"moveSpeed\":" + F(S("moveSpeed")) +
+            ",\"damage\":" + I("damage") + ",\"windup\":" + F(S("windupDuration")) + ",\"recovery\":" + F(S("recoveryDuration")) +
+            ",\"snapDamage\":" + I("snapDamage") + ",\"lungeDamage\":" + I("lungeDamage") + ",\"stalkFor\":" + F(S("stalkFor"));
+        var atk = so.FindProperty("attack");
+        if (atk != null && atk.objectReferenceValue != null)
+        {
+            var spec = new SerializedObject(atk.objectReferenceValue).FindProperty("settings");
+            extra += ",\"attack\":{\"windup\":" + F(spec.FindPropertyRelative("windup").floatValue) + ",\"active\":" + F(spec.FindPropertyRelative("active").floatValue) +
+                ",\"recovery\":" + F(spec.FindPropertyRelative("recovery").floatValue) + ",\"damage\":" + spec.FindPropertyRelative("damage").intValue +
+                ",\"chargeSpeed\":" + F(spec.FindPropertyRelative("chargeSpeed").floatValue) + "}";
+        }
+        Add("enemy", mb, extra);
+    }
+    else if (t == "Bonfire" || t == "SunShardReward" || t == "HeartFragmentPickup" || t == "RewardChest" || t == "ToolPickup" ||
+             t == "CoinSource" || t == "Breakable" || t == "SceneExit" || t == "SceneSpawnPoint" || t == "RecallSluice" ||
+             t == "SluiceTarget" || t == "SluiceCrank" || t == "ForgeInscription" || t == "Trader" || t == "RopeAnchor" ||
+             t == "EncounterUnlock" || t == "PermanentPassage" || t == "RecallAwakeningStone" || t == "RecallSealGate" ||
+             t == "PracticeTarget" || t == "ThrowPracticeStand" || t == "WorldPickup" || t == "AxePickup")
+        Add(t, mb, null);
+    else if (t == "AreaName")
+    {
+        var a = (RoadOfTheOldKing.World.AreaName)mb; var r = a.Bounds;
+        Add("AreaName", mb, ",\"label\":" + Q(a.DisplayName) + ",\"rect\":[" + F(r.xMin) + "," + F(r.yMin) + "," + F(r.width) + "," + F(r.height) + "]");
+    }
+    else if (t == "TutorialGuide")
+    {
+        var steps = (System.Collections.IList)Field(mb, "steps");
+        var parts = new List<string>();
+        foreach (var s in steps)
+        {
+            var area = (Vector2)Field(s, "area"); var cue = Field(s, "cueTarget") as Transform;
+            parts.Add("{\"id\":" + Q((string)Field(s, "id")) + ",\"condition\":" + Q(Field(s, "condition").ToString()) +
+                ",\"area\":" + V(area) + ",\"cue\":" + (cue != null ? V(cue.position) : "null") + "}");
+        }
+        Add("TutorialGuide", mb, ",\"steps\":[" + string.Join(",", parts.ToArray()) + "]");
+    }
+}
+// Walkability: the player's 0.75 box against everything its layer collides with, ignoring triggers and dynamic bodies.
+var player = GameObject.Find("Player");
+int layer = player != null ? player.layer : 0;
+int mask = Physics2D.GetLayerCollisionMask(layer);
+Physics2D.SyncTransforms();
+var bounds = new Bounds(); bool first = true;
+foreach (var t in UnityEngine.Object.FindObjectsByType<UnityEngine.Tilemaps.TilemapRenderer>(FindObjectsSortMode.None))
+{ if (t.gameObject.scene != scene) continue; if (first) { bounds = t.bounds; first = false; } else bounds.Encapsulate(t.bounds); }
+float cell = .5f; int w = Mathf.CeilToInt(bounds.size.x / cell), h = Mathf.CeilToInt(bounds.size.y / cell);
+var filter = new ContactFilter2D { useTriggers = false, useLayerMask = true, layerMask = mask };
+// Story gates the player passes once the story opens them: sample with their colliders off, restore right after.
+var opened = new List<Collider2D>();
+foreach (var mb in UnityEngine.Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+{
+    if (mb == null || mb.gameObject.scene != scene) continue;
+    string tn = mb.GetType().Name;
+    if (tn != "RecallSealGate" && tn != "PermanentPassage") continue;
+    foreach (var col in mb.GetComponentsInChildren<Collider2D>()) if (col.enabled && !col.isTrigger) { col.enabled = false; opened.Add(col); }
+}
+Physics2D.SyncTransforms();
+var hits = new List<Collider2D>();
+var grid = new System.Text.StringBuilder(w * h);
+for (int y = 0; y < h; y++) for (int x = 0; x < w; x++)
+{
+    var c = new Vector2(bounds.min.x + (x + .5f) * cell, bounds.min.y + (y + .5f) * cell);
+    hits.Clear(); Physics2D.OverlapBox(c, new Vector2(.75f, .75f), 0f, filter, hits);
+    bool blocked = false;
+    foreach (var hit in hits) { var rb = hit.attachedRigidbody; if (rb != null && rb.bodyType == RigidbodyType2D.Dynamic) continue; blocked = true; break; }
+    grid.Append(blocked ? '1' : '0');
+}
+foreach (var col in opened) col.enabled = true;
+Physics2D.SyncTransforms();
+string json = "{\"scene\":" + Q(scene.name) + ",\"grid\":{\"origin\":" + V(bounds.min) + ",\"cell\":" + F(cell) + ",\"w\":" + w + ",\"h\":" + h +
+    ",\"data\":" + Q(grid.ToString()) + "},\"items\":[" + string.Join(",", items.ToArray()) + "]}";
+System.IO.File.WriteAllText(outPath, json);
+return scene.name + ": " + items.Count + " items, grid " + w + "x" + h + " -> " + outPath;
