@@ -38,7 +38,6 @@ Built by Ronno7. Art and animation made with [PixelLab](https://www.pixellab.ai/
 - [*Moonshire*](https://store.steampowered.com/app/2542170/MOONSHIRE/) by Challacade: art direction reference ([Enhancing my game's pixel art!](https://www.youtube.com/watch?v=jBYRUxGmEv0))
 
 **Techniques and tutorials**
-- [Historic England, listed sluice](https://historicengland.org.uk/listing/the-list/list-entry/1215011?section=official-list-entry): fixed guides and lifting timber water gate
 - [SLYNYRD Pixelblog](https://www.slynyrd.com/pixelblog-catalogue): top-down tiles, trees, objects, interiors, palettes, walk cycles and attack animation
 - [Pixel Frog, Tiny Swords tilemap guide](https://pixelfrog-assets.itch.io/tiny-swords/devlog/1138989/tilemap-guide): elevation, cliff and stair tile relationships
 - Radical Fish Games, CrossCode height-map tooling ([1](https://www.radicalfishgames.com/?p=2475), [2](https://www.radicalfishgames.com/?p=3598)): height planning separate from tile art
