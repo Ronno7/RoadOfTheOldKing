@@ -9,6 +9,8 @@ namespace RoadOfTheOldKing.Enemies
         public float windup, active, recovery, reach, arc, knockback, stagger;
         public int damage;
         public float chargeSpeed, trackingTime;
+        [Tooltip("Hyper-armour once the direction locks, through the active window: hits still damage but cannot interrupt the committed blow.")]
+        public bool armoredWhenLocked;
     }
 
     // Immutable authoring data in play. The runner takes a value copy at commitment.

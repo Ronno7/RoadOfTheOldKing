@@ -21,6 +21,7 @@ namespace RoadOfTheOldKing.Enemies
             return true;
         }
 
+        public static bool CanAcquire(object owner) => holders.Contains(owner) || holders.Count < MaxAttackers;
         public static void Release(object owner) => holders.Remove(owner);
         public static bool Holds(object owner) => holders.Contains(owner);
     }

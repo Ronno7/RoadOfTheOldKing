@@ -1,4 +1,4 @@
-// Empty, save-free Play Mode only (22 Oct). PursuitBrain chase/leash/re-engage contract from playtest feedback:
+// Empty, save-free Play Mode only (22 Oct; wolf section 26 Oct). PursuitBrain chase/leash/re-engage contract from playtest feedback:
 // chases past its notice radius, gives up at its own leash, ignores the player near the leash edge, re-engages
 // when followed back inside 60% of the leash or when hit, and otherwise walks home and idles.
 if (!EditorApplication.isPlaying || UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Progression.GameSession>() != null)
@@ -21,8 +21,27 @@ try{
  var tick=t.GetMethod("Tick",flags);
  Action<int> run=n=>{for(int i=0;i<n;i++){tick.Invoke(brain,new object[]{.02f});Physics2D.Simulate(.02f);}};
  Action<Vector2> put=pos=>{victim.transform.position=pos;pb.position=pos;};
- put(home+Vector2.right*(notice-1)); run(2);
- check(brain.IsAware,"notices inside radius");
+ float watch=(float)t.GetField("watchDuration",flags).GetValue(brain);
+ int detections=0; brain.PlayerDetected+=()=>detections++;
+ put(home+Vector2.right*(notice-1)); Physics2D.SyncTransforms(); run(15);
+ check(brain.IsWatching&&!brain.IsAware&&brain.Suspicion>.25f&&brain.Suspicion<.5f,"visible exposure builds suspicion before pursuit");
+ check(body.position==home&&Vector2.Dot(brain.FacingDirection,Vector2.right)>.99f&&detections==0,"watching faces the player without moving or announcing engagement");
+ var indicator=obj.GetComponent<RoadOfTheOldKing.Enemies.EnemyAwarenessIndicator>();
+ var present=indicator.GetType().GetMethod("Present",flags);present.Invoke(indicator,new object[]{.02f});
+ var ui=(RoadOfTheOldKing.UI.WorldUIDocument)indicator.GetType().GetField("ui",flags).GetValue(indicator);
+ var track=ui.Q<UnityEngine.UIElements.VisualElement>("awareness-track");var fill=ui.Q<UnityEngine.UIElements.VisualElement>("awareness-fill");
+ check(track.style.display.value==UnityEngine.UIElements.DisplayStyle.Flex&&fill.style.width.value.value>0,"watching shows a filled suspicion meter");
+ float before=brain.Suspicion;tick.Invoke(brain,new object[]{0f});
+ check(brain.Suspicion==before,"paused time does not build suspicion");
+ var wall=new GameObject("Awareness sight blocker");created.Add(wall);wall.transform.position=home+Vector2.right*2;wall.AddComponent<BoxCollider2D>().size=new Vector2(.2f,5);Physics2D.SyncTransforms();run(5);
+ check(!brain.IsAware&&brain.Suspicion<before,"a solid sight blocker drains suspicion");
+ run(40);check(!brain.IsWatching&&brain.Suspicion==0&&body.position==home,"lost sight returns the watcher to idle without a chase");
+ wall.SetActive(false);put(home+Vector2.right*(notice-1));Physics2D.SyncTransforms();run(20);put(home+Vector2.up*(notice+1));Physics2D.SyncTransforms();before=brain.Suspicion;run(5);
+ check(brain.Suspicion<before&&!brain.IsAware,"leaving notice range also drains suspicion");
+ brain.ResetOnRest();put(home+Vector2.right*(notice-1));Physics2D.SyncTransforms();run(Mathf.CeilToInt(watch/.02f)+2);
+ check(brain.IsAware&&detections==1,"full visible exposure engages exactly once");
+ present.Invoke(indicator,new object[]{.02f});
+ check(track.style.display.value==UnityEngine.UIElements.DisplayStyle.None&&ui.Q<UnityEngine.UIElements.VisualElement>("awareness-mark").style.display.value==UnityEngine.UIElements.DisplayStyle.Flex,"engagement replaces the meter with the alert glyph");
  put(home+Vector2.right*(notice+2)); run(10);
  check(brain.IsAware&&brain.State==RoadOfTheOldKing.Enemies.PursuitState.Pursuing,"keeps chasing past notice radius");
  for(int i=0;i<400&&brain.IsAware;i++){ put(body.position+Vector2.right*3f); run(1);}
@@ -42,5 +61,39 @@ try{
  brain.ResetOnRest(); put(home+Vector2.right*200); body.position=home+Vector2.right*3; run(1);
  for(int i=0;i<200&&brain.State!=RoadOfTheOldKing.Enemies.PursuitState.Idle;i++) run(1);
  check(brain.State==RoadOfTheOldKing.Enemies.PursuitState.Idle&&Vector2.Distance(body.position,home)<.3f,"returns to home and idles");
+ brain.ResetOnRest();put(home+Vector2.right*(notice-1));Physics2D.SyncTransforms();run(10);
+ check(brain.IsWatching&&brain.Suspicion>0,"new encounter begins with fresh suspicion");
+ obj.GetComponent<RoadOfTheOldKing.Combat.Damageable>().DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.left,0,.2f));
+ check(brain.IsAware&&!brain.IsWatching&&brain.Suspicion==0,"being struck engages immediately even during stagger");
+ brain.ResetOnRest();run(10);brain.enabled=false;
+ check(!brain.IsAware&&brain.Suspicion==0,"disable clears suspicion");brain.enabled=true;
+ run(10);brain.ResetOnRest();present.Invoke(indicator,new object[]{.02f});
+ check(brain.Suspicion==0&&!brain.IsAware&&ui.Root.style.visibility.value==UnityEngine.UIElements.Visibility.Hidden,"rest clears suspicion and its indicator");
+ // PredatorBrain shares the same EnemyBody home/leash/sight rules (26 Oct). Time.time is frozen inside this call, so lost sight is staged.
+ var wolfObj=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Combat/Wolf.prefab"),home+Vector2.up*100,Quaternion.identity);created.Add(wolfObj);
+ foreach(var fx in wolfObj.GetComponentsInChildren<RoadOfTheOldKing.Enemies.EnemyImpactFeedback>()) fx.enabled=false;
+ var wolf=wolfObj.GetComponent<RoadOfTheOldKing.Enemies.PredatorBrain>();var wb=wolfObj.GetComponent<Rigidbody2D>();var wt=wolf.GetType();
+ wt.GetField("target",flags).SetValue(wolf,player);var wtick=wt.GetMethod("Tick",flags);var wHome=wb.position;
+ float wNotice=(float)wt.GetField("noticeRadius",flags).GetValue(wolf),wLeash=(float)wt.GetField("leashRadius",flags).GetValue(wolf),wLose=(float)wt.GetField("loseSightTime",flags).GetValue(wolf);
+ var senses=wt.GetField("actor",flags).GetValue(wolf);var seen=senses.GetType().GetField("lastSeen",flags);
+ Action<int> wrun=n=>{for(int i=0;i<n;i++){wtick.Invoke(wolf,new object[]{.02f});Physics2D.Simulate(.02f);}};
+ Action<Vector2> wput=pos=>{wb.position=pos;wolfObj.transform.position=pos;Physics2D.SyncTransforms();};
+ wolf.ResetOnRest();put(wHome+Vector2.right*(wNotice-1));Physics2D.SyncTransforms();wrun(1);
+ check(wolf.IsAware&&wolf.State==RoadOfTheOldKing.Enemies.PredatorState.Alert,"wolf notices a visible player inside notice range");
+ put(wHome+Vector2.right*(wNotice*1.5f+2));Physics2D.SyncTransforms();wrun(1);
+ check(wolf.IsAware,"wolf keeps hunting briefly after losing sight");
+ seen.SetValue(senses,Time.time-wLose-.1f);wrun(1);
+ // Still at home, so Return settles straight into Idle within the same tick.
+ check(!wolf.IsAware&&wolf.State==RoadOfTheOldKing.Enemies.PredatorState.Idle,"wolf gives up after its lose-sight time");
+ wolf.ResetOnRest();put(wHome+Vector2.right*(wNotice-1));Physics2D.SyncTransforms();wrun(1);
+ wput(wHome+Vector2.right*(wLeash+.5f));put(wb.position+Vector2.right*2);Physics2D.SyncTransforms();wrun(1);
+ check(!wolf.IsAware&&wolf.State==RoadOfTheOldKing.Enemies.PredatorState.Return,"wolf gives up past its own leash");
+ wput(wHome+Vector2.right*(wLeash*.7f));put(wb.position+Vector2.right*2);Physics2D.SyncTransforms();wrun(1);
+ check(!wolf.IsAware,"wolf ignores the player outside 60% of its leash");
+ wput(wHome+Vector2.right*(wLeash*.5f));put(wb.position+Vector2.right*2);Physics2D.SyncTransforms();wrun(1);
+ check(wolf.IsAware,"wolf re-engages when followed back inside 60% of its leash");
+ wolf.ResetOnRest();put(wHome+Vector2.right*(wNotice*1.5f+2));Physics2D.SyncTransforms();seen.SetValue(senses,Time.time-wLose-.1f);
+ wolfObj.GetComponent<RoadOfTheOldKing.Combat.Damageable>().DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.left,0,0));wrun(1);
+ check(wolf.IsAware,"a hit from out of sight engages the wolf and counts as seeing the player");
  return "PASS "+passed.Count+"\n"+string.Join("\n",passed.ToArray());
 } finally { foreach(var g in created) if(g!=null) UnityEngine.Object.Destroy(g); Physics2D.simulationMode=sim; }

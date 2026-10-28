@@ -110,6 +110,7 @@ GameObject:
   - component: {fileID: 95020225304347271}
   - component: {fileID: 5620348281807506487}
   - component: {fileID: 1072501595478793125}
+  - component: {fileID: 6400531888760331847}
   m_Layer: 0
   m_Name: RoadScavenger
   m_TagString: Untagged
@@ -248,11 +249,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.SimpleMeleeEnemy
   target: {fileID: 0}
-  attack: {fileID: 0}
+  attack: {fileID: 11400000, guid: 092fa2fdb32ed9749b3c33fe3bca565b, type: 2}
   moveSpeed: 3.3
   noticeRadius: 7
+  watchDuration: 0.9
+  forgetDuration: 0.6
   leashRadius: 10
-  attackDistance: 1.85
+  loseSightTime: 2
+  attackDistance: 2.6
   attackReach: 2.25
   attackArc: 85
   windupDuration: 0.5
@@ -260,6 +264,11 @@ MonoBehaviour:
   recoveryDuration: 0.8
   damage: 18
   hitRecovery: 0.1
+  closeAttack: {fileID: 11400000, guid: cc2da1dadf3ecef409adea2ae417a2a2, type: 2}
+  closeRangeFraction: 0.75
+  holdDistance: 3.2
+  attackCooldown: 0.8
+  takesTurns: 1
 --- !u!114 &6032105979022356310
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -338,6 +347,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.EnemyCoinDrop
   coinVisual: {fileID: 3059770832308618910}
+  firstDefeatRewardId: 
+  firstDefeatCoins: 0
+  replacesCoinSource: 
+--- !u!114 &6400531888760331847
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 423607603060298351}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ded85ff939c67a34cbdaf660090669c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Enemies.EnemyAwarenessIndicator
+  body: {fileID: 5195685374505168920}
+  panel: {fileID: 11400000, guid: 18015c3b74002454fab6d92829abd2aa, type: 2}
+  layout: {fileID: 9197481963319205126, guid: 79df98bc4ec28d04db859ed7128cbf0f, type: 3}
+  duration: 0.75
+  gap: 0.375
+  anchorHeight: 2.6
 --- !u!1 &1413637243877571580
 GameObject:
   m_ObjectHideFlags: 0

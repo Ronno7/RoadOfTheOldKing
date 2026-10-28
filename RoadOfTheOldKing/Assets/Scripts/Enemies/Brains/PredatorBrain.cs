@@ -24,7 +24,7 @@ namespace RoadOfTheOldKing.Enemies
 
         [Header("Senses")]
         [SerializeField, Min(.1f)] private float noticeRadius = 10f;
-        [Tooltip("Gives up and returns home when it or the player strays this far from home.")]
+        [Tooltip("Gives up and returns home when it strays this far from home.")]
         [SerializeField, Min(.1f)] private float leashRadius = 20f;
         [Tooltip("Pause on first noticing the player, the '!' beat before it closes in.")]
         [SerializeField, Min(0f)] private float alertDuration = .4f;
@@ -123,8 +123,8 @@ namespace RoadOfTheOldKing.Enemies
         private PlayerCombatController combat;
         private PlayerStamina stamina;
         private PlayerFlask flask;
-        private Vector2 home, previousPosition, repositionPoint, evadeDirection;
-        private float elapsed, duration, stalkFor, lastSeen, blockedTime, actualSpeed, evadeReadyAt;
+        private Vector2 previousPosition, repositionPoint, evadeDirection;
+        private float elapsed, duration, stalkFor, blockedTime, actualSpeed, evadeReadyAt;
         private int circleSign = 1;
         private bool feint, hitPending, playerWasStriking, playerWasExposed;
         private uint lastFlightSequence;
@@ -148,8 +148,6 @@ namespace RoadOfTheOldKing.Enemies
         public bool IsDefeated => State == PredatorState.Defeated;
         public int ResetVersion { get; private set; }
         public event Action PlayerDetected;
-
-        private const float ReengageFraction = .6f;
 
         private AxeWeapon PlayerWeapon =>combat != null ? combat.Weapon : null;
 
@@ -206,7 +204,7 @@ namespace RoadOfTheOldKing.Enemies
             actor = new EnemyBody(gameObject);
             health = actor.Health; reaction = actor.Reaction; body = actor.Rigidbody; bodyCollider = actor.Collider;
             action = new EnemyActionRunner();
-            home = previousPosition = body.position;
+            previousPosition = body.position;
         }
 
         private void Start()
@@ -256,8 +254,7 @@ namespace RoadOfTheOldKing.Enemies
             Vector2 toTarget = targetAlive ? (Vector2)target.transform.position - body.position : Vector2.zero;
             float distance = toTarget.magnitude;
             Vector2 toward = distance > .001f ? toTarget / distance : FacingDirection;
-            bool sees = targetAlive && distance <= noticeRadius * 1.5f && HasLineOfSight(target.transform.position);
-            if (sees) lastSeen = Time.time;
+            bool sees = targetAlive && actor.Sees(target.transform, noticeRadius, true);
 
             // Read the player once per tick; reactions trigger on the moment a swing or an opening begins.
             bool swinging = targetAlive && PlayerSwinging, exposed = targetAlive && PlayerExposed;
@@ -284,7 +281,7 @@ namespace RoadOfTheOldKing.Enemies
                 return;
             }
 
-            if (IsAware && (!targetAlive || OutsideLeash() || Time.time - lastSeen > loseSightTime))
+            if (IsAware && (!targetAlive || actor.OutsideLeash(leashRadius) || actor.LostSight(loseSightTime)))
             {
                 LoseTarget();
                 Enter(PredatorState.Return);
@@ -324,9 +321,9 @@ namespace RoadOfTheOldKing.Enemies
                     else Move(toPoint.normalized, trotSpeed, dt);
                     break;
                 case PredatorState.Return:
-                    Vector2 toHome = home - body.position;
+                    Vector2 toHome = actor.Home - body.position;
                     // Followed back into its ground: take the player up again (well inside the leash, so it doesn't flicker at the edge).
-                    if (sees && distance <= noticeRadius && toHome.magnitude <= leashRadius * ReengageFraction) Notice();
+                    if (sees && distance <= noticeRadius && actor.CanReengage(leashRadius)) Notice();
                     else if (toHome.magnitude <= .15f) { Brake(dt); Enter(PredatorState.Idle); }
                     else Move(toHome.normalized, trotSpeed, dt);
                     break;
@@ -480,7 +477,7 @@ namespace RoadOfTheOldKing.Enemies
         private void Notice()
         {
             IsAware = true;
-            lastSeen = Time.time;
+            actor.MarkSeen();
             Enter(PredatorState.Alert);
             PlayerDetected?.Invoke();
         }
@@ -490,9 +487,6 @@ namespace RoadOfTheOldKing.Enemies
             IsAware = false;
             AttackTokens.Release(this);
         }
-
-        // Only its own distance counts, so stepping away from its home doesn't shake it off (playtest, 22 Oct).
-        private bool OutsideLeash() => Vector2.Distance(body.position, home) > leashRadius;
 
         // Terrain and static props block sight; characters (dynamic bodies) do not.
         private bool HasLineOfSight(Vector2 point) => actor.CanSee(point, target != null ? target.transform : null, true);
@@ -523,7 +517,7 @@ namespace RoadOfTheOldKing.Enemies
             }
             else if (state == PredatorState.Reposition)
             {
-                Vector2 center = target != null ? (Vector2)target.transform.position : home;
+                Vector2 center = target != null ? (Vector2)target.transform.position : actor.Home;
                 Vector2 away = body.position - center;
                 away = away.sqrMagnitude > .001f ? away.normalized : -FacingDirection;
                 float angle = 40f * circleSign * Mathf.Deg2Rad;
@@ -540,7 +534,7 @@ namespace RoadOfTheOldKing.Enemies
             if (!IsAware && target != null && target.IsAlive)
             {
                 IsAware = true;
-                lastSeen = Time.time;
+                actor.MarkSeen();
                 if (State == PredatorState.Idle || State == PredatorState.Return) Enter(PredatorState.Stalk);
                 PlayerDetected?.Invoke();
             }
@@ -585,7 +579,7 @@ namespace RoadOfTheOldKing.Enemies
             AttackTokens.Release(this);
             ResetVersion++;
             actor.Reset();
-            previousPosition = home;
+            previousPosition = actor.Home;
             body.linearVelocity = Vector2.zero;
             hitPending = playerWasStriking = playerWasExposed = false;
             Enter(PredatorState.Idle);

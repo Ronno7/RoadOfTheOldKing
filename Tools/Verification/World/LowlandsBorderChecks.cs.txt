@@ -56,8 +56,8 @@ if(phase==0||phase==2||phase==4){
   check(wolves[0].IsAware&&!wolves[1].IsAware,"First encounter notices without pulling second");
   pose(new Vector2(15.5f,3));
   // Lose-sight uses Time.time, which cannot advance inside this synchronous call: stage the elapsed time.
-  var lastSeen=wolves[0].GetType().GetField("lastSeen",flags);var loseSight=(float)wolves[0].GetType().GetField("loseSightTime",flags).GetValue(wolves[0]);
-  lastSeen.SetValue(wolves[0],Time.time-loseSight-.1f);
+  var senses=wolves[0].GetType().GetField("actor",flags).GetValue(wolves[0]);var lastSeen=senses.GetType().GetField("lastSeen",flags);var loseSight=(float)wolves[0].GetType().GetField("loseSightTime",flags).GetValue(wolves[0]);
+  lastSeen.SetValue(senses,Time.time-loseSight-.1f);
   for(int n=0;n<80;n++)wolves[0].GetType().GetMethod("Tick",flags).Invoke(wolves[0],new object[]{.02f});
   check(wolves[0].State==RoadOfTheOldKing.Enemies.PredatorState.Return||wolves[0].State==RoadOfTheOldKing.Enemies.PredatorState.Idle,"First wolf gives up before the bonfire");
   foreach(var wolf in wolves)wolf.ResetOnRest();

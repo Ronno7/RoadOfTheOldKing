@@ -3,6 +3,8 @@
 ## Unreleased
 
 **Added**
+- Scavengers watch you for 0.9 s before chasing; their suspicion meter drains if you break sight.
+- Scavengers fight with a lunging thrust and a slow armoured overhead that leaves them open for 1.1 s; they take turns and hold back while waiting.
 - Scavengers and boars have idle animations; boars play a run cycle when they charge.
 
 **Changed**
@@ -17,6 +19,7 @@
 **Fixed**
 - The third swing-practice bush stays cleared after leaving Ardan's Edge and returning.
 - Wolves dodge when a cleave is released, not when it starts charging.
+- Charge and lunge warnings match the attack's real width (boar charge 0.67 units each side, was 1.05).
 - Entering the Sunken Storehouse showed "Green Lowlands" as the place name.
 
 ## 0.5 — Full production

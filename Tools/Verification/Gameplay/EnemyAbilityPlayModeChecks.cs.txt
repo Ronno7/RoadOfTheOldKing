@@ -1,4 +1,4 @@
-// Empty, save-free Play Mode only. Synchronous policy/action/physics regression; no authored scene changes.
+// Empty, save-free Play Mode only. Synchronous policy/action/physics regression; no authored scene changes. Scavenger duel section 26 Oct.
 if (!EditorApplication.isPlaying || UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Progression.GameSession>() != null || RoadOfTheOldKing.Enemies.EnemyRegistry.Active.Count != 0)
     throw new Exception("Use an empty Play Mode scene without GameSession.");
 var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
@@ -162,7 +162,8 @@ try {
     var secondBrain=second.GetComponent<RoadOfTheOldKing.Enemies.PursuitBrain>();var secondAction=secondBrain.Action;
     secondBrain.GetType().GetField("target",flags).SetValue(secondBrain,player);
     move((Vector2)second.transform.position+Vector2.right*.9f);
-    var meleeSpec=(RoadOfTheOldKing.Enemies.EnemyAttackSpec)secondBrain.GetType().GetProperty("Settings",flags).GetValue(secondBrain,null);
+    // The scavenger's overhead is its stationary arc; its main step-in moves (duel section below).
+    var meleeSpec=(RoadOfTheOldKing.Enemies.EnemyAttackSpec)secondBrain.GetType().GetProperty("CloseSettings",flags).GetValue(secondBrain,null);
     check(secondAction!=charge&&secondBrain.TryBeginAttack(meleeSpec,player,Vector2.right)&&!charge.IsRunning,"enemies own independent action clocks");
     secondAction.Tick(meleeSpec.windup);secondAction.Tick(.02f);
     check(!secondAction.IsCharge&&player.Health.Health==player.Health.MaxHealth-meleeSpec.damage&&second.GetComponent<Rigidbody2D>().linearVelocity==Vector2.zero,"stationary melee uses the same runner and authored contact");
@@ -172,6 +173,64 @@ try {
     check(meleeSprite.sprite!=null&&meleeSprite.sprite.pixelsPerUnit==16,"shared animation set retains native scavenger presentation");
     var hurtbox=second.GetComponentInChildren<RoadOfTheOldKing.Enemies.EnemyHurtbox>();hurtbox.GetType().GetMethod("LateUpdate",flags).Invoke(hurtbox,null);
     check(hurtbox.CanReceiveHits&&second.GetComponent<RoadOfTheOldKing.Enemies.IEnemyFacing>()==secondBrain,"body-hit coverage reads the narrow facing contract");
+    // Road Scavenger duel (26 Oct): step-in, one overhead follow-up, promised recovery, shared attack turn and spacing.
+    var duelist=spawn("Assets/Prefabs/Combat/RoadScavenger.prefab",new Vector2(1080,1000));
+    var duel=duelist.GetComponent<RoadOfTheOldKing.Enemies.PursuitBrain>();var duelType=duel.GetType();
+    duelType.GetField("target",flags).SetValue(duel,player);
+    var duelTick=duelType.GetMethod("Tick",flags);var duelBody=duelist.GetComponent<Rigidbody2D>();
+    var duelHp=duelist.GetComponent<RoadOfTheOldKing.Combat.Damageable>();var duelReaction=duelist.GetComponent<RoadOfTheOldKing.Combat.HitReaction>();
+    var duelHome=duelBody.position;
+    var stepSpec=(RoadOfTheOldKing.Enemies.EnemyAttackSpec)duelType.GetProperty("Settings",flags).GetValue(duel,null);
+    var overSpec=(RoadOfTheOldKing.Enemies.EnemyAttackSpec)duelType.GetProperty("CloseSettings",flags).GetValue(duel,null);
+    float duelCooldown=(float)duelType.GetField("attackCooldown",flags).GetValue(duel);
+    var invulnerable=player.GetType().GetField("invulnerableUntil",flags);
+    Action<float> dstep=dt=>{duelTick.Invoke(duel,new object[]{dt});if(dt>0)Physics2D.Simulate(dt);};
+    Action<Vector2> engage=offset=>{duel.ResetOnRest();player.HealAtRest();player.DebugGodMode=false;if(invulnerable!=null)invulnerable.SetValue(player,-1f);
+        move(duelHome+offset);duelType.GetMethod("Engage",flags).Invoke(duel,null);};
+    var rival=new object();
+    check(stepSpec.chargeSpeed>0&&overSpec.chargeSpeed==0&&overSpec.armoredWhenLocked&&overSpec.recovery>stepSpec.recovery,"scavenger pairs a moving step-in with a committed, armoured-when-locked overhead");
+    engage(Vector2.right*2.2f);RoadOfTheOldKing.Enemies.AttackTokens.TryAcquire(rival);dstep(.02f);
+    check(duel.State==RoadOfTheOldKing.Enemies.PursuitState.Holding&&!duel.Action.IsRunning&&Vector2.Dot(duel.FacingDirection,Vector2.right)>.99f&&duelBody.linearVelocity.x<0,"while a partner holds the turn it backs off to its holding distance, facing the player");
+    RoadOfTheOldKing.Enemies.AttackTokens.Release(rival);
+    engage(Vector2.right*2.2f);dstep(.02f);
+    check(duel.State==RoadOfTheOldKing.Enemies.PursuitState.Windup&&duel.IsChargeAttack&&!duel.IsCloseAttack&&RoadOfTheOldKing.Enemies.AttackTokens.Holds(duel),"in step range it commits to the step-in and takes the attack turn");
+    check(!RoadOfTheOldKing.Enemies.AttackTokens.TryAcquire(rival),"a partner waits while the step-in holds the turn");
+    move(duelHome+new Vector2(2.2f,.6f));dstep(.1f);
+    check(Vector2.Dot(duel.FacingDirection,new Vector2(2.2f,.6f).normalized)>.99f&&!duel.IsLaneLocked,"step-in tracks early in its windup");
+    dstep(.16f);var duelLane=duel.FacingDirection;move(duelHome+new Vector2(2.2f,-.8f));dstep(.02f);
+    check(duel.IsLaneLocked&&duel.FacingDirection==duelLane,"step-in locks its lane before contact");
+    for(int i=0;i<60&&!duel.IsFollowUp&&duel.Action.IsRunning;i++)dstep(.02f);
+    check(duel.IsFollowUp&&duel.IsCloseAttack&&duel.State==RoadOfTheOldKing.Enemies.PursuitState.Windup&&RoadOfTheOldKing.Enemies.AttackTokens.Holds(duel)&&player.Health.Health==player.Health.MaxHealth,"a missed step-in with the player still in reach continues into the overhead, keeping its turn");
+    check(!duelReaction.Armored,"overhead is still interruptible before it locks");
+    for(int i=0;i<40&&!duel.IsLaneLocked;i++)dstep(.02f);
+    check(duelReaction.Armored,"locked overhead is armoured");
+    int duelBefore=duelHp.Health;
+    duelHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,5,Vector2.left,3,.3f));
+    check(duelHp.Health==duelBefore-5&&!duelReaction.IsStaggered&&duel.State==RoadOfTheOldKing.Enemies.PursuitState.Windup,"armour takes damage without interrupting the committed overhead");
+    for(int i=0;i<60&&duel.State!=RoadOfTheOldKing.Enemies.PursuitState.Recovering;i++)dstep(.02f);
+    check(player.Health.Health==player.Health.MaxHealth-overSpec.damage&&!duelReaction.Armored,"overhead lands its authored damage and drops armour for recovery");
+    var recoveryFacing=duel.FacingDirection;move(duelBody.position-recoveryFacing*1.2f);float recovered=0;bool facingHeld=true;
+    while(duel.State==RoadOfTheOldKing.Enemies.PursuitState.Recovering&&recovered<3){dstep(.02f);recovered+=.02f;if(duel.State==RoadOfTheOldKing.Enemies.PursuitState.Recovering)facingHeld&=duel.FacingDirection==recoveryFacing;}
+    check(recovered>=overSpec.recovery-.03f&&facingHeld,"overhead recovery runs in full with its facing locked, exposing the flank behind it");
+    check(!duel.IsFollowUp&&!RoadOfTheOldKing.Enemies.AttackTokens.Holds(duel)&&duel.State==RoadOfTheOldKing.Enemies.PursuitState.Holding,"the finished sequence hands on the turn and holds during its cooldown");
+    for(int i=0;i<Mathf.CeilToInt((duelCooldown+2f)/.02f)&&!duel.Action.IsRunning;i++)dstep(.02f);
+    check(duel.Action.IsRunning,"after its cooldown it attacks again");
+    engage(Vector2.right*2f);dstep(.02f);
+    for(int i=0;i<60&&duel.Action.IsRunning&&duel.State!=RoadOfTheOldKing.Enemies.PursuitState.Recovering;i++)dstep(.02f);
+    check(player.Health.Health==player.Health.MaxHealth-stepSpec.damage&&duel.State==RoadOfTheOldKing.Enemies.PursuitState.Recovering&&!duel.IsFollowUp,"a landed step-in ends in its short recovery without a follow-up");
+    for(int i=0;i<60&&duel.State==RoadOfTheOldKing.Enemies.PursuitState.Recovering;i++)dstep(.02f);
+    check(!duel.IsFollowUp&&!RoadOfTheOldKing.Enemies.AttackTokens.Holds(duel),"its recovery ends the sequence and frees the turn");
+    engage(Vector2.right*1f);dstep(.02f);
+    check(duel.IsCloseAttack&&!duel.IsFollowUp&&!duel.IsChargeAttack&&duel.State==RoadOfTheOldKing.Enemies.PursuitState.Windup,"a hugging player draws the overhead directly");
+    duelHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.left,3,.3f));dstep(.02f);
+    check(!duel.Action.IsRunning&&duelReaction.IsStaggered&&!RoadOfTheOldKing.Enemies.AttackTokens.Holds(duel),"a hit before the overhead locks interrupts it and frees the turn");
+    engage(Vector2.right*2f);dstep(.02f);duelHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.left,0,0));
+    check(duel.IsDefeated&&!RoadOfTheOldKing.Enemies.AttackTokens.Holds(duel),"defeat frees the turn");
+    engage(Vector2.right*1f);for(int i=0;i<30&&!duelReaction.Armored;i++)dstep(.02f);duel.enabled=false;
+    check(!RoadOfTheOldKing.Enemies.AttackTokens.Holds(duel)&&!duelReaction.Armored&&!duel.Action.IsRunning,"disable frees the turn and clears armour");duel.enabled=true;
+    resetBoar();RoadOfTheOldKing.Enemies.AttackTokens.TryAcquire(rival);move(boarHome+Vector2.right*4);pursuitTick.Invoke(pursuit,new object[]{.02f});
+    check(charge.IsRunning&&!RoadOfTheOldKing.Enemies.AttackTokens.Holds(pursuit),"the boar keeps its own attack rule, outside the shared turn");
+    RoadOfTheOldKing.Enemies.AttackTokens.Release(rival);resetBoar();
     check(RoadOfTheOldKing.Progression.GameSession.Instance==null,"checks created no game session");
 } finally {
     foreach(var obj in created)if(obj!=null)UnityEngine.Object.DestroyImmediate(obj);

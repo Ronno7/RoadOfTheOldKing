@@ -34,6 +34,7 @@ namespace RoadOfTheOldKing.Enemies
             wasAlive = health.IsAlive; resetVersion = enemy.ResetVersion;
         }
         private static bool Has(DirectionalSpriteAnimation clip) => clip != null && !clip.IsEmpty;
+        private DirectionalSpriteAnimation AttackClip => enemy.IsCloseAttack && Has(animations.closeAttack) ? animations.closeAttack : animations.attack;
         private void LateUpdate()
         {
             if (animations == null || bodyVisual == null) return;
@@ -44,9 +45,9 @@ namespace RoadOfTheOldKing.Enemies
             var clip = animations.rotations; float progress = 0;
             bool windup = enemy.State == PursuitState.Windup, strike = enemy.State == PursuitState.Striking;
             if (!health.IsAlive) { deathTime += Time.deltaTime; if (Has(animations.death)) { clip = animations.death; progress = deathTime / clip.Duration(octant); } }
-            else if ((windup || strike || enemy.State == PursuitState.Recovering) && Has(animations.attack))
+            else if ((windup || strike || enemy.State == PursuitState.Recovering) && Has(AttackClip))
             {
-                clip = animations.attack;
+                clip = AttackClip;
                 int contact = clip.contactFrame > 0 ? clip.contactFrame : Mathf.Max(1, clip.FrameCount(octant) / 2);
                 int frame = windup ? Mathf.FloorToInt(enemy.StateProgress * contact) : strike ? contact : contact + 1 + Mathf.FloorToInt(enemy.StateProgress * (clip.FrameCount(octant) - contact - 1));
                 bodyVisual.sprite = clip.Frame(octant, Mathf.Clamp(frame, 0, clip.FrameCount(octant) - 1));
@@ -69,15 +70,18 @@ namespace RoadOfTheOldKing.Enemies
             attackOutline.enabled = health.IsAlive && (windup || strike);
             if (!attackOutline.enabled) return;
             attackOutline.startColor = attackOutline.endColor = strike ? new Color(1, .3f, .15f, .9f) : new Color(1, .75f, .2f, .65f);
+            // Locked direction: the honest dodge cue for both charge lanes and arcs.
+            if (windup && enemy.IsLaneLocked) attackOutline.startColor = attackOutline.endColor = new Color(1, .5f, .15f, .85f);
             if (enemy.IsChargeAttack)
             {
-                Vector2 direction = enemy.FacingDirection, side = new Vector2(-direction.y, direction.x) * enemy.AttackReach;
+                // The lane is as wide as the arc actually reaches sideways, so it never overstates the danger.
+                float halfWidth = enemy.AttackReach * Mathf.Sin(Mathf.Min(enemy.AttackArc, 180f) * .5f * Mathf.Deg2Rad);
+                Vector2 direction = enemy.FacingDirection, side = new Vector2(-direction.y, direction.x) * halfWidth;
                 Vector2 start = enemy.AttackOrigin, end = start + direction * (enemy.ChargeDistance + enemy.AttackReach);
                 attackOutline.positionCount = 5;
                 attackOutline.SetPosition(0, start - side); attackOutline.SetPosition(1, end - side);
                 attackOutline.SetPosition(2, end + side); attackOutline.SetPosition(3, start + side);
                 attackOutline.SetPosition(4, start - side);
-                if (windup && enemy.IsLaneLocked) attackOutline.startColor = attackOutline.endColor = new Color(1, .5f, .15f, .85f);
                 return;
             }
             const int segments = 16; attackOutline.positionCount = segments + 3;

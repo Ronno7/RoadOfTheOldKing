@@ -8,6 +8,8 @@ namespace RoadOfTheOldKing.Enemies
     public class EnemyAnimationSet : ScriptableObject
     {
         public DirectionalSpriteAnimation rotations, idle, walk, run, attack, hurt, death;
+        [Tooltip("Optional second attack (the brain's close attack). Empty uses the attack clip.")]
+        public DirectionalSpriteAnimation closeAttack;
         [Min(.1f)] public float walkCycleLength = 2f;
         [Tooltip("Ground covered by one run cycle, in world units.")]
         [Min(.1f)] public float runCycleLength = 3.6f;

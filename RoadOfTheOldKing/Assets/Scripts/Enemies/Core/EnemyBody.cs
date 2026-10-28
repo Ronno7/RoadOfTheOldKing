@@ -12,11 +12,15 @@ namespace RoadOfTheOldKing.Enemies
         public Rigidbody2D Rigidbody { get; }
         public Collider2D Collider { get; }
         public Vector2 Home { get; }
+        // Followed back inside this share of the leash, a returning enemy takes the player up again
+        // (well inside the edge, so it doesn't flicker there).
+        private const float ReengageFraction = .6f;
         private readonly Transform transform;
         private readonly ContactFilter2D solids = new ContactFilter2D { useTriggers = false };
         private readonly List<RaycastHit2D> sight = new List<RaycastHit2D>(12);
         private readonly RaycastHit2D[] slideHits = new RaycastHit2D[8];
         private Vector2 deathSlide;
+        private float lastSeen;
 
         public EnemyBody(GameObject owner)
         {
@@ -37,6 +41,24 @@ namespace RoadOfTheOldKing.Enemies
             }
             return true;
         }
+
+        // Sight reaches half again past the notice radius, so an aware enemy keeps a player it is chasing.
+        // Seeing the target records the time for LostSight.
+        public bool Sees(Transform target, float noticeRadius, bool ignoreDynamicBodies)
+        {
+            Vector2 point = target.position;
+            bool sees = Vector2.Distance(Rigidbody.position, point) <= noticeRadius * 1.5f && CanSee(point, target, ignoreDynamicBodies);
+            if (sees) MarkSeen();
+            return sees;
+        }
+
+        public void MarkSeen() => lastSeen = Time.time;
+        public bool LostSight(float loseSightTime) => Time.time - lastSeen > loseSightTime;
+
+        // Only the enemy's own distance from home counts, so the player stepping away doesn't shake it off (playtest, 22 Oct).
+        public float DistanceFromHome => Vector2.Distance(Rigidbody.position, Home);
+        public bool OutsideLeash(float leashRadius) => DistanceFromHome > leashRadius;
+        public bool CanReengage(float leashRadius) => DistanceFromHome <= leashRadius * ReengageFraction;
 
         public void BeginDefeat()
         {

@@ -43,7 +43,8 @@ else{
     // Current enemy-action API (16 Oct): the wolf's private BeginAttack(snap) and the pursuit runner, each ticked
     // through windup into its active window. Damage comes from the authored values, not copied constants.
     var runner=brain==wolf?wolf.Action:melee.Action;Vector2 origin=brain.transform.position;
-    var meleeSpec=(RoadOfTheOldKing.Enemies.EnemyAttackSpec)melee.GetType().GetProperty("Settings",flags).GetValue(melee,null);
+    // The scavenger's overhead is its stationary arc; its step-in moves (EnemyAbilityPlayModeChecks duel section).
+    var meleeSpec=(RoadOfTheOldKing.Enemies.EnemyAttackSpec)melee.GetType().GetProperty("CloseSettings",flags).GetValue(melee,null);
     int damage=brain==wolf?(int)t.GetField("snapDamage",flags).GetValue(brain):meleeSpec.damage;
     System.Action<Vector2?> strike=afterWindup=>{
      if(brain==wolf){RoadOfTheOldKing.Enemies.AttackTokens.TryAcquire(wolf);t.GetMethod("BeginAttack",flags).Invoke(brain,new object[]{false,Vector2.right,false});}
