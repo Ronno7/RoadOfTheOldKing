@@ -13,7 +13,7 @@ namespace RoadOfTheOldKing.Editor
         private static readonly PropertyInfo ShowToolbar =
             GameViewType?.GetProperty("showToolbar", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
-        [MenuItem("Road of the Old King/Fullscreen Game View %#&f")]
+        [MenuItem("Road of the Old King/Fullscreen Game View _F11")]
         public static void Toggle()
         {
             if (GameViewType == null)
