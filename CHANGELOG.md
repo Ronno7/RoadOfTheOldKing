@@ -3,11 +3,15 @@
 ## Unreleased
 
 **Added**
-- Scavengers watch you for 0.9 s before chasing; their suspicion meter drains if you break sight.
-- Scavengers fight with a lunging thrust and a slow armoured overhead that leaves them open for 1.1 s; they take turns and hold back while waiting.
+- Boars sweep their tusks when you're close.
+- Scavengers chase after 0.9s of sight; suspicion fades when out of view.
+- Scavengers fight with a lunging thrust and a slow armoured overhead.
 - Scavengers and boars have idle animations; boars play a run cycle when they charge.
 
 **Changed**
+- Wolves share one tuning
+- Enemies no longer take turns attacking.
+- Charging boars can't be interrupted; hitting a wall head on stuns them.
 - Road from Ardan's Edge to the Lowlands rebuilt: 188 units long (was 74), three fights (was two).
 - Lantern casts warm, flickering light with soft shadows behind walls (was a hard-edged cut-out).
 - Thrown axe flies 50% faster (full range in 0.39 s, was 0.58 s).

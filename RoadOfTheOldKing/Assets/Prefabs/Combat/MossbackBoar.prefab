@@ -515,7 +515,10 @@ MonoBehaviour:
   attack: {fileID: 11400000, guid: 812432c34c690554ab73e8bf94bcb26b, type: 2}
   moveSpeed: 2.8
   noticeRadius: 8
+  watchDuration: 0
+  forgetDuration: 0.6
   leashRadius: 12
+  loseSightTime: 2
   attackDistance: 7
   attackReach: 1.65
   attackArc: 85
@@ -524,6 +527,11 @@ MonoBehaviour:
   recoveryDuration: 0.95
   damage: 18
   hitRecovery: 0.1
+  closeAttack: {fileID: 11400000, guid: 466bb93e7f22005458356d249c1aba7e, type: 2}
+  closeRangeFraction: 0.75
+  followUpOnMiss: 0
+  holdDistance: 0
+  attackCooldown: 0
 --- !u!114 &2751467187380559122
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -602,6 +610,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.EnemyCoinDrop
   coinVisual: {fileID: 649847401882323964}
+  firstDefeatRewardId: 
+  firstDefeatCoins: 0
+  replacesCoinSource: 
 --- !u!1 &4943360059327782604
 GameObject:
   m_ObjectHideFlags: 0

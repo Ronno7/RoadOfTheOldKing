@@ -81,7 +81,8 @@ namespace RoadOfTheOldKing.EditorTools
                     Defaults = new Dictionary<string, (float, bool)>
                     {
                         { "rotations", (1f, true) }, { "idle", (6f, true) }, { "walk", (10f, true) },
-                        { "run", (12f, true) }, { "attack", (10f, false) }, { "hurt", (12f, false) }, { "death", (10f, false) }
+                        { "run", (12f, true) }, { "attack", (10f, false) }, { "closeAttack", (10f, false) },
+                        { "hurt", (12f, false) }, { "death", (10f, false) }
                     }
                 });
         }

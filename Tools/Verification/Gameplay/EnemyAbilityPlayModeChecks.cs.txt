@@ -1,4 +1,4 @@
-// Empty, save-free Play Mode only. Synchronous policy/action/physics regression; no authored scene changes. Scavenger duel section 26 Oct.
+// Empty, save-free Play Mode only. Synchronous policy/action/physics regression; no authored scene changes. Scavenger duel section 26 Oct; boar duel 28 Oct.
 if (!EditorApplication.isPlaying || UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Progression.GameSession>() != null || RoadOfTheOldKing.Enemies.EnemyRegistry.Active.Count != 0)
     throw new Exception("Use an empty Play Mode scene without GameSession.");
 var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
@@ -7,7 +7,6 @@ Action<bool,string> check = (ok,label) => { if (!ok) throw new Exception("FAIL: 
 var created = new System.Collections.Generic.List<GameObject>();
 var simulation = Physics2D.simulationMode;
 var random = UnityEngine.Random.state;
-int maxAttackers = RoadOfTheOldKing.Enemies.AttackTokens.MaxAttackers;
 Func<string,Vector2,GameObject> spawn = (path,position) => {
     var obj = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(path), position, Quaternion.identity);
     created.Add(obj);
@@ -17,7 +16,6 @@ Func<string,Vector2,GameObject> spawn = (path,position) => {
 try {
     Physics2D.simulationMode = SimulationMode2D.Script;
     UnityEngine.Random.InitState(163);
-    RoadOfTheOldKing.Enemies.AttackTokens.MaxAttackers = 1;
     var victim = new GameObject("Ability verification target"); created.Add(victim); victim.SetActive(false);
     var playerBody = victim.AddComponent<Rigidbody2D>(); playerBody.gravityScale = 0; playerBody.constraints = RigidbodyConstraints2D.FreezeRotation;
     victim.AddComponent<CircleCollider2D>().radius = .375f;
@@ -39,7 +37,7 @@ try {
     Action<Vector2> move = p => { playerBody.position=p; victim.transform.position=p; playerBody.linearVelocity=Vector2.zero; Physics2D.SyncTransforms(); };
     Action<float> step = dt => { tick.Invoke(brain,new object[]{dt}); if(dt>0) Physics2D.Simulate(dt); };
     Action reset = () => { brain.ResetOnRest(); player.HealAtRest(); player.DebugGodMode=false; set("feintChance",0f);set("followUpChance",0f); Physics2D.SyncTransforms(); };
-    Action<bool,bool> attack = (lunge,quick) => { RoadOfTheOldKing.Enemies.AttackTokens.TryAcquire(brain);begin.Invoke(brain,new object[]{lunge,Vector2.right,quick}); };
+    Action<bool,bool> attack = (lunge,quick) => { begin.Invoke(brain,new object[]{lunge,Vector2.right,quick}); };
     reset(); move(home+Vector2.right*4); attack(true,false);
     check(brain.State==RoadOfTheOldKing.Enemies.PredatorState.Windup && !reaction.Armored,"predator starts with an unarmored windup");
     check(brain.Action.IsRunning&&!brain.Action.Begin(new RoadOfTheOldKing.Enemies.EvadeAction(body,Vector2.left,2,.2f)),"predator attacks and evades share exclusive ownership");
@@ -64,36 +62,33 @@ try {
     step(.02f);check(body.linearVelocity.sqrMagnitude>1&&Vector2.Dot(body.linearVelocity.normalized,tracked)>.99f,"lunge moves along the committed lane");
     for(int i=0;i<30&&brain.State==RoadOfTheOldKing.Enemies.PredatorState.Lunge;i++)step(.02f);
     check(brain.State==RoadOfTheOldKing.Enemies.PredatorState.Recover&&!reaction.Armored,"lunge ends in an unarmored punish window");
-    check(RoadOfTheOldKing.Enemies.AttackTokens.Holds(brain),"pack turn stays reserved through recovery");
-    step(.56f);check(brain.State==RoadOfTheOldKing.Enemies.PredatorState.Reposition&&!RoadOfTheOldKing.Enemies.AttackTokens.Holds(brain),"recovery releases the pack turn");
+    step((float)brainType.GetField("lungeRecovery",flags).GetValue(brain)+.01f);check(brain.State==RoadOfTheOldKing.Enemies.PredatorState.Reposition,"recovery returns the wolf to repositioning");
     reset();move(home+Vector2.right*.9f);attack(false,true);step(.28f);step(.02f);
-    check(player.Health.Health==player.Health.MaxHealth-15,"snap delivers authored damage");
+    check(player.Health.Health==player.Health.MaxHealth-(int)brainType.GetField("snapDamage",flags).GetValue(brain),"snap delivers authored damage");
     player.HealAtRest();step(.02f);check(player.Health.Health==player.Health.MaxHealth,"snap cannot repeat its contact attempt");
     reset();move(home+Vector2.right*4);attack(false,true);step(.28f);step(.02f);move(home+Vector2.right*.9f);step(.02f);
     check(player.Health.Health==player.Health.MaxHealth,"missed snap does not gain a late hit");
     reset();move(home+Vector2.right*4);set("feintChance",1f);attack(true,false);
     check(brain.IsFeint,"authored feint selection remains available");
     for(int i=0;i<50&&brain.State==RoadOfTheOldKing.Enemies.PredatorState.Windup;i++)step(.02f);
-    check(brain.State==RoadOfTheOldKing.Enemies.PredatorState.Reposition&&!reaction.Armored&&!RoadOfTheOldKing.Enemies.AttackTokens.Holds(brain)&&player.Health.Health==player.Health.MaxHealth,"feint breaks off without damage or a held pack turn");
+    check(brain.State==RoadOfTheOldKing.Enemies.PredatorState.Reposition&&!reaction.Armored&&player.Health.Health==player.Health.MaxHealth,"feint breaks off without damage");
     reset();move(home+Vector2.right*7);set("followUpChance",1f);attack(true,false);step(.81f);
     for(int i=0;i<30&&brain.State==RoadOfTheOldKing.Enemies.PredatorState.Lunge;i++)step(.02f);
-    check(brain.State==RoadOfTheOldKing.Enemies.PredatorState.Windup&&!brain.IsFeint&&RoadOfTheOldKing.Enemies.AttackTokens.Holds(brain),"miss can chain a quick follow-up while keeping its turn");
+    check(brain.State==RoadOfTheOldKing.Enemies.PredatorState.Windup&&!brain.IsFeint,"miss can chain a quick follow-up");
     reset();move(home+Vector2.right*4);set("evadeDirection",Vector2.left);enter.Invoke(brain,new object[]{RoadOfTheOldKing.Enemies.PredatorState.Evade,.2f});step(.1f);
     check(body.position.x<home.x-.5f&&!reaction.Armored,"evade owns retreat movement without armor");step(.11f);
     check(brain.State==RoadOfTheOldKing.Enemies.PredatorState.Stalk,"evade returns control to the decision policy");
     reset();move(home+Vector2.right*4);attack(true,false);
     hp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,30,Vector2.left,3,.3f));
     float impulse=body.linearVelocity.x;
-    check(brain.State==RoadOfTheOldKing.Enemies.PredatorState.Staggered&&reaction.IsStaggered&&!reaction.Armored&&!RoadOfTheOldKing.Enemies.AttackTokens.Holds(brain),"actual stagger cancels commitment and pack turn");
+    check(brain.State==RoadOfTheOldKing.Enemies.PredatorState.Staggered&&reaction.IsStaggered&&!reaction.Armored,"actual stagger cancels commitment");
     tick.Invoke(brain,new object[]{.02f});check(impulse<0&&body.linearVelocity.x==impulse,"stagger preserves weapon knockback");
-    var competitor=new object();reset();attack(true,false);check(!RoadOfTheOldKing.Enemies.AttackTokens.TryAcquire(competitor),"second pack member waits for the active turn");
-    brain.ResetOnRest();check(RoadOfTheOldKing.Enemies.AttackTokens.TryAcquire(competitor),"rest releases the pack turn");RoadOfTheOldKing.Enemies.AttackTokens.Release(competitor);
     reset();move(home+Vector2.right*4);attack(true,false);step(.81f);brain.enabled=false;
-    check(!reaction.Armored&&body.linearVelocity==Vector2.zero&&!RoadOfTheOldKing.Enemies.AttackTokens.Holds(brain),"disable clears armor, motion and pack ownership");brain.enabled=true;
+    check(!reaction.Armored&&body.linearVelocity==Vector2.zero,"disable clears armor and motion");brain.enabled=true;
     check(!brain.Action.IsRunning&&brain.State==RoadOfTheOldKing.Enemies.PredatorState.Idle,"re-enable cannot resume a cancelled predator action");
     reset();body.linearVelocity=Vector2.right*3;brain.enabled=false;check(body.linearVelocity==Vector2.zero,"disable also stops non-action locomotion");brain.enabled=true;
     reset();attack(true,false);hp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.left,3,.3f));
-    check(brain.IsDefeated&&!shape.enabled&&!reaction.Armored&&!RoadOfTheOldKing.Enemies.AttackTokens.Holds(brain),"death clears commitment and collision");
+    check(brain.IsDefeated&&!shape.enabled&&!reaction.Armored,"death clears commitment and collision");
     var visit=brain.CaptureVisitState();int version=brain.ResetVersion;brain.ResetOnRest();
     check(!brain.IsDefeated&&shape.enabled&&hp.Health==hp.MaxHealth&&body.position==home&&brain.ResetVersion==version+1,"rest restores health, home and presentation version");
     brain.RestoreVisitState(visit);check(brain.IsDefeated&&!shape.enabled,"visit restoration preserves defeat without replaying combat");
@@ -135,18 +130,45 @@ try {
     var wall=new GameObject("Ability verification wall");created.Add(wall);wall.transform.position=boarHome+Vector2.right*2;wall.AddComponent<BoxCollider2D>().size=new Vector2(.05f,4);Physics2D.SyncTransforms();
     pursuit.TryBeginAttack(spec,player,Vector2.right);charge.Tick(spec.windup);
     for(int i=0;i<45&&charge.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Active;i++){charge.Tick(.02f);Physics2D.Simulate(.02f);}
-    check(charge.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Recovery&&boarBody.position.x<boarHome.x+1.5f&&!charge.HasContact&&player.Health.Health==player.Health.MaxHealth,"swept charge stops at thin walls without damage through them");
+    check(charge.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Recovery&&boarBody.position.x<boarHome.x+1.5f&&!charge.HasContact&&player.Health.Health==player.Health.MaxHealth&&!pursuit.IsWallStunned,"swept charge stops at thin, invisible walls without damage through them or a stun");
     wall.SetActive(false);
+    // Boar duel, 28 Oct: wall stun only head-on into a visible obstacle; armour only while charging; close tusk sweep; no follow-up.
+    Func<GameObject,bool> chargeInto=(obstacle)=>{resetBoar();move(boarHome+Vector2.right*5);Physics2D.SyncTransforms();pursuit.TryBeginAttack(spec,player,Vector2.right);charge.Tick(spec.windup);
+        for(int i=0;i<45&&charge.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Active;i++){charge.Tick(.02f);Physics2D.Simulate(.02f);}
+        bool stunned=charge.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Recovery&&pursuit.IsWallStunned;obstacle.SetActive(false);return stunned;};
+    var rock=new GameObject("Ability verification rock");created.Add(rock);rock.transform.position=boarHome+Vector2.right*3;rock.AddComponent<BoxCollider2D>().size=new Vector2(.5f,4);rock.AddComponent<SpriteRenderer>();Physics2D.SyncTransforms();
+    resetBoar();move(boarHome+Vector2.right*5);pursuit.TryBeginAttack(spec,player,Vector2.right);charge.Tick(spec.windup);
+    for(int i=0;i<45&&charge.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Active;i++){charge.Tick(.02f);Physics2D.Simulate(.02f);}
+    check(charge.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Recovery&&pursuit.IsWallStunned&&player.Health.Health==player.Health.MaxHealth,"head-on charge into a visible wall stuns the boar");
+    charge.Tick(spec.recovery+.05f);check(charge.IsRunning&&boarBody.linearVelocity==Vector2.zero,"wall stun outlasts the normal recovery");
+    charge.Tick(spec.wallStunRecovery-spec.recovery);check(!charge.IsRunning&&!pursuit.IsWallStunned,"wall stun ends at its authored length");
+    rock.SetActive(true);rock.transform.rotation=Quaternion.Euler(0,0,50);check(!chargeInto(rock),"a grazing wall contact does not stun");rock.transform.rotation=Quaternion.identity;
+    var blocker=spawn("Assets/Prefabs/Combat/MossbackBoar.prefab",boarHome+Vector2.right*3);blocker.GetComponent<RoadOfTheOldKing.Enemies.PursuitBrain>().enabled=false;Physics2D.SyncTransforms();
+    check(!chargeInto(blocker),"running into another enemy does not stun");
+    resetBoar();move(boarHome+Vector2.right*4);pursuitTick.Invoke(pursuit,new object[]{.02f});pursuitTick.Invoke(pursuit,new object[]{.4f});
+    check(charge.IsLocked&&charge.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Windup&&!boarReaction.Armored,"the locked charge windup is still unarmoured");
+    boarHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.left,3,.3f));
+    check(!charge.IsRunning&&boarReaction.IsStaggered,"a hit before the charge starts interrupts it");
+    resetBoar();move(boarHome+Vector2.right);pursuitTick.Invoke(pursuit,new object[]{.02f});
+    check(pursuit.State==RoadOfTheOldKing.Enemies.PursuitState.Windup&&pursuit.IsCloseAttack&&!pursuit.IsChargeAttack&&pursuit.AttackArc==150,"a close player draws the tusk sweep instead of a charge");
+    pursuitTick.Invoke(pursuit,new object[]{.4f});check(charge.IsLocked&&!boarReaction.Armored,"the tusk sweep is never armoured");
+    pursuitTick.Invoke(pursuit,new object[]{.25f});pursuitTick.Invoke(pursuit,new object[]{.02f});
+    check(player.Health.Health==player.Health.MaxHealth-14,"the tusk sweep lands its authored damage");
+    resetBoar();move(boarHome+Vector2.right*5);pursuitTick.Invoke(pursuit,new object[]{.02f});pursuitTick.Invoke(pursuit,new object[]{.4f});
+    move(boarHome+new Vector2(7.5f,1.3f));Physics2D.SyncTransforms();pursuitTick.Invoke(pursuit,new object[]{spec.windup});
+    for(int i=0;i<45&&pursuit.State==RoadOfTheOldKing.Enemies.PursuitState.Striking;i++){pursuitTick.Invoke(pursuit,new object[]{.02f});Physics2D.Simulate(.02f);}
+    pursuitTick.Invoke(pursuit,new object[]{.02f});
+    check(pursuit.State==RoadOfTheOldKing.Enemies.PursuitState.Recovering&&!pursuit.IsFollowUp&&!pursuit.IsCloseAttack&&player.Health.Health==player.Health.MaxHealth&&Vector2.Distance(boarBody.position,player.transform.position)<=1.6f,"a missed charge always ends in its recovery, even with the player in sweep reach");
     resetBoar();move(boarHome+Vector2.right*4);pursuitTick.Invoke(pursuit,new object[]{.02f});
     check(pursuit.State==RoadOfTheOldKing.Enemies.PursuitState.Windup&&charge.IsRunning,"pursuit policy chooses its authored attack");
     boarHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.left,3,.3f));
     impulse=boarBody.linearVelocity.x;pursuitTick.Invoke(pursuit,new object[]{.02f});
     check(!charge.IsRunning&&boarReaction.IsStaggered&&impulse<0&&boarBody.linearVelocity.x==impulse,"pursuit stagger cancels action and preserves knockback");
-    resetBoar();move(boarHome+Vector2.right*4);pursuitTick.Invoke(pursuit,new object[]{.02f});pursuitTick.Invoke(pursuit,new object[]{spec.windup});boarReaction.Armored=true;
+    resetBoar();move(boarHome+Vector2.right*4);pursuitTick.Invoke(pursuit,new object[]{.02f});pursuitTick.Invoke(pursuit,new object[]{spec.windup});
     boarHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.left,3,.3f));
-    check(charge.IsRunning&&!boarReaction.IsStaggered,"absorbed hit does not cancel a pursuit action");boarReaction.Armored=false;
+    check(charge.IsRunning&&boarReaction.Armored&&!boarReaction.IsStaggered,"the charge itself is armoured: a hit damages but does not cancel it");boarReaction.Armored=false;
     boarHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.left,3,.3f));
-    check(!charge.IsRunning&&boarReaction.IsStaggered,"real stagger interrupts active charge");
+    check(!charge.IsRunning&&boarReaction.IsStaggered,"an unarmoured stagger still interrupts an active action");
     resetBoar();move(boarHome+Vector2.right*4);pursuitTick.Invoke(pursuit,new object[]{.02f});
     boarHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.left,0,0));
     check(pursuit.IsDefeated&&!charge.IsRunning&&!boarShape.enabled,"pursuit death releases action and collision");
@@ -173,7 +195,7 @@ try {
     check(meleeSprite.sprite!=null&&meleeSprite.sprite.pixelsPerUnit==16,"shared animation set retains native scavenger presentation");
     var hurtbox=second.GetComponentInChildren<RoadOfTheOldKing.Enemies.EnemyHurtbox>();hurtbox.GetType().GetMethod("LateUpdate",flags).Invoke(hurtbox,null);
     check(hurtbox.CanReceiveHits&&second.GetComponent<RoadOfTheOldKing.Enemies.IEnemyFacing>()==secondBrain,"body-hit coverage reads the narrow facing contract");
-    // Road Scavenger duel (26 Oct): step-in, one overhead follow-up, promised recovery, shared attack turn and spacing.
+    // Road Scavenger duel (26 Oct): step-in, one overhead follow-up, promised recovery and spacing during cooldown; no shared turn since 28 Oct.
     var duelist=spawn("Assets/Prefabs/Combat/RoadScavenger.prefab",new Vector2(1080,1000));
     var duel=duelist.GetComponent<RoadOfTheOldKing.Enemies.PursuitBrain>();var duelType=duel.GetType();
     duelType.GetField("target",flags).SetValue(duel,player);
@@ -187,20 +209,20 @@ try {
     Action<float> dstep=dt=>{duelTick.Invoke(duel,new object[]{dt});if(dt>0)Physics2D.Simulate(dt);};
     Action<Vector2> engage=offset=>{duel.ResetOnRest();player.HealAtRest();player.DebugGodMode=false;if(invulnerable!=null)invulnerable.SetValue(player,-1f);
         move(duelHome+offset);duelType.GetMethod("Engage",flags).Invoke(duel,null);};
-    var rival=new object();
     check(stepSpec.chargeSpeed>0&&overSpec.chargeSpeed==0&&overSpec.armoredWhenLocked&&overSpec.recovery>stepSpec.recovery,"scavenger pairs a moving step-in with a committed, armoured-when-locked overhead");
-    engage(Vector2.right*2.2f);RoadOfTheOldKing.Enemies.AttackTokens.TryAcquire(rival);dstep(.02f);
-    check(duel.State==RoadOfTheOldKing.Enemies.PursuitState.Holding&&!duel.Action.IsRunning&&Vector2.Dot(duel.FacingDirection,Vector2.right)>.99f&&duelBody.linearVelocity.x<0,"while a partner holds the turn it backs off to its holding distance, facing the player");
-    RoadOfTheOldKing.Enemies.AttackTokens.Release(rival);
+    var partner=spawn("Assets/Prefabs/Combat/RoadScavenger.prefab",duelHome+Vector2.right*4.4f);var partnerBrain=partner.GetComponent<RoadOfTheOldKing.Enemies.PursuitBrain>();
+    duelType.GetField("target",flags).SetValue(partnerBrain,player);
+    engage(Vector2.right*2.2f);duelType.GetMethod("Engage",flags).Invoke(partnerBrain,null);dstep(.02f);duelTick.Invoke(partnerBrain,new object[]{.02f});
+    check(duel.State==RoadOfTheOldKing.Enemies.PursuitState.Windup&&partnerBrain.State==RoadOfTheOldKing.Enemies.PursuitState.Windup,"two scavengers commit at once: no shared attack turn (Dark Souls style, 28 Oct)");
+    partner.SetActive(false);
     engage(Vector2.right*2.2f);dstep(.02f);
-    check(duel.State==RoadOfTheOldKing.Enemies.PursuitState.Windup&&duel.IsChargeAttack&&!duel.IsCloseAttack&&RoadOfTheOldKing.Enemies.AttackTokens.Holds(duel),"in step range it commits to the step-in and takes the attack turn");
-    check(!RoadOfTheOldKing.Enemies.AttackTokens.TryAcquire(rival),"a partner waits while the step-in holds the turn");
+    check(duel.State==RoadOfTheOldKing.Enemies.PursuitState.Windup&&duel.IsChargeAttack&&!duel.IsCloseAttack,"in step range it commits to the step-in");
     move(duelHome+new Vector2(2.2f,.6f));dstep(.1f);
     check(Vector2.Dot(duel.FacingDirection,new Vector2(2.2f,.6f).normalized)>.99f&&!duel.IsLaneLocked,"step-in tracks early in its windup");
     dstep(.16f);var duelLane=duel.FacingDirection;move(duelHome+new Vector2(2.2f,-.8f));dstep(.02f);
     check(duel.IsLaneLocked&&duel.FacingDirection==duelLane,"step-in locks its lane before contact");
     for(int i=0;i<60&&!duel.IsFollowUp&&duel.Action.IsRunning;i++)dstep(.02f);
-    check(duel.IsFollowUp&&duel.IsCloseAttack&&duel.State==RoadOfTheOldKing.Enemies.PursuitState.Windup&&RoadOfTheOldKing.Enemies.AttackTokens.Holds(duel)&&player.Health.Health==player.Health.MaxHealth,"a missed step-in with the player still in reach continues into the overhead, keeping its turn");
+    check(duel.IsFollowUp&&duel.IsCloseAttack&&duel.State==RoadOfTheOldKing.Enemies.PursuitState.Windup&&player.Health.Health==player.Health.MaxHealth,"a missed step-in with the player still in reach continues into the overhead");
     check(!duelReaction.Armored,"overhead is still interruptible before it locks");
     for(int i=0;i<40&&!duel.IsLaneLocked;i++)dstep(.02f);
     check(duelReaction.Armored,"locked overhead is armoured");
@@ -212,28 +234,41 @@ try {
     var recoveryFacing=duel.FacingDirection;move(duelBody.position-recoveryFacing*1.2f);float recovered=0;bool facingHeld=true;
     while(duel.State==RoadOfTheOldKing.Enemies.PursuitState.Recovering&&recovered<3){dstep(.02f);recovered+=.02f;if(duel.State==RoadOfTheOldKing.Enemies.PursuitState.Recovering)facingHeld&=duel.FacingDirection==recoveryFacing;}
     check(recovered>=overSpec.recovery-.03f&&facingHeld,"overhead recovery runs in full with its facing locked, exposing the flank behind it");
-    check(!duel.IsFollowUp&&!RoadOfTheOldKing.Enemies.AttackTokens.Holds(duel)&&duel.State==RoadOfTheOldKing.Enemies.PursuitState.Holding,"the finished sequence hands on the turn and holds during its cooldown");
+    check(!duel.IsFollowUp&&duel.State==RoadOfTheOldKing.Enemies.PursuitState.Holding,"the finished sequence holds its distance during its cooldown");
     for(int i=0;i<Mathf.CeilToInt((duelCooldown+2f)/.02f)&&!duel.Action.IsRunning;i++)dstep(.02f);
     check(duel.Action.IsRunning,"after its cooldown it attacks again");
     engage(Vector2.right*2f);dstep(.02f);
     for(int i=0;i<60&&duel.Action.IsRunning&&duel.State!=RoadOfTheOldKing.Enemies.PursuitState.Recovering;i++)dstep(.02f);
     check(player.Health.Health==player.Health.MaxHealth-stepSpec.damage&&duel.State==RoadOfTheOldKing.Enemies.PursuitState.Recovering&&!duel.IsFollowUp,"a landed step-in ends in its short recovery without a follow-up");
     for(int i=0;i<60&&duel.State==RoadOfTheOldKing.Enemies.PursuitState.Recovering;i++)dstep(.02f);
-    check(!duel.IsFollowUp&&!RoadOfTheOldKing.Enemies.AttackTokens.Holds(duel),"its recovery ends the sequence and frees the turn");
+    check(!duel.IsFollowUp,"its recovery ends the sequence");
     engage(Vector2.right*1f);dstep(.02f);
     check(duel.IsCloseAttack&&!duel.IsFollowUp&&!duel.IsChargeAttack&&duel.State==RoadOfTheOldKing.Enemies.PursuitState.Windup,"a hugging player draws the overhead directly");
     duelHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.left,3,.3f));dstep(.02f);
-    check(!duel.Action.IsRunning&&duelReaction.IsStaggered&&!RoadOfTheOldKing.Enemies.AttackTokens.Holds(duel),"a hit before the overhead locks interrupts it and frees the turn");
+    check(!duel.Action.IsRunning&&duelReaction.IsStaggered,"a hit before the overhead locks interrupts it");
     engage(Vector2.right*2f);dstep(.02f);duelHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.left,0,0));
-    check(duel.IsDefeated&&!RoadOfTheOldKing.Enemies.AttackTokens.Holds(duel),"defeat frees the turn");
+    check(duel.IsDefeated,"defeat ends the sequence");
     engage(Vector2.right*1f);for(int i=0;i<30&&!duelReaction.Armored;i++)dstep(.02f);duel.enabled=false;
-    check(!RoadOfTheOldKing.Enemies.AttackTokens.Holds(duel)&&!duelReaction.Armored&&!duel.Action.IsRunning,"disable frees the turn and clears armour");duel.enabled=true;
-    resetBoar();RoadOfTheOldKing.Enemies.AttackTokens.TryAcquire(rival);move(boarHome+Vector2.right*4);pursuitTick.Invoke(pursuit,new object[]{.02f});
-    check(charge.IsRunning&&!RoadOfTheOldKing.Enemies.AttackTokens.Holds(pursuit),"the boar keeps its own attack rule, outside the shared turn");
-    RoadOfTheOldKing.Enemies.AttackTokens.Release(rival);resetBoar();
+    check(!duelReaction.Armored&&!duel.Action.IsRunning,"disable clears armour and the action");duel.enabled=true;
+    // Thorn Rat (28 Oct): dart, nip and retreat on the shared pursuit brain; one chop kills; no coins.
+    var ratRoot=spawn("Assets/Prefabs/Combat/ThornRat.prefab",new Vector2(1120,1000));var rat=ratRoot.GetComponent<RoadOfTheOldKing.Enemies.PursuitBrain>();
+    duelType.GetField("target",flags).SetValue(rat,player);var ratBody=ratRoot.GetComponent<Rigidbody2D>();var ratHp=ratRoot.GetComponent<RoadOfTheOldKing.Combat.Damageable>();var ratHome=ratBody.position;
+    var nipSpec=(RoadOfTheOldKing.Enemies.EnemyAttackSpec)duelType.GetProperty("Settings",flags).GetValue(rat,null);
+    Action<float> rstep=dt=>{duelTick.Invoke(rat,new object[]{dt});if(dt>0)Physics2D.Simulate(dt);};
+    rat.ResetOnRest();player.HealAtRest();player.DebugGodMode=false;if(invulnerable!=null)invulnerable.SetValue(player,-1f);move(ratHome+Vector2.right*1.8f);duelType.GetMethod("Engage",flags).Invoke(rat,null);
+    check(ratHp.MaxHealth==10&&ratRoot.GetComponent("EnemyCoinDrop")==null&&nipSpec.chargeSpeed>0&&nipSpec.damage==6,"thorn rat: 10 health, no coin drop, a 6-damage dart");
+    rstep(.02f);check(rat.State==RoadOfTheOldKing.Enemies.PursuitState.Windup&&rat.IsChargeAttack&&!rat.IsLaneLocked,"in range the rat crouches into its dart, still tracking");
+    for(int i=0;i<40&&rat.State!=RoadOfTheOldKing.Enemies.PursuitState.Recovering;i++)rstep(.02f);
+    check(player.Health.Health==player.Health.MaxHealth-6&&rat.State==RoadOfTheOldKing.Enemies.PursuitState.Recovering,"the dart nips once for its authored damage");
+    for(int i=0;i<30&&rat.State==RoadOfTheOldKing.Enemies.PursuitState.Recovering;i++)rstep(.02f);rstep(.02f);
+    check(rat.State==RoadOfTheOldKing.Enemies.PursuitState.Holding&&!rat.Action.IsRunning,"after the nip it backs off to its holding distance");
+    var ratCooldown=(float)duelType.GetField("cooldown",flags).GetValue(rat);check(ratCooldown>=.9f-.05f&&ratCooldown<=1.7f,"its cooldown carries a per-rat random spread");
+    for(int i=0;i<120&&!rat.Action.IsRunning;i++)rstep(.02f);check(rat.Action.IsRunning,"it darts in again after the cooldown");
+    ratHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,10,Vector2.left,3,.3f));check(rat.IsDefeated,"one light chop kills a rat");
+    ratRoot.SetActive(false);
     check(RoadOfTheOldKing.Progression.GameSession.Instance==null,"checks created no game session");
 } finally {
     foreach(var obj in created)if(obj!=null)UnityEngine.Object.DestroyImmediate(obj);
-    Physics2D.simulationMode=simulation;UnityEngine.Random.state=random;RoadOfTheOldKing.Enemies.AttackTokens.MaxAttackers=maxAttackers;
+    Physics2D.simulationMode=simulation;UnityEngine.Random.state=random;
 }
 return "PASS "+passed.Count+"\n"+string.Join("\n",passed.ToArray());

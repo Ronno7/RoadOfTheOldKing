@@ -39,12 +39,14 @@ namespace RoadOfTheOldKing.Enemies
         [SerializeField] private EnemyAttackDefinition closeAttack;
         [Tooltip("Share of the close attack's reach inside which it opens with the close attack instead of the main one.")]
         [SerializeField, Range(.1f, 1f)] private float closeRangeFraction = .75f;
-        [Tooltip("Distance kept, facing the player, while waiting for its attack turn or cooldown. Zero closes straight in.")]
+        [Tooltip("A missed main attack continues into the close attack when the player is still in its reach. Off: the main attack's recovery is always the opening.")]
+        [SerializeField] private bool followUpOnMiss = true;
+        [Tooltip("Distance kept, facing the player, during its cooldown between attack sequences. Zero closes straight in.")]
         [SerializeField, Min(0f)] private float holdDistance;
-        [Tooltip("Pause after a finished attack sequence before the next, so a partner can take its turn.")]
+        [Tooltip("Pause after a finished attack sequence before the next; it keeps its distance meanwhile.")]
         [SerializeField, Min(0f)] private float attackCooldown;
-        [Tooltip("Takes the shared attack turn, so only one enemy commits to an attack on the player at a time.")]
-        [SerializeField] private bool takesTurns;
+        [Tooltip("Random extra cooldown, up to this many seconds, so a swarm doesn't strike in lockstep.")]
+        [SerializeField, Min(0f)] private float cooldownJitter;
         private EnemyBody actor;
         private Damageable health;
         private HitReaction reaction;
@@ -59,6 +61,7 @@ namespace RoadOfTheOldKing.Enemies
         private EnemyAttackSpec current;
         private bool inSequence, followUpChecked;
         private float cooldown;
+        private MeleeAttackAction melee;
 
         public PursuitState State { get; private set; }
         public Vector2 FacingDirection { get; private set; } = Vector2.down;
@@ -72,12 +75,15 @@ namespace RoadOfTheOldKing.Enemies
         public EnemyActionRunner Action => action;
         public bool IsCloseAttack { get; private set; }
         public bool IsFollowUp { get; private set; }
+        public bool IsWallStunned => melee != null && action.IsRunning && melee.WallStunned;
 
         // Starts one attack outside the duel sequence (no follow-up); the sequence uses BeginSequenceAttack.
         public bool TryBeginAttack(EnemyAttackSpec settings, PlayerHealth victim, Vector2 direction)
         {
-            if (action.IsRunning || !action.Begin(new MeleeAttackAction(gameObject, body, bodyCollider, reaction, HasLineOfSight, settings, victim, direction)))
-                return false;
+            if (action.IsRunning) return false;
+            var next = new MeleeAttackAction(gameObject, body, bodyCollider, reaction, HasLineOfSight, settings, victim, direction);
+            if (!action.Begin(next)) return false;
+            melee = next;
             current = settings; IsCloseAttack = IsFollowUp = false; followUpChecked = true;
             return true;
         }
@@ -171,7 +177,7 @@ namespace RoadOfTheOldKing.Enemies
                 if (action.IsRunning && action.Phase == EnemyAttackPhase.Recovery && !followUpChecked)
                 {
                     followUpChecked = true;
-                    if (closeAttack != null && !action.HasContact && CanFollowUp(out Vector2 toward))
+                    if (closeAttack != null && followUpOnMiss && !action.HasContact && CanFollowUp(out Vector2 toward))
                     {
                         action.Cancel(false);
                         if (BeginSequenceAttack(CloseSettings, toward, true)) { IsFollowUp = true; State = PursuitState.Windup; return; }
@@ -243,7 +249,7 @@ namespace RoadOfTheOldKing.Enemies
             }
             float distance = toTarget.magnitude;
             bool close = closeAttack != null && distance <= CloseSettings.reach * closeRangeFraction;
-            bool ready = cooldown <= 0f && (!takesTurns || AttackTokens.CanAcquire(this));
+            bool ready = cooldown <= 0f;
             if (ready && (close || distance <= attackDistance))
             {
                 FacingDirection = toTarget.sqrMagnitude > 0.001f ? toTarget.normalized : FacingDirection;
@@ -259,12 +265,7 @@ namespace RoadOfTheOldKing.Enemies
 
         private bool BeginSequenceAttack(EnemyAttackSpec settings, Vector2 direction, bool isClose)
         {
-            if (takesTurns && !AttackTokens.TryAcquire(this)) return false;
-            if (!TryBeginAttack(settings, target, direction))
-            {
-                if (!inSequence) AttackTokens.Release(this);
-                return false;
-            }
+            if (!TryBeginAttack(settings, target, direction)) return false;
             inSequence = true; IsCloseAttack = isClose; followUpChecked = isClose;
             return true;
         }
@@ -279,16 +280,15 @@ namespace RoadOfTheOldKing.Enemies
             return true;
         }
 
-        // A finished, interrupted or abandoned sequence hands the turn on and waits out its cooldown.
+        // A finished, interrupted or abandoned sequence waits out its cooldown.
         private void EndSequence()
         {
             if (!inSequence) return;
             inSequence = false; IsFollowUp = false;
-            cooldown = attackCooldown;
-            AttackTokens.Release(this);
+            cooldown = attackCooldown + (cooldownJitter > 0f ? Random.Range(0f, cooldownJitter) : 0f);
         }
 
-        // Waiting for its turn: keep a useful distance and face the player.
+        // Between sequences: keep a useful distance and face the player.
         private void Hold(float distance, Vector2 toTarget)
         {
             State = PursuitState.Holding;

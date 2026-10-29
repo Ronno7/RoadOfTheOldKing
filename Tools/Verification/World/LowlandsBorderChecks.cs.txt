@@ -49,7 +49,7 @@ if(phase==0||phase==2||phase==4){
   check(!player.IsAlive,"Actual defeat before Lowlands fire");
   game.Checkpoints.Respawn();check(game.IsLoading,"Checkpoint respawn starts");
  }else if(phase==3){
-  check(wolves.Length==2&&wolves.All(w=>w.GetComponent<RoadOfTheOldKing.Combat.Damageable>().MaxHealth==40),"Instances use reduced health; shared prefab remains separate");
+  check(wolves.Length==2&&wolves.All(w=>w.GetComponent<RoadOfTheOldKing.Combat.Damageable>().MaxHealth==50),"Border wolves use the canonical prefab wolf (no instance overrides, 28 Oct)");
   player.DebugGodMode=true;
   pose(new Vector2(3.5f,-43));
   foreach(var wolf in wolves)wolf.GetType().GetMethod("Tick",flags).Invoke(wolf,new object[]{.02f});

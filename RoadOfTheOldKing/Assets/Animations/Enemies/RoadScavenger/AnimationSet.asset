@@ -18,6 +18,9 @@ MonoBehaviour:
   run: {fileID: 11400000, guid: c3b14ff0fb007df439f92ae8c1912a63, type: 2}
   attack: {fileID: 0}
   hurt: {fileID: 0}
-  death: {fileID: 0}
+  death: {fileID: 11400000, guid: 5514c5cf092254e4b887cabf40d5da2c, type: 2}
+  closeAttack: {fileID: 0}
   walkCycleLength: 2
+  runCycleLength: 3.6
+  runAnimationSpeed: 4.8
   deathFadeDuration: 0.5

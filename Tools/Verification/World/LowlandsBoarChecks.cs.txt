@@ -62,7 +62,7 @@ try{
  float impulse=body.linearVelocity.x;brainTick.Invoke(brain,new object[]{.02f});check(impulse<0&&body.linearVelocity.x==impulse,"interruption preserves real weapon knockback");
  reset();move(home+Vector2.right*4);brainTick.Invoke(brain,new object[]{.02f});brainTick.Invoke(brain,new object[]{spec.windup});
  check(brain.State==RoadOfTheOldKing.Enemies.PursuitState.Striking,"brain maps active phase");
- hp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.left,3,.3f));check(!action.IsRunning&&reaction.IsStaggered,"weapon stagger interrupts active charge");
+ hp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.left,3,.3f));check(action.IsRunning&&reaction.Armored&&!reaction.IsStaggered,"active charge is armoured: a weapon hit does not interrupt it");
  reset();move(home+Vector2.right*4);brainTick.Invoke(brain,new object[]{.02f});reaction.Armored=true;
  hp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.left,3,.3f));
  check(action.IsRunning&&!reaction.IsStaggered&&hp.Health==89,"shared brain cancels only actual stagger, not armor-absorbed hits");

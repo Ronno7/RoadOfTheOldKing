@@ -14,7 +14,7 @@ namespace RoadOfTheOldKing.Enemies
     // but always locks its lane a fixed lead before the leap (an honest tell), or snaps when the player
     // is close. It reads the player: hops back from swings, punishes whiffs and an away axe, presses a
     // tired player, bites back when a hit doesn't break its poise, and chains a follow-up when a lunge
-    // misses. Its recovery is the player's window. Attack tokens make a pack take turns.
+    // misses. Its recovery is the player's window. Each wolf keeps its own rhythm; packs don't take turns.
     // Chooses locomotion and actions. EnemyActionRunner owns committed movement/timing/damage; presentation only samples state.
     [DisallowMultipleComponent, RequireComponent(typeof(Damageable), typeof(HitReaction), typeof(Rigidbody2D))]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "RoadOfTheOldKing.Combat", null, "WolfAI")]
@@ -230,7 +230,6 @@ namespace RoadOfTheOldKing.Enemies
         private void OnDisable()
         {
             EnemyRegistry.Unregister(this);
-            AttackTokens.Release(this);
             IsAware = false;
             health.HitReceived -= OnHit;
             health.Defeated -= OnDefeated;
@@ -274,7 +273,7 @@ namespace RoadOfTheOldKing.Enemies
             {
                 if (reaction.IsStaggered) { elapsed = 0f; return; }
                 if (elapsed < hitRecovery) return;
-                if (targetAlive && distance <= snapRange && Random.value < counterChance && AttackTokens.TryAcquire(this))
+                if (targetAlive && distance <= snapRange && Random.value < counterChance)
                     BeginAttack(false, toward, true);
                 else
                     Enter(PredatorState.Reposition);
@@ -349,7 +348,7 @@ namespace RoadOfTheOldKing.Enemies
                 }
             }
             // Hit without breaking its poise: bite back.
-            if (wasHit && distance <= snapRange + .3f && Random.value < retaliateChance && AttackTokens.TryAcquire(this))
+            if (wasHit && distance <= snapRange + .3f && Random.value < retaliateChance)
             {
                 BeginAttack(false, toward, true);
                 return true;
@@ -366,7 +365,7 @@ namespace RoadOfTheOldKing.Enemies
             if (openingStarted && sees && Random.value < punishChance)
             {
                 bool snapOk = distance <= snapRange, lungeOk = distance >= lungeRange.x && distance <= lungeRange.y;
-                if ((snapOk || lungeOk) && AttackTokens.TryAcquire(this))
+                if ((snapOk || lungeOk))
                 {
                     BeginAttack(!snapOk, toward, true);
                     return true;
@@ -386,7 +385,7 @@ namespace RoadOfTheOldKing.Enemies
             {
                 bool snapOk = distance <= snapRange;
                 bool lungeOk = distance >= lungeRange.x && distance <= lungeRange.y;
-                if ((snapOk || lungeOk) && AttackTokens.TryAcquire(this)) { BeginAttack(!snapOk, toward, false); return; }
+                if ((snapOk || lungeOk)) { BeginAttack(!snapOk, toward, false); return; }
                 if (elapsed >= stalkFor) stalkFor = elapsed + .25f; // no opening yet: look again shortly
             }
             // Circle the player, easing back to the ring; a hugging player pushes it outward.
@@ -421,7 +420,7 @@ namespace RoadOfTheOldKing.Enemies
                 }
             };
             var next = new PredatorAttackAction(gameObject, body, reaction, target, HasLineOfSight, spec, toward);
-            if (!action.Begin(next)) { AttackTokens.Release(this); return; }
+            if (!action.Begin(next)) return;
             attackAction = next; IsLungeAttack = lunge; feint = selectedFeint; AttackDirection = toward;
             State = PredatorState.Windup; elapsed = duration = blockedTime = 0f;
         }
@@ -436,7 +435,7 @@ namespace RoadOfTheOldKing.Enemies
                 Face(toward);
                 if (!action.IsRunning)
                 {
-                    if (exposed && distance >= lungeRange.x && distance <= lungeRange.y && AttackTokens.TryAcquire(this))
+                    if (exposed && distance >= lungeRange.x && distance <= lungeRange.y)
                         BeginAttack(true, toward, true);
                     else Enter(PredatorState.Stalk);
                 }
@@ -444,7 +443,7 @@ namespace RoadOfTheOldKing.Enemies
             }
             AttackDirection = action.Direction; Face(AttackDirection);
             if (attackAction.Feinted)
-            { AttackTokens.Release(this); Enter(PredatorState.Reposition); return; }
+            { Enter(PredatorState.Reposition); return; }
             if (attackAction.FinishedActive && IsLungeAttack && !attackAction.HasContact && Random.value < followUpChance)
             {
                 if (distance <= snapRange || (distance >= lungeRange.x && distance <= lungeRange.y))
@@ -453,7 +452,7 @@ namespace RoadOfTheOldKing.Enemies
             if (!action.IsRunning)
             {
                 if (distance <= snapRange && swinging && Random.value < retaliateChance) BeginAttack(false, toward, true);
-                else { AttackTokens.Release(this); Enter(PredatorState.Reposition); }
+                else Enter(PredatorState.Reposition);
                 return;
             }
             State = action.Phase == EnemyAttackPhase.Windup ? PredatorState.Windup :
@@ -485,7 +484,6 @@ namespace RoadOfTheOldKing.Enemies
         private void LoseTarget()
         {
             IsAware = false;
-            AttackTokens.Release(this);
         }
 
         // Terrain and static props block sight; characters (dynamic bodies) do not.
@@ -544,14 +542,12 @@ namespace RoadOfTheOldKing.Enemies
         private void OnStaggered(CombatHit hit)
         {
             if (!health.IsAlive) return;
-            AttackTokens.Release(this);
             Enter(PredatorState.Staggered);
         }
 
         private void OnDefeated()
         {
             IsAware = false;
-            AttackTokens.Release(this);
             reaction.Armored = false;
             // Carry the killing blow's knockback into a short corpse slide. The collider switches off at
             // once so throws and the player pass through, so the slide stops at walls by casting.
@@ -576,7 +572,6 @@ namespace RoadOfTheOldKing.Enemies
         public void ResetOnRest()
         {
             IsAware = false;
-            AttackTokens.Release(this);
             ResetVersion++;
             actor.Reset();
             previousPosition = actor.Home;

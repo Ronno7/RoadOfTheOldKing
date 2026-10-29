@@ -11,6 +11,10 @@ namespace RoadOfTheOldKing.Enemies
         public float chargeSpeed, trackingTime;
         [Tooltip("Hyper-armour once the direction locks, through the active window: hits still damage but cannot interrupt the committed blow.")]
         public bool armoredWhenLocked;
+        [Tooltip("Hyper-armour for the active window only (a charge); the windup stays interruptible.")]
+        public bool armoredWhileActive;
+        [Tooltip("Charges only: recovery after running head-on into a visible wall or rock. Zero keeps the normal recovery.")]
+        public float wallStunRecovery;
     }
 
     // Immutable authoring data in play. The runner takes a value copy at commitment.

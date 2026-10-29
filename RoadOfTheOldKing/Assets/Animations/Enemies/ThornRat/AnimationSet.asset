@@ -14,10 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.EnemyAnimationSet
   rotations: {fileID: 11400000, guid: b56e6b9113f124944b3b5069b6b4e41b, type: 2}
   idle: {fileID: 0}
-  walk: {fileID: 0}
+  walk: {fileID: 11400000, guid: 3d0d0fab209f8054c9667439bebde728, type: 2}
   run: {fileID: 11400000, guid: f78826d3a904c1947bf43b5b8e61da52, type: 2}
   attack: {fileID: 0}
   hurt: {fileID: 0}
-  death: {fileID: 0}
+  death: {fileID: 11400000, guid: 35fe638774bdee24fbf7174433d51e17, type: 2}
+  closeAttack: {fileID: 0}
   walkCycleLength: 2
+  runCycleLength: 3.6
+  runAnimationSpeed: 4.8
   deathFadeDuration: 0.5

@@ -30874,10 +30874,6 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1220608268331909534, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: maxHealth
-      value: 60
-      objectReference: {fileID: 0}
     - target: {fileID: 1312492780506765286, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
       propertyPath: m_Enabled
       value: 0
@@ -67180,6 +67176,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SceneSpawnPoint
   id: from-green-lowlands
   arrivalFacing: {x: 0, y: 0}
+  hideFromDevTravel: 0
 --- !u!1 &258880400
 GameObject:
   m_ObjectHideFlags: 0
@@ -283603,10 +283600,6 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1220608268331909534, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: maxHealth
-      value: 60
-      objectReference: {fileID: 0}
     - target: {fileID: 1312492780506765286, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
       propertyPath: m_Enabled
       value: 0
@@ -400481,10 +400474,6 @@ PrefabInstance:
     - target: {fileID: 980551573255439911, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
       propertyPath: m_LocalRotation.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1220608268331909534, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: maxHealth
-      value: 60
       objectReference: {fileID: 0}
     - target: {fileID: 1312492780506765286, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
       propertyPath: m_Enabled
@@ -714361,7 +714350,7 @@ Tilemap:
       - {fileID: 1922039361, guid: 405c7d0154050bf478856281391a20e8, type: 3}
       - {fileID: -435753032, guid: 405c7d0154050bf478856281391a20e8, type: 3}
       - {fileID: -1497324419, guid: 405c7d0154050bf478856281391a20e8, type: 3}
-      m_AnimationSpeed: 1.25
+      m_AnimationSpeed: 1.2500001
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: 65, y: 86, z: 0}

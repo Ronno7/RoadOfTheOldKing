@@ -241,7 +241,7 @@ namespace RoadOfTheOldKing.EditorTools
             importer.SaveAndReimport();
         }
 
-        private static void ApplyPixelSettings(TextureImporter importer, Vector2? pivot)
+        internal static void ApplyPixelSettings(TextureImporter importer, Vector2? pivot)
         {
             importer.textureType = TextureImporterType.Sprite;
             importer.spriteImportMode = SpriteImportMode.Single;

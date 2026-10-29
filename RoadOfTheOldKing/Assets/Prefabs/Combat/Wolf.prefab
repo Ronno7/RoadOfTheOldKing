@@ -418,7 +418,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.Damageable
-  maxHealth: 100
+  maxHealth: 50
   protectionSource: {fileID: 0}
 --- !u!114 &5467780097179905967
 MonoBehaviour:
@@ -525,8 +525,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.WolfAI
   target: {fileID: 0}
-  noticeRadius: 10
-  leashRadius: 20
+  noticeRadius: 9
+  leashRadius: 16
   alertDuration: 0.4
   loseSightTime: 2.5
   stalkSpeed: 2.6
@@ -540,27 +540,27 @@ MonoBehaviour:
   stalkTime: {x: 0.5, y: 1.3}
   pressureScale: 0.35
   tiredStamina: 25
-  feintChance: 0.25
-  evadeChance: 0.45
+  feintChance: 0.1
+  evadeChance: 0.15
   evadeDistance: 2.4
   evadeDuration: 0.2
   evadeCooldown: 1.5
-  sidestepChance: 0.45
+  sidestepChance: 0.2
   throwThreatAngle: 25
   threatMargin: 0.6
-  punishChance: 0.8
-  retaliateChance: 0.5
-  counterChance: 0.35
-  lungeWindup: {x: 0.42, y: 0.95}
+  punishChance: 0.5
+  retaliateChance: 0.3
+  counterChance: 0.2
+  lungeWindup: {x: 0.55, y: 1}
   lockLead: 0.32
   lungeDistance: 3.4
   lungeDuration: 0.3
-  lungeRecovery: 0.55
+  lungeRecovery: 0.7
   lungeRange: {x: 2, y: 4.8}
-  followUpChance: 0.5
+  followUpChance: 0.25
   snoutOffset: 1
   biteRadius: 0.75
-  lungeDamage: 20
+  lungeDamage: 14
   lungeKnockback: 4
   lungeStagger: 0.25
   snapRange: 1.9
@@ -570,7 +570,7 @@ MonoBehaviour:
   snapRecovery: 0.36
   snapReach: 2.1
   snapArc: 80
-  snapDamage: 15
+  snapDamage: 10
   snapKnockback: 2.4
   snapStagger: 0.18
   hitRecovery: 0.15

@@ -27,6 +27,8 @@ namespace RoadOfTheOldKing.Enemies
         public bool HasContact { get; private set; }
         public Vector2 Direction { get; private set; }
         public Vector2 Origin { get; private set; }
+        // A charge that ran head-on into a visible wall or rock; its recovery is the longer stun.
+        public bool WallStunned { get; private set; }
         public bool IsCharge => spec.chargeSpeed > 0;
         public bool IsLocked => Phase != EnemyAttackPhase.Windup || clock.Elapsed >= spec.trackingTime;
         public float Progress => clock.Progress;
@@ -46,7 +48,7 @@ namespace RoadOfTheOldKing.Enemies
             spec.recovery = Mathf.Max(.05f, spec.recovery); spec.chargeSpeed = Mathf.Max(0, spec.chargeSpeed);
             spec.trackingTime = Mathf.Clamp(spec.trackingTime, 0, spec.windup - .05f);
             Direction = initialDirection.sqrMagnitude > .001f ? initialDirection.normalized : Vector2.down;
-            Origin = body.position; HasContact = false; Enter(EnemyAttackPhase.Windup);
+            Origin = body.position; HasContact = WallStunned = false; Enter(EnemyAttackPhase.Windup);
             return true;
         }
 
@@ -79,11 +81,19 @@ namespace RoadOfTheOldKing.Enemies
             {
                 float distance = spec.chargeSpeed * dt, allowed = distance;
                 int count = collider.Cast(Direction, filter, hits, distance + .02f);
+                float nearest = float.MaxValue;
+                bool wall = false;
                 for (int i = 0; i < count; i++)
                 {
                     if (hits[i].collider == null || hits[i].transform.IsChildOf(owner.transform)) continue;
                     allowed = Mathf.Min(allowed, Mathf.Max(0, hits[i].distance - .02f));
                     blocked = true;
+                    if (hits[i].distance < nearest) { nearest = hits[i].distance; wall = IsHeadOnWall(hits[i]); }
+                }
+                if (blocked && wall && spec.wallStunRecovery > 0f)
+                {
+                    WallStunned = true;
+                    spec.recovery = Mathf.Max(spec.recovery, spec.wallStunRecovery);
                 }
                 next += Direction * allowed;
                 body.linearVelocity = Direction * (allowed / dt);
@@ -95,6 +105,18 @@ namespace RoadOfTheOldKing.Enemies
             if (clock.Elapsed >= spec.active || (IsCharge && (blocked || HasContact))) Enter(EnemyAttackPhase.Recovery);
         }
 
+        // Only a solid, visible obstacle met nearly square-on stuns: not a graze, another creature, a
+        // breakable, or an invisible boundary the player can't read as a wall.
+        private bool IsHeadOnWall(RaycastHit2D hit)
+        {
+            if (Vector2.Dot(Direction, -hit.normal) < .7f) return false;
+            var other = hit.collider;
+            if (other.GetComponentInParent<IEnemy>() != null || other.GetComponentInParent<PlayerHealth>() != null ||
+                other.GetComponentInParent<IHitReceiver>() != null) return false;
+            var renderer = other.GetComponentInParent<Renderer>();
+            return renderer != null && renderer.enabled;
+        }
+
         public void Cancel(bool stopMovement = true)
         {
             clock.Clear(); target = null; HasContact = false; SetArmor(false);
@@ -104,6 +126,7 @@ namespace RoadOfTheOldKing.Enemies
         {
             clock.Enter(phase, phase == EnemyAttackPhase.Windup ? spec.windup : phase == EnemyAttackPhase.Active ? spec.active : spec.recovery);
             body.linearVelocity = Vector2.zero;
+            if (phase == EnemyAttackPhase.Active && spec.armoredWhileActive) SetArmor(true);
             // Recovery is the opening: armour never carries into it.
             if (phase == EnemyAttackPhase.Recovery) SetArmor(false);
         }

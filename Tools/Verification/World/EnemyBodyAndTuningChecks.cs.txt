@@ -66,7 +66,6 @@ try{
  tick.Invoke(bandit,new object[]{stepIn.windup});
  for(int i=0;i<20&&bandit.State==RoadOfTheOldKing.Enemies.PursuitState.Striking;i++){tick.Invoke(bandit,new object[]{.02f});Physics2D.Simulate(.02f);}
  check(player.Health.Health==player.Health.MaxHealth-stepIn.damage&&bandit.State==RoadOfTheOldKing.Enemies.PursuitState.Recovering&&!bandit.IsFollowUp,"bandit step-in closes the gap and lands once, ending in recovery");
- RoadOfTheOldKing.Enemies.AttackTokens.Release(bandit);
 }finally{
  Physics2D.simulationMode=simulation;if(root!=null)UnityEngine.Object.DestroyImmediate(root);if(wall!=null)UnityEngine.Object.DestroyImmediate(wall);if(trigger!=null)UnityEngine.Object.DestroyImmediate(trigger);UnityEngine.Object.DestroyImmediate(owner);
  player.DebugGodMode=false;player.Health.RestoreHealth();player.GetComponent<RoadOfTheOldKing.Combat.HitReaction>().Clear();playerBody.position=oldPosition;player.transform.position=oldPosition;playerBody.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();
