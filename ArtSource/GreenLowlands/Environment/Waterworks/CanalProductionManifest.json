@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "approved": true,
+  "approval": "User approved empty-canal review on 26 October 2026 and requested duration match the basin drainage.",
+  "pixelsPerUnit": 16,
+  "sourceDirectory": "Source",
+  "parts": [
+    {
+      "name": "CanalBed",
+      "file": "CanalBed.png",
+      "width": 48,
+      "height": 64,
+      "sha256": "82dcbbfd2c381104bdfdccd797dff06458b90bc9a29651036c06eebfc5de95d5"
+    },
+    {
+      "name": "CanalBedTurn",
+      "file": "CanalBedTurn.png",
+      "width": 48,
+      "height": 48,
+      "sha256": "47b7c2d4e85f8caa4d6e47dcf340579f84256400b1330bf4b39afe5afd520a80"
+    },
+    {
+      "name": "CanalBedWest",
+      "file": "CanalBedWest.png",
+      "width": 64,
+      "height": 32,
+      "sha256": "cf20ae1d023f02c226c541a3d0469a64810101909a3408ae1f16c610b091b27a"
+    },
+    {
+      "name": "SpillwayFlow",
+      "file": "SpillwayFlow.png",
+      "width": 192,
+      "height": 1216,
+      "sha256": "9dd5b532dcb3b61277f8a998ef77ccd707ca05ae4efa7749b9371c7ac52b21f8"
+    }
+  ],
+  "flowExtraction": "Rows 6 through 18 of the four-column source, top 16 pixels per frame. Thirteen widths, four phases.",
+  "timing": "All recession uses SluiceWaterReveal.Progress; canal settles at basin completion, including the west exit. No independent drain duration."
+}

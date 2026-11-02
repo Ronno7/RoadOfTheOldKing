@@ -20,12 +20,6 @@
         },
         {
             "scenePath": "Assets/Scenes/GreenLowlands.unity",
-            "id": "from-barrow",
-            "label": "Barrow road return",
-            "bonfire": false
-        },
-        {
-            "scenePath": "Assets/Scenes/GreenLowlands.unity",
             "id": "from-storm-highlands",
             "label": "High Pass - future Highlands arrival",
             "bonfire": false
@@ -35,6 +29,18 @@
             "id": "green-lowlands/arrival-fire",
             "label": "Lowlands Bonfire",
             "bonfire": true
+        },
+        {
+            "scenePath": "Assets/Scenes/GreenLowlands.unity",
+            "id": "green-lowlands/north-bank-fire",
+            "label": "North Bank Bonfire",
+            "bonfire": true
+        },
+        {
+            "scenePath": "Assets/Scenes/GreenLowlands.unity",
+            "id": "from-old-drain",
+            "label": "Old Drain return",
+            "bonfire": false
         },
         {
             "scenePath": "Assets/Scenes/GreenLowlands.unity",
@@ -49,7 +55,13 @@
             "bonfire": false
         },
         {
-            "scenePath": "Assets/Scenes/LowlandsStorehouse.unity",
+            "scenePath": "Assets/Scenes/OldDrain.unity",
+            "id": "from-lowlands",
+            "label": "From Lowlands",
+            "bonfire": false
+        },
+        {
+            "scenePath": "Assets/Scenes/OldDrain.unity",
             "id": "from-barrow-drain",
             "label": "Old Drain return from Barrow",
             "bonfire": false

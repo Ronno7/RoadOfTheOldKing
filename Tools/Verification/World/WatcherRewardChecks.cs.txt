@@ -1,0 +1,62 @@
+// Watcher defeat reward (28 Oct): the Watcher's EncounterUnlock reveals its lodged Sun Shard where it fell, the
+// sluice controls unguard, and both survive a scene reload separately (leave before taking it: still there).
+// Run with FixtureRunner (compiler=codedom, Runner.Skip 0).
+// 1. Shared GreenLowlandsGameplayChecks SETUP (stopped). 2. Stopped: run once to seed the isolated save.
+// 3. Play, then run between frames: Continue -> travel -> defeat -> re-enter -> take -> re-enter -> DONE.
+// 4. Stop and run the shared cleanup. Only the isolated key is touched.
+string key=SessionState.GetString("GreenLowlands.Gameplay.Key","");
+if(!key.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new System.Exception("Isolated setup required");
+var checks=new System.Collections.Generic.List<string>();
+System.Action<bool,string> check=(ok,s)=>{if(!ok)throw new System.Exception("FAIL: "+s+" | passed: "+string.Join("; ",checks.ToArray()));checks.Add(s);};
+var f=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+System.Func<RoadOfTheOldKing.World.RewardPickup,GameObject> visual=r=>(GameObject)typeof(RoadOfTheOldKing.World.RewardPickup).GetField("visual",f).GetValue(r);
+int phase=SessionState.GetInt("WatcherReward.Phase",0);
+if(!EditorApplication.isPlaying){
+ if(phase!=0)throw new System.Exception("Seed only before Play (WatcherReward.Phase 0)");
+ var store=new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(key);var s=store.Load();
+ s.Complete("shard/collected/tutorial/first-enemy");s.sunShards=1;
+ store.Save(s);SessionState.SetInt("WatcherReward.Phase",1);return "SEEDED; enter Play and run again";
+}
+var g=RoadOfTheOldKing.Progression.GameSession.Instance;
+if(g==null||g.StorageKey!=key)throw new System.Exception("Isolated Play session required");
+Application.runInBackground=true;if(g.IsLoading)return "WAIT";
+var player=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();
+System.Action<Vector2> pose=at=>{var b=player.GetComponent<Rigidbody2D>();b.position=at;player.transform.position=at;b.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();};
+System.Func<RoadOfTheOldKing.World.SunShardReward> shardOf=()=>System.Array.Find(UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SunShardReward>(FindObjectsInactive.Include,FindObjectsSortMode.None),r=>r.RewardId=="green-lowlands/watcher");
+System.Func<RoadOfTheOldKing.Progression.EncounterUnlock> recordOf=()=>UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Progression.EncounterUnlock>(FindObjectsSortMode.None).Single(u=>u.Milestone=="green-lowlands/watcher-defeated");
+System.Func<RoadOfTheOldKing.Enemies.PursuitBrain> watcherOf=()=>UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Enemies.BossHealthBar>().GetComponent<RoadOfTheOldKing.Enemies.PursuitBrain>();
+System.Func<bool> guarded=()=>UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RecallSluice>().IsGuarded;
+if(phase==1)check(g.Continue(),"Continue the seeded save");
+else if(phase==2){
+ check(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name=="Tutorial","seeded save continues into the Tutorial");
+ check(g.Checkpoints.LeaveScene("Assets/Scenes/GreenLowlands.unity","from-tutorial"),"travel to Lowlands");
+}else if(phase==3){
+ var shard=shardOf();var record=recordOf();var watcher=watcherOf();
+ check(shard!=null&&shard.Unlock==record&&record.Guards.Count==1,"the Watcher's shard is gated by its own defeat record");
+ check(!shard.IsAvailable&&!visual(shard).activeSelf&&!record.IsUnlocked(g.Progress),"before the fight the shard is hidden");
+ check(guarded(),"the sluice controls are held fast while it stands");
+ pose((Vector2)shard.transform.position+Vector2.down*.6f);check(!shard.TryCollect(player),"nothing to take at its seat yet");
+ var fallAt=(Vector2)watcher.transform.position+new Vector2(1.5f,-1f);watcher.transform.position=fallAt;watcher.GetComponent<Rigidbody2D>().position=fallAt;Physics2D.SyncTransforms();
+ record.Guards[0].DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.up,0,0));
+ check(record.IsUnlocked(g.Progress)&&watcher.IsDefeated,"defeat records the milestone");
+ check(shard.IsAvailable&&visual(shard).activeSelf&&Vector2.Distance(shard.transform.position,fallAt)<.05f,"its shard appears in the body where it fell");
+ check(!guarded(),"the sluice controls answer once it has fallen");
+ check(g.Progress.sunShards==1,"leaving without taking it: nothing granted yet");
+ check(g.Checkpoints.LeaveScene("Assets/Scenes/GreenLowlands.unity","from-tutorial"),"re-enter the Lowlands before taking it");
+}else if(phase==4){
+ var shard=shardOf();var watcher=watcherOf();
+ check(watcher.IsDefeated,"the Watcher stays a fallen ruin after reloading");
+ check(shard.IsAvailable&&!shard.IsCollected&&visual(shard).activeSelf,"the untaken shard is still there after reloading");
+ check(Vector2.Distance(shard.transform.position,watcher.transform.position)<.05f,"after reloading it still lies in the body, wherever it fell");
+ check(!guarded(),"the sluice stays unguarded after reloading");
+ pose((Vector2)shard.transform.position+Vector2.down*.6f);
+ check(shard.TryCollect(player)&&g.Progress.sunShards==2&&g.Progress.Has("shard/collected/green-lowlands/watcher"),"taking it grants one shard under its own key");
+ check(!shard.TryCollect(player)&&!visual(shard).activeSelf,"it cannot be taken twice");
+ check(g.Checkpoints.LeaveScene("Assets/Scenes/GreenLowlands.unity","from-tutorial"),"re-enter once more");
+}else if(phase==5){
+ var shard=shardOf();
+ check(shard.IsCollected&&!visual(shard).activeSelf&&g.Progress.sunShards==2,"taken stays taken");
+ check(watcherOf().IsDefeated&&!guarded(),"defeat and sluice access persist");
+}else return "DONE";
+SessionState.SetInt("WatcherReward.Phase",phase+1);
+return new{phase,passed=checks.Count,checks=checks.ToArray()};

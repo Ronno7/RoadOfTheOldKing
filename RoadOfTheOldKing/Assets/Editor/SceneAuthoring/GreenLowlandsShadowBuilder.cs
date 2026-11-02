@@ -32,6 +32,7 @@ namespace RoadOfTheOldKing.EditorTools
                 case "Terrain - Farm tops": case "Terrain - Farm faces": return true;
                 case "Terrain - Ridge tops": case "Terrain - Ridge faces": height = 1; return true;
                 case "Terrain - Enclosure tops": case "Terrain - Enclosure faces": height = 2; return true;
+                case "Terrain - High Pass peak tops": case "Terrain - High Pass peak faces": height = 3; return true;
                 default: return false;
             }
         }
@@ -147,7 +148,7 @@ namespace RoadOfTheOldKing.EditorTools
                         PathOf(map.transform).Contains("/Arrival/Ground/") || n.StartsWith("Paths -"));
                     bool isUpper = n == "Terrain - upper meadow terraces";
                     bool isBasin = n == "Ground - exposed basin silt";
-                    bool isWater = n == "Terrain - permanent water" || n == "Border river" || n == "Sluice - lower tailrace water";
+                    bool isWater = n == "Terrain - permanent water" || n == "Border river" || n == "Sluice - lower tailrace water" || n == "High Pass headwater";
                     bool isRaised = false;
                     bool isCliffTop = nativeLayer && layerTop;
                     bool isFace = n == "Sluice - basin stair masonry" ||
@@ -519,13 +520,32 @@ namespace RoadOfTheOldKing.EditorTools
                 string[] families = { "Oak", "Birch", "Apple_Tree", "Farmhouse_Weathered", "Workshop_Weathered", "Watermill", "Woodshed_Weathered",
                     "Well_Disused", "Farm_Cart", "Plank_Bridge", "Fence_Weathered", "Reused_Stone_Post", "Boulder", "Boulder_Cluster",
                     "Fallen_Log", "Hedgerow", "Collapsed_Crate", "WoodenBucket", "SmallSageBush",
-                    "Firewood_Rack", "Axe_Stump", "Fence_Horizontal", "GrainSack", "ClayJar" };
+                    "Firewood_Rack", "Axe_Stump", "Fence_Horizontal", "Fence_Post", "GrainSack", "ClayJar" };
                 foreach (var t in world.Find("Scenery").GetComponentsInChildren<Transform>(true).ToArray())
                 {
                     if (PrefabUtility.GetNearestPrefabInstanceRoot(t.gameObject) != t.gameObject) continue;
                     string family = System.IO.Path.GetFileNameWithoutExtension(PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(t.gameObject));
                     if (families.Contains(family)) Project(PathOf(t), Shape(t));
                 }
+                // The arrival and Hayfields forests are stamped Tilemaps, not prefab instances.
+                // Each centre trunk slice owns one tree's foot, elevation and placement jitter.
+                var treeSprites = AssetDatabase.LoadAllAssetsAtPath(AssetDatabase.GetAssetPath(
+                    AssetDatabase.LoadAssetAtPath<Tile>("Assets/Art/Tiles/Shared/Environment/Trees/Tiles/Oak_1_0.asset").sprite))
+                    .OfType<Sprite>().Where(s => s.name == "Oak" || s.name == "Birch" || s.name == "Apple_Tree")
+                    .ToDictionary(s => s.name);
+                foreach (var map in maps.Where(m => m.name == "Forest trunks" && m.gameObject.activeInHierarchy &&
+                    m.GetComponent<TilemapRenderer>() != null && m.GetComponent<TilemapRenderer>().enabled))
+                    foreach (var c in map.cellBounds.allPositionsWithin)
+                    {
+                        var slice = map.GetSprite(c);
+                        if (slice == null || !slice.name.EndsWith("_1_0", StringComparison.Ordinal)) continue;
+                        if (!treeSprites.TryGetValue(slice.name.Substring(0, slice.name.Length - 4), out var sprite)) continue;
+                        var shape = new HashSet<Vector2Int>();
+                        AddSprite(shape, sprite, map.transform.localToWorldMatrix *
+                            Matrix4x4.Translate(map.CellToLocal(c) + map.tileAnchor) * map.GetTransformMatrix(c) *
+                            Matrix4x4.Translate(new Vector3((sprite.pivot.x - 24) / Ppu, (sprite.pivot.y - 8) / Ppu)));
+                        Project(PathOf(map.transform) + " " + c, shape);
+                    }
                 foreach (var r in world.Find("Gameplay").GetComponentsInChildren<SpriteRenderer>(true))
                 {
                     if (!r.enabled || !r.gameObject.activeInHierarchy || r.sprite == null) continue;

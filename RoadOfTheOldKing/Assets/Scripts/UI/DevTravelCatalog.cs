@@ -26,7 +26,7 @@ namespace RoadOfTheOldKing.UI
             {
                 foreach (var fire in root.GetComponentsInChildren<Bonfire>().Where(f => f.isActiveAndEnabled && !string.IsNullOrEmpty(f.Id)))
                     yield return new DevTravelDestination { scenePath = scene.path, id = fire.Id, label = fire.DisplayName, bonfire = true };
-                foreach (var point in root.GetComponentsInChildren<SceneSpawnPoint>().Where(p => p.isActiveAndEnabled && !string.IsNullOrEmpty(p.Id)))
+                foreach (var point in root.GetComponentsInChildren<SceneSpawnPoint>().Where(p => p.isActiveAndEnabled && p.ShowInDevTravel && !string.IsNullOrEmpty(p.Id)))
                     yield return new DevTravelDestination { scenePath = scene.path, id = point.Id, label = point.name };
             }
         }

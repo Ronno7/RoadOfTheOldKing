@@ -162,12 +162,15 @@ namespace RoadOfTheOldKing.EditorTools
                 bool grass=n=="Ground - regional meadow"||n=="Border grass"||
                     (n=="Grass"&&map.transform.parent.name=="Ground");
                 bool water=n=="Flooded pond and road-cut"||n=="Permanent river continuation"||
+                    n=="High Pass headwater"||n=="High Pass waterfall"||
                     n=="Border river"||n=="MeadowWater"||n=="StoneWater"||n=="DeepWater";
                 bool exclude=water||n=="Cliffs and outer boundary"||n=="Woodland barriers"||
                     n=="Basin exclusion mask"||n=="Path exclusion mask"||
                     n=="Border lane"||n=="Border collision"||n=="Paths - sluice paving"||
                     n=="Ground - worksite paving"||
                     n=="Ground - storehouse threshold paving"||
+                    // Moved under Regional surfaces on 20 Oct, so the Paths parent rule below no longer covers them.
+                    n=="Paths - old country lanes"||n=="Ground - waystation paving"||
                     n=="Terrain - orchard ascent"||n=="Terrain - height connectors"||
                     n=="Terrain - submerged height connectors"||
                     n=="Terrain - structural bank edges"||n=="Terrain - shard island masonry"||
@@ -296,7 +299,12 @@ namespace RoadOfTheOldKing.EditorTools
         }
 
 
-        public static void Bake()
+        public static void Bake()=>Bake(null);
+
+        // With a region, only roots inside it are regenerated; every existing plant outside is kept
+        // as baked, so geometry edits do not reshuffle accepted fields elsewhere. Kept plants seed the
+        // spacing buckets, so new roots along the region edge still respect them.
+        public static void Bake(RectInt? region)
         {
             var mask=ReadMask();
             if(!File.Exists(DensityPath))
@@ -334,6 +342,20 @@ namespace RoadOfTheOldKing.EditorTools
             int seed=layout!=null?layout.seed:1703;
             var plants=new List<VegetationLayout.Plant>();
             var buckets=new Dictionary<Vector2Int,List<Vector2>>();
+            Func<Vector2,bool> inside=p=>region.HasValue&&p.x>=region.Value.xMin&&p.x<region.Value.xMax&&
+                p.y>=region.Value.yMin&&p.y<region.Value.yMax;
+            if(region.HasValue)
+            {
+                if(layout==null||layout.plants==null)throw new InvalidOperationException("A region bake needs an existing layout to keep.");
+                foreach(var kept in layout.plants.Where(p=>!inside(p.position)))
+                {
+                    plants.Add(kept);
+                    var keptCell=Vector2Int.FloorToInt(kept.position/Spacing);
+                    if(!buckets.TryGetValue(keptCell,out var keptList))buckets.Add(keptCell,keptList=new List<Vector2>());
+                    keptList.Add(kept.position);
+                }
+            }
+            int keptCount=plants.Count;
             var input=density.GetPixels32();
             for(int y=0;y<Height;y++)for(int x=0;x<Width;x++)for(int slot=0;slot<4;slot++)
             {
@@ -342,6 +364,7 @@ namespace RoadOfTheOldKing.EditorTools
                 var p=(Vector2)Origin+new Vector2(x+.25f+(slot%2)*.5f+(Random01(key+1)-.5f)*.25f,
                     y+.25f+(slot/2)*.5f+(Random01(key+2)-.5f)*.25f);
                 p=new Vector2(Mathf.Round(p.x*16)/16,Mathf.Round(p.y*16)/16);
+                if(region.HasValue&&!inside(p))continue;
                 float v=Random01(key+3);
                 int species=v<.32f?0:v<.88f?1:v<.94f?2:3;
                 if(mask.NearWater(p))species=4;
@@ -353,7 +376,7 @@ namespace RoadOfTheOldKing.EditorTools
             }
             // A broken scene mask must not silently erase an accepted field. An all-black density
             // remains a deliberate way to clear it, but nonempty authoring input needs some roots.
-            if(plants.Count==0&&input.Any(p=>p.r>0))
+            if(!region.HasValue&&plants.Count==0&&input.Any(p=>p.r>0))
                 throw new InvalidDataException("Nonempty Lowlands density produced zero plants. Check scene masks; existing layout was not changed.");
             if(layout==null){layout=ScriptableObject.CreateInstance<VegetationLayout>();AssetDatabase.CreateAsset(layout,LayoutPath);}
             Undo.RecordObject(layout,"Bake Lowlands vegetation");
@@ -371,7 +394,7 @@ namespace RoadOfTheOldKing.EditorTools
             field.interactor=UnityEngine.Object.FindFirstObjectByType<PlayerMovement>().transform;
             field.transform.SetPositionAndRotation(Vector3.zero,Quaternion.identity);field.transform.localScale=Vector3.one;
             field.Rebuild();EditorUtility.SetDirty(field);EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
-            Debug.Log("Lowlands density baked: "+plants.Count+" plants. "+ValidateLayout());
+            Debug.Log("Lowlands density baked: "+plants.Count+" plants"+(region.HasValue?" ("+keptCount+" kept outside "+region.Value+")":"")+". "+ValidateLayout());
         }
 
         static float Random01(uint n)

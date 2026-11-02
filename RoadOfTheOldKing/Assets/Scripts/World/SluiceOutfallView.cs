@@ -11,8 +11,12 @@ namespace RoadOfTheOldKing.World
         [SerializeField] private SluiceWaterReveal pondReveal;
         [SerializeField] private SpriteRenderer surge;
         [SerializeField] private Sprite[] flowFrames;
+        [SerializeField] private SluiceCanalView canal;
+        [SerializeField] private SluiceCulvertView culvert;
         [SerializeField] private SpriteRenderer upstreamSurface;
         [SerializeField] private Renderer[] wetMarks;
+        [Tooltip("Set to zero when the downstream apron artwork already contains the settled rivulet.")]
+        [SerializeField, Range(0f, 1f)] private float settledSurgeStrength = .3f;
 
         private Color surgeColor, upstreamColor;
         private Sprite surgeSprite;
@@ -58,7 +62,7 @@ namespace RoadOfTheOldKing.World
         {
             Cache();
             float opening = mechanism != null ? Mathf.Clamp01(mechanism.Opening) : 0f;
-            int frameCount = flowFrames != null ? Mathf.Min(4, flowFrames.Length) : 0;
+            int frameCount = canal != null ? 4 : flowFrames != null ? Mathf.Min(4, flowFrames.Length) : 0;
             if (opening > 0f && seconds > 0f && frameCount > 0)
                 frameTime = Mathf.Repeat(frameTime + seconds, frameCount / FramesPerSecond);
             else if (opening <= 0f)
@@ -66,14 +70,22 @@ namespace RoadOfTheOldKing.World
 
             bool draining = pondReveal != null && pondReveal.IsDraining;
             bool settledLow = sluice != null && sluice.Stage == SluiceStage.PondLow && !draining;
-            if (surge != null)
+            float progress = draining ? pondReveal.Progress : settledLow ? 1f : 0f;
+            if (culvert != null)
+                culvert.Present(progress, Mathf.FloorToInt(frameTime * FramesPerSecond));
+            if (canal != null)
+            {
+                if (surge != null) surge.enabled = false;
+                canal.Present(opening > 0f, progress, Mathf.FloorToInt(frameTime * FramesPerSecond));
+            }
+            else if (surge != null)
             {
                 // The draining surge subsides into a small persistent rivulet under the open gate.
-                float strength = draining ? Mathf.Lerp(1f, .3f, pondReveal.Progress) : .3f;
+                float strength = draining ? Mathf.Lerp(1f, settledSurgeStrength, pondReveal.Progress) : settledSurgeStrength;
                 var color = surgeColor;
                 color.a *= opening * strength;
                 surge.color = color;
-                surge.enabled = opening > 0f;
+                surge.enabled = opening > 0f && strength > 0f;
                 if (frameCount > 0 && opening > 0f)
                 {
                     int frame = Mathf.Min(frameCount - 1, Mathf.FloorToInt(frameTime * FramesPerSecond));
@@ -96,6 +108,8 @@ namespace RoadOfTheOldKing.World
 
         private void OnDisable()
         {
+            if (canal != null) canal.RestoreAuthoredVisuals();
+            if (culvert != null) culvert.RestoreAuthoredVisuals();
             if (!cached) return;
             if (surge != null)
             {

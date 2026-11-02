@@ -42,7 +42,7 @@ foreach (var mb in UnityEngine.Object.FindObjectsByType<MonoBehaviour>(FindObjec
     else if (t == "Bonfire" || t == "SunShardReward" || t == "HeartFragmentPickup" || t == "RewardChest" || t == "ToolPickup" ||
              t == "CoinSource" || t == "Breakable" || t == "SceneExit" || t == "SceneSpawnPoint" || t == "RecallSluice" ||
              t == "SluiceTarget" || t == "SluiceCrank" || t == "ForgeInscription" || t == "Trader" || t == "RopeAnchor" ||
-             t == "EncounterUnlock" || t == "PermanentPassage" || t == "RecallAwakeningStone" || t == "RecallSealGate" ||
+             t == "EncounterUnlock" || t == "RecallRelease" || t == "PermanentPassage" || t == "RecallAwakeningStone" || t == "RecallSealGate" ||
              t == "PracticeTarget" || t == "ThrowPracticeStand" || t == "WorldPickup" || t == "AxePickup")
         Add(t, mb, null);
     else if (t == "AreaName")
@@ -74,27 +74,41 @@ foreach (var t in UnityEngine.Object.FindObjectsByType<UnityEngine.Tilemaps.Tile
 float cell = .5f; int w = Mathf.CeilToInt(bounds.size.x / cell), h = Mathf.CeilToInt(bounds.size.y / cell);
 var filter = new ContactFilter2D { useTriggers = false, useLayerMask = true, layerMask = mask };
 // Story gates the player passes once the story opens them: sample with their colliders off, restore right after.
-var opened = new List<Collider2D>();
-foreach (var mb in UnityEngine.Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
-{
-    if (mb == null || mb.gameObject.scene != scene) continue;
-    string tn = mb.GetType().Name;
-    if (tn != "RecallSealGate" && tn != "PermanentPassage") continue;
-    foreach (var col in mb.GetComponentsInChildren<Collider2D>()) if (col.enabled && !col.isTrigger) { col.enabled = false; opened.Add(col); }
-}
-Physics2D.SyncTransforms();
-var hits = new List<Collider2D>();
+var opened = new HashSet<Collider2D>();
 var grid = new System.Text.StringBuilder(w * h);
-for (int y = 0; y < h; y++) for (int x = 0; x < w; x++)
+try
 {
-    var c = new Vector2(bounds.min.x + (x + .5f) * cell, bounds.min.y + (y + .5f) * cell);
-    hits.Clear(); Physics2D.OverlapBox(c, new Vector2(.75f, .75f), 0f, filter, hits);
-    bool blocked = false;
-    foreach (var hit in hits) { var rb = hit.attachedRigidbody; if (rb != null && rb.bodyType == RigidbodyType2D.Dynamic) continue; blocked = true; break; }
-    grid.Append(blocked ? '1' : '0');
+    foreach (var mb in UnityEngine.Object.FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+    {
+        if (mb == null || mb.gameObject.scene != scene) continue;
+        string tn = mb.GetType().Name;
+        IEnumerable<Collider2D> candidates;
+        if (tn == "RecallSealGate") candidates = mb.GetComponentsInChildren<Collider2D>();
+        else if (tn == "PermanentPassage" || tn == "RecallRelease")
+        {
+            // Only the closed obstruction disappears; receivers, rails and fixed posts remain solid.
+            var closed = Field(mb, "closedObjects") as GameObject[];
+            candidates = (closed ?? new GameObject[0]).Where(o => o != null).SelectMany(o => o.GetComponentsInChildren<Collider2D>());
+        }
+        else continue;
+        foreach (var col in candidates) if (col.enabled && !col.isTrigger) { opened.Add(col); col.enabled = false; }
+    }
+    Physics2D.SyncTransforms();
+    var hits = new List<Collider2D>();
+    for (int y = 0; y < h; y++) for (int x = 0; x < w; x++)
+    {
+        var c = new Vector2(bounds.min.x + (x + .5f) * cell, bounds.min.y + (y + .5f) * cell);
+        hits.Clear(); Physics2D.OverlapBox(c, new Vector2(.75f, .75f), 0f, filter, hits);
+        bool blocked = false;
+        foreach (var hit in hits) { var rb = hit.attachedRigidbody; if (rb != null && rb.bodyType == RigidbodyType2D.Dynamic) continue; blocked = true; break; }
+        grid.Append(blocked ? '1' : '0');
+    }
 }
-foreach (var col in opened) col.enabled = true;
-Physics2D.SyncTransforms();
+finally
+{
+    foreach (var col in opened) if (col != null) col.enabled = true;
+    Physics2D.SyncTransforms();
+}
 string json = "{\"scene\":" + Q(scene.name) + ",\"grid\":{\"origin\":" + V(bounds.min) + ",\"cell\":" + F(cell) + ",\"w\":" + w + ",\"h\":" + h +
     ",\"data\":" + Q(grid.ToString()) + "},\"items\":[" + string.Join(",", items.ToArray()) + "]}";
 System.IO.File.WriteAllText(outPath, json);

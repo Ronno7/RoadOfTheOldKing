@@ -62,7 +62,7 @@ if(!EditorApplication.isPlaying)throw new System.Exception("Isolated Play requir
     fpose((Vector2)drop.GetType().GetField("dropPosition",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).GetValue(drop));
     if(drop.TryCollect(fp))bonusesPaid++;}
    check(bonusesPaid==3&&fg.Progress.bronzeCoins==20,"orchard guards' first-defeat bonuses bring fixed income to twenty");
-   var lowShard=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SunShardReward>();
+   var lowShard=System.Array.Find(UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SunShardReward>(FindObjectsInactive.Include,FindObjectsSortMode.None),r=>r.RewardId=="green-lowlands/basin");
    fpose(lowShard.transform.position);check(!lowShard.TryCollect(fp),"S3 remains locked before drainage");fpose(new Vector2(15.5f,3));
   }else if(fvPhase==3){
    var fs=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RecallSluice>();
@@ -79,9 +79,9 @@ if(!EditorApplication.isPlaying)throw new System.Exception("Isolated Play requir
   }else if(fvPhase==4){
    // The pond keeps its collision until the eight-second drain completes, so the basin shard's clear-reach check
    // waits for it (17 Oct: split from phase 3, which pressed F in the same frame the pond began to lower).
-   var waitShard=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SunShardReward>();fpose((Vector2)waitShard.transform.position+Vector2.down*.7f);
+   var waitShard=System.Array.Find(UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SunShardReward>(FindObjectsInactive.Include,FindObjectsSortMode.None),r=>r.RewardId=="green-lowlands/basin");fpose((Vector2)waitShard.transform.position+Vector2.down*.7f);
    if(!waitShard.CanCollect(fp))return "WAIT: pond still draining";
-   var basinShard=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SunShardReward>();fpose((Vector2)basinShard.transform.position+Vector2.down*.7f);
+   var basinShard=System.Array.Find(UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SunShardReward>(FindObjectsInactive.Include,FindObjectsSortMode.None),r=>r.RewardId=="green-lowlands/basin");fpose((Vector2)basinShard.transform.position+Vector2.down*.7f);
    check(fi.TryInteract()&&basinShard.IsCollected&&fg.Progress.sunShards==3,"F earns S3; all three shards obtained through authored rewards");
    var basinMoney=fchest("basin-cache");fpose((Vector2)basinMoney.transform.position+Vector2.down*.7f);
    check(fi.TryInteract()&&basinMoney.IsOpen&&fg.Progress.bronzeCoins==45,"basin chest completes all 45 fixed coins without random payouts");
@@ -123,7 +123,7 @@ if(!EditorApplication.isPlaying)throw new System.Exception("Isolated Play requir
    check(fg.Progress.bronzeCoins==15&&fg.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.RopeKit),"Continue retains earned balance and purchased kit");
    check(UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RopeRoute>().IsSecured,"Continue retains secured rope");
    check(UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RecallSluice>().Stage==RoadOfTheOldKing.World.SluiceStage.PondLow,"Continue retains player-changed water");
-   check(fchest("orchard").IsOpen&&fchest("basin-cache").IsOpen&&UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SunShardReward>().IsCollected,"Continue keeps all regional route rewards exhausted");
+   check(fchest("orchard").IsOpen&&fchest("basin-cache").IsOpen&&System.Array.Find(UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SunShardReward>(FindObjectsInactive.Include,FindObjectsSortMode.None),r=>r.RewardId=="green-lowlands/basin").IsCollected,"Continue keeps all regional route rewards exhausted");
    check(UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Enemies.PursuitBrain>(FindObjectsSortMode.None).Where(e=>e.name.StartsWith("Orchard scavenger ")).All(e=>!e.IsDefeated)&&fg.Progress.Has("green-lowlands/orchard-cleared"),"guards revive without relocking earned stash");
   }
  }

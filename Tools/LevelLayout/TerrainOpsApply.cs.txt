@@ -14,7 +14,28 @@ var maps = new Dictionary<string, string> {
     { "marks", "Authoring/Authoring - elevation guides/Height plan markings" },
     { "elev", "Authoring/Authoring - elevation guides/Elevation - Lower Normal Upper" },
     { "trans", "Authoring/Authoring - elevation guides/Transitions - arrows point uphill" },
+    // Core layers (north_layout.py)
+    { "enclTop", "Terrain/Landforms and rock enclosure/Terrain - Enclosure tops" },
+    { "enclFace", "Terrain/Landforms and rock enclosure/Terrain - Enclosure faces" },
+    { "terrace", "Terrain/Landforms and rock enclosure/Terrain - upper meadow terraces" },
+    { "outerColl", "Collision/Cliffs and outer boundary" },
+    { "countryLane", "Ground and Paths/Regional surfaces/Paths - old country lanes" },
+    { "maskTerrace", "Authoring/Vegetation masks (hidden)/Upper terrace mask" },
+    { "maskPath", "Authoring/Vegetation masks (hidden)/Path exclusion mask" },
+    // Farm ground, woodland and pond layers (hayfields_layout.py)
+    { "farmTop", "Terrain/Landforms and rock enclosure/Terrain - Farm tops" },
+    { "farmFace", "Terrain/Landforms and rock enclosure/Terrain - Farm faces" },
+    { "meadow", "Ground and Paths/Regional surfaces/Ground - regional meadow" },
+    { "woodland", "Collision/Woodland barriers" },
+    { "pondColl", "Collision/Pond high water/Flooded pond and road-cut" },
+    { "pondWater", "Collision/Pond high water/Terrain - changing pond water" },
+    { "silt", "Ground and Paths/Regional surfaces/Ground - exposed basin silt" },
+    { "maskBasin", "Authoring/Vegetation masks (hidden)/Basin exclusion mask" },
+    { "subConn", "Terrain/Transitions/Terrain - submerged height connectors" },
 };
+// Only maps an ops file actually touches are recorded and refreshed.
+var usedKeys = new HashSet<string>(System.Text.RegularExpressions.Regex.Matches(System.IO.File.ReadAllText(SessionState.GetString("Layout.Ops", "")), "\\[\\s*\"(\\w+)\"").Cast<System.Text.RegularExpressions.Match>().Select(m => m.Groups[1].Value));
+maps = maps.Where(kv => usedKeys.Contains(kv.Key)).ToDictionary(kv => kv.Key, kv => kv.Value);
 var tms = new Dictionary<string, UnityEngine.Tilemaps.Tilemap>();
 foreach (var kv in maps) { var t = root.Find(kv.Value); if (t == null) return "Missing " + kv.Value; tms[kv.Key] = t.GetComponent<UnityEngine.Tilemaps.Tilemap>(); }
 // Resolve tile names to the assets the scene already uses (any map in the region), then the asset database.
@@ -37,7 +58,7 @@ foreach (var op in ops)
     if (guid != null) byName[op[3]] = guid; else unresolved.Add(op[3]);
 }
 if (unresolved.Count > 0) return "Unresolved tiles: " + string.Join(",", unresolved.ToArray());
-foreach (var tm in tms.Values) Undo.RegisterCompleteObjectUndo(tm, "Arrival road terrain");
+foreach (var tm in tms.Values) Undo.RegisterCompleteObjectUndo(tm, "Layout terrain ops");
 var counts = new Dictionary<string, int>();
 foreach (var op in ops)
 {

@@ -1,6 +1,6 @@
 // Bridge limit: submit only the LIVE branch or the Edit branch below, not this whole file.
 // Edit starts at the stopped-mode guard after the closing LIVE block.
-// Run GreenLowlandsPresentationChecks separately for sprite, bank and footing checks.
+// Checks reachability against real colliders; sprite and footing review is by eye.
 // Edit Mode, read-only authored scene connectivity audit. Loads GreenLowlands additively if needed,
 // samples real .75-unit body clearance on a half-cell lattice and checks swept links.
 // Edit-state changes stay in this temporary load; never save it. No PlayerPrefs in Edit checks.
@@ -20,12 +20,15 @@ if(EditorApplication.isPlaying){
     var sluice=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RecallSluice>();
     var reveals=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SluiceWaterReveal>(FindObjectsInactive.Include,FindObjectsSortMode.None);
     var advanceWater=typeof(RoadOfTheOldKing.World.SluiceWaterReveal).GetMethod("Advance",flags);
+    // The passage gates slide open 0.55 s after the water reveal ends; advance them with the water.
+    var sluiceView=sluice.GetComponent<RoadOfTheOldKing.World.SluiceMechanismView>();
+    var advanceView=typeof(RoadOfTheOldKing.World.SluiceMechanismView).GetMethod("Advance",flags);
     var body=player.GetComponent<Rigidbody2D>();
     var logs=new System.Collections.Generic.List<string>();
     System.Action<bool,string> check=(ok,label)=>{if(!ok)throw new System.Exception(label+" at "+body.position+" | "+string.Join(";",logs.ToArray()));logs.Add(label);};
     System.Action<Vector2> pose=p=>{axe.CancelAction();body.position=p;player.transform.position=p;body.linearVelocity=Vector2.zero;combat.GetType().GetField("controlsActive",flags).SetValue(combat,true);Physics2D.SyncTransforms();};
     System.Action<Vector2> stand=p=>{body.position=p;player.transform.position=p;body.linearVelocity=Vector2.zero;combat.GetType().GetField("controlsActive",flags).SetValue(combat,true);Physics2D.SyncTransforms();};
-    System.Action<int> tick=count=>{for(int i=0;i<count;i++){sluice.GetType().GetMethod("FixedUpdate",flags).Invoke(sluice,null);Physics2D.SyncTransforms();axe.GetType().GetMethod("Simulate",flags).Invoke(axe,new object[]{.02f});foreach(var reveal in reveals)advanceWater.Invoke(reveal,new object[]{.02f});}};
+    System.Action<int> tick=count=>{for(int i=0;i<count;i++){sluice.GetType().GetMethod("FixedUpdate",flags).Invoke(sluice,null);Physics2D.SyncTransforms();axe.GetType().GetMethod("Simulate",flags).Invoke(axe,new object[]{.02f});foreach(var reveal in reveals)advanceWater.Invoke(reveal,new object[]{.02f});if(sluiceView!=null)advanceView.Invoke(sluiceView,new object[]{.02f});}};
     System.Action<Vector2> lodge=p=>{pose(p);player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>().Restore();check(axe.TryThrow(Vector2.right),"throw accepted");tick(90);check(axe.State==RoadOfTheOldKing.Weapons.AxeState.Stuck,"real regional lodging");};
     System.Action<Vector2> recall=p=>{stand(p);player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>().Restore();check(axe.TryPlayerRecall(),"Recall accepted");tick(180);};
     game.Progress.completedIds.RemoveAll(id=>id.StartsWith("green-lowlands/sluice/"));sluice.RestoreProgress(game.Progress);
@@ -48,14 +51,20 @@ if(EditorApplication.isPlaying){
     for(int wait=0;wait<600&&reveals.Any(r=>r.IsDraining);wait++)tick(1);
     check(GameObject.Find("Pond high water")==null,"whole pond and road-cut barrier turn off");
     check(new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(game.StorageKey).Load().Has("green-lowlands/sluice/pond-low"),"regional outcome written to isolated save");
+    var mainGateCollision=sluice.transform.parent.Find("Sluice architecture/Main passage gate/Main passage gate collision").GetComponent<Collider2D>();
+    for(int settle=0;settle<300&&mainGateCollision.enabled;settle++)tick(1);
+    check(!mainGateCollision.enabled,"main passage gate opens after the water reveal");
     }
 
     var motor=player.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>();
     var input=player.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();
     var actions=(UnityEngine.InputSystem.InputActionMap)input.GetType().GetField("actions",flags).GetValue(input);
-    var oldDevices=actions.devices;var oldRouting=UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode;
+    var oldDevices=actions.devices;var oldRouting=UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode;var oldBackground=UnityEngine.InputSystem.InputSystem.settings.backgroundBehavior;
     var oldFocus=(bool)input.GetType().GetField("hasFocus",flags).GetValue(input);var oldPaused=(bool)input.GetType().GetField("paused",flags).GetValue(input);
-    var oldSimulation=Physics2D.simulationMode;Vector2 original=body.position;var keyboard=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
+    var oldSimulation=Physics2D.simulationMode;Vector2 original=body.position;
+    // An unfocused editor otherwise disables the virtual keyboard; set before adding it, restored in finally.
+    UnityEngine.InputSystem.InputSystem.settings.backgroundBehavior=UnityEngine.InputSystem.InputSettings.BackgroundBehavior.IgnoreFocus;
+    var keyboard=UnityEngine.InputSystem.InputSystem.AddDevice<UnityEngine.InputSystem.Keyboard>();
     // Arrival encounters (two wolves, rat stand-in among them, and the cart scavenger) live under one group.
     var borderWolves=GameObject.Find("Green Lowlands").transform.Find("Encounters/Border wolves").Cast<Transform>().ToArray();
     var borderWolfColliders=borderWolves.SelectMany(w=>w.GetComponentsInChildren<Collider2D>(true)).Where(c=>!c.isTrigger).ToArray();
@@ -67,29 +76,29 @@ if(EditorApplication.isPlaying){
         actions.devices=new UnityEngine.InputSystem.InputDevice[]{keyboard};input.GetType().GetField("paused",flags).SetValue(input,false);Physics2D.simulationMode=SimulationMode2D.Script;
         // Exercise both reconnection routes explicitly; shortest-path checks alone can miss a blocked branch.
         SessionState.SetString("Lowlands.Layout.Path.high.NorthFork","111,41;108,49;114,56;121,58");
-        SessionState.SetString("Lowlands.Layout.Path.high.SouthFork","111,41;119,31;132,27;144,34;146,42;137,49;128,53;121,58");
+        // Re-derived 24 Oct: since the 20 Oct camp lane, the south branch reconnects by the eastern dogleg.
+        SessionState.SetString("Lowlands.Layout.Path.high.SouthFork","111,41;112.5,41;112.5,38.5;113.5,38.5;113.5,37.5;114.5,37.5;114.5,35.5;115.5,35.5;115.5,34.5;116.5,34.5;116.5,33.5;117.5,33.5;117.5,32.5;119,32.5;119,31;132,27;144,27;144,34;146,42;145.5,42;145.5,47.5;144.5,47.5;144.5,49.5;143.5,49.5;143.5,52.5;142.5,52.5;142.5,53.5;141.5,53.5;141.5,54.5;140.5,54.5;140.5,55.5;138.5,55.5;138.5,56.5;137.5,56.5;137.5,57.5;121,57.5;121,58");
         SessionState.SetString("Lowlands.Layout.Path.high.VistaLane","75,34;69,41;76,47;69,54");
+        // Bank, grove and shore probes re-derived on 24 Oct against the 20 Oct terrain and vegetation (waypoints kept or
+        // moved at most 1 unit to clear ground, joined by collision-checked lattice paths at high water).
         const string pastureGap="76.5,52.5;88.5,52.5;88.5,53.5;94.5,53.5;94.5,54.5;97.5,54.5;97.5,55.5;98.5,55.5;98.5,56.5;99.5,56.5;99.5,57.5;111.5,57.5;111.5,58.5";
         SessionState.SetString("Lowlands.Layout.Path.high.PastureGap",pastureGap);
         SessionState.SetString("Lowlands.Layout.Path.PastureGap",pastureGap);
         const string orchardGrove="111.5,58.5;111.5,67.5;114.5,69.5;120.5,70.5;120.5,75.5;124,77;124,82";
         SessionState.SetString("Lowlands.Layout.Path.high.OrchardGrove",orchardGrove);
         SessionState.SetString("Lowlands.Layout.Path.OrchardGrove",orchardGrove);
-        const string eastPondBank="67,38;64.5,40;64.5,60";
+        const string eastPondBank="67,38;64.75,40;70.5,40;70.5,50.5;67.75,50.5;67.75,51.5;66.75,51.5;66.75,52.5;65.75,52.5;65.75,55.5;64.75,55.5;64.75,60";
         SessionState.SetString("Lowlands.Layout.Path.high.EastPondBank",eastPondBank);
         SessionState.SetString("Lowlands.Layout.Path.EastPondBank",eastPondBank);
-        const string northernGrove="108,83.5;94.5,83.5;86,83.5;86,91.5;94.5,91.5;100,94.5";
+        const string northernGrove="108,83.5;94.5,83.5;94.5,82.5;86,82.5;86,83.5;85.25,83.5;85.25,91.5;86,91.5;94.5,91.5;100,94.5";
         SessionState.SetString("Lowlands.Layout.Path.high.NorthernGrove",northernGrove);
         SessionState.SetString("Lowlands.Layout.Path.NorthernGrove",northernGrove);
-        const string westernSpurGrove="90,65;84,68;75,68;74,72;80,73;87,73";
-        const string spurLowerShore="64.5,59;65.5,60;65.5,68.5";
+        const string westernSpurGrove="90,65;84,68;75,68;72.5,68;72.5,71.5;74,71.5;74,72;80,73;87,73";
         SessionState.SetString("Lowlands.Layout.Path.high.WesternSpurGrove",westernSpurGrove);
         SessionState.SetString("Lowlands.Layout.Path.WesternSpurGrove",westernSpurGrove);
-        SessionState.SetString("Lowlands.Layout.Path.high.SpurLowerShore",spurLowerShore);
-        SessionState.SetString("Lowlands.Layout.Path.SpurLowerShore",spurLowerShore);
-        const string northernRidgeClearing="40.5,96.5;44.5,96.5;44.5,95.5;51.5,95.5;53.5,94.5;57.5,94.5";
-        const string upperOrchardClearing="111.5,98.5;118.5,98.5;118.5,96.5;118.5,98.5;121.5,98.5;123.5,98.5";
-        const string northernShoreWalk="13.5,77.5;13.5,81.5;17.5,81.5;17.5,82.5;22.5,82.5;22.5,84.5;34.5,84.5;34.5,86.5;36.5,86.5;36.5,88.5;38.5,88.5;38.5,90.5;41.5,90.5;41.5,92.5;54.5,92.5;58.5,92.5;58.5,93.5;61.5,93.5;61.5,92.5";
+        const string northernRidgeClearing="40.5,96.5;44.5,96.5;44.5,95.5;51.5,95.5;53.5,95.5;53.5,94.5;57.5,94.5";
+        const string upperOrchardClearing="111.5,98.5;118.5,98.5;118.5,96.5;118.5,98.5;120.5,98.5;120.5,97.5;123.5,97.5;123.5,98.5";
+        const string northernShoreWalk="13.5,78.5;13.75,78.5;13.75,81.5;17.5,81.5;17.5,82.5;22.25,82.5;22.25,84.5;22.5,84.5;34.5,84.5;34.5,86.5;35.25,86.5;35.25,87.5;36.5,87.5;36.5,88.5;38.5,88.5;38.5,90.5;41.5,90.5;41.5,92.5;44.25,92.5;44.25,93.5;54.5,93.5;58.5,93.5;61.5,93.5;61.5,92.5";
         foreach(string prefix in new[]{"Lowlands.Layout.Path.high.","Lowlands.Layout.Path."}){
             SessionState.SetString(prefix+"NorthernRidgeClearing",northernRidgeClearing);
             SessionState.SetString(prefix+"UpperOrchardClearing",upperOrchardClearing);
@@ -103,25 +112,28 @@ if(EditorApplication.isPlaying){
         SessionState.SetString("Lowlands.Layout.Path.high.ArrivalRiverbank",riverbankWalk);
         SessionState.SetString("Lowlands.Layout.Path.ArrivalRiverbank",riverbankWalk);
         const string villageBankWalk="25.5,1.5;25.5,0.5;29.5,0.5;29.5,1.5;34.5,1.5;34.5,0.5;37.5,0.5;37.5,1.5;41,1.5";
-        SessionState.SetString("Lowlands.Layout.Path.high.VillageBank",villageBankWalk);
+        // Low water only: at high water the raised river covers the bank start.
         SessionState.SetString("Lowlands.Layout.Path.VillageBank",villageBankWalk);
-        const string farmRimWalk="-0.5,1.5;-0.5,19.5;8.5,19.5;8.5,28.5;10.5,28.5";
-        const string millBankWalk="25.5,18.5;25.5,20.5;26.5,20.5;26.5,22.5;29,22.5";
+        // Ends at x=9.5: the 20 Oct rebuild made (10,28) a height boundary.
+        const string farmRimWalk="-0.5,1.5;-0.5,19.5;8.5,19.5;8.5,28.5;9.5,28.5";
+        const string millBankWalk="25.75,18.5;26.75,18.5;26.75,20.25;30.25,20.25;30.25,22.25;29.75,22.25";
         SessionState.SetString("Lowlands.Layout.Path.high.FarmRim",farmRimWalk);
         SessionState.SetString("Lowlands.Layout.Path.FarmRim",farmRimWalk);
         SessionState.SetString("Lowlands.Layout.Path.high.MillBank",millBankWalk);
         SessionState.SetString("Lowlands.Layout.Path.MillBank",millBankWalk);
-        SessionState.SetString("Lowlands.Layout.Path.WesternPond","13.5,35.5;13.5,59.5;11.5,59.5;11.5,60.5;12.5,60.5;13.5,60.5;13.5,62.5");
-        SessionState.SetString("Lowlands.Layout.Path.WorksiteMargins","68.5,83.5;68.5,87.5;70.5,87.5;70.5,84.5;83.5,84.5;83.5,89.5");
+        // The 20 Oct rebuild made x<=11, y>=60 a height boundary, so the shore probe starts at x=12.
+        SessionState.SetString("Lowlands.Layout.Path.WesternPond","13.5,35.5;13.5,59.5;12.5,59.5;12.5,60.5;13.5,60.5;13.5,62.5");
+        // SpurLowerShore and WorksiteMargins were retired on 24 Oct: the 20 Oct terrain has no continuous lower spur
+        // shore, and the worksite margin walk crossed the camp side rim this fixture requires to be blocked.
         var destinations=highWalkOnly?new[]{"BorderOutward","BorderReturn","MillOverlook","VillageEast","Pasture","EastMeadow","Orchard","H1","NorthBank","RopeApproach","Distributor","NorthFork","SouthFork","VistaLane"}:new[]{"BorderOutward","BorderReturn","Pasture","EastMeadow","Orchard","H1","NorthBank","RopeApproach","Distributor","MainBay","S3","H2","Storehouse","BarrowRoad","RoadCampWest","WesternPond"};
-        foreach(string name in destinations.Concat(new[]{"ArrivalUplandEdge","ArrivalRiverbank","VillageBank","FarmRim","MillBank","PastureGap","OrchardGrove","EastPondBank","NorthernGrove","WesternSpurGrove","SpurLowerShore","NorthernRidgeClearing","UpperOrchardClearing","NorthernShoreWalk"}).Concat(highWalkOnly?new string[0]:new[]{"WorksiteMargins"})){
+        foreach(string name in destinations.Concat(highWalkOnly?new string[0]:new[]{"VillageBank"}).Concat(new[]{"ArrivalUplandEdge","ArrivalRiverbank","FarmRim","MillBank","PastureGap","OrchardGrove","EastPondBank","NorthernGrove","WesternSpurGrove","NorthernRidgeClearing","UpperOrchardClearing","NorthernShoreWalk"})){
             string route=SessionState.GetString("Lowlands.Layout.Path."+(highWalkOnly?"high.":"")+name,"");if(route=="")throw new System.Exception("Run Edit geometry fixture to cache paths first.");
             bool borderRoute=name=="BorderOutward"||name=="BorderReturn"||name=="ArrivalRiverbank";
             if(borderRoute&&borderWolves.Length!=3)throw new System.Exception("Expected the three authored arrival encounters for terrain-only motor checks.");
             for(int i=0;i<borderWolfColliders.Length;i++)borderWolfColliders[i].enabled=borderRoute?false:borderColliderStates[i];
             Physics2D.SyncTransforms();
             var points=route.Split(';').Select(s=>s.Split(',')).Select(a=>new Vector2(float.Parse(a[0],System.Globalization.CultureInfo.InvariantCulture),float.Parse(a[1],System.Globalization.CultureInfo.InvariantCulture))).ToArray();
-            if(name=="NorthFork"||name=="SouthFork"||name=="VistaLane"||name=="VillageEast"||name=="ArrivalUplandEdge"||name=="ArrivalRiverbank"||name=="VillageBank"||name=="FarmRim"||name=="MillBank"||name=="WesternPond"||name=="PastureGap"||name=="OrchardGrove"||name=="EastPondBank"||name=="NorthernGrove"||name=="WesternSpurGrove"||name=="SpurLowerShore"||name=="NorthernRidgeClearing"||name=="UpperOrchardClearing"||name=="NorthernShoreWalk"||name=="WorksiteMargins"){
+            if(name=="NorthFork"||name=="SouthFork"||name=="VistaLane"||name=="VillageEast"||name=="ArrivalUplandEdge"||name=="ArrivalRiverbank"||name=="VillageBank"||name=="FarmRim"||name=="MillBank"||name=="WesternPond"||name=="PastureGap"||name=="OrchardGrove"||name=="EastPondBank"||name=="NorthernGrove"||name=="WesternSpurGrove"||name=="NorthernRidgeClearing"||name=="UpperOrchardClearing"||name=="NorthernShoreWalk"){
                 var sampled=new System.Collections.Generic.List<Vector2>{points[0]};
                 for(int i=1;i<points.Length;i++){int steps=Mathf.CeilToInt(Vector2.Distance(points[i-1],points[i])/.5f);for(int j=1;j<=steps;j++)sampled.Add(Vector2.Lerp(points[i-1],points[i],(float)j/steps));}
                 points=sampled.ToArray();
@@ -141,14 +153,16 @@ if(EditorApplication.isPlaying){
             keys(new UnityEngine.InputSystem.Key[0]);check(walked,"real input/motor reaches "+name+" along sampled route"+(borderRoute?" (terrain only; wolf collision suppressed)":""));
             if(borderRoute)borderWalked=true;
         }
-        pose(new Vector2(64.5f,50));motor.GetType().GetField("freeVelocity",flags).SetValue(motor,Vector2.zero);
+        // The 20 Oct terrain moved this bank east: Height 0 from x=68, its face at 67.25 (was 64.5).
+        pose(new Vector2(68,50.5f));motor.GetType().GetField("freeVelocity",flags).SetValue(motor,Vector2.zero);
         for(int frame=0;frame<30;frame++){keys(new[]{UnityEngine.InputSystem.Key.A});motor.GetType().GetMethod("FixedUpdate",flags).Invoke(motor,null);Physics2D.Simulate(Time.fixedDeltaTime);}
         keys(new UnityEngine.InputSystem.Key[0]);
-        check(body.position.x>64.2f,"Permanent east pond bank stops the actual player with "+(highWalkOnly?"high":"low")+" water");
+        check(body.position.x>67.3f,"Permanent east pond bank stops the actual player with "+(highWalkOnly?"high":"low")+" water");
         pose(new Vector2(85.5f,86));motor.GetType().GetField("freeVelocity",flags).SetValue(motor,Vector2.zero);
         for(int frame=0;frame<30;frame++){keys(new[]{UnityEngine.InputSystem.Key.A});motor.GetType().GetMethod("FixedUpdate",flags).Invoke(motor,null);Physics2D.Simulate(Time.fixedDeltaTime);}
         keys(new UnityEngine.InputSystem.Key[0]);
-        check(body.position.x>85.2f,"Upper grove bank stops the actual player crossing into the lower worksite with "+(highWalkOnly?"high":"low")+" water");
+        // Face at x=84.25 since the 20 Oct terrain: the body stops at 84.63, still on Height 1.
+        check(body.position.x>84.5f,"Upper grove bank stops the actual player crossing into the lower worksite with "+(highWalkOnly?"high":"low")+" water");
         pose(new Vector2(65.5f,64));motor.GetType().GetField("freeVelocity",flags).SetValue(motor,Vector2.zero);
         for(int frame=0;frame<30;frame++){keys(new[]{UnityEngine.InputSystem.Key.D});motor.GetType().GetMethod("FixedUpdate",flags).Invoke(motor,null);Physics2D.Simulate(Time.fixedDeltaTime);}
         keys(new UnityEngine.InputSystem.Key[0]);
@@ -156,15 +170,18 @@ if(EditorApplication.isPlaying){
         pose(new Vector2(78,75.5f));motor.GetType().GetField("freeVelocity",flags).SetValue(motor,Vector2.zero);
         for(int frame=0;frame<30;frame++){keys(new[]{UnityEngine.InputSystem.Key.W});motor.GetType().GetMethod("FixedUpdate",flags).Invoke(motor,null);Physics2D.Simulate(Time.fixedDeltaTime);}
         keys(new UnityEngine.InputSystem.Key[0]);
-        check(body.position.y<75.8f,"Permanent north rim stops the player bypassing the worksite's basin approach");
+        // Rim face at y=76.87 since the 20 Oct terrain: the body stops at 76.49, still on Height 1.
+        check(body.position.y<76.6f,"Permanent north rim stops the player bypassing the worksite's basin approach");
         pose(new Vector2(66.5f,91.5f));motor.GetType().GetField("freeVelocity",flags).SetValue(motor,Vector2.zero);
         for(int frame=0;frame<30;frame++){keys(new[]{UnityEngine.InputSystem.Key.D});motor.GetType().GetMethod("FixedUpdate",flags).Invoke(motor,null);Physics2D.Simulate(Time.fixedDeltaTime);}
         keys(new UnityEngine.InputSystem.Key[0]);
-        check(body.position.x<66.8f,"Native road corner stops the actual player leaving the upper flight sideways");
-        pose(new Vector2(66,96.5f));motor.GetType().GetField("freeVelocity",flags).SetValue(motor,Vector2.zero);
+        // Corner face at x=67.75 since the 20 Oct terrain: the body stops at 67.36, still on the flight.
+        check(body.position.x<67.5f,"Native road corner stops the actual player leaving the upper flight sideways");
+        // Front face at y=100 since the 20 Oct terrain: the body stops at 99.63. The planned King's Road north opens it later.
+        pose(new Vector2(66,98.5f));motor.GetType().GetField("freeVelocity",flags).SetValue(motor,Vector2.zero);
         for(int frame=0;frame<30;frame++){keys(new[]{UnityEngine.InputSystem.Key.W});motor.GetType().GetMethod("FixedUpdate",flags).Invoke(motor,null);Physics2D.Simulate(Time.fixedDeltaTime);}
         keys(new UnityEngine.InputSystem.Key[0]);
-        check(body.position.y>96.6f&&body.position.y<97.8f,"Northern rocky front stops the actual player after an unobstructed ridge approach");
+        check(body.position.y>98.6f&&body.position.y<99.8f,"Northern rocky front stops the actual player after an unobstructed ridge approach");
         pose(new Vector2(61.5f,89.5f));motor.GetType().GetField("freeVelocity",flags).SetValue(motor,Vector2.zero);
         for(int frame=0;frame<30;frame++){keys(new[]{UnityEngine.InputSystem.Key.D});motor.GetType().GetMethod("FixedUpdate",flags).Invoke(motor,null);Physics2D.Simulate(Time.fixedDeltaTime);}
         keys(new UnityEngine.InputSystem.Key[0]);
@@ -176,7 +193,7 @@ if(EditorApplication.isPlaying){
         pose(new Vector2(66,94.5f));motor.GetType().GetField("freeVelocity",flags).SetValue(motor,Vector2.zero);
         for(int frame=0;frame<30;frame++){keys(new[]{UnityEngine.InputSystem.Key.S});motor.GetType().GetMethod("FixedUpdate",flags).Invoke(motor,null);Physics2D.Simulate(Time.fixedDeltaTime);}
         keys(new UnityEngine.InputSystem.Key[0]);
-        check(body.position.y>94.1f,"Sealed ridge stops the dry upper road bypassing the flooded Barrow passage");
+        check(body.position.y>94.1f,"Sealed ridge stops the dry upper road bypassing the flooded Old Drain passage");
         if(highWalkOnly){
             pose(new Vector2(36.5f,-25));motor.GetType().GetField("freeVelocity",flags).SetValue(motor,Vector2.zero);
             for(int frame=0;frame<30;frame++){keys(new[]{UnityEngine.InputSystem.Key.D});motor.GetType().GetMethod("FixedUpdate",flags).Invoke(motor,null);Physics2D.Simulate(Time.fixedDeltaTime);}
@@ -193,6 +210,11 @@ if(EditorApplication.isPlaying){
                 pose(foot+Vector2.down*.875f);bush.GetType().GetMethod("LateUpdate",flags).Invoke(bush,null);
                 check(view.sortingOrder<hero.sortingOrder,"Player draws over the bush from the front");
                 var around=new[]{new Vector2(-1.125f,-.875f),new Vector2(1.125f,-.875f),new Vector2(1.125f,.875f),new Vector2(-1.125f,.875f),new Vector2(-1.125f,-.875f)};
+                // A bush set against other collision (a path edge) has no walkable ring; report it instead of walking.
+                var ringHits=new System.Collections.Generic.List<RaycastHit2D>();bool ringFree=true;
+                for(int r=0;r<4;r++){Physics2D.BoxCast(foot+around[r],new Vector2(.75f,.75f),0,(around[r+1]-around[r]).normalized,new ContactFilter2D{useTriggers=false},ringHits,Vector2.Distance(around[r],around[r+1]));
+                    ringFree&=!ringHits.Any(h=>h.collider!=collider&&h.collider.attachedRigidbody!=body);}
+                if(!ringFree){logs.Add("Bush at "+foot+" stands against other collision; walk-around and base push skipped");continue;}
                 pose(foot+around[0]);motor.GetType().GetField("freeVelocity",flags).SetValue(motor,Vector2.zero);bool clear=true;
                 foreach(var offset in around.Skip(1)){
                     int frames=0;var target=foot+offset;
@@ -211,7 +233,7 @@ if(EditorApplication.isPlaying){
             }
         }
     }finally{
-        keys(new UnityEngine.InputSystem.Key[0]);actions.devices=oldDevices;UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard);UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=oldRouting;
+        keys(new UnityEngine.InputSystem.Key[0]);actions.devices=oldDevices;UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard);UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=oldRouting;UnityEngine.InputSystem.InputSystem.settings.backgroundBehavior=oldBackground;
         input.GetType().GetField("hasFocus",flags).SetValue(input,oldFocus);input.GetType().GetField("paused",flags).SetValue(input,oldPaused);Physics2D.simulationMode=oldSimulation;
         for(int i=0;i<borderWolfColliders.Length;i++)if(borderWolfColliders[i]!=null)borderWolfColliders[i].enabled=borderColliderStates[i];
         pose(original);
@@ -235,6 +257,11 @@ var scene=UnityEditor.SceneManagement.EditorSceneManager.OpenScene(path,UnityEdi
 try{
     var root=scene.GetRootGameObjects().First(g=>g.name=="Green Lowlands");
     var sluice=root.GetComponentInChildren<RoadOfTheOldKing.World.RecallSluice>(true);
+    // Old Drain is open at (66,90) after drainage (26 Oct). This legacy-box lookup also
+    // lets the fixture diagnose retained older scenes; the Barrow closure moved inside the drain.
+    var barrowBlockTransform=root.transform.Find("Gameplay/Regional connections/Barrow block (closed until Barrow is rebuilt)");
+    var barrowBlock=barrowBlockTransform!=null?barrowBlockTransform.GetComponent<BoxCollider2D>():null;
+    System.Func<Vector2,bool> barrowBlocked=c=>barrowBlock!=null&&barrowBlock.enabled&&barrowBlock.bounds.Intersects(new Bounds(c,new Vector3(.76f,.76f,1)));
     var logs=new System.Collections.Generic.List<string>();
     var failed=new System.Collections.Generic.List<string>();
     System.Action<bool,string> check=(ok,name)=>{if(!ok)failed.Add(name);else logs.Add(name);};
@@ -243,7 +270,7 @@ try{
     check(scene.GetRootGameObjects().SelectMany(g=>g.GetComponentsInChildren<Component>(true)).All(c=>c!=null),"no missing scene components");
     check(root.GetComponentsInChildren<RoadOfTheOldKing.Progression.GameSession>(true).Length==0&&root.GetComponentsInChildren<RoadOfTheOldKing.Player.PlayerHealth>(true).Length==0,"expansion adds no duplicate session/player");
     check(scene.GetRootGameObjects().SelectMany(g=>g.GetComponentsInChildren<RoadOfTheOldKing.World.RewardChest>(true)).All(c=>!c.RewardId.StartsWith("prototype")),"regional chests have no prototype reward IDs");
-    const int w=354,h=382;const float step=.5f;const float originX=-16,originY=-85;
+    const int w=354,h=404;const float step=.5f;const float originX=-16,originY=-85;   // to y116: the King's Road cut reaches the guide's top row
     var filter=new ContactFilter2D{useTriggers=false};
     var overlap=new System.Collections.Generic.List<Collider2D>();
     var sweep=new System.Collections.Generic.List<RaycastHit2D>();
@@ -251,17 +278,24 @@ try{
     System.Func<int,Vector2> position=i=>new Vector2(originX+(i%w)*step,originY+(i/w)*step);
     System.Func<Vector2,int> index=v=>Mathf.RoundToInt((v.x-originX)/step)+Mathf.RoundToInt((v.y-originY)/step)*w;
     var anchors=new System.Collections.Generic.Dictionary<string,Vector2>{
-        {"OutsideSouth",new Vector2(6,-83)}, {"OutsideSouthEast",new Vector2(72,10)}, {"OutsideEast",new Vector2(159,45)}, {"BorderArrival",new Vector2(6,-58)}, {"BorderFight1",new Vector2(3.5f,-39)}, {"BorderFight2",new Vector2(20.5f,-21)}, {"BorderFight3",new Vector2(41,-14)}, {"Fire",new Vector2(15.5f,3)}, {"MillOverlook",new Vector2(11,26)},
+        {"OutsideSouth",new Vector2(6,-83)}, {"OutsideSouthEast",new Vector2(60,10)}, {"OutsideEast",new Vector2(159,45)}, {"BorderArrival",new Vector2(6,-58)}, {"BorderFight1",new Vector2(3.5f,-39)}, {"BorderFight2",new Vector2(20.5f,-21)}, {"BorderFight3",new Vector2(41,-14)}, {"Fire",new Vector2(15.5f,3)}, {"MillOverlook",new Vector2(11,26)},
         {"Pasture",new Vector2(84,32)}, {"EastMeadow",new Vector2(149,44)}, {"Orchard",new Vector2(117,88)},
         {"H1",new Vector2(69,58.5f)}, {"NorthBank",new Vector2(27,85)},
         {"Distributor",new Vector2(5,86)}, {"MainBay",new Vector2(5,74)},
         {"S3",new Vector2(18.5f,26.5f)}, {"H2",new Vector2(30.5f,80.5f)},
         {"Storehouse",new Vector2(20.5f,76.5f)}, {"BarrowRoad",new Vector2(66,86)}, {"RoadLanding",new Vector2(66,88.5f)},
         {"RoadCampWest",new Vector2(73,86)}, {"RoadCampEast",new Vector2(79,89)}, {"RoadCampLanding",new Vector2(73.5f,82.5f)},
-        {"RopeApproach",new Vector2(110.5f,45.5f)}, {"RopeWorkshop",new Vector2(119.5f,45.5f)}, {"HighPass",new Vector2(135,99)},
+        {"RopeApproach",new Vector2(140.5f,43.5f)}, {"RopeWorkshop",new Vector2(138.5f,43.5f)}, {"HighPass",new Vector2(135,99)},
         {"H1Lookout",new Vector2(69,54)}, {"H2Lookout",new Vector2(30.5f,85)},
-        {"RopeLookout",new Vector2(109,44)}, {"PassLookout",new Vector2(126,97)},
-        {"BarrowLookout",new Vector2(66,95)}, {"S2Lookout",new Vector2(123,84)} };
+        {"HollowPocket",new Vector2(134.5f,53.5f)}, {"RopeLookout",new Vector2(139.5f,49)}, {"PassLookout",new Vector2(126,97)},
+        {"BarrowLookout",new Vector2(66,95)}, {"S2Lookout",new Vector2(123,84)},
+        // North bank (24 Oct): fire at the fork, Watcher forecourt, King's Road mouth and the road past its 0.5 logs.
+        {"NorthFire",new Vector2(59,98.5f)}, {"Forecourt",new Vector2(24.5f,95)}, {"KingsRoadMouth",new Vector2(55,104)}, {"KingsRoadBeyond",new Vector2(55,112)},
+        // Drowned Hayfields (24 Oct, simplified): entry from the E1 lane bend, the drove bank up to its breach, the barn
+        // yard (closed until the loading beam bridges the breach; its back gate is barred from inside), the hollow side of
+        // that gate, and the south field reachable only once the pond drains.
+        {"HayEntry",new Vector2(95,18)}, {"HayDroveBank",new Vector2(110,14)}, {"HayBreachWest",new Vector2(115.5f,14)}, {"HayBarnYard",new Vector2(135,7)},
+        {"HayGateOutside",new Vector2(138,21.5f)}, {"HayDrainedField",new Vector2(104,10.5f)} };
     var coinPatches=scene.GetRootGameObjects().SelectMany(g=>g.GetComponentsInChildren<RoadOfTheOldKing.World.VegetationCoinPatch>(true)).ToArray();
     check(coinPatches.Length==16,"Sixteen authored vegetation coin patches complete the prop-source budget");
     var plantedFields=scene.GetRootGameObjects().SelectMany(g=>g.GetComponentsInChildren<RoadOfTheOldKing.World.InteractiveVegetation>(true)).ToArray();
@@ -324,7 +358,7 @@ try{
             }
             var surfaces=plan["surfaces"].ToDictionary(t=>(string)t["id"],t=>t);
             var components=surfaces.ToDictionary(k=>k.Key,k=>labels[index(point(k.Value["sample"]))]);
-            foreach(var surface in surfaces)check(components[surface.Key]>=0,"Elevation sample is body-clear: "+surface.Key);
+            foreach(var surface in surfaces)check(components[surface.Key]>=0||(surface.Key=="BarrowThreshold"&&barrowBlock!=null),"Elevation sample is body-clear: "+surface.Key);
             var ids=surfaces.Keys.ToArray();
             for(int a=0;a<ids.Length;a++)for(int b=a+1;b<ids.Length;b++)
                 if((int)surfaces[ids[a]]["height"]!=(int)surfaces[ids[b]]["height"])
@@ -341,10 +375,13 @@ try{
         check(clear[index(anchors["Storehouse"])],state+": storehouse landing stays dry and body-clear");
         bool ridgeSealed=true,lowerRoadMatchesWater=true;
         for(int x=65;x<=66;x++)ridgeSealed&=blockedAcross(new Vector2(x+.5f,95),new Vector2(x+.5f,88.5f));
-        for(int y=87;y<=89;y++)for(int x=65;x<=66;x++)lowerRoadMatchesWater&=clear[index(new Vector2(x+.5f,y+.5f))]==(y==89||state=="low");
-        check(ridgeSealed,state+": sealed ridge prevents a dry bypass into the Barrow passage");
+        for(int y=87;y<=89;y++)for(int x=65;x<=66;x++){var cell=new Vector2(x+.5f,y+.5f);lowerRoadMatchesWater&=clear[index(cell)]==(!barrowBlocked(cell)&&(y==89||state=="low"));}
+        check(ridgeSealed,state+": sealed ridge prevents a dry bypass into the Old Drain passage");
         check(lowerRoadMatchesWater,state+": old road approach follows basin water access");
         check(!blockedAcross(new Vector2(18.5f,8),new Vector2(25.5f,8)),state+": entrance bridge remains walkable over expanded river water");
+        // Until the loading beam is lowered, its breach cuts the drove bank in every water state.
+        Physics2D.BoxCast(new Vector2(115.5f,14),new Vector2(.76f,.76f),0,Vector2.right,filter,sweep,5f);   // the beam's own blocker, not a tile rim
+        check(sweep.Any(hit=>solid(hit.collider)),state+": Hayfields breach cuts the drove bank");
         check(clear[index(anchors["RoadCampWest"])]&&clear[index(anchors["RoadCampEast"])],state+": roadworkers' sentries stand on dry ground");
         bool campStair=true,campRims=true;
         for(int y=79;y<=81;y++)for(int x=72;x<=74;x++)campStair&=clear[index(new Vector2(x+.5f,y+.5f))]==(y==89||state=="low");
@@ -360,11 +397,12 @@ try{
         bool sluiceApronDry=true,sluiceDescentMatchesWater=true;
         // The 4px side and 2px rear rim occupy the deck's edge. Check the
         // usable apron with a full body, inset from that visible boundary.
-        for(int y=270;y<=277;y++)for(int x=50;x<=65;x++){
+        // Whole platform moved three tiles south: walking rows 64..66, stair row 63.
+        for(int y=258;y<=265;y++)for(int x=50;x<=65;x++){
             Physics2D.OverlapBox(new Vector2(x/4f,y/4f),new Vector2(.76f,.76f),0,filter,overlap);
             sluiceApronDry&=!overlap.Any(solid);
         }
-        for(int y=64;y<=66;y++)for(int x=14;x<=16;x++)sluiceDescentMatchesWater&=clear[index(new Vector2(x+.5f,y+.5f))]==(y==89||state=="low");
+        for(int y=61;y<=63;y++)for(int x=14;x<=16;x++)sluiceDescentMatchesWater&=clear[index(new Vector2(x+.5f,y+.5f))]==(state=="low");
         check(sluiceApronDry,state+": sluice landing stays on the dry working deck");
         check(sluiceDescentMatchesWater,state+": south-facing sluice descent remains flooded until the pond lowers");
         var queue=new System.Collections.Generic.Queue<int>();queue.Enqueue(start);previous[start]=start;
@@ -379,18 +417,19 @@ try{
             }
         }
         // Body-clear combat footprints; not a substitute for fights with enemy telegraphs.
-        var arenas=new[]{new Vector4(84,32,24,16),new Vector4(116,88,18,12),new Vector4(128,44,10,6),new Vector4(3.5f,-39,8,9),new Vector4(20.5f,-20.5f,8,6),new Vector4(42,-13.5f,9,8),new Vector4(76.75f,85.75f,12,6)};
+        var arenas=new[]{new Vector4(84,32,24,16),new Vector4(116,94,18,12),new Vector4(128,44,10,6),new Vector4(3.5f,-39,8,9),new Vector4(20.5f,-20.5f,8,6),new Vector4(42,-13.5f,9,8),new Vector4(76.75f,85.75f,12,6),new Vector4(24.5f,94.5f,10,7),new Vector4(139.5f,7,12,3)};
         foreach(var area in arenas){Physics2D.OverlapBox(new Vector2(area.x,area.y),new Vector2(area.z,area.w),0,filter,overlap);check(!overlap.Any(solid),state+": combat clearing "+area.x+","+area.y+" "+area.z+"x"+area.w);}
         var targets=new System.Collections.Generic.List<object>();
         foreach(var entry in anchors){
             int at=index(entry.Value);bool expected=entry.Key!="RopeWorkshop"&&entry.Key!="HighPass"&&entry.Key!="OutsideSouthEast"&&entry.Key!="OutsideEast"&&entry.Key!="OutsideSouth";
-            if(new[]{"S3","H2","Storehouse","BarrowRoad","RoadLanding","RoadCampWest","RoadCampEast","RoadCampLanding"}.Contains(entry.Key))expected=state=="low";
+            if(new[]{"S3","H2","Storehouse","BarrowRoad","RoadLanding","RoadCampWest","RoadCampEast","RoadCampLanding","HayDrainedField"}.Contains(entry.Key))expected=state=="low";
             if(entry.Key=="MainBay")expected=state!="high";
+            if(barrowBlocked(entry.Value)||entry.Key=="KingsRoadBeyond"||entry.Key=="HayBarnYard")expected=false;   // King's Road closed for 0.5; barn until the beam bridge
             bool reachable=previous[at]>=0;
             check(reachable==expected,state+": "+entry.Key+" reachability "+reachable);
             targets.Add(new{name=entry.Key,clear=clear[at],reachable=reachable,distance=reachable?distances[at]:-1});
         }
-        Physics2D.OverlapBox(new Vector2(119.5f,45.5f),new Vector2(.76f,.76f),0,filter,overlap);
+        Physics2D.OverlapBox(new Vector2(138.5f,43.5f),new Vector2(.76f,.76f),0,filter,overlap);
         check(!overlap.Any(solid),state+": upper rope landing body-clear");
         // Cache actual collision-safe paths for the live motor fixture, not authored waypoints.
         foreach(string name in new[]{"OutsideEast","BorderArrival","MillOverlook","Pasture","EastMeadow","Orchard","H1","NorthBank","RopeApproach","Distributor","MainBay","S3","H2","Storehouse","BarrowRoad","RoadLanding","RoadCampWest"}){

@@ -22,6 +22,8 @@ namespace RoadOfTheOldKing.World
         [SerializeField] private GameObject exposedBasin;
         [SerializeField] private Transform brake;
         [SerializeField] private SluiceMechanismView mechanismView;
+        [Tooltip("The guardian whose recorded defeat frees the controls. Unassigned: always free.")]
+        [SerializeField] private EncounterUnlock guardian;
         private Vector3 brakeRest;
         private AxeWeapon attempt;
         private uint attemptFlight;
@@ -31,6 +33,9 @@ namespace RoadOfTheOldKing.World
         private SluiceFeedback actionFeedback;
 
         public SluiceStage Stage { get; private set; }
+        // Held fast until its guardian falls; a drained basin stays drained regardless.
+        public bool IsGuarded => guardian != null && Stage < SluiceStage.PondLow &&
+            (GameSession.Instance == null || !guardian.IsUnlocked(GameSession.Instance.Progress));
         public bool IsDrawing => drawing && !IsMoving;
         public bool IsMoving => carriage != null &&
             (carriage.localPosition - (drawing ? drawingPosition : loadingPosition)).sqrMagnitude > .0001f;
@@ -72,6 +77,12 @@ namespace RoadOfTheOldKing.World
         public void Lodge(SluicePart fork, AxeWeapon weapon)
         {
             ClearAttempt();
+            if (IsGuarded)
+            {
+                Feedback = "The mechanism is held fast.";
+                Changed?.Invoke();
+                return;
+            }
             if (!isActiveAndEnabled || weapon == null || weapon.State != AxeState.Stuck ||
                 weapon.Owner == null || weapon.Owner.Weapon != weapon) return;
             if (!((fork == SluicePart.DistributorFork && Stage == SluiceStage.High) ||
@@ -85,7 +96,7 @@ namespace RoadOfTheOldKing.World
 
         public bool ReceiveVane(SluicePart part, CombatHit hit)
         {
-            if (!isActiveAndEnabled || hit.Kind != AttackKind.Recall || !ValidAttempt() ||
+            if (!isActiveAndEnabled || IsGuarded || hit.Kind != AttackKind.Recall || !ValidAttempt() ||
                 hit.Source != attempt.Owner.gameObject || attempt.State != AxeState.Returning) return false;
             if (part == SluicePart.DistributorVane && attemptFork == SluicePart.DistributorFork && Stage == SluiceStage.High)
             {
@@ -115,7 +126,7 @@ namespace RoadOfTheOldKing.World
 
         public bool CanTurn(bool moveCarriage)
         {
-            if (!isActiveAndEnabled || GameSession.Instance == null || GameSession.Instance.IsLoading) return false;
+            if (!isActiveAndEnabled || GameSession.Instance == null || GameSession.Instance.IsLoading || IsGuarded) return false;
             return moveCarriage ? Stage == SluiceStage.ServiceDiverted && !IsMoving &&
                 (attempt == null || attempt.State != AxeState.Returning) : Stage == SluiceStage.DistributorReleased;
         }

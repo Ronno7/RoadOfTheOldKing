@@ -1,6 +1,8 @@
 // Run after the gameplay fixture reaches GreenLowlands, with its isolated session.
 // Virtual keyboard -> actual input actions -> PlayerMovement -> Physics2D.
 // Fixed steps are driven explicitly; this is not a human keyboard playthrough.
+// Set SessionState GreenLowlands.Movement.CulvertOnly for the focused culvert regression.
+bool culvertOnly=SessionState.GetBool("GreenLowlands.Movement.CulvertOnly",false);
 if(!EditorApplication.isPlaying||UnityEngine.SceneManagement.SceneManager.GetActiveScene().name!="GreenLowlands")throw new System.Exception("Run in GreenLowlands Play Mode.");
 var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
 var session=RoadOfTheOldKing.Progression.GameSession.Instance;
@@ -39,6 +41,7 @@ try{
  UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=UnityEngine.InputSystem.InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
  actions.devices=new UnityEngine.InputSystem.InputDevice[]{keyboard};
  input.GetType().GetField("paused",flags).SetValue(input,false);Physics2D.simulationMode=SimulationMode2D.Script;
+ if(!culvertOnly){
  walk(new Vector2(18.5f,7.5f),UnityEngine.InputSystem.Key.D,1.9f);
  check(body.position.x>25.5f&&Mathf.Abs(body.position.y-7.5f)<.05f,"Motor crosses near bridge lane west to east");
  walk(new Vector2(25.5f,8.5f),UnityEngine.InputSystem.Key.A,1.9f);
@@ -47,14 +50,54 @@ try{
  check(body.position.y<=8.64f&&body.position.y>=8.5f,"Far bridge rail stops the motor");
  walk(new Vector2(21.5f,8),UnityEngine.InputSystem.Key.S,.8f);
  check(body.position.y>=7.36f&&body.position.y<=7.5f,"Near bridge rail stops the motor");
- walk(new Vector2(19,12),UnityEngine.InputSystem.Key.D,.8f);
- check(body.position.x<=19.64f&&body.position.x>=19.5f,"River blocks walking away from the bridge");
  walk(new Vector2(35.9375f,.75f),UnityEngine.InputSystem.Key.W,.8f);
  check(body.position.y<=1.33f&&body.position.y>=1.2f,"Oak trunk stops the motor");
  walk(new Vector2(34.75f,2.25f),UnityEngine.InputSystem.Key.W,.75f);
  check(body.position.y>5,"Motor passes beneath the oak canopy beside its trunk");
  walk(new Vector2(16.5f,11),UnityEngine.InputSystem.Key.W,.8f);
  check(body.position.y<=12.64f&&body.position.y>=12.5f,"Mill approach remains clear up to the solid base");
+ }
+ // South waterworks: the culvert edge must agree with its x6 visual rim.
+ var sluice=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RecallSluice>();
+ try{for(int state=0;state<3;state++){
+  var progress=new RoadOfTheOldKing.Progression.ProgressState();
+  if(state>=1)progress.Complete("green-lowlands/sluice/service");
+  if(state==2)progress.Complete("green-lowlands/sluice/pond-low");
+  sluice.RestoreProgress(progress);
+  if(!culvertOnly){
+   // The drawn west rim begins at x18.75. The former x19 start overlapped it.
+   walk(new Vector2(17.5f,12),UnityEngine.InputSystem.Key.D,.8f);
+   check(body.position.x>18.3f&&body.position.x<18.45f&&Mathf.Abs(body.position.y-12)<.05f,"River contact matches the visible west rim, state "+state);
+  }
+  walk(new Vector2(4.5f,70.5f),UnityEngine.InputSystem.Key.D,.8f);
+  check(body.position.x>5.55f&&body.position.x<5.68f,"Culvert west contact aligns with x6 stone edge, state "+state);
+  walk(new Vector2(8,68),UnityEngine.InputSystem.Key.W,.8f);
+  check(body.position.y>68.5f&&body.position.y<68.7f,"Culvert south edge remains solid, state "+state);
+  walk(new Vector2(4.5f,70.5f),UnityEngine.InputSystem.Key.S,.85f);
+  check(state==2?body.position.y<68.2f:body.position.y>69.8f,"Main passage follows its puzzle gate, state "+state);
+  walk(new Vector2(10.5f,65),UnityEngine.InputSystem.Key.D,1.2f);
+  check(body.position.x>14.7f,"Moved landing connects to the lawn without the old wall, state "+state);
+  walk(new Vector2(14.5f,65),UnityEngine.InputSystem.Key.A,1.1f);
+  check(body.position.x<11,"Moved landing returns west through its wall opening, state "+state);
+  walk(new Vector2(15.5f,64.5f),UnityEngine.InputSystem.Key.S,1f);
+  check(state==2?body.position.y<61.8f:body.position.y>64.3f,"Moved stairs descend only after basin drainage, state "+state);
+  walk(new Vector2(13.5f,65.5f),UnityEngine.InputSystem.Key.W,.8f);
+  check(body.position.y>66.4f&&body.position.y<66.6f,"Platform north rim stops at its visible edge, state "+state);
+  walk(new Vector2(15.5f,65),UnityEngine.InputSystem.Key.D,.8f);
+  check(body.position.x>16.3f&&body.position.x<16.5f,"Platform east rim stops at its visible edge, state "+state);
+  if(state==2){
+   walk(new Vector2(15.5f,61.5f),UnityEngine.InputSystem.Key.W,1.2f);
+   check(body.position.y>64.8f,"Moved basin stairs also support the return climb");
+   walk(new Vector2(13.5f,68.5f),UnityEngine.InputSystem.Key.D,.8f);
+   check(body.position.x>16.5f,"Former platform space is open drained basin without obsolete padding");
+   walk(new Vector2(13.5f,68.5f),UnityEngine.InputSystem.Key.S,.8f);
+   check(body.position.y>67.3f&&body.position.y<67.5f,"Basin approach reaches the platform wall without a full-tile invisible gap");
+  }
+  move(new Vector2(5.25f,69.9f));keys(new[]{UnityEngine.InputSystem.Key.W,UnityEngine.InputSystem.Key.D});
+  for(int i=0;i<25;i++){motor.GetType().GetMethod("FixedUpdate",flags).Invoke(motor,null);Physics2D.Simulate(Time.fixedDeltaTime);}
+  keys(new UnityEngine.InputSystem.Key[0]);
+  check(body.position.y>70.9f&&body.position.x>5.5f&&body.position.x<5.7f,"Diagonal approach slides along the culvert edge, state "+state);
+ }}finally{sluice.RestoreProgress(session.Progress);}
 }finally{
  keys(new UnityEngine.InputSystem.Key[0]);actions.devices=oldDevices;
  UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard);

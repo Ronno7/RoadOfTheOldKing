@@ -3,6 +3,7 @@ import argparse
 import re
 import shutil
 import stat
+import tempfile
 import zipfile
 from html.parser import HTMLParser
 from pathlib import Path, PurePosixPath
@@ -85,15 +86,30 @@ def pack(source, output):
     if output == source / "index.html" or any(output.is_relative_to(source / f) for f in FOLDERS):
         raise ValueError("Place the archive outside the exported build's asset folders.")
     output.parent.mkdir(parents=True, exist_ok=True)
-    with zipfile.ZipFile(output, "x", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
-        for file in files:
-            archive.write(file, file.relative_to(source).as_posix())
-    total = sum(file.stat().st_size for file in files)
+    # A failed compression must not occupy the final release path and block retry.
+    with tempfile.TemporaryDirectory(prefix=".webgl-pack-", dir=output.parent) as staging:
+        staged = Path(staging) / "webgl.zip"
+        with zipfile.ZipFile(staged, "x", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
+            for file in files:
+                archive.write(file, file.relative_to(source).as_posix())
+            total = sum(info.file_size for info in archive.infolist())
+        created = False
+        try:
+            # Exclusive creation also protects an archive added during compression.
+            with output.open("xb") as destination:
+                created = True
+                with staged.open("rb") as source_zip:
+                    shutil.copyfileobj(source_zip, destination)
+        except BaseException:
+            if created:
+                output.unlink()
+            raise
     print(f"Packaged {version}: {len(files)} files, {total / 1048576:.2f} MiB -> {output.stat().st_size / 1048576:.2f} MiB ZIP")
     print(output)
 
 
 def unpack(source, output, version):
+    output = output.resolve()
     if output.exists():
         raise ValueError(f"Extraction destination must not exist: {output}")
     with zipfile.ZipFile(source) as archive:
@@ -106,13 +122,19 @@ def unpack(source, output, version):
                     or stat.S_ISLNK(info.external_attr >> 16)):
                 raise ValueError(f"Unsupported or duplicate archive entry: {info.filename}")
             seen.add(info.filename.casefold())
-        output.mkdir(parents=True)
-        for info in files:
-            target = output / info.filename
-            target.parent.mkdir(parents=True, exist_ok=True)
-            with archive.open(info) as src, target.open("xb") as dst:
-                shutil.copyfileobj(src, dst)
-    actual = validate(output, version)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(prefix=".webgl-unpack-", dir=output.parent) as staging:
+            staged = Path(staging) / "site"
+            staged.mkdir()
+            for info in files:
+                target = staged / info.filename
+                target.parent.mkdir(parents=True, exist_ok=True)
+                with archive.open(info) as src, target.open("xb") as dst:
+                    shutil.copyfileobj(src, dst)
+            actual = validate(staged, version)
+            if output.exists():
+                raise ValueError(f"Extraction destination appeared during validation; kept it: {output}")
+            staged.rename(output)
     print(f"Validated {actual}: {len(files)} files ready for Pages at {output}")
 
 

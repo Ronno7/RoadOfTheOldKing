@@ -14,13 +14,22 @@ var left=(Transform)v.GetType().GetField("leftShutter",f).GetValue(v);var right=
 var outlet=(Transform)v.GetType().GetField("outletGate",f).GetValue(v);var outletTravel=(Vector3)v.GetType().GetField("outletTravel",f).GetValue(v);
 var architecture=GameObject.Find("Sluice architecture");
 var outfall=architecture!=null?architecture.GetComponent<RoadOfTheOldKing.World.SluiceOutfallView>():null;
+var culvert=architecture.GetComponentInChildren<RoadOfTheOldKing.World.SluiceCulvertView>();
+if(culvert==null)throw new System.Exception("Installed recessed culvert required");
+var culvertWater=(SpriteRenderer)culvert.GetType().GetField("water",f).GetValue(culvert);
+var culvertFrames=(Sprite[])culvert.GetType().GetField("flowFrames",f).GetValue(culvert);
+var culvertStone=culvert.transform.Find("Recessed masonry");var culvertIron=culvert.transform.Find("Recessed iron bars");
+var stoneRest=culvertStone.position;var ironRest=culvertIron.position;
 var cutaway=architecture!=null?architecture.GetComponent<RoadOfTheOldKing.World.BuildingCutaway>():null;
 if(outlet==null||outfall==null||cutaway==null||!cutaway.enabled)throw new System.Exception("Authored exterior outlet, SluiceOutfallView and enabled BuildingCutaway required");
 if((Transform)cutaway.GetType().GetField("occupant",f).GetValue(cutaway)!=p.transform)throw new System.Exception("Cutaway must follow the tested player's foot transform");
 var pond=(RoadOfTheOldKing.World.SluiceWaterReveal)outfall.GetType().GetField("pondReveal",f).GetValue(outfall);
 var surge=(SpriteRenderer)outfall.GetType().GetField("surge",f).GetValue(outfall);var upstream=(SpriteRenderer)outfall.GetType().GetField("upstreamSurface",f).GetValue(outfall);
 var wet=(Renderer[])outfall.GetType().GetField("wetMarks",f).GetValue(outfall);var frames=(Sprite[])outfall.GetType().GetField("flowFrames",f).GetValue(outfall);
-if(pond==null||surge==null||upstream==null||wet==null||wet.Length==0||frames==null||frames.Length!=4||frames.Any(x=>x==null))throw new System.Exception("Complete four-frame outfall, intake and wet-line references required");
+if(pond==null||surge==null||upstream==null||wet==null||wet.Length==0||frames==null||(frames.Length<1||frames.Length>4)||frames.Any(x=>x==null))throw new System.Exception("Complete one-to-four-frame outfall, intake and wet-line references required");
+var canal=architecture.GetComponent<RoadOfTheOldKing.World.SluiceCanalView>();
+var canalWater=GameObject.Find("Canal flow").GetComponentsInChildren<SpriteRenderer>(true);
+if(canal==null||canalWater.Length!=49)throw new Exception("Installed forty-nine-reach canal required");
 var high=(GameObject)s.GetType().GetField("highWater",f).GetValue(s);var service=(GameObject)s.GetType().GetField("serviceWater",f).GetValue(s);
 var serviceReveal=service.GetComponent<RoadOfTheOldKing.World.SluiceWaterReveal>();
 var serviceGate=v.GetType().GetField("serviceGate",f).GetValue(v);var mainGate=v.GetType().GetField("mainGate",f).GetValue(v);
@@ -31,6 +40,9 @@ var serviceBlocker=(Collider2D)gateField(serviceGate,"blocker");var mainBlocker=
 var serviceTravel=(Vector3)gateField(serviceGate,"travel");var mainTravel=(Vector3)gateField(mainGate,"travel");
 float serviceOpening=(float)gateField(serviceGate,"openingDuration"),mainOpening=(float)gateField(mainGate,"openingDuration");
 if(serviceLeaf==null||mainLeaf==null||serviceBlocker==null||mainBlocker==null||serviceTravel.sqrMagnitude<.01f||mainTravel.sqrMagnitude<.01f||serviceOpening<=0f||mainOpening<=0f)throw new System.Exception("Complete passage leaves, blockers, travel and timing required");
+float residual=(float)outfall.GetType().GetField("settledSurgeStrength",f).GetValue(outfall);
+var fixedFrame=GameObject.Find("Exterior sluice hoist").transform;var fixedFramePosition=fixedFrame.position;
+var apron=GameObject.Find("Downstream sluice apron");
 var surgeOriginal=(Color)outfall.GetType().GetField("surgeColor",f).GetValue(outfall);var upstreamOriginal=(Color)outfall.GetType().GetField("upstreamColor",f).GetValue(outfall);
 var originalSurgeSprite=(Sprite)outfall.GetType().GetField("surgeSprite",f).GetValue(outfall);bool originalSurgeEnabled=(bool)outfall.GetType().GetField("surgeEnabled",f).GetValue(outfall);bool originalUpstreamEnabled=(bool)outfall.GetType().GetField("upstreamEnabled",f).GetValue(outfall);var originalWet=(bool[])outfall.GetType().GetField("wetEnabled",f).GetValue(outfall);
 var receivers=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SluiceTarget>(FindObjectsSortMode.None).Where(x=>x.Part!=RoadOfTheOldKing.World.SluicePart.MainFork).ToArray();var positions=receivers.Select(x=>x.transform.position).ToArray();
@@ -47,6 +59,7 @@ try{
  var boltRest=bolt.localPosition;var brakeRest=brake.localPosition;var weightRest=weight.localPosition;
  var leftRest=left.localPosition;var rightRest=right.localPosition;
  var outletRest=outlet.localPosition;outfall.RefreshNow();
+ check(surgeOriginal.a>.99f,"Authored surge is visible before presentation scales its opacity");
  var serviceRest=serviceLeaf.localPosition;var mainRest=mainLeaf.localPosition;
  check(serviceBlocker.enabled&&mainBlocker.enabled,"High water keeps both pedestrian gates physically closed");
  check((RoadOfTheOldKing.World.SluiceWaterReveal)gateField(serviceGate,"waterReveal")==serviceReveal&&(RoadOfTheOldKing.World.SluiceWaterReveal)gateField(mainGate,"waterReveal")==pond,"Passage gates wait for their own authored water transition");
@@ -128,13 +141,15 @@ try{
  check((wire.GetPosition(1)-(weight.position+Vector3.up*.875f)).sqrMagnitude<.0001f,"Suspension follows weight");
  check(Mathf.Abs(left.localPosition.x-leftRest.x+.4375f)<.001f&&Mathf.Abs(right.localPosition.x-rightRest.x-.4375f)<.001f,"Gate reaches full opening");
  check(v.Opening==1f&&(outlet.localPosition-outletRest-outletTravel).sqrMagnitude<.000001f,"Exterior gate reaches its full authored opening");
- check(pond.IsDraining&&surge.enabled&&Mathf.Abs(surge.color.a-surgeOriginal.a)<.001f,"Open gate carries the initial draining surge");
+ check(pond.IsDraining&&!surge.enabled&&canalWater.All(r=>!r.enabled),"Opening the blade alone cannot advance the basin-owned canal front");
  check(mainLeaf.localPosition==mainRest&&mainBlocker.enabled&&!serviceBlocker.enabled,"Main pedestrian gate waits while the exterior sluice opens and drains");
  var pausedSprite=surge.sprite;float pausedAlpha=surge.color.a;outfall.Present(0f);
  check(surge.sprite==pausedSprite&&surge.color.a==pausedAlpha,"Zero elapsed time preserves outfall animation frame and strength");
- outfall.Present(.13f);check(surge.sprite!=pausedSprite,"Flow advances through distinct native artwork frames");
+ outfall.Present(.13f);check(canalWater.All(r=>!r.enabled),"Artwork time alone cannot fill the canal while basin progress is zero");
  float drainDuration=(float)pond.GetType().GetField("duration",f).GetValue(pond);pond.GetType().GetMethod("Advance",f).Invoke(pond,new object[]{drainDuration*.5f});v.GetType().GetMethod("Advance",f).Invoke(v,new object[]{mainOpening});outfall.RefreshNow();
- check(pond.IsDraining&&Mathf.Abs(pond.Progress-.5f)<.001f&&Mathf.Abs(surge.color.a-surgeOriginal.a*.65f)<.001f&&Mathf.Abs(upstream.color.a-upstreamOriginal.a*.5f)<.001f,"Outlet surge and intake recede with the pond reveal");
+ check(pond.IsDraining&&Mathf.Abs(pond.Progress-.5f)<.001f&&canalWater.All(r=>r.enabled&&r.color.a>.99f)&&Mathf.Abs(upstream.color.a-upstreamOriginal.a*.5f)<.001f,"Basin half-progress carries opaque moving water through the whole canal");
+ var canalPhase=canalWater[0].sprite;outfall.Present(.13f);check(canalWater[0].sprite!=canalPhase,"Canal highlights advance independently of the basin-owned water volume");
+ check(canalWater[0].sprite.name.Substring(10,2)!=canalWater[canalWater.Length-1].sprite.name.Substring(10,2),"Near outlet recedes before the downstream reach");
  check(mainLeaf.localPosition==mainRest&&mainBlocker.enabled,"Half-drained pond cannot begin pedestrian gate retraction");
  pond.GetType().GetMethod("Advance",f).Invoke(pond,new object[]{drainDuration});outfall.RefreshNow();
  check(mainLeaf.localPosition==mainRest&&mainBlocker.enabled,"Pond completion retains the physical exit gate until it moves");
@@ -145,10 +160,13 @@ try{
  v.GetType().GetMethod("Advance",f).Invoke(v,new object[]{mainOpening});
  check((mainLeaf.localPosition-mainRest-mainTravel).sqrMagnitude<.000001f&&!mainBlocker.enabled,"Fully retracted exit gate releases the dry passage");
  check(!high.activeSelf&&outlet.gameObject.activeInHierarchy&&outfall.gameObject.activeInHierarchy,"Exterior waterworks remain visible after pond collision clears");
- check(surge.enabled&&Mathf.Abs(surge.color.a-surgeOriginal.a*.3f)<.001f&&!upstream.enabled&&wet.All(r=>r.enabled),"Settled low water leaves a small rivulet and exposed wet masonry");
+ check(!surge.enabled&&canalWater.All(r=>r.enabled&&r.sprite.name.StartsWith("CanalFlow_12_"))&&!upstream.enabled&&wet.All(r=>r.enabled),"Every canal reach settles exactly with basin completion");
+ check(apron!=null&&!apron.GetComponent<SpriteRenderer>().enabled&&!GameObject.Find("Sluice - lower tailrace water").GetComponent<UnityEngine.Tilemaps.TilemapRenderer>().enabled,"Superseded pool and painted rivulet stay hidden");
+ check(fixedFrame.position==fixedFramePosition&&!fixedFrame.IsChildOf(outlet),"Sluice side guides and hoist stay fixed through the blade stroke");
  outfall.enabled=false;
  check(surge.color==surgeOriginal&&surge.sprite==originalSurgeSprite&&surge.enabled==originalSurgeEnabled&&upstream.color==upstreamOriginal&&upstream.enabled==originalUpstreamEnabled&&wet.Select((r,i)=>r.enabled==originalWet[i]).All(ok=>ok),"Disabling outlet presentation restores authored artwork states");
- outfall.enabled=true;check(surge.enabled&&!upstream.enabled&&wet.All(r=>r.enabled),"Re-enabled outlet immediately restores the saved low-water presentation");
+ check(canalWater.All(r=>!r.enabled),"Disabling presentation restores authored empty canal renderers");
+ outfall.enabled=true;check(canalWater.All(r=>r.enabled&&r.sprite.name.StartsWith("CanalFlow_12_"))&&!upstream.enabled&&wet.All(r=>r.enabled),"Re-enabled outlet immediately restores saved shallow flow without replay");
  check((leftRod.GetPosition(1)-left.position-Vector3.up*.3125f).sqrMagnitude<.0001f&&(rightRod.GetPosition(1)-right.position-Vector3.up*.3125f).sqrMagnitude<.0001f,"Connecting rods remain attached to moving leaves");
  check(receivers.Select((x,i)=>x.transform.position==positions[i]).All(ok=>ok),"All fixed vane/fork colliders keep authored positions");
  s.ResetOnRest();check(Mathf.Abs(weight.localPosition.y-weightRest.y+1.25f)<.001f&&Mathf.Abs(bolt.localPosition.x-boltRest.x+.5f)<.001f,"Rest retains solved mechanical pose");
@@ -162,10 +180,35 @@ try{
  v.enabled=false;
  check((serviceLeaf.localPosition-serviceRest-serviceTravel).sqrMagnitude<.000001f&&(mainLeaf.localPosition-mainRest-mainTravel).sqrMagnitude<.000001f&&!serviceBlocker.enabled&&!mainBlocker.enabled,"Disabling the view settles passage gates to authoritative saved progress");
  v.enabled=true;
+ // Duration variation proves canal timing follows the basin, including the far exit.
+ var durationField=pond.GetType().GetField("duration",f);float authoredDuration=(float)durationField.GetValue(pond);
+ try{foreach(float seconds in new[]{2f,8f,16f}){
+  durationField.SetValue(pond,seconds);s.RestoreProgress(game.Progress);v.Present(RoadOfTheOldKing.World.SluiceStage.High,false,false);pond.SetVisible(true,false);v.Present(RoadOfTheOldKing.World.SluiceStage.PondLow,true,true);pond.SetVisible(false,true);v.GetType().GetMethod("Advance",f).Invoke(v,new object[]{1f});outfall.RefreshNow();
+  check(canalWater.All(r=>!r.enabled),"Empty receiving canal at start, duration "+seconds);
+  check(culvertFrames.Length==40&&culvertFrames.All(r=>r!=null)&&culvertWater.sprite.name.StartsWith("CulvertFlow_00_"),"Culvert begins full below fixed stone, duration "+seconds);
+  pond.GetType().GetMethod("Advance",f).Invoke(pond,new object[]{seconds*.2f});outfall.RefreshNow();
+  check(canalWater[0].enabled&&!canalWater[canalWater.Length-1].enabled,"Travelling front leaves the far channel empty at 20%, duration "+seconds);
+  int culvertLevel=Mathf.RoundToInt(Mathf.SmoothStep(0,1,pond.Progress)*9);
+  check(culvertWater.sprite.name.StartsWith("CulvertFlow_"+culvertLevel.ToString("00")+"_"),"Culvert waterline follows actual basin progress, duration "+seconds);
+  var frontPositions=canalWater.Select(r=>r.transform.position).ToArray();var frontSizes=canalWater.Select(r=>r.size).ToArray();outfall.Present(100f);
+  check(canalWater.Select((r,i)=>r.transform.position==frontPositions[i]&&r.size==frontSizes[i]).All(ok=>ok),"Animation time cannot advance basin-owned water, duration "+seconds);
+  check(culvertWater.sprite.name.StartsWith("CulvertFlow_"+culvertLevel.ToString("00")+"_"),"Artwork time alone cannot drain the culvert, duration "+seconds);
+  pond.GetType().GetMethod("Advance",f).Invoke(pond,new object[]{seconds*.65f});outfall.RefreshNow();
+  check(pond.IsDraining&&canalWater.All(r=>r.enabled)&&!canalWater[canalWater.Length-1].sprite.name.StartsWith("CanalFlow_12_"),"Far exit still carries discharge at 85%, duration "+seconds);
+  pond.GetType().GetMethod("Advance",f).Invoke(pond,new object[]{seconds*.151f});outfall.RefreshNow();
+  check(!pond.IsDraining&&canalWater.All(r=>r.enabled&&r.sprite.name.StartsWith("CanalFlow_12_")),"Entire canal settles with basin completion, duration "+seconds);
+  check(culvertWater.sprite.name.StartsWith("CulvertFlow_09_")&&culvertStone.position==stoneRest&&culvertIron.position==ironRest,"Culvert settles below stationary masonry and iron with basin completion, duration "+seconds);
+ }
+ // Interrupt a draining presentation with rest: saved completion wins immediately.
+ s.RestoreProgress(game.Progress);pond.SetVisible(true,false);pond.SetVisible(false,true);pond.GetType().GetMethod("Advance",f).Invoke(pond,new object[]{.5f});outfall.RefreshNow();s.ResetOnRest();outfall.RefreshNow();
+ check(!pond.IsDraining&&canalWater.All(r=>r.enabled&&r.sprite.name.StartsWith("CanalFlow_12_")),"Rest during drainage restores saved shallow flow without replay");
+ }finally{durationField.SetValue(pond,authoredDuration);}
+ check(culvertWater.sprite.name.StartsWith("CulvertFlow_09_"),"Rest restores the saved low culvert without replay");
  game.Progress.completedIds.RemoveAll(id=>id.StartsWith("green-lowlands/sluice/"));s.RestoreProgress(game.Progress);
+ outfall.RefreshNow();check(culvertWater.sprite.name.StartsWith("CulvertFlow_00_"),"Fresh progress restores full culvert below the retaining face");
  check(bolt.localPosition==boltRest&&brake.localPosition==brakeRest&&weight.localPosition==weightRest,"Fresh restore recovers authored rest poses");
  check(left.localPosition==leftRest&&right.localPosition==rightRest,"Fresh restore closes both leaves");
  check(serviceLeaf.localPosition==serviceRest&&mainLeaf.localPosition==mainRest&&serviceBlocker.enabled&&mainBlocker.enabled,"Fresh restore returns both passage leaves and blockers to closed state");
- outfall.RefreshNow();check(v.Opening==0f&&outlet.localPosition==outletRest&&!surge.enabled&&upstream.enabled&&wet.All(r=>!r.enabled),"Fresh restore recovers closed outlet and high intake water");
+ outfall.RefreshNow();check(v.Opening==0f&&outlet.localPosition==outletRest&&!surge.enabled&&canalWater.All(r=>!r.enabled)&&upstream.enabled&&wet.All(r=>!r.enabled),"Fresh restore recovers closed outlet and high intake water");
 }finally{RoadOfTheOldKing.UI.FeedbackSettings.FlashScale=savedFlash;outfall.enabled=true;v.enabled=true;a.CancelAction();game.Progress.completedIds.Clear();game.Progress.completedIds.AddRange(saved);game.Progress.ownedTools.Clear();game.Progress.ownedTools.AddRange(savedTools);s.RestoreProgress(game.Progress);outfall.RefreshNow();pose(origin);cutaway.EvaluateAt(origin,true);p.GetType().GetField("controlsActive",f).SetValue(p,controls);if(savedExists)PlayerPrefs.SetString(game.StorageKey,savedRecord);else PlayerPrefs.DeleteKey(game.StorageKey);PlayerPrefs.Save();}
 return new{passed=checks.Count,checks=checks.ToArray()};

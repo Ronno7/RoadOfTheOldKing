@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "approved": true,
+  "approval": "User approved revised drains on 26 October 2026. Gate studies excluded.",
+  "pixelsPerUnit": 16,
+  "sourceDirectory": "Source",
+  "parts": [
+    {
+      "name": "DrainEWet",
+      "file": "DrainEWet.png",
+      "width": 16,
+      "height": 24,
+      "sha256": "87d04b725fa987e9fe5a370ae695a6235fd1282b30182a473a53fab214c68ed6",
+      "pixelLabDrawingId": "7cf77be3-69a1-4cc1-9065-9c2572f37a5e"
+    },
+    {
+      "name": "DrainEDry",
+      "file": "DrainEDry.png",
+      "width": 16,
+      "height": 24,
+      "sha256": "953d66892702e7214c26a40f888169cddd9a1d9c23db928d9dfdc896994c9a0d",
+      "pixelLabDrawingId": "6b8fec06-7e58-4203-81cc-be443c8a3be0"
+    },
+    {
+      "name": "DrainWWet",
+      "file": "DrainWWet.png",
+      "width": 16,
+      "height": 24,
+      "sha256": "c39672db738ea3fc3958da848f433119a636626309882aaf9ec8cc062036181c",
+      "pixelLabDrawingId": "3930ec5a-fbd1-45e2-8b57-1fb6a94e6c54"
+    },
+    {
+      "name": "DrainWDry",
+      "file": "DrainWDry.png",
+      "width": 16,
+      "height": 24,
+      "sha256": "a7dc3db34fbdff0f6acb38dc15e6dcdde123121b72defb79c3021362e7ca609a",
+      "pixelLabDrawingId": "27608d84-c1f9-4956-90b2-0ce25fe03ac2"
+    },
+    {
+      "name": "DrainOutletWet",
+      "file": "DrainOutletWet.png",
+      "width": 24,
+      "height": 24,
+      "sha256": "5fb4bd1334a747258cef4904994bc56659b8a1a5d0f5fc9a985509e2996e1615",
+      "pixelLabDrawingId": "2f5e53f4-8a75-4f45-80ac-966174fc2d6b"
+    }
+  ],
+  "derivedLayers": "DrainEWater and DrainWWater retain wet pixels only where wet/dry sources differ. Each composite exactly reproduces its approved wet source."
+}

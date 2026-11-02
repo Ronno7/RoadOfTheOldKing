@@ -109,6 +109,9 @@ def enemy_profile(e):
     p["tokened"] = kind == "wolf"     # wolves share one attack token; pursuit enemies attack independently today
     return p
 
+MAX_FAILED_ATTEMPTS = 2  # one replay; deterministic repeated failure is reported as incomplete
+DEATH_SECONDS = 6       # assumed death/load overhead, separate from the actual return route
+
 MID_FIGHT_DRINK = 30   # a player drinks mid-fight below this; the drink spends one enemy cycle without attacking
 
 def fight(group, tier, hp, flasks, t=None):
@@ -121,7 +124,7 @@ def fight(group, tier, hp, flasks, t=None):
         dur += cycle; taken += incoming; cur -= incoming; pressure += [attackers] * int(round(cycle))
         if cur <= 0: return dur, taken, pressure, flasks, drinks, True
         if cur < MID_FIGHT_DRINK and flasks > 0:
-            flasks -= 1; drinks += 1; cur = min(MAX_HP, cur + FLASK_HEAL); taken -= FLASK_HEAL; continue
+            flasks -= 1; drinks += 1; healed = min(FLASK_HEAL, MAX_HP - cur); cur += healed; taken -= healed; continue
         target = min(alive, key=lambda a: a["hp"])
         if target["kind"] == "rat":   # a sweep catches clustered rats
             for r in sorted((a for a in alive if a["kind"] == "rat"), key=lambda a: a["hp"])[:t["sweep"]]: r["hp"] -= t["dmg_per_opening"]
@@ -132,72 +135,142 @@ def fight(group, tier, hp, flasks, t=None):
 
 # --- Route walk --------------------------------------------------------------------------------------------------
 def simulate(export, route, tier, state):
-    grid = Grid(export["grid"]); allowed = grid.reachable_from(route[0]["pos"])
-    enemies = {e["name"]: e for e in export["items"] if e["kind"] == "enemy"}
-    t = TIERS[tier]; speed = WALK * (1 - t["sprint_share"]) + SPRINT * t["sprint_share"]
-    timeline = []; clock = 0.0; pos = route[0]["pos"]; notes = []
-    hp, flasks = state["hp"], state["flasks"]; last_rest = 0.0; deaths = 0
+    """Single-scene convenience wrapper; use simulate_journey for cross-scene checkpoints."""
+    return simulate_journey({"scene": export}, [{"scene": "scene", "name": "route", "beats": route}], tier, state)
+
+
+def simulate_journey(exports, legs, tier, state):
+    """Replay the authored route from the latest rest after death, retaining one-time progress.
+
+    Replays include respawning fights and travel through the same waypoints. They skip completed
+    non-combat actions (puzzles, rewards, observations, shopping). This is a conservative authored
+    return itinerary, not a claim that a player repeats every detour or cannot evade a respawn.
+    Two failures at the same encounter stop the model; deterministic inputs cannot imply mastery.
+    """
+    steps = [(leg["scene"], leg["name"], beat) for leg in legs for beat in leg["beats"]
+             if tier in beat.get("tiers", TIERS)]
+    if not steps:
+        raise ValueError("Route has no beats for " + tier)
+    grids = {scene: Grid(export["grid"]) for scene, export in exports.items()}
+    allowed = {}
+    enemies = {scene: {e["name"]: e for e in export["items"] if e["kind"] == "enemy"}
+               for scene, export in exports.items()}
+    for scene, _, beat in steps:
+        if scene not in allowed:
+            allowed[scene] = grids[scene].reachable_from(beat["pos"])
+        missing = set(beat.get("enemies", [])) - enemies[scene].keys()
+        if missing:
+            raise ValueError("Missing exported enemies in " + scene + ": " + ", ".join(sorted(missing)))
+    t = TIERS[tier]
+    speed = WALK * (1 - t["sprint_share"]) + SPRINT * t["sprint_share"]
+    timeline, notes = [], []
+    clock = 0.0
+    scene, leg_name, first = steps[0]
+    pos = first["pos"]
+    hp, flasks = state["hp"], state["flasks"]
+    checkpoint = (0, scene, pos)
+    completed, failures, attempts = set(), {}, {}
+    deaths, index, replay_until = 0, 0, -1
+    state.update(completed=True, blocked_at=None)
 
     def add(kind, label, dur, intensity, extra=None):
         nonlocal clock
-        seg = dict(kind=kind, label=label, start=round(clock, 1), dur=round(dur, 1), intensity=intensity, hp=round(hp), flasks=flasks)
-        if extra: seg.update(extra)
-        timeline.append(seg); clock += dur
+        seg = dict(kind=kind, label=label, start=round(clock, 1), dur=round(dur, 1),
+                   intensity=intensity, hp=round(hp), flasks=flasks, leg=leg_name,
+                   retry=index <= replay_until)
+        if extra:
+            seg.update(extra)
+        timeline.append(seg)
+        clock += dur
 
-    for beat in route:
-        if "tiers" in beat and tier not in beat["tiers"]: continue   # optional beat only some players take
+    while index < len(steps):
+        next_scene, leg_name, beat = steps[index]
+        if next_scene != scene:
+            # Each scene's first beat is its arrival; no invented inter-scene distance.
+            scene, pos = next_scene, beat["pos"]
         if beat["pos"] != pos:
-            d = grid.path_length(pos, beat["pos"], allowed)
-            if d is None:
-                d = math.dist(pos, beat["pos"]) * 1.3; notes.append(f"no grid path to {beat['label']} (water state?); used 1.3x straight line")
-            d += beat.get("extra", 0)   # proposed road length not yet in the scene
-            dur = d * t["route_factor"] / speed
-            add("travel", "to " + beat["label"], dur, beat.get("travel_intensity", 1), dict(distance=round(d, 1)))
+            d = grids[scene].path_length(pos, beat["pos"], allowed[scene])
+            estimated = d is None
+            if estimated:
+                d = math.dist(pos, beat["pos"]) * 1.3
+                notes.append(f"no grid path to {beat['label']} (water state?); used 1.3x straight line")
+            d += beat.get("extra", 0)
+            add("travel", "to " + beat["label"], d * t["route_factor"] / speed,
+                beat.get("travel_intensity", 1), dict(distance=round(d, 1), estimated=estimated))
             pos = beat["pos"]
         k = beat["kind"]
+        if index in completed and (k != "fight" or beat.get("persistent", False)):
+            index += 1
+            continue
         if k == "fight":
-            group = [enemy_profile(enemies[n]) for n in beat.get("enemies", []) if n in enemies]
+            group = [enemy_profile(enemies[scene][n]) for n in beat.get("enemies", [])]
             group += [dict(ENEMY["rat"], kind="rat", tokened=False) for _ in range(beat.get("rats", 0))]
-            group += [dict(dict(cycle=3.0, dmg=20, hp=60), **e, tokened=False) for e in beat.get("synthetic", [])]   # proposed enemies
-            if beat.get("coordinated"):   # approved rule: one committed attack sequence at a time
-                for g in group: g["tokened"] = True
-            scale = beat.get("opening_scale", 1)   # long, promised recoveries let a player land more per opening
-            if scale != 1: t = dict(t, dmg_per_opening=t["dmg_per_opening"] * scale)
-            dur, taken, pressure, flasks, drinks, died = fight(group, tier, hp, flasks, t)
+            group += [dict(dict(cycle=3.0, dmg=20, hp=60), **e, tokened=False) for e in beat.get("synthetic", [])]
+            if beat.get("coordinated"):
+                for g in group:
+                    g["tokened"] = True
+            # A guardian's generous opening belongs to that encounter, never later fights.
+            fight_tier = dict(t, dmg_per_opening=t["dmg_per_opening"] * beat.get("opening_scale", 1))
+            attempts[index] = attempts.get(index, 0) + 1
+            dur, taken, pressure, flasks, drinks, died = fight(group, tier, hp, flasks, fight_tier)
             peak = max(pressure) if pressure else 1
             hp = max(0, hp - taken)
-            add("fight", beat["label"], dur, min(10, 4 + 1.5 * (peak - 1) + (3 if beat.get("boss") else 0) + (2 if taken + drinks * FLASK_HEAL > 30 else 0)),
-                dict(damage=round(taken + drinks * FLASK_HEAL), peak_attackers=peak, died=died, drinks=drinks))
+            add("fight", beat["label"], dur,
+                min(10, 4 + 1.5 * (peak - 1) + (3 if beat.get("boss") else 0) + (2 if taken + drinks * FLASK_HEAL > 30 else 0)),
+                dict(damage=round(taken + drinks * FLASK_HEAL), peak_attackers=peak,
+                     died=died, drinks=drinks, attempt=attempts[index]))
             if died:
-                deaths += 1; retry = clock - last_rest
-                add("death", "death at " + beat["label"], 6 + retry, 0, dict(retry_cost=round(retry)))
+                deaths += 1
+                failures[index] = failures.get(index, 0) + 1
+                terminal = failures[index] >= MAX_FAILED_ATTEMPTS
+                add("death", "death at " + beat["label"], DEATH_SECONDS, 0, dict(terminal=terminal))
+                if terminal:
+                    state.update(completed=False, blocked_at=beat["label"])
+                    notes.append(f"incomplete: {beat['label']} failed {MAX_FAILED_ATTEMPTS} times; no later beats simulated")
+                    break
+                replay_until = max(replay_until, index)
                 hp, flasks = MAX_HP, FLASKS
-                d2, t2, _, flasks, dr2, died2 = fight(group, tier, hp, flasks, t); hp = max(1, hp - t2)
-                add("fight", beat["label"] + " (retry)", d2, 7, dict(damage=round(t2 + dr2 * FLASK_HEAL), drinks=dr2, died=died2))
+                index, scene, pos = checkpoint
+                continue
             while hp < t["drink_below"] and flasks > 0 and hp < MAX_HP:
-                hp = min(MAX_HP, hp + FLASK_HEAL); flasks -= 1
+                hp = min(MAX_HP, hp + FLASK_HEAL)
+                flasks -= 1
                 add("recover", "flask", 1.5, 0.5)
         elif k == "rest":
-            t = TIERS[tier]
-            hp, flasks = MAX_HP, FLASKS; last_rest = clock
+            hp, flasks = MAX_HP, FLASKS
             add("rest", beat["label"], BEAT_TIME["light_rest"], 0)
+            checkpoint = (index + 1, scene, pos)
         else:
             base = BEAT_TIME.get(k, 5) * (t["puzzle"] if k == "puzzle" else t["lesson"] if k in ("lesson", "awaken") else 1)
             add(k, beat["label"], beat.get("time", base), beat.get("intensity", {"lesson": 2, "puzzle": 3, "awaken": 4, "look": 1.5}.get(k, 1)))
+        completed.add(index)
+        index += 1
     state.update(hp=hp, flasks=flasks)
     return timeline, notes, deaths
+
 
 def metrics(tl):
     total = sum(s["dur"] for s in tl) or 1
     by = lambda k: sum(s["dur"] for s in tl if s["kind"] == k)
-    first = next((s["start"] for s in tl if s["kind"] == "fight"), None)
-    gaps, last = [], 0.0
+    elapsed, first, quiet = 0.0, None, 0.0
+    gaps = []
     for s in tl:
         if s["kind"] == "fight":
-            gaps.append(s["start"] - last); last = s["start"] + s["dur"]
-    return dict(total_s=round(total), travel_pct=round(100 * by("travel") / total), fight_pct=round(100 * by("fight") / total),
+            if first is None:
+                first = round(elapsed, 1)
+            gaps.append(quiet)
+            quiet = 0.0
+        else:
+            quiet += s["dur"]
+        elapsed += s["dur"]
+    gaps.append(quiet)
+    complete = not any(s.get("terminal", False) for s in tl)
+    return dict(completed=complete, completion_s=round(total) if complete else None,
+                retry_s=round(sum(s["dur"] for s in tl if s.get("retry"))), death_s=round(by("death")),
+                estimated_travel_s=round(sum(s["dur"] for s in tl if s.get("estimated"))),
+                total_s=round(total), travel_pct=round(100 * by("travel") / total), fight_pct=round(100 * by("fight") / total),
                 learn_pct=round(100 * (by("lesson") + by("puzzle") + by("awaken")) / total), rest_pct=round(100 * (by("rest") + by("recover") + by("trader")) / total),
-                first_threat_s=first, longest_quiet_s=round(max(gaps + [total - last])), fights=sum(1 for s in tl if s["kind"] == "fight"),
+                first_threat_s=first, longest_quiet_s=round(max(gaps)), fights=sum(1 for s in tl if s["kind"] == "fight"),
                 damage=round(sum(s.get("damage", 0) for s in tl)), deaths=sum(1 for s in tl if s["kind"] == "death"),
                 flasks_used=sum(1 for s in tl if s["kind"] == "recover") + sum(s.get("drinks", 0) for s in tl))
 
@@ -216,7 +289,7 @@ def booth_stress(tl):
 
 def chart(path, title, runs):
     from PIL import Image, ImageDraw
-    W, H, L, B = 1500, 230 * len(runs) + 40, 70, 30
+    W, H, L = 1500, 250 * len(runs) + 60, 70
     img = Image.new("RGB", (W, H), (250, 249, 245)); d = ImageDraw.Draw(img)
     colors = {"travel": (184, 196, 170), "fight": (198, 70, 52), "lesson": (90, 130, 200), "puzzle": (70, 90, 170), "awaken": (150, 90, 190),
               "rest": (232, 160, 50), "recover": (240, 200, 120), "trader": (232, 160, 50), "death": (30, 30, 30), "pickup": (240, 210, 60),
@@ -224,12 +297,16 @@ def chart(path, title, runs):
     d.text((L, 8), title, fill=(30, 30, 30))
     maxt = max(sum(s["dur"] for s in tl) for _, tl, _ in runs)
     for r, (name, tl, stress) in enumerate(runs):
-        top = 40 + r * 230; sx = (W - L - 20) / maxt
-        d.text((8, top + 90), name, fill=(30, 30, 30))
+        top = 60 + r * 250; sx = (W - L - 20) / maxt
+        d.text((L, top - 20), name, fill=(30, 30, 30))
+        if not metrics(tl)["completed"]:
+            d.text((L + 240, top - 20), "INCOMPLETE: " + next(s["label"] for s in tl if s.get("terminal")), fill=(170, 35, 25))
         for s in tl:   # designed intensity bars
             x0 = L + s["start"] * sx; x1 = L + (s["start"] + s["dur"]) * sx; hgt = s["intensity"] * 16
             d.rectangle([x0, top + 170 - hgt, max(x0 + 1, x1), top + 170], fill=colors.get(s["kind"], (150, 150, 150)))
-        pts = [(L + i * sx, top + 170 - v * 1.6) for i, v in enumerate(stress)]   # Booth stress line
+        times = [s["start"] + s["dur"] * (i + 1) / max(1, int(round(s["dur"])))
+                 for s in tl for i in range(max(1, int(round(s["dur"]))))]
+        pts = [(L + time * sx, top + 170 - v * 1.6) for time, v in zip(times, stress)]
         if len(pts) > 1: d.line(pts, fill=(20, 20, 20), width=2)
         for s in tl:   # health
             x = L + s["start"] * sx; d.ellipse([x - 1, top + 222 - s["hp"] * .2 - 1, x + 1, top + 222 - s["hp"] * .2 + 1], fill=(40, 140, 60))
@@ -252,14 +329,10 @@ if __name__ == "__main__":
     exports = {sc: json.loads((src / f"pacing_{sc}.json").read_text(encoding="utf8")) for sc in {r["scene"] for r in routes}}
     results = {}
     for tier in TIERS:
-        state = dict(hp=MAX_HP, flasks=FLASKS); tl_all, notes_all = [], []
-        for leg in routes:
-            tl, notes, _ = simulate(exports[leg["scene"]], leg["beats"], tier, state)
-            offset = sum(s["dur"] for s in tl_all)
-            for s in tl: s["start"] = round(s["start"] + offset, 1); s["leg"] = leg["name"]
-            tl_all += tl; notes_all += notes
-        results[tier] = dict(timeline=tl_all, metrics=metrics(tl_all), notes=sorted(set(notes_all)),
-                             legs={leg["name"]: metrics([s for s in tl_all if s["leg"] == leg["name"]]) for leg in routes})
+        state = dict(hp=MAX_HP, flasks=FLASKS)
+        tl_all, notes_all, _ = simulate_journey(exports, routes, tier, state)
+        results[tier] = dict(timeline=tl_all, metrics=metrics(tl_all), blocked_at=state["blocked_at"], notes=sorted(set(notes_all)),
+                             legs={leg["name"]: metrics([s for s in tl_all if s["leg"] == leg["name"]]) for leg in routes if any(s["leg"] == leg["name"] for s in tl_all)})
     out.mkdir(parents=True, exist_ok=True)
     (out / f"pacing_{variant}.json").write_text(json.dumps(results, indent=1), encoding="utf8")
     chart(out / f"pacing_{variant}.png", f"Pacing model, {variant}: bars = designed intensity by beat type, line = Booth-style stress, dots = health",

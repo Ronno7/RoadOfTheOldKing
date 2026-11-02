@@ -1,0 +1,57 @@
+// Forest and props apply (24 Oct). Edit Mode. Reads "forest", "edgeTrees", "barn" and "beam" from an ops JSON written by
+// hayfields_layout.py (SessionState "Layout.Ops"). Stamped trees go into the shared Forest mass maps (row 0 trunks,
+// rows 1-3 canopy, one jitter per tree, like the arrival forest); edge trees, the barn and the beam are prefab
+// placeholders under Scenery/Hayfields (graybox). Undo recorded; does not save. Rerunning replaces the group.
+if (EditorApplication.isPlayingOrWillChangePlaymode) return "Stop Play first.";
+var root = GameObject.Find("Green Lowlands").transform;
+var json = Newtonsoft.Json.Linq.JObject.Parse(System.IO.File.ReadAllText(SessionState.GetString("Layout.Ops", "")));
+var mass = root.Find("Scenery/Arrival road landmarks/Forest mass");
+var trunks = mass.Find("Forest trunks").GetComponent<UnityEngine.Tilemaps.Tilemap>();
+var canopy = mass.Find("Forest canopy").GetComponent<UnityEngine.Tilemaps.Tilemap>();
+var byName = new Dictionary<string, UnityEngine.Tilemaps.TileBase>();
+foreach (var tm in new[] { trunks, canopy }) {
+    var used = new UnityEngine.Tilemaps.TileBase[tm.GetUsedTilesCount()]; tm.GetUsedTilesNonAlloc(used);
+    foreach (var t in used) if (t != null) byName[t.name] = t;
+}
+Undo.RegisterCompleteObjectUndo(trunks, "Hayfields forest"); Undo.RegisterCompleteObjectUndo(canopy, "Hayfields forest");
+var clear = json["forestClear"];   // replace this layout's earlier stamps; other forest (the arrival) is outside the rect
+if (clear != null) for (int x = (int)clear[0]; x <= (int)clear[1]; x++) for (int y = (int)clear[2]; y <= (int)clear[3]; y++)
+    foreach (var map in new[] { trunks, canopy }) { var c = new Vector3Int(x, y, 0); map.SetTile(c, null); map.SetTransformMatrix(c, Matrix4x4.identity); }
+int stamped = 0;
+foreach (var s in json["forest"]) {
+    int x = (int)s[1], y = (int)s[2]; string kind = (string)s[3];
+    var m = Matrix4x4.Translate(new Vector3((float)s[4], (float)s[5], 0));
+    for (int i = 0; i < 3; i++) for (int j = 0; j < 4; j++) {
+        var map = j == 0 ? trunks : canopy; var c = new Vector3Int(x + i, y + j, 0);
+        map.SetTile(c, byName[kind + "_" + i + "_" + j]); map.SetTransformMatrix(c, m);
+    }
+    stamped++;
+}
+var scenery = root.Find("Scenery");
+var old = scenery.Find("Hayfields (graybox)"); if (old != null) Undo.DestroyObjectImmediate(old.gameObject);
+var group = new GameObject("Hayfields (graybox)"); Undo.RegisterCreatedObjectUndo(group, "Hayfields props"); group.transform.SetParent(scenery, false);
+var edgeGroup = new GameObject("Edge trees"); edgeGroup.transform.SetParent(group.transform, false);
+Func<string, Transform, Vector3, string, GameObject> place = (path, parent, pos, name) => {
+    var go = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(path), parent);
+    go.transform.position = pos; go.name = name; return go;
+};
+foreach (var e in json["edgeTrees"]) {   // prefab trunk spans local x 0..2 with its collider on x 1
+    string kind = (string)e[3];
+    place("Assets/Prefabs/Environment/Shared/Trees/" + kind + ".prefab", edgeGroup.transform, new Vector3((int)e[1] - 1 + (float)e[4], (int)e[2], 0), kind);
+}
+var b = json["barn"];
+place("Assets/Prefabs/Environment/GreenLowlands/Workshop_Weathered.prefab", group.transform, new Vector3((int)b[0], (int)b[1], 0), "Harvest barn (placeholder)");
+var beam = json["beam"];   // the beam and gate are saved objects now (HayfieldsMechanismSetup); kept for older ops files
+if (beam != null && beam.Type != Newtonsoft.Json.Linq.JTokenType.Null) place("Assets/Prefabs/Environment/Shared/Fence_Post.prefab", group.transform, new Vector3((float)beam[0] - .5f, (float)beam[1] + 1, 0), "Hay-loading beam, raised over the breach (placeholder)");
+var gate = json["gate"];
+if (gate != null && gate.Type != Newtonsoft.Json.Linq.JTokenType.Null) {   // barred from inside until the unbar interaction exists: fences for the look, one block for collision
+    var gx = (float)gate[0]; var gy = (float)gate[1];
+    place("Assets/Prefabs/Environment/Shared/Fence_Horizontal.prefab", group.transform, new Vector3(gx - 2.5f, gy - .5f, 0), "Barn back gate (placeholder)");
+    place("Assets/Prefabs/Environment/Shared/Fence_Horizontal.prefab", group.transform, new Vector3(gx + .5f, gy - .5f, 0), "Barn back gate (placeholder)");
+    var block = new GameObject("Barn back gate block (barred from inside)"); block.transform.SetParent(group.transform, false);
+    block.transform.position = new Vector3(gx, gy, 0); block.layer = LayerMask.NameToLayer("Environment");
+    block.AddComponent<BoxCollider2D>().size = new Vector2(5.2f, 1f);
+}
+trunks.CompressBounds(); canopy.CompressBounds();
+UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(root.gameObject.scene);
+return "stamped " + stamped + ", edge trees " + edgeGroup.transform.childCount + ", barn and beam placed";

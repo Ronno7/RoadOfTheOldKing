@@ -34,6 +34,14 @@ GameObject probe=null;
 try{
  check(occupant==player.transform,"Cutaway follows the explicit player's foot transform");
  check(fade>0f&&hysteresis>0f,"Roof has a finite fade and exit hysteresis");
+ var heroBody=player.GetComponentsInChildren<SpriteRenderer>().First(r=>r.name=="Body");
+ System.Func<Renderer,Renderer,bool> drawsAbove=(a,b)=>SortingLayer.GetLayerValueFromID(a.sortingLayerID)>SortingLayer.GetLayerValueFromID(b.sortingLayerID)||(a.sortingLayerID==b.sortingLayerID&&a.sortingOrder>b.sortingOrder);
+ foreach(string roofName in new[]{"Distributor hall roof","Main hall roof"}){
+  var roof=GameObject.Find(roofName).GetComponent<SpriteRenderer>();
+  check(drawsAbove(roof,heroBody),"Closed roof occludes player behind building: "+roofName);
+  foreach(var gate in cut.GetComponentsInChildren<SpriteRenderer>(true).Where(r=>r.name=="Sliding timber leaf"))
+   check(drawsAbove(roof,gate),"Roof occludes passage leaf where projections overlap: "+roofName+"/"+gate.transform.parent.name);
+ }
  cut.enabled=false;var originalColors=roofs.Select(color).ToArray();var originalEnabled=roofs.Select(r=>r.enabled).ToArray();
  var interiorColors=interiors.Select(color).ToArray();var interiorEnabled=interiors.Select(r=>r.enabled).ToArray();
  check(originalEnabled.Any(x=>x),"Authored exterior has visible covering artwork");

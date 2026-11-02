@@ -37,7 +37,7 @@ if(EditorApplication.isPlaying&&SessionState.GetBool("Lowlands.Economy.PickupArt
         SessionState.SetInt("Lowlands.Economy.PickupArtPhase",1);
     }else if(stage==1){
         check(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name=="GreenLowlands","regional pickup-art phase");
-        var shard=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SunShardReward>();
+        var shard=System.Array.Find(UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SunShardReward>(FindObjectsInactive.Include,FindObjectsSortMode.None),r=>r.RewardId=="green-lowlands/basin");
         var visual=(GameObject)shard.GetType().GetField("visual",flags).GetValue(shard);
         check(native(visual,"SunShard")&&visual.activeSelf,"regional shard uses same visible native art");
         move(shard.transform.position);check(!shard.TryCollect(hero),"native shard still respects water-state gate");
@@ -67,7 +67,7 @@ if(EditorApplication.isPlaying&&SessionState.GetBool("Lowlands.Economy.PickupArt
         check(pg.ReturnToTitle(),"real scene unload after native pickup collection");
         SessionState.SetInt("Lowlands.Economy.PickupArtPhase",2);
     }else{
-        var shard=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SunShardReward>();
+        var shard=System.Array.Find(UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SunShardReward>(FindObjectsInactive.Include,FindObjectsSortMode.None),r=>r.RewardId=="green-lowlands/basin");
         check(shard.IsCollected&&!((GameObject)shard.GetType().GetField("visual",flags).GetValue(shard)).activeSelf,"reload keeps collected shard hidden");
         var heart=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.HeartFragmentPickup>(FindObjectsSortMode.None).First(h=>h.name=="H1 fragment");
         check(heart.IsCollected&&!((GameObject)heart.GetType().GetField("visual",flags).GetValue(heart)).activeSelf,"reload keeps collected heart hidden");
@@ -294,7 +294,7 @@ if(phase==0||phase==10){
     check(!game.Rewards.TryCollectCoinCache("invalid",0)&&!game.Rewards.TryCollectCoinCache("invalid",-1),"nonpositive coin awards rejected");
     int balance=game.Progress.bronzeCoins;game.Progress.bronzeCoins=int.MaxValue-1;check(!game.Rewards.TryCollectCoinCache("overflow",5)&&!game.Progress.Has("coins/collected/overflow"),"overflow does not consume reward");game.Progress.bronzeCoins=balance;
     check(game.Rewards.TryCollectCoinCache("verification/trader-funding",100),"isolated test funding");
-    foreach(var heart in UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.HeartFragmentPickup>(FindObjectsSortMode.None)){pose(heart.transform.position);check(heart.TryCollect(player),"collect reachable authored fragment "+heart.RewardId);}
+    foreach(var heart in UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.HeartFragmentPickup>(FindObjectsSortMode.None)){if(!heart.IsAvailable)continue;/* H3 waits on the barn fight (28 Oct) */pose(heart.transform.position);check(heart.TryCollect(player),"collect reachable authored fragment "+heart.RewardId);}
     approachTrader();int oldMax=player.Health.MaxHealth;
     check(offer("trader-fragment").TryCollect(player)&&game.Progress.bronzeCoins==55&&player.Health.MaxHealth==oldMax+20,"finite shop fragment completes heart and debits once");
     check(!offer("trader-fragment").TryCollect(player)&&game.Progress.bronzeCoins==55,"sold fragment cannot charge or grant twice");

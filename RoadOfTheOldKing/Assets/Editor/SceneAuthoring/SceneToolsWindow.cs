@@ -9,6 +9,9 @@ namespace RoadOfTheOldKing.EditorTools
     {
         string result = "Run the updates needed after editing. Inspect the result, then save normally.";
         Vector2 scroll;
+        // Lowlands only: limit the vegetation bake to the edited area so accepted fields elsewhere stay as baked.
+        bool vegetationRegionOnly = true;
+        RectInt vegetationRegion = new RectInt(0, 0, 10, 10);
 
         [MenuItem("Road of the Old King/Scene Tools", priority = 10)]
         public static void Open() => GetWindow<SceneToolsWindow>("Scene Tools");
@@ -29,10 +32,17 @@ namespace RoadOfTheOldKing.EditorTools
                     if (GUILayout.Button("Height Brush")) LowlandsElevationWindow.Open();
                     Button("Update basin drainage", () => { TerrainKitBuilder.BakeBasinDrainage(); return "Basin drainage updated."; });
                 }
+                if (lowlands)
+                {
+                    vegetationRegionOnly = EditorGUILayout.ToggleLeft("Update vegetation only inside the edited area (world cells)", vegetationRegionOnly);
+                    if (vegetationRegionOnly) vegetationRegion = EditorGUILayout.RectIntField(vegetationRegion);
+                    else EditorGUILayout.HelpBox("A whole-region bake reshuffles accepted fields: the current masks add plants the accepted layout does not have.", MessageType.Warning);
+                }
                 if (tutorial || lowlands)
                 {
                     Button("Update vegetation", () => {
-                        if (tutorial) TutorialVegetationBuilder.Bake(); else GreenLowlandsVegetationBuilder.Bake();
+                        if (tutorial) TutorialVegetationBuilder.Bake();
+                        else GreenLowlandsVegetationBuilder.Bake(vegetationRegionOnly ? vegetationRegion : (RectInt?)null);
                         return tutorial ? TutorialVegetationBuilder.ValidateLayout() : GreenLowlandsVegetationBuilder.ValidateLayout();
                     });
                     Button("Check vegetation", () => tutorial ? TutorialVegetationBuilder.ValidateLayout() : GreenLowlandsVegetationBuilder.ValidateLayout());

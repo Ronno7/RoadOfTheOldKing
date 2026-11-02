@@ -45,6 +45,40 @@ namespace RoadOfTheOldKing.EditorTools
             scroll = EditorGUILayout.BeginScrollView(scroll);
             EditorGUILayout.SelectableLabel(result, EditorStyles.wordWrappedLabel, GUILayout.MinHeight(140));
             EditorGUILayout.EndScrollView();
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField("World mechanisms", EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox("Hayfields imports the approved source manifest with a fixed hinge pivot. It does not change scenes or character art.", MessageType.Info);
+            using (new EditorGUI.DisabledScope(EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling))
+                if (GUILayout.Button("Import Hayfields mechanism"))
+                {
+                    try { result = HayfieldsAnimationImporter.Import(); }
+                    catch (Exception e) { result = e.Message; Debug.LogException(e); }
+                }
+            EditorGUILayout.HelpBox("Waterworks imports the approved drain manifest and separates water from dry masonry. It does not change scenes or gate art.", MessageType.Info);
+            using (new EditorGUI.DisabledScope(EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling))
+                if (GUILayout.Button("Import Waterworks drains"))
+                {
+                    try { result = WaterworksAnimationImporter.Import(); }
+                    catch (Exception e) { result = e.Message; Debug.LogException(e); }
+                }
+            using (new EditorGUI.DisabledScope(EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling))
+                if (GUILayout.Button("Import Waterworks gates"))
+                {
+                    try { result = WaterworksAnimationImporter.ImportGates(); }
+                    catch (Exception e) { result = e.Message; Debug.LogException(e); }
+                }
+            using (new EditorGUI.DisabledScope(EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling))
+                if (GUILayout.Button("Import Waterworks canal"))
+                {
+                    try { result = WaterworksAnimationImporter.ImportCanal(); }
+                    catch (Exception e) { result = e.Message; Debug.LogException(e); }
+                }
+            using (new EditorGUI.DisabledScope(EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling))
+                if (GUILayout.Button("Import Waterworks culvert"))
+                {
+                    try { result = WaterworksAnimationImporter.ImportCulvert(); }
+                    catch (Exception e) { result = e.Message; Debug.LogException(e); }
+                }
         }
     }
 }

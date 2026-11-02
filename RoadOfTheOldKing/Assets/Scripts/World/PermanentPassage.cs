@@ -22,6 +22,7 @@ namespace RoadOfTheOldKing.World
 
         public bool IsOpen { get; private set; }
         public bool IsMoving => IsOpen && opening < 1f;
+        public float OpeningProgress => IsOpen ? opening : 0f;
         public string ProgressId => progressId;
         public override string Prompt => prompt;
 

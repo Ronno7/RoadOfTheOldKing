@@ -9,9 +9,12 @@ namespace RoadOfTheOldKing.World
         [SerializeField] private string id;
         [Tooltip("Optional world-space facing on arrival. Zero preserves the player's normal initial facing.")]
         [SerializeField] private Vector2 arrivalFacing = Vector2.zero;
+        [Tooltip("Keep compatibility arrivals resolvable without listing them as duplicate F4 travel destinations.")]
+        [SerializeField] private bool hideFromDevTravel;
         public string Id => id;
         public Vector2 Position => transform.position;
         public Vector2 ArrivalFacing => arrivalFacing;
+        public bool ShowInDevTravel => !hideFromDevTravel;
 
         public static SceneSpawnPoint Find(string id)
         {

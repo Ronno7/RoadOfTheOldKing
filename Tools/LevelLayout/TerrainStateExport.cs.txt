@@ -4,7 +4,9 @@
 var root = GameObject.Find("Green Lowlands").transform;
 string outPath = SessionState.GetString("Layout.Out", "");
 if (string.IsNullOrEmpty(outPath)) return "Set SessionState Layout.Out.";
-int x0 = -30, x1 = 48, y0 = -82, y1 = 4;
+int x0 = -30, x1 = 48, y0 = -82, y1 = 4;   // arrival road; SessionState "Layout.Region" = "x0,x1,y0,y1" overrides
+var reg = SessionState.GetString("Layout.Region", "");
+if (reg.Length > 0) { var r = reg.Split(',').Select(int.Parse).ToArray(); x0 = r[0]; x1 = r[1]; y0 = r[2]; y1 = r[3]; }
 Func<string, UnityEngine.Tilemaps.Tilemap> T = m => { var t = root.Find(m); return t != null ? t.GetComponent<UnityEngine.Tilemaps.Tilemap>() : null; };
 var maps = new Dictionary<string, UnityEngine.Tilemaps.Tilemap> {
     { "ridgeTop", T("Terrain/Landforms and rock enclosure/Terrain - Ridge tops") },
@@ -24,6 +26,25 @@ var maps = new Dictionary<string, UnityEngine.Tilemaps.Tilemap> {
     { "marks", T("Authoring/Authoring - elevation guides/Height plan markings") },
     { "elev", T("Authoring/Authoring - elevation guides/Elevation - Lower Normal Upper") },
     { "trans", T("Authoring/Authoring - elevation guides/Transitions - arrows point uphill") },
+    // Core layers (north bank and beyond): stone enclosure massifs, upper terrace turf, meadow and vegetation masks.
+    { "enclTop", T("Terrain/Landforms and rock enclosure/Terrain - Enclosure tops") },
+    { "enclFace", T("Terrain/Landforms and rock enclosure/Terrain - Enclosure faces") },
+    { "terrace", T("Terrain/Landforms and rock enclosure/Terrain - upper meadow terraces") },
+    { "meadow", T("Ground and Paths/Regional surfaces/Ground - regional meadow") },
+    { "countryLane", T("Ground and Paths/Regional surfaces/Paths - old country lanes") },
+    { "woodland", T("Collision/Woodland barriers") },
+    { "maskMeadow", T("Authoring/Vegetation masks (hidden)/Meadow mask") },
+    { "maskTerrace", T("Authoring/Vegetation masks (hidden)/Upper terrace mask") },
+    { "maskPath", T("Authoring/Vegetation masks (hidden)/Path exclusion mask") },
+    // Pond high water and its drained floor (both change with the sluice), basin stairs and the stamped forest mass.
+    { "pondColl", T("Collision/Pond high water/Flooded pond and road-cut") },
+    { "pondWater", T("Collision/Pond high water/Terrain - changing pond water") },
+    { "silt", T("Ground and Paths/Regional surfaces/Ground - exposed basin silt") },
+    { "basinFloor", T("Scenery/Ground detail/Detail - basin floor") },
+    { "maskBasin", T("Authoring/Vegetation masks (hidden)/Basin exclusion mask") },
+    { "subConn", T("Terrain/Transitions/Terrain - submerged height connectors") },
+    { "forestTrunk", T("Scenery/Arrival road landmarks/Forest mass/Forest trunks") },
+    { "forestCanopy", T("Scenery/Arrival road landmarks/Forest mass/Forest canopy") },
 };
 var missing = maps.Where(kv => kv.Value == null).Select(kv => kv.Key).ToArray();
 if (missing.Length > 0) return "Missing maps: " + string.Join(",", missing);

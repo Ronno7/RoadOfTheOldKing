@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "approved": true,
+  "date": "2026-10-26",
+  "approval": "User accepted corrected whole-platform preview and requested keeping the culvert visibly below the path.",
+  "pixelsPerUnit": 16,
+  "sourceDirectory": "Source",
+  "parts": [
+    {
+      "name": "CulvertDepthBed",
+      "file": "CulvertDepthBed.png",
+      "sha256": "1dc75ac8d590353b26e32e767f517beaca5401b4a376a31be11eb8a75590e7cc",
+      "width": 96,
+      "height": 52,
+      "pivotX": 48,
+      "pivotY": 26
+    },
+    {
+      "name": "CulvertDepthBars",
+      "file": "CulvertDepthBars.png",
+      "sha256": "11d9a3581f101dfecc4ce513006bcde3c4ea191ac8403730ea5c42c2b497eae4",
+      "width": 96,
+      "height": 52,
+      "pivotX": 48,
+      "pivotY": 26
+    },
+    {
+      "name": "CulvertDepthWater",
+      "file": "CulvertDepthWater.png",
+      "sha256": "6ab63b3b5623e1926ed64077c10c86ea9e2144e547d2bff61e24b66dce20fe35",
+      "width": 384,
+      "height": 52,
+      "pivotX": 48,
+      "pivotY": 26
+    }
+  ]
+}

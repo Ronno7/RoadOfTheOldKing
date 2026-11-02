@@ -1,3 +1,4 @@
+using RoadOfTheOldKing.Combat;
 using RoadOfTheOldKing.Player;
 using RoadOfTheOldKing.Progression;
 using UnityEngine;
@@ -19,7 +20,7 @@ namespace RoadOfTheOldKing.World
         [SerializeField] protected string requiredMilestone;
         [Tooltip("Optional encounter: the reward appears once all its guards are defeated.")]
         [SerializeField] protected EncounterUnlock unlock;
-        [Tooltip("With an unlock: move to where the last guard fell.")]
+        [Tooltip("With an unlock: lie in the fallen guard's body (where the last one fell, and with the body after a reload or a corpse slide).")]
         [SerializeField] protected bool appearWhereLastFell;
         [Tooltip("With an unlock: grant immediately, with nothing to pick up.")]
         [SerializeField] protected bool awardImmediately;
@@ -33,6 +34,7 @@ namespace RoadOfTheOldKing.World
         public string RewardId => rewardId;
         public EncounterUnlock Unlock => unlock;
         public bool IsAvailable { get; private set; } = true;
+        private bool followFallen;
         public bool IsCollected => GameSession.Instance != null &&
             RewardKeys.IsGranted(GameSession.Instance.Progress, Kind, rewardId, GrantedTool);
 
@@ -56,6 +58,7 @@ namespace RoadOfTheOldKing.World
             if (IsAvailable || IsCollected) return;
             IsAvailable = true;
             if (appearWhereLastFell && source.LastFallen.HasValue) transform.position = source.LastFallen.Value;
+            followFallen = appearWhereLastFell;
             if (awardImmediately) Grant(null);
             Refresh();
             // Only a live unlock announces itself; RestoreProgress shows the reward quietly.
@@ -89,6 +92,23 @@ namespace RoadOfTheOldKing.World
             OnRefresh(shown);
         }
 
+        // An untaken reward stays in the body it fell from: corpses slide after the killing blow, and a scene
+        // revisit restores bodies where they fell. It follows the nearest fallen guard; with none fallen
+        // (revived by rest) it stays put.
+        private void LateUpdate()
+        {
+            if (!followFallen || !IsAvailable || IsCollected) return;
+            Damageable nearest = null;
+            float best = float.MaxValue;
+            foreach (var guard in unlock.Guards)
+            {
+                if (guard == null || guard.IsAlive) continue;
+                float d = ((Vector2)(guard.transform.position - transform.position)).sqrMagnitude;
+                if (d < best) { best = d; nearest = guard; }
+            }
+            if (nearest != null) transform.position = nearest.transform.position;
+        }
+
         // Subclass presentation beyond the visual (e.g. a collider).
         protected virtual void OnRefresh(bool shown) { }
 
@@ -97,6 +117,7 @@ namespace RoadOfTheOldKing.World
         public void RestoreProgress(ProgressState state)
         {
             IsAvailable = unlock == null || unlock.IsUnlocked(state);
+            followFallen = appearWhereLastFell && unlock != null && IsAvailable;
             if (IsAvailable && awardImmediately && !RewardKeys.IsGranted(state, Kind, rewardId, GrantedTool)) Grant(null);
             Refresh();
         }

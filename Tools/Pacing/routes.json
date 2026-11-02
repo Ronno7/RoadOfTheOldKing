@@ -844,20 +844,20 @@
      ]
     },
     {
-     "label": "eastern hollow: camp view, rope anchor, hidden pocket",
+     "label": "eastern hollow road",
      "pos": [
-      108,
-      40
+      148.5,
+      44.5
      ],
      "kind": "look",
-     "time": 12,
+     "time": 4,
      "travel_intensity": 1.5
     },
     {
      "label": "E3 orchard (coordinated)",
      "pos": [
-      116,
-      88
+      115,
+      92
      ],
      "kind": "fight",
      "enemies": [
@@ -876,21 +876,10 @@
      "kind": "pickup"
     },
     {
-     "label": "orchard shortcut to the mill bonfire",
-     "pos": [
-      14.5,
-      4
-     ],
-     "kind": "rest",
-     "tiers": [
-      "newcomer"
-     ]
-    },
-    {
      "label": "E4 north-bank wolves",
      "pos": [
-      60,
-      92
+      84,
+      97
      ],
      "kind": "fight",
      "synthetic": [
@@ -912,16 +901,16 @@
     {
      "label": "north-bank bonfire (before the guardian)",
      "pos": [
-      34,
-      90
+      60.5,
+      99.5
      ],
      "kind": "rest"
     },
     {
      "label": "ancient guardian wakes",
      "pos": [
-      20,
-      88
+      24.5,
+      95
      ],
      "kind": "fight",
      "synthetic": [
@@ -938,8 +927,1283 @@
     {
      "label": "rest after the guardian",
      "pos": [
-      34,
-      90
+      60.5,
+      99.5
+     ],
+     "kind": "rest",
+     "tiers": [
+      "newcomer",
+      "learning"
+     ]
+    },
+    {
+     "label": "sluice puzzle",
+     "pos": [
+      8,
+      86
+     ],
+     "kind": "puzzle"
+    },
+    {
+     "label": "basin drains: rat nest exposed",
+     "pos": [
+      18.5,
+      30
+     ],
+     "kind": "fight",
+     "rats": 5
+    },
+    {
+     "label": "S3 in the basin",
+     "pos": [
+      18.5,
+      26.5
+     ],
+     "kind": "pickup"
+    },
+    {
+     "label": "upgrade at the fire",
+     "pos": [
+      14.5,
+      4
+     ],
+     "kind": "upgrade"
+    }
+   ]
+  }
+ ],
+ "built_curious": [
+  {
+   "name": "Lowlands",
+   "scene": "GreenLowlands",
+   "beats": [
+    {
+     "label": "arrival: old road descent",
+     "pos": [
+      6,
+      -58
+     ],
+     "kind": "look",
+     "time": 2
+    },
+    {
+     "label": "vista ledge over the waystation",
+     "pos": [
+      0,
+      -27.5
+     ],
+     "kind": "look",
+     "time": 6,
+     "travel_intensity": 1.5
+    },
+    {
+     "label": "rat swarm at the waystation",
+     "pos": [
+      3.5,
+      -38.5
+     ],
+     "kind": "fight",
+     "rats": 6
+    },
+    {
+     "label": "lone scavenger at the looted cart",
+     "pos": [
+      21.5,
+      -20
+     ],
+     "kind": "fight",
+     "enemies": [
+      "Border scavenger (looted cart)"
+     ],
+     "travel_intensity": 1.5
+    },
+    {
+     "label": "mixed pack in the riverside meadow",
+     "pos": [
+      41,
+      -15
+     ],
+     "kind": "fight",
+     "enemies": [
+      "Border wolf 2"
+     ],
+     "rats": 3
+    },
+    {
+     "label": "first sight of the Lowlands",
+     "pos": [
+      29.5,
+      -1.5
+     ],
+     "kind": "look",
+     "time": 4
+    },
+    {
+     "label": "Lowlands bonfire",
+     "pos": [
+      14.5,
+      4
+     ],
+     "kind": "rest"
+    },
+    {
+     "label": "trader",
+     "pos": [
+      10,
+      3
+     ],
+     "kind": "trader"
+    },
+    {
+     "label": "village pots",
+     "pos": [
+      7,
+      11
+     ],
+     "kind": "pickup"
+    },
+    {
+     "label": "pot by the mill lane",
+     "pos": [
+      13,
+      18
+     ],
+     "kind": "pickup"
+    },
+    {
+     "label": "roadside purse",
+     "pos": [
+      41.5,
+      20.5
+     ],
+     "kind": "pickup"
+    },
+    {
+     "label": "mill overlook (S3 glimpse)",
+     "pos": [
+      22,
+      12
+     ],
+     "kind": "look"
+    },
+    {
+     "label": "E1 boar",
+     "pos": [
+      84,
+      32
+     ],
+     "kind": "fight",
+     "enemies": [
+      "Lower pasture boar"
+     ]
+    },
+    {
+     "label": "E2 hedgerow-bend wolves (fork)",
+     "pos": [
+      97,
+      30
+     ],
+     "kind": "fight",
+     "coordinated": true,
+     "synthetic": [
+      {
+       "kind": "wolf",
+       "hp": 60,
+       "cycle": 3.0,
+       "dmg": 15
+      },
+      {
+       "kind": "wolf",
+       "hp": 60,
+       "cycle": 3.0,
+       "dmg": 15
+      }
+     ]
+    },
+    {
+     "label": "pasture edge: H1 glimpse",
+     "pos": [
+      69,
+      54
+     ],
+     "kind": "look"
+    },
+    {
+     "label": "hollow bank stair",
+     "pos": [
+      136.5,
+      28.5
+     ],
+     "kind": "look",
+     "time": 0
+    },
+    {
+     "label": "bank rope anchor: kit needed",
+     "pos": [
+      140.5,
+      43.5
+     ],
+     "kind": "look",
+     "time": 3
+    },
+    {
+     "label": "look down into the camp",
+     "pos": [
+      139.5,
+      49
+     ],
+     "kind": "look",
+     "time": 4
+    },
+    {
+     "label": "hidden bank pot",
+     "pos": [
+      134.5,
+      53.5
+     ],
+     "kind": "pickup"
+    },
+    {
+     "label": "return down the bank stair",
+     "pos": [
+      136.5,
+      28.5
+     ],
+     "kind": "look",
+     "time": 0
+    },
+    {
+     "label": "eastern hollow road",
+     "pos": [
+      148.5,
+      44.5
+     ],
+     "kind": "look",
+     "time": 4,
+     "travel_intensity": 1.5
+    },
+    {
+     "label": "hollow north exit",
+     "pos": [
+      124.5,
+      73.5
+     ],
+     "kind": "look",
+     "time": 0
+    },
+    {
+     "label": "orchard stair: rim fork",
+     "pos": [
+      124.5,
+      81.5
+     ],
+     "kind": "look",
+     "time": 0
+    },
+    {
+     "label": "orchard rim west turn",
+     "pos": [
+      105.5,
+      81.5
+     ],
+     "kind": "look",
+     "time": 0
+    },
+    {
+     "label": "orchard lookout: observe the trio",
+     "pos": [
+      106,
+      92
+     ],
+     "kind": "look",
+     "time": 4
+    },
+    {
+     "label": "E3 orchard (coordinated)",
+     "pos": [
+      115,
+      92
+     ],
+     "kind": "fight",
+     "enemies": [
+      "Orchard scavenger 1",
+      "Orchard scavenger 2",
+      "Orchard scavenger 3"
+     ],
+     "coordinated": true
+    },
+    {
+     "label": "S2 chest",
+     "pos": [
+      117,
+      88
+     ],
+     "kind": "pickup"
+    },
+    {
+     "label": "high route: High Pass glimpse",
+     "pos": [
+      126,
+      97
+     ],
+     "kind": "look"
+    },
+    {
+     "label": "E6 upper spur scavengers",
+     "pos": [
+      89.5,
+      61
+     ],
+     "kind": "fight",
+     "enemies": [
+      "Upper spur scavenger 1",
+      "Upper spur scavenger 2"
+     ]
+    },
+    {
+     "label": "H1 fragment",
+     "pos": [
+      68.49,
+      60.25
+     ],
+     "kind": "pickup"
+    },
+    {
+     "label": "E4 north-bank wolves",
+     "pos": [
+      84,
+      97
+     ],
+     "kind": "fight",
+     "synthetic": [
+      {
+       "kind": "wolf",
+       "hp": 60,
+       "cycle": 3.0,
+       "dmg": 15
+      },
+      {
+       "kind": "wolf",
+       "hp": 60,
+       "cycle": 3.0,
+       "dmg": 15
+      }
+     ],
+     "coordinated": true
+    },
+    {
+     "label": "north bank: H2 glimpse",
+     "pos": [
+      30.5,
+      85
+     ],
+     "kind": "look"
+    },
+    {
+     "label": "north-bank bonfire (before the guardian)",
+     "pos": [
+      60.5,
+      99.5
+     ],
+     "kind": "rest"
+    },
+    {
+     "label": "ancient guardian wakes",
+     "pos": [
+      24.5,
+      95
+     ],
+     "kind": "fight",
+     "synthetic": [
+      {
+       "kind": "guardian",
+       "hp": 240,
+       "cycle": 4.0,
+       "dmg": 22
+      }
+     ],
+     "boss": true,
+     "opening_scale": 1.5
+    },
+    {
+     "label": "rest after the guardian",
+     "pos": [
+      60.5,
+      99.5
+     ],
+     "kind": "rest",
+     "tiers": [
+      "newcomer",
+      "learning"
+     ]
+    },
+    {
+     "label": "sluice puzzle",
+     "pos": [
+      8,
+      86
+     ],
+     "kind": "puzzle"
+    },
+    {
+     "label": "basin drains: rat nest exposed",
+     "pos": [
+      18.5,
+      30
+     ],
+     "kind": "fight",
+     "rats": 5
+    },
+    {
+     "label": "S3 in the basin",
+     "pos": [
+      18.5,
+      26.5
+     ],
+     "kind": "pickup"
+    },
+    {
+     "label": "H2 fragment (drained shelf)",
+     "pos": [
+      30.55,
+      81.52
+     ],
+     "kind": "pickup"
+    },
+    {
+     "label": "E5 roadworkers' camp",
+     "pos": [
+      76,
+      87
+     ],
+     "kind": "fight",
+     "enemies": [
+      "Northern road scavenger 1",
+      "Northern road scavenger 2"
+     ]
+    },
+    {
+     "label": "storehouse doorway (dark; lantern later)",
+     "pos": [
+      20.5,
+      77.75
+     ],
+     "kind": "look",
+     "time": 8
+    },
+    {
+     "label": "upgrade at the fire",
+     "pos": [
+      14.5,
+      4
+     ],
+     "kind": "upgrade"
+    },
+    {
+     "label": "buy rope",
+     "pos": [
+      10,
+      3
+     ],
+     "kind": "trader"
+    },
+    {
+     "label": "bank rope crossing to the camp",
+     "pos": [
+      140.5,
+      43.5
+     ],
+     "kind": "look",
+     "time": 2
+    },
+    {
+     "label": "E7 bandit camp",
+     "pos": [
+      127.5,
+      43
+     ],
+     "kind": "fight",
+     "enemies": [
+      "Workshop scavenger 1",
+      "Workshop scavenger 2"
+     ]
+    },
+    {
+     "label": "F1 workshop carving",
+     "pos": [
+      134.91,
+      49.21
+     ],
+     "kind": "lesson",
+     "time": 12
+    },
+    {
+     "label": "workshop cache",
+     "pos": [
+      133,
+      48
+     ],
+     "kind": "pickup"
+    }
+   ]
+  }
+ ],
+ "built_purposeful": [
+  {
+   "name": "Lowlands",
+   "scene": "GreenLowlands",
+   "beats": [
+    {
+     "label": "arrival: old road descent",
+     "pos": [
+      6,
+      -58
+     ],
+     "kind": "look",
+     "time": 2
+    },
+    {
+     "label": "vista ledge over the waystation",
+     "pos": [
+      0,
+      -27.5
+     ],
+     "kind": "look",
+     "time": 6,
+     "travel_intensity": 1.5
+    },
+    {
+     "label": "rat swarm at the waystation",
+     "pos": [
+      3.5,
+      -38.5
+     ],
+     "kind": "fight",
+     "rats": 6
+    },
+    {
+     "label": "lone scavenger at the looted cart",
+     "pos": [
+      21.5,
+      -20
+     ],
+     "kind": "fight",
+     "enemies": [
+      "Border scavenger (looted cart)"
+     ],
+     "travel_intensity": 1.5
+    },
+    {
+     "label": "mixed pack in the riverside meadow",
+     "pos": [
+      41,
+      -15
+     ],
+     "kind": "fight",
+     "enemies": [
+      "Border wolf 2"
+     ],
+     "rats": 3
+    },
+    {
+     "label": "first sight of the Lowlands",
+     "pos": [
+      29.5,
+      -1.5
+     ],
+     "kind": "look",
+     "time": 4
+    },
+    {
+     "label": "Lowlands bonfire",
+     "pos": [
+      14.5,
+      4
+     ],
+     "kind": "rest"
+    },
+    {
+     "label": "trader",
+     "pos": [
+      10,
+      3
+     ],
+     "kind": "trader"
+    },
+    {
+     "label": "mill overlook (S3 glimpse)",
+     "pos": [
+      22,
+      12
+     ],
+     "kind": "look"
+    },
+    {
+     "label": "E1 boar",
+     "pos": [
+      84,
+      32
+     ],
+     "kind": "fight",
+     "enemies": [
+      "Lower pasture boar"
+     ]
+    },
+    {
+     "label": "E2 hedgerow-bend wolves (fork)",
+     "pos": [
+      97,
+      30
+     ],
+     "kind": "fight",
+     "coordinated": true,
+     "synthetic": [
+      {
+       "kind": "wolf",
+       "hp": 60,
+       "cycle": 3.0,
+       "dmg": 15
+      },
+      {
+       "kind": "wolf",
+       "hp": 60,
+       "cycle": 3.0,
+       "dmg": 15
+      }
+     ]
+    },
+    {
+     "label": "eastern hollow road",
+     "pos": [
+      148.5,
+      44.5
+     ],
+     "kind": "look",
+     "time": 4,
+     "travel_intensity": 1.5
+    },
+    {
+     "label": "E3 orchard (coordinated)",
+     "pos": [
+      115,
+      92
+     ],
+     "kind": "fight",
+     "enemies": [
+      "Orchard scavenger 1",
+      "Orchard scavenger 2",
+      "Orchard scavenger 3"
+     ],
+     "coordinated": true
+    },
+    {
+     "label": "S2 chest",
+     "pos": [
+      117,
+      88
+     ],
+     "kind": "pickup"
+    },
+    {
+     "label": "E4 north-bank wolves",
+     "pos": [
+      84,
+      97
+     ],
+     "kind": "fight",
+     "synthetic": [
+      {
+       "kind": "wolf",
+       "hp": 60,
+       "cycle": 3.0,
+       "dmg": 15
+      },
+      {
+       "kind": "wolf",
+       "hp": 60,
+       "cycle": 3.0,
+       "dmg": 15
+      }
+     ],
+     "coordinated": true
+    },
+    {
+     "label": "north-bank bonfire (before the guardian)",
+     "pos": [
+      60.5,
+      99.5
+     ],
+     "kind": "rest"
+    },
+    {
+     "label": "ancient guardian wakes",
+     "pos": [
+      24.5,
+      95
+     ],
+     "kind": "fight",
+     "synthetic": [
+      {
+       "kind": "guardian",
+       "hp": 240,
+       "cycle": 4.0,
+       "dmg": 22
+      }
+     ],
+     "boss": true,
+     "opening_scale": 1.5
+    },
+    {
+     "label": "rest after the guardian",
+     "pos": [
+      60.5,
+      99.5
+     ],
+     "kind": "rest",
+     "tiers": [
+      "newcomer",
+      "learning"
+     ]
+    },
+    {
+     "label": "sluice puzzle",
+     "pos": [
+      8,
+      86
+     ],
+     "kind": "puzzle"
+    },
+    {
+     "label": "basin drains: rat nest exposed",
+     "pos": [
+      18.5,
+      30
+     ],
+     "kind": "fight",
+     "rats": 5
+    },
+    {
+     "label": "S3 in the basin",
+     "pos": [
+      18.5,
+      26.5
+     ],
+     "kind": "pickup"
+    },
+    {
+     "label": "upgrade at the fire",
+     "pos": [
+      14.5,
+      4
+     ],
+     "kind": "upgrade"
+    }
+   ]
+  }
+ ],
+ "built_no_shortcut": [
+  {
+   "name": "Lowlands",
+   "scene": "GreenLowlands",
+   "beats": [
+    {
+     "label": "arrival: old road descent",
+     "pos": [
+      6,
+      -58
+     ],
+     "kind": "look",
+     "time": 2
+    },
+    {
+     "label": "vista ledge over the waystation",
+     "pos": [
+      0,
+      -27.5
+     ],
+     "kind": "look",
+     "time": 6,
+     "travel_intensity": 1.5
+    },
+    {
+     "label": "rat swarm at the waystation",
+     "pos": [
+      3.5,
+      -38.5
+     ],
+     "kind": "fight",
+     "rats": 6
+    },
+    {
+     "label": "lone scavenger at the looted cart",
+     "pos": [
+      21.5,
+      -20
+     ],
+     "kind": "fight",
+     "enemies": [
+      "Border scavenger (looted cart)"
+     ],
+     "travel_intensity": 1.5
+    },
+    {
+     "label": "mixed pack in the riverside meadow",
+     "pos": [
+      41,
+      -15
+     ],
+     "kind": "fight",
+     "enemies": [
+      "Border wolf 2"
+     ],
+     "rats": 3
+    },
+    {
+     "label": "first sight of the Lowlands",
+     "pos": [
+      29.5,
+      -1.5
+     ],
+     "kind": "look",
+     "time": 4
+    },
+    {
+     "label": "Lowlands bonfire",
+     "pos": [
+      14.5,
+      4
+     ],
+     "kind": "rest"
+    },
+    {
+     "label": "trader",
+     "pos": [
+      10,
+      3
+     ],
+     "kind": "trader"
+    },
+    {
+     "label": "mill overlook (S3 glimpse)",
+     "pos": [
+      22,
+      12
+     ],
+     "kind": "look"
+    },
+    {
+     "label": "E1 boar",
+     "pos": [
+      84,
+      32
+     ],
+     "kind": "fight",
+     "enemies": [
+      "Lower pasture boar"
+     ]
+    },
+    {
+     "label": "E2 hedgerow-bend wolves (fork)",
+     "pos": [
+      97,
+      30
+     ],
+     "kind": "fight",
+     "coordinated": true,
+     "synthetic": [
+      {
+       "kind": "wolf",
+       "hp": 60,
+       "cycle": 3.0,
+       "dmg": 15
+      },
+      {
+       "kind": "wolf",
+       "hp": 60,
+       "cycle": 3.0,
+       "dmg": 15
+      }
+     ]
+    },
+    {
+     "label": "eastern hollow road",
+     "pos": [
+      148.5,
+      44.5
+     ],
+     "kind": "look",
+     "time": 4,
+     "travel_intensity": 1.5
+    },
+    {
+     "label": "E3 orchard (coordinated)",
+     "pos": [
+      115,
+      92
+     ],
+     "kind": "fight",
+     "enemies": [
+      "Orchard scavenger 1",
+      "Orchard scavenger 2",
+      "Orchard scavenger 3"
+     ],
+     "coordinated": true
+    },
+    {
+     "label": "S2 chest",
+     "pos": [
+      117,
+      88
+     ],
+     "kind": "pickup"
+    },
+    {
+     "label": "E4 north-bank wolves",
+     "pos": [
+      84,
+      97
+     ],
+     "kind": "fight",
+     "synthetic": [
+      {
+       "kind": "wolf",
+       "hp": 60,
+       "cycle": 3.0,
+       "dmg": 15
+      },
+      {
+       "kind": "wolf",
+       "hp": 60,
+       "cycle": 3.0,
+       "dmg": 15
+      }
+     ],
+     "coordinated": true
+    },
+    {
+     "label": "north-bank bonfire (before the guardian)",
+     "pos": [
+      60.5,
+      99.5
+     ],
+     "kind": "rest"
+    },
+    {
+     "label": "ancient guardian wakes",
+     "pos": [
+      24.5,
+      95
+     ],
+     "kind": "fight",
+     "synthetic": [
+      {
+       "kind": "guardian",
+       "hp": 240,
+       "cycle": 4.0,
+       "dmg": 22
+      }
+     ],
+     "boss": true,
+     "opening_scale": 1.5
+    },
+    {
+     "label": "rest after the guardian",
+     "pos": [
+      60.5,
+      99.5
+     ],
+     "kind": "rest",
+     "tiers": [
+      "newcomer",
+      "learning"
+     ]
+    },
+    {
+     "label": "sluice puzzle",
+     "pos": [
+      8,
+      86
+     ],
+     "kind": "puzzle"
+    },
+    {
+     "label": "basin drains: rat nest exposed",
+     "pos": [
+      18.5,
+      30
+     ],
+     "kind": "fight",
+     "rats": 5
+    },
+    {
+     "label": "S3 in the basin",
+     "pos": [
+      18.5,
+      26.5
+     ],
+     "kind": "pickup"
+    },
+    {
+     "label": "upgrade at the fire",
+     "pos": [
+      14.5,
+      4
+     ],
+     "kind": "upgrade"
+    }
+   ]
+  }
+ ],
+ "built_hayfields": [
+  {
+   "name": "Lowlands",
+   "scene": "GreenLowlands",
+   "beats": [
+    {
+     "label": "arrival: old road descent",
+     "pos": [
+      6,
+      -58
+     ],
+     "kind": "look",
+     "time": 2
+    },
+    {
+     "label": "vista ledge over the waystation",
+     "pos": [
+      0,
+      -27.5
+     ],
+     "kind": "look",
+     "time": 6,
+     "travel_intensity": 1.5
+    },
+    {
+     "label": "rat swarm at the waystation",
+     "pos": [
+      3.5,
+      -38.5
+     ],
+     "kind": "fight",
+     "rats": 6
+    },
+    {
+     "label": "lone scavenger at the looted cart",
+     "pos": [
+      21.5,
+      -20
+     ],
+     "kind": "fight",
+     "enemies": [
+      "Border scavenger (looted cart)"
+     ],
+     "travel_intensity": 1.5
+    },
+    {
+     "label": "mixed pack in the riverside meadow",
+     "pos": [
+      41,
+      -15
+     ],
+     "kind": "fight",
+     "enemies": [
+      "Border wolf 2"
+     ],
+     "rats": 3
+    },
+    {
+     "label": "first sight of the Lowlands",
+     "pos": [
+      29.5,
+      -1.5
+     ],
+     "kind": "look",
+     "time": 4
+    },
+    {
+     "label": "Lowlands bonfire",
+     "pos": [
+      14.5,
+      4
+     ],
+     "kind": "rest"
+    },
+    {
+     "label": "trader",
+     "pos": [
+      10,
+      3
+     ],
+     "kind": "trader"
+    },
+    {
+     "label": "mill overlook (S3 glimpse)",
+     "pos": [
+      22,
+      12
+     ],
+     "kind": "look"
+    },
+    {
+     "label": "E1 boar",
+     "pos": [
+      84,
+      32
+     ],
+     "kind": "fight",
+     "enemies": [
+      "Lower pasture boar"
+     ]
+    },
+    {
+     "label": "E2 hedgerow-bend wolves (fork)",
+     "pos": [
+      97,
+      30
+     ],
+     "kind": "fight",
+     "coordinated": true,
+     "synthetic": [
+      {
+       "kind": "wolf",
+       "hp": 60,
+       "cycle": 3.0,
+       "dmg": 15
+      },
+      {
+       "kind": "wolf",
+       "hp": 60,
+       "cycle": 3.0,
+       "dmg": 15
+      }
+     ]
+    },
+    {
+     "label": "Hayfields: drove bank between the flooded fields",
+     "pos": [
+      110,
+      14
+     ],
+     "kind": "look",
+     "time": 6
+    },
+    {
+     "label": "Hayfields: loading-platform Recall release",
+     "pos": [
+      111,
+      12.5
+     ],
+     "kind": "puzzle",
+     "time": 45
+    },
+    {
+     "label": "Hayfields barn: boar + wolf",
+     "pos": [
+      139.5,
+      7
+     ],
+     "kind": "fight",
+     "coordinated": true,
+     "synthetic": [
+      {
+       "kind": "boar",
+       "hp": 90,
+       "cycle": 4.0,
+       "dmg": 24
+      },
+      {
+       "kind": "wolf",
+       "hp": 60,
+       "cycle": 3.0,
+       "dmg": 15
+      }
+     ]
+    },
+    {
+     "label": "Hayfields exit to the lower hollow",
+     "pos": [
+      138,
+      22
+     ],
+     "kind": "look",
+     "time": 3
+    },
+    {
+     "label": "E3 orchard (coordinated)",
+     "pos": [
+      115,
+      92
+     ],
+     "kind": "fight",
+     "enemies": [
+      "Orchard scavenger 1",
+      "Orchard scavenger 2",
+      "Orchard scavenger 3"
+     ],
+     "coordinated": true
+    },
+    {
+     "label": "S2 chest",
+     "pos": [
+      117,
+      88
+     ],
+     "kind": "pickup"
+    },
+    {
+     "label": "E4 north-bank wolves",
+     "pos": [
+      84,
+      97
+     ],
+     "kind": "fight",
+     "synthetic": [
+      {
+       "kind": "wolf",
+       "hp": 60,
+       "cycle": 3.0,
+       "dmg": 15
+      },
+      {
+       "kind": "wolf",
+       "hp": 60,
+       "cycle": 3.0,
+       "dmg": 15
+      }
+     ],
+     "coordinated": true
+    },
+    {
+     "label": "north-bank bonfire (before the guardian)",
+     "pos": [
+      60.5,
+      99.5
+     ],
+     "kind": "rest"
+    },
+    {
+     "label": "ancient guardian wakes",
+     "pos": [
+      24.5,
+      95
+     ],
+     "kind": "fight",
+     "synthetic": [
+      {
+       "kind": "guardian",
+       "hp": 240,
+       "cycle": 4.0,
+       "dmg": 22
+      }
+     ],
+     "boss": true,
+     "opening_scale": 1.5
+    },
+    {
+     "label": "rest after the guardian",
+     "pos": [
+      60.5,
+      99.5
      ],
      "kind": "rest",
      "tiers": [

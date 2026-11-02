@@ -3,28 +3,45 @@
 ## Unreleased
 
 **Added**
+- The Broken Watcher, a boss guarding the sluice.
+- Boss health bar with the boss's name along the bottom of the screen.
+- The Broken Watcher drops a Sun Shard when defeated.
+- Thorn Rats, which dart in, nip and back off.
 - Boars sweep their tusks when you're close.
 - Scavengers chase after 0.9s of sight; suspicion fades when out of view.
 - Scavengers fight with a lunging thrust and a slow armoured overhead.
 - Scavengers and boars have idle animations; boars play a run cycle when they charge.
+- North Bank Bonfire where the King's Road leaves the Lowlands; fallen logs block the road until Barrow Woods returns.
+- Drowned Hayfields: flooded fields and a barn south of the pasture, with a heart fragment.
 
 **Changed**
 - Wolves share one tuning
 - Enemies no longer take turns attacking.
 - Charging boars can't be interrupted; hitting a wall head on stuns them.
-- Road from Ardan's Edge to the Lowlands rebuilt: 188 units long (was 74), three fights (was two).
-- Lantern casts warm, flickering light with soft shadows behind walls (was a hard-edged cut-out).
+- Thrown axes no longer stagger boars.
+- Shorter cleave charges cost less stamina (down to about 19, 35 at full).
+- Moved the basin stair platform south.
+- Improved waterworks buildings, sluice lift gate, and canal art and animations.
+- Reshaped the cliffs and basin edge around the waterworks.
+- Raised the rocky ridge south of High Pass.
+- Separated Old Drain from the storehouse: enter through the basin arch; Barrow remains sealed.
+- Camp rope moved to the eastern bank ledge.
+- Road from Ardan's Edge to the Lowlands rebuilt for longer route with additional enemies.
+- Lantern casts warm, flickering light with soft shadows behind walls (was a hard edged cut out).
 - Thrown axe flies 50% faster (full range in 0.39 s, was 0.58 s).
 - Stamina arc shows whenever stamina is below full (was combat only).
-- Enemies chase until they stray past their leash (wolves 20, scavengers 10–11, boar 12); hitting or following them re-engages.
+- Enemies chase until they stray past their leash; hitting or following them re-engages.
 - Tutorial hints skip lessons you've passed by the bridge, the Recall stone or a bonfire.
 - Barrow Approach is closed until Barrow Woods is rebuilt.
 
 **Fixed**
-- The third swing-practice bush stays cleared after leaving Ardan's Edge and returning.
+- Invisible walls along the road into the Lowlands; the woods there are now thick trees.
+- Fixed waterworks collision issues, closing gaps, blocking unintended access, and removing invisible barriers.
+- Sluice roofs conceal the player and gates behind them.
+- Restored missing shadows beneath Lowlands forests.
 - Wolves dodge when a cleave is released, not when it starts charging.
 - Charge and lunge warnings match the attack's real width (boar charge 0.67 units each side, was 1.05).
-- Entering the Sunken Storehouse showed "Green Lowlands" as the place name.
+- Entering the Sunken Storehouse showed "Green Lowlands" as the place name; it shows "Sunken Storehouse" at the smaller landmark size.
 
 ## 0.5 — Full production
 
