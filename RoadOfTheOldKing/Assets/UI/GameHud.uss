@@ -61,6 +61,16 @@ Label { margin: 0; padding: 0; -unity-font-style: normal; }
     -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2;
 }
 
+/* Boss bar, lower centre above the hint (Dark Souls style): the name in stone light over a long health bar in the
+   corner vitals' frame. Width matches GameHud.BossBarWidth plus the 2 px frame on each side. */
+#boss { position: absolute; bottom: 56px; left: 0; right: 0; align-items: center; }
+#boss-column { align-items: flex-start; }
+#boss-name { color: var(--kit-text); margin-bottom: 2px; white-space: nowrap; }
+#boss-bar { width: 480px; }
+#boss-fill { position: absolute; left: 0; top: 0; bottom: 0; }
+/* What the last hits took, trailing the fill before it drains. */
+#boss-lag { position: absolute; left: 0; top: 0; bottom: 0; background-color: rgb(231, 184, 92); }
+
 /* One teaching hint, lower centre: the chip with the bronze ledge. */
 #hint { position: absolute; bottom: 16px; left: 0; right: 0; align-items: center; }
 #hint-text {

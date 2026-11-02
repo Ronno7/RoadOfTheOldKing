@@ -50,7 +50,7 @@ namespace RoadOfTheOldKing.EditorTools
             Defaults = new Dictionary<string, (float, bool)>
             {
                 { "rotations", (1f, true) }, { "idle", (6f, true) }, { "stalk", (8f, true) }, { "walk", (10f, true) }, { "run", (12f, true) },
-                { "bark", (10f, false) }, { "bite", (12f, false) }, { "hurt", (12f, false) }, { "death", (10f, false) }
+                { "bark", (10f, false) }, { "bite", (12f, false) }, { "hurt", (12f, false) }, { "death", (10f, false) }, { "wake", (6f, false) }
             }
         };
 
@@ -82,7 +82,7 @@ namespace RoadOfTheOldKing.EditorTools
                     {
                         { "rotations", (1f, true) }, { "idle", (6f, true) }, { "walk", (10f, true) },
                         { "run", (12f, true) }, { "attack", (10f, false) }, { "closeAttack", (10f, false) },
-                        { "hurt", (12f, false) }, { "death", (10f, false) }
+                        { "hurt", (12f, false) }, { "death", (10f, false) }, { "wake", (6f, false) }
                     }
                 });
         }

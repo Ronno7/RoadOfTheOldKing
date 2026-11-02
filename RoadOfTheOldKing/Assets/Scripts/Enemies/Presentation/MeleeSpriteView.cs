@@ -17,7 +17,7 @@ namespace RoadOfTheOldKing.Enemies
         private Vector2 previous;
         private float gait, idleTime, deathTime, flashUntil;
         private int octant = 6, resetVersion;
-        private bool wasAlive;
+        private bool wasAlive, wasStriking;
         private MaterialPropertyBlock properties;
 
         private void Awake()
@@ -44,7 +44,14 @@ namespace RoadOfTheOldKing.Enemies
             if (health.IsAlive) octant = DirectionalSpriteAnimation.Octant(enemy.FacingDirection);
             var clip = animations.rotations; float progress = 0;
             bool windup = enemy.State == PursuitState.Windup, strike = enemy.State == PursuitState.Striking;
+            // A ground slam shakes the screen once as it lands.
+            if (strike && !wasStriking && enemy.ImpactShake > 0f && Camera.main != null &&
+                Camera.main.TryGetComponent(out RoadOfTheOldKing.Cameras.CameraFollow2D follow))
+                follow.Kick(Vector2.down, enemy.ImpactShake);
+            wasStriking = strike;
             if (!health.IsAlive) { deathTime += Time.deltaTime; if (Has(animations.death)) { clip = animations.death; progress = deathTime / clip.Duration(octant); } }
+            // A dormant guardian holds the wake clip's first frame (its resting pose) and rises through it.
+            else if ((enemy.IsDormant || enemy.IsWaking) && Has(animations.wake)) { clip = animations.wake; progress = enemy.IsDormant ? 0f : enemy.StateProgress; }
             else if ((windup || strike || enemy.State == PursuitState.Recovering) && Has(AttackClip))
             {
                 clip = AttackClip;
@@ -84,7 +91,7 @@ namespace RoadOfTheOldKing.Enemies
                 attackOutline.SetPosition(4, start - side);
                 return;
             }
-            const int segments = 16; attackOutline.positionCount = segments + 3;
+            int segments = enemy.AttackArc > 180f ? 32 : 16; attackOutline.positionCount = segments + 3;
             attackOutline.SetPosition(0, transform.position);
             float angle = Mathf.Atan2(enemy.FacingDirection.y, enemy.FacingDirection.x) * Mathf.Rad2Deg;
             for (int i = 0; i <= segments; i++)

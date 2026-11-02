@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace RoadOfTheOldKing.Enemies
 {
-    public enum PursuitState { Idle, Pursuing, Windup, Striking, Recovering, Returning, Defeated, Watching, Holding }
+    public enum PursuitState { Idle, Pursuing, Windup, Striking, Recovering, Returning, Defeated, Watching, Holding, Dormant, Waking }
 
     [DisallowMultipleComponent, RequireComponent(typeof(Damageable), typeof(HitReaction), typeof(Rigidbody2D))]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "RoadOfTheOldKing.Combat", null, "SimpleMeleeEnemy")]
@@ -41,6 +41,14 @@ namespace RoadOfTheOldKing.Enemies
         [SerializeField, Range(.1f, 1f)] private float closeRangeFraction = .75f;
         [Tooltip("A missed main attack continues into the close attack when the player is still in its reach. Off: the main attack's recovery is always the opening.")]
         [SerializeField] private bool followUpOnMiss = true;
+
+        [Header("Guardian (optional)")]
+        [Tooltip("Sits dormant until the player comes this close in sight, or strikes it, then rises. Zero: no dormant stage.")]
+        [SerializeField, Min(0f)] private float wakeRadius;
+        [Tooltip("Seconds the rise takes before it fights.")]
+        [SerializeField, Min(0f)] private float wakeDuration = 1.5f;
+        [Tooltip("Once this encounter is recorded, the guardian stays a fallen ruin through rest and reloads.")]
+        [SerializeField] private EncounterUnlock defeatRecord;
         [Tooltip("Distance kept, facing the player, during its cooldown between attack sequences. Zero closes straight in.")]
         [SerializeField, Min(0f)] private float holdDistance;
         [Tooltip("Pause after a finished attack sequence before the next; it keeps its distance meanwhile.")]
@@ -62,6 +70,7 @@ namespace RoadOfTheOldKing.Enemies
         private bool inSequence, followUpChecked;
         private float cooldown;
         private MeleeAttackAction melee;
+        private bool recordChecked;
 
         public PursuitState State { get; private set; }
         public Vector2 FacingDirection { get; private set; } = Vector2.down;
@@ -69,6 +78,7 @@ namespace RoadOfTheOldKing.Enemies
         public float AttackArc => Shown.arc;
         public float StateProgress => action != null && action.IsRunning ? action.Progress : stateDuration > 0f ? Mathf.Clamp01(1f - remaining / stateDuration) : 0f;
         public bool IsChargeAttack => Shown.chargeSpeed > 0;
+        public float ImpactShake => Shown.impactShake;
         public bool IsLaneLocked => action != null && action.IsLocked;
         public Vector2 AttackOrigin => action != null && State == PursuitState.Striking ? action.Origin : (Vector2)transform.position;
         public float ChargeDistance => Shown.chargeSpeed * Shown.active;
@@ -99,6 +109,10 @@ namespace RoadOfTheOldKing.Enemies
         public bool IsWatching => State == PursuitState.Watching && !IsAware;
         public bool HasWatchingStage => watchDuration > 0f;
         public bool IsDefeated => State == PursuitState.Defeated;
+        public bool IsDormant => State == PursuitState.Dormant;
+        public bool IsWaking => State == PursuitState.Waking;
+        // Where it settles when not fighting: a guardian goes dormant again.
+        private PursuitState RestState => wakeRadius > 0f ? PursuitState.Dormant : PursuitState.Idle;
         public event System.Action PlayerDetected;
 
         private void Awake()
@@ -112,6 +126,7 @@ namespace RoadOfTheOldKing.Enemies
         {
             if (target == null)
                 target = FindFirstObjectByType<PlayerHealth>();
+            if (State == PursuitState.Idle) State = RestState;
         }
 
         private void OnEnable()
@@ -131,7 +146,7 @@ namespace RoadOfTheOldKing.Enemies
             health.Defeated -= OnDefeated;
             action.Cancel();
             EndSequence();
-            if (!IsDefeated) SetState(PursuitState.Idle);
+            if (!IsDefeated) SetState(RestState);
             if (body != null)
                 body.linearVelocity = Vector2.zero;
         }
@@ -147,6 +162,11 @@ namespace RoadOfTheOldKing.Enemies
             }
             if (deltaTime <= 0f)
                 return;
+            if (!recordChecked && defeatRecord != null && GameSession.Instance != null && !GameSession.Instance.IsLoading)
+            {
+                recordChecked = true;
+                if (defeatRecord.IsUnlocked(GameSession.Instance.Progress)) { StayFallen(); return; }
+            }
             if (target == null || !target.IsAlive)
             {
                 IsAware = false;
@@ -195,6 +215,28 @@ namespace RoadOfTheOldKing.Enemies
                 SetState(PursuitState.Idle);
             }
 
+            // A guardian sits dormant until the player comes near or strikes it, rises (the player stays in
+            // control), then fights. It cannot act while rising.
+            if (State == PursuitState.Dormant || State == PursuitState.Waking)
+            {
+                body.linearVelocity = Vector2.zero;
+                if (State == PursuitState.Waking)
+                {
+                    if (remaining > 0f) return;
+                    State = PursuitState.Idle;
+                    Engage();
+                }
+                else
+                {
+                    bool near = actor.Sees(target.transform, wakeRadius, false) &&
+                        ((Vector2)target.transform.position - body.position).magnitude <= wakeRadius;
+                    if (!near && !provoked) return;
+                    provoked = false;
+                    SetState(PursuitState.Waking, wakeDuration);
+                    return;
+                }
+            }
+
             // Once aware it keeps chasing until the player is out of sight for a while or it strays past its
             // own leash; then it walks home, and takes the player up again if struck or followed back in.
             Vector2 toTarget = (Vector2)target.transform.position - body.position;
@@ -208,7 +250,7 @@ namespace RoadOfTheOldKing.Enemies
                 else
                 {
                     Vector2 toHome = actor.Home - body.position;
-                    if (toHome.magnitude <= 0.15f) SetState(PursuitState.Idle);
+                    if (toHome.magnitude <= 0.15f) SetState(RestState);
                     else Move(toHome);
                     return;
                 }
@@ -241,7 +283,7 @@ namespace RoadOfTheOldKing.Enemies
                     {
                         // Idle away from home (e.g. after a stagger): head back.
                         if (actor.DistanceFromHome > 0.15f) State = PursuitState.Returning;
-                        else SetState(PursuitState.Idle);
+                        else SetState(RestState);
                         return;
                     }
                     Engage();
@@ -366,13 +408,27 @@ namespace RoadOfTheOldKing.Enemies
             cooldown = 0f;
             ResetVersion++;
             actor.Reset();
-            SetState(PursuitState.Idle);
+            SetState(RestState);
+            recordChecked = false;
+            if (defeatRecord != null && GameSession.Instance != null && defeatRecord.IsUnlocked(GameSession.Instance.Progress))
+            {
+                recordChecked = true;
+                StayFallen();
+            }
+        }
+
+        // A recorded guardian stays where it fell as a ruin: no rest or reload raises it again.
+        private void StayFallen()
+        {
+            health.RestoreVisitHealth(0);
+            OnDefeated();
         }
 
         private void SetState(PursuitState state, float duration = 0f)
         {
             State = state;
             suspicion = 0f;
+            if (state == PursuitState.Dormant) FacingDirection = Vector2.down; // it sits facing its approach
             remaining = duration;
             stateDuration = duration;
             action.Cancel();

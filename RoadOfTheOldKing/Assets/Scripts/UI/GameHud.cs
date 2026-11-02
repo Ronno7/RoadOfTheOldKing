@@ -71,6 +71,13 @@ namespace RoadOfTheOldKing.UI
         // nothing covers it, then runs on unscaled time; a newer name replaces it.
         private const float AreaIn = .8f, AreaHold = 2.6f, AreaOut = 1.2f;
         private VisualElement areaBanner;
+        // Boss bar (Dark Souls style): name and a long bar along the bottom while a boss is fought. A pale segment
+        // trails each hit and drains after a short hold; on defeat the bar empties, holds, then fades.
+        private const float BossBarWidth = 476f, BossLagHold = .55f, BossLagRate = .45f, BossDefeatHold = 1.8f;
+        private VisualElement bossPanel, bossFill, bossLag;
+        private Label bossName;
+        private RoadOfTheOldKing.Enemies.BossHealthBar boss;
+        private float bossShown = 1f, bossLagged = 1f, bossLagFrom, bossDefeatedAt = -1f;
         private readonly List<Label> areaLabels = new List<Label>();
         private int areaVersion;
         private float areaStartedAt = float.NegativeInfinity;
@@ -167,6 +174,7 @@ namespace RoadOfTheOldKing.UI
             speechChip = AnchoredChip("speech-chip", out speechText);
             charge.Show(false); staminaArc.Show(false); SetVisible(hint, false);
             SetVisible(weaponAway, false); SetVisible(banner, false); SetVisible(areaBanner, false);
+            BuildBossBar();
             BuildVignette();
             return true;
         }
@@ -308,6 +316,7 @@ namespace RoadOfTheOldKing.UI
             UpdateBanner(alive);
             var game = GameSession.Instance;
             UpdateArea(alive && !menuOpen && !scripted && !BannerShowing() && (game == null || !game.IsLoading));
+            UpdateBoss(alive && !menuOpen);
         }
 
         private void UpdateArea(bool clear)
@@ -551,6 +560,48 @@ namespace RoadOfTheOldKing.UI
             bool show = allowed && HudNotifications.SpeechShowing;
             SetVisible(speechChip, show);
             if (show) speechText.text = HudNotifications.Speech;
+        }
+
+        private void BuildBossBar()
+        {
+            bossPanel = new VisualElement { name = "boss", pickingMode = PickingMode.Ignore };
+            var column = new VisualElement { name = "boss-column", pickingMode = PickingMode.Ignore };
+            bossName = new Label { name = "boss-name", pickingMode = PickingMode.Ignore };
+            var frame = new VisualElement { name = "boss-bar", pickingMode = PickingMode.Ignore };
+            frame.AddToClassList("pixel-bar");
+            var track = new VisualElement { pickingMode = PickingMode.Ignore };
+            track.AddToClassList("bar-track"); track.AddToClassList("health-track");
+            bossLag = new VisualElement { name = "boss-lag", pickingMode = PickingMode.Ignore };
+            bossFill = new VisualElement { name = "boss-fill", pickingMode = PickingMode.Ignore };
+            bossFill.AddToClassList("health-fill");
+            track.Add(bossLag); track.Add(bossFill); frame.Add(track);
+            column.Add(bossName); column.Add(frame); bossPanel.Add(column); root.Add(bossPanel);
+            SetVisible(bossPanel, false);
+        }
+
+        private void UpdateBoss(bool allowed)
+        {
+            var engaged = RoadOfTheOldKing.Enemies.BossHealthBar.Engaged;
+            if (engaged != null && engaged != boss)
+            {
+                boss = engaged; bossName.text = boss.BossName;
+                bossShown = bossLagged = boss.Fraction; bossDefeatedAt = -1f;
+            }
+            // Gone, or back at rest after the player fell or left: no bar.
+            if (boss == null || (engaged == null && boss.IsAlive)) { boss = null; SetVisible(bossPanel, false); return; }
+            float now = Time.time, fraction = boss.Fraction;
+            if (fraction < bossShown) { if (bossLagged <= bossShown) bossLagFrom = now; bossLagged = Mathf.Max(bossLagged, bossShown); }
+            bossShown = fraction;
+            if (bossLagged > bossShown && now - bossLagFrom >= BossLagHold) bossLagged = Mathf.Max(bossShown, bossLagged - BossLagRate * Time.deltaTime);
+            if (bossLagged < bossShown) bossLagged = bossShown;
+            if (!boss.IsAlive && bossDefeatedAt < 0f) bossDefeatedAt = now;
+            bool showing = allowed && (bossDefeatedAt < 0f || now - bossDefeatedAt < BossDefeatHold + .6f);
+            SetVisible(bossPanel, showing);
+            if (!showing) return;
+            bossPanel.style.opacity = bossDefeatedAt < 0f ? 1f : Mathf.Clamp01(1f - (now - bossDefeatedAt - BossDefeatHold) / .6f);
+            // Whole UI pixels (2 reference px), like the corner vitals.
+            bossFill.style.width = Mathf.Round(bossShown * BossBarWidth / HudPixel) * HudPixel;
+            bossLag.style.width = Mathf.Round(bossLagged * BossBarWidth / HudPixel) * HudPixel;
         }
 
         private static void SetVisible(VisualElement element, bool visible)

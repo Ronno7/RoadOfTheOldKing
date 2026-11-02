@@ -52,7 +52,7 @@ namespace RoadOfTheOldKing.Weapons
         [Min(0.1f)] public float cleaveDuration = 0.45f;
         [Min(0.1f)] public float cleaveRadius = 2.1f;
         [Min(1)] public int cleaveDamage = 30;
-        [Tooltip("Paid when charging begins, including cancelled charges.")]
+        [Tooltip("Paid on release for a full charge; a shorter charge pays down to half, on the same curve as its damage. Cancelled charges cost nothing.")]
         [Min(0f)] public float cleaveStaminaCost = 35f;
         [Min(0f)] public float cleaveKnockback = 6f;
         [Min(0f)] public float cleaveStagger = 0.7f;

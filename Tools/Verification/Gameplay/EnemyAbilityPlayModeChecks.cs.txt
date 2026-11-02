@@ -1,4 +1,4 @@
-// Empty, save-free Play Mode only. Synchronous policy/action/physics regression; no authored scene changes. Scavenger duel section 26 Oct; boar duel 28 Oct.
+// Empty, save-free Play Mode only. Synchronous policy/action/physics regression; no authored scene changes. Scavenger duel section 26 Oct; boar duel 28 Oct; boss bar 28 Oct.
 if (!EditorApplication.isPlaying || UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Progression.GameSession>() != null || RoadOfTheOldKing.Enemies.EnemyRegistry.Active.Count != 0)
     throw new Exception("Use an empty Play Mode scene without GameSession.");
 var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
@@ -147,8 +147,11 @@ try {
     check(!chargeInto(blocker),"running into another enemy does not stun");
     resetBoar();move(boarHome+Vector2.right*4);pursuitTick.Invoke(pursuit,new object[]{.02f});pursuitTick.Invoke(pursuit,new object[]{.4f});
     check(charge.IsLocked&&charge.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Windup&&!boarReaction.Armored,"the locked charge windup is still unarmoured");
-    boarHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.left,3,.3f));
+    boarHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,10,Vector2.left,3,.3f));
     check(!charge.IsRunning&&boarReaction.IsStaggered,"a hit before the charge starts interrupts it");
+    resetBoar();move(boarHome+Vector2.right*4);pursuitTick.Invoke(pursuit,new object[]{.02f});
+    boarHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.Throw,15,Vector2.left,3,.3f));
+    check(charge.IsRunning&&!boarReaction.IsStaggered&&boarHp.Health==boarHp.MaxHealth-15,"a thrown axe damages the boar without breaking its poise (28 Oct)");
     resetBoar();move(boarHome+Vector2.right);pursuitTick.Invoke(pursuit,new object[]{.02f});
     check(pursuit.State==RoadOfTheOldKing.Enemies.PursuitState.Windup&&pursuit.IsCloseAttack&&!pursuit.IsChargeAttack&&pursuit.AttackArc==150,"a close player draws the tusk sweep instead of a charge");
     pursuitTick.Invoke(pursuit,new object[]{.4f});check(charge.IsLocked&&!boarReaction.Armored,"the tusk sweep is never armoured");
@@ -161,13 +164,13 @@ try {
     check(pursuit.State==RoadOfTheOldKing.Enemies.PursuitState.Recovering&&!pursuit.IsFollowUp&&!pursuit.IsCloseAttack&&player.Health.Health==player.Health.MaxHealth&&Vector2.Distance(boarBody.position,player.transform.position)<=1.6f,"a missed charge always ends in its recovery, even with the player in sweep reach");
     resetBoar();move(boarHome+Vector2.right*4);pursuitTick.Invoke(pursuit,new object[]{.02f});
     check(pursuit.State==RoadOfTheOldKing.Enemies.PursuitState.Windup&&charge.IsRunning,"pursuit policy chooses its authored attack");
-    boarHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.left,3,.3f));
+    boarHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,10,Vector2.left,3,.3f));
     impulse=boarBody.linearVelocity.x;pursuitTick.Invoke(pursuit,new object[]{.02f});
     check(!charge.IsRunning&&boarReaction.IsStaggered&&impulse<0&&boarBody.linearVelocity.x==impulse,"pursuit stagger cancels action and preserves knockback");
     resetBoar();move(boarHome+Vector2.right*4);pursuitTick.Invoke(pursuit,new object[]{.02f});pursuitTick.Invoke(pursuit,new object[]{spec.windup});
     boarHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.left,3,.3f));
     check(charge.IsRunning&&boarReaction.Armored&&!boarReaction.IsStaggered,"the charge itself is armoured: a hit damages but does not cancel it");boarReaction.Armored=false;
-    boarHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.left,3,.3f));
+    boarHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,10,Vector2.left,3,.3f));
     check(!charge.IsRunning&&boarReaction.IsStaggered,"an unarmoured stagger still interrupts an active action");
     resetBoar();move(boarHome+Vector2.right*4);pursuitTick.Invoke(pursuit,new object[]{.02f});
     boarHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.left,0,0));
@@ -266,6 +269,30 @@ try {
     for(int i=0;i<120&&!rat.Action.IsRunning;i++)rstep(.02f);check(rat.Action.IsRunning,"it darts in again after the cooldown");
     ratHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,10,Vector2.left,3,.3f));check(rat.IsDefeated,"one light chop kills a rat");
     ratRoot.SetActive(false);
+    // Broken Watcher guardian (28 Oct): dormant until near or struck, rises without acting, slam at range, sweep up close.
+    var wRoot=spawn("Assets/Prefabs/Combat/BrokenWatcher.prefab",new Vector2(1160,1000));var watcher=wRoot.GetComponent<RoadOfTheOldKing.Enemies.PursuitBrain>();
+    duelType.GetField("target",flags).SetValue(watcher,player);duelType.GetMethod("Start",flags).Invoke(watcher,null);var wHp=wRoot.GetComponent<RoadOfTheOldKing.Combat.Damageable>();var wHome=(Vector2)wRoot.transform.position;
+    Action<float> wstep=dt=>{duelTick.Invoke(watcher,new object[]{dt});if(dt>0)Physics2D.Simulate(dt);};
+    float wakeTime=(float)duelType.GetField("wakeDuration",flags).GetValue(watcher);
+    player.HealAtRest();move(wHome+Vector2.down*9);wstep(.02f);
+    check(watcher.IsDormant&&!watcher.IsAware&&watcher.FacingDirection==Vector2.down,"the Watcher sits dormant, facing its approach, while the player is far");
+    move(wHome+Vector2.down*5);wstep(.02f);check(watcher.IsWaking&&!watcher.Action.IsRunning,"coming near wakes it");
+    move(wHome+Vector2.down*2.6f);wstep(wakeTime*.5f);check(watcher.IsWaking&&!watcher.Action.IsRunning,"it cannot attack while it rises, even with the player in reach");
+    wstep(wakeTime);wstep(.02f);check(watcher.IsAware&&watcher.State==RoadOfTheOldKing.Enemies.PursuitState.Windup&&!watcher.IsCloseAttack&&watcher.AttackArc==360&&watcher.ImpactShake>0,"risen, it slams: a full circle that shakes the screen, answered by backing off");
+    watcher.ResetOnRest();check(watcher.IsDormant&&wHp.Health==wHp.MaxHealth,"a reset puts it back to sleep at full health");
+    move(wHome+Vector2.down*9);wHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.Throw,15,Vector2.up,0,0));wstep(.02f);check(watcher.IsWaking,"striking it from range wakes it");
+    watcher.ResetOnRest();move(wHome+Vector2.down*1.2f);wstep(.02f);wstep(wakeTime+.02f);wstep(.02f);
+    check(watcher.State==RoadOfTheOldKing.Enemies.PursuitState.Windup&&watcher.IsCloseAttack&&watcher.AttackArc==170,"up close it sweeps: a wide arc answered by stepping back");
+    // Boss bar (28 Oct): engaged from the wake until rest; the overhead bar is replaced; a fall stays engaged so the HUD can drain it.
+    var bossBar=wRoot.GetComponent<RoadOfTheOldKing.Enemies.BossHealthBar>();var bossUpdate=bossBar.GetType().GetMethod("Update",flags);
+    check(bossBar!=null&&!wRoot.GetComponent<RoadOfTheOldKing.Enemies.EnemyHealthIndicator>().enabled,"the Watcher is a named boss and its overhead bar is off");
+    bossUpdate.Invoke(bossBar,null);check(RoadOfTheOldKing.Enemies.BossHealthBar.Engaged==bossBar&&bossBar.BossName=="Broken Watcher","the boss bar shows once it has risen");
+    watcher.ResetOnRest();bossUpdate.Invoke(bossBar,null);check(RoadOfTheOldKing.Enemies.BossHealthBar.Engaged==null,"back at rest, no boss bar");
+    move(wHome+Vector2.down*5);wstep(.02f);bossUpdate.Invoke(bossBar,null);check(RoadOfTheOldKing.Enemies.BossHealthBar.Engaged==bossBar,"the bar appears as it begins to wake");
+    wHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,26,Vector2.up,0,0));check(Mathf.Abs(bossBar.Fraction-(1f-26f/wHp.MaxHealth))<.001f,"the bar reads the same health combat uses");
+    wHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,wHp.MaxHealth,Vector2.up,0,0));wstep(.02f);bossUpdate.Invoke(bossBar,null);
+    check(!bossBar.IsAlive&&RoadOfTheOldKing.Enemies.BossHealthBar.Engaged==bossBar,"on defeat it stays engaged so the HUD empties and fades the bar");
+    wRoot.SetActive(false);check(RoadOfTheOldKing.Enemies.BossHealthBar.Engaged==null,"a disabled boss leaves no bar");
     check(RoadOfTheOldKing.Progression.GameSession.Instance==null,"checks created no game session");
 } finally {
     foreach(var obj in created)if(obj!=null)UnityEngine.Object.DestroyImmediate(obj);

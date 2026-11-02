@@ -16,8 +16,12 @@ MonoBehaviour:
   idle: {fileID: 0}
   walk: {fileID: 11400000, guid: b1d657efac0f9324aa0535d39482a0b8, type: 2}
   run: {fileID: 0}
-  attack: {fileID: 0}
+  attack: {fileID: 11400000, guid: 21026cc64517eb241a8d7f9e5584358c, type: 2}
   hurt: {fileID: 0}
-  death: {fileID: 0}
+  death: {fileID: 11400000, guid: 999dd284366197a4e9044f10bbb1b03f, type: 2}
+  closeAttack: {fileID: 11400000, guid: 702e9809b3aa5104facd99754c46c9d8, type: 2}
+  wake: {fileID: 11400000, guid: eb3d0da645f63db4d802f0511a6daa73, type: 2}
   walkCycleLength: 2
+  runCycleLength: 3.6
+  runAnimationSpeed: 4.8
   deathFadeDuration: 0.5

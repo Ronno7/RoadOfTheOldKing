@@ -205,7 +205,10 @@ namespace RoadOfTheOldKing.Weapons
         {
             if (State != AxeState.Charging)
                 return false;
-            if (elapsed < settings.minimumCharge || !owner.Stamina.TrySpend(settings.cleaveStaminaCost))
+            // The cost follows the charge on the same curve as the damage (half at the shortest cleave, all
+            // at full charge), so a quick cleave never buys more damage per stamina than a full one (user, 28 Oct).
+            float cost = settings.cleaveStaminaCost * Mathf.Lerp(0.5f, 1f, Charge01);
+            if (elapsed < settings.minimumCharge || !owner.Stamina.TrySpend(cost))
             {
                 CancelCharge();
                 return false;

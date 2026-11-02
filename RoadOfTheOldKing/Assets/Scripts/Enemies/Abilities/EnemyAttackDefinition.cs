@@ -15,6 +15,8 @@ namespace RoadOfTheOldKing.Enemies
         public bool armoredWhileActive;
         [Tooltip("Charges only: recovery after running head-on into a visible wall or rock. Zero keeps the normal recovery.")]
         public float wallStunRecovery;
+        [Tooltip("Camera kick (world units) when the blow lands, e.g. a ground slam. Zero: none.")]
+        public float impactShake;
     }
 
     // Immutable authoring data in play. The runner takes a value copy at commitment.
