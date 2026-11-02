@@ -1,13 +1,22 @@
-# Development tooling
+# Tools
 
-These tools support asset generation and focused verification. They are not required by the running game. Player sprites are imported inside Unity by **Road of the Old King > Animation Import > Player**.
+Development tooling. The running game needs none of it.
 
-| Directory | Responsibility |
+| Folder | Does |
 | --- | --- |
-| [Art/World](Art/World) | Native tile geometry, atlas generation and manifests |
-| [Art/UI](Art/UI) | Pixel font, HUD icons and panel art |
-| [Verification](Verification) | Gameplay, player animation, progression and world-asset checks |
+| [Art](Art) | Exports native tiles, UI art and fonts; downloads recorded enemy art |
+| [Audio](Audio) | Builds combat, reward and machinery sounds |
+| [LevelLayout](LevelLayout) | Exports scene terrain and applies reviewed terrain edits |
+| [Pacing](Pacing) | Simulates a route over real collision and charts its pacing. These are estimates, not playtests |
+| [Release](Release) | Validates and packages a Unity WebGL export |
+| [Verification](Verification) | Editor check snippets and offline regressions |
 
-Verification `.cs.txt` files are focused Unity Editor snippets, not an automatically discovered test suite. Check their assumptions against the current code and use isolated saves for gameplay checks.
+Sprite imports run inside Unity: **Road of the Old King > Animation Import**.
 
-The implementation is described in the [systems overview](../Docs/SystemsOverview.md), [player animation](../Docs/PlayerAnimation.md) and [world documentation](../Docs/World.md).
+Files named `.cs.txt` are snippets run in the Editor against isolated saves, not an automatic test suite. Offline regressions need neither Unity nor saves:
+
+```
+python -B -m unittest discover -s Tools/Verification/Pacing -p "test_*.py"
+python -B -m unittest discover -s Tools/Verification/Release -p "test_*.py"
+python -B -m unittest discover -s Tools/Verification/Art -p "test_*.py"
+```

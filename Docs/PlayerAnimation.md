@@ -1,62 +1,48 @@
 # Player animation
 
+How the hero is drawn and animated.
+
 [Systems overview](SystemsOverview.md) · [World and tilemaps](World.md)
 
-The hero is a small, arm-less wanderer wrapped in a blue hooded cloak, drawn as 16-bit-style pixel art in eight directions. Sprites are generated with [PixelLab](https://www.pixellab.ai/): standing views on a 32 x 32 canvas and animations on padded 40 x 40 or 48 x 48 canvases at the same figure scale, imported at 16 pixels per unit, the density of the world tiles, so character and terrain pixels match.
+The hero is an arm-less wanderer in a blue hooded cloak, drawn in eight directions with [PixelLab](https://www.pixellab.ai/) at 16 pixels per unit, the same density as the world tiles.
 
 ![Hero standing views](Art/Player/Hero-Rotations.png)
 
 ![Walk cycle, east and south](Art/Player/Hero-Walk.png)
 
-Currently implemented: the standing views, an eight-frame walk and run, a four-frame dash, a six-frame hurt flinch, a seven-frame throw, a six-frame flask drink and an eight-frame seated bonfire loop in all directions. Light attacks, the finisher, the charged cleave, catch, death and pickup animations are still to come; until then those states fall back as described below.
+## Slots
 
-## Presentation
+`PlayerSpriteAnimator` is the only writer of the body sprite. It reads gameplay state and never drives it. Each state has a slot in `PlayerAnimationSet`.
 
-`PlayerSpriteAnimator` is the only component that writes the body sprite. It reads gameplay state every frame and never drives it: movement, damage, stamina, weapon possession and action timing stay with their gameplay owners. Each gameplay state has a slot in a `PlayerAnimationSet`; each slot holds a `DirectionalSpriteAnimation` with up to eight directional frame sequences.
+| Slot | Plays while | Clock | Art |
+| --- | --- | --- | --- |
+| Rotations | Anything without its own clip | Single view | Yes |
+| Walk / Run | Moving / sprinting | Distance travelled | Yes |
+| Dash | Dodging | Dash progress | Yes |
+| Throw | Releasing a throw | Aligned with the launch | Yes |
+| Hurt | Staggered | Time | Yes |
+| Drink | Drinking a flask | Drink progress; the swig lands with the heal | Yes |
+| Rest | At a bonfire | Time, looping | Yes |
+| Light attacks, finisher | Three-hit combo | Weapon action clock | Pending |
+| Charge / Cleave | Charged spin | Time, then action clock | Pending |
+| Catch, Death, Pickup | Their moment | Time | Pending |
 
-| Slot | Played while | Clock |
-| --- | --- | --- |
-| Rotations | Any state without its own animation | Single standing view per direction |
-| Idle | Standing | Time, looping |
-| Walk / Run | Moving / sprinting | Distance travelled; cycle lengths tuned on the player prefab (currently walk 2 / run 3 units) |
-| Dash | Dodge dash | Dash progress |
-| Light attack 1, 2, finisher | Three-hit combo | Weapon action progress, contact frame aligned with the damage window |
-| Charge / Cleave | Charged spin attack | Time while charging, action progress while cleaving |
-| Throw aim / Throw | Holding and releasing a throw | Time while aiming; release aligned with the physical launch |
-| Catching | Recall catch | Time, after confirmed arrival |
-| Hurt / Death | Stagger / defeat | Time, holding the last frame |
-| Drink | Drinking a flask | Drink progress; the contact frame (the swig) lands with the heal |
-| Rest | Bonfire menu open, facing the fire | Time, looping at 6 fps; returns immediately to normal presentation when closed |
+Empty slots fall back instead of blocking: run uses walk, actions use locomotion, and everything ends at the standing views. A contact frame on each clip lines the drawn hit up with the first damaging physics step.
 
-Empty slots fall back rather than blocking: run uses walk, dash uses run or walk, actions and reactions use locomotion facing their action direction, and everything ends at the standing rotations. Slots for a combat stance, Recall gesture, getting up and pickup exist but are not presented until those interactions ship. Rest samples the existing bonfire interaction without adding a control lock or delaying exit; there are no sit-down/get-up transitions yet. The axe stays upright beside the seated hero, without a grip fold or breathing bob.
+## Import
 
-Facing uses eight 45-degree sectors. Movement sets it while walking; attacks and throws face their committed direction. When two diagonal keys are released a moment apart (0.1 seconds by default), the hero keeps the diagonal instead of snapping to whichever key was released last.
+1. Put frames in `Assets/Art/Sprites/Player/<Slot>/<direction>/`, the layout PixelLab exports.
+2. Run **Road of the Old King > Animation Import > Player**.
 
-Each animation can mark a contact frame. Attack frames before it fill the wind-up and the rest fill the strike and recovery, so the drawn hit coincides with the first damaging physics step for any frame count. The throw uses the same rule with the launch moment.
+The importer sets 16 PPU point filtering, pins each direction's pivot to its lowest opaque row so feet stay on the ground line, and fills the slot. Playback rate, looping and contact frames live on the animation asset and survive re-imports.
 
-## Assets and import
+## Weapon
 
-Each slot has a folder under `Assets/Art/Sprites/Player/<Slot>/`, containing either `<direction>.png` single frames or `<direction>/` folders of numbered frames, the layout PixelLab exports. Original exports are kept as delivered under `ArtSource/Player`. **Road of the Old King > Animation Import > Player** then:
-
-- imports every frame as a single point-filtered, uncompressed sprite at 16 pixels per unit;
-- measures the lowest opaque row across each direction's frames and pins the pivot there, so feet stay on the ground line while bobbing or jumping frames keep their motion;
-- creates or updates the slot's animation under `Assets/Animations/Player` and assigns it in `PlayerAnimationSet.asset`.
-- anchors the throw to the standing views' ground row instead of its lowest pixel, because its lunging foot steps below the standing feet (other slots measure their lowest pixel).
-
-Playback rate, looping and contact frames are edited on the animation asset and survive re-imports.
-
-## Weapon and hit pause
-
-The hero has no arms, so the weapon, an aged bronze halberd drawn at the same 16 pixels per unit, is always a separate sprite and never part of the body frames. Out of combat, `PlayerWeaponCarry` stands it upright at his right side, butt down, with one hold per facing: a whole-pixel grip offset, mirroring, and whether it draws in front of or behind him. On the camera side it stands a few pixels lower as a depth cue, and a small fold of his cloak (a 5 x 4 pixel sprite in his own palette, mirrored per side) wraps the grip, so a hand hidden inside the cloak appears to hold the haft. In the east view the haft runs in line with his back half; facing west it stands behind him in line with his body, and facing north behind his right side with a strip of handle showing, so he masks most of the haft and the head shows over his shoulder, as if held in front of him. Blades always point away from his face. The importer measures every frame's figure height, so the weapon and fold rise and fall with the walk's bob.
+The hero has no arms, so the bronze halberd is always a separate sprite, never part of the body frames.
 
 ![Halberd carry in each direction, standing and mid-stride](Art/Player/Hero-Halberd-Carry.png)
 
-The light combo uses a procedural sweep, reverse sweep and thrust, synchronized to the same geometry and phases as damage and ground feedback. The finisher has a longer windup and a physics-driven lunge; dedicated body attack art remains pending. During throws the weapon is placed procedurally along the aim; a combat presentation that brings it to the ready, following the cursor, is planned. The weapon starts planted upright in the Tutorial's chopping stump.
-
-During a successful Recall, `AxeView` applies the shared `SpectralRecall` material after posing the accepted sprite. Three cyan/pale tones and 72% opacity preserve its crisp silhouette, with a narrow 0.10-second cyan trail. Manual, automatic and scripted returns share this treatment; refused inputs leave the weapon solid. Catch, cancellation and disable restore the original material and clear the trail. Flight geometry, combat, sorting and catch recovery are unchanged. The effect casts no light; the storehouse darkness cover masks the weapon and trail with the rest of the world. A separate wall-only visibility treatment remains unimplemented.
-
-A confirmed light hit pauses only the swing's action clock. The pause belongs to `AxeWeapon` and is tuned on `AxeSettings` (`lightHitPause`, `finisherHitPauseMultiplier`); animation frames freeze with it because they sample that clock.
-
-## Previous character art
-
-Until 28 September 2026 the player used a hand-assembled four-direction set at 128 pixels per unit, with separately registered body and axe layers. It was retired in favor of the native-density PixelLab hero. The original sources, exporters and captures are available in repository history.
+- **Carry:** `PlayerWeaponCarry` holds one whole-pixel grip per facing, in front of or behind the body. A small cloak fold wraps the grip so a hidden hand appears to hold it.
+- **Attacks:** procedural sweeps and thrusts, sampled from the same clock and geometry as the damage.
+- **Recall:** the returning axe keeps its silhouette in translucent cyan with a short trail, then turns solid on the catch.
+- **Hit pause:** a confirmed hit pauses only the weapon's clock, and body frames freeze with it because they sample that clock.

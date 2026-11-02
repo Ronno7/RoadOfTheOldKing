@@ -1,18 +1,17 @@
-# Art source files
+# Art sources
 
-Source artwork and reconstruction inputs are kept outside Unity's imported runtime assets.
+Source art and import inputs, kept outside Unity's runtime assets. Runtime sprites and tiles live in `RoadOfTheOldKing/Assets/Art`. See [World and tilemaps](../Docs/World.md#art-pipeline) for how they get there.
 
-Accepted outlined interaction sprites are drawn by `Tools/Art/World/build_shared_interactables.py`; bonfire and rope sources remain in Shared. Historical prompts in Green Lowlands provenance are records, not dependencies for rebuilding retired art.
+| Folder | Holds | Imported with |
+| --- | --- | --- |
+| `Player/` | Hero exports from PixelLab, as delivered | **Animation Import > Player** |
+| `Enemies/` | Enemy exports, recorded in `LowlandsManifest.json`; the wolf in its own folder | **Animation Import**, per character |
+| `NPCs/TravelingTrader/` | Merchant frames and source record | **Animation Import > Traveling Trader** |
+| `Shared/` | Trees, vegetation, props, bonfire, decoration, palette | **Advanced > Asset Maintenance** |
+| `Tutorial/` | Village buildings and recipes | **Advanced > Asset Maintenance** |
+| `GreenLowlands/` | Buildings, fittings, elevation data, provenance | **Advanced > Asset Maintenance** |
+| `GreenLowlands/Environment/Waterworks/` | Sluice, canal, culvert and drain sources, with one manifest per set | **Animation Import** |
+| `GreenLowlands/Environment/Hayfields/` | Beam and release mechanism | **Animation Import** |
+| `Weapons/` | Halberd and scavenger spear | Copied into `Assets/Art/Sprites` |
 
-- [Player](Player/README.md): accepted PixelLab exports for the current hero, kept as delivered before copying into the runtime import folders.
-- [Traveling trader](NPCs/TravelingTrader/Manifest.json): the selected eight-direction merchant and source record; approved idle/walk exports are retained in `NPCs/TravelingTrader/Animations`.
-- [Tutorial](Tutorial/README.md): current building recipes and original decoration provenance.
-- `Shared/` owns sources used across regions: [vegetation](Shared/Vegetation/Provenance.json), trees in `Shared/Environment/Trees`, interactive props in `Shared/Interactive`, and the installed [Meadow palette](Shared/Palettes/Meadow.json). Both production regions use the [leaf source](Shared/Vegetation/LowlandsGrassLeaves_Source.png) and its [edit prompt](Shared/Vegetation/LowlandsGrassLeaves.prompt.txt): 16/12-pixel blades, imported to `LowlandsGrassLeaves16.png`. Refreshing species preserves planted roots and density; smooth leaf motion and accepted flowers/reeds remain.
-- Shared outlined boulders and the production breakable shrub/cleave stone use [OutlinedProps_Source.png](Shared/Environment/Props/OutlinedProps_Source.png), the [exact prompt](Shared/Environment/Props/OutlinedProps.prompt.txt) and [native recipe](Shared/Environment/Props/NativeRecipe.json). Native PNGs retain their canvas registration; boulder tile GUIDs and existing prefab collision stay intact.
-- [Green Lowlands provenance](GreenLowlands/Provenance.json) records imports and historical prompts. Regional building inputs and registration are in `GreenLowlands/Environment/Buildings`; sluice sources remain in `GreenLowlands/Interactive`. The retired original Environment source sheets and rebuild commands are no longer dependencies; the Unity catalog retains placement dimensions and collision contracts.
-  The six waterworks fittings use [WaterworksFittings_Source.png](GreenLowlands/Interactive/WaterworksFittings_Source.png), the [exact prompt](GreenLowlands/Interactive/WaterworksFittings.prompt.txt) and [native registration](GreenLowlands/Interactive/WaterworksFittings.recipe.json). Both architecture and shared interaction exporters reproduce this source with one-pixel black contours; historical `SluiceFittings_Source.png` records the earlier prototype art.
-  Shared grass, reeds, field weeds and collapsed-crate sources are in `Shared/Decoration/Field`, using the same provenance file and the shared Field Decoration manifest for native sizes and swatches. The original Tutorial sample/expansion sheets now live in `Shared/Decoration/Meadow`; original briefs remain in Tutorial provenance. Imported detail atlases and palettes live under `Assets/Art/Tiles/Shared/DetailDecoration`.
-  `Shared/Interactive/BonfireFlame_Source.png` and `BonfireBase_Source.png` supply the accepted four-frame flame and stone ring with charred logs. Their manifests under `Assets/Art/Sprites/World/Shared/Bonfire` preserve frame dimensions and palettes. `Assets/Prefabs/World/Shared/Bonfire.prefab` owns both; future custom fires should inherit it and override their sprites. Historical prompts remain in the Green Lowlands provenance file.
-  [Arrival layout seed](GreenLowlands/ArrivalLayout.json) records the initial composition used to start the regional art scene. The authored `Assets/Scenes/GreenLowlands.unity` is now authoritative; this seed must not overwrite later scene work.
-
-Runtime sprites and tile assets live under `RoadOfTheOldKing/Assets/Art`. Shared Ground, Terrain, Paths and environment assets belong in `Tiles/Shared`; regional buildings and terrain variants stay under their region. Scene-derived drainage and shadow outputs belong in `Art/Generated`; cliffs use reusable native tiles. Folder ownership describes reuse, not a newly approved regional art direction. [Player animation](../Docs/PlayerAnimation.md) and [world presentation](../Docs/World.md) explain runtime use.
+Keep only what an import reads, plus its provenance. Review material doesn't belong here.
