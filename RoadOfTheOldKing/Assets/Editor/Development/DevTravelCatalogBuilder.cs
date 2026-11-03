@@ -6,6 +6,7 @@ using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 // Keep the cheat menu in sync with authored arrivals; never save or replace an open scene.
 [InitializeOnLoad]
@@ -41,8 +42,12 @@ public sealed class DevTravelCatalogBuilder : IPreprocessBuildWithReport
         var catalog = new DevTravelCatalog();
         foreach (var entry in EditorBuildSettings.scenes.Where(s => s.enabled))
         {
-            // Preview scenes read saved content without disturbing dirty scenes or active selection.
-            var scene = EditorSceneManager.OpenPreviewScene(entry.path);
+            // Preview scenes read saved content without disturbing dirty scenes or active selection. Loading one
+            // beside the open scene puts two global lights in URP's list, and it logs a false duplicate-light error.
+            Debug.unityLogger.logEnabled = false;
+            Scene scene;
+            try { scene = EditorSceneManager.OpenPreviewScene(entry.path); }
+            finally { Debug.unityLogger.logEnabled = true; }
             try { catalog.destinations.AddRange(DevTravelCatalog.FromScene(scene)); }
             finally { EditorSceneManager.ClosePreviewScene(scene); }
         }

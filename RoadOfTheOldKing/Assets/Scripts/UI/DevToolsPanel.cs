@@ -16,7 +16,7 @@ namespace RoadOfTheOldKing.UI
     public sealed class DevToolsPanel : MonoBehaviour, IModalMenu
     {
         public static DevToolsPanel Instance { get; private set; }
-        public static bool CapturesInput => Instance != null && (Instance.IsOpen || Instance.releasePending);
+        public static bool CapturesInput => Instance != null && (Instance.IsOpen || Instance.releasePending || Instance.noteOpen);
         public bool IsOpen { get; private set; }
         public bool PauseWhileOpen { get; private set; } = true;
         private DevRuntimeCommands commands;
@@ -25,7 +25,10 @@ namespace RoadOfTheOldKing.UI
         private VisualElement overlay, playerPage, itemsPage, travelPage, destinations;
         private Label summary, status, marker, inventory;
         private Label effects;
-        private Toggle god, infinite, collision, pauseToggle;
+        private Toggle god, infinite, collision, showCollision, pauseToggle;
+        private VisualElement noteBox;
+        private TextField noteField;
+        private bool noteOpen;
         private Slider speed, time;
         private FloatField x, y;
         private TextField travelSearch;
@@ -82,6 +85,9 @@ namespace RoadOfTheOldKing.UI
             BuildPlayer(); BuildItems(); BuildTravel(); SelectTab("Player");
             commands.SceneChanged += OnSceneChanged;
             overlay.style.display = DisplayStyle.None;
+#if UNITY_EDITOR
+            BuildNoteBox(root);
+#endif
         }
         private void Update()
         {
@@ -104,6 +110,15 @@ namespace RoadOfTheOldKing.UI
         {
             var keyboard = Keyboard.current;
             if (keyboard == null) return;
+#if UNITY_EDITOR
+            if (noteOpen)
+            {
+                if (keyboard.escapeKey.wasPressedThisFrame || keyboard.f6Key.wasPressedThisFrame) CloseNote(false);
+                else if (keyboard.enterKey.wasPressedThisFrame || keyboard.numpadEnterKey.wasPressedThisFrame) CloseNote(true);
+                return;
+            }
+            if (!IsOpen && keyboard.f6Key.wasPressedThisFrame) { OpenNote(); return; }
+#endif
             if (keyboard.f4Key.wasPressedThisFrame) { if (IsOpen) Close(); else Open(); }
             else if (IsOpen && keyboard.escapeKey.wasPressedThisFrame) Close();
         }
@@ -156,7 +171,7 @@ namespace RoadOfTheOldKing.UI
             return !(k.wKey.isPressed || k.aKey.isPressed || k.sKey.isPressed || k.dKey.isPressed ||
                 k.upArrowKey.isPressed || k.downArrowKey.isPressed || k.leftArrowKey.isPressed || k.rightArrowKey.isPressed ||
                 k.eKey.isPressed || k.qKey.isPressed || k.fKey.isPressed || k.rKey.isPressed || k.spaceKey.isPressed ||
-                k.escapeKey.isPressed || k.enterKey.isPressed || k.f4Key.isPressed);
+                k.escapeKey.isPressed || k.enterKey.isPressed || k.f4Key.isPressed || k.f6Key.isPressed);
         }
         private void OnSceneChanged() { Close(); ReleaseInput(); }
         private void OnDisable()
@@ -166,7 +181,83 @@ namespace RoadOfTheOldKing.UI
             if (Instance == this) Instance = null;
         }
         private void OnDestroy() { if (settings != null) Destroy(settings); }
-        public void Back() => Close();
+#if UNITY_EDITOR
+        // F6, editor only: one line into THOUGHTS, with where you were standing. It reaches the repo's own file.
+        private void BuildNoteBox(VisualElement root)
+        {
+            noteBox = new VisualElement();
+            noteBox.style.position = Position.Absolute;
+            noteBox.style.left = new Length(20, LengthUnit.Percent);
+            noteBox.style.right = new Length(20, LengthUnit.Percent);
+            noteBox.style.top = new Length(38, LengthUnit.Percent);
+            noteBox.style.paddingLeft = noteBox.style.paddingRight = noteBox.style.paddingTop = noteBox.style.paddingBottom = 12;
+            noteBox.style.backgroundColor = new Color(.09f, .12f, .13f, .96f);
+            noteBox.style.display = DisplayStyle.None;
+            Section(noteBox, "Note for THOUGHTS");
+            noteField = new TextField();
+            noteBox.Add(noteField);
+            Hint(noteBox, "Enter saves. Esc cancels.");
+            root.Add(noteBox);
+        }
+
+        private void OpenNote()
+        {
+            noteOpen = true; releasePending = false;
+            LockPlayer();
+            MenuStack.Push(this);
+            pause = SimulationPause.Acquire(true);
+            noteField.SetValueWithoutNotify("");
+            noteBox.style.display = DisplayStyle.Flex;
+            noteField.Focus();
+        }
+
+        private void CloseNote(bool save)
+        {
+            if (!noteOpen) return;
+            noteOpen = false;
+            noteBox.style.display = DisplayStyle.None;
+            MenuStack.Remove(this);
+            pause?.Dispose(); pause = null;
+            releasePending = true; closedFrame = Time.frameCount;
+            document.rootVisualElement.focusController?.focusedElement?.Blur();
+            string text = noteField.value.Trim();
+            if (save && text.Length > 0) HudNotifications.Post(AppendNote(text) ? "Noted." : "Couldn't write the note; see the console.", 2.5f);
+        }
+
+        // Adds to the end of the New section, keeping the file's line endings and everything already there.
+        private bool AppendNote(string text)
+        {
+            string path = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "..", "DeveloperNotes", "THOUGHTS.md"));
+            try
+            {
+                string file = File.ReadAllText(path);
+                string ending = file.Contains("\r\n") ? "\r\n" : "\n";
+                var lines = new List<string>(file.Replace("\r\n", "\n").Split('\n'));
+                int heading = lines.IndexOf("## New");
+                if (heading < 0) { Debug.LogError("THOUGHTS.md has no '## New' section."); return false; }
+                int next = lines.FindIndex(heading + 1, l => l.StartsWith("## "));
+                if (next < 0) next = lines.Count;
+                int last = next - 1;
+                while (last > heading && string.IsNullOrWhiteSpace(lines[last])) last--;
+                lines.RemoveRange(last + 1, next - last - 1);
+                if (last == heading) { lines.Insert(last + 1, ""); last++; }
+                string where = SceneManager.GetActiveScene().name;
+                if (commands.HasPlayer) { var p = commands.Player.transform.position; where += $" {p.x:0.#}, {p.y:0.#}"; }
+                lines.Insert(last + 1, $"- {text} ({where})");
+                lines.Insert(last + 2, "");
+                File.WriteAllText(path, string.Join(ending, lines));
+                return true;
+            }
+            catch (IOException e) { Debug.LogError("Couldn't write the note: " + e.Message); return false; }
+        }
+#endif
+        public void Back()
+        {
+#if UNITY_EDITOR
+            if (noteOpen) { CloseNote(false); return; }
+#endif
+            Close();
+        }
         // UI Toolkit owns arrows/Enter/Tab, including text fields, rather than MenuList's buttons.
         public void Navigate(int direction) { }
         public void Submit() { }
@@ -183,6 +274,7 @@ namespace RoadOfTheOldKing.UI
             god = AddToggle(playerPage, "God mode", commands.SetGodMode);
             infinite = AddToggle(playerPage, "Infinite stamina", commands.SetInfiniteStamina);
             collision = AddToggle(playerPage, "No collision", value => commands.SetCollision(!value));
+            showCollision = AddToggle(playerPage, "Show collision", commands.SetShowCollision);
             speed = AddSlider(playerPage, "Move speed", .25f, 4f, 1f, commands.SetSpeed);
             var testing = new Foldout { text = "Combat & simulation", value = false }; playerPage.Add(testing);
             row = Row(testing);
@@ -196,7 +288,7 @@ namespace RoadOfTheOldKing.UI
             var radius = new FloatField("Enemy radius") { value = 15, isDelayed = true }; testing.Add(radius);
             row = Row(testing);
             AddButton(row, "Kill nearby", () => commands.KillNearby(radius.value), true, "danger").tooltip = "Runs normal reward and save events.";
-            AddButton(row, "Reset enemies", commands.ResetEnemies);
+            AddButton(row, "Reset enemies", commands.ResetEnemies).tooltip = "Back to their posts at full health. Fallen bosses rise again.";
         }
         private void BuildItems()
         {
@@ -313,6 +405,7 @@ namespace RoadOfTheOldKing.UI
             var modifiers = new List<string>();
             if (commands.GodMode) modifiers.Add("GOD"); if (commands.InfiniteStamina) modifiers.Add("STAMINA");
             if (commands.NoCollision) modifiers.Add("NO COLLISION");
+            if (commands.ShowCollision) modifiers.Add(commands.Touching.Length > 0 ? "TOUCHING " + commands.Touching : "SHOW COLLISION");
             if (!Mathf.Approximately(commands.SpeedMultiplier, 1)) modifiers.Add($"MOVE {commands.SpeedMultiplier:0.##}x");
             if (!Mathf.Approximately(SimulationPause.UnpausedTimeScale, 1)) modifiers.Add($"TIME {SimulationPause.UnpausedTimeScale:0.##}x");
             string flags = modifiers.Count > 0 ? string.Join(" · ", modifiers) : "No runtime overrides";
@@ -340,7 +433,7 @@ namespace RoadOfTheOldKing.UI
                 $"{session.Progress.bronzeCoins} coins   |   {session.Progress.sunShards} shards   |   {HeartFragmentProgression.Count(session.Progress)} fragments";
             speed.SetEnabled(ready);
             god.SetValueWithoutNotify(commands.GodMode); infinite.SetValueWithoutNotify(commands.InfiniteStamina);
-            collision.SetValueWithoutNotify(commands.NoCollision);
+            collision.SetValueWithoutNotify(commands.NoCollision); showCollision.SetValueWithoutNotify(commands.ShowCollision);
             speed.SetValueWithoutNotify(commands.SpeedMultiplier); time.SetValueWithoutNotify(SimulationPause.UnpausedTimeScale);
             marker.text = commands.Marker.HasValue ? $"Marker: {commands.Marker.Value.x:0.0}, {commands.Marker.Value.y:0.0}" : "No marker set";
             status.text = commands.LastResult; status.EnableInClassList("error", !commands.LastSucceeded);

@@ -82,6 +82,9 @@ namespace RoadOfTheOldKing.Progression
             if (!TryGetComponent(out transitions)) transitions = gameObject.AddComponent<SceneTransitions>();
             Checkpoints = new CheckpointService(this);
             Rewards = new RewardService(this, upgradeTiers);
+#if UNITY_EDITOR
+            if (DevPlayFromHere.IsActive) { saveKey = DevPlayFromHere.SaveKey; legacySaveKeys = Array.Empty<string>(); }
+#endif
             store = new PlayerPrefsProgressStore(saveKey, legacySaveKeys);
             try { Progress = store.Load(); }
             catch (Exception)
@@ -142,6 +145,9 @@ namespace RoadOfTheOldKing.Progression
             Visits.Restore();
             Rewards.ApplyUpgrades();
             Checkpoints.ApplyCarriedVitals();
+#if UNITY_EDITOR
+            if (DevPlayFromHere.TakeSpot(out Vector2 spot)) Checkpoints.MoveTo(spot);
+#endif
             transitions.HoldArrivingPlayer(Player.GetComponent<PlayerControlLocks>());
         }
 

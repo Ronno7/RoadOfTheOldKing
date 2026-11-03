@@ -15,6 +15,7 @@
 - North Bank Bonfire where the King's Road leaves the Lowlands; fallen logs block the road until Barrow Woods returns, with an end card there once the basin is drained.
 - Drowned Hayfields: flooded fields and a barn south of the pasture, with a heart fragment.
 - Breakable bushes; two close the way into the Drowned Hayfields.
+- F4 Developer Tools can show collision and bring fallen bosses back.
 
 **Changed**
 - Wolves share one tuning

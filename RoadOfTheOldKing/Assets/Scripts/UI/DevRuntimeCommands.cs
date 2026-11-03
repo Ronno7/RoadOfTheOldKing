@@ -29,6 +29,9 @@ namespace RoadOfTheOldKing.UI
         public bool GodMode => HasPlayer && Player.DebugGodMode;
         public bool InfiniteStamina => Stamina != null && Stamina.DebugInfinite;
         public bool NoCollision { get; private set; }
+        public bool ShowCollision => collisionOverlay != null && collisionOverlay.enabled;
+        public string Touching => ShowCollision ? collisionOverlay.Touching : "";
+        private DevCollisionOverlay collisionOverlay;
         public float SpeedMultiplier => Movement != null ? Movement.DebugSpeedMultiplier : 1f;
         public string LastResult { get; private set; } = "Ready.";
         public bool LastSucceeded { get; private set; } = true;
@@ -326,8 +329,13 @@ namespace RoadOfTheOldKing.UI
         {
             int count = 0;
             foreach (var enemy in EnemyRegistry.Active.ToArray())
+            {
+                // A recorded boss stays fallen through any reset, so fighting it again means forgetting its defeat.
+                if (enemy is PursuitBrain brain && brain.DefeatRecord != null && GameSession.Instance != null)
+                    GameSession.Instance.Progress.completedIds.Remove(brain.DefeatRecord.Milestone);
                 if (enemy is IResetOnRest reset) { reset.ResetOnRest(); count++; }
-            return Report(true, $"Reset {count} enemies. Saved rewards and milestones unchanged.");
+            }
+            return Report(true, $"Reset {count} enemies. Fallen bosses rise again; other rewards and milestones unchanged.");
         }
         public bool RetrieveAxe()
         {
@@ -344,6 +352,12 @@ namespace RoadOfTheOldKing.UI
             GameSession.Instance.Checkpoints.RestartFromCheckpoint();
             return Report(true, "Reloading at checkpoint; permanent progress kept.");
         }
+        public bool SetShowCollision(bool value)
+        {
+            if (value && collisionOverlay == null) collisionOverlay = gameObject.AddComponent<DevCollisionOverlay>();
+            if (collisionOverlay != null) collisionOverlay.enabled = value;
+            return Report(true, value ? "Showing collision: red solid, cyan bodies, yellow triggers, white what you're touching." : "Collision hidden.");
+        }
         public bool ResetOverrides()
         {
             if (NoCollision && Alive) SetCollision(true);
@@ -356,6 +370,7 @@ namespace RoadOfTheOldKing.UI
             if (Stamina != null) Stamina.DebugInfinite = false;
             if (Movement != null) Movement.DebugSpeedMultiplier = 1f;
             RestoreCollision();
+            if (collisionOverlay != null) collisionOverlay.enabled = false;
             if (timeChanged) SimulationPause.SetTimeScale(originalTimeScale);
             timeChanged = false;
         }

@@ -294,7 +294,7 @@ One verb per space. Each lesson completes from a real outcome, not a key press.
 
 - **Combat Effects Preview** (Unity menu): replays attacks against a target with slow motion and frame stepping.
 - **F3 Debug Panel:** read-only performance, player, world and save readouts.
-- **F4 Developer Tools:** restore, grants, god mode, no collision, game speed and travel to any fire or arrival point.
+- **F4 Developer Tools:** restore, grants, god mode, no collision, show collision, game speed, reset enemies and fallen bosses, and travel to any fire or arrival point.
 - [Tools](../Tools/README.md): art exporters, pacing simulator, release packaging and regression checks.
 
 Limits today: Barrow Woods and later regions are unbuilt, Settings is small, and some body attack animations are still pending.
