@@ -280,11 +280,13 @@ namespace RoadOfTheOldKing.Enemies
                 return;
             }
 
-            if (IsAware && (!targetAlive || actor.OutsideLeash(leashRadius) || actor.LostSight(loseSightTime)))
+            actor.TickChase(dt);
+            if (IsAware && (!targetAlive || actor.ShouldBreakOff(leashRadius, loseSightTime, distance, noticeRadius)))
             {
                 LoseTarget();
                 Enter(PredatorState.Return);
             }
+            if (!IsAware) actor.Mend(dt);
 
             bool free = State == PredatorState.Stalk || State == PredatorState.Reposition || State == PredatorState.Chase;
             if (IsAware && free && Reacted(distance, toward, sees, swingStarted, openingStarted, wasHit, throwLaunched)) return;
@@ -321,9 +323,9 @@ namespace RoadOfTheOldKing.Enemies
                     break;
                 case PredatorState.Return:
                     Vector2 toHome = actor.Home - body.position;
-                    // Followed back into its ground: take the player up again (well inside the leash, so it doesn't flicker at the edge).
-                    if (sees && distance <= noticeRadius && actor.CanReengage(leashRadius)) Notice();
-                    else if (toHome.magnitude <= .15f) { Brake(dt); Enter(PredatorState.Idle); }
+                    // Followed back into its ground, or the player right beside it: take them up again.
+                    if (sees && actor.ShouldTurnBack(leashRadius, distance, noticeRadius)) Notice();
+                    else if (toHome.magnitude <= .15f || actor.SettleIfStuck(dt)) { Brake(dt); Enter(PredatorState.Idle); }
                     else Move(toHome.normalized, trotSpeed, dt);
                     break;
             }
@@ -477,6 +479,7 @@ namespace RoadOfTheOldKing.Enemies
         {
             IsAware = true;
             actor.MarkSeen();
+            actor.ClearWalkHome();
             Enter(PredatorState.Alert);
             PlayerDetected?.Invoke();
         }
@@ -528,6 +531,7 @@ namespace RoadOfTheOldKing.Enemies
         {
             if (!health.IsAlive) return;
             hitPending = true;
+            actor.Provoke();
             // Struck from hiding: it knows where you are now.
             if (!IsAware && target != null && target.IsAlive)
             {

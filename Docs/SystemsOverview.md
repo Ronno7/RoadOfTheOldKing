@@ -173,7 +173,7 @@ Values live in `Assets/Settings/Weapons/AxeSettings.asset`.
 | `Brains` | `PredatorBrain` circles, commits and punishes. `PursuitBrain` approaches, attacks and returns. |
 | `Abilities` | `EnemyActionRunner` runs one `IEnemyAction` at a time on a shared phase clock. |
 | `Core` | `EnemyBody` owns sight, leash, home and reset. `EnemyRegistry` lets shared systems find enemies. |
-| `Presentation` | Sprite views, health bars, awareness marker, weapon view. They only sample. |
+| `Presentation` | Sprite views, health bars, awareness marker, weapon view, drawn attack ground. They only sample. |
 
 | Enemy | Brain | Health | Attacks | What it asks of you |
 | --- | --- | --- | --- | --- |
@@ -181,7 +181,7 @@ Values live in `Assets/Settings/Weapons/AxeSettings.asset`.
 | Road Scavenger | Pursuit | 75 | Step-in, overhead | Keep your spacing; watches 0.9 s before it engages |
 | Mossback Boar | Pursuit | 90 | Charge, tusk sweep | Bait the charge; hitting a wall head-on stuns it 2.2 s |
 | Thorn Rat | Pursuit | 10 | Dart and nip | Don't get surrounded |
-| Broken Watcher (boss) | Pursuit, guardian stage | 260 | 360° slam, close sweep | Back out of the ring, then punish the recovery |
+| Broken Watcher (boss) | Pursuit, guardian stage | 440 | 360° slam, close sweep, a draw from afar | Leave the ring, fight the pull, punish the recovery |
 
 Every attack follows the same contract, with values in `Assets/Settings/Enemies`:
 
@@ -192,7 +192,9 @@ flowchart LR
 
 - **Openings are promises.** At most one follow-up, and recovery is never cancelled.
 - **No shared attack turn.** Each enemy attacks on its own rhythm. Groups are shaped by placement and notice radius, so a careful player can pull one at a time.
-- **Leash.** An aware enemy chases until it strays past its own leash or loses sight, then walks home.
+- **Leash.** An enemy breaks off when it loses sight, or once past its leash with the player out of notice range, then walks home. A hit, or the player coming close, turns it back. All of this lives in `EnemyBody`.
+- **Mending.** Out of the fight an enemy heals 10% of its health per second. A boss back on its seat is whole at once.
+- **Boss arena.** While its boss is awake, `BossArena` stands fog walls on a rectangle. They hold the boss in, and the player too once fully inside. Only a seated or fallen boss drops them, so any reset reopens the way.
 
 ## Progression and saving
 
@@ -243,6 +245,7 @@ Level construction is in [World and tilemaps](World.md).
 | Trader | `Trader`, `ShopOffer`, `CollectionMenu` | Talk, then trade. A purchase saves coins, item and stock together. |
 | Rope | `RopeAnchor`, `RopeRoute` | A bought kit secures a saved two-way route. |
 | Inscriptions | `ForgeInscription`, `InscriptionReader` | Reading saves the knowledge; the carving stays. |
+| End card | `EndCard`, `InscriptionReader` | A rereadable card where a build stops, offered after a milestone. |
 | Recall puzzles | `RecallAwakeningStone`, `RecallSluice`, `RecallRelease` | Bind a lodged axe and its return hits to one flight. |
 | Gates and bridges | `PermanentPassage` | One-time. Collision holds until the animation ends and restores on load. |
 | Roofs | `BuildingCutaway` | Roofs fade while the player's feet are inside authored rectangles. |

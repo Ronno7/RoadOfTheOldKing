@@ -256,8 +256,8 @@ MonoBehaviour:
   noticeRadius: 7
   watchDuration: 0.9
   forgetDuration: 0.6
-  leashRadius: 10
-  loseSightTime: 2
+  leashRadius: 16
+  loseSightTime: 3
   attackDistance: 2.6
   attackReach: 2.25
   attackArc: 85
@@ -269,8 +269,12 @@ MonoBehaviour:
   closeAttack: {fileID: 11400000, guid: cc2da1dadf3ecef409adea2ae417a2a2, type: 2}
   closeRangeFraction: 0.75
   followUpOnMiss: 1
+  wakeRadius: 0
+  wakeDuration: 1.5
+  defeatRecord: {fileID: 0}
   holdDistance: 3.2
   attackCooldown: 0.8
+  cooldownJitter: 0
 --- !u!114 &6032105979022356310
 MonoBehaviour:
   m_ObjectHideFlags: 0

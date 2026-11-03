@@ -42,6 +42,13 @@ namespace RoadOfTheOldKing.Enemies
         [Tooltip("A missed main attack continues into the close attack when the player is still in its reach. Off: the main attack's recovery is always the opening.")]
         [SerializeField] private bool followUpOnMiss = true;
 
+        [Header("Far attack (optional)")]
+        [Tooltip("Committed attack used on a player in sight this far off or further. Unassigned: it only walks in.")]
+        [SerializeField] private EnemyAttackDefinition farAttack;
+        [SerializeField, Min(0f)] private float farAttackRange = 5f;
+        [Tooltip("Seconds between far attacks, from the start of the last; it walks in meanwhile.")]
+        [SerializeField, Min(0f)] private float farAttackInterval = 6f;
+
         [Header("Guardian (optional)")]
         [Tooltip("Sits dormant until the player comes this close in sight, or strikes it, then rises. Zero: no dormant stage.")]
         [SerializeField, Min(0f)] private float wakeRadius;
@@ -68,7 +75,7 @@ namespace RoadOfTheOldKing.Enemies
         private float suspicion;
         private EnemyAttackSpec current;
         private bool inSequence, followUpChecked;
-        private float cooldown;
+        private float cooldown, farCooldown;
         private MeleeAttackAction melee;
         private bool recordChecked;
 
@@ -86,6 +93,8 @@ namespace RoadOfTheOldKing.Enemies
         public bool IsCloseAttack { get; private set; }
         public bool IsFollowUp { get; private set; }
         public bool IsWallStunned => melee != null && action.IsRunning && melee.WallStunned;
+        public EncounterUnlock DefeatRecord => defeatRecord;
+        public bool IsDrawing => State == PursuitState.Windup && action != null && action.IsRunning && current.drawSpeed > 0f;
 
         // Starts one attack outside the duel sequence (no follow-up); the sequence uses BeginSequenceAttack.
         public bool TryBeginAttack(EnemyAttackSpec settings, PlayerHealth victim, Vector2 direction)
@@ -184,6 +193,7 @@ namespace RoadOfTheOldKing.Enemies
 
             remaining -= deltaTime;
             cooldown = Mathf.Max(0f, cooldown - deltaTime);
+            farCooldown = Mathf.Max(0f, farCooldown - deltaTime);
             if (action.IsRunning)
             {
                 action.Tick(deltaTime);
@@ -230,7 +240,12 @@ namespace RoadOfTheOldKing.Enemies
                 {
                     bool near = actor.Sees(target.transform, wakeRadius, false) &&
                         ((Vector2)target.transform.position - body.position).magnitude <= wakeRadius;
-                    if (!near && !provoked) return;
+                    if (!near && !provoked)
+                    {
+                        // Back on its seat it's whole again: a fight left, or a throw from afar, wears nothing down.
+                        health.Heal(health.MaxHealth);
+                        return;
+                    }
                     provoked = false;
                     SetState(PursuitState.Waking, wakeDuration);
                     return;
@@ -241,21 +256,23 @@ namespace RoadOfTheOldKing.Enemies
             // own leash; then it walks home, and takes the player up again if struck or followed back in.
             Vector2 toTarget = (Vector2)target.transform.position - body.position;
             bool sees = actor.Sees(target.transform, noticeRadius, false);
-            if (provoked && !actor.OutsideLeash(leashRadius)) Engage();
+            actor.TickChase(deltaTime);
+            if (provoked) Engage();
             provoked = false;
+            if (!IsAware) actor.Mend(deltaTime);
             if (State == PursuitState.Returning)
             {
-                if (sees && toTarget.magnitude <= noticeRadius && actor.CanReengage(leashRadius))
+                if (sees && actor.ShouldTurnBack(leashRadius, toTarget.magnitude, noticeRadius))
                     Engage();
                 else
                 {
                     Vector2 toHome = actor.Home - body.position;
-                    if (toHome.magnitude <= 0.15f) SetState(RestState);
+                    if (toHome.magnitude <= 0.15f || actor.SettleIfStuck(deltaTime)) { body.linearVelocity = Vector2.zero; SetState(RestState); }
                     else Move(toHome);
                     return;
                 }
             }
-            if (IsAware && (actor.OutsideLeash(leashRadius) || actor.LostSight(loseSightTime)))
+            if (IsAware && actor.ShouldBreakOff(leashRadius, loseSightTime, toTarget.magnitude, noticeRadius))
             {
                 IsAware = false;
                 State = PursuitState.Returning;
@@ -292,7 +309,13 @@ namespace RoadOfTheOldKing.Enemies
             float distance = toTarget.magnitude;
             bool close = closeAttack != null && distance <= CloseSettings.reach * closeRangeFraction;
             bool ready = cooldown <= 0f;
-            if (ready && (close || distance <= attackDistance))
+            if (ready && farAttack != null && farCooldown <= 0f && distance >= farAttackRange && sees)
+            {
+                FacingDirection = toTarget.normalized;
+                farCooldown = farAttackInterval;
+                if (BeginSequenceAttack(farAttack.settings, FacingDirection, false)) State = PursuitState.Windup;
+            }
+            else if (ready && (close || distance <= attackDistance))
             {
                 FacingDirection = toTarget.sqrMagnitude > 0.001f ? toTarget.normalized : FacingDirection;
                 if (BeginSequenceAttack(close ? CloseSettings : Settings, FacingDirection, close)) State = PursuitState.Windup;
@@ -344,6 +367,7 @@ namespace RoadOfTheOldKing.Enemies
             suspicion = 0f;
             if (State == PursuitState.Returning || State == PursuitState.Watching) State = PursuitState.Idle;
             actor.MarkSeen();
+            actor.ClearWalkHome();
             if (IsAware) return;
             IsAware = true;
             PlayerDetected?.Invoke();
@@ -361,20 +385,24 @@ namespace RoadOfTheOldKing.Enemies
         {
             if (health.IsAlive && hit.StaggerDuration > 0f)
             {
+                // A break never shortens a promised opening: whatever recovery was left still stands.
+                float owed = melee != null && action.IsRunning ? melee.RecoveryLeft - hit.StaggerDuration : 0f;
                 // Keep the impulse already applied by HitReaction; the stagger itself runs first.
                 State = PursuitState.Recovering;
-                remaining = hitRecovery;
+                remaining = Mathf.Max(hitRecovery, owed);
                 stateDuration = remaining;
                 action.Cancel(false);
                 knockedBack = true;
             }
         }
 
-        // Any hit, staggering or not, makes it take the player up again (within its leash).
+        // Any hit, staggering or not, makes it take the player up again, even from past its leash, so it
+        // can't be lured to the edge and struck in the back on its way home.
         private void OnProvoked(CombatHit hit)
         {
             if (!health.IsAlive) return;
-            if (HasWatchingStage && !actor.OutsideLeash(leashRadius)) Engage();
+            actor.Provoke();
+            if (HasWatchingStage) Engage();
             else provoked = true;
         }
 
@@ -403,9 +431,10 @@ namespace RoadOfTheOldKing.Enemies
 
         public void ResetOnRest()
         {
+            if (actor == null) return; // Never woken, like a nest hidden until the basin drains: it starts fresh when shown.
             IsAware = provoked = false;
             EndSequence();
-            cooldown = 0f;
+            cooldown = farCooldown = 0f;
             ResetVersion++;
             actor.Reset();
             SetState(RestState);

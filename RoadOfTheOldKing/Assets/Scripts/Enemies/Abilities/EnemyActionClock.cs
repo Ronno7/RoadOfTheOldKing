@@ -12,6 +12,7 @@ namespace RoadOfTheOldKing.Enemies
         private float duration;
         public float Progress => Mathf.Clamp01(Elapsed / Mathf.Max(.001f, duration));
         public bool Expired => Elapsed >= duration;
+        public float Remaining => Mathf.Max(0f, duration - Elapsed);
         public void Enter(EnemyAttackPhase phase, float seconds)
         { Phase = phase; duration = seconds; Elapsed = 0f; }
         public bool Advance(float dt)

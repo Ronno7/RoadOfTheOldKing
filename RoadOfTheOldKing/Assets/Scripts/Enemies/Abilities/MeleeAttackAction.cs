@@ -21,6 +21,9 @@ namespace RoadOfTheOldKing.Enemies
         private readonly Vector2 initialDirection;
         private EnemyAttackSpec spec;
         private bool armored;
+        private PlayerMovement drawn;
+        // A drawn player stops short of the body rather than pressing against it.
+        private const float DrawStopDistance = 1.6f;
         public EnemyAttackPhase Phase => clock.Phase;
         public bool IsComplete => !IsRunning;
         public bool IsRunning => Phase != EnemyAttackPhase.None;
@@ -32,6 +35,7 @@ namespace RoadOfTheOldKing.Enemies
         public bool IsCharge => spec.chargeSpeed > 0;
         public bool IsLocked => Phase != EnemyAttackPhase.Windup || clock.Elapsed >= spec.trackingTime;
         public float Progress => clock.Progress;
+        public float RecoveryLeft => Phase == EnemyAttackPhase.Recovery ? clock.Remaining : 0f;
 
         public MeleeAttackAction(GameObject owner, Rigidbody2D body, Collider2D collider, HitReaction reaction, Func<Vector2, bool> clear,
             EnemyAttackSpec settings, PlayerHealth victim, Vector2 direction)
@@ -49,7 +53,15 @@ namespace RoadOfTheOldKing.Enemies
             spec.trackingTime = Mathf.Clamp(spec.trackingTime, 0, spec.windup - .05f);
             Direction = initialDirection.sqrMagnitude > .001f ? initialDirection.normalized : Vector2.down;
             Origin = body.position; HasContact = WallStunned = false; Enter(EnemyAttackPhase.Windup);
+            drawn = spec.drawSpeed > 0f ? target.GetComponent<PlayerMovement>() : null;
             return true;
+        }
+
+        private void DrawTarget()
+        {
+            Vector2 toward = body.position - (Vector2)target.transform.position;
+            if (toward.sqrMagnitude > DrawStopDistance * DrawStopDistance && clear(target.transform.position))
+                drawn.Pull(toward.normalized * spec.drawSpeed);
         }
 
         public void Tick(float dt)
@@ -65,6 +77,7 @@ namespace RoadOfTheOldKing.Enemies
                     if (toward.sqrMagnitude > .001f) Direction = toward.normalized;
                 }
                 if (IsLocked && spec.armoredWhenLocked) SetArmor(true);
+                if (drawn != null) DrawTarget();
                 if (clock.Elapsed >= spec.windup) { Origin = body.position; Enter(EnemyAttackPhase.Active); }
                 return;
             }

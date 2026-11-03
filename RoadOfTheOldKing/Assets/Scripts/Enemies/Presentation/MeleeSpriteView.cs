@@ -14,6 +14,7 @@ namespace RoadOfTheOldKing.Enemies
         [SerializeField] private LineRenderer attackOutline;
         private PursuitBrain enemy;
         private Damageable health;
+        private EnemySlamView slamView;
         private Vector2 previous;
         private float gait, idleTime, deathTime, flashUntil;
         private int octant = 6, resetVersion;
@@ -22,7 +23,7 @@ namespace RoadOfTheOldKing.Enemies
 
         private void Awake()
         {
-            enemy = GetComponent<PursuitBrain>(); health = GetComponent<Damageable>();
+            enemy = GetComponent<PursuitBrain>(); health = GetComponent<Damageable>(); slamView = GetComponent<EnemySlamView>();
             properties = new MaterialPropertyBlock();
         }
         private void OnEnable() { health.HitReceived += OnHit; ResetPresentation(); }
@@ -75,7 +76,9 @@ namespace RoadOfTheOldKing.Enemies
             bodyVisual.GetPropertyBlock(properties); properties.SetFloat("_FlashAmount", Time.time < flashUntil ? 1 : 0); bodyVisual.SetPropertyBlock(properties);
             wasAlive = health.IsAlive;
             if (attackOutline == null) return;
-            attackOutline.enabled = health.IsAlive && (windup || strike);
+            // An attack with its own drawn ground needs no outline; charges keep their lanes.
+            bool drawnGround = slamView != null && !enemy.IsChargeAttack;
+            attackOutline.enabled = health.IsAlive && (windup || strike) && !drawnGround;
             if (!attackOutline.enabled) return;
             attackOutline.startColor = attackOutline.endColor = strike ? new Color(1, .3f, .15f, .9f) : new Color(1, .75f, .2f, .65f);
             // Locked direction: the honest dodge cue for both charge lanes and arcs.

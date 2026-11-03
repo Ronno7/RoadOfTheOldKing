@@ -17,6 +17,8 @@ namespace RoadOfTheOldKing.Enemies
         public float wallStunRecovery;
         [Tooltip("Camera kick (world units) when the blow lands, e.g. a ground slam. Zero: none.")]
         public float impactShake;
+        [Tooltip("Drags a player it can see toward it through the windup, at this speed in units per second. Zero: none.")]
+        public float drawSpeed;
     }
 
     // Immutable authoring data in play. The runner takes a value copy at commitment.

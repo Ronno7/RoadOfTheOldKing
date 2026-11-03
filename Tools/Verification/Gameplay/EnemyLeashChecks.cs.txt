@@ -1,5 +1,5 @@
 // Empty, save-free Play Mode only (22 Oct; wolf section 26 Oct). PursuitBrain chase/leash/re-engage contract from playtest feedback:
-// chases past its notice radius, gives up at its own leash, ignores the player near the leash edge, re-engages
+// chases past its notice radius, gives up past its own leash once the player has got away, ignores a player near the leash edge, re-engages
 // when followed back inside 60% of the leash or when hit, and otherwise walks home and idles.
 if (!EditorApplication.isPlaying || UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Progression.GameSession>() != null)
     throw new Exception("Use an empty Play Mode scene without GameSession.");
@@ -44,13 +44,13 @@ try{
  check(track.style.display.value==UnityEngine.UIElements.DisplayStyle.None&&ui.Q<UnityEngine.UIElements.VisualElement>("awareness-mark").style.display.value==UnityEngine.UIElements.DisplayStyle.Flex,"engagement replaces the meter with the alert glyph");
  put(home+Vector2.right*(notice+2)); run(10);
  check(brain.IsAware&&brain.State==RoadOfTheOldKing.Enemies.PursuitState.Pursuing,"keeps chasing past notice radius");
- for(int i=0;i<400&&brain.IsAware;i++){ put(body.position+Vector2.right*3f); run(1);}
+ for(int i=0;i<400&&brain.IsAware;i++){ put(body.position+Vector2.right*(notice+1)); run(1);}
  float out1=Vector2.Distance(body.position,home);
  check(!brain.IsAware&&out1>leash-.5f,"gives up at its own leash ("+out1.ToString("0.0")+" of "+leash+")");
  check(brain.State==RoadOfTheOldKing.Enemies.PursuitState.Returning,"walks home");
- put(body.position+Vector2.right*2); run(5);
+ put(body.position+Vector2.right*5); run(5);
  check(!brain.IsAware,"ignores player near the leash edge");
- for(int i=0;i<600&&!brain.IsAware;i++){ put(body.position+Vector2.right*2); run(1);}
+ for(int i=0;i<600&&!brain.IsAware;i++){ put(body.position+Vector2.right*5); run(1);}
  float d2=Vector2.Distance(body.position,home);
  check(brain.IsAware&&d2<=leash*.6f+.2f,"re-engages when followed back in ("+d2.ToString("0.0")+")");
  brain.ResetOnRest(); put(home+Vector2.right*(notice+20)); body.position=home+Vector2.right*(leash*.5f); run(1);
@@ -58,6 +58,40 @@ try{
  obj.GetComponent<RoadOfTheOldKing.Combat.Damageable>().DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.left,0,0));
  for(int i=0;i<40&&!brain.IsAware;i++) run(1);
  check(brain.IsAware,"a hit while returning re-engages");
+ // #77: a hit from past the leash draws it back, holds the chase for a while, then it gives up again.
+ brain.ResetOnRest(); put(home+Vector2.right*200); body.position=home+Vector2.right*(leash+3); run(1);
+ check(brain.State==RoadOfTheOldKing.Enemies.PursuitState.Returning&&!brain.IsAware,"past its leash it walks home");
+ obj.GetComponent<RoadOfTheOldKing.Combat.Damageable>().DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.left,0,0));
+ run(2);
+ check(brain.IsAware&&brain.State!=RoadOfTheOldKing.Enemies.PursuitState.Returning,"a hit from past the leash draws it back");
+ run(50);
+ check(brain.IsAware,"the hit holds the chase past the leash");
+ run(255);
+ check(!brain.IsAware,"once the hit's chase runs out it gives up again");
+ // A fight past the leash: it keeps its face to a player beside it, but can't be led across the map.
+ brain.ResetOnRest(); body.position=home+Vector2.right*(leash+1); obj.transform.position=body.position; put(body.position+Vector2.right*1.5f); Physics2D.SyncTransforms();
+ t.GetMethod("Engage",flags).Invoke(brain,null); run(1);
+ check(brain.IsAware,"beside the player past its leash it keeps fighting");
+ brain.ResetOnRest(); body.position=home+Vector2.right*(leash*1.5f+1); obj.transform.position=body.position; put(body.position+Vector2.right*1.5f); Physics2D.SyncTransforms();
+ t.GetMethod("Engage",flags).Invoke(brain,null); run(1);
+ check(!brain.IsAware,"far past its leash it gives up even beside the player");
+ // Walking home it still reacts to a player right next to it, and a wall in the way ends the walk.
+ brain.ResetOnRest(); put(home+Vector2.right*200); body.position=home+Vector2.right*(leash*.9f); obj.transform.position=body.position; Physics2D.SyncTransforms(); run(1);
+ put(body.position+Vector2.right*1.5f); Physics2D.SyncTransforms(); run(1);
+ check(brain.IsAware,"walking home it turns on a player right beside it");
+ brain.ResetOnRest(); put(home+Vector2.right*200); body.position=home+Vector2.right*8; obj.transform.position=body.position;
+ var wallObj=new GameObject("Leash wall"); created.Add(wallObj); wallObj.transform.position=home+Vector2.right*4; wallObj.AddComponent<BoxCollider2D>().size=new Vector2(1,8); Physics2D.SyncTransforms();
+ run(260);
+ check(brain.State==RoadOfTheOldKing.Enemies.PursuitState.Idle&&body.linearVelocity.magnitude<.01f&&Vector2.Distance(body.position,home)>2,"a wall on the way home ends the walk, not walking on the spot");
+ UnityEngine.Object.DestroyImmediate(wallObj); Physics2D.SyncTransforms(); brain.ResetOnRest();
+ check(Vector2.Distance(body.position,home)<.01f,"rest puts it back at its real home");
+ // Out of the fight it mends at a mid rate; in the fight it doesn't.
+ var scavHealth=obj.GetComponent<RoadOfTheOldKing.Combat.Damageable>(); put(home+Vector2.right*200); Physics2D.SyncTransforms();
+ scavHealth.SetHealth(scavHealth.MaxHealth/2); int halfHealth=scavHealth.Health; run(50);
+ check(scavHealth.Health>halfHealth&&scavHealth.Health<scavHealth.MaxHealth,"out of the fight it mends, but not all at once ("+halfHealth+" to "+scavHealth.Health+" of "+scavHealth.MaxHealth+" in 1 s)");
+ run(500); check(scavHealth.Health==scavHealth.MaxHealth,"it mends back to full");
+ t.GetMethod("Engage",flags).Invoke(brain,null); scavHealth.SetHealth(halfHealth); run(50);
+ check(scavHealth.Health==halfHealth,"it doesn't mend while in the fight"); brain.ResetOnRest();
  brain.ResetOnRest(); put(home+Vector2.right*200); body.position=home+Vector2.right*3; run(1);
  for(int i=0;i<200&&brain.State!=RoadOfTheOldKing.Enemies.PursuitState.Idle;i++) run(1);
  check(brain.State==RoadOfTheOldKing.Enemies.PursuitState.Idle&&Vector2.Distance(body.position,home)<.3f,"returns to home and idles");
@@ -86,14 +120,81 @@ try{
  // Still at home, so Return settles straight into Idle within the same tick.
  check(!wolf.IsAware&&wolf.State==RoadOfTheOldKing.Enemies.PredatorState.Idle,"wolf gives up after its lose-sight time");
  wolf.ResetOnRest();put(wHome+Vector2.right*(wNotice-1));Physics2D.SyncTransforms();wrun(1);
- wput(wHome+Vector2.right*(wLeash+.5f));put(wb.position+Vector2.right*2);Physics2D.SyncTransforms();wrun(1);
+ wput(wHome+Vector2.right*(wLeash+.5f));put(wb.position+Vector2.right*(wNotice+1));Physics2D.SyncTransforms();wrun(1);
  check(!wolf.IsAware&&wolf.State==RoadOfTheOldKing.Enemies.PredatorState.Return,"wolf gives up past its own leash");
- wput(wHome+Vector2.right*(wLeash*.7f));put(wb.position+Vector2.right*2);Physics2D.SyncTransforms();wrun(1);
+ wput(wHome+Vector2.right*(wLeash*.7f));put(wb.position+Vector2.right*5);Physics2D.SyncTransforms();wrun(1);
  check(!wolf.IsAware,"wolf ignores the player outside 60% of its leash");
  wput(wHome+Vector2.right*(wLeash*.5f));put(wb.position+Vector2.right*2);Physics2D.SyncTransforms();wrun(1);
  check(wolf.IsAware,"wolf re-engages when followed back inside 60% of its leash");
  wolf.ResetOnRest();put(wHome+Vector2.right*(wNotice*1.5f+2));Physics2D.SyncTransforms();seen.SetValue(senses,Time.time-wLose-.1f);
  wolfObj.GetComponent<RoadOfTheOldKing.Combat.Damageable>().DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.left,0,0));wrun(1);
  check(wolf.IsAware,"a hit from out of sight engages the wolf and counts as seeing the player");
+ wolf.ResetOnRest();wput(wHome+Vector2.right*(wLeash+3));put(wHome+Vector2.right*300);Physics2D.SyncTransforms();wrun(1);
+ wolfObj.GetComponent<RoadOfTheOldKing.Combat.Damageable>().DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.left,0,0));wrun(5);
+ check(wolf.IsAware&&wolf.State!=RoadOfTheOldKing.Enemies.PredatorState.Return,"a hit from past its leash draws the wolf back");
+ wolf.ResetOnRest();wput(wHome+Vector2.right*(wLeash+1));put(wb.position+Vector2.right*1.5f);Physics2D.SyncTransforms();wt.GetMethod("Notice",flags).Invoke(wolf,null);wrun(1);
+ check(wolf.IsAware,"beside the player past its leash the wolf keeps fighting");
+ // Boss arena: the fog holds an awake boss in, and the player once inside; only a seated or fallen boss drops it.
+ var aHome=home+Vector2.down*300;
+ var bossObj=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Combat/BrokenWatcher.prefab"),aHome,Quaternion.identity);created.Add(bossObj);
+ var boss=bossObj.GetComponent<RoadOfTheOldKing.Enemies.PursuitBrain>();var bBody=bossObj.GetComponent<Rigidbody2D>();var bHealth=bossObj.GetComponent<RoadOfTheOldKing.Combat.Damageable>();
+ t.GetField("target",flags).SetValue(boss,player);
+ float bWake=(float)t.GetField("wakeRadius",flags).GetValue(boss),bWakeTime=(float)t.GetField("wakeDuration",flags).GetValue(boss);
+ var bSenses=t.GetField("actor",flags).GetValue(boss);
+ var arenaObj=new GameObject("Boss arena");created.Add(arenaObj);arenaObj.SetActive(false);arenaObj.layer=LayerMask.NameToLayer("Environment");arenaObj.transform.position=aHome;
+ var arena=arenaObj.AddComponent<RoadOfTheOldKing.World.BossArena>();var at=arena.GetType();
+ at.GetField("boss",flags).SetValue(arena,boss);at.GetField("size",flags).SetValue(arena,new Vector2(16,16));arenaObj.SetActive(true);
+ var aUpdate=at.GetMethod("Update",flags);var aWalls=arenaObj.GetComponents<BoxCollider2D>();var vBody=victim.GetComponent<Collider2D>();
+ Action<int> brun=n=>{for(int i=0;i<n;i++){tick.Invoke(boss,new object[]{.02f});Physics2D.Simulate(.02f);aUpdate.Invoke(arena,null);}};
+ Func<float,bool> inRoom=m=>Mathf.Abs(bBody.position.x-aHome.x)<=8+m&&Mathf.Abs(bBody.position.y-aHome.y)<=8+m;
+ put(aHome+Vector2.right*30);Physics2D.SyncTransforms();brun(5);
+ check(boss.IsDormant&&!arena.IsUp&&!aWalls[0].enabled,"no fog while the boss sits");
+ put(aHome+Vector2.right*12);Physics2D.SyncTransforms();
+ bHealth.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,10,Vector2.left,0,0));brun(1);
+ check(!boss.IsDormant&&arena.IsUp&&aWalls[0].enabled&&!arena.HoldsPlayer&&Physics2D.GetIgnoreCollision(aWalls[1],vBody),"a throw from outside raises the wall, still open to the player");
+ check(bHealth.Health==bHealth.MaxHealth-10,"the blow that wakes it still counts ("+bHealth.Health+" of "+bHealth.MaxHealth+")");
+ brun(Mathf.CeilToInt(bWakeTime/.02f)+2);
+ bBody.position=aHome+Vector2.right*4;Physics2D.SyncTransforms();
+ for(int i=0;i<60;i++){bBody.linearVelocity=Vector2.right*6;Physics2D.Simulate(.02f);}
+ bBody.linearVelocity=Vector2.zero;
+ check(bBody.position.x-aHome.x>4.5f&&inRoom(.1f),"the awake boss can't leave ("+(bBody.position-aHome)+")");
+ bHealth.SetHealth(bHealth.MaxHealth/2);bBody.position=aHome;Physics2D.SyncTransforms();
+ for(int i=0;i<1000&&!boss.IsDormant;i++){seen.SetValue(bSenses,Time.time-10f);brun(1);}
+ check(boss.IsDormant&&!arena.IsUp&&!aWalls[0].enabled,"left alone it goes back to its seat and the wall drops ("+boss.State+")");
+ brun(1);check(bHealth.Health==bHealth.MaxHealth,"back on its seat it's whole again");
+ put(aHome+Vector2.right*(bWake-1));Physics2D.SyncTransforms();brun(1);
+ check(arena.IsUp&&arena.HoldsPlayer&&!Physics2D.GetIgnoreCollision(aWalls[1],vBody),"waking with the player inside holds the player");
+ pb.bodyType=RigidbodyType2D.Dynamic;pb.position=aHome+Vector2.right*7;victim.transform.position=pb.position;Physics2D.SyncTransforms();
+ for(int i=0;i<60;i++){pb.linearVelocity=Vector2.right*12;Physics2D.Simulate(.02f);}
+ pb.linearVelocity=Vector2.zero;
+ check(pb.position.x-aHome.x<=8.05f-.375f,"the held player can't dash out ("+(pb.position.x-aHome.x)+")");
+ pb.bodyType=RigidbodyType2D.Kinematic;
+ boss.ResetOnRest();aUpdate.Invoke(arena,null);
+ check(boss.IsDormant&&!arena.IsUp&&!arena.HoldsPlayer&&!aWalls[0].enabled,"rest or death resets the boss and drops the wall");
+ put(aHome+Vector2.right*(bWake-1));Physics2D.SyncTransforms();brun(1);
+ check(arena.IsUp&&arena.HoldsPlayer,"the next attempt raises it again");
+ // Its far attack: a draw from range, on an interval, never up close.
+ brun(Mathf.CeilToInt(bWakeTime/.02f)+2);
+ put(aHome+Vector2.right*6.5f);Physics2D.SyncTransforms();
+ for(int i=0;i<60&&!boss.IsDrawing;i++)brun(1);
+ check(boss.IsDrawing&&boss.AttackArc>=360f,"from afar it starts the draw");
+ for(int i=0;i<300&&boss.IsDrawing;i++)brun(1);
+ check(!boss.IsDrawing&&(boss.State==RoadOfTheOldKing.Enemies.PursuitState.Striking||boss.State==RoadOfTheOldKing.Enemies.PursuitState.Recovering),"the draw ends in its slam");
+ for(int i=0;i<200&&boss.State!=RoadOfTheOldKing.Enemies.PursuitState.Pursuing;i++)brun(1);
+ brun(5);check(!boss.IsDrawing,"it doesn't draw again straight away");
+ boss.ResetOnRest();put(aHome+Vector2.right*1.9f);Physics2D.SyncTransforms();brun(Mathf.CeilToInt(bWakeTime/.02f)+3);
+ for(int i=0;i<60&&boss.State!=RoadOfTheOldKing.Enemies.PursuitState.Windup;i++)brun(1);
+ check(!boss.IsDrawing&&boss.IsCloseAttack,"up close it sweeps, not draws");
+ // A break never shortens a promised opening.
+ brain.ResetOnRest();put(home+Vector2.right*1.5f);Physics2D.SyncTransforms();brain.GetType().GetMethod("Engage",flags).Invoke(brain,null);
+ for(int i=0;i<300&&brain.State!=RoadOfTheOldKing.Enemies.PursuitState.Recovering;i++)run(1);
+ var openingLeft=(float)t.GetField("melee",flags).GetValue(brain).GetType().GetProperty("RecoveryLeft").GetValue(t.GetField("melee",flags).GetValue(brain),null);
+ check(openingLeft>.3f,"the scavenger is in its recovery ("+openingLeft.ToString("0.00")+" s left)");
+ scavHealth.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,40,Vector2.left,0,.2f));
+ check((float)t.GetField("remaining",flags).GetValue(brain)>=openingLeft-.2f-.03f,"a break in recovery keeps the rest of the opening");
+ brain.ResetOnRest();scavHealth.RestoreHealth();
+ put(aHome+Vector2.right*(bWake-1));Physics2D.SyncTransforms();brun(1);
+ bHealth.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,bHealth.MaxHealth*10,Vector2.left,0,0));brun(1);
+ check(boss.IsDefeated&&!arena.IsUp&&!aWalls[0].enabled,"its defeat drops the wall");
  return "PASS "+passed.Count+"\n"+string.Join("\n",passed.ToArray());
 } finally { foreach(var g in created) if(g!=null) UnityEngine.Object.Destroy(g); Physics2D.simulationMode=sim; }

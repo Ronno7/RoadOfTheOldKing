@@ -4,7 +4,7 @@ Development tooling. The running game needs none of it.
 
 | Folder | Does |
 | --- | --- |
-| [Art](Art) | Exports native tiles, UI art and fonts; downloads recorded enemy art |
+| [Art](Art) | Exports native tiles, UI art and fonts; downloads and fits recorded enemy art |
 | [Audio](Audio) | Builds combat, reward and machinery sounds |
 | [LevelLayout](LevelLayout) | Exports scene terrain and applies reviewed terrain edits |
 | [Pacing](Pacing) | Simulates a route over real collision and charts its pacing. These are estimates, not playtests |

@@ -274,7 +274,8 @@ try{
     var filter=new ContactFilter2D{useTriggers=false};
     var overlap=new System.Collections.Generic.List<Collider2D>();
     var sweep=new System.Collections.Generic.List<RaycastHit2D>();
-    System.Func<Collider2D,bool> solid=c=>c!=null&&c.gameObject.scene==scene&&!c.isTrigger&&c.GetComponentInParent<RoadOfTheOldKing.Player.PlayerHealth>()==null&&c.GetComponentInParent<RoadOfTheOldKing.Enemies.IEnemy>()==null;
+    // Enemies and anything the axe can break (bushes, pots) don't close a route.
+    System.Func<Collider2D,bool> solid=c=>c!=null&&c.gameObject.scene==scene&&!c.isTrigger&&c.GetComponentInParent<RoadOfTheOldKing.Player.PlayerHealth>()==null&&c.GetComponentInParent<RoadOfTheOldKing.Enemies.IEnemy>()==null&&c.GetComponentInParent<RoadOfTheOldKing.Combat.Breakable>()==null;
     System.Func<int,Vector2> position=i=>new Vector2(originX+(i%w)*step,originY+(i/w)*step);
     System.Func<Vector2,int> index=v=>Mathf.RoundToInt((v.x-originX)/step)+Mathf.RoundToInt((v.y-originY)/step)*w;
     var anchors=new System.Collections.Generic.Dictionary<string,Vector2>{

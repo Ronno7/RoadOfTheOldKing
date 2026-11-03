@@ -277,7 +277,7 @@ try {
     player.HealAtRest();move(wHome+Vector2.down*9);wstep(.02f);
     check(watcher.IsDormant&&!watcher.IsAware&&watcher.FacingDirection==Vector2.down,"the Watcher sits dormant, facing its approach, while the player is far");
     move(wHome+Vector2.down*5);wstep(.02f);check(watcher.IsWaking&&!watcher.Action.IsRunning,"coming near wakes it");
-    move(wHome+Vector2.down*2.6f);wstep(wakeTime*.5f);check(watcher.IsWaking&&!watcher.Action.IsRunning,"it cannot attack while it rises, even with the player in reach");
+    move(wHome+Vector2.down*3.2f);wstep(wakeTime*.5f);check(watcher.IsWaking&&!watcher.Action.IsRunning,"it cannot attack while it rises, even with the player in reach");
     wstep(wakeTime);wstep(.02f);check(watcher.IsAware&&watcher.State==RoadOfTheOldKing.Enemies.PursuitState.Windup&&!watcher.IsCloseAttack&&watcher.AttackArc==360&&watcher.ImpactShake>0,"risen, it slams: a full circle that shakes the screen, answered by backing off");
     watcher.ResetOnRest();check(watcher.IsDormant&&wHp.Health==wHp.MaxHealth,"a reset puts it back to sleep at full health");
     move(wHome+Vector2.down*9);wHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.Throw,15,Vector2.up,0,0));wstep(.02f);check(watcher.IsWaking,"striking it from range wakes it");

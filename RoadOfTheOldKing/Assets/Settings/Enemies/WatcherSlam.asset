@@ -13,17 +13,18 @@ MonoBehaviour:
   m_Name: WatcherSlam
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Enemies.EnemyAttackDefinition
   settings:
-    windup: 1.1
+    windup: 1
     active: 0.15
-    recovery: 1.6
-    reach: 3.2
+    recovery: 1.25
+    reach: 4.2
     arc: 360
     knockback: 4.5
     stagger: 0.4
-    damage: 30
+    damage: 40
     chargeSpeed: 0
-    trackingTime: 0.6
+    trackingTime: 0
     armoredWhenLocked: 1
     armoredWhileActive: 0
     wallStunRecovery: 0
     impactShake: 0.45
+    drawSpeed: 0

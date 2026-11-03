@@ -22,7 +22,7 @@ namespace RoadOfTheOldKing.UI
         private VisualElement overlay;
         private Label heading, body, knowledge;
         private Button closeButton;
-        private ForgeInscription source;
+        private WorldPickup source;
         private IDisposable pause;
         private Coroutine restoring;
 
@@ -70,19 +70,33 @@ namespace RoadOfTheOldKing.UI
             var session = GameSession.Instance;
             bool known = ForgeInscriptionProgression.Knows(session.Progress, inscription.SiteNumber);
             if (!known && !session.Rewards.TryLearnInscription(inscription, player)) return false;
-            source = inscription;
-            heading.text = inscription.Heading;
-            body.text = inscription.Text;
             int count = ForgeInscriptionProgression.Count(session.Progress);
-            knowledge.text = (known ? "Remembered" : "Knowledge gained") + " · " + count +
-                (count == 1 ? " inscription" : " inscriptions");
+            Show(inscription, inscription.Heading, inscription.Text, (known ? "Remembered" : "Knowledge gained") + " · " + count +
+                (count == 1 ? " inscription" : " inscriptions"));
+            return true;
+        }
+
+        // A plain card: the same reader and input, teaching nothing.
+        public bool TryOpen(WorldPickup card, string title, string text)
+        {
+            if (!CanOpen || card == null || !Build()) return false;
+            Show(card, title, text, "");
+            return true;
+        }
+
+        private void Show(WorldPickup from, string title, string text, string note)
+        {
+            source = from;
+            heading.text = title;
+            body.text = text;
+            knowledge.text = note;
+            knowledge.style.display = string.IsNullOrEmpty(note) ? DisplayStyle.None : DisplayStyle.Flex;
             overlay.style.display = DisplayStyle.Flex;
             ControlLabels.Bind(overlay.Q<Label>("hint"), "Esc / Enter Leave", "A / B Leave");
             locks.Lock(this);
             pause = SimulationPause.Acquire();
             MenuStack.Push(this);
             closeButton.Focus();
-            return true;
         }
 
         private void Update()

@@ -216,6 +216,7 @@ GameObject:
   - component: {fileID: 1462644825338206894}
   - component: {fileID: 1848394518750002021}
   - component: {fileID: 8075216643608637257}
+  - component: {fileID: 5876216429773531711}
   m_Layer: 0
   m_Name: BrokenWatcher
   m_TagString: Untagged
@@ -318,7 +319,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.Damageable
-  maxHealth: 260
+  maxHealth: 440
   protectionSource: {fileID: 0}
 --- !u!114 &7469049545066965235
 MonoBehaviour:
@@ -336,8 +337,8 @@ MonoBehaviour:
   maxKnockbackImpulse: 0
   replaceMovementOnHit: 1
   lethalKnockbackMultiplier: 1.6
-  poise: 40
-  poiseResetDelay: 2.5
+  poise: 120
+  poiseResetDelay: 8
   unstaggeredKnockback: 0.2
   rangedPoiseMultiplier: 0.5
 --- !u!114 &2632014230872862715
@@ -354,29 +355,32 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.SimpleMeleeEnemy
   target: {fileID: 0}
   attack: {fileID: 11400000, guid: 4baa19513d1a8534b9d9db64ab5c4a92, type: 2}
-  moveSpeed: 1.8
+  moveSpeed: 2.7
   noticeRadius: 12
   watchDuration: 0
   forgetDuration: 0.6
-  leashRadius: 10
+  leashRadius: 40
   loseSightTime: 4
-  attackDistance: 3
+  attackDistance: 3.4
   attackReach: 1.65
   attackArc: 85
   windupDuration: 0.7
   strikeDuration: 0.12
   recoveryDuration: 0.95
   damage: 18
-  hitRecovery: 0.1
+  hitRecovery: 1.6
   closeAttack: {fileID: 11400000, guid: e013ded5aa6df2a4c8e58fc4b8fb1044, type: 2}
-  closeRangeFraction: 0.75
+  closeRangeFraction: 1
   followUpOnMiss: 0
+  farAttack: {fileID: 11400000, guid: a9fa5f3f45fd13a408f329a5724b1783, type: 2}
+  farAttackRange: 5
+  farAttackInterval: 6
   wakeRadius: 6
   wakeDuration: 1.6
   defeatRecord: {fileID: 0}
   holdDistance: 0
-  attackCooldown: 0.4
-  cooldownJitter: 0.4
+  attackCooldown: 0.2
+  cooldownJitter: 0.3
 --- !u!114 &2751467187380559122
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -455,6 +459,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Enemies.BossHealthBar
   bossName: Broken Watcher
+--- !u!114 &5876216429773531711
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1457853514096952128}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 21cd33ec52b82ed4296535a6441f5d44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Enemies.EnemySlamView
+  shader: {fileID: 4800000, guid: 6b1b4e34081b85449a5772eceeb8b0af, type: 3}
+  afterglow: 1.1
 --- !u!1 &4943360059327782604
 GameObject:
   m_ObjectHideFlags: 0

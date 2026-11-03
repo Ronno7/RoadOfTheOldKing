@@ -134,7 +134,7 @@ namespace RoadOfTheOldKing.UI
             int have = session.Progress.sunShards;
             bool lacking = nextTier != null && have < nextTier.shardCost;
             bool locked = nextTier != null && (lacking || !fire.AllowsUpgrades);
-            string requirement = nextTier == null ? "All chosen." :
+            string requirement = nextTier == null ? (have > 0 ? "All chosen. Keep spare shards for the road ahead." : "All chosen.") :
                 !fire.AllowsUpgrades ? "Choose upgrades at an upgrade bonfire." :
                 lacking ? "Need " + nextTier.shardCost + " Sun Shards." :
                 "Choose one for " + nextTier.shardCost + " shards.";
@@ -149,7 +149,7 @@ namespace RoadOfTheOldKing.UI
                     // Sitting down already rested (PlayerBonfireInteraction.Open), as at a Souls bonfire,
                     // so the menu offers only what resting unlocks.
                     status.text = session.Status;
-                    items.Add(new PauseMenuAction("Upgrades", locked ? requirement : "View the next choices.",
+                    items.Add(new PauseMenuAction("Upgrades", locked || nextTier == null ? requirement : "View the next choices.",
                         () => Show(Page.Upgrades), locked: locked));
                     bool travel = false;
                     // Every discovered fire, including those in other scenes; names refresh when rested at.
@@ -172,7 +172,7 @@ namespace RoadOfTheOldKing.UI
                     var tier = session.Rewards.Upgrades.NextTier;
                     if (tier == null)
                     {
-                        status.text = "All chosen.";
+                        status.text = requirement;
                         foreach (var chosen in session.Rewards.Upgrades.Selected)
                             items.Add(new PauseMenuAction(chosen.displayName, chosen.description, null, false));
                     }

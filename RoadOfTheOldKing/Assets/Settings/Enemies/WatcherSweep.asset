@@ -15,14 +15,16 @@ MonoBehaviour:
   settings:
     windup: 0.8
     active: 0.2
-    recovery: 1.3
-    reach: 2.4
+    recovery: 1
+    reach: 3
     arc: 170
     knockback: 4
     stagger: 0.35
-    damage: 22
+    damage: 28
     chargeSpeed: 0
     trackingTime: 0.45
-    armoredWhenLocked: 0
+    armoredWhenLocked: 1
     armoredWhileActive: 0
     wallStunRecovery: 0
+    impactShake: 0
+    drawSpeed: 0

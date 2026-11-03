@@ -36,6 +36,7 @@ namespace RoadOfTheOldKing.Player
         [SerializeField, Range(0f, 1f)] private float bounceCooldown = 0.35f;
         private bool leavingAction;
         private Vector2 freeVelocity;
+        private Vector2 pendingPull, appliedPull, motorVelocity;
         private float bounceRemaining;
         private float lastBounceTime = float.NegativeInfinity;
 
@@ -98,7 +99,22 @@ namespace RoadOfTheOldKing.Player
             }
         }
 
+        // An outside force dragging the player for this physics step. A dodge, a stagger or a rope breaks free of it.
+        public void Pull(Vector2 velocity) => pendingPull = velocity;
+
         private void FixedUpdate()
+        {
+            // The pull rides on top of the motor, which never sees it, so momentum can't build on it.
+            bool staggered = hitReaction != null && hitReaction.IsStaggered;
+            if (appliedPull != Vector2.zero && !staggered) body.linearVelocity = motorVelocity;
+            Drive();
+            motorVelocity = body.linearVelocity;
+            appliedPull = dash.IsDashing || IsTraversingRope || staggered ? Vector2.zero : pendingPull;
+            pendingPull = Vector2.zero;
+            body.linearVelocity += appliedPull;
+        }
+
+        private void Drive()
         {
             Vector2 actionDisplacement = combat != null && combat.Weapon != null
                 ? combat.Weapon.ConsumeActionDisplacement() : Vector2.zero;
