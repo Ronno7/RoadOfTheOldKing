@@ -9,7 +9,7 @@
 - Thorn Rats, which dart in, nip and back off.
 - Boars sweep their tusks when you're close.
 - Scavengers chase after 0.9s of sight; suspicion fades when out of view.
-- Scavengers fight with a lunging thrust and a slow armoured overhead.
+- Scavengers fight from a planted stance with a lunging thrust and a slow armoured overhead.
 - Scavengers and boars have idle animations; boars play a run cycle when they charge.
 - North Bank Bonfire where the King's Road leaves the Lowlands; fallen logs block the road until Barrow Woods returns.
 - Drowned Hayfields: flooded fields and a barn south of the pasture, with a heart fragment.

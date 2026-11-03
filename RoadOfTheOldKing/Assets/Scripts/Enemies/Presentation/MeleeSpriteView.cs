@@ -52,11 +52,12 @@ namespace RoadOfTheOldKing.Enemies
             if (!health.IsAlive) { deathTime += Time.deltaTime; if (Has(animations.death)) { clip = animations.death; progress = deathTime / clip.Duration(octant); } }
             // A dormant guardian holds the wake clip's first frame (its resting pose) and rises through it.
             else if ((enemy.IsDormant || enemy.IsWaking) && Has(animations.wake)) { clip = animations.wake; progress = enemy.IsDormant ? 0f : enemy.StateProgress; }
-            else if ((windup || strike || enemy.State == PursuitState.Recovering) && Has(AttackClip))
+            // Standing its ground between attacks reads as the same fight, so it keeps the attack's stance.
+            else if ((windup || strike || enemy.State == PursuitState.Recovering || (enemy.State == PursuitState.Holding && distance <= .0001f)) && Has(AttackClip))
             {
                 clip = AttackClip;
                 int contact = clip.contactFrame > 0 ? clip.contactFrame : Mathf.Max(1, clip.FrameCount(octant) / 2);
-                int frame = windup ? Mathf.FloorToInt(enemy.StateProgress * contact) : strike ? contact : contact + 1 + Mathf.FloorToInt(enemy.StateProgress * (clip.FrameCount(octant) - contact - 1));
+                int frame = enemy.State == PursuitState.Holding ? 0 : windup ? Mathf.FloorToInt(enemy.StateProgress * contact) : strike ? contact : contact + 1 + Mathf.FloorToInt(enemy.StateProgress * (clip.FrameCount(octant) - contact - 1));
                 bodyVisual.sprite = clip.Frame(octant, Mathf.Clamp(frame, 0, clip.FrameCount(octant) - 1));
                 clip = null;
             }

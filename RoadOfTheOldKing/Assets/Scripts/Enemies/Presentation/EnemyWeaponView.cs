@@ -79,6 +79,13 @@ namespace RoadOfTheOldKing.Enemies
                 return;
             }
             var state = brain.State;
+            // Between attacks it stays levelled at the player, where the next windup begins.
+            if (state == PursuitState.Holding)
+            {
+                grip = new Vector2Int(0, attackHeight); pointing = facing;
+                inFront = facing == 0 || facing >= 4;
+                return;
+            }
             if (state != PursuitState.Windup && state != PursuitState.Striking && state != PursuitState.Recovering) return;
 
             Vector2 lane = Step(facing);
