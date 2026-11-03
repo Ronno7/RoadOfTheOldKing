@@ -29,9 +29,7 @@ namespace RoadOfTheOldKing.UI
             new PauseMenuAction("Settings", "Display and HUD options.", openSettings, openSettings != null, closeOnExecute: false),
             new PauseMenuAction("Main Menu", "Save and return to the title.\nContinue resumes here.",
                 () => GameSession.Instance?.ReturnToTitle(), GameSession.Instance != null && GameSession.Instance.CanReturnToTitle),
-            new PauseMenuAction("Quit", Application.platform == RuntimePlatform.WebGLPlayer
-                ? "Close the browser tab to quit." : "Leave the game.", Quit,
-                Application.platform != RuntimePlatform.WebGLPlayer)
+            new PauseMenuAction("Quit", "Leave the game.", Quit)
         };
 
         private static void Quit()

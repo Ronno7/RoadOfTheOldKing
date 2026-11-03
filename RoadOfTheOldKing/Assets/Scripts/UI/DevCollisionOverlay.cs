@@ -1,4 +1,4 @@
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || ROTOK_DEV_TOOLS
 using System.Collections.Generic;
 using RoadOfTheOldKing.Player;
 using UnityEngine;
@@ -37,8 +37,7 @@ namespace RoadOfTheOldKing.UI
         private void Awake()
         {
             commands = GetComponent<DevRuntimeCommands>();
-            everything = new ContactFilter2D { useTriggers = true };
-            everything.NoFilter();
+            everything = ContactFilter2D.noFilter;
             mesh = new Mesh { name = "Collision outlines", indexFormat = IndexFormat.UInt32 };
             mesh.MarkDynamic();
             holder = new GameObject("Collision outlines");

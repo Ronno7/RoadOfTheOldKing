@@ -48,7 +48,7 @@ namespace RoadOfTheOldKing.Player
         private PlayerDash dash;
         private PlayerFlask flask;
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || ROTOK_DEV_TOOLS
         public float DebugSpeedMultiplier { get; set; } = 1f;
         public float MoveSpeed => moveSpeed * DebugSpeedMultiplier;
 #else

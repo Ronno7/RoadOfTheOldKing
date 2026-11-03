@@ -30,7 +30,7 @@ namespace RoadOfTheOldKing.Combat
             return ApplyHit(hit);
         }
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || ROTOK_DEV_TOOLS
         // Explicit testing command: bypass protection but preserve all real hit/defeat listeners.
         public bool DebugReceiveHit(CombatHit hit) => IsAlive && hit.Damage > 0 && ApplyHit(hit);
 #endif

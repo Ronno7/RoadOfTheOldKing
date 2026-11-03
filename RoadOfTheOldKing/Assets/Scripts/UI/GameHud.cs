@@ -296,7 +296,7 @@ namespace RoadOfTheOldKing.UI
             if (document == null) return;
             Subscribe();
             bool menuOpen = MenuStack.IsAnyOpen || (interaction != null && interaction.IsOpen) || (pauseMenu != null && pauseMenu.BlocksGameplay);
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || ROTOK_DEV_TOOLS
             menuOpen |= DevToolsPanel.CapturesInput;
 #endif
             bool alive = player.IsAlive;

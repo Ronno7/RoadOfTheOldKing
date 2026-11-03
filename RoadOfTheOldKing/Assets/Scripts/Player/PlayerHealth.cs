@@ -37,12 +37,12 @@ namespace RoadOfTheOldKing.Player
             health.Defeated -= OnDefeated;
         }
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || ROTOK_DEV_TOOLS
         public bool DebugGodMode { get; set; }
 #endif
         public bool Blocks(CombatHit hit)
         {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || ROTOK_DEV_TOOLS
             if (DebugGodMode) return true;
 #endif
             return IsInvulnerable;

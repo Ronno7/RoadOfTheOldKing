@@ -198,7 +198,7 @@ flowchart LR
 
 ## Progression and saving
 
-`GameSession` is one session for the whole game. It survives scene loads and writes one versioned JSON record to PlayerPrefs, which also works in the browser. `CheckpointService` owns rest, travel and placement; `RewardService` owns shards, fragments, coins, tools and purchases.
+`GameSession` is one session for the whole game. It survives scene loads and writes one versioned JSON record to PlayerPrefs. `CheckpointService` owns rest, travel and placement; `RewardService` owns shards, fragments, coins, tools and purchases.
 
 ```mermaid
 sequenceDiagram

@@ -64,7 +64,7 @@ namespace RoadOfTheOldKing.UI
         {
             if (IsOpen && (player == null || !player.IsAlive || GameSession.Instance == null ||
                 GameSession.Instance.IsLoading || (trading && (trader == null || !trader.CanTradeFrom(player))))) { Close(); return; }
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || ROTOK_DEV_TOOLS
             if (DevToolsPanel.CapturesInput) return;
 #endif
             if (!Application.isFocused) return;

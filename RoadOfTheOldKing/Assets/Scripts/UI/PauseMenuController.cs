@@ -71,7 +71,7 @@ namespace RoadOfTheOldKing.UI
             if (dash != null) dash.Cancel();
             pause = SimulationPause.Acquire(true);
             MenuStack.Push(this);
-            // Pausing is a likely moment to leave (or close the browser tab): remember the exact spot.
+            // Pausing is a likely moment to leave: remember the exact spot.
             GameSession.Instance?.RecordResume();
             return true;
         }

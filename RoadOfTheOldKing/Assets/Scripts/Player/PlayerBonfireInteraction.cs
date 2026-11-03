@@ -49,7 +49,7 @@ namespace RoadOfTheOldKing.Player
             }
             // Escape/B are routed to the bonfire menu through MenuStack; F toggles here. The controller's A
             // also selects menu entries, so it interacts only while no menu is open and controls are free.
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || ROTOK_DEV_TOOLS
             if (RoadOfTheOldKing.UI.DevToolsPanel.CapturesInput) return;
 #endif
             var keyboard = Keyboard.current;

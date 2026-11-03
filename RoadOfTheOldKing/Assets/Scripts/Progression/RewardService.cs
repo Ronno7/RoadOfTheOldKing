@@ -138,7 +138,7 @@ namespace RoadOfTheOldKing.Progression
         // The upgrade view wraps a ProgressState, so it is rebuilt when the session replaces it.
         internal void OnProgressReplaced() => upgrades = null;
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || ROTOK_DEV_TOOLS
         // Dev grants have no world-source receipt, so authored pickups remain collectible.
         public bool DebugGiveCoins(int amount)
         {

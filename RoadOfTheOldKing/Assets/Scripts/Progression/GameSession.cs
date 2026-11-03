@@ -243,7 +243,7 @@ namespace RoadOfTheOldKing.Progression
             if (!EncounterState.InCombat) RecordResume(force: false);
         }
 
-        // Moments a player may be leaving: the window or browser tab loses focus, or the application quits.
+        // Moments a player may be leaving: the window loses focus, or the application quits.
         private void OnApplicationFocus(bool focused) { if (!focused) { RecordResume(); FlushResume(); } }
         private void OnApplicationQuit() { RecordResume(); FlushResume(); }
 

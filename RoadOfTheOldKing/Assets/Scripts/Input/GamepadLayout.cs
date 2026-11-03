@@ -1,7 +1,7 @@
 namespace RoadOfTheOldKing.Input
 {
     // The fixed controller layout (user, 16 Oct): Souls-style triggers. Bindings use the generic
-    // Gamepad layout, so Xbox, PlayStation and browser "standard" pads all work; ControlLabels shows
+    // Gamepad layout, so Xbox, PlayStation and other standard pads all work; ControlLabels shows
     // Xbox names. Adapters bind these paths beside their keyboard/mouse bindings, so both stay live.
     public static class GamepadLayout
     {

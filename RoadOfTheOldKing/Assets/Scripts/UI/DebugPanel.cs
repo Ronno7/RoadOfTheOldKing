@@ -14,7 +14,7 @@ using UnityEngine.UIElements;
 namespace RoadOfTheOldKing.UI
 {
     // F3 developer overlay: performance, player, world and save state. Installs itself in the
-    // Editor, development builds and WebGL; reads, never writes, gameplay.
+    // Editor, development builds and tester builds; reads, never writes, gameplay.
     public sealed class DebugPanel : MonoBehaviour
     {
         private const Key ToggleKey = Key.F3;
@@ -42,7 +42,9 @@ namespace RoadOfTheOldKing.UI
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Install()
         {
-            if (!Application.isEditor && !Debug.isDebugBuild && Application.platform != RuntimePlatform.WebGLPlayer) return;
+#if !ROTOK_DEV_TOOLS
+            if (!Application.isEditor && !Debug.isDebugBuild) return;
+#endif
             var host = new GameObject("Debug Panel (F3)");
             DontDestroyOnLoad(host);
             host.AddComponent<DebugPanel>();
@@ -93,7 +95,7 @@ namespace RoadOfTheOldKing.UI
                 refreshIn = 0f;
             }
             bool show = visible;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || ROTOK_DEV_TOOLS
             show &= DevToolsPanel.Instance == null || !DevToolsPanel.Instance.IsOpen;
 #endif
             readout.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;

@@ -10,7 +10,7 @@ using UnityEngine.UIElements;
 namespace RoadOfTheOldKing.UI
 {
     // Title screen (foundation): Continue resumes at the last rest, New Game starts over (confirmed when a
-    // save exists), Settings opens the shared settings page, Quit leaves (disabled in the browser). Presentation only; GameSession loads the scenes.
+    // save exists), Settings opens the shared settings page, Quit leaves. Presentation only; GameSession loads the scenes.
     // Keyboard/controller input comes from the PauseMenuInput beside it; Escape or B steps back from the confirmation.
     // Opening (user, 17 Oct): when the game boots into this scene, the logo waits for any button before the menu
     // appears. New Game plays the text prologue (pages from a TextAsset) before the run starts; Escape/Start skips it.
@@ -116,9 +116,7 @@ namespace RoadOfTheOldKing.UI
                     () => Session.Continue(), HasSave),
                 new PauseMenuAction("New Game", "Begin a new journey.", NewGame, Session != null),
                 new PauseMenuAction("Settings", "Display and HUD options.", () => ShowSettings(0)),
-                new PauseMenuAction("Quit", Application.platform == RuntimePlatform.WebGLPlayer
-                    ? "Close the browser tab to quit." : "Leave the game.", Quit,
-                    Application.platform != RuntimePlatform.WebGLPlayer)
+                new PauseMenuAction("Quit", "Leave the game.", Quit)
             }, select >= 0 ? select : HasSave ? 0 : NewGameRow);
         }
 

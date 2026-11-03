@@ -43,7 +43,7 @@ namespace RoadOfTheOldKing.UI
         private void Update()
         {
             if (!shown && showAt >= 0f && Time.unscaledTime >= showAt) Show();
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || ROTOK_DEV_TOOLS
             if (DevToolsPanel.CapturesInput) return;
 #endif
             var keyboard = Keyboard.current;

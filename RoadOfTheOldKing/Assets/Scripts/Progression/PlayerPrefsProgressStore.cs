@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace RoadOfTheOldKing.Progression
 {
-    // One small versioned JSON record. PlayerPrefs also supports browser builds.
+    // One small versioned JSON record.
     // When the key is empty, the first legacy key holding a save is migrated into it once; the legacy
     // record is left untouched as a backup and cleared with the main save on New Game.
     public sealed class PlayerPrefsProgressStore : IProgressStore

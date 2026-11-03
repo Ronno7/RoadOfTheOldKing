@@ -25,7 +25,7 @@ namespace RoadOfTheOldKing.Player
         public float Normalized => Mathf.Clamp01(Current / maximum);
         public bool IsExhausted => Current < 0f;
         public bool WasSpendRejected => Time.unscaledTime < rejectedUntil;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || ROTOK_DEV_TOOLS
         public bool DebugInfinite { get; set; }
         public void DebugSetCurrent(float value)
         {
@@ -58,7 +58,7 @@ namespace RoadOfTheOldKing.Player
         public bool TrySpend(float amount)
         {
             if (!CanAct(amount)) return false;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || ROTOK_DEV_TOOLS
             if (DebugInfinite) { Restore(); return true; }
 #endif
             // Any positive stamina is enough to act; continuous sprinting leaves tiny float remainders.
@@ -78,7 +78,7 @@ namespace RoadOfTheOldKing.Player
         public bool TryDrain(float amount)
         {
             if (!CanAct(amount)) return false;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || ROTOK_DEV_TOOLS
             if (DebugInfinite) { Restore(); return true; }
 #endif
             if (Current <= 0.001f) return false;

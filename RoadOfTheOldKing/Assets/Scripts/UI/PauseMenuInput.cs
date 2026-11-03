@@ -36,7 +36,7 @@ namespace RoadOfTheOldKing.UI
         private void OnDestroy() => actions?.Dispose();
         private void Update()
         {
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || ROTOK_DEV_TOOLS
             if (DevToolsPanel.CapturesInput) return;
 #endif
             if (!Application.isFocused) return;

@@ -32,7 +32,7 @@ namespace RoadOfTheOldKing.Input
         public CameraLookInputFrame Read()
         {
             IsLooking = false;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD || UNITY_WEBGL
+#if UNITY_EDITOR || DEVELOPMENT_BUILD || ROTOK_DEV_TOOLS
             if (RoadOfTheOldKing.UI.DevToolsPanel.CapturesInput) { requireRelease = true; return default; }
 #endif
             bool padHeld = padLook.IsPressed();
