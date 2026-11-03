@@ -2,59 +2,59 @@
 
 ## Unreleased
 
+## 0.5 — Full production
+
+### 0.5.0-dev.2 — 2026-11-03 · Development build: the Broken Watcher, a bigger Lowlands and Windows
+
+**Development build** for playtesting. A pre-release of work in progress toward 0.5.0, not the finished update.
+
+**Windows build**
+
 **Added**
-- The Broken Watcher, a boss guarding the sluice, with a slam that cracks the ground and a pull that drags you into it; drops a Sun Shard when defeated.
-- Boss health bar with the boss's name along the bottom of the screen.
-- A fog wall seals the Broken Watcher's court while it's awake; it clears when the boss falls or you die.
+- The Broken Watcher, a boss guarding the sluice, with a slam that cracks the ground and a pull that drags you into it; a health bar with its name, a fog wall sealing its court while it's awake, and a Sun Shard when defeated.
 - Thorn Rats, which dart in, nip and back off; five nest in the drained basin, on the way to its Sun Shard.
-- Boars sweep their tusks when you're close.
-- Scavengers chase after 0.9s of sight; suspicion fades when out of view.
-- Scavengers fight from a planted stance with a lunging thrust and a slow armoured overhead.
-- Scavengers and boars have idle animations; boars play a run cycle when they charge.
+- Scavengers fight from a planted stance with a lunging thrust and a slow armoured overhead; they chase after 0.9 s of sight, and suspicion fades when out of view.
+- Boars sweep their tusks when you're close and play a run cycle when they charge; scavengers and boars have idle animations.
 - The hero holds a ready stance for standing attacks, the charge and the cleave.
 - North Bank Bonfire where the King's Road leaves the Lowlands; fallen logs block the road until Barrow Woods returns, with an end card there once the basin is drained.
+- Bridge Bonfire before the Tutorial's first wolf.
 - Drowned Hayfields: flooded fields and a barn south of the pasture, with a heart fragment.
 - Breakable bushes; two close the way into the Drowned Hayfields.
-- F4 Developer Tools can show collision and bring fallen bosses back.
-- Bridge Bonfire before the Tutorial's first wolf.
 - Inventory shows health, stamina, flask and axe damage numbers.
 - Health bar flashes with the heartbeat at low health.
+- F4 Developer Tools can show collision and bring fallen bosses back.
 
 **Changed**
-- Wolves share one tuning
-- Enemies no longer take turns attacking.
+- Windows download replaces the browser version.
+- Enemy attack warnings are drawn on the ground as lanes with arrows and wedges (were thin outlines), matching the attack's real width (boar charge 0.67 units each side, was 1.05).
+- Enemies no longer take turns attacking; wolves share one tuning.
+- Enemies break off past their leash only once you've got away; a hit or getting close turns them back.
+- Scavengers chase further (16 units from home, was 10) and keep looking for you longer (3 s, was 2).
+- Enemies heal 10% of their health per second once out of the fight; the Broken Watcher is back at full health once it returns to its seat.
 - Charging boars can't be interrupted; hitting a wall head on stuns them, and thrown axes no longer stagger them.
 - Shorter cleave charges cost less stamina (down to about 19, 35 at full).
-- Improved waterworks buildings, sluice lift gate, and canal art and animations.
-- Broken Watcher's court dressed with worn paving, loose stones, flowers and reeds.
-- Reshaped the cliffs and basin edge around the waterworks; moved the basin stair platform south.
-- Raised the rocky ridge south of High Pass.
-- Separated Old Drain from the storehouse: enter through the basin arch; Barrow remains sealed and Barrow Approach is closed until Barrow Woods is rebuilt.
-- Camp rope moved to the eastern bank ledge.
-- Road from Ardan's Edge to the Lowlands rebuilt for longer route with additional enemies.
-- Lantern casts warm, flickering light with soft shadows behind walls (was a hard edged cut out).
 - Thrown axe flies 50% faster (full range in 0.39 s, was 0.58 s).
 - Stamina arc shows whenever stamina is below full (was combat only).
+- Improved waterworks buildings, sluice lift gate, and canal art and animations; reshaped the cliffs and basin edge around them and moved the basin stair platform south.
+- Broken Watcher's court dressed with worn paving, loose stones, flowers and reeds.
+- Separated Old Drain from the storehouse: enter through the basin arch; Barrow remains sealed and Barrow Approach is closed until Barrow Woods is rebuilt.
+- Road from Ardan's Edge to the Lowlands rebuilt for longer route with additional enemies.
+- Raised the rocky ridge south of High Pass; camp rope moved to the eastern bank ledge.
+- Lantern casts warm, flickering light with soft shadows behind walls (was a hard edged cut out).
 - Bonfire menu says spare Sun Shards keep for the road ahead.
 - Redrew the hero's north drinking frames.
-- Enemies break off past their leash only once you've got away; a hit or getting close turns them back.
-- Enemies heal 10% of their health per second once out of the fight; the Broken Watcher is back at full health once it returns to its seat.
-- Scavengers chase further (16 units from home, was 10) and keep looking for you longer (3 s, was 2).
-- Tutorial hints skip lessons you've passed by the bridge, the Recall stone or the roadside bonfire.
 - Place names show once per save, the first time you enter.
+- Tutorial hints skip lessons you've passed by the bridge, the Recall stone or the roadside bonfire.
 - Free look stays where you leave it until you move, then eases back (was recentring on release).
 
 **Fixed**
 - Invisible walls along the road into the Lowlands; the woods there are now thick trees.
-- Fixed waterworks collision issues, closing gaps, blocking unintended access, and removing invisible barriers; the stream in the drained basin could be walked on.
+- Waterworks collision: gaps closed, unintended access blocked, invisible barriers removed, and the drained basin's stream can't be walked on.
 - Sluice roofs conceal the player and gates behind them.
 - Restored missing shadows beneath Lowlands forests.
 - Wolves dodge when a cleave is released, not when it starts charging.
 - Enemies blocked by a wall on the way home no longer walk on the spot.
-- Charge and lunge warnings match the attack's real width (boar charge 0.67 units each side, was 1.05).
 - Entering the Sunken Storehouse showed "Green Lowlands" as the place name; it shows "Sunken Storehouse" at the smaller landmark size.
-
-## 0.5 — Full production
 
 ### 0.5.0-dev.1 — 2026-10-22 · Development build: atmosphere, light and feedback
 

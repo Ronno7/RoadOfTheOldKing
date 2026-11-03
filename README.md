@@ -1,6 +1,6 @@
 <img width="100%" alt="Road of the Old King" src="Docs/Branding/Title.png" />
 
-# <p align="center">[PLAY HERE](https://ronno7.github.io/RoadOfTheOldKing/)</p>
+# <p align="center">[DOWNLOAD FOR WINDOWS](https://github.com/Ronno7/RoadOfTheOldKing/releases)</p>
 
 <img width="100%" alt="The journey begins: chimney smoke rises over Ardan's Edge as the blue-cloaked traveler approaches a stone bridge over the flowing river." src="Docs/Branding/Banner-Top.gif" />
 
