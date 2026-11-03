@@ -9,7 +9,7 @@ namespace RoadOfTheOldKing.Enemies
 
     [DisallowMultipleComponent, RequireComponent(typeof(Damageable), typeof(HitReaction), typeof(Rigidbody2D))]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "RoadOfTheOldKing.Combat", null, "SimpleMeleeEnemy")]
-    public sealed class PursuitBrain : MonoBehaviour, IEnemy, IEnemyFacing, IResetOnRest, ISceneVisitParticipant
+    public sealed class PursuitBrain : MonoBehaviour, IEnemy, IEnemyFacing, IEnemyAttackShape, IResetOnRest, ISceneVisitParticipant
     {
         [SerializeField] private PlayerHealth target;
         [Tooltip("Optional authored action. Unassigned legacy enemies retain their serialized melee tuning.")]
@@ -89,6 +89,16 @@ namespace RoadOfTheOldKing.Enemies
         public bool IsLaneLocked => action != null && action.IsLocked;
         public Vector2 AttackOrigin => action != null && State == PursuitState.Striking ? action.Origin : (Vector2)transform.position;
         public float ChargeDistance => Shown.chargeSpeed * Shown.active;
+        public Vector2 AttackDirection => FacingDirection;
+        public bool IsWindingUp => State == PursuitState.Windup;
+        public bool IsStriking => State == PursuitState.Striking;
+        public float WindupProgress => StateProgress;
+        public bool IsAttackLocked => IsLaneLocked;
+        public float StrikeSeconds => Shown.active;
+        public float DrawnLaneLength => IsChargeAttack ? ChargeDistance + AttackReach : 0f;
+        public float DrawnLaneTravel => ChargeDistance;
+        // As wide as the arc actually reaches sideways, so it never overstates the danger.
+        public float DrawnLaneWidth => 2f * AttackReach * Mathf.Sin(Mathf.Min(AttackArc, 180f) * .5f * Mathf.Deg2Rad);
         public EnemyActionRunner Action => action;
         public bool IsCloseAttack { get; private set; }
         public bool IsFollowUp { get; private set; }

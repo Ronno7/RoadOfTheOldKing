@@ -7,14 +7,14 @@ namespace RoadOfTheOldKing.Enemies
     // Presentation only. PredatorBrain owns movement, attack commitment, damage and reset; this samples its
     // state: locomotion follows distance travelled (stalk while circling, walk to reposition, run to
     // chase), the bite follows the windup clock so the jaws open on the leap or snap, death plays once
-    // and holds as the corpse. Draws the attack telegraph: a lane for the lunge, an arc for the snap.
+    // and holds as the corpse.
     [DisallowMultipleComponent, RequireComponent(typeof(PredatorBrain), typeof(Damageable), typeof(EnemyCorpseSorting))]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "RoadOfTheOldKing.Combat", null, "WolfView")]
     public sealed class PredatorSpriteView : MonoBehaviour
     {
         [SerializeField] private PredatorAnimationSet animations;
         [SerializeField] private SpriteRenderer bodyVisual;
-        [SerializeField] private LineRenderer attackOutline;
+        public EnemyAnimationSet Animations => animations;
         [Tooltip("Degrees past an octant's edge before facing switches, so circling doesn't flicker.")]
         [SerializeField, Range(0f, 20f)] private float facingHysteresis = 8f;
         private PredatorBrain wolf;
@@ -33,12 +33,6 @@ namespace RoadOfTheOldKing.Enemies
             flashProperties = new MaterialPropertyBlock();
             wolf = GetComponent<PredatorBrain>();
             health = GetComponent<Damageable>();
-            if (attackOutline != null)
-            {
-                var properties = new MaterialPropertyBlock();
-                properties.SetTexture("_MainTex", Texture2D.whiteTexture);
-                attackOutline.SetPropertyBlock(properties);
-            }
         }
 
         private void OnEnable()
@@ -50,7 +44,6 @@ namespace RoadOfTheOldKing.Enemies
         private void OnDisable()
         {
             health.HitReceived -= OnHit;
-            if (attackOutline != null) attackOutline.enabled = false;
             SetFlash(false);
         }
 
@@ -90,7 +83,6 @@ namespace RoadOfTheOldKing.Enemies
             bodyVisual.color = new Color(1f, 1f, 1f, alpha);
             SetFlash(Time.time < flashUntil);
             wasAlive = health.IsAlive;
-            DrawTelegraph();
         }
 
         private Sprite SelectSprite(float distance, float dt)
@@ -194,52 +186,6 @@ namespace RoadOfTheOldKing.Enemies
             bodyVisual.GetPropertyBlock(flashProperties);
             flashProperties.SetFloat("_FlashAmount", active ? 1f : 0f);
             bodyVisual.SetPropertyBlock(flashProperties);
-        }
-
-        // Windup: faint while still tracking, firmer once the lane locks; active: red.
-        private void DrawTelegraph()
-        {
-            if (attackOutline == null) return;
-            var state = wolf.State;
-            // Feints telegraph exactly like a real lunge until they break off.
-            bool windup = state == PredatorState.Windup;
-            bool active = state == PredatorState.Lunge || state == PredatorState.Snap;
-            attackOutline.enabled = health.IsAlive && (windup || active);
-            if (!attackOutline.enabled) return;
-            Color color = active ? new Color(.95f, .35f, .25f, .7f)
-                : wolf.IsLaneLocked || !wolf.IsLungeAttack ? new Color(.92f, .6f, .3f, .55f) : new Color(.85f, .58f, .30f, .3f);
-            attackOutline.startColor = attackOutline.endColor = color;
-            // One world pixel while tracking, two once committed: the lock is the cue to dodge.
-            const float Pixel = 1f / 16f;
-            attackOutline.widthMultiplier = 1f;
-            attackOutline.startWidth = attackOutline.endWidth = active || wolf.IsLaneLocked || !wolf.IsLungeAttack ? 2f * Pixel : Pixel;
-            attackOutline.sortingLayerID = bodyVisual.sortingLayerID;
-            attackOutline.sortingOrder = bodyVisual.sortingOrder - 1;
-            Vector2 dir = wolf.AttackDirection;
-            float z = transform.position.z;
-            if (wolf.IsLungeAttack)
-            {
-                Vector2 origin = wolf.AttackOrigin;
-                Vector2 side = new Vector2(-dir.y, dir.x) * (wolf.LaneWidth * .5f);
-                Vector2 end = origin + dir * wolf.LaneLength;
-                attackOutline.positionCount = 5;
-                attackOutline.SetPosition(0, new Vector3(origin.x + side.x, origin.y + side.y, z));
-                attackOutline.SetPosition(1, new Vector3(end.x + side.x, end.y + side.y, z));
-                attackOutline.SetPosition(2, new Vector3(end.x - side.x, end.y - side.y, z));
-                attackOutline.SetPosition(3, new Vector3(origin.x - side.x, origin.y - side.y, z));
-                attackOutline.SetPosition(4, new Vector3(origin.x + side.x, origin.y + side.y, z));
-                return;
-            }
-            const int segments = 16;
-            attackOutline.positionCount = segments + 3;
-            attackOutline.SetPosition(0, transform.position);
-            float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-            for (int i = 0; i <= segments; i++)
-            {
-                float a = (angle - wolf.SnapArc * .5f + wolf.SnapArc * i / segments) * Mathf.Deg2Rad;
-                attackOutline.SetPosition(i + 1, transform.position + new Vector3(Mathf.Cos(a), Mathf.Sin(a)) * wolf.SnapReach);
-            }
-            attackOutline.SetPosition(segments + 2, transform.position);
         }
     }
 }

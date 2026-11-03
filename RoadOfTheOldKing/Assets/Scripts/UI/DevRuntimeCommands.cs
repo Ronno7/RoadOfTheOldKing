@@ -352,6 +352,14 @@ namespace RoadOfTheOldKing.UI
             GameSession.Instance.Checkpoints.RestartFromCheckpoint();
             return Report(true, "Reloading at checkpoint; permanent progress kept.");
         }
+        public bool ChalkWarnings => FeedbackSettings.AttackWarnings == AttackWarningStyle.Chalk;
+
+        public bool SetChalkWarnings(bool value)
+        {
+            FeedbackSettings.AttackWarnings = value ? AttackWarningStyle.Chalk : AttackWarningStyle.GhostSteps;
+            return true;
+        }
+
         public bool SetShowCollision(bool value)
         {
             if (value && collisionOverlay == null) collisionOverlay = gameObject.AddComponent<DevCollisionOverlay>();

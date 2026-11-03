@@ -11,10 +11,9 @@ namespace RoadOfTheOldKing.Enemies
     {
         [SerializeField] private EnemyAnimationSet animations;
         [SerializeField] private SpriteRenderer bodyVisual;
-        [SerializeField] private LineRenderer attackOutline;
+        public EnemyAnimationSet Animations => animations;
         private PursuitBrain enemy;
         private Damageable health;
-        private EnemySlamView slamView;
         private Vector2 previous;
         private float gait, idleTime, deathTime, flashUntil;
         private int octant = 6, resetVersion;
@@ -23,11 +22,11 @@ namespace RoadOfTheOldKing.Enemies
 
         private void Awake()
         {
-            enemy = GetComponent<PursuitBrain>(); health = GetComponent<Damageable>(); slamView = GetComponent<EnemySlamView>();
+            enemy = GetComponent<PursuitBrain>(); health = GetComponent<Damageable>();
             properties = new MaterialPropertyBlock();
         }
         private void OnEnable() { health.HitReceived += OnHit; ResetPresentation(); }
-        private void OnDisable() { health.HitReceived -= OnHit; if (attackOutline != null) attackOutline.enabled = false; }
+        private void OnDisable() => health.HitReceived -= OnHit;
         private void OnHit(CombatHit hit) => flashUntil = Time.time + .1f;
         private void ResetPresentation()
         {
@@ -75,35 +74,6 @@ namespace RoadOfTheOldKing.Enemies
             bodyVisual.color = new Color(1, 1, 1, alpha); bodyVisual.flipX = false;
             bodyVisual.GetPropertyBlock(properties); properties.SetFloat("_FlashAmount", Time.time < flashUntil ? 1 : 0); bodyVisual.SetPropertyBlock(properties);
             wasAlive = health.IsAlive;
-            if (attackOutline == null) return;
-            // An attack with its own drawn ground needs no outline; charges keep their lanes.
-            bool drawnGround = slamView != null && !enemy.IsChargeAttack;
-            attackOutline.enabled = health.IsAlive && (windup || strike) && !drawnGround;
-            if (!attackOutline.enabled) return;
-            attackOutline.startColor = attackOutline.endColor = strike ? new Color(1, .3f, .15f, .9f) : new Color(1, .75f, .2f, .65f);
-            // Locked direction: the honest dodge cue for both charge lanes and arcs.
-            if (windup && enemy.IsLaneLocked) attackOutline.startColor = attackOutline.endColor = new Color(1, .5f, .15f, .85f);
-            if (enemy.IsChargeAttack)
-            {
-                // The lane is as wide as the arc actually reaches sideways, so it never overstates the danger.
-                float halfWidth = enemy.AttackReach * Mathf.Sin(Mathf.Min(enemy.AttackArc, 180f) * .5f * Mathf.Deg2Rad);
-                Vector2 direction = enemy.FacingDirection, side = new Vector2(-direction.y, direction.x) * halfWidth;
-                Vector2 start = enemy.AttackOrigin, end = start + direction * (enemy.ChargeDistance + enemy.AttackReach);
-                attackOutline.positionCount = 5;
-                attackOutline.SetPosition(0, start - side); attackOutline.SetPosition(1, end - side);
-                attackOutline.SetPosition(2, end + side); attackOutline.SetPosition(3, start + side);
-                attackOutline.SetPosition(4, start - side);
-                return;
-            }
-            int segments = enemy.AttackArc > 180f ? 32 : 16; attackOutline.positionCount = segments + 3;
-            attackOutline.SetPosition(0, transform.position);
-            float angle = Mathf.Atan2(enemy.FacingDirection.y, enemy.FacingDirection.x) * Mathf.Rad2Deg;
-            for (int i = 0; i <= segments; i++)
-            {
-                float a = (angle - enemy.AttackArc * .5f + enemy.AttackArc * i / segments) * Mathf.Deg2Rad;
-                attackOutline.SetPosition(i + 1, transform.position + new Vector3(Mathf.Cos(a), Mathf.Sin(a)) * enemy.AttackReach);
-            }
-            attackOutline.SetPosition(segments + 2, transform.position);
         }
     }
 }

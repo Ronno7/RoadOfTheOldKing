@@ -18,5 +18,14 @@ namespace RoadOfTheOldKing.Enemies
         [Tooltip("Measured speed (units/s) at or above which travel shows the run cycle. Sets without a walk run at any speed.")]
         [Min(.1f)] public float runAnimationSpeed = 4.8f;
         [Min(.05f)] public float deathFadeDuration = .5f;
+
+        // A mid-stride frame facing a direction, for drawing the enemy where it's about to be.
+        public Sprite StridePose(Vector2 direction)
+        {
+            var clip = run != null && !run.IsEmpty ? run : walk != null && !walk.IsEmpty ? walk : rotations;
+            if (clip == null || clip.IsEmpty) return null;
+            int octant = DirectionalSpriteAnimation.Octant(direction);
+            return clip.Frame(octant, Mathf.Min(1, clip.FrameCount(octant) - 1));
+        }
     }
 }

@@ -43,19 +43,20 @@ try {
     check(brain.Action.IsRunning&&!brain.Action.Begin(new RoadOfTheOldKing.Enemies.EvadeAction(body,Vector2.left,2,.2f)),"predator attacks and evades share exclusive ownership");
     var predatorView=root.GetComponent<RoadOfTheOldKing.Enemies.PredatorSpriteView>();
     var predatorRender=predatorView.GetType().GetMethod("LateUpdate",flags);
-    var predatorLine=(LineRenderer)predatorView.GetType().GetField("attackOutline",flags).GetValue(predatorView);
+    var predatorGround=root.GetComponent<RoadOfTheOldKing.Enemies.EnemyAttackGround>();var groundRender=predatorGround.GetType().GetMethod("LateUpdate",flags);
+    var predatorGroundView=(MeshRenderer)predatorGround.GetType().GetField("view",flags).GetValue(predatorGround);var predatorMark=(Material)predatorGround.GetType().GetField("material",flags).GetValue(predatorGround);
     var predatorSprite=(SpriteRenderer)predatorView.GetType().GetField("bodyVisual",flags).GetValue(predatorView);
     var predatorSet=(RoadOfTheOldKing.Enemies.PredatorAnimationSet)predatorView.GetType().GetField("animations",flags).GetValue(predatorView);
-    predatorRender.Invoke(predatorView,null);
-    check(predatorLine.enabled&&predatorLine.positionCount==5&&predatorSprite.sprite!=null,"predator windup still renders its authored art and lane");
+    predatorRender.Invoke(predatorView,null);groundRender.Invoke(predatorGround,null);
+    check(predatorGroundView.enabled&&predatorMark.GetFloat("_Lane")==brain.LaneLength&&Mathf.Approximately(predatorMark.GetFloat("_Radius"),brain.LaneWidth*.5f)&&predatorSprite.sprite!=null,"predator windup still renders its authored art and draws its lane on the ground");
     check(predatorSet.walk!=null&&predatorSet.bite!=null&&predatorSet.walkCycleLength==2.4f,"inherited animation data retains original clips and gait tuning");
     step(0);check(brain.StateProgress==0,"zero time preserves the commitment clock");
     move(home+new Vector2(4,1));step(.2f);var tracked=brain.AttackDirection;
     check(Vector2.Dot(tracked,new Vector2(4,1).normalized)>.999f&&!brain.IsLaneLocked,"lunge tracks during early windup");
     move(home+new Vector2(4,-2));step(.3f);
     check(brain.IsLaneLocked&&brain.AttackDirection==tracked,"lunge locks with the original dodge lead");
-    predatorRender.Invoke(predatorView,null);
-    check(Mathf.Abs(predatorLine.startWidth-2f/16f)<.0001f,"locked lunge retains its two-pixel dodge cue");
+    groundRender.Invoke(predatorGround,null);
+    check(predatorMark.GetFloat("_Locked")==1f,"locked lunge retains its dodge cue");
     step(.301f);check(brain.State==RoadOfTheOldKing.Enemies.PredatorState.Lunge&&reaction.Armored,"committed lunge acquires armor");
     hp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,1,Vector2.left,0,.2f));
     check(hp.Health==hp.MaxHealth-1&&!reaction.IsStaggered&&brain.State==RoadOfTheOldKing.Enemies.PredatorState.Lunge,"armor permits damage but prevents interruption");
@@ -194,7 +195,6 @@ try {
     check(!secondAction.IsCharge&&player.Health.Health==player.Health.MaxHealth-meleeSpec.damage&&second.GetComponent<Rigidbody2D>().linearVelocity==Vector2.zero,"stationary melee uses the same runner and authored contact");
     var meleeView=second.GetComponent<RoadOfTheOldKing.Enemies.MeleeSpriteView>();meleeView.GetType().GetMethod("LateUpdate",flags).Invoke(meleeView,null);
     var meleeSprite=(SpriteRenderer)meleeView.GetType().GetField("bodyVisual",flags).GetValue(meleeView);
-    var meleeLine=(LineRenderer)meleeView.GetType().GetField("attackOutline",flags).GetValue(meleeView);
     check(meleeSprite.sprite!=null&&meleeSprite.sprite.pixelsPerUnit==16,"shared animation set retains native scavenger presentation");
     var hurtbox=second.GetComponentInChildren<RoadOfTheOldKing.Enemies.EnemyHurtbox>();hurtbox.GetType().GetMethod("LateUpdate",flags).Invoke(hurtbox,null);
     check(hurtbox.CanReceiveHits&&second.GetComponent<RoadOfTheOldKing.Enemies.IEnemyFacing>()==secondBrain,"body-hit coverage reads the narrow facing contract");
@@ -224,11 +224,22 @@ try {
     check(Vector2.Dot(duel.FacingDirection,new Vector2(2.2f,.6f).normalized)>.99f&&!duel.IsLaneLocked,"step-in tracks early in its windup");
     dstep(.16f);var duelLane=duel.FacingDirection;move(duelHome+new Vector2(2.2f,-.8f));dstep(.02f);
     check(duel.IsLaneLocked&&duel.FacingDirection==duelLane,"step-in locks its lane before contact");
+    var duelGround=duelist.GetComponent<RoadOfTheOldKing.Enemies.EnemyAttackGround>();var duelGroundRender=duelGround.GetType().GetMethod("LateUpdate",flags);
+    var duelMark=(Material)duelGround.GetType().GetField("material",flags).GetValue(duelGround);var duelGroundView=(MeshRenderer)duelGround.GetType().GetField("view",flags).GetValue(duelGround);
+    RoadOfTheOldKing.UI.FeedbackSettings.AttackWarnings=RoadOfTheOldKing.UI.AttackWarningStyle.GhostSteps;duelGroundRender.Invoke(duelGround,null);
+    var duelGhosts=(SpriteRenderer[])duelGround.GetType().GetField("ghosts",flags).GetValue(duelGround);
+    check(duelMark.GetFloat("_Ghost")==1f&&duelGhosts!=null&&duelGhosts[0].enabled&&duelGhosts[0].sprite!=null&&Vector2.Distance(duelGhosts[0].transform.position,duelHome+duelLane*duel.ChargeDistance)<.02f&&duelGhosts[0].sortingLayerName=="Ground","step-in's after-image stands where the step will end");
+    RoadOfTheOldKing.UI.FeedbackSettings.AttackWarnings=RoadOfTheOldKing.UI.AttackWarningStyle.Chalk;duelGroundRender.Invoke(duelGround,null);
+    check(duelMark.GetFloat("_Ghost")==0f&&!duelGhosts[0].enabled,"the chalk fallback hides the after-images");
+    RoadOfTheOldKing.UI.FeedbackSettings.AttackWarnings=RoadOfTheOldKing.UI.AttackWarningStyle.GhostSteps;duelGroundRender.Invoke(duelGround,null);
+    check(duelGroundView.enabled&&Mathf.Approximately(duelMark.GetFloat("_Lane"),duel.ChargeDistance+duel.AttackReach)&&Mathf.Approximately(duelMark.GetFloat("_Radius"),duel.AttackReach*Mathf.Sin(duel.AttackArc*.5f*Mathf.Deg2Rad))&&duelMark.GetFloat("_Locked")==1f,"step-in draws a lane exactly as long and wide as it reaches");
     for(int i=0;i<60&&!duel.IsFollowUp&&duel.Action.IsRunning;i++)dstep(.02f);
     check(duel.IsFollowUp&&duel.IsCloseAttack&&duel.State==RoadOfTheOldKing.Enemies.PursuitState.Windup&&player.Health.Health==player.Health.MaxHealth,"a missed step-in with the player still in reach continues into the overhead");
     check(!duelReaction.Armored,"overhead is still interruptible before it locks");
     for(int i=0;i<40&&!duel.IsLaneLocked;i++)dstep(.02f);
     check(duelReaction.Armored,"locked overhead is armoured");
+    duelGroundRender.Invoke(duelGround,null);
+    check(duelGroundView.enabled&&duelMark.GetFloat("_Lane")==0f&&Mathf.Approximately(duelMark.GetFloat("_Radius"),duel.AttackReach)&&Mathf.Approximately(duelMark.GetFloat("_Arc"),duel.AttackArc/720f),"overhead draws a wedge of its own reach and arc");
     int duelBefore=duelHp.Health;
     duelHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,5,Vector2.left,3,.3f));
     check(duelHp.Health==duelBefore-5&&!duelReaction.IsStaggered&&duel.State==RoadOfTheOldKing.Enemies.PursuitState.Windup,"armour takes damage without interrupting the committed overhead");
@@ -296,6 +307,6 @@ try {
     check(RoadOfTheOldKing.Progression.GameSession.Instance==null,"checks created no game session");
 } finally {
     foreach(var obj in created)if(obj!=null)UnityEngine.Object.DestroyImmediate(obj);
-    Physics2D.simulationMode=simulation;UnityEngine.Random.state=random;
+    Physics2D.simulationMode=simulation;UnityEngine.Random.state=random;RoadOfTheOldKing.UI.FeedbackSettings.AttackWarnings=RoadOfTheOldKing.UI.AttackWarningStyle.Chalk;
 }
 return "PASS "+passed.Count+"\n"+string.Join("\n",passed.ToArray());

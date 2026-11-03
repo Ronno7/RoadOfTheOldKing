@@ -25,7 +25,7 @@ namespace RoadOfTheOldKing.UI
         private VisualElement overlay, playerPage, itemsPage, travelPage, destinations;
         private Label summary, status, marker, inventory;
         private Label effects;
-        private Toggle god, infinite, collision, showCollision, pauseToggle;
+        private Toggle god, infinite, collision, showCollision, chalkWarnings, pauseToggle;
         private VisualElement noteBox;
         private TextField noteField;
         private bool noteOpen;
@@ -275,6 +275,7 @@ namespace RoadOfTheOldKing.UI
             infinite = AddToggle(playerPage, "Infinite stamina", commands.SetInfiniteStamina);
             collision = AddToggle(playerPage, "No collision", value => commands.SetCollision(!value));
             showCollision = AddToggle(playerPage, "Show collision", commands.SetShowCollision);
+            chalkWarnings = AddToggle(playerPage, "Chalk attack warnings", commands.SetChalkWarnings);
             speed = AddSlider(playerPage, "Move speed", .25f, 4f, 1f, commands.SetSpeed);
             var testing = new Foldout { text = "Combat & simulation", value = false }; playerPage.Add(testing);
             row = Row(testing);
@@ -433,7 +434,7 @@ namespace RoadOfTheOldKing.UI
                 $"{session.Progress.bronzeCoins} coins   |   {session.Progress.sunShards} shards   |   {HeartFragmentProgression.Count(session.Progress)} fragments";
             speed.SetEnabled(ready);
             god.SetValueWithoutNotify(commands.GodMode); infinite.SetValueWithoutNotify(commands.InfiniteStamina);
-            collision.SetValueWithoutNotify(commands.NoCollision); showCollision.SetValueWithoutNotify(commands.ShowCollision);
+            collision.SetValueWithoutNotify(commands.NoCollision); showCollision.SetValueWithoutNotify(commands.ShowCollision); chalkWarnings.SetValueWithoutNotify(commands.ChalkWarnings);
             speed.SetValueWithoutNotify(commands.SpeedMultiplier); time.SetValueWithoutNotify(SimulationPause.UnpausedTimeScale);
             marker.text = commands.Marker.HasValue ? $"Marker: {commands.Marker.Value.x:0.0}, {commands.Marker.Value.y:0.0}" : "No marker set";
             status.text = commands.LastResult; status.EnableInClassList("error", !commands.LastSucceeded);

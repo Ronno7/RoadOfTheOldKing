@@ -18,7 +18,7 @@ namespace RoadOfTheOldKing.Enemies
     // Chooses locomotion and actions. EnemyActionRunner owns committed movement/timing/damage; presentation only samples state.
     [DisallowMultipleComponent, RequireComponent(typeof(Damageable), typeof(HitReaction), typeof(Rigidbody2D))]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "RoadOfTheOldKing.Combat", null, "WolfAI")]
-    public sealed class PredatorBrain : MonoBehaviour, IEnemy, IEnemyFacing, IResetOnRest, ISceneVisitParticipant
+    public sealed class PredatorBrain : MonoBehaviour, IEnemy, IEnemyFacing, IEnemyAttackShape, IResetOnRest, ISceneVisitParticipant
     {
         [SerializeField] private PlayerHealth target;
 
@@ -144,6 +144,17 @@ namespace RoadOfTheOldKing.Enemies
         public float LaneWidth => biteRadius * 2f;
         public float SnapReach => snapReach;
         public float SnapArc => snapArc;
+        public bool IsWindingUp => State == PredatorState.Windup;
+        public bool IsStriking => State == PredatorState.Lunge || State == PredatorState.Snap;
+        public float WindupProgress => StateProgress;
+        public bool IsAttackLocked => IsLaneLocked || !IsLungeAttack;
+        public bool IsDrawing => false;
+        public float AttackReach => snapReach;
+        public float AttackArc => snapArc;
+        public float StrikeSeconds => IsLungeAttack ? lungeDuration : snapActive;
+        public float DrawnLaneLength => IsLungeAttack ? LaneLength : 0f;
+        public float DrawnLaneWidth => LaneWidth;
+        public float DrawnLaneTravel => lungeDistance;
         public bool IsAware { get; private set; }
         public bool IsDefeated => State == PredatorState.Defeated;
         public int ResetVersion { get; private set; }
