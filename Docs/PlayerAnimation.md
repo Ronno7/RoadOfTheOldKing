@@ -23,11 +23,12 @@ The hero is an arm-less wanderer in a blue hooded cloak, drawn in eight directio
 | Hurt | Staggered | Time | Yes |
 | Drink | Drinking a flask | Drink progress; the swig lands with the heal | Yes |
 | Rest | At a bonfire | Time, looping | Yes |
+| Combat idle | Ready stance; see below | Single view | Yes |
 | Light attacks, finisher | Three-hit combo | Weapon action clock | Pending |
 | Charge / Cleave | Charged spin | Time, then action clock | Pending |
 | Catch, Death, Pickup | Their moment | Time | Pending |
 
-Empty slots fall back instead of blocking: run uses walk, actions use locomotion, and everything ends at the standing views. A contact frame on each clip lines the drawn hit up with the first damaging physics step.
+Empty slots fall back instead of blocking: run uses walk, actions use locomotion, and everything ends at the standing views. Without their own clips, light attacks hold the combat idle while standing still, and the charge and cleave turn through its views. A contact frame on each clip lines the drawn hit up with the first damaging physics step.
 
 ## Import
 

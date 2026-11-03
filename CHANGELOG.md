@@ -11,6 +11,7 @@
 - Scavengers chase after 0.9s of sight; suspicion fades when out of view.
 - Scavengers fight from a planted stance with a lunging thrust and a slow armoured overhead.
 - Scavengers and boars have idle animations; boars play a run cycle when they charge.
+- The hero holds a ready stance for standing attacks, the charge and the cleave.
 - North Bank Bonfire where the King's Road leaves the Lowlands; fallen logs block the road until Barrow Woods returns.
 - Drowned Hayfields: flooded fields and a barn south of the pasture, with a heart fragment.
 
@@ -30,6 +31,7 @@
 - Lantern casts warm, flickering light with soft shadows behind walls (was a hard edged cut out).
 - Thrown axe flies 50% faster (full range in 0.39 s, was 0.58 s).
 - Stamina arc shows whenever stamina is below full (was combat only).
+- Redrew the hero's north drinking frames.
 - Enemies chase until they stray past their leash; hitting or following them re-engages.
 - Tutorial hints skip lessons you've passed by the bridge, the Recall stone or a bonfire.
 - Barrow Approach is closed until Barrow Woods is rebuilt.

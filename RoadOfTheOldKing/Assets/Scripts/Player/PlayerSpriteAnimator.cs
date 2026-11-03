@@ -161,29 +161,32 @@ namespace RoadOfTheOldKing.Player
                 PlayLocomotion(octant, true, distance);
                 return;
             }
-            if (weapon != null && combat.CanContinueAction && TryPlayWeapon()) return;
+            if (weapon != null && combat.CanContinueAction && TryPlayWeapon(walking)) return;
             if (catchRemaining > 0f && PlayTimed("Catch", animations.catching, catchOctant)) return;
             PlayLocomotion(facing, walking, distance);
         }
 
-        private bool TryPlayWeapon()
+        private bool TryPlayWeapon(bool walking)
         {
             int octant = DirectionalSpriteAnimation.Octant(combat.ActionFacing);
+            var stance = HasFrames(animations.combatIdle) ? animations.combatIdle : animations.rotations;
             switch (weapon.State)
             {
                 case AxeState.LightChop:
                     var attack = weapon.ComboIndex == 0 ? animations.lightAttack1
                         : weapon.ComboIndex == 1 ? animations.lightAttack2 : animations.finisher;
-                    return Play(AttackStates[Mathf.Clamp(weapon.ComboIndex, 0, 2)], attack, octant,
-                        weapon.AttackProgress, true, weapon.LightWindupFraction);
-                // Until dedicated art exists: the charge coils one octant clockwise, against the spin, and the
-                // cleave turns the standing views counter-clockwise with the axe's orbit, from the aim back to it.
+                    if (Play(AttackStates[Mathf.Clamp(weapon.ComboIndex, 0, 2)], attack, octant,
+                        weapon.AttackProgress, true, weapon.LightWindupFraction)) return true;
+                    // He keeps walking through light attacks, and a held pose would glide: plant the stance only standing still.
+                    return !walking && Play("Ready", animations.combatIdle, octant, 0f);
+                // The charge coils the stance one octant clockwise, against the spin, and the cleave turns its
+                // views counter-clockwise with the axe's orbit, from the aim back to it.
                 case AxeState.Charging:
                     return PlayTimed("Charge", animations.charge, octant) ||
-                        Play("Charge", animations.rotations, (octant + 7) % 8, 0f);
+                        Play("Charge", stance, (octant + 7) % 8, 0f);
                 case AxeState.Cleaving:
                     return Play("Cleave", animations.cleave, octant, weapon.AttackProgress, true) ||
-                        Play("Cleave", animations.rotations, (octant + Mathf.FloorToInt(weapon.AttackProgress * 8f + .5f)) % 8, 0f);
+                        Play("Cleave", stance, (octant + Mathf.FloorToInt(weapon.AttackProgress * 8f + .5f)) % 8, 0f);
             }
             if (!weapon.IsThrowing)
                 return false;
