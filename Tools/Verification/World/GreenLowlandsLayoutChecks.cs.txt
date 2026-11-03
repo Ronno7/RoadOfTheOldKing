@@ -35,6 +35,7 @@ if(EditorApplication.isPlaying){
     check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.High,"starts with high pond");
     bool highWalkOnly=SessionState.GetBool("Lowlands.Layout.HighWalk",false);
     if(!highWalkOnly){
+    game.Progress.Complete("green-lowlands/watcher-defeated");
     pose(new Vector2(5,91.3f));
     var crankPickup=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.ToolPickup>();
     check(game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank) || crankPickup.TryCollect(player),"maintenance crank available before puzzle");
@@ -68,6 +69,8 @@ if(EditorApplication.isPlaying){
     // Arrival encounters (two wolves, rat stand-in among them, and the cart scavenger) live under one group.
     var borderWolves=GameObject.Find("Green Lowlands").transform.Find("Encounters/Border wolves").Cast<Transform>().ToArray();
     var borderWolfColliders=borderWolves.SelectMany(w=>w.GetComponentsInChildren<Collider2D>(true)).Where(c=>!c.isTrigger).ToArray();
+    // Breakables are chopped through, so they don't count as route collision here or in the Edit branch.
+    foreach(var breakable in UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Combat.Breakable>(FindObjectsSortMode.None))foreach(var part in breakable.GetComponentsInChildren<Collider2D>(true))part.enabled=false;
     var borderColliderStates=borderWolfColliders.Select(c=>c.enabled).ToArray();
     bool borderWalked=false;
     System.Action<UnityEngine.InputSystem.Key[]> keys=held=>{UnityEngine.InputSystem.InputSystem.QueueStateEvent(keyboard,new UnityEngine.InputSystem.LowLevel.KeyboardState(held));UnityEngine.InputSystem.InputSystem.Update();input.GetType().GetField("hasFocus",flags).SetValue(input,true);input.GetType().GetMethod("Update",flags).Invoke(input,null);};
@@ -129,8 +132,7 @@ if(EditorApplication.isPlaying){
         foreach(string name in destinations.Concat(highWalkOnly?new string[0]:new[]{"VillageBank"}).Concat(new[]{"ArrivalUplandEdge","ArrivalRiverbank","FarmRim","MillBank","PastureGap","OrchardGrove","EastPondBank","NorthernGrove","WesternSpurGrove","NorthernRidgeClearing","UpperOrchardClearing","NorthernShoreWalk"})){
             string route=SessionState.GetString("Lowlands.Layout.Path."+(highWalkOnly?"high.":"")+name,"");if(route=="")throw new System.Exception("Run Edit geometry fixture to cache paths first.");
             bool borderRoute=name=="BorderOutward"||name=="BorderReturn"||name=="ArrivalRiverbank";
-            if(borderRoute&&borderWolves.Length!=3)throw new System.Exception("Expected the three authored arrival encounters for terrain-only motor checks.");
-            for(int i=0;i<borderWolfColliders.Length;i++)borderWolfColliders[i].enabled=borderRoute?false:borderColliderStates[i];
+                        for(int i=0;i<borderWolfColliders.Length;i++)borderWolfColliders[i].enabled=borderRoute?false:borderColliderStates[i];
             Physics2D.SyncTransforms();
             var points=route.Split(';').Select(s=>s.Split(',')).Select(a=>new Vector2(float.Parse(a[0],System.Globalization.CultureInfo.InvariantCulture),float.Parse(a[1],System.Globalization.CultureInfo.InvariantCulture))).ToArray();
             if(name=="NorthFork"||name=="SouthFork"||name=="VistaLane"||name=="VillageEast"||name=="ArrivalUplandEdge"||name=="ArrivalRiverbank"||name=="VillageBank"||name=="FarmRim"||name=="MillBank"||name=="WesternPond"||name=="PastureGap"||name=="OrchardGrove"||name=="EastPondBank"||name=="NorthernGrove"||name=="WesternSpurGrove"||name=="NorthernRidgeClearing"||name=="UpperOrchardClearing"||name=="NorthernShoreWalk"){

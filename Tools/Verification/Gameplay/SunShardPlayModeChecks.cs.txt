@@ -105,7 +105,7 @@ else if(phase==2){
   check(!game.Rewards.TryPurchaseUpgrade(fire,tier.retiredChoices.Single())&&game.Progress.sunShards==3,"retired offer rejected by real reward service");
   foreign.id="verification/foreign";check(!game.Rewards.TryPurchaseUpgrade(fire,foreign)&&game.Progress.sunShards==3,"foreign choice rejected");
   // Use actual menu actions, including the safe default on confirmation.
-  menu.Navigate(1);menu.Submit();for(int i=0;i<choiceIndex;i++)menu.Navigate(1);menu.Submit();
+  menu.Submit();for(int i=0;i<choiceIndex;i++)menu.Navigate(1);menu.Submit();
   check(typeof(RoadOfTheOldKing.UI.BonfireMenu).GetField("page",flags).GetValue(menu).ToString()=="Confirm","choice opens confirmation");
   menu.Submit();check(game.Progress.sunShards==3&&game.Progress.upgrades.Count==0,"confirmation defaults to Back, no spend");
   for(int i=0;i<choiceIndex;i++)menu.Navigate(1);menu.Submit();menu.Navigate(1);menu.Submit();

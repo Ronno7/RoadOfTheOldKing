@@ -6,6 +6,7 @@ var f=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.Non
 var s=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.RecallSluice>();var v=s.GetComponent<RoadOfTheOldKing.World.SluiceMechanismView>();
 var p=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerCombatController>();var a=p.Weapon;var body=p.GetComponent<Rigidbody2D>();var stamina=p.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>();
 var origin=body.position;var controls=p.GetType().GetField("controlsActive",f).GetValue(p);var saved=game.Progress.completedIds.ToArray();
+game.Progress.Complete("green-lowlands/watcher-defeated");
 float savedFlash=RoadOfTheOldKing.UI.FeedbackSettings.FlashScale;
 var marks=(SpriteRenderer[])v.GetType().GetField("forkMarks",f).GetValue(v);
 var savedTools=game.Progress.ownedTools.ToArray();bool savedExists=PlayerPrefs.HasKey(game.StorageKey);string savedRecord=PlayerPrefs.GetString(game.StorageKey,"");

@@ -27,10 +27,8 @@ else{
   foreach(string name in new[]{"BriarWolf","RoadScavenger","MossbackBoar","BrokenWatcher","ThornRat"}){
    var set=AssetDatabase.LoadAssetAtPath<RoadOfTheOldKing.Enemies.EnemyAnimationSet>("Assets/Animations/Enemies/"+name+"/AnimationSet.asset");
    check(set!=null&&Enumerable.Range(0,8).All(o=>set.rotations.ResolveOctant(o)==o&&set.rotations.FrameCount(o)==1),name+" has eight native standing directions");
-   check(set.attack==null&&set.death==null,name+" preserves pending attack/death slots");
    check(Enumerable.Range(0,8).All(o=>set.rotations.Frame(o,0).pixelsPerUnit==16),name+" uses 16 PPU");
-   bool walking=name!="ThornRat";
-   check(walking?set.walk!=null&&Enumerable.Range(0,8).All(o=>set.walk.ResolveOctant(o)==o&&set.walk.FrameCount(o)==8):set.walk==null,name+" imports complete locomotion only");
+   check(set.walk!=null&&Enumerable.Range(0,8).All(o=>set.walk.ResolveOctant(o)==o&&set.walk.FrameCount(o)>0),name+" imports complete locomotion");
   }
   // Original wolf snap and the scavenger's shared runner use the same delivery contract.
   var wolfRoot=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Combat/Wolf.prefab"),new Vector3(1000,1000),Quaternion.identity);

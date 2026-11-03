@@ -172,7 +172,7 @@ if(phase==2){
                 if(delta.y>.025f)held.Add(UnityEngine.InputSystem.Key.W);else if(delta.y<-.025f)held.Add(UnityEngine.InputSystem.Key.S);
                 keys(held.ToArray());step();
             }
-            if(frames>=400)throw new System.Exception("Motor blocked: "+label+" at "+body.position+" toward "+points[n]);
+            if(frames>=400)throw new System.Exception("Motor blocked: "+label+" at "+body.position+" toward "+points[n]+" touching "+string.Join(", ",System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Select(System.Linq.Enumerable.Where(Physics2D.OverlapCircleAll(body.position,.8f),c=>!c.isTrigger&&c.attachedRigidbody!=body),c=>c.name+" "+c.bounds.min.ToString("F1")+"-"+c.bounds.max.ToString("F1")))));
         }
         keys(new UnityEngine.InputSystem.Key[0]);check(true,label);
     };

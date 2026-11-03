@@ -7,7 +7,7 @@
 // and execute again. Cleanup also works after a failed phase; do not save the bootstrap.
 // Setup requires saved, clean scenes. It never saves or modifies authored scene files.
 // This checks actual trigger/load/death/menu lifecycles with teleported setup positions;
-// it is not a keyboard, player-motor, complete Tutorial loop or browser test.
+// it is not a keyboard, player-motor, complete Tutorial loop or build test.
 string prefix="GreenLowlands.Gameplay.";
 string command=SessionState.GetString(prefix+"Command",SessionState.GetBool(prefix+"Active",false)?"advance":"setup");
 var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
@@ -248,11 +248,11 @@ if(phase==2){
     string milestone=SessionState.GetString(prefix+"ExitMilestone","");
     check(string.IsNullOrEmpty(milestone)||saved.Load().Has(milestone),"Exit milestone persisted");
     check(saved.Load().scenePath==tutorialPath,"Arrival alone does not change the last rest checkpoint");
-    var fire=session.Checkpoints.Fires.Single();SessionState.SetString(prefix+"RegionalFire",fire.Id);
+    var fire=session.Checkpoints.Fires.Single(f=>f.Id=="green-lowlands/arrival-fire");SessionState.SetString(prefix+"RegionalFire",fire.Id);
     move(fire.SpawnPosition);
     var interaction=player.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>();
     var locks=player.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>();
-    check(interaction.Open(fire)&&interaction.IsOpen&&locks.IsLocked,"Regional fire opens the real rest interaction");
+    check(fire.IsDiscovered||session.Checkpoints.Light(fire),"Regional fire lights");check(interaction.Open(fire)&&interaction.IsOpen&&locks.IsLocked,"Regional fire opens the real rest interaction");
     check(player.GetComponent<RoadOfTheOldKing.UI.BonfireMenu>().IsOpen,"Bonfire menu builds and opens");
     check(player.Health.Health==player.Health.MaxHealth&&player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().Charges==player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().MaxCharges,"Regional rest replenishes carried vitals");
     var progress=saved.Load();

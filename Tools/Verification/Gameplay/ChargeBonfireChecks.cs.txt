@@ -59,7 +59,8 @@ else if(phase==1){
   for(int tap=0;tap<5;tap++){weapon.TryBeginCharge();tick(.05f);weapon.TryReleaseCharge(Vector2.right);}
   check(stamina.Current==100&&!weapon.IsAttacking,"spamming short taps no longer drains stamina");
   check(weapon.TryBeginCharge(),"charge for paid release");tick(weapon.Settings.minimumCharge+.05f);
-  check(weapon.TryReleaseCharge(Vector2.right)&&Mathf.Abs(stamina.Current-65)<.001f,"a real cleave pays 35 on release");
+  float paidCost=weapon.Settings.cleaveStaminaCost*Mathf.Lerp(.5f,1f,weapon.Charge01);
+  check(paidCost<weapon.Settings.cleaveStaminaCost&&weapon.TryReleaseCharge(Vector2.right)&&Mathf.Abs(stamina.Current-(100-paidCost))<.001f,"a short real cleave pays by its charge on release");
   weapon.CancelAction();stamina.Restore();stamina.TrySpend(100);
   check(!weapon.TryBeginCharge(),"no charge without stamina");
   foreach(float seconds in new[]{.4f,.79999f,.8f,1.2f}){

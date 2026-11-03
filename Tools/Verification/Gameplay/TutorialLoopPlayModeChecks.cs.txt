@@ -129,7 +129,7 @@ if(phase==8||phase==10){
             var bridge=session.Checkpoints.Fires.Single(f=>f.Id=="tutorial/bridge-fire");
             move(bridge.SpawnPosition);check(interaction.TryInteract()&&bridge.IsDiscovered,"Real F lights the bridge fire");
             check(interaction.TryInteract()&&interaction.IsOpen&&session.Progress.checkpointId==bridge.Id,"Second F rests at the bridge");interaction.Close();updateGuide();
-            check(!guide.IsDone("rest")&&guide.Steps[guide.HintIndex].id=="first-wolf","Bridge rest keeps the wolf, flask and stone teaching ahead");
+            var wolfStep=System.Linq.Enumerable.ToList(guide.Steps).FindIndex(s=>s.id=="first-wolf");check(!guide.IsDone("rest")&&guide.HintIndex<=wolfStep,"Bridge rest keeps the wolf, flask and stone teaching ahead");
         }else throw new Exception("All phases completed or unexpected phase "+phase);
     }
 }

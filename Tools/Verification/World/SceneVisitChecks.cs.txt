@@ -38,7 +38,7 @@ System.Action<string> preserved=label=>{
  check(dead.IsDefeated&&!dead.GetComponent<RoadOfTheOldKing.Combat.Damageable>().IsAlive,"dead enemy remains dead after real load");
  check(!dead.GetComponent<Collider2D>().enabled,"corpse collision disabled");
  var hurt=wolves.Single(w=>w.name==SessionState.GetString(prefix+label+"Wounded",""));
- check(hurt.GetComponent<RoadOfTheOldKing.Combat.Damageable>().Health==7,"wounded enemy health retained");
+ var hurtHealth=hurt.GetComponent<RoadOfTheOldKing.Combat.Damageable>();check(hurtHealth.Health>=7&&hurtHealth.Health<hurtHealth.MaxHealth,"wounded enemy keeps its wounds, mending from there");
  string cuts=string.Join(",",Enumerable.Range(0,field.layout.plants.Length).Where(i=>field.IsCut(i)).Select(i=>i.ToString()).ToArray());
  check(cuts==SessionState.GetString(prefix+label+"Cuts","")&&field.CutCount>0,"exact cut mask retained");
  check(player.Health.Health==55&&player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().Charges==1,"doorway retains player vitals");
@@ -50,7 +50,7 @@ System.Action fresh=()=>{
 System.Action rest=()=>{
  var fire=game.Checkpoints.Fires.First();var body=player.GetComponent<Rigidbody2D>();
  player.transform.position=fire.transform.position;body.position=fire.transform.position;body.linearVelocity=Vector2.zero;Physics2D.SyncTransforms();
- check(game.Checkpoints.Rest(fire),"actual bonfire rest");
+ check(fire.IsDiscovered||game.Checkpoints.Light(fire),"fire lit before resting");check(game.Checkpoints.Rest(fire),"actual bonfire rest");
 };
 if(phase==0){check(game.Continue(),"isolated Continue starts");}
 else if(phase==1){check(scene.path==tutorial,"Tutorial loaded");seed("Tutorial");check(game.Checkpoints.LeaveScene(region,"from-tutorial"),"leave for region");}

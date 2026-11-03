@@ -71,6 +71,7 @@ if(!EditorApplication.isPlaying)throw new System.Exception("Isolated Play requir
    System.Action<int> ftick=count=>{for(int i=0;i<count;i++){fs.GetType().GetMethod("FixedUpdate",flags).Invoke(fs,null);Physics2D.SyncTransforms();fa.GetType().GetMethod("Simulate",flags).Invoke(fa,new object[]{.02f});foreach(var reveal in fwater)reveal.GetType().GetMethod("Advance",flags).Invoke(reveal,new object[]{.02f});}};
    System.Action<Vector2> flodge=at=>{fpose(at);fp.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>().Restore();check(fa.TryThrow(Vector2.right),"real puzzle throw");ftick(90);check(fa.State==RoadOfTheOldKing.Weapons.AxeState.Stuck,"real fork lodging");};
    System.Action<Vector2> frecall=at=>{fmove(at);fp.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>().Restore();check(fa.TryPlayerRecall(),"real puzzle Recall");ftick(180);};
+   fg.Progress.Complete("green-lowlands/watcher-defeated");check(!fs.IsGuarded,"the Watcher's fall frees the controls");
    fpose(new Vector2(5,91.3f));check(fi.TryInteract()&&fg.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank),"F collects required crank");
    flodge(new Vector2(5,86));frecall(new Vector2(6,90));check(fs.Stage==RoadOfTheOldKing.World.SluiceStage.DistributorReleased,"distributor released");
    fmove(new Vector2(6,88));check(fi.TryInteract()&&fs.Stage==RoadOfTheOldKing.World.SluiceStage.ServiceDiverted,"F diverts service channel");
@@ -81,10 +82,12 @@ if(!EditorApplication.isPlaying)throw new System.Exception("Isolated Play requir
    // waits for it (17 Oct: split from phase 3, which pressed F in the same frame the pond began to lower).
    var waitShard=System.Array.Find(UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SunShardReward>(FindObjectsInactive.Include,FindObjectsSortMode.None),r=>r.RewardId=="green-lowlands/basin");fpose((Vector2)waitShard.transform.position+Vector2.down*.7f);
    if(!waitShard.CanCollect(fp))return "WAIT: pond still draining";
+   // The flood collider stands until the drain finishes; a real player cannot get here before then.
+   var floodLeft=GameObject.Find("Flooded pond and road-cut");if(floodLeft!=null&&floodLeft.GetComponent<Collider2D>().enabled)return "WAIT: flood still clearing";
    var basinShard=System.Array.Find(UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SunShardReward>(FindObjectsInactive.Include,FindObjectsSortMode.None),r=>r.RewardId=="green-lowlands/basin");fpose((Vector2)basinShard.transform.position+Vector2.down*.7f);
    check(fi.TryInteract()&&basinShard.IsCollected&&fg.Progress.sunShards==3,"F earns S3; all three shards obtained through authored rewards");
    var basinMoney=fchest("basin-cache");fpose((Vector2)basinMoney.transform.position+Vector2.down*.7f);
-   check(fi.TryInteract()&&basinMoney.IsOpen&&fg.Progress.bronzeCoins==45,"basin chest completes all 45 fixed coins without random payouts");
+   check(fi.TryInteract()&&basinMoney.IsOpen&&fg.Progress.bronzeCoins==45,"basin chest completes all 45 fixed coins without random payouts (open "+basinMoney.IsOpen+", can "+basinMoney.CanCollect(fp)+", coins "+fg.Progress.bronzeCoins+", chest at "+basinMoney.transform.position+", on the line: "+string.Join(", ",System.Array.ConvertAll(Physics2D.LinecastAll(fp.transform.position,basinMoney.transform.position),x=>x.collider.name+(x.collider.isTrigger?"(trigger)":"")))+")");
    fpose(new Vector2(15.5f,3));check(fi.TryInteract()&&fi.IsOpen,"second fire F rests and opens menu");
    var upgradeMenu=fp.GetComponent<RoadOfTheOldKing.UI.BonfireMenu>();
    // Upgrades is the first row since the separate Rest entry was removed (17 Oct).

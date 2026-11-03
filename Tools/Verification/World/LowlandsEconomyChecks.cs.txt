@@ -253,7 +253,7 @@ if(phase==0||phase==10){
     pose(new Vector2(6,88));check(!crank.TryCollect(player)&&sluice.Stage==RoadOfTheOldKing.World.SluiceStage.DistributorReleased,"unowned crank cannot divert released machinery");
     pose(new Vector2(5,91.3f));check(interaction.TryInteract()&&game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank),"F acquires maintenance crank");
     check(!game.Rewards.TryCollectTool("duplicate-crank",RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank),"tool ownership deduplicates");
-    game.Progress.completedIds.Remove("green-lowlands/sluice/distributor");sluice.RestoreProgress(game.Progress);
+    game.Progress.Complete("green-lowlands/watcher-defeated");game.Progress.completedIds.Remove("green-lowlands/sluice/distributor");sluice.RestoreProgress(game.Progress);
     System.Action<int> tick=count=>{for(int i=0;i<count;i++){sluice.GetType().GetMethod("FixedUpdate",flags).Invoke(sluice,null);Physics2D.SyncTransforms();axe.GetType().GetMethod("Simulate",flags).Invoke(axe,new object[]{.02f});}};
     System.Action<Vector2> lodge=p=>{pose(p);player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>().Restore();check(axe.TryThrow(Vector2.right),"sluice throw accepted");tick(90);check(axe.State==RoadOfTheOldKing.Weapons.AxeState.Stuck,"sluice actual lodging");};
     System.Action<Vector2> recall=p=>{stand(p);player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>().Restore();check(axe.TryPlayerRecall(),"sluice Recall accepted");tick(80);};
