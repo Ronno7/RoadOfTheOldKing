@@ -26,6 +26,7 @@
 - Charging boars can't be interrupted; hitting a wall head on stuns them, and thrown axes no longer stagger them.
 - Shorter cleave charges cost less stamina (down to about 19, 35 at full).
 - Improved waterworks buildings, sluice lift gate, and canal art and animations.
+- Broken Watcher's court dressed with worn paving, loose stones, flowers and reeds.
 - Reshaped the cliffs and basin edge around the waterworks; moved the basin stair platform south.
 - Raised the rocky ridge south of High Pass.
 - Separated Old Drain from the storehouse: enter through the basin arch; Barrow remains sealed and Barrow Approach is closed until Barrow Woods is rebuilt.
