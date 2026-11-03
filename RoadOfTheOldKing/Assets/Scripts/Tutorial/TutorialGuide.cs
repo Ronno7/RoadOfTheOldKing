@@ -35,7 +35,7 @@ namespace RoadOfTheOldKing.Tutorial
         public string hint;
         public TutorialCondition condition;
         [Tooltip("Units for Moved/Sprinted, count for Dodged.")] public float amount = 1f;
-        [Tooltip("Progress id for Milestone.")] public string milestone;
+        [Tooltip("Progress id for Milestone; for Rested, the fire that counts (empty: any fire).")] public string milestone;
         [Tooltip("World position for ReachArea (layout anchors are editor-only, so positions are stored).")] public Vector2 area;
         [Min(0.5f)] public float radius = 4f;
 
@@ -182,7 +182,7 @@ namespace RoadOfTheOldKing.Tutorial
                 case TutorialCondition.Dodged: return dashes >= Mathf.Max(1f, step.amount);
                 case TutorialCondition.HasAxe: return combat != null && combat.Weapon != null;
                 case TutorialCondition.RecallUnlocked: return combat != null && combat.CanRecall;
-                case TutorialCondition.Rested: return GameSession.Instance != null && GameSession.Instance.Checkpoints.HasCheckpoint;
+                case TutorialCondition.Rested: return progress != null && !string.IsNullOrEmpty(progress.checkpointId) && (string.IsNullOrEmpty(step.milestone) || progress.checkpointId == step.milestone);
                 case TutorialCondition.Milestone: return progress != null && progress.Has(step.milestone);
                 case TutorialCondition.DrankFlask:
                     return progress != null && progress.Has("tutorial/enemy/first-wolf") &&
@@ -274,7 +274,7 @@ namespace RoadOfTheOldKing.Tutorial
             new TutorialStep("flask", "Drink a flask {heal}", TutorialCondition.DrankFlask),
             new TutorialStep("stone", "The stone seals the way\nThrow {throw}", TutorialCondition.RecallUnlocked),
             new TutorialStep("first-shard", "Follow the trail north", TutorialCondition.Milestone) { milestone = RewardKeys.ShardCollected("tutorial/first-enemy") },
-            new TutorialStep("rest", "", TutorialCondition.Rested),
+            new TutorialStep("rest", "", TutorialCondition.Rested) { milestone = "tutorial/roadside-fire" },
             new TutorialStep("exit", "Take the road northeast", TutorialCondition.Milestone) { milestone = "tutorial/complete" },
         };
     }

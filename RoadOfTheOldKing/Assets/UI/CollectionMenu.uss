@@ -37,6 +37,7 @@ Label { margin: 0; padding: 0; -unity-font-style: normal; white-space: normal; }
 .pack-item.counted { justify-content: flex-start; padding-top: 8px; }
 .item-count { position: absolute; left: 0; right: 0; bottom: 4px; white-space: nowrap; -unity-text-align: lower-center; color: var(--kit-text); }
 #item-name { height: 20px; color: var(--kit-gold); -unity-text-align: middle-center; margin-top: 4px; }
+#stats { flex-direction: row; justify-content: space-between; margin-top: 8px; color: var(--kit-muted); }
 #pack-footer { flex-direction: row; align-items: center; justify-content: space-between; height: 28px; margin-top: 12px; }
 #hint { white-space: nowrap; color: var(--kit-muted); }
 #collection-close {

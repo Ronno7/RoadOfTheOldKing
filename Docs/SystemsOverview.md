@@ -240,7 +240,7 @@ Level construction is in [World and tilemaps](World.md).
 | --- | --- | --- |
 | Interaction (F) | `PlayerBonfireInteraction` | Picks one nearby target. The HUD prompt reads the same selection. |
 | Bonfires | `Bonfire` | First use lights it and unlocks travel. Next use rests: heals, refills, resets enemies, sets the respawn point. |
-| Place names | `AreaName` | The smallest zone containing the player names the place. |
+| Place names | `AreaName` | The smallest zone containing the player names the place, shown once per save. |
 | Pots and chests | `Breakable`, `CoinSource`, `RewardChest` | Each result saves once, including empty rolls. |
 | Trader | `Trader`, `ShopOffer`, `CollectionMenu` | Talk, then trade. A purchase saves coins, item and stock together. |
 | Rope | `RopeAnchor`, `RopeRoute` | A bought kit secures a saved two-way route. |
@@ -271,7 +271,7 @@ One verb per space. Each lesson completes from a real outcome, not a key press.
 
 ## Camera and UI
 
-**Camera** (`FollowCamera.prefab`): `CameraFollow2D` is the only writer of position, `CameraZoom2D` keeps the player's zoom for the session and `CameraFreelook2D` looks up to three tiles away. The bonfire and dialogue close-ups request framing and zoom through owner-released overrides.
+**Camera** (`FollowCamera.prefab`): `CameraFollow2D` is the only writer of position, `CameraZoom2D` keeps the player's zoom for the session and `CameraFreelook2D` looks up to five tiles away and holds there until the player moves, then eases back. The bonfire and dialogue close-ups request framing and zoom through owner-released overrides.
 
 **HUD** (`GameHud`, UI Toolkit) is contextual, so quiet exploration shows almost nothing.
 

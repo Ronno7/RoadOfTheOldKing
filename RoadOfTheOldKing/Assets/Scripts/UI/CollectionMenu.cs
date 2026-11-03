@@ -148,6 +148,23 @@ namespace RoadOfTheOldKing.UI
             context.text = "";
             ControlLabels.Bind(hint, "Tab / Esc", "View / B");
             inventory.Show(player);
+            ShowStats();
+        }
+
+        // Real numbers, so a hit for 20 means something: read live, so upgrades and heart fragments show here too.
+        private void ShowStats()
+        {
+            var health = player.Health;
+            var stamina = player.GetComponent<PlayerStamina>();
+            var flask = player.GetComponent<PlayerFlask>();
+            string vitals = $"Health {health.Health} / {health.MaxHealth}";
+            if (stamina != null) vitals += $"\nStamina {Mathf.RoundToInt(stamina.Maximum)}";
+            if (flask != null) vitals += $"\nFlask {flask.Charges} / {flask.MaxCharges}\nFlask heals {flask.HealAmount}";
+            overlay.Q<Label>("stats-vitals").text = vitals;
+            var axe = combat != null ? combat.Weapon : null;
+            var settings = axe != null ? axe.Settings : null;
+            overlay.Q<Label>("stats-axe").text = settings == null ? "" :
+                $"Chop {settings.lightDamage}\nFinisher {axe.FinisherDamage}\nCleave up to {settings.cleaveDamage}\nThrow {settings.throwDamage}\nRecall {settings.recallDamage}";
         }
 
         private VisualElement CreateIcon(string id)

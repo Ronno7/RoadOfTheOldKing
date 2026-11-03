@@ -2,7 +2,8 @@
 // Use GreenLowlandsGameplayChecks SETUP/CLEANUP only. Enter its unsaved bootstrap,
 // set SessionState Tutorial.LoopCommand=start, then execute this file. This clears
 // only the isolated seed and loads a fresh Tutorial (no owned axe or Recall).
-// Run once per phase; allow real frames/reloads. After phase 9, stop/re-enter the
+// Run once per phase; allow about 4.5 s of real frames (3 s combat grace, 1.4 s awakening,
+// scene reloads) between phases. After phase 9, stop/re-enter the
 // same unsaved bootstrap before phase 10. Never save the bootstrap. Enemy defeats
 // use direct Damageable hits: this checks progression, not human combat balance.
 if (!Application.isPlaying) throw new Exception("Play Mode required.");
@@ -48,9 +49,11 @@ if(phase==8||phase==10){
         var gate=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Tutorial.RecallSealGate>();
         var gateShadow=gate.transform.Find("Gate-shadow").GetComponent<SpriteRenderer>();
         var lesson=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Tutorial.ThrowRetrieveLesson>();
-        var melee=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Tutorial.HitCountLesson>();
+        var melee=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Tutorial.HitCountLesson>(FindObjectsSortMode.None).Single(l=>new SerializedObject(l).FindProperty("progressId").stringValue=="tutorial/lesson/melee");
         var reward=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.SunShardReward>();
         var fire=session.Checkpoints.Fires.Single(f=>f.Id=="tutorial/roadside-fire");
+        var guide=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Tutorial.TutorialGuide>();
+        System.Action updateGuide=()=>guide.GetType().GetMethod("Update",flags).Invoke(guide,null);
         var wolves=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Enemies.PredatorBrain>(FindObjectsSortMode.None);
         var lone=wolves.Single(w=>w.GetComponent<RoadOfTheOldKing.Progression.DefeatMilestone>()!=null);
         var pack=wolves.Where(w=>w!=lone).OrderBy(w=>w.name).ToArray();
@@ -105,7 +108,7 @@ if(phase==8||phase==10){
             check(!reward.TryCollect(player)&&store.Load().sunShards==1,"Duplicate reward rejected and saved");
             move(fire.SpawnPosition+Vector2.down);check(interaction.TryInteract()&&fire.IsDiscovered,"Real F lights rebuilt bonfire");
             check(interaction.TryInteract()&&interaction.IsOpen,"Second F rests and opens bonfire menu");
-            check(player.Health.Health==player.Health.MaxHealth&&flask.Charges==flask.MaxCharges,"Rest refills health and flasks");interaction.Close();die();
+            check(player.Health.Health==player.Health.MaxHealth&&flask.Charges==flask.MaxCharges,"Rest refills health and flasks");interaction.Close();updateGuide();check(guide.IsDone("rest"),"Roadside rest completes the rest step");die();
         }else if(phase==5){
             check(player.IsAlive&&Vector2.Distance(body.position,fire.SpawnPosition)<.1f,"Death after rest returns to bonfire");
             check(combat.CanRecall&&reward.IsCollected&&session.Progress.sunShards==1&&gate.IsOpen,"Progress retained after checkpoint respawn");
@@ -123,6 +126,10 @@ if(phase==8||phase==10){
         }else if(phase==12){
             check(combat.Weapon==null&&!combat.CanRecall&&!gate.IsOpen&&gateShadow.enabled&&gateShadow.color.a==1&&!reward.IsAvailable&&!session.Checkpoints.HasCheckpoint,"New run resets isolated progression and gate shadow");
             check(!lesson.IsComplete&&!melee.IsComplete&&Vector2.Distance(body.position,new Vector2(11.82f,36.92f))<.1f,"Lessons reset at home");
+            var bridge=session.Checkpoints.Fires.Single(f=>f.Id=="tutorial/bridge-fire");
+            move(bridge.SpawnPosition);check(interaction.TryInteract()&&bridge.IsDiscovered,"Real F lights the bridge fire");
+            check(interaction.TryInteract()&&interaction.IsOpen&&session.Progress.checkpointId==bridge.Id,"Second F rests at the bridge");interaction.Close();updateGuide();
+            check(!guide.IsDone("rest")&&guide.Steps[guide.HintIndex].id=="first-wolf","Bridge rest keeps the wolf, flask and stone teaching ahead");
         }else throw new Exception("All phases completed or unexpected phase "+phase);
     }
 }

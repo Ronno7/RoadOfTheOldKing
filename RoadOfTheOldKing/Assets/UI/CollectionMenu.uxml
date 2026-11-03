@@ -17,6 +17,10 @@
             <ui:VisualElement name="inventory-body">
                 <ui:VisualElement name="item-grid" />
                 <ui:Label name="item-name" />
+                <ui:VisualElement name="stats">
+                    <ui:Label name="stats-vitals" />
+                    <ui:Label name="stats-axe" />
+                </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement name="trade-body">
                 <ui:ScrollView name="entry-scroll" mode="Vertical" horizontal-scroller-visibility="Hidden"><ui:VisualElement name="entries" /></ui:ScrollView>

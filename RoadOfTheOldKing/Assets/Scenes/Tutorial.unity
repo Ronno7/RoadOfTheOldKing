@@ -323578,7 +323578,7 @@ MonoBehaviour:
     hint: 
     condition: 5
     amount: 1
-    milestone: 
+    milestone: tutorial/roadside-fire
     area: {x: 0, y: 0}
     radius: 4
     cueTarget: {fileID: 0}
@@ -398191,6 +398191,84 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0737e20ca30731b40a3299e4ad2cf3d8, type: 3}
+--- !u!1001 &2126525084
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 2144952346}
+    m_Modifications:
+    - target: {fileID: 552519079130167117, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: id
+      value: tutorial/bridge-fire
+      objectReference: {fileID: 0}
+    - target: {fileID: 552519079130167117, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: displayName
+      value: Bridge Bonfire
+      objectReference: {fileID: 0}
+    - target: {fileID: 552519079130167117, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: displayOrder
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1881476792191968801, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 72
+      objectReference: {fileID: 0}
+    - target: {fileID: 1881476792191968801, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 26.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1881476792191968801, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1881476792191968801, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1881476792191968801, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1881476792191968801, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1881476792191968801, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1881476792191968801, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1881476792191968801, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1881476792191968801, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4829341851063174414, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 8209990534844468561, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+      propertyPath: m_Name
+      value: Bridge Bonfire
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+--- !u!4 &2126525085 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1881476792191968801, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
+  m_PrefabInstance: {fileID: 2126525084}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2128737686
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -399562,6 +399640,7 @@ Transform:
   - {fileID: 9001000011}
   - {fileID: 257731886}
   - {fileID: 1899408425}
+  - {fileID: 2126525085}
   m_Father: {fileID: 2047353617}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2145942526

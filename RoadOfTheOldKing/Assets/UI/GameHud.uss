@@ -110,3 +110,5 @@ Label { margin: 0; padding: 0; -unity-font-style: normal; }
     font-size: 32px; -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKHeading16.asset");
 }
 #area-banner.landmark #area-rule { display: none; }
+/* The low-health flash, on the heartbeat. */
+.health-fill.health-low-beat { background-color: rgb(236, 96, 78); border-top-color: rgb(255, 176, 150); }

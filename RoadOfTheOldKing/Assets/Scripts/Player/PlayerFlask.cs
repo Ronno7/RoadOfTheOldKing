@@ -32,6 +32,7 @@ namespace RoadOfTheOldKing.Player
 
         public int Charges { get; private set; }
         public int MaxCharges => maxCharges;
+        public int HealAmount => healAmount;
         public bool IsDrinking { get; private set; }
         public float MoveScale => moveScale;
         public float HealAt => healAt;

@@ -9,7 +9,7 @@ namespace RoadOfTheOldKing.World
     // A named place, announced Dark Souls style when the player walks into it. Zones are plain world rectangles
     // (no colliders or physics contacts); where several contain the player, the smallest wins, so a landmark
     // inside a region names itself. Several components with the same name form one irregular place.
-    // The last announced name survives scene loads: respawning or arriving inside the same place stays quiet.
+    // Each name is announced once per playthrough, the first time the player walks into it; the save remembers.
     public sealed class AreaName : MonoBehaviour
     {
         [Tooltip("Shown to the player. Several zones may share a name.")]
@@ -20,12 +20,11 @@ namespace RoadOfTheOldKing.World
         [SerializeField] private bool landmark;
 
         private static readonly List<AreaName> zones = new List<AreaName>();
-        private static readonly Dictionary<string, float> shownAt = new Dictionary<string, float>();
+        private static readonly HashSet<string> seenWithoutSession = new HashSet<string>();
         private static string current;
         private static float nextCheck;
         private static PlayerHealth player;
-        // The same name only re-announces after this long, so pacing along a boundary stays quiet.
-        private const float RepeatDelay = 60f, CheckInterval = .2f;
+        private const float CheckInterval = .2f;
 
         public string DisplayName => displayName;
         public Rect Bounds => new Rect((Vector2)transform.position - size * .5f, size);
@@ -33,7 +32,7 @@ namespace RoadOfTheOldKing.World
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatics()
         {
-            zones.Clear(); shownAt.Clear(); current = null; nextCheck = 0f; player = null;
+            zones.Clear(); seenWithoutSession.Clear(); current = null; nextCheck = 0f; player = null;
         }
 
         private void OnEnable() => zones.Add(this);
@@ -52,9 +51,15 @@ namespace RoadOfTheOldKing.World
             string name = zone != null ? zone.displayName.Trim() : null;
             if (string.IsNullOrEmpty(name) || name == current) return;
             current = name;
-            if (shownAt.TryGetValue(name, out float last) && Time.unscaledTime - last < RepeatDelay) return;
-            shownAt[name] = Time.unscaledTime;
-            HudNotifications.ShowArea(name, zone.landmark);
+            if (FirstVisit(name, game)) HudNotifications.ShowArea(name, zone.landmark);
+        }
+
+        private static bool FirstVisit(string name, GameSession game)
+        {
+            if (game == null) return seenWithoutSession.Add(name);
+            if (!game.Progress.MarkAreaSeen(name)) return false;
+            game.SaveProgress();
+            return true;
         }
 
         private static AreaName Containing(Vector2 point)

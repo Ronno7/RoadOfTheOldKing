@@ -16,6 +16,9 @@
 - Drowned Hayfields: flooded fields and a barn south of the pasture, with a heart fragment.
 - Breakable bushes; two close the way into the Drowned Hayfields.
 - F4 Developer Tools can show collision and bring fallen bosses back.
+- Bridge Bonfire before the Tutorial's first wolf.
+- Inventory shows health, stamina, flask and axe damage numbers.
+- Health bar flashes with the heartbeat at low health.
 
 **Changed**
 - Wolves share one tuning
@@ -36,7 +39,9 @@
 - Enemies break off past their leash only once you've got away; a hit or getting close turns them back.
 - Enemies heal 10% of their health per second once out of the fight; the Broken Watcher is back at full health once it returns to its seat.
 - Scavengers chase further (16 units from home, was 10) and keep looking for you longer (3 s, was 2).
-- Tutorial hints skip lessons you've passed by the bridge, the Recall stone or a bonfire.
+- Tutorial hints skip lessons you've passed by the bridge, the Recall stone or the roadside bonfire.
+- Place names show once per save, the first time you enter.
+- Free look stays where you leave it until you move, then eases back (was recentring on release).
 
 **Fixed**
 - Invisible walls along the road into the Lowlands; the woods there are now thick trees.

@@ -462,13 +462,17 @@ namespace RoadOfTheOldKing.UI
             var health = player.Health;
             float ratio = health != null && health.MaxHealth > 0 ? (float)health.Health / health.MaxHealth : 1f;
             float pulse = 0f;
+            bool barBeat = false;
             if (alive && ratio < lowHealth)
             {
                 // Two beats per period, like a heartbeat, stronger as health falls.
                 float t = Mathf.Repeat(Time.unscaledTime / heartbeatPeriod, 1f);
                 float beat = Mathf.Max(Mathf.Exp(-Mathf.Pow((t - .1f) / .06f, 2f)), .7f * Mathf.Exp(-Mathf.Pow((t - .3f) / .06f, 2f)));
                 pulse = lowHealthPulse * (.5f + .5f * (1f - ratio / lowHealth)) * (.35f + .65f * beat);
+                barBeat = beat > .35f && FeedbackSettings.FlashScale > 0f;
             }
+            // The bar flashes on the same beat, in a hard step to its brighter red.
+            healthFill?.EnableInClassList("health-low-beat", barBeat);
             float opacity = Mathf.Max(hurtAmount * hurtAmount * hurtFlash, pulse) * Mathf.Clamp01(FeedbackSettings.FlashScale);
             vignette.style.opacity = opacity;
         }

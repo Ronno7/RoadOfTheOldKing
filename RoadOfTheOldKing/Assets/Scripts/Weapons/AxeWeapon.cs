@@ -52,6 +52,7 @@ namespace RoadOfTheOldKing.Weapons
         }
 
         public AxeSettings Settings => settings;
+        public int FinisherDamage => Mathf.RoundToInt(settings.finisherDamage * finisherDamageMultiplier);
         public AxeState State { get; private set; } = AxeState.OnGround;
         public PlayerCombatController Owner => owner;
         public Vector2 AimDirection { get; private set; } = Vector2.right;

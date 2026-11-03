@@ -17,6 +17,8 @@ namespace RoadOfTheOldKing.Progression
         public string scenePath = "";
         public List<FireRecord> fires = new List<FireRecord>();
         public List<string> completedIds = new List<string>();
+        // Place names already announced. Separate from completedIds, which decide whether there's a save to continue.
+        public List<string> seenAreas = new List<string>();
         public int sunShards;
         public int bronzeCoins;
         public List<WorldTool> ownedTools = new List<WorldTool>();
@@ -27,6 +29,13 @@ namespace RoadOfTheOldKing.Progression
         public CoinSourceRecord FindCoinSource(string id) => string.IsNullOrEmpty(id) ? null : coinSources.Find(s => s.id == id);
 
         public bool Has(string id) => !string.IsNullOrEmpty(id) && completedIds.Contains(id);
+        public bool MarkAreaSeen(string name)
+        {
+            if (seenAreas == null) seenAreas = new List<string>();
+            if (seenAreas.Contains(name)) return false;
+            seenAreas.Add(name);
+            return true;
+        }
         public void Complete(string id)
         {
             if (!string.IsNullOrEmpty(id) && !completedIds.Contains(id))
