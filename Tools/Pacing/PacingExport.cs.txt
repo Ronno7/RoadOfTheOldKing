@@ -28,12 +28,19 @@ foreach (var mb in UnityEngine.Object.FindObjectsByType<MonoBehaviour>(FindObjec
         string extra = ",\"brain\":" + Q(t) + ",\"hp\":" + (hp != null ? F(hp.MaxHealth) : "0") +
             ",\"notice\":" + F(S("noticeRadius")) + ",\"leash\":" + F(S("leashRadius")) + ",\"moveSpeed\":" + F(S("moveSpeed")) +
             ",\"damage\":" + I("damage") + ",\"windup\":" + F(S("windupDuration")) + ",\"recovery\":" + F(S("recoveryDuration")) +
-            ",\"snapDamage\":" + I("snapDamage") + ",\"lungeDamage\":" + I("lungeDamage") + ",\"stalkFor\":" + F(S("stalkFor"));
-        var atk = so.FindProperty("attack");
-        if (atk != null && atk.objectReferenceValue != null)
+            ",\"snapDamage\":" + I("snapDamage") + ",\"lungeDamage\":" + I("lungeDamage") + ",\"cooldown\":" + F(S("attackCooldown")) +
+            ",\"jitter\":" + F(S("cooldownJitter")) + ",\"lungeDuration\":" + F(S("lungeDuration")) + ",\"lungeRecovery\":" + F(S("lungeRecovery"));
+        foreach (var range in new[] { "lungeWindup", "stalkTime" })
         {
+            var pr = so.FindProperty(range);
+            if (pr != null) extra += ",\"" + range + "\":" + V(pr.vector2Value);
+        }
+        foreach (var slot in new[] { "attack", "closeAttack" })
+        {
+            var atk = so.FindProperty(slot);
+            if (atk == null || atk.objectReferenceValue == null) continue;
             var spec = new SerializedObject(atk.objectReferenceValue).FindProperty("settings");
-            extra += ",\"attack\":{\"windup\":" + F(spec.FindPropertyRelative("windup").floatValue) + ",\"active\":" + F(spec.FindPropertyRelative("active").floatValue) +
+            extra += ",\"" + slot + "\":{\"windup\":" + F(spec.FindPropertyRelative("windup").floatValue) + ",\"active\":" + F(spec.FindPropertyRelative("active").floatValue) +
                 ",\"recovery\":" + F(spec.FindPropertyRelative("recovery").floatValue) + ",\"damage\":" + spec.FindPropertyRelative("damage").intValue +
                 ",\"chargeSpeed\":" + F(spec.FindPropertyRelative("chargeSpeed").floatValue) + "}";
         }
@@ -73,7 +80,8 @@ foreach (var t in UnityEngine.Object.FindObjectsByType<UnityEngine.Tilemaps.Tile
 { if (t.gameObject.scene != scene) continue; if (first) { bounds = t.bounds; first = false; } else bounds.Encapsulate(t.bounds); }
 float cell = .5f; int w = Mathf.CeilToInt(bounds.size.x / cell), h = Mathf.CeilToInt(bounds.size.y / cell);
 var filter = new ContactFilter2D { useTriggers = false, useLayerMask = true, layerMask = mask };
-// Story gates the player passes once the story opens them: sample with their colliders off, restore right after.
+// Story gates the player passes once the story opens them, and breakables they can chop through: sample with their
+// colliders off, restore right after.
 var opened = new HashSet<Collider2D>();
 var grid = new System.Text.StringBuilder(w * h);
 try
@@ -83,7 +91,7 @@ try
         if (mb == null || mb.gameObject.scene != scene) continue;
         string tn = mb.GetType().Name;
         IEnumerable<Collider2D> candidates;
-        if (tn == "RecallSealGate") candidates = mb.GetComponentsInChildren<Collider2D>();
+        if (tn == "RecallSealGate" || tn == "Breakable") candidates = mb.GetComponentsInChildren<Collider2D>();
         else if (tn == "PermanentPassage" || tn == "RecallRelease")
         {
             // Only the closed obstruction disappears; receivers, rails and fixed posts remain solid.

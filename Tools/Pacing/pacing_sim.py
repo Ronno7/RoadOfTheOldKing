@@ -5,8 +5,8 @@ Output: per-tier timelines (JSON) and charts (PNG) for DeveloperNotes/PacingDesi
 
 This is a model, not a playtest. Every assumption lives in TIERS / ENEMY / BEAT_TIME below so it can be tuned
 against human playtests and opt-in data (#75). Usage:
-    python pacing_sim.py <export dir> <out dir> [route set: before|after|built]
-    python pacing_sim.py compare <out dir> [a=before] [b=after]
+    python pacing_sim.py <export dir> <out dir> [route set: built|built_curious|built_hayfields]
+    python pacing_sim.py compare <out dir> <route set a> <route set b>
 """
 import heapq
 import json
@@ -25,13 +25,15 @@ TIERS = {
     "learning":  dict(route_factor=1.15, sprint_share=0.3, dmg_per_opening=20, sweep=3, p_hit=0.25, drink_below=50, lesson=1.0, puzzle=1.0),
     "confident": dict(route_factor=1.00, sprint_share=0.7, dmg_per_opening=40, sweep=3, p_hit=0.10, drink_below=35, lesson=0.6, puzzle=0.5),
 }
-# --- Enemy timing: seconds per attack cycle (approach/stalk + windup + active + recovery), damage per landed attack.
+# --- Enemy timing comes from the export's real tuning (enemy_profile); these only stand in if an export lacks it.
 ENEMY = {
-    "wolf":      dict(cycle=3.0, dmg=None),   # dmg from export: mean of snap/lunge
+    "wolf":      dict(cycle=3.0, dmg=12),
     "scavenger": dict(cycle=2.6, dmg=18),
     "boar":      dict(cycle=4.0, dmg=24),
-    "rat":       dict(cycle=1.8, dmg=5, hp=20),
+    "rat":       dict(cycle=2.0, dmg=6, hp=20),
+    "guardian":  dict(cycle=3.0, dmg=34),
 }
+APPROACH = 0.4  # seconds to close back in between one attack ending and the next windup starting
 # Seconds for non-combat beats at the "learning" tier (scaled by lesson/puzzle factors).
 BEAT_TIME = {"pickup": 3, "lesson": 10, "awaken": 8, "light_rest": 10, "trader": 20, "puzzle": 240, "upgrade": 25, "look": 4}
 
@@ -97,16 +99,29 @@ class Grid:
         return None
 
 # --- Encounter model ---------------------------------------------------------------------------------------------
+def attack_seconds(a):
+    """One attack start to finish. A charge rarely runs its full length before it lands or hits something."""
+    return a["windup"] + a["active"] * (0.5 if a.get("chargeSpeed", 0) > 0 else 1) + a["recovery"]
+
+
 def enemy_profile(e):
+    """One attack cycle and its damage, from the enemy's real tuning. Main and close attacks count evenly."""
     name = e["name"].lower()
     if "rat" in name: kind = "rat"
     elif "boar" in name: kind = "boar"
+    elif "watcher" in name: kind = "guardian"
     elif e.get("brain") == "PredatorBrain": kind = "wolf"
     else: kind = "scavenger"
     p = dict(ENEMY[kind]); p["kind"] = kind
     p["hp"] = e.get("hp") or p.get("hp", 50)
-    if kind == "wolf": p["dmg"] = (e["snapDamage"] + e["lungeDamage"]) / 2
-    p["tokened"] = kind == "wolf"     # wolves share one attack token; pursuit enemies attack independently today
+    attacks = [a for a in (e.get("attack"), e.get("closeAttack")) if a]
+    if kind == "wolf":
+        p["dmg"] = (e["snapDamage"] + e["lungeDamage"]) / 2
+        if "lungeWindup" in e:
+            p["cycle"] = sum(e["lungeWindup"]) / 2 + e["lungeDuration"] + e["lungeRecovery"] + sum(e["stalkTime"]) / 2
+    elif attacks:
+        p["dmg"] = sum(a["damage"] for a in attacks) / len(attacks)
+        p["cycle"] = sum(attack_seconds(a) for a in attacks) / len(attacks) + max(0, e.get("cooldown", 0)) + max(0, e.get("jitter", 0)) / 2 + APPROACH
     return p
 
 MAX_FAILED_ATTEMPTS = 2  # one replay; deterministic repeated failure is reported as incomplete
@@ -118,9 +133,11 @@ def fight(group, tier, hp, flasks, t=None):
     """Expected values, not a random roll. Returns (duration, net damage, attacker counts, flasks left, drinks, died)."""
     t = t or TIERS[tier]; alive = [dict(g) for g in group]; dur = 0.0; taken = 0.0; pressure = []; drinks = 0; cur = hp
     while alive:
-        attackers = 1 if all(a["tokened"] for a in alive) else sum(1 for a in alive if not a["tokened"]) + (1 if any(a["tokened"] for a in alive) else 0)
+        # No shared attack turn: all of them attack on their own rhythm, unless the player pulled them apart.
+        attackers = 1 if t.get("pulled") else len(alive)
         cycle = max(a["cycle"] for a in alive)
-        incoming = sum(a["dmg"] for a in sorted(alive, key=lambda a: -a["dmg"])[:attackers]) * t["p_hit"]
+        rates = sorted((a["dmg"] * cycle / a["cycle"] for a in alive), reverse=True)
+        incoming = sum(rates[:attackers]) * t["p_hit"]
         dur += cycle; taken += incoming; cur -= incoming; pressure += [attackers] * int(round(cycle))
         if cur <= 0: return dur, taken, pressure, flasks, drinks, True
         if cur < MID_FIGHT_DRINK and flasks > 0:
@@ -204,13 +221,9 @@ def simulate_journey(exports, legs, tier, state):
             continue
         if k == "fight":
             group = [enemy_profile(enemies[scene][n]) for n in beat.get("enemies", [])]
-            group += [dict(ENEMY["rat"], kind="rat", tokened=False) for _ in range(beat.get("rats", 0))]
-            group += [dict(dict(cycle=3.0, dmg=20, hp=60), **e, tokened=False) for e in beat.get("synthetic", [])]
-            if beat.get("coordinated"):
-                for g in group:
-                    g["tokened"] = True
-            # A guardian's generous opening belongs to that encounter, never later fights.
-            fight_tier = dict(t, dmg_per_opening=t["dmg_per_opening"] * beat.get("opening_scale", 1))
+            group += [dict(dict(cycle=3.0, dmg=20, hp=60), **e) for e in beat.get("synthetic", [])]
+            # "pulled" lists the tiers that split a group and fight it one at a time, as its placement allows.
+            fight_tier = dict(t, dmg_per_opening=t["dmg_per_opening"] * beat.get("opening_scale", 1), pulled=tier in beat.get("pulled", []))
             attempts[index] = attempts.get(index, 0) + 1
             dur, taken, pressure, flasks, drinks, died = fight(group, tier, hp, flasks, fight_tier)
             peak = max(pressure) if pressure else 1
@@ -314,7 +327,7 @@ def chart(path, title, runs):
             x = L + m * sx; d.line([x, top + 172, x, top + 178], fill=(80, 80, 80)); d.text((x - 8, top + 180), f"{m // 60}m", fill=(80, 80, 80))
     img.save(path)
 
-def compare(out, a="before", b="after"):
+def compare(out, a, b):
     """One chart per tier: variant a above variant b, same time scale."""
     ra = json.loads((out / f"pacing_{a}.json").read_text(encoding="utf8")); rb = json.loads((out / f"pacing_{b}.json").read_text(encoding="utf8"))
     for tier in TIERS:
@@ -324,7 +337,7 @@ def compare(out, a="before", b="after"):
 if __name__ == "__main__":
     if sys.argv[1] == "compare":
         compare(Path(sys.argv[2]), *sys.argv[3:5]); sys.exit()
-    src, out = Path(sys.argv[1]), Path(sys.argv[2]); variant = sys.argv[3] if len(sys.argv) > 3 else "before"
+    src, out = Path(sys.argv[1]), Path(sys.argv[2]); variant = sys.argv[3] if len(sys.argv) > 3 else "built"
     routes = json.loads((Path(__file__).with_name("routes.json")).read_text(encoding="utf8"))[variant]
     exports = {sc: json.loads((src / f"pacing_{sc}.json").read_text(encoding="utf8")) for sc in {r["scene"] for r in routes}}
     results = {}

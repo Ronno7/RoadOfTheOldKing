@@ -74,6 +74,18 @@ class PacingTests(unittest.TestCase):
         self.assertEqual([(s["leg"], s["distance"]) for s in tl if s["kind"] == "travel" and s["retry"]], [("Tutorial", 5), ("Lowlands", 7)])
         self.assertEqual(sum(s["kind"] == "exit" for s in tl), 1)
 
+    def test_group_attacks_together_unless_pulled(self):
+        pair = [dict(kind="wolf", hp=20, cycle=2, dmg=10), dict(kind="wolf", hp=20, cycle=2, dmg=10)]
+        together = sim.fight(pair, "learning", 100, 3)[1]
+        pulled = sim.fight(pair, "learning", 100, 3, dict(sim.TIERS["learning"], pulled=True))[1]
+        self.assertGreater(together, pulled)
+
+    def test_profile_reads_real_tuning(self):
+        attack = dict(windup=1, active=.2, recovery=1, damage=30, chargeSpeed=0)
+        profile = sim.enemy_profile(dict(name="Road Scavenger", brain="PursuitBrain", hp=75, attack=attack, cooldown=.5, jitter=.2))
+        self.assertAlmostEqual(profile["cycle"], 2.2 + .5 + .1 + sim.APPROACH)
+        self.assertEqual((profile["dmg"], profile["hp"]), (30, 75))
+
     def test_opening_scale_does_not_leak_to_next_encounter(self):
         with patch.object(sim, "fight", return_value=(2, 0, [1], 3, 0, False)) as fight:
             self.run_route([encounter("guardian", 0, opening_scale=1.5), encounter("later", 2)])
