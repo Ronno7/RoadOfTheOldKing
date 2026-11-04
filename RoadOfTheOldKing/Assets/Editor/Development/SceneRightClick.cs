@@ -59,19 +59,27 @@ namespace RoadOfTheOldKing.EditorTools
             return view != null ? (Vector2)view.pivot : Vector2.zero;
         }
 
+        public enum PlayStart { Fresh, WatcherDead, BasinDrained }
+
         [MenuItem(Items + "Play from here", false, Priority)]
-        private static void PlayHere(MenuCommand command) => PlayFrom(ClickedSpot(), false);
+        private static void PlayHere(MenuCommand command) => PlayFrom(ClickedSpot(), PlayStart.Fresh);
 
         [MenuItem(Items + "Play from here", true)]
         private static bool CanPlayHere(MenuCommand command) => !EditorApplication.isPlaying && Find<GameSession>() != null;
 
-        [MenuItem(Items + "Play from here, basin drained", false, Priority + 1)]
-        private static void PlayHereDrained(MenuCommand command) => PlayFrom(ClickedSpot(), true);
+        [MenuItem(Items + "Play from here, Watcher dead", false, Priority + 1)]
+        private static void PlayHereWatcherDead(MenuCommand command) => PlayFrom(ClickedSpot(), PlayStart.WatcherDead);
+
+        [MenuItem(Items + "Play from here, Watcher dead", true)]
+        private static bool CanPlayHereWatcherDead(MenuCommand command) => CanPlayHereDrained(command);
+
+        [MenuItem(Items + "Play from here, basin drained", false, Priority + 2)]
+        private static void PlayHereDrained(MenuCommand command) => PlayFrom(ClickedSpot(), PlayStart.BasinDrained);
 
         [MenuItem(Items + "Play from here, basin drained", true)]
         private static bool CanPlayHereDrained(MenuCommand command) => CanPlayHere(command) && Find<RecallSluice>() != null;
 
-        [MenuItem(Items + "What's on this cell", false, Priority + 2)]
+        [MenuItem(Items + "What's on this cell", false, Priority + 3)]
         private static void ShowCell(MenuCommand command)
         {
             cellMenuPending = true;
@@ -143,19 +151,25 @@ namespace RoadOfTheOldKing.EditorTools
 
         private static T Find<T>() where T : Object => Object.FindFirstObjectByType<T>(FindObjectsInactive.Include);
 
-        // Copies the real save if there is one, so progress matches, and always has the axe and Recall.
-        public static void PlayFrom(Vector2 spot, bool drained)
+        // Always a new save holding only the axe and Recall. The real save is never read, so nothing already done
+        // carries over: the Watcher is alive and the basin full unless a start asks otherwise.
+        public static void PlayFrom(Vector2 spot, PlayStart start)
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode) return;
             var session = Find<GameSession>();
             if (session == null) { Debug.LogWarning("Play from here needs a game session in the open scene."); return; }
             ClearSave();
-            string real = new SerializedObject(session).FindProperty("saveKey").stringValue;
-            if (PlayerPrefs.HasKey(real)) PlayerPrefs.SetString(DevPlayFromHere.SaveKey, PlayerPrefs.GetString(real));
             var store = new PlayerPrefsProgressStore(DevPlayFromHere.SaveKey);
             var progress = store.Load();
             progress.hasAxe = progress.recallUnlocked = true;
-            if (drained) progress.Complete(Find<RecallSluice>().LowWaterId);
+            var sluice = Find<RecallSluice>();
+            if (start != PlayStart.Fresh && sluice != null)
+            {
+                // A recorded defeat is what keeps the Watcher down and frees the sluice's controls.
+                var guardian = new SerializedObject(sluice).FindProperty("guardian").objectReferenceValue as EncounterUnlock;
+                if (guardian != null) progress.Complete(guardian.Milestone);
+                if (start == PlayStart.BasinDrained) progress.Complete(sluice.LowWaterId);
+            }
             store.Save(progress);
             PlayerPrefs.Save();
             DevPlayFromHere.Arm(spot);

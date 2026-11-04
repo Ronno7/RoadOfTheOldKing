@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace RoadOfTheOldKing.Progression
 {
-    // The Scene view's "Play from here": one Play session on a throwaway save, starting at a chosen spot. The real save
-    // is only read, to copy it. SessionState survives the domain reload on entering Play and ends with the editor.
+    // The Scene view's "Play from here": one Play session on a new throwaway save, starting at a chosen spot. The real
+    // save is never read or written. SessionState survives the domain reload on entering Play and ends with the editor.
     public static class DevPlayFromHere
     {
         public const string SaveKey = "RoadOfTheOldKing.PlayFromHere";
