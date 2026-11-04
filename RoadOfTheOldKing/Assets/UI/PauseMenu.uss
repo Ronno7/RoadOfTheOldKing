@@ -3,3 +3,17 @@
 
 /* Reserve two lines so hover and keyboard selection never resize the panel. */
 #pause-panel #description { height: 40px; min-height: 40px; max-height: 40px; flex-shrink: 0; -unity-text-align: middle-center; }
+
+/* Controls page: a wider panel with two blocks of action, keys and pad, and Back underneath. */
+#pause-panel.controls-open { width: 744px; }
+#pause-panel.controls-open #description { display: none; }
+#pause-panel.controls-open #actions { width: 160px; align-self: center; margin: 12px 0 0 0; }
+.controls-table { display: none; flex-direction: row; justify-content: space-between; flex-shrink: 0; }
+#pause-panel.controls-open .controls-table { display: flex; }
+.controls-block { width: 332px; }
+.controls-row { flex-direction: row; align-items: center; height: 24px; }
+.controls-heading { margin-top: 4px; }
+.controls-heading .controls-action { color: var(--kit-gold); }
+.controls-action { flex-grow: 1; color: var(--kit-text); }
+.controls-keys, .controls-pad { width: 76px; color: var(--kit-muted); -unity-text-align: middle-center; }
+.using-keyboard .controls-keys, .using-gamepad .controls-pad { color: var(--kit-gold); }

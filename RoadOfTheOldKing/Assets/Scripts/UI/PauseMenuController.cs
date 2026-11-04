@@ -17,10 +17,11 @@ namespace RoadOfTheOldKing.UI
         private PlayerHealth health;
         private PlayerControlLocks locks;
         private PlayerDash dash;
+        private PlayerCombatController combat;
         private IDisposable pause;
         private IReadOnlyList<PauseMenuAction> actions;
         private Coroutine restoring;
-        private bool customActions, inSettings;
+        private bool customActions, inSettings, inControls;
         public bool IsOpen => pause != null;
         public bool BlocksGameplay => IsOpen || restoring != null;
 
@@ -28,9 +29,11 @@ namespace RoadOfTheOldKing.UI
         {
             input = GetComponent<PauseMenuInput>(); view = GetComponent<PauseMenuView>();
             health = GetComponent<PlayerHealth>(); locks = GetComponent<PlayerControlLocks>();
-            dash = GetComponent<PlayerDash>();
-            actions = PauseMenuCommands.CreateDefault(() => ShowSettings(0));
+            dash = GetComponent<PlayerDash>(); combat = GetComponent<PlayerCombatController>();
+            actions = MainActions();
         }
+
+        private PauseMenuAction[] MainActions() => PauseMenuCommands.CreateDefault(() => ShowSettings(0), ShowControls);
 
         private void OnEnable()
         {
@@ -64,8 +67,8 @@ namespace RoadOfTheOldKing.UI
         {
             if (!isActiveAndEnabled || BlocksGameplay || health == null || !health.IsAlive || MenuStack.IsAnyOpen) return false;
             // Rebuilt per open so setting toggles show their current state.
-            if (!customActions) actions = PauseMenuCommands.CreateDefault(() => ShowSettings(0));
-            inSettings = false;
+            if (!customActions) actions = MainActions();
+            inSettings = inControls = false;
             if (!view.Show(actions, Execute)) return false;
             if (locks != null) locks.Lock(this);
             if (dash != null) dash.Cancel();
@@ -90,17 +93,25 @@ namespace RoadOfTheOldKing.UI
         public void Back()
         {
             if (inSettings) ShowMain(SettingsRow);
+            else if (inControls) ShowMain(ControlsRow);
             else Close();
         }
 
-        // Settings is the second entry of the default list; Back from its page returns there.
-        private const int SettingsRow = 1;
+        // Their rows in the default list; Back from either page returns there.
+        private const int ControlsRow = 1, SettingsRow = 2;
 
         private void ShowMain(int selected)
         {
-            inSettings = false;
-            if (!customActions) actions = PauseMenuCommands.CreateDefault(() => ShowSettings(0));
+            inSettings = inControls = false;
+            if (!customActions) actions = MainActions();
             view.Show(actions, Execute, selected);
+        }
+
+        private void ShowControls()
+        {
+            inControls = true;
+            actions = new[] { new PauseMenuAction("Back", "", () => ShowMain(ControlsRow), closeOnExecute: false) };
+            view.ShowControls(actions, Execute, combat != null && combat.CanRecall);
         }
 
         // Rebuilt per show so toggles name their current state.

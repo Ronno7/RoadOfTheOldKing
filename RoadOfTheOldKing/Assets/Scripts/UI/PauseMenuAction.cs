@@ -23,9 +23,10 @@ namespace RoadOfTheOldKing.UI
     {
         // New Game lives on the title screen; settings have their own page (user, 4 Oct). Resume replaced
         // Return to bonfire (user, 17 Oct): death is the way back to the last rest.
-        public static PauseMenuAction[] CreateDefault(Action openSettings = null) => new[]
+        public static PauseMenuAction[] CreateDefault(Action openSettings = null, Action openControls = null) => new[]
         {
             new PauseMenuAction("Resume", "Back to the road.", null),
+            new PauseMenuAction("Controls", "Keyboard and controller.", openControls, openControls != null, closeOnExecute: false),
             new PauseMenuAction("Settings", "Display and HUD options.", openSettings, openSettings != null, closeOnExecute: false),
             new PauseMenuAction("Main Menu", "Save and return to the title.\nContinue resumes here.",
                 () => GameSession.Instance?.ReturnToTitle(), GameSession.Instance != null && GameSession.Instance.CanReturnToTitle),

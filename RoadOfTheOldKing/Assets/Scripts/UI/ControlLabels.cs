@@ -16,12 +16,14 @@ namespace RoadOfTheOldKing.UI
             { "move", "WASD" }, { "sprint", "Shift" }, { "dash", "Space" }, { "interact", "F" },
             { "attack", "LMB" }, { "cleave", "RMB" }, { "throw", "E" },
             { "recall", "E" }, { "pause", "Esc" }, { "status", "Tab" }, { "look", "Alt" }, { "heal", "Q" },
+            { "aim", "Mouse" }, { "zoom", "Wheel" }, { "select", "Enter" }, { "back", "Esc" },
         };
         private static readonly Dictionary<string, string> gamepad = new Dictionary<string, string>
         {
             { "move", "LS" }, { "sprint", "L3" }, { "dash", "B" }, { "interact", "A" },
             { "attack", "RB" }, { "cleave", "RT" }, { "throw", "LT" },
             { "recall", "LT" }, { "pause", "Start" }, { "status", "View" }, { "look", "LB + RS" }, { "heal", "X" },
+            { "aim", "RS" }, { "zoom", "D-pad" }, { "select", "A" }, { "back", "B" },
         };
         private static readonly List<(Label label, string keys, string pad)> bound = new List<(Label, string, string)>();
         private static bool subscribed;
@@ -30,6 +32,10 @@ namespace RoadOfTheOldKing.UI
 
         public static string Get(string token) => Active.TryGetValue(token, out var label) ? label : token;
         public static void Set(string token, string label) => Active[token] = label;
+
+        // Both devices at once, for the controls page.
+        public static string KeyboardLabel(string token) => keyboard.TryGetValue(token, out var label) ? label : token;
+        public static string GamepadLabel(string token) => gamepad.TryGetValue(token, out var label) ? label : token;
 
         // Plain menu hint lines (user rule, 4 Oct: key names stay out of buttons) for each device.
         public static string Pick(string keyboardText, string gamepadText) => ActiveInput.UsingGamepad ? gamepadText : keyboardText;

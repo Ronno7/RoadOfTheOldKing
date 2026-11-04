@@ -1,5 +1,5 @@
 // Pause menu lifecycle (rewritten 21 Oct for MenuStack, owner-scoped control/pause leases and the current
-// Resume/Settings/Main Menu/Quit list). Empty, unsaved Play Mode scene without a GameSession; run through FixtureRunner
+// Resume/Controls/Settings/Main Menu/Quit list). Empty, unsaved Play Mode scene without a GameSession; run through FixtureRunner
 // (Runner.Skip 0). Synchronous: the closing-frame shield is completed by running the menu's own UnlockNextFrame
 // enumerator in place of the next frame. Commands are injected where executing them would save, load or quit.
 if (!Application.isPlaying || RoadOfTheOldKing.Progression.GameSession.Instance != null || RoadOfTheOldKing.UI.MenuStack.IsAnyOpen ||
@@ -31,10 +31,10 @@ try {
     int resumes=0,quits=0;
     var actions=new[]{new RoadOfTheOldKing.UI.PauseMenuAction("Resume","Back",()=>resumes++),new RoadOfTheOldKing.UI.PauseMenuAction("Quit","Leave",()=>quits++)};
 
-    // Default list: Resume, Settings, Main Menu, Quit. Without a session Main Menu is unavailable.
-    var defaults=RoadOfTheOldKing.UI.PauseMenuCommands.CreateDefault(()=>{});
-    check(defaults.Length==4&&defaults[0].Label=="Resume"&&defaults[1].Label=="Settings"&&defaults[2].Label=="Main Menu"&&defaults[3].Label=="Quit","Default list is Resume, Settings, Main Menu, Quit");
-    check(defaults[0].CloseOnExecute&&!defaults[1].CloseOnExecute&&!defaults[2].Enabled,"Resume closes, Settings pages, Main Menu disabled without a session");
+    // Default list: Resume, Controls, Settings, Main Menu, Quit. Without a session Main Menu is unavailable.
+    var defaults=RoadOfTheOldKing.UI.PauseMenuCommands.CreateDefault(()=>{},()=>{});
+    check(defaults.Length==5&&defaults[0].Label=="Resume"&&defaults[1].Label=="Controls"&&defaults[2].Label=="Settings"&&defaults[3].Label=="Main Menu"&&defaults[4].Label=="Quit","Default list is Resume, Controls, Settings, Main Menu, Quit");
+    check(defaults[0].CloseOnExecute&&!defaults[1].CloseOnExecute&&!defaults[2].CloseOnExecute&&!defaults[3].Enabled,"Resume closes, Controls and Settings page, Main Menu disabled without a session");
 
     // Open: one modal, one pause lease, one control lease owned by the menu.
     check(!menu.IsOpen&&!view.IsVisible&&!locks.IsLocked,"Menu starts hidden with no leases");
@@ -72,10 +72,29 @@ try {
     menu.Toggle();check(!menu.IsOpen,"Escape closes the open pause");nextFrame();
 
     // Settings paging with the default list: Back returns to the main page on the Settings row, then closes.
-    menu.Open();menu.Navigate(1);menu.Submit();
+    menu.Open();menu.Navigate(2);menu.Submit();
     check(menu.IsOpen&&(bool)menu.GetType().GetField("inSettings",flags).GetValue(menu),"Settings opens a page without closing");
     menu.Back();check(menu.IsOpen&&!(bool)menu.GetType().GetField("inSettings",flags).GetValue(menu),"Back from Settings returns to the main page");
     menu.Back();check(!menu.IsOpen,"Back on the main page closes");nextFrame();
+
+    // Controls page: lists both devices from ControlLabels, returns by Back or its own row, and hides again on the main page.
+    Func<UnityEngine.UIElements.VisualElement,string,UnityEngine.UIElements.VisualElement> find=(e,n)=>UnityEngine.UIElements.UQueryExtensions.Q(e,n,(string)null);
+    Func<UnityEngine.UIElements.VisualElement> pageRoot=()=>root.GetComponentsInChildren<UnityEngine.UIElements.UIDocument>(true).First(d=>find(d.rootVisualElement,"pause-panel")!=null).rootVisualElement;
+    var inControls=menu.GetType().GetField("inControls",flags);
+    menu.Open();menu.Navigate(1);menu.Submit();
+    check(menu.IsOpen&&(bool)inControls.GetValue(menu),"Controls opens a page without closing");
+    var page=pageRoot();
+    check(find(page,"pause-panel").ClassListContains("controls-open")&&((UnityEngine.UIElements.Label)find(page,"heading")).text=="CONTROLS","The page shows the table under its own heading");
+    Func<string,List<string>> cells=c=>UnityEngine.UIElements.UQueryExtensions.Query<UnityEngine.UIElements.Label>(find(page,"controls"),(string)null,c).ToList().Select(l=>l.text).Where(t=>t!="").ToList();
+    var names=cells("controls-action");var keys=cells("controls-keys");var pads=cells("controls-pad");
+    foreach(var row in new[]{"Move","Sprint","Dodge","Light attack","Charged cleave","Throw","Aim","Drink flask","Interact","Inventory","Look around","Zoom","Pause","Select","Back"})check(names.Contains(row),"Lists "+row);
+    check(keys.Contains(RoadOfTheOldKing.UI.ControlLabels.KeyboardLabel("dash"))&&pads.Contains(RoadOfTheOldKing.UI.ControlLabels.GamepadLabel("dash"))&&keys.Contains("Space")&&pads.Contains("B"),"Dodge reads Space and B from ControlLabels");
+    check(keys.Count==pads.Count&&keys.Count==17,"All 15 rows have a key and a pad name, plus each block's column title");
+    check(!names.Contains("Throw, Recall"),"Recall stays unnamed until it's earned");
+    menu.Back();check(menu.IsOpen&&!(bool)inControls.GetValue(menu)&&!find(pageRoot(),"pause-panel").ClassListContains("controls-open"),"Back returns to the main page and drops the table");
+    menu.Submit();check((bool)inControls.GetValue(menu),"Back left the selection on the Controls row");
+    menu.Submit();check(menu.IsOpen&&!(bool)inControls.GetValue(menu),"The page's own Back row returns too");
+    menu.Back();check(!menu.IsOpen,"The main page still closes");nextFrame();
 
     // Injected commands: dispatch once; disabled commands are inert.
     menu.ConfigureActions(actions);
