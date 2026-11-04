@@ -122,9 +122,7 @@ namespace RoadOfTheOldKing.Enemies
         private EnemyActionRunner action;
         private PredatorAttackAction attackAction;
         public EnemyActionRunner Action => action;
-        private PlayerCombatController combat;
-        private PlayerStamina stamina;
-        private PlayerFlask flask;
+        private readonly PlayerRead read = new PlayerRead();
         private Vector2 previousPosition, repositionPoint, evadeDirection;
         private float elapsed, duration, stalkFor, blockedTime, actualSpeed, evadeReadyAt;
         private int circleSign = 1;
@@ -162,45 +160,12 @@ namespace RoadOfTheOldKing.Enemies
         public int ResetVersion { get; private set; }
         public event Action PlayerDetected;
 
-        private AxeWeapon PlayerWeapon =>combat != null ? combat.Weapon : null;
-
-        // A swing that can still hit: light windup/active, charging or cleaving.
-        private bool PlayerSwinging
-        {
-            get
-            {
-                var w = PlayerWeapon;
-                return w != null && ((w.State == AxeState.LightChop && w.LightPhase != MeleePhase.Recovery) ||
-                    w.State == AxeState.Charging || w.State == AxeState.Cleaving);
-            }
-        }
-
-        // A blow actually coming: a light chop or a released cleave. Holding a charge is not one, so
-        // evasion keys on the release rather than the charge start (playtest, 22 Oct).
-        private bool PlayerStriking
-        {
-            get
-            {
-                var w = PlayerWeapon;
-                return w != null && ((w.State == AxeState.LightChop && w.LightPhase != MeleePhase.Recovery) ||
-                    w.State == AxeState.Cleaving);
-            }
-        }
-
-        // Committed and unable to swing back: attack recovery, a throw being released, or the axe away.
-        private bool PlayerExposed
-        {
-            get
-            {
-                var w = PlayerWeapon;
-                if (combat == null) return false;
-                return w == null || w.IsAway || w.IsCatching || (flask != null && flask.IsDrinking) || (w.State == AxeState.LightChop && w.LightPhase == MeleePhase.Recovery) ||
-                    (w.IsThrowing && !w.CanCancelThrowAim);
-            }
-        }
-
-        private bool PlayerTired => stamina != null && stamina.Current < tiredStamina;
-        private bool PlayerAxeAway => PlayerWeapon != null && PlayerWeapon.IsAway;
+        private AxeWeapon PlayerWeapon => read.Weapon;
+        private bool PlayerSwinging => read.Swinging;
+        private bool PlayerStriking => read.Striking;
+        private bool PlayerExposed => read.Exposed;
+        private bool PlayerTired => read.StaminaBelow(tiredStamina);
+        private bool PlayerAxeAway => read.AxeAway;
 
         private float PlayerThreatRange
         {
@@ -224,12 +189,7 @@ namespace RoadOfTheOldKing.Enemies
         {
             if (target == null)
                 target = FindFirstObjectByType<PlayerHealth>();
-            if (target != null)
-            {
-                combat = target.GetComponent<PlayerCombatController>();
-                stamina = target.GetComponent<PlayerStamina>();
-                flask = target.GetComponent<PlayerFlask>();
-            }
+            read.Bind(target);
         }
 
         private void OnEnable()

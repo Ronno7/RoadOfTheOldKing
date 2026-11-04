@@ -539,6 +539,14 @@ MonoBehaviour:
   holdDistance: 0
   attackCooldown: 0
   cooldownJitter: 0
+  exposedCooldownRate: 1
+  exposedWindupScale: 0.75
+  reactionDelay: 0.15
+  sidestepChance: 0
+  sidestepDistance: 1.8
+  sidestepDuration: 0.25
+  sidestepCooldown: 2.5
+  throwThreatAngle: 25
 --- !u!114 &2751467187380559122
 MonoBehaviour:
   m_ObjectHideFlags: 0

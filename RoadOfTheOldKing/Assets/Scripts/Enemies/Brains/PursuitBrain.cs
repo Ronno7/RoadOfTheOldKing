@@ -1,11 +1,12 @@
 using RoadOfTheOldKing.Combat;
 using RoadOfTheOldKing.Player;
 using RoadOfTheOldKing.Progression;
+using RoadOfTheOldKing.Weapons;
 using UnityEngine;
 
 namespace RoadOfTheOldKing.Enemies
 {
-    public enum PursuitState { Idle, Pursuing, Windup, Striking, Recovering, Returning, Defeated, Watching, Holding, Dormant, Waking }
+    public enum PursuitState { Idle, Pursuing, Windup, Striking, Recovering, Returning, Defeated, Watching, Holding, Dormant, Waking, Sidestepping }
 
     [DisallowMultipleComponent, RequireComponent(typeof(Damageable), typeof(HitReaction), typeof(Rigidbody2D))]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "RoadOfTheOldKing.Combat", null, "SimpleMeleeEnemy")]
@@ -62,6 +63,24 @@ namespace RoadOfTheOldKing.Enemies
         [SerializeField, Min(0f)] private float attackCooldown;
         [Tooltip("Random extra cooldown, up to this many seconds, so a swarm doesn't strike in lockstep.")]
         [SerializeField, Min(0f)] private float cooldownJitter;
+
+        [Header("Reading the player (optional)")]
+        [Tooltip("While the player is committed (drinking, axe away, catching, recovering from a chop) its cooldown runs this many times faster and it closes in instead of holding off. One: it doesn't read the player.")]
+        [SerializeField, Min(1f)] private float exposedCooldownRate = 1f;
+        [Tooltip("Share of the windup left on an attack started against a committed player. The direction still locks the same time before the blow. One: the full windup.")]
+        [SerializeField, Range(.4f, 1f)] private float exposedWindupScale = 1f;
+        [Tooltip("Seconds it must have seen the player committed before it reacts, so it is never frame-perfect.")]
+        [SerializeField, Min(0f)] private float reactionDelay = .15f;
+        [Tooltip("Chance to step off the line of an axe thrown straight at it. Zero: it never does.")]
+        [SerializeField, Range(0f, 1f)] private float sidestepChance;
+        [SerializeField, Min(.1f)] private float sidestepDistance = 1.8f;
+        [SerializeField, Min(.05f)] private float sidestepDuration = .25f;
+        [SerializeField, Min(0f)] private float sidestepCooldown = 2.5f;
+        [Tooltip("How far off its body a throw can be aimed and still count as thrown at it.")]
+        [SerializeField, Range(1f, 60f)] private float throwThreatAngle = 25f;
+        private readonly PlayerRead read = new PlayerRead();
+        private float exposedFor, sidestepWait;
+        private uint lastFlight;
         private EnemyBody actor;
         private Damageable health;
         private HitReaction reaction;
@@ -202,8 +221,17 @@ namespace RoadOfTheOldKing.Enemies
             }
 
             remaining -= deltaTime;
-            cooldown = Mathf.Max(0f, cooldown - deltaTime);
+            bool committed = ReadPlayer(deltaTime, out bool throwLaunched);
+            cooldown = Mathf.Max(0f, cooldown - deltaTime * (committed ? exposedCooldownRate : 1f));
             farCooldown = Mathf.Max(0f, farCooldown - deltaTime);
+            sidestepWait = Mathf.Max(0f, sidestepWait - deltaTime);
+            if (action.Current is EvadeAction)
+            {
+                action.Tick(deltaTime);
+                if (action.IsRunning) { State = PursuitState.Sidestepping; return; }
+                action.Cancel(false);
+                State = PursuitState.Idle;
+            }
             if (action.IsRunning)
             {
                 action.Tick(deltaTime);
@@ -317,6 +345,7 @@ namespace RoadOfTheOldKing.Enemies
                 }
             }
             float distance = toTarget.magnitude;
+            if (throwLaunched && TrySidestep(distance, toTarget, sees)) return;
             bool close = closeAttack != null && distance <= CloseSettings.reach * closeRangeFraction;
             bool ready = cooldown <= 0f;
             if (ready && farAttack != null && farCooldown <= 0f && distance >= farAttackRange && sees)
@@ -328,14 +357,56 @@ namespace RoadOfTheOldKing.Enemies
             else if (ready && (close || distance <= attackDistance))
             {
                 FacingDirection = toTarget.sqrMagnitude > 0.001f ? toTarget.normalized : FacingDirection;
-                if (BeginSequenceAttack(close ? CloseSettings : Settings, FacingDirection, close)) State = PursuitState.Windup;
+                if (BeginSequenceAttack(Against(close ? CloseSettings : Settings, committed), FacingDirection, close)) State = PursuitState.Windup;
             }
-            else if (!ready && holdDistance > 0f) Hold(distance, toTarget);
+            else if (!ready && holdDistance > 0f && !committed) Hold(distance, toTarget);
             else
             {
                 State = PursuitState.Pursuing;
                 Move(toTarget);
             }
+        }
+
+        // Sees a committed player only after a beat. This runs down its own cooldown and shortens attacks it
+        // hasn't started; a recovery already under way is untouched, so openings stay promises.
+        private bool ReadPlayer(float deltaTime, out bool throwLaunched)
+        {
+            read.Bind(target);
+            var weapon = read.Weapon;
+            throwLaunched = weapon != null && weapon.FlightSequence != lastFlight && weapon.State == AxeState.Flying;
+            if (weapon != null) lastFlight = weapon.FlightSequence;
+            bool reads = exposedCooldownRate > 1f || exposedWindupScale < 1f;
+            bool seen = reads && IsAware && weapon != null && read.Exposed && actor.Sees(target.transform, noticeRadius, false);
+            exposedFor = seen ? exposedFor + deltaTime : 0f;
+            return seen && exposedFor >= reactionDelay;
+        }
+
+        // The attack as started against this player. The lock keeps its distance from the blow.
+        private EnemyAttackSpec Against(EnemyAttackSpec settings, bool committed)
+        {
+            if (!committed || exposedWindupScale >= 1f) return settings;
+            float lockLead = settings.windup - settings.trackingTime;
+            settings.windup *= exposedWindupScale;
+            settings.trackingTime = Mathf.Max(0f, settings.windup - lockLead);
+            return settings;
+        }
+
+        // An axe thrown straight at it: step off the line, to the side it is already on. Only from a free
+        // moment, never out of an attack or its recovery.
+        private bool TrySidestep(float distance, Vector2 toTarget, bool sees)
+        {
+            var weapon = read.Weapon;
+            if (sidestepChance <= 0f || weapon == null || !IsAware || !sees || sidestepWait > 0f ||
+                distance > weapon.Settings.throwRange + 1f) return false;
+            Vector2 line = weapon.AttackDirection, fromPlayer = -toTarget.normalized;
+            if (Vector2.Angle(line, fromPlayer) > throwThreatAngle || Random.value >= sidestepChance) return false;
+            float side = line.x * fromPlayer.y - line.y * fromPlayer.x;
+            if (Mathf.Abs(side) < .001f) side = Random.value < .5f ? -1f : 1f;
+            if (!action.Begin(new EvadeAction(body, new Vector2(-line.y, line.x) * Mathf.Sign(side), sidestepDistance, sidestepDuration))) return false;
+            sidestepWait = sidestepCooldown;
+            melee = null;
+            State = PursuitState.Sidestepping;
+            return true;
         }
 
         private bool BeginSequenceAttack(EnemyAttackSpec settings, Vector2 direction, bool isClose)
@@ -444,7 +515,7 @@ namespace RoadOfTheOldKing.Enemies
             if (actor == null) return; // Never woken, like a nest hidden until the basin drains: it starts fresh when shown.
             IsAware = provoked = false;
             EndSequence();
-            cooldown = farCooldown = 0f;
+            cooldown = farCooldown = exposedFor = sidestepWait = 0f;
             ResetVersion++;
             actor.Reset();
             SetState(RestState);

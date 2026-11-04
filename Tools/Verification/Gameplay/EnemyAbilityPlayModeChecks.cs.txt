@@ -269,7 +269,51 @@ try {
     check(duel.IsDefeated,"defeat ends the sequence");
     engage(Vector2.right*1f);for(int i=0;i<30&&!duelReaction.Armored;i++)dstep(.02f);duel.enabled=false;
     check(!duelReaction.Armored&&!duel.Action.IsRunning,"disable clears armour and the action");duel.enabled=true;
-    // Thorn Rat (28 Oct): dart, nip and retreat on the shared pursuit brain; one chop kills; no coins.
+    // Reading the player (3 Nov): a committed player draws a reacting enemy in, after a beat, and openings stay promises.
+    // The stand-in target would block sight, as any body in the way does.
+    move(duelHome+Vector2.down*40);
+    var reader=spawn("Assets/Prefabs/Player/Player.prefab",duelHome+Vector2.right*30);
+    var readHealth=reader.GetComponent<RoadOfTheOldKing.Player.PlayerHealth>();readHealth.DebugGodMode=true;
+    var readBody=reader.GetComponent<Rigidbody2D>();var readFlask=reader.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>();
+    var readAxeRoot=spawn("Assets/Prefabs/Weapons/Axe.prefab",duelHome+Vector2.right*30);var readAxe=readAxeRoot.GetComponent<RoadOfTheOldKing.Weapons.AxeWeapon>();
+    check(reader.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>().TryEquip(readAxe),"the reading checks have an armed player");
+    var duelTarget=duelType.GetField("target",flags);duelTarget.SetValue(duel,readHealth);
+    var duelCool=duelType.GetField("cooldown",flags);var duelEngage=duelType.GetMethod("Engage",flags);
+    Action<Vector2> readAt=offset=>{duel.ResetOnRest();reader.transform.position=duelHome+offset;readBody.position=duelHome+offset;Physics2D.SyncTransforms();duelEngage.Invoke(duel,null);};
+    readAt(Vector2.right*2.2f);duelCool.SetValue(duel,1f);dstep(.1f);
+    check(duel.State==RoadOfTheOldKing.Enemies.PursuitState.Holding&&Mathf.Abs((float)duelCool.GetValue(duel)-.9f)<.001f,"an armed, idle player gets the ordinary cooldown");
+    check(readFlask.TryDrink(),"the reading player drinks");
+    dstep(.1f);check(duel.State==RoadOfTheOldKing.Enemies.PursuitState.Holding&&Mathf.Abs((float)duelCool.GetValue(duel)-.8f)<.001f,"it doesn't react on the instant");
+    dstep(.1f);check(duel.State==RoadOfTheOldKing.Enemies.PursuitState.Pursuing&&Mathf.Abs((float)duelCool.GetValue(duel)-.5f)<.001f,"a drinking player draws it in and runs its cooldown down three times as fast");
+    readAt(Vector2.right*2f);dstep(.02f);
+    for(int i=0;i<60&&duel.State!=RoadOfTheOldKing.Enemies.PursuitState.Recovering;i++)dstep(.02f);
+    float readRecovered=0;while(duel.State==RoadOfTheOldKing.Enemies.PursuitState.Recovering&&readRecovered<3){dstep(.02f);readRecovered+=.02f;}
+    check(readRecovered>=stepSpec.recovery-.03f,"a committed player doesn't cut its recovery short");
+    var axeType=readAxe.GetType();var launch=axeType.GetMethod("LaunchThrow",flags);axeType.GetField("attackDirection",flags).SetValue(readAxe,Vector2.left);
+    duelType.GetField("sidestepChance",flags).SetValue(duel,1f);
+    readAt(Vector2.right*5f);dstep(.02f);float readStartY=duelBody.position.y;
+    launch.Invoke(readAxe,null);dstep(.02f);
+    check(duel.State==RoadOfTheOldKing.Enemies.PursuitState.Sidestepping,"an axe thrown straight at it makes it step aside");
+    for(int i=0;i<30&&duel.State==RoadOfTheOldKing.Enemies.PursuitState.Sidestepping;i++)dstep(.02f);
+    check(Mathf.Abs(duelBody.position.y-readStartY)>1f&&duel.State!=RoadOfTheOldKing.Enemies.PursuitState.Sidestepping,"it steps off the line and goes back to the fight");
+    launch.Invoke(readAxe,null);dstep(.02f);
+    check(duel.State!=RoadOfTheOldKing.Enemies.PursuitState.Sidestepping,"it can't sidestep again straight away");
+    readAt(Vector2.right*2f);dstep(.02f);
+    for(int i=0;i<60&&duel.State!=RoadOfTheOldKing.Enemies.PursuitState.Recovering;i++)dstep(.02f);
+    launch.Invoke(readAxe,null);dstep(.02f);
+    check(duel.State==RoadOfTheOldKing.Enemies.PursuitState.Recovering,"a throw during its recovery doesn't get it out");
+    duelTarget.SetValue(duel,player);
+    duelTarget.SetValue(pursuit,readHealth);resetBoar();reader.transform.position=boarHome+Vector2.right*4;readBody.position=boarHome+Vector2.right*4;Physics2D.SyncTransforms();
+    duelEngage.Invoke(pursuit,null);pursuitTick.Invoke(pursuit,new object[]{.16f});
+    var quickSpec=(RoadOfTheOldKing.Enemies.EnemyAttackSpec)duelType.GetField("current",flags).GetValue(pursuit);
+    check(pursuit.State==RoadOfTheOldKing.Enemies.PursuitState.Windup&&Mathf.Approximately(quickSpec.windup,spec.windup*.75f)&&Mathf.Approximately(quickSpec.trackingTime,quickSpec.windup-(spec.windup-spec.trackingTime)),"against a committed player a boar's windup shortens, and it still locks as close to the blow");
+    resetBoar();duelTarget.SetValue(pursuit,player);
+    Func<string,string,float> authored=(prefabName,field)=>(float)duelType.GetField(field,flags).GetValue(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Combat/"+prefabName+".prefab").GetComponent<RoadOfTheOldKing.Enemies.PursuitBrain>());
+    check(authored("RoadScavenger","exposedCooldownRate")>1f&&authored("ThornRat","exposedCooldownRate")>1f&&authored("MossbackBoar","exposedWindupScale")<1f,"scavengers, rats and boars read the player");
+    check(authored("RoadScavenger","sidestepChance")>0f&&authored("ThornRat","sidestepChance")==0f&&authored("MossbackBoar","sidestepChance")==0f,"only scavengers sidestep throws");
+    check(authored("BrokenWatcher","exposedCooldownRate")==1f&&authored("BrokenWatcher","exposedWindupScale")==1f&&authored("BrokenWatcher","sidestepChance")==0f,"the Watcher doesn't read the player");
+    reader.SetActive(false);readAxeRoot.SetActive(false);
+    // Thorn Rat (28 Oct): dart, nip and retreat on the shared pursuit brain; two chops kill (3 Nov); no coins.
     var ratRoot=spawn("Assets/Prefabs/Combat/ThornRat.prefab",new Vector2(1120,1000));var rat=ratRoot.GetComponent<RoadOfTheOldKing.Enemies.PursuitBrain>();
     duelType.GetField("target",flags).SetValue(rat,player);var ratBody=ratRoot.GetComponent<Rigidbody2D>();var ratHp=ratRoot.GetComponent<RoadOfTheOldKing.Combat.Damageable>();var ratHome=ratBody.position;
     var nipSpec=(RoadOfTheOldKing.Enemies.EnemyAttackSpec)duelType.GetProperty("Settings",flags).GetValue(rat,null);
