@@ -191,6 +191,7 @@ flowchart LR
 ```
 
 - **Openings are promises.** At most one follow-up, and recovery is never cancelled.
+- **Reading the player.** `PlayerRead` tells both brains what they can see the player doing: drinking, axe away, recovering from a chop. After a 0.15 s beat, scavengers and rats press in and boars start their charge sooner. It never cuts a recovery short.
 - **No shared attack turn.** Each enemy attacks on its own rhythm. Groups are shaped by placement and notice radius, so a careful player can pull one at a time.
 - **Leash.** An enemy breaks off when it loses sight, or once past its leash with the player out of notice range, then walks home. A hit, or the player coming close, turns it back. All of this lives in `EnemyBody`.
 - **Mending.** Out of the fight an enemy heals 10% of its health per second. A boss back on its seat is whole at once.
@@ -242,6 +243,8 @@ Level construction is in [World and tilemaps](World.md).
 | Bonfires | `Bonfire` | First use lights it and unlocks travel. Next use rests: heals, refills, resets enemies, sets the respawn point. |
 | Place names | `AreaName` | The smallest zone containing the player names the place, shown once per save. |
 | Pots and chests | `Breakable`, `CoinSource`, `RewardChest` | Each result saves once, including empty rolls. |
+| Hold-up | `RewardHoldUp` | A shard, fragment, tool or chest's contents rises over the hero for about a second while the world stops. The reward is saved first, so it only presents. |
+| Material feedback | `SurfaceTag`, `AxeSurfaceFeedback` | A prefab's tag names what it's made of. The axe reports what it strikes, at most one plain object per attack, and the feedback plays that material's sound and flecks. Untagged objects stay silent. |
 | Trader | `Trader`, `ShopOffer`, `CollectionMenu` | Talk, then trade. A purchase saves coins, item and stock together. |
 | Rope | `RopeAnchor`, `RopeRoute` | A bought kit secures a saved two-way route. |
 | Inscriptions | `ForgeInscription`, `InscriptionReader` | Reading saves the knowledge; the carving stays. |

@@ -4,6 +4,8 @@
 
 **Added**
 - Pause menu lists every control for keyboard and controller.
+- Sun Shards, heart fragments, tools and chest contents are held up over the hero's head for about a second when taken.
+- Axe hits on wood, stone, brush and pottery have their own sound and flecks; pots break with a ceramic sound.
 
 **Changed**
 - Enemies move faster: scavengers 4.8 u/s (was 3.3), boars 4 (was 2.8), rats 5.5 (was 4.2), trotting wolves 5 (was 4.2).
@@ -12,6 +14,9 @@
 - Scavengers pause 0.4 s between attacks (was 0.8 s), stand closer and engage after 0.5 s of sight (was 0.9 s).
 - Rats take two chops (20 health, was 10) and pause 0.5 s between darts (was 0.9 s).
 - Wolves dodge, feint and punish more often.
+- Scavengers and rats press in when you drink, throw or recover from a chop; boars charge 25% sooner.
+- Scavengers sometimes sidestep thrown axes.
+- Removed the small sage bushes that looked like breakable ones.
 
 ## 0.5 — Full production
 
