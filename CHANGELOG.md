@@ -20,6 +20,7 @@
 - New fence art at chest height (23 px, was 29), in four styles.
 - Fence collision is 0.375 tiles deep (was 1), so you can stand right behind one.
 - Three new carts replace the single cart.
+- New art for the mill bridge and the stone fence posts.
 
 **Fixed**
 - Fences no longer draw over a hero standing in front of them.

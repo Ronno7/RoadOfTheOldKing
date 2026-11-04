@@ -134,7 +134,7 @@ if(phase==1){
     check(beam.IsReleased&&!beam.IsMoving,"cold session restores the lowered beam");
     check(gate.IsOpen,"cold session restores the lifted gate");
     view.RefreshPresentation();check(view.FrameIndex==6,"cold session restores the final visual pose");
-    check(beam.GetComponentsInChildren<UnityEngine.Tilemaps.TilemapRenderer>(true).All(r=>!r.enabled),"placeholder renderers stay hidden after scene reload");
+    check(new[]{"Raised beam (receiver)/Raised beam (placeholder)","Latch (release)/Latch post (placeholder)","Lowered beam deck"}.All(n=>beam.transform.Find(n).GetComponentsInChildren<Renderer>(true).All(r=>!r.enabled)),"placeholder renderers stay hidden after scene reload");
     check(!blocked(new Vector2(115.5f,13.6f),new Vector2(121f,13.6f)),"cold collision agrees: deck open");
     check(!blocked(new Vector2(138.5f,17.8f),new Vector2(138.5f,22f)),"cold collision agrees: gate open");
     SessionState.SetInt(p+"Phase",2);
