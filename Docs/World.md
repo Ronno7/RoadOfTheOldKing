@@ -38,7 +38,7 @@ Art and collision are independent: a water or cliff tile isn't an obstacle until
 | Ground | Grass, earth, stone |
 | Terrain | Banks, water, cliffs, stairs |
 | Paths | Dirt lanes, paving |
-| Environment | Trees, buildings, fences, rocks, ruins |
+| Environment | Trees, buildings, rocks, ruins |
 | Detail / Decoration | Ground accents, small props |
 | Collision | Invisible boundaries and footprints |
 | Above Player | Canopies, roofs |

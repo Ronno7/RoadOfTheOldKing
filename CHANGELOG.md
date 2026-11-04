@@ -17,6 +17,12 @@
 - Scavengers and rats press in when you drink, throw or recover from a chop; boars charge 25% sooner.
 - Scavengers sometimes sidestep thrown axes.
 - Removed the small sage bushes that looked like breakable ones.
+- New fence art at chest height (23 px, was 29), in four styles.
+- Fence collision is 0.375 tiles deep (was 1), so you can stand right behind one.
+- Three new carts replace the single cart.
+
+**Fixed**
+- Fences no longer draw over a hero standing in front of them.
 
 ## 0.5 — Full production
 

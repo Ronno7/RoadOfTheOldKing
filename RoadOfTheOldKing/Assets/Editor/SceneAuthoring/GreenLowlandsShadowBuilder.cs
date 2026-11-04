@@ -518,7 +518,7 @@ namespace RoadOfTheOldKing.EditorTools
                 var root = new GameObject(RootName); Undo.RegisterCreatedObjectUndo(root, "Bake Lowlands shadows");
                 root.transform.SetParent(world.Find("Scenery"), false); output = root.transform;
                 string[] families = { "Oak", "Birch", "Apple_Tree", "Farmhouse_Weathered", "Workshop_Weathered", "Watermill", "Woodshed_Weathered",
-                    "Well_Disused", "Farm_Cart", "Plank_Bridge", "Fence_Weathered", "Reused_Stone_Post", "Boulder", "Boulder_Cluster",
+                    "Well_Disused", "Farm_Cart", "Farm_Cart_Looted", "Farm_Cart_Sacks", "Plank_Bridge", "Fence_Weathered", "Reused_Stone_Post", "Boulder", "Boulder_Cluster",
                     "Fallen_Log", "Hedgerow", "Collapsed_Crate", "WoodenBucket", "SmallSageBush",
                     "Firewood_Rack", "Axe_Stump", "Fence_Horizontal", "Fence_Post", "GrainSack", "ClayJar" };
                 foreach (var t in world.Find("Scenery").GetComponentsInChildren<Transform>(true).ToArray())
@@ -665,7 +665,7 @@ namespace RoadOfTheOldKing.EditorTools
                 // Flat clutter and living actors retain their existing presentation. These are the
                 // standing environment families; their lower/overhead tiles form one silhouette.
                 string[] families = { "Oak", "Birch", "Apple_Tree", "Cottage_Thatch", "Cottage_Clay", "Village_Well", "Woodshed",
-                    "Firewood_Rack", "Axe_Stump", "Fallen_Log", "Boulder", "Boulder_Cluster", "Stone_Bridge", "Fence_Horizontal",
+                    "Firewood_Rack", "Axe_Stump", "Fallen_Log", "Boulder", "Boulder_Cluster", "Stone_Bridge", "Fence_Horizontal", "Fence_Straight",
                     "Fence_Repaired", "Fence_Post", "Hedgerow", "Ruined_Wall", "Broken_Pillar", "ClayJar",
                     "GrainSack", "WoodenBucket" };
                 // Route-edge trees are authored under Boundary Woodland too.
