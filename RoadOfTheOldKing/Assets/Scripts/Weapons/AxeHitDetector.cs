@@ -1,6 +1,7 @@
 using RoadOfTheOldKing.Enemies;
 using System.Collections.Generic;
 using RoadOfTheOldKing.Combat;
+using RoadOfTheOldKing.World;
 using UnityEngine;
 
 namespace RoadOfTheOldKing.Weapons
@@ -17,18 +18,22 @@ namespace RoadOfTheOldKing.Weapons
         private readonly List<RaycastHit2D> sight = new List<RaycastHit2D>(8);
         private readonly HashSet<IHitReceiver> hitTargets = new HashSet<IHitReceiver>();
         private readonly System.Action<CombatHit> confirmedHit;
+        private readonly System.Action<SurfaceStrike> surfaceStruck;
         private readonly System.Func<Vector2, bool> canReach;
         private Vector2 meleeOrigin;
+        private bool solidStruck;
 
-        public AxeHitDetector(Transform owner, Transform weapon, System.Action<CombatHit> confirmedHit = null)
+        public AxeHitDetector(Transform owner, Transform weapon, System.Action<CombatHit> confirmedHit = null,
+            System.Action<SurfaceStrike> surfaceStruck = null)
         {
             this.owner = owner;
             this.weapon = weapon;
             this.confirmedHit = confirmedHit;
+            this.surfaceStruck = surfaceStruck;
             canReach = CanReachMeleePoint;
         }
 
-        public void BeginAttack() => hitTargets.Clear();
+        public void BeginAttack() { hitTargets.Clear(); solidStruck = false; }
 
         // Counts a target as already hit for this attack (e.g. the one a recalled axe is pulled out of).
         public void Exclude(IHitReceiver receiver) { if (receiver != null) hitTargets.Add(receiver); }
@@ -65,8 +70,23 @@ namespace RoadOfTheOldKing.Weapons
             {
                 var resolved = new CombatHit(hit.Source, hit.Kind, hit.Damage, hit.Direction,
                     hit.Knockback, hit.StaggerDuration, hit.BreaksGuard, impactPoint);
-                if (receiver.ReceiveHit(resolved)) confirmedHit?.Invoke(resolved);
+                // Read first: a blow that breaks the object can switch it off.
+                var surface = collider.GetComponentInParent<SurfaceTag>();
+                bool accepted = receiver.ReceiveHit(resolved);
+                if (accepted) confirmedHit?.Invoke(resolved);
+                // A tagged object answers either way, so a stone that needs a full cleave still clanks.
+                if (surface != null) surfaceStruck?.Invoke(new SurfaceStrike(surface.Material, impactPoint, hit.Direction, accepted));
             }
+        }
+
+        // Plain world objects, at most once per attack, so a sweep past a fence doesn't rattle.
+        private void StrikeSolid(Collider2D collider, Vector2 point, Vector2 direction)
+        {
+            if (solidStruck) return;
+            var surface = collider.GetComponentInParent<SurfaceTag>();
+            if (surface == null) return;
+            solidStruck = true;
+            surfaceStruck?.Invoke(new SurfaceStrike(surface.Material, point, direction, false));
         }
 
         public void Melee(Vector2 center, Vector2 aim, float radius, float arc, CombatHit hit, float laneWidth = 0f)
@@ -79,6 +99,8 @@ namespace RoadOfTheOldKing.Weapons
                     Mathf.Atan2(aim.y, aim.x) * Mathf.Rad2Deg, filter, overlaps);
             else
                 Physics2D.OverlapCircle(center, radius, filter, overlaps);
+            Collider2D nearestSolid = null;
+            Vector2 nearestPoint = center, nearestDirection = aim;
             foreach (var collider in overlaps)
             {
                 if (!IsCandidate(collider))
@@ -96,11 +118,20 @@ namespace RoadOfTheOldKing.Weapons
                         obstructed = true;
                         break;
                     }
-                if (!obstructed)
-                    Apply(collider, new CombatHit(hit.Source, hit.Kind, hit.Damage,
-                        direction.sqrMagnitude > 0.001f ? direction : aim,
-                        hit.Knockback, hit.StaggerDuration, hit.BreaksGuard), point);
+                if (obstructed)
+                    continue;
+                Apply(collider, new CombatHit(hit.Source, hit.Kind, hit.Damage,
+                    direction.sqrMagnitude > 0.001f ? direction : aim,
+                    hit.Knockback, hit.StaggerDuration, hit.BreaksGuard), point);
+                if (!solidStruck && BlocksMelee(collider) &&
+                    (nearestSolid == null || direction.sqrMagnitude < (nearestPoint - center).sqrMagnitude))
+                {
+                    nearestSolid = collider;
+                    nearestPoint = point;
+                    nearestDirection = direction.sqrMagnitude > 0.001f ? direction : aim;
+                }
             }
+            if (nearestSolid != null) StrikeSolid(nearestSolid, nearestPoint, nearestDirection);
         }
 
         public bool Flight(Vector2 origin, Vector2 destination, float radius, CombatHit hit,
@@ -117,6 +148,7 @@ namespace RoadOfTheOldKing.Weapons
                 Apply(cast.collider, hit, cast.point);
                 if (stopAtImpact)
                 {
+                    if (BlocksMelee(cast.collider)) StrikeSolid(cast.collider, cast.point, delta.normalized);
                     impact = cast;
                     WeaponSweep.Raise(new WeaponSweep(hit.Source, origin,
                         origin + delta.normalized * cast.distance, delta.normalized,

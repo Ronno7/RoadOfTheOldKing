@@ -26,6 +26,7 @@ namespace RoadOfTheOldKing.Player
         private PlayerDash dash;
         private PlayerFlask flask;
         private PlayerBonfireInteraction bonfire;
+        private RoadOfTheOldKing.World.RewardHoldUp holdUp;
         private PlayerCombatController combat;
         private HitReaction reaction;
         private Damageable health;
@@ -63,6 +64,7 @@ namespace RoadOfTheOldKing.Player
             dash = GetComponent<PlayerDash>();
             flask = GetComponent<PlayerFlask>();
             bonfire = GetComponent<PlayerBonfireInteraction>();
+            holdUp = GetComponent<RoadOfTheOldKing.World.RewardHoldUp>();
             combat = GetComponent<PlayerCombatController>();
             reaction = GetComponent<HitReaction>();
             health = GetComponent<Damageable>();
@@ -122,6 +124,9 @@ namespace RoadOfTheOldKing.Player
             Vector2 position = transform.position;
             Vector2 displacement = position - previousPosition;
             previousPosition = position;
+            // The hold-up stops time and faces the camera, so it comes before the paused check.
+            if (holdUp != null && holdUp.IsPlaying && Play("Hold up", animations.rotations, DirectionalSpriteAnimation.Octant(Vector2.down), 0f))
+                return;
             if (frameDelta <= 0f)
                 return;
 

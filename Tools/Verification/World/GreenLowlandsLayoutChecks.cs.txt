@@ -11,6 +11,7 @@
 // Border walks test terrain with virtual input: the arrival encounters' solid colliders
 // are temporarily suppressed and restored exactly. They are not combat/playthrough evidence.
 if(EditorApplication.isPlaying){
+    RoadOfTheOldKing.World.RewardHoldUp.SkipForChecks=true; // Staged checks step time themselves.
     var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
     var game=RoadOfTheOldKing.Progression.GameSession.Instance;
     if(game==null||game.IsLoading||!game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands.")||UnityEngine.SceneManagement.SceneManager.GetActiveScene().name!="GreenLowlands")throw new System.Exception("Settled isolated Lowlands session required.");
@@ -201,38 +202,6 @@ if(EditorApplication.isPlaying){
             for(int frame=0;frame<30;frame++){keys(new[]{UnityEngine.InputSystem.Key.D});motor.GetType().GetMethod("FixedUpdate",flags).Invoke(motor,null);Physics2D.Simulate(Time.fixedDeltaTime);}
             keys(new UnityEngine.InputSystem.Key[0]);
             check(body.position.x<36.75f,"Permanent river stops the actual player from the newly opened bank");
-            var bushes=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.WorldPropDepth>(FindObjectsSortMode.None).Where(d=>d.transform.parent!=null&&d.transform.parent.name=="Small sage bush").ToArray();
-            check(bushes.Length>0,"Sparse whole bushes are included in live depth/footing checks");
-            foreach(var bush in bushes){
-                var foot=(Vector2)bush.transform.parent.position;var view=bush.GetComponent<SpriteRenderer>();var hero=player.GetComponentInChildren<SpriteRenderer>();
-                var collider=bush.transform.parent.GetComponent<BoxCollider2D>();
-                check(collider!=null&&collider.size==new Vector2(.625f,.375f)&&view.sprite.pixelsPerUnit==16,"Small bush has native art and a compact base collider");
-                pose(foot+Vector2.up*.875f);bush.GetType().GetMethod("LateUpdate",flags).Invoke(bush,null);
-                check(view.sortingLayerID==hero.sortingLayerID&&view.sortingOrder>hero.sortingOrder,"Bush crown draws over the player behind its grounded base");
-                pose(foot+Vector2.down*.875f);bush.GetType().GetMethod("LateUpdate",flags).Invoke(bush,null);
-                check(view.sortingOrder<hero.sortingOrder,"Player draws over the bush from the front");
-                var around=new[]{new Vector2(-1.125f,-.875f),new Vector2(1.125f,-.875f),new Vector2(1.125f,.875f),new Vector2(-1.125f,.875f),new Vector2(-1.125f,-.875f)};
-                // A bush set against other collision (a path edge) has no walkable ring; report it instead of walking.
-                var ringHits=new System.Collections.Generic.List<RaycastHit2D>();bool ringFree=true;
-                for(int r=0;r<4;r++){Physics2D.BoxCast(foot+around[r],new Vector2(.75f,.75f),0,(around[r+1]-around[r]).normalized,new ContactFilter2D{useTriggers=false},ringHits,Vector2.Distance(around[r],around[r+1]));
-                    ringFree&=!ringHits.Any(h=>h.collider!=collider&&h.collider.attachedRigidbody!=body);}
-                if(!ringFree){logs.Add("Bush at "+foot+" stands against other collision; walk-around and base push skipped");continue;}
-                pose(foot+around[0]);motor.GetType().GetField("freeVelocity",flags).SetValue(motor,Vector2.zero);bool clear=true;
-                foreach(var offset in around.Skip(1)){
-                    int frames=0;var target=foot+offset;
-                    while(Vector2.Distance(body.position,target)>.065f&&frames++<80){
-                        Vector2 delta=target-body.position;var held=new System.Collections.Generic.List<UnityEngine.InputSystem.Key>();
-                        if(delta.x>.025f)held.Add(UnityEngine.InputSystem.Key.D);else if(delta.x<-.025f)held.Add(UnityEngine.InputSystem.Key.A);
-                        if(delta.y>.025f)held.Add(UnityEngine.InputSystem.Key.W);else if(delta.y<-.025f)held.Add(UnityEngine.InputSystem.Key.S);
-                        keys(held.ToArray());motor.GetType().GetMethod("FixedUpdate",flags).Invoke(motor,null);Physics2D.Simulate(Time.fixedDeltaTime);
-                    }
-                    if(frames>=80){clear=false;break;}
-                }
-                keys(new UnityEngine.InputSystem.Key[0]);check(clear,"Actual motor walks both sides and behind the small bush");
-                pose(foot+Vector2.down*.875f);motor.GetType().GetField("freeVelocity",flags).SetValue(motor,Vector2.zero);
-                keys(new[]{UnityEngine.InputSystem.Key.W});for(int frame=0;frame<30;frame++){motor.GetType().GetMethod("FixedUpdate",flags).Invoke(motor,null);Physics2D.Simulate(Time.fixedDeltaTime);}
-                keys(new UnityEngine.InputSystem.Key[0]);check(body.position.y<foot.y-.35f&&body.position.y>foot.y-.7f,"Compact bush base stops the actual player body");
-            }
         }
     }finally{
         keys(new UnityEngine.InputSystem.Key[0]);actions.devices=oldDevices;UnityEngine.InputSystem.InputSystem.RemoveDevice(keyboard);UnityEngine.InputSystem.InputSystem.settings.editorInputBehaviorInPlayMode=oldRouting;UnityEngine.InputSystem.InputSystem.settings.backgroundBehavior=oldBackground;

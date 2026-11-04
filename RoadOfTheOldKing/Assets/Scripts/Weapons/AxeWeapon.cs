@@ -36,6 +36,8 @@ namespace RoadOfTheOldKing.Weapons
         private float catchRecoveryRemaining;
         private readonly ThrowActionClock throwAction = new ThrowActionClock();
         public event System.Action<CombatHit> HitConfirmed;
+        // The axe struck something tagged with a material; presentation answers it.
+        public event System.Action<RoadOfTheOldKing.World.SurfaceStrike> SurfaceStruck;
         // Successful Recall arrival only; cancellation, equip and ground pickup do not catch.
         public event System.Action ReturnedToHand;
         // Presentation samples actual transit time, including steps that cross release.
@@ -151,7 +153,7 @@ namespace RoadOfTheOldKing.Weapons
             if (!isActiveAndEnabled || State != AxeState.OnGround || newOwner == null)
                 return false;
             owner = newOwner;
-            hits = new AxeHitDetector(owner.transform, transform, OnHitConfirmed);
+            hits = new AxeHitDetector(owner.transform, transform, OnHitConfirmed, strike => SurfaceStruck?.Invoke(strike));
             if (pickupCollider != null)
                 pickupCollider.enabled = false;
             transform.position = owner.transform.position;

@@ -6,6 +6,7 @@
 // scene reloads) between phases. After phase 9, stop/re-enter the
 // same unsaved bootstrap before phase 10. Never save the bootstrap. Enemy defeats
 // use direct Damageable hits: this checks progression, not human combat balance.
+RoadOfTheOldKing.World.RewardHoldUp.SkipForChecks=true; // Staged checks step time themselves.
 if (!Application.isPlaying) throw new Exception("Play Mode required.");
 var session=RoadOfTheOldKing.Progression.GameSession.Instance;
 if(session==null||!session.StorageKey.StartsWith("RoadOfTheOldKing.Verification."))throw new Exception("Isolated save required.");

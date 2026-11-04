@@ -80,9 +80,22 @@ namespace RoadOfTheOldKing.World
         {
             var game = GameSession.Instance;
             if (game == null || !game.Rewards.TryGrant(Kind, rewardId, CoinAmount, GrantedTool)) return false;
-            if (!awardImmediately) PickupPresentation.Collected(visual, player);
+            if (!awardImmediately && !HoldUp(player)) PickupPresentation.Collected(visual, player);
             Refresh();
             return true;
+        }
+
+        // Finds worth a moment raise them over the hero's head instead of the ordinary burst.
+        protected virtual bool HoldsUp => true;
+
+        private bool HoldUp(PlayerHealth player)
+        {
+            if (!HoldsUp || visual == null) return false;
+            var view = visual.GetComponentInChildren<PickupPresentation>(true);
+            var art = view != null ? view.GetComponent<SpriteRenderer>() : visual.GetComponentInChildren<SpriteRenderer>(true);
+            if (art == null) return false;
+            bool heart = view != null && view.Style == PickupStyle.Heart;
+            return RewardHoldUp.TryPlay(player, art.sprite, art.transform.position, heart ? PickupPresentation.Heart : PickupPresentation.Warm, art);
         }
 
         protected void Refresh()

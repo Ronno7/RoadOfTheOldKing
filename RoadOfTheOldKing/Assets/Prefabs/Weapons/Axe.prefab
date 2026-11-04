@@ -49,6 +49,7 @@ GameObject:
   - component: {fileID: 6429593735296070591}
   - component: {fileID: 8052522283898620741}
   - component: {fileID: 4267560185938670804}
+  - component: {fileID: 5683182220769324428}
   m_Layer: 0
   m_Name: Axe
   m_TagString: Untagged
@@ -199,6 +200,49 @@ MonoBehaviour:
   edgeOpacity: 0.9
   edgeWidth: 0.045
   swipeWidth: 0.28
+--- !u!114 &5683182220769324428
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 723456740818772572}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc2fa44894271254c82d62ab60ee0aa7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Weapons.AxeSurfaceFeedback
+  voices:
+  - material: 1
+    strike: {fileID: 8300000, guid: 24ee50dcbf8b16e4badd6370399811d1, type: 3}
+    breakSound: {fileID: 0}
+    light: {r: 0.75686276, g: 0.6117647, b: 0.4392157, a: 1}
+    dark: {r: 0.50980395, g: 0.4, b: 0.29803923, a: 1}
+  - material: 2
+    strike: {fileID: 8300000, guid: 5c3776705dd60a74392428eca9d7ec3d, type: 3}
+    breakSound: {fileID: 0}
+    light: {r: 0.8235294, g: 0.8, b: 0.67058825, a: 1}
+    dark: {r: 0.54901963, g: 0.57254905, b: 0.4627451, a: 1}
+  - material: 3
+    strike: {fileID: 8300000, guid: 21ab9bf2da0b9354e9ef8c5fc3fcf121, type: 3}
+    breakSound: {fileID: 0}
+    light: {r: 0.5882353, g: 0.6862745, b: 0.5294118, a: 1}
+    dark: {r: 0.32156864, g: 0.45490196, b: 0.3529412, a: 1}
+  - material: 4
+    strike: {fileID: 8300000, guid: b90475fb49323bc4882091f02a7ae9f0, type: 3}
+    breakSound: {fileID: 0}
+    light: {r: 0.74509805, g: 0.627451, b: 0.4745098, a: 1}
+    dark: {r: 0.3882353, g: 0.32156864, b: 0.24705882, a: 1}
+  - material: 5
+    strike: {fileID: 8300000, guid: c8b0e0a8b43a6b24bbdd8a9dcb26906c, type: 3}
+    breakSound: {fileID: 8300000, guid: c8b0e0a8b43a6b24bbdd8a9dcb26906c, type: 3}
+    light: {r: 0.827451, g: 0.69411767, b: 0.5176471, a: 1}
+    dark: {r: 0.6392157, g: 0.50980395, b: 0.36862746, a: 1}
+  volume: 0.32
+  breakVolume: 0.42
+  strikeFlecks: 4
+  breakFlecks: 10
+  visualHeight: 0.4
 --- !u!1 &748218526537793129
 GameObject:
   m_ObjectHideFlags: 0

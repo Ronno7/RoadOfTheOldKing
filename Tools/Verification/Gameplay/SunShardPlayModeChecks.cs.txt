@@ -5,6 +5,7 @@
 // Tests the authored enabled Lowlands fire and all three active choices, then a
 // seeded legacy Sweeping Edge save. No authored asset or normal save is changed.
 // Stop and use the shared bootstrap cleanup after success OR failure.
+RoadOfTheOldKing.World.RewardHoldUp.SkipForChecks=true; // Staged checks step time themselves.
 if(!Application.isPlaying){
  var source=AssetDatabase.LoadAssetAtPath<RoadOfTheOldKing.Weapons.AxeUpgradeTier>("Assets/Settings/Weapons/Upgrades/TierOne.asset");
  string before=JsonUtility.ToJson(source);

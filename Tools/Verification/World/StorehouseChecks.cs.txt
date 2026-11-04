@@ -3,6 +3,7 @@
 // Stop then run shared cleanup even after failure. Never run with normal save keys.
 // Phases 10-21 cover contents, reading, pottery, motor navigation and persistence.
 // Phases 22-24 prove actual motor/physics doorway crossings; select phase 22 after phase 9 to skip contents.
+RoadOfTheOldKing.World.RewardHoldUp.SkipForChecks=true; // Staged checks step time themselves.
 var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
 var game=RoadOfTheOldKing.Progression.GameSession.Instance;
 if(!Application.isPlaying||!SessionState.GetBool("GreenLowlands.Gameplay.Active",false)||game==null||

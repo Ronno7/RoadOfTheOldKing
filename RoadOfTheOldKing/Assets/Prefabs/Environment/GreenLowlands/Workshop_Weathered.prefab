@@ -724,6 +724,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7279737630488789090}
   - component: {fileID: 1504432218234622156}
+  - component: {fileID: 5667899842502156394}
   m_Layer: 0
   m_Name: Workshop_Weathered
   m_TagString: Untagged
@@ -761,6 +762,19 @@ Grid:
   m_CellGap: {x: 0, y: 0, z: 0}
   m_CellLayout: 0
   m_CellSwizzle: 0
+--- !u!114 &5667899842502156394
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7265572730827052967}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5da44f6554a10404bb422a0fb9ca04ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
+  material: 1
 --- !u!1 &9040271197104118740
 GameObject:
   m_ObjectHideFlags: 0

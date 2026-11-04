@@ -5,6 +5,7 @@
 // allow death/respawn, then phase 2. Each call advances automatically; WAIT preserves its phase.
 // Stop/re-enter that same bootstrap and Continue for phase 3 (fresh-session and access/feedback checks).
 // Finally stop and use the bootstrap fixture's cleanup; never save the bootstrap.
+RoadOfTheOldKing.World.RewardHoldUp.SkipForChecks=true; // Staged checks step time themselves.
 var checks=new System.Collections.Generic.List<string>();
 System.Action<bool,string> check=(ok,label)=>{if(!ok)throw new System.Exception(label+" | "+string.Join("; ",checks.ToArray()));checks.Add(label);};
 var flags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;

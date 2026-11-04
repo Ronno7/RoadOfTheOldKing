@@ -1,5 +1,6 @@
 // Lowlands pickup presentation: set SessionState PickupCheck.Mode = "presentation".
 // Requires the existing GreenLowlands isolated bootstrap; leaves normal saves untouched.
+RoadOfTheOldKing.World.RewardHoldUp.SkipForChecks=true; // Staged checks step time themselves.
 if (SessionState.GetString("PickupCheck.Mode","") == "presentation") {
     if(!EditorApplication.isPlaying) throw new Exception("Isolated Play Mode required");
     var pGame=RoadOfTheOldKing.Progression.GameSession.Instance;
@@ -123,6 +124,42 @@ if (SessionState.GetString("PickupCheck.Mode","") == "presentation") {
         pCheck(((SpriteRenderer[])pViewType.GetField("glint",pFlags).GetValue(pChestView)).All(r=>!r.enabled),"Opened chest stops advertising a reward");
         pChest.RestoreProgress(pGame.Progress);
         pCheck(pChest.IsOpen && !pChest.TryCollect(pPlayer),"Opened chest restore is idempotent");
+
+        // Hold-up (3 Nov): a real find stops the world and the hero raises it. The reward is saved first, and it ends clean.
+        RoadOfTheOldKing.World.RewardHoldUp.SkipForChecks=false;
+        var hUp=pPlayer.GetComponent<RoadOfTheOldKing.World.RewardHoldUp>();var hLocks=pPlayer.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>();
+        pCheck(hUp!=null&&!hUp.IsPlaying,"The player carries the hold-up, idle");
+        Func<int> hBursts=()=>UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.PickupCollectBurst>(FindObjectsSortMode.None).Length;
+        // Counts leases, not "is anything paused": a kill freeze earlier in this check holds its own until a real frame.
+        Func<int> hLeases=()=>(int)typeof(RoadOfTheOldKing.UI.SimulationPause).GetField("leases",System.Reflection.BindingFlags.Static|System.Reflection.BindingFlags.NonPublic).GetValue(null);
+        int hBaseLeases=hLeases();
+        Action hEnd=()=>{typeof(RoadOfTheOldKing.World.RewardHoldUp).GetField("age",pFlags).SetValue(hUp,10f);typeof(RoadOfTheOldKing.World.RewardHoldUp).GetMethod("Update",pFlags).Invoke(hUp,null);};
+        var hShard=pSpawn("Assets/Prefabs/World/Shared/SunShard.prefab").GetComponent<RoadOfTheOldKing.World.SunShardReward>();
+        hShard.GetType().GetField("rewardId",pFlags).SetValue(hShard,pId+"/held-shard");hShard.RestoreProgress(pGame.Progress);pMove(new Vector2(14,3.5f));
+        var hShardArt=hShard.GetComponentInChildren<RoadOfTheOldKing.World.PickupPresentation>(true).GetComponent<SpriteRenderer>().sprite;
+        int hShards=pGame.Progress.sunShards,hBurst=hBursts();
+        pCheck(hShard.TryCollect(pPlayer)&&hUp.IsPlaying,"Taking a shard starts the hold-up");
+        pCheck(pGame.Progress.sunShards==hShards+1&&new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(pGame.StorageKey).Load().sunShards==hShards+1,"The shard is already granted and saved");
+        pCheck(Time.timeScale==0f&&hLeases()==hBaseLeases+1&&hLocks.IsLockedBy(hUp),"The world stops and controls lock");
+        pCheck(hBursts()==hBurst,"No ordinary burst on top of it");
+        var hHeld=hUp.transform.Find("Reward hold-up/Held item").GetComponent<SpriteRenderer>();
+        pCheck(hHeld.enabled&&hHeld.sprite==hShardArt,"The hero holds up the shard's own art");
+        hEnd();
+        pCheck(!hUp.IsPlaying&&hLeases()==hBaseLeases&&!hLocks.IsLockedBy(hUp)&&!hHeld.enabled,"It ends and gives everything back");
+        var hChest=pSpawn("Assets/Prefabs/World/Shared/RewardChest.prefab").GetComponent<RoadOfTheOldKing.World.RewardChest>();
+        hChest.GetType().GetField("rewardId",pFlags).SetValue(hChest,pId+"/held-chest");hChest.GetType().GetField("reward",pFlags).SetValue(hChest,RoadOfTheOldKing.Progression.RewardKind.BronzeCoins);
+        hChest.GetType().GetField("requiredMilestone",pFlags).SetValue(hChest,"");hChest.RestoreProgress(pGame.Progress);pMove((Vector2)hChest.transform.position+Vector2.down*.6f);
+        var hCoins=(Sprite)hChest.GetType().GetField("coinsSprite",pFlags).GetValue(hChest);int hMoney=pGame.Progress.bronzeCoins;
+        pCheck(hCoins!=null&&hChest.TryCollect(pPlayer)&&hUp.IsPlaying&&hHeld.sprite==hCoins&&hChest.IsOpen&&pGame.Progress.bronzeCoins>hMoney,"A chest holds up its coins, already paid");
+        hEnd();
+        pCheck(!hUp.IsPlaying&&hLeases()==hBaseLeases,"A chest's hold-up ends clean too");
+        // A second find during one replaces it, and disabling mid-way can't strand the pause.
+        var hSecond=pSpawn("Assets/Prefabs/World/Shared/SunShard.prefab").GetComponent<RoadOfTheOldKing.World.SunShardReward>();
+        hSecond.GetType().GetField("rewardId",pFlags).SetValue(hSecond,pId+"/held-second");hSecond.RestoreProgress(pGame.Progress);pMove((Vector2)hSecond.transform.position+Vector2.down*.5f);
+        pCheck(hSecond.TryCollect(pPlayer)&&hUp.IsPlaying,"Another find starts one");
+        hUp.enabled=false;
+        pCheck(!hUp.IsPlaying&&hLeases()==hBaseLeases&&!hLocks.IsLockedBy(hUp),"Disabling it mid-way releases the pause and the lock");
+        hUp.enabled=true;RoadOfTheOldKing.World.RewardHoldUp.SkipForChecks=true;
 
         foreach(var pEffect in UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.PickupCollectBurst>(FindObjectsSortMode.None))
             pCheck(pEffect.GetComponentsInChildren<SpriteRenderer>(true).Length<=7,"Collection effect has a bounded renderer count");

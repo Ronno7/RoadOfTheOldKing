@@ -240,6 +240,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8146153955124394889}
   - component: {fileID: 1437603845137733737}
+  - component: {fileID: 9112009157036704186}
   m_Layer: 0
   m_Name: Woodshed
   m_TagString: Untagged
@@ -277,6 +278,19 @@ Grid:
   m_CellGap: {x: 0, y: 0, z: 0}
   m_CellLayout: 0
   m_CellSwizzle: 0
+--- !u!114 &9112009157036704186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4571028085404520791}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5da44f6554a10404bb422a0fb9ca04ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
+  material: 1
 --- !u!1 &7650973148960936668
 GameObject:
   m_ObjectHideFlags: 0

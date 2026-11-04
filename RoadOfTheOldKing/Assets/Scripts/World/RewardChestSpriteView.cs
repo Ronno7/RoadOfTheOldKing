@@ -2,7 +2,8 @@ using UnityEngine;
 
 namespace RoadOfTheOldKing.World
 {
-    // Presentation only: the reward commits immediately; loading never replays the opening.
+    // Presentation only: the reward commits immediately; loading never replays the opening. Unscaled, because the
+    // lid has to open during the hold-up, which stops the world.
     [DisallowMultipleComponent]
     public sealed class RewardChestSpriteView : MonoBehaviour
     {
@@ -26,7 +27,7 @@ namespace RoadOfTheOldKing.World
             enabled = true;
         }
 
-        private void Update() => Advance(Time.deltaTime);
+        private void Update() => Advance(Time.unscaledDeltaTime);
         private void Advance(float elapsed)
         {
             clock += elapsed;

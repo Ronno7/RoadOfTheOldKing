@@ -185,6 +185,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5206451348382629134}
   - component: {fileID: 1599723095937329875}
+  - component: {fileID: 2804202254479323651}
   m_Layer: 0
   m_Name: Broken_Pillar
   m_TagString: Untagged
@@ -222,6 +223,19 @@ Grid:
   m_CellGap: {x: 0, y: 0, z: 0}
   m_CellLayout: 0
   m_CellSwizzle: 0
+--- !u!114 &2804202254479323651
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3128729672691818113}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5da44f6554a10404bb422a0fb9ca04ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
+  material: 2
 --- !u!1 &3557547850323859935
 GameObject:
   m_ObjectHideFlags: 0

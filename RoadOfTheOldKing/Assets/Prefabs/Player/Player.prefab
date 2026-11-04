@@ -37,6 +37,7 @@ GameObject:
   - component: {fileID: 2981494936759904667}
   - component: {fileID: 4619141286165907218}
   - component: {fileID: 301705873979853676}
+  - component: {fileID: 5315980139413701495}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -605,6 +606,24 @@ MonoBehaviour:
   panelSettings: {fileID: 11400000, guid: e8d13b02f4a53d441b064a4b1cf6e2bf, type: 2}
   charactersPerSecond: 48
   closeUpSize: 4.75
+--- !u!114 &5315980139413701495
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0877f31e19aacc04483e8ed4b55ebad7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.RewardHoldUp
+  sound: {fileID: 8300000, guid: 359df94937bd5714db13b1e9a505a198, type: 3}
+  volume: 0.45
+  riseSeconds: 0.22
+  holdSeconds: 0.9
+  fadeSeconds: 0.16
+  overHead: 2.1
 --- !u!1 &1007
 GameObject:
   m_ObjectHideFlags: 0

@@ -7,6 +7,7 @@
 // Focused art follow-up: after phase 0 reload, set Lowlands.Rope.Art=true and ArtPhase=0.
 // Run art phases 0,1,2 with real frames/reload between; then stop/shared cleanup.
 // This stages the workshop milestone, not its unfinished encounter.
+RoadOfTheOldKing.World.RewardHoldUp.SkipForChecks=true; // Staged checks step time themselves.
 var game=RoadOfTheOldKing.Progression.GameSession.Instance;
 if(!EditorApplication.isPlaying||game==null||game.IsLoading||!game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands.")||UnityEngine.SceneManagement.SceneManager.GetActiveScene().name!="GreenLowlands")throw new System.Exception("Settled isolated GreenLowlands required.");
 var f=System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance;

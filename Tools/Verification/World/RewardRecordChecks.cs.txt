@@ -3,6 +3,7 @@
 // 1. Shared GreenLowlandsGameplayChecks SETUP (stopped). 2. Stopped: run this once to seed the isolated save with
 //    keys written exactly as the old code wrote them. 3. Play, then run between frames: Continue -> Tutorial checks ->
 //    travel -> Lowlands checks -> workshop unlock. 4. Stop and run the shared cleanup. Only the isolated key is touched.
+RoadOfTheOldKing.World.RewardHoldUp.SkipForChecks=true; // Staged checks step time themselves.
 string key=SessionState.GetString("GreenLowlands.Gameplay.Key","");
 if(!key.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new System.Exception("Isolated setup required");
 var checks=new System.Collections.Generic.List<string>();

@@ -731,6 +731,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2149075141218958768}
   - component: {fileID: 6337606016297519438}
+  - component: {fileID: 9200226276457751484}
   m_Layer: 0
   m_Name: Farmhouse_Weathered
   m_TagString: Untagged
@@ -768,6 +769,19 @@ Grid:
   m_CellGap: {x: 0, y: 0, z: 0}
   m_CellLayout: 0
   m_CellSwizzle: 0
+--- !u!114 &9200226276457751484
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7157618506457080513}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5da44f6554a10404bb422a0fb9ca04ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
+  material: 1
 --- !u!1 &8396764966833996075
 GameObject:
   m_ObjectHideFlags: 0

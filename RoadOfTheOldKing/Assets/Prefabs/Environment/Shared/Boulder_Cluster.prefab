@@ -588,6 +588,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2831985473872950640}
   - component: {fileID: 4416508622812754281}
+  - component: {fileID: 8376542601643229330}
   m_Layer: 0
   m_Name: Boulder_Cluster
   m_TagString: Untagged
@@ -625,3 +626,16 @@ Grid:
   m_CellGap: {x: 0, y: 0, z: 0}
   m_CellLayout: 0
   m_CellSwizzle: 0
+--- !u!114 &8376542601643229330
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5123165470733623513}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5da44f6554a10404bb422a0fb9ca04ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
+  material: 2

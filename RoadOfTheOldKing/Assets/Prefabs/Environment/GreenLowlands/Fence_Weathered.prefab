@@ -608,6 +608,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2777310438164912161}
   - component: {fileID: 2015516010706068720}
+  - component: {fileID: 1895830544506172670}
   m_Layer: 0
   m_Name: Fence_Weathered
   m_TagString: Untagged
@@ -645,3 +646,16 @@ Grid:
   m_CellGap: {x: 0, y: 0, z: 0}
   m_CellLayout: 0
   m_CellSwizzle: 0
+--- !u!114 &1895830544506172670
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8593389834721900671}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5da44f6554a10404bb422a0fb9ca04ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
+  material: 1

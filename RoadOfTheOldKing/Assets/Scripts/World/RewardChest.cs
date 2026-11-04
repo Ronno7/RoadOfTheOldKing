@@ -19,6 +19,11 @@ namespace RoadOfTheOldKing.World
         [SerializeField] private GameObject closedVisual;
         [SerializeField] private GameObject openVisual;
         [SerializeField] private RewardChestSpriteView spriteView;
+        [Header("What the hero holds up")]
+        [SerializeField] private Sprite coinsSprite;
+        [SerializeField] private Sprite shardSprite;
+        [SerializeField] private Sprite heartSprite;
+        [SerializeField] private Sprite toolSprite;
         public bool IsOpen { get; private set; }
         public string RewardId => rewardId;
         public override string Prompt => "Open chest";
@@ -37,11 +42,20 @@ namespace RoadOfTheOldKing.World
             if (!CanCollect(player)) return false;
             var session = GameSession.Instance;
             bool awarded = session.Rewards.TryGrant(reward, rewardId, coinAmount, tool);
-            if (awarded) PickupPresentation.Collected(gameObject, player);
+            if (awarded && !HoldUp(player)) PickupPresentation.Collected(gameObject, player);
             // Also reconcile a reward granted elsewhere under the same unique ID.
             RestoreProgress(session.Progress);
             if (awarded && spriteView != null) spriteView.PlayOpening();
             return awarded;
+        }
+
+        private bool HoldUp(PlayerHealth player)
+        {
+            var contents = reward == RewardKind.BronzeCoins ? coinsSprite : reward == RewardKind.SunShard ? shardSprite :
+                reward == RewardKind.HeartFragment ? heartSprite : toolSprite;
+            var template = GetComponentInChildren<SpriteRenderer>(true);
+            return RewardHoldUp.TryPlay(player, contents, transform.position + Vector3.up * .5f,
+                reward == RewardKind.HeartFragment ? PickupPresentation.Heart : PickupPresentation.Warm, template);
         }
 
         public void CaptureProgress(ProgressState state) { }

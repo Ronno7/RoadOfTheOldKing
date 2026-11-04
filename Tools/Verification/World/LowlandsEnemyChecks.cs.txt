@@ -1,5 +1,6 @@
 // Shared GreenLowlands setup -> confirmed SETUP -> Play -> reset Lowlands.Enemies.Phase/Passed.
 // Run phases 0-7 between real frames, then stop and shared cleanup. Attacks/defeats are staged, not a human run.
+RoadOfTheOldKing.World.RewardHoldUp.SkipForChecks=true; // Staged checks step time themselves.
 var game=RoadOfTheOldKing.Progression.GameSession.Instance;
 if(!Application.isPlaying||game==null||game.StorageKey!=SessionState.GetString("GreenLowlands.Gameplay.Key","")||!game.StorageKey.StartsWith("RoadOfTheOldKing.Verification.GreenLowlands."))throw new System.Exception("Isolated Play required");
 Application.runInBackground=true;EditorApplication.QueuePlayerLoopUpdate();if(game.IsLoading)return "WAIT";
