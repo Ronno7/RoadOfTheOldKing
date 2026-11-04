@@ -178,9 +178,9 @@ Values live in `Assets/Settings/Weapons/AxeSettings.asset`.
 | Enemy | Brain | Health | Attacks | What it asks of you |
 | --- | --- | --- | --- | --- |
 | Wolf | Predator | 50 | Lunge, snap | Read the lock, then sidestep or punish the recovery |
-| Road Scavenger | Pursuit | 75 | Step-in, overhead | Keep your spacing; watches 0.9 s before it engages |
+| Road Scavenger | Pursuit | 75 | Step-in, overhead | Keep your spacing; watches 0.5 s before it engages |
 | Mossback Boar | Pursuit | 90 | Charge, tusk sweep | Bait the charge; hitting a wall head-on stuns it 2.2 s |
-| Thorn Rat | Pursuit | 10 | Dart and nip | Don't get surrounded |
+| Thorn Rat | Pursuit | 20 | Dart and nip | Don't get surrounded |
 | Broken Watcher (boss) | Pursuit, guardian stage | 440 | 360° slam, close sweep, a draw from afar | Leave the ring, fight the pull, punish the recovery |
 
 Every attack follows the same contract, with values in `Assets/Settings/Enemies`:
@@ -286,7 +286,7 @@ One verb per space. Each lesson completes from a real outcome, not a key press.
 
 - **UI kit:** every panel, menu and chip shares `UI/Kit.uss` and the RotOK pixel fonts, at 2 reference pixels per UI pixel on a 960x540 canvas.
 - **World meters:** enemy bars and the charge bar are small world-space documents, so they scale with what they measure.
-- **Menus:** `MenuStack` routes input to the top menu. Title, pause, bonfire and defeat screens share one theme.
+- **Menus:** `MenuStack` routes input to the top menu. Title, pause, bonfire and defeat screens share one theme. Pause lists every control for both devices from `ControlLabels`, the source the prompts use.
 - **Atmosphere:** `RegionAtmosphere` lays a grade, cloud shadows and motes over each region, with Restrained (default) and Cinematic looks.
 - **Feedback:** `PlayerHitFeedback` flashes, kicks the camera and blinks the hero; `FeedbackSettings` scales it down for players who prefer less.
 

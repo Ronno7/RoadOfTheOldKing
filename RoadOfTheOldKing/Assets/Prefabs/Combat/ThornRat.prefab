@@ -317,7 +317,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.Damageable
-  maxHealth: 10
+  maxHealth: 20
   protectionSource: {fileID: 0}
 --- !u!114 &7469049545066965235
 MonoBehaviour:
@@ -353,7 +353,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.SimpleMeleeEnemy
   target: {fileID: 0}
   attack: {fileID: 11400000, guid: 83aba22af48620644b0261b26abf98a4, type: 2}
-  moveSpeed: 4.2
+  moveSpeed: 5.5
   noticeRadius: 7
   watchDuration: 0
   forgetDuration: 0.6
@@ -377,7 +377,7 @@ MonoBehaviour:
   wakeDuration: 1.5
   defeatRecord: {fileID: 0}
   holdDistance: 2.6
-  attackCooldown: 0.9
+  attackCooldown: 0.5
   cooldownJitter: 0.8
 --- !u!114 &2751467187380559122
 MonoBehaviour:

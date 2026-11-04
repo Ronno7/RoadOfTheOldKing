@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: MossbackCharge
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.EnemyAttackDefinition
   settings:
-    windup: 0.85
+    windup: 0.7
     active: 0.8
     recovery: 1.1
     reach: 1.05
@@ -22,7 +22,9 @@ MonoBehaviour:
     stagger: 0.25
     damage: 24
     chargeSpeed: 10
-    trackingTime: 0.35
+    trackingTime: 0.55
     armoredWhenLocked: 0
     armoredWhileActive: 1
     wallStunRecovery: 2.2
+    impactShake: 0
+    drawSpeed: 0

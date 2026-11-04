@@ -23,7 +23,7 @@ try{
  Action<Vector2> put=pos=>{victim.transform.position=pos;pb.position=pos;};
  float watch=(float)t.GetField("watchDuration",flags).GetValue(brain);
  int detections=0; brain.PlayerDetected+=()=>detections++;
- put(home+Vector2.right*(notice-1)); Physics2D.SyncTransforms(); run(15);
+ put(home+Vector2.right*(notice-1)); Physics2D.SyncTransforms(); run(Mathf.RoundToInt(watch*.375f/.02f));
  check(brain.IsWatching&&!brain.IsAware&&brain.Suspicion>.25f&&brain.Suspicion<.5f,"visible exposure builds suspicion before pursuit");
  check(body.position==home&&Vector2.Dot(brain.FacingDirection,Vector2.right)>.99f&&detections==0,"watching faces the player without moving or announcing engagement");
  var indicator=obj.GetComponent<RoadOfTheOldKing.Enemies.EnemyAwarenessIndicator>();

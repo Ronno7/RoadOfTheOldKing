@@ -79,6 +79,8 @@ namespace RoadOfTheOldKing.Enemies
         [SerializeField] private Vector2 lungeWindup = new Vector2(.42f, .95f);
         [Tooltip("Seconds between the lane locking and the leap: the honest dodge cue.")]
         [SerializeField, Min(.05f)] private float lockLead = .32f;
+        [Tooltip("Windup of a quick lunge: a punish, retaliation or follow-up.")]
+        [SerializeField, Min(.05f)] private float quickLungeWindup = .42f;
         [SerializeField, Min(.5f)] private float lungeDistance = 3.4f;
         [SerializeField, Min(.05f)] private float lungeDuration = .3f;
         [Tooltip("Standing still after a lunge: the player's punish window.")]
@@ -418,7 +420,7 @@ namespace RoadOfTheOldKing.Enemies
             bool selectedFeint = lunge && !quick && Random.value < feintChance;
             float selectedFeintAt = Random.Range(.4f, .6f);
             float windup = lunge
-                ? quick ? lockLead + .1f : Random.Range(Mathf.Min(lungeWindup.x, lungeWindup.y), Mathf.Max(lungeWindup.x, lungeWindup.y))
+                ? quick ? quickLungeWindup : Random.Range(Mathf.Min(lungeWindup.x, lungeWindup.y), Mathf.Max(lungeWindup.x, lungeWindup.y))
                 : quick ? quickSnapWindup : snapWindup;
             var spec = new PredatorAttackSpec
             {

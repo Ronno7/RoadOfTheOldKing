@@ -495,7 +495,7 @@ MonoBehaviour:
   maxKnockbackImpulse: 0
   replaceMovementOnHit: 1
   lethalKnockbackMultiplier: 1.6
-  poise: 10
+  poise: 30
   poiseResetDelay: 2.5
   unstaggeredKnockback: 0.2
   rangedPoiseMultiplier: 0.5
@@ -513,7 +513,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.SimpleMeleeEnemy
   target: {fileID: 0}
   attack: {fileID: 11400000, guid: 812432c34c690554ab73e8bf94bcb26b, type: 2}
-  moveSpeed: 2.8
+  moveSpeed: 4
   noticeRadius: 8
   watchDuration: 0
   forgetDuration: 0.6

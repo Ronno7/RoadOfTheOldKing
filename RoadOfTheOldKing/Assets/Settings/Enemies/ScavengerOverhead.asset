@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ScavengerOverhead
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Enemies.EnemyAttackDefinition
   settings:
-    windup: 0.8
+    windup: 0.65
     active: 0.12
     recovery: 1.1
     reach: 2
@@ -24,3 +24,7 @@ MonoBehaviour:
     chargeSpeed: 0
     trackingTime: 0.45
     armoredWhenLocked: 1
+    armoredWhileActive: 0
+    wallStunRecovery: 0
+    impactShake: 0
+    drawSpeed: 0

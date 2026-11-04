@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+**Added**
+- Pause menu lists every control for keyboard and controller.
+
+**Changed**
+- Enemies move faster: scavengers 4.8 u/s (was 3.3), boars 4 (was 2.8), rats 5.5 (was 4.2), trotting wolves 5 (was 4.2).
+- Scavenger, boar and wolf attacks lock their aim about 0.15 s before they land (were 0.3 to 0.5 s).
+- One chop no longer interrupts a scavenger or boar; a full combo does.
+- Scavengers pause 0.4 s between attacks (was 0.8 s), stand closer and engage after 0.5 s of sight (was 0.9 s).
+- Rats take two chops (20 health, was 10) and pause 0.5 s between darts (was 0.9 s).
+- Wolves dodge, feint and punish more often.
+
 ## 0.5 — Full production
 
 ### 0.5.0-dev.2 — 2026-11-03 · Development build: the Broken Watcher, a bigger Lowlands and Windows
