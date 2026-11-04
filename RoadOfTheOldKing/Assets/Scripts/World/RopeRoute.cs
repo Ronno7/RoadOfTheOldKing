@@ -22,6 +22,12 @@ namespace RoadOfTheOldKing.World
             upperAnchor != null && lowerAnchor != upperAnchor && traversedCliff != null;
         public bool OwnsAnchor(RopeAnchor anchor) => anchor != null && (anchor == lowerAnchor || anchor == upperAnchor);
 
+        private Vector2 FarEnd(RopeAnchor anchor) =>
+            anchor == lowerAnchor ? upperAnchor.transform.position : lowerAnchor.transform.position;
+
+        public bool CanTraverse(PlayerMovement motor, RopeAnchor anchor) => motor != null && IsConfigured &&
+            OwnsAnchor(anchor) && motor.CanTraverseRope(anchor.transform.position, FarEnd(anchor), traversedCliff);
+
         public bool TryClimb(PlayerHealth player, RopeAnchor anchor)
         {
             var session = GameSession.Instance;
@@ -29,8 +35,7 @@ namespace RoadOfTheOldKing.World
                 session == null || session.IsLoading ||
                 (!IsSecured && !session.Progress.OwnsTool(WorldTool.RopeKit))) return false;
             var motor = player.GetComponent<PlayerMovement>();
-            Vector2 end = anchor == lowerAnchor ? upperAnchor.transform.position : lowerAnchor.transform.position;
-            if (motor == null || !motor.TryBeginRopeTraversal(this, anchor.transform.position, end, traversedCliff, climbSpeed))
+            if (motor == null || !motor.TryBeginRopeTraversal(this, anchor.transform.position, FarEnd(anchor), traversedCliff, climbSpeed))
                 return false;
             climber = motor;
             if (!IsSecured)

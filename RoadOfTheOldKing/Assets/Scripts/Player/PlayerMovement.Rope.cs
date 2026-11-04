@@ -42,13 +42,16 @@ namespace RoadOfTheOldKing.Player
             (combat == null || combat.CanStartAttack && !combat.IsAttacking && !combat.ControlsMovement &&
                 (combat.Weapon == null || !combat.Weapon.IsAway && !combat.Weapon.IsThrowing));
 
+        // The prompt asks this too, so it never offers a climb that the press would refuse.
+        public bool CanTraverseRope(Vector2 start, Vector2 end, Collider2D cliff) =>
+            CanStartRopeTraversal && cliff != null && Vector2.Distance(body.position, start) <= 1.25f &&
+            Vector2.Distance(start, end) >= .5f && Vector2.Distance(start, end) <= 12f &&
+            RopeLandingClear(body.position) && RopeLandingClear(start) && RopeLandingClear(end) &&
+            RopeSegmentClear(body.position, start, null) && RopeSegmentClear(start, end, cliff);
+
         public bool TryBeginRopeTraversal(RopeRoute route, Vector2 start, Vector2 end, Collider2D cliff, float speed)
         {
-            if (!CanStartRopeTraversal || route == null || !route.isActiveAndEnabled || cliff == null ||
-                speed <= 0f || Vector2.Distance(body.position, start) > 1.25f ||
-                Vector2.Distance(start, end) < .5f || Vector2.Distance(start, end) > 12f ||
-                !RopeLandingClear(body.position) || !RopeLandingClear(start) || !RopeLandingClear(end) ||
-                !RopeSegmentClear(body.position, start, null) || !RopeSegmentClear(start, end, cliff)) return false;
+            if (route == null || !route.isActiveAndEnabled || speed <= 0f || !CanTraverseRope(start, end, cliff)) return false;
             ropeOrigin = body.position;
             ropeStart = start;
             ropeEnd = end;

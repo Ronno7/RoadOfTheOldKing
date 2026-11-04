@@ -79,7 +79,7 @@ try{
   game.Progress.completedIds.Remove("shop/purchased/green-lowlands/rope-kit");game.Progress.completedIds.Remove("tool/collected/green-lowlands/rope-kit");
   game.Progress.bronzeCoins=45;
   foreach(var stock in UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.ShopOffer>(FindObjectsSortMode.None))stock.RestoreProgress(game.Progress);
-  pose(new Vector2(10,3));check(UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.ShopOffer>(FindObjectsSortMode.None).First(o=>o.Tool==RoadOfTheOldKing.Progression.WorldTool.RopeKit).TryCollect(p),"Regional rope transaction succeeds at trader");
+  pose((Vector2)UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.Trader>().transform.position+Vector2.right);check(UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.ShopOffer>(FindObjectsSortMode.None).First(o=>o.Tool==RoadOfTheOldKing.Progression.WorldTool.RopeKit).TryCollect(p),"Regional rope transaction succeeds at trader");
   check(game.Progress.bronzeCoins==15&&game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.RopeKit),"price debited once and kit owned");
   pose(lowerPosition+Vector2.left*3);check(!lower.TryCollect(p),"distant activation rejected");
   pose(lowerPosition+Vector2.right*1.2f);check(!lower.TryCollect(p),"activation from inside cliff rejected");
@@ -90,9 +90,9 @@ try{
   check(axe.TryThrow(Vector2.left),"throw started for exclusion");check(!lower.TryCollect(p),"away axe rejects climb");axe.CancelAction();
   check(axe.TryLightChop(Vector2.right),"attack started for exclusion");check(!lower.TryCollect(p),"attack rejects climb");axe.CancelAction();
   obstacle=new GameObject("Verification rope obstacle");var box=obstacle.AddComponent<BoxCollider2D>();box.size=Vector2.one;
-  obstacle.transform.position=(Vector3)upperPosition;Physics2D.SyncTransforms();check(!lower.TryCollect(p)&&!route.IsSecured,"occupied destination rejects without persisting rope");
-  obstacle.transform.position=(Vector3)((lowerPosition+upperPosition)*.5f);Physics2D.SyncTransforms();check(!lower.TryCollect(p),"second solid along cliff crossing rejected");
-  UnityEngine.Object.DestroyImmediate(obstacle);obstacle=null;Physics2D.SyncTransforms();
+  obstacle.transform.position=(Vector3)upperPosition;Physics2D.SyncTransforms();check(!lower.CanCollect(p),"occupied destination withdraws the prompt");check(!lower.TryCollect(p)&&!route.IsSecured,"occupied destination rejects without persisting rope");
+  obstacle.transform.position=(Vector3)((lowerPosition+upperPosition)*.5f);Physics2D.SyncTransforms();check(!lower.CanCollect(p)&&!lower.TryCollect(p),"second solid along cliff crossing withdraws the prompt and rejects");
+  UnityEngine.Object.DestroyImmediate(obstacle);obstacle=null;Physics2D.SyncTransforms();check(lower.CanCollect(p),"prompt returns once the way is clear");
   ready();check(p.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>().TryInteract(),"F secures and starts actual rope");
   check(motor.IsTraversingRope&&locks.IsLockedBy(motor)&&body.bodyType==RigidbodyType2D.Kinematic,"motor owns traversal and its control lease");
   check(route.IsSecured&&store.Load().Has(route.ProgressId),"secured rope immediately persisted");

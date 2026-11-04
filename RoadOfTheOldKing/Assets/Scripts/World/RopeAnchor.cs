@@ -17,7 +17,7 @@ namespace RoadOfTheOldKing.World
                 !route.IsConfigured || !route.OwnsAnchor(this) || !HasClearAccess(player)) return false;
             var session = GameSession.Instance;
             var motor = player.GetComponent<PlayerMovement>();
-            return session != null && !session.IsLoading && motor != null && motor.CanStartRopeTraversal;
+            return session != null && !session.IsLoading && route.CanTraverse(motor, this);
         }
         public override bool TryCollect(PlayerHealth player) => route != null && route.TryClimb(player, this);
     }

@@ -23,6 +23,7 @@
 
 **Fixed**
 - Fences no longer draw over a hero standing in front of them.
+- The rope no longer offers a climb while its way is blocked.
 
 ## 0.5 — Full production
 
