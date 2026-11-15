@@ -14,6 +14,10 @@ namespace RoadOfTheOldKing.Player
         [SerializeField, Min(0f)] private float cooldown = 0.35f;
         [Tooltip("Protection at the start of a dash, shorter than the full movement.")]
         [SerializeField, Min(0f)] private float dodgeWindow = 0.1f;
+        [Tooltip("How front-loaded the dodge is. 0 is one steady speed; higher bursts out faster and eases off toward the exit speed. Distance and duration stay exact.")]
+        [SerializeField, Min(0f)] private float easeOut = 2f;
+        [Tooltip("Units/s the dodge eases down to as it ends. Walking speed hands straight back to movement.")]
+        [SerializeField, Min(0f)] private float exitSpeed = 4.5f;
         private PlayerStamina stamina;
         private PlayerCombatController combat;
         private PlayerHealth health;
@@ -70,9 +74,22 @@ namespace RoadOfTheOldKing.Player
             cooldownRemaining = Mathf.Max(0f, cooldownRemaining - deltaTime);
         }
 
-        public Vector2 GetVelocity(float deltaTime) => IsDashing && deltaTime > 0f
-            ? Direction * (distance / duration) * Mathf.Min(1f, remaining / deltaTime)
-            : Vector2.zero;
+        // This step's share of the curve, so the dodge lands on its distance at any physics rate.
+        public Vector2 GetVelocity(float deltaTime)
+        {
+            if (!IsDashing || deltaTime <= 0f) return Vector2.zero;
+            float from = duration - remaining, to = Mathf.Min(duration, from + deltaTime);
+            return Direction * ((Covered(to) - Covered(from)) / deltaTime);
+        }
+
+        // Distance covered t seconds in. Speed falls from a burst to the exit speed as (1 - t/duration)^easeOut,
+        // with the burst sized so the whole dodge covers exactly `distance`.
+        private float Covered(float t)
+        {
+            float average = distance / duration, end = Mathf.Min(exitSpeed, average);
+            float u = Mathf.Clamp01(t / duration);
+            return end * u * duration + (average - end) * duration * (1f - Mathf.Pow(1f - u, easeOut + 1f));
+        }
 
         public void Cancel()
         {

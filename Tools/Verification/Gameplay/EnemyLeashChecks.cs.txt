@@ -164,8 +164,9 @@ try{
  brun(1);check(bHealth.Health==bHealth.MaxHealth,"back on its seat it's whole again");
  put(aHome+Vector2.right*(bWake-1));Physics2D.SyncTransforms();brun(1);
  check(arena.IsUp&&arena.HoldsPlayer&&!Physics2D.GetIgnoreCollision(aWalls[1],vBody),"waking with the player inside holds the player");
- pb.bodyType=RigidbodyType2D.Dynamic;pb.position=aHome+Vector2.right*7;victim.transform.position=pb.position;Physics2D.SyncTransforms();
- for(int i=0;i<60;i++){pb.linearVelocity=Vector2.right*12;Physics2D.Simulate(.02f);}
+ // Faster than the dodge's 16.9 u/s burst, with the player's continuous collision.
+ pb.bodyType=RigidbodyType2D.Dynamic;pb.collisionDetectionMode=CollisionDetectionMode2D.Continuous;pb.position=aHome+Vector2.right*7;victim.transform.position=pb.position;Physics2D.SyncTransforms();
+ for(int i=0;i<60;i++){pb.linearVelocity=Vector2.right*17;Physics2D.Simulate(.02f);}
  pb.linearVelocity=Vector2.zero;
  check(pb.position.x-aHome.x<=8.05f-.375f,"the held player can't dash out ("+(pb.position.x-aHome.x)+")");
  pb.bodyType=RigidbodyType2D.Kinematic;

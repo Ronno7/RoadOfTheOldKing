@@ -323362,6 +323362,16 @@ MonoBehaviour:
     cueTarget: {fileID: 0}
     cueAtPlayer: 0
     cueOffset: {x: 0, y: 2.5}
+  - id: dodge
+    hint: Dodge {dash}
+    condition: 2
+    amount: 1
+    milestone: 
+    area: {x: 0, y: 0}
+    radius: 4
+    cueTarget: {fileID: 0}
+    cueAtPlayer: 0
+    cueOffset: {x: 0, y: 2.5}
   - id: take-axe
     hint: It's dangerous to go alone! Take this. {interact}
     condition: 3
@@ -323411,16 +323421,6 @@ MonoBehaviour:
     radius: 4
     cueTarget: {fileID: 204502253}
     cueAtPlayer: 0
-    cueOffset: {x: 0, y: 2.5}
-  - id: dodge
-    hint: Dodge {dash}
-    condition: 2
-    amount: 1
-    milestone: 
-    area: {x: 0, y: 0}
-    radius: 4
-    cueTarget: {fileID: 0}
-    cueAtPlayer: 1
     cueOffset: {x: 0, y: 2.5}
   - id: sprint
     hint: Sprint {sprint}
@@ -714185,7 +714185,7 @@ Tilemap:
       - {fileID: 1922039361, guid: 405c7d0154050bf478856281391a20e8, type: 3}
       - {fileID: -435753032, guid: 405c7d0154050bf478856281391a20e8, type: 3}
       - {fileID: -1497324419, guid: 405c7d0154050bf478856281391a20e8, type: 3}
-      m_AnimationSpeed: 1.2500001
+      m_AnimationSpeed: 1.25
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: 65, y: 86, z: 0}

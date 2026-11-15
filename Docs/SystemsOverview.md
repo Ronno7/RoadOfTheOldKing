@@ -84,7 +84,7 @@ Prompts follow whichever device was used last.
 | Right click (hold, release) | RT (hold, release) | Charged cleave |
 | E | LT | Tap to throw, hold to aim; while the axe is away, Recall |
 | Mouse | Right stick | Aim |
-| Q | X | Drink a flask |
+| R | X | Drink a flask |
 | F | A | Interact |
 | Tab | View | Inventory |
 | Alt (hold) | LB (hold) + right stick | Look around |
@@ -98,7 +98,7 @@ Prompts follow whichever device was used last.
 
 1. **Stagger:** knockback plays out and input is ignored.
 2. **Controls lost** (menu, death): the body stops.
-3. **Dodge:** 3.2 units over 0.36 s in a locked direction.
+3. **Dodge:** 3.2 units over 0.36 s in a locked direction, bursting out and easing to walking speed.
 4. **Weapon action:** attacks and throws scale walking speed; the finisher adds a lunge.
 5. **Free movement:** momentum toward the input velocity (walk 4.5 u/s, sprint 7.2 u/s).
 

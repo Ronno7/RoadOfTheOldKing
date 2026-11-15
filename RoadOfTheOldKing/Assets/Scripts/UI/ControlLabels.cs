@@ -15,7 +15,7 @@ namespace RoadOfTheOldKing.UI
         {
             { "move", "WASD" }, { "sprint", "Shift" }, { "dash", "Space" }, { "interact", "F" },
             { "attack", "LMB" }, { "cleave", "RMB" }, { "throw", "E" },
-            { "recall", "E" }, { "pause", "Esc" }, { "status", "Tab" }, { "look", "Alt" }, { "heal", "Q" },
+            { "recall", "E" }, { "pause", "Esc" }, { "status", "Tab" }, { "look", "Alt" }, { "heal", "R" },
             { "aim", "Mouse" }, { "zoom", "Wheel" }, { "select", "Enter" }, { "back", "Esc" },
         };
         private static readonly Dictionary<string, string> gamepad = new Dictionary<string, string>

@@ -263,10 +263,10 @@ namespace RoadOfTheOldKing.Tutorial
         public static List<TutorialStep> DefaultSteps() => new List<TutorialStep>
         {
             new TutorialStep("move", "Head into the village {move}", TutorialCondition.Moved) { amount = 3f },
+            new TutorialStep("dodge", "Dodge {dash}", TutorialCondition.Dodged),
             new TutorialStep("take-axe", "It's dangerous to go alone! Take this. {interact}", TutorialCondition.HasAxe),
             new TutorialStep("throw", "Throw at a target {throw}, then pick it up", TutorialCondition.Milestone) { milestone = "tutorial/lesson/throw-retrieve" },
             new TutorialStep("melee", "Strike the dummy {attack}", TutorialCondition.Milestone) { milestone = "tutorial/lesson/melee" },
-            new TutorialStep("dodge", "Dodge {dash}", TutorialCondition.Dodged),
             new TutorialStep("sprint", "Sprint {sprint}", TutorialCondition.Sprinted) { amount = 4f },
             new TutorialStep("look", "Hold {look} to look around", TutorialCondition.Looked) { cueAtPlayer = true },
             new TutorialStep("road", "Follow the road south to the bridge", TutorialCondition.ReachArea) { area = new Vector2(72f, 27.5f), radius = 5f },

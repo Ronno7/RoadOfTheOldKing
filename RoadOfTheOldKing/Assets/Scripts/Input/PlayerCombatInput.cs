@@ -32,7 +32,7 @@ namespace RoadOfTheOldKing.Input
             charge.AddBinding(GamepadLayout.Cleave);
             throwWeapon = actions.AddAction("Throw Recall", InputActionType.Button, "<Keyboard>/e");
             throwWeapon.AddBinding(GamepadLayout.ThrowRecall);
-            heal = actions.AddAction("Heal", InputActionType.Button, "<Keyboard>/q");
+            heal = actions.AddAction("Heal", InputActionType.Button, "<Keyboard>/r");
             heal.AddBinding(GamepadLayout.Heal);
             aimStick = actions.AddAction("Aim", InputActionType.Value, GamepadLayout.Aim, expectedControlLayout: "Vector2");
             // While the look button steers the camera, the right stick is not aiming.
