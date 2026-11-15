@@ -2,6 +2,7 @@
 
   shrink <character> <slot> <factor>   Redraw a slot's frames smaller, keeping their palette, with a clean rebuilt outline.
   plant <character> <slot>             Shift a slot's frames so the feet stand where the standing view's do, so poses don't slide.
+  snap <character> <slot>              Move any pixel off the standing views' colours to the nearest of them.
 
 Run the downloader first, then once on the newly downloaded slot: shrinking a slot twice shrinks it twice.
 """
@@ -77,6 +78,19 @@ def planted(image, standing):
     return result
 
 
+def snapped(image, palette):
+    """Every opaque pixel on one of the palette's colours: the nearest, by RGB distance."""
+    result = image.convert("RGBA")
+    pixels = result.load()
+    for y in range(result.height):
+        for x in range(result.width):
+            r, g, b, a = pixels[x, y]
+            if a and (r, g, b) not in palette:
+                nr, ng, nb = min(palette, key=lambda c: (c[0] - r) ** 2 + (c[1] - g) ** 2 + (c[2] - b) ** 2)
+                pixels[x, y] = (nr, ng, nb, 255)
+    return result
+
+
 def rewrite(character, frame, image):
     relative = Path(character["name"]) / frame["slot"] / frame["file"]
     paths = [base / relative for base in ROOTS]
@@ -90,7 +104,7 @@ def rewrite(character, frame, image):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=("shrink", "plant"))
+    parser.add_argument("mode", choices=("shrink", "plant", "snap"))
     parser.add_argument("character")
     parser.add_argument("slot")
     parser.add_argument("factor", nargs="?", type=float, help="for shrink")
@@ -100,12 +114,16 @@ def main():
     manifest = json.loads(MANIFEST.read_bytes())
     character = next(c for c in manifest["characters"] if c["name"] == args.character)
     count = 0
+    palette = {c[:3] for view in (ROOTS[0] / character["name"] / "Rotations").glob("*.png")
+               for c in Image.open(view).convert("RGBA").get_flattened_data() if c[3]} if args.mode == "snap" else None
     for frame in character["files"]:
         if frame["slot"] != args.slot:
             continue
         path = ROOTS[0] / character["name"] / frame["slot"] / frame["file"]
         if args.mode == "shrink":
             rewrite(character, frame, shrink(Image.open(path), args.factor))
+        elif args.mode == "snap":
+            rewrite(character, frame, snapped(Image.open(path), palette))
         else:
             standing = Image.open(ROOTS[0] / character["name"] / "Rotations" / (frame["direction"] + ".png"))
             rewrite(character, frame, planted(Image.open(path), standing))

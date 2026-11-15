@@ -44,6 +44,8 @@ namespace RoadOfTheOldKing.Enemies
             if (health.IsAlive) octant = DirectionalSpriteAnimation.Octant(enemy.FacingDirection);
             var clip = animations.rotations; float progress = 0;
             bool windup = enemy.State == PursuitState.Windup, strike = enemy.State == PursuitState.Striking;
+            // A charging body runs; the attack's poses keep the windup and recovery.
+            bool strikePose = strike && !(animations.strikeRuns && distance > .0001f);
             // A ground slam shakes the screen once as it lands.
             if (strike && !wasStriking && enemy.ImpactShake > 0f && Camera.main != null &&
                 Camera.main.TryGetComponent(out RoadOfTheOldKing.Cameras.CameraFollow2D follow))
@@ -53,7 +55,7 @@ namespace RoadOfTheOldKing.Enemies
             // A dormant guardian holds the wake clip's first frame (its resting pose) and rises through it.
             else if ((enemy.IsDormant || enemy.IsWaking) && Has(animations.wake)) { clip = animations.wake; progress = enemy.IsDormant ? 0f : enemy.StateProgress; }
             // Standing its ground between attacks reads as the same fight, so it keeps the attack's stance.
-            else if ((windup || strike || enemy.State == PursuitState.Recovering || (enemy.State == PursuitState.Holding && distance <= .0001f)) && Has(AttackClip))
+            else if ((windup || strikePose || enemy.State == PursuitState.Recovering || (enemy.State == PursuitState.Holding && distance <= .0001f)) && Has(AttackClip))
             {
                 clip = AttackClip;
                 int contact = clip.contactFrame > 0 ? clip.contactFrame : Mathf.Max(1, clip.FrameCount(octant) / 2);

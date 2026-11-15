@@ -6,6 +6,7 @@
 - Pause menu lists every control for keyboard and controller.
 - Sun Shards, heart fragments, tools and chest contents are held up over the hero's head for about a second when taken.
 - Axe hits on wood, stone, brush and pottery have their own sound and flecks; pots break with a ceramic sound.
+- Boars have animations for the charge windup, the recovery, the tusk sweep and death.
 
 **Changed**
 - Enemies move faster: scavengers 4.8 u/s (was 3.3), boars 4 (was 2.8), rats 5.5 (was 4.2), trotting wolves 5 (was 4.2).

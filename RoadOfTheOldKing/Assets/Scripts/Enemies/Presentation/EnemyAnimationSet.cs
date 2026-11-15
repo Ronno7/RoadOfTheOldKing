@@ -18,6 +18,8 @@ namespace RoadOfTheOldKing.Enemies
         [Tooltip("Measured speed (units/s) at or above which travel shows the run cycle. Sets without a walk run at any speed.")]
         [Min(.1f)] public float runAnimationSpeed = 4.8f;
         [Min(.05f)] public float deathFadeDuration = .5f;
+        [Tooltip("A strike that carries the body (a charge) shows the run cycle instead of holding the attack's contact frame.")]
+        public bool strikeRuns;
 
         // A mid-stride frame facing a direction, for drawing the enemy where it's about to be.
         public Sprite StridePose(Vector2 direction)
