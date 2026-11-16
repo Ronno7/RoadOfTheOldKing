@@ -9,7 +9,7 @@ var origin=body.position;var controls=p.GetType().GetField("controlsActive",f).G
 game.Progress.Complete("green-lowlands/watcher-defeated");
 float savedFlash=RoadOfTheOldKing.UI.FeedbackSettings.FlashScale;
 var marks=(SpriteRenderer[])v.GetType().GetField("forkMarks",f).GetValue(v);
-var savedTools=game.Progress.ownedTools.ToArray();bool savedExists=PlayerPrefs.HasKey(game.StorageKey);string savedRecord=PlayerPrefs.GetString(game.StorageKey,"");
+var savedTools=game.Progress.ownedTools.ToArray();var savedSocket=game.Progress.crankSocket;bool savedExists=PlayerPrefs.HasKey(game.StorageKey);string savedRecord=PlayerPrefs.GetString(game.StorageKey,"");
 var bolt=(Transform)v.GetType().GetField("bolt",f).GetValue(v);var brake=(Transform)v.GetType().GetField("brake",f).GetValue(v);var weight=(Transform)v.GetType().GetField("counterweight",f).GetValue(v);var wire=(LineRenderer)v.GetType().GetField("suspension",f).GetValue(v);
 var left=(Transform)v.GetType().GetField("leftShutter",f).GetValue(v);var right=(Transform)v.GetType().GetField("rightShutter",f).GetValue(v);var leftRod=(LineRenderer)v.GetType().GetField("leftRod",f).GetValue(v);var rightRod=(LineRenderer)v.GetType().GetField("rightRod",f).GetValue(v);
 var outlet=(Transform)v.GetType().GetField("outletGate",f).GetValue(v);var outletTravel=(Vector3)v.GetType().GetField("outletTravel",f).GetValue(v);
@@ -53,9 +53,12 @@ System.Action<Vector2> pose=at=>{body.position=at;p.transform.position=at;body.l
 System.Action<int> tick=n=>{for(int i=0;i<n;i++){s.GetType().GetMethod("FixedUpdate",f).Invoke(s,null);Physics2D.SyncTransforms();a.GetType().GetMethod("Simulate",f).Invoke(a,new object[]{.02f});cutaway.EvaluateAt(body.position);cutaway.GetType().GetMethod("Advance",f).Invoke(cutaway,new object[]{.02f});v.GetType().GetMethod("Advance",f).Invoke(v,new object[]{.02f});outfall.Present(.02f);}};
 System.Action<Vector2> lodge=at=>{a.CancelAction();pose(at);stamina.Restore();check(a.TryThrow(Vector2.right),"Throw accepted");tick(90);check(a.State==RoadOfTheOldKing.Weapons.AxeState.Stuck,"Real fork lodging");};
 System.Action<Vector2> recall=at=>{pose(at);stamina.Restore();check(a.TryPlayerRecall(),"Recall accepted");};
+var hintFeedback=s.GetComponent<RoadOfTheOldKing.World.SluiceFeedback>();var hintFittings=(System.Array)hintFeedback.GetType().GetField("fittings",f).GetValue(hintFeedback);
+// Recall targets twinkle while their stage needs them (user, 15 Nov): the names of the vanes glinting now.
+System.Func<string> glinting=()=>{var on=new System.Collections.Generic.List<string>();foreach(var x in hintFittings){var rec=(Transform)x.GetType().GetField("receiver").GetValue(x);if(rec!=null&&(bool)hintFeedback.GetType().GetMethod("HintWanted",f).Invoke(hintFeedback,new object[]{x}))on.Add(rec.name);}on.Sort();return string.Join(",",on.ToArray());};
 System.Func<bool,bool> turn=carriage=>{pose(carriage?new Vector2(4.5f,76):new Vector2(6,88));return p.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>().TryInteract();};
 try{
- if(!game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank))game.Progress.ownedTools.Add(RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank);
+ if(!game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank))game.Progress.ownedTools.Add(RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank);game.Progress.crankSocket="";
  game.Progress.completedIds.RemoveAll(id=>id.StartsWith("green-lowlands/sluice/"));s.RestoreProgress(game.Progress);
  var boltRest=bolt.localPosition;var brakeRest=brake.localPosition;var weightRest=weight.localPosition;
  var leftRest=left.localPosition;var rightRest=right.localPosition;
@@ -90,12 +93,23 @@ try{
  RoadOfTheOldKing.UI.FeedbackSettings.FlashScale=savedFlash;
  lodge(new Vector2(5,86));recall(new Vector2(6,90));tick(1);
  check(marks.All(m=>!m.enabled),"Starting Recall clears loaded inlay");
+ check(glinting()=="Distributor vane","First stage: only the distributor vane glints ("+glinting()+")");
+ game.Progress.completedIds.Remove("green-lowlands/watcher-defeated");check(glinting()=="","Nothing glints while the guardian holds the controls");game.Progress.Complete("green-lowlands/watcher-defeated");
  for(int i=0;i<70&&s.Stage==RoadOfTheOldKing.World.SluiceStage.High;i++)tick(1);
  check(s.Stage==RoadOfTheOldKing.World.SluiceStage.DistributorReleased,"Real distributor stroke releases bolt");
  check(bolt.gameObject.activeSelf&&bolt.localPosition.x<boltRest.x&&bolt.localPosition.x>boltRest.x-.5f,"Bolt slides instead of disappearing or snapping");
  tick(30);check(Mathf.Abs(bolt.localPosition.x-(boltRest.x-.5f))<.001f,"Bolt remains fully retracted");
  check(serviceBlocker.enabled&&mainBlocker.enabled&&serviceLeaf.localPosition==serviceRest&&mainLeaf.localPosition==mainRest,"Distributor latch alone cannot open either pedestrian passage");
+ // One crank (user, 15 Nov): carried, placed in a socket, turned there, then taken out for the other.
+ var cranks=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SluiceCrank>(FindObjectsInactive.Include,FindObjectsSortMode.None);var dCrank=cranks.First(c=>c.name=="Distributor crank");var cCrank=cranks.First(c=>c.name=="Carriage crank");
+ var feedback=s.GetComponent<RoadOfTheOldKing.World.SluiceFeedback>();System.Func<RoadOfTheOldKing.World.SluiceCrank,string> shows=c=>{feedback.GetType().GetMethod("Advance",f).Invoke(feedback,new object[]{.02f});return c.transform.Find("Native fitting visual").GetComponent<SpriteRenderer>().sprite.name;};
+ check(dCrank.Prompt=="Place crank"&&cCrank.Prompt=="Place crank"&&shows(dCrank)=="CrankSocket"&&shows(cCrank)=="CrankSocket","Carried, the crank is in neither socket and both offer a place for it");
+ check(turn(false)&&game.Progress.crankSocket=="green-lowlands/crank/distributor"&&dCrank.HoldsCrank&&!cCrank.HoldsCrank&&cCrank.Prompt=="Requires maintenance crank"&&shows(dCrank)=="Machine_Crank"&&shows(cCrank)=="CrankSocket","Placing puts the one crank in the distributor only");
  check(turn(false),"Owned crank and contextual interaction divert service");
+ check(dCrank.Prompt=="Take crank","With its work done, the distributor offers the crank back");
+ check(glinting()=="Brake vane,Catch vane","Second bay: both its vanes glint together, never in order ("+glinting()+")");
+ check(turn(false)&&string.IsNullOrEmpty(game.Progress.crankSocket)&&shows(dCrank)=="CrankSocket","Taking it out carries it again");
+ check(turn(true)&&cCrank.HoldsCrank&&shows(cCrank)=="Machine_Crank","Placed in the carriage socket");
  check(serviceReveal.IsDraining&&serviceBlocker.enabled&&serviceLeaf.localPosition==serviceRest,"Service diversion starts drainage before moving its passage gate");
  float serviceDuration=(float)serviceReveal.GetType().GetField("duration",f).GetValue(serviceReveal);
  // Water updates precede the gate view, matching Update before LateUpdate in play.
@@ -133,7 +147,7 @@ try{
  pose(new Vector2(11,78));tick(90);check(weight.localPosition==weightRest&&s.Stage==RoadOfTheOldKing.World.SluiceStage.ServiceDiverted,"Wrong-order tug settles with no progress");
  s.ResetOnRest();lodge(new Vector2(5,74));check(turn(true),"Final carriage move accepted");tick(60);recall(new Vector2(4.5f,78));
  for(int i=0;i<70&&s.Stage!=RoadOfTheOldKing.World.SluiceStage.PondLow;i++)tick(1);
- check(s.Stage==RoadOfTheOldKing.World.SluiceStage.PondLow,"Ordered real return releases main mechanism");
+ check(s.Stage==RoadOfTheOldKing.World.SluiceStage.PondLow,"Ordered real return releases main mechanism");check(glinting()=="","Solved, nothing glints");
  check(weight.localPosition.y<weightRest.y&&weight.localPosition.y>weightRest.y-1.25f,"Released counterweight begins a visible drop");
  float fraction=(weightRest.y-weight.localPosition.y)/1.25f;
  check(v.Opening>0f&&v.Opening<1f&&Mathf.Abs(v.Opening-fraction)<.001f&&(outlet.localPosition-outletRest-outletTravel*v.Opening).sqrMagnitude<.000001f,"Exterior gate opens on the same counterweight stroke");
@@ -211,5 +225,5 @@ try{
  check(left.localPosition==leftRest&&right.localPosition==rightRest,"Fresh restore closes both leaves");
  check(serviceLeaf.localPosition==serviceRest&&mainLeaf.localPosition==mainRest&&serviceBlocker.enabled&&mainBlocker.enabled,"Fresh restore returns both passage leaves and blockers to closed state");
  outfall.RefreshNow();check(v.Opening==0f&&outlet.localPosition==outletRest&&!surge.enabled&&canalWater.All(r=>!r.enabled)&&upstream.enabled&&wet.All(r=>!r.enabled),"Fresh restore recovers closed outlet and high intake water");
-}finally{RoadOfTheOldKing.UI.FeedbackSettings.FlashScale=savedFlash;outfall.enabled=true;v.enabled=true;a.CancelAction();game.Progress.completedIds.Clear();game.Progress.completedIds.AddRange(saved);game.Progress.ownedTools.Clear();game.Progress.ownedTools.AddRange(savedTools);s.RestoreProgress(game.Progress);outfall.RefreshNow();pose(origin);cutaway.EvaluateAt(origin,true);p.GetType().GetField("controlsActive",f).SetValue(p,controls);if(savedExists)PlayerPrefs.SetString(game.StorageKey,savedRecord);else PlayerPrefs.DeleteKey(game.StorageKey);PlayerPrefs.Save();}
+}finally{RoadOfTheOldKing.UI.FeedbackSettings.FlashScale=savedFlash;outfall.enabled=true;v.enabled=true;a.CancelAction();game.Progress.completedIds.Clear();game.Progress.completedIds.AddRange(saved);game.Progress.ownedTools.Clear();game.Progress.ownedTools.AddRange(savedTools);game.Progress.crankSocket=savedSocket;s.RestoreProgress(game.Progress);outfall.RefreshNow();pose(origin);cutaway.EvaluateAt(origin,true);p.GetType().GetField("controlsActive",f).SetValue(p,controls);if(savedExists)PlayerPrefs.SetString(game.StorageKey,savedRecord);else PlayerPrefs.DeleteKey(game.StorageKey);PlayerPrefs.Save();}
 return new{passed=checks.Count,checks=checks.ToArray()};

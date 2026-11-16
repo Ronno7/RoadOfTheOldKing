@@ -95,6 +95,7 @@ namespace RoadOfTheOldKing.EditorTools
             public readonly HashSet<Vector2Int> structure = new HashSet<Vector2Int>();
             public readonly HashSet<Vector2Int> water = new HashSet<Vector2Int>();
             public readonly List<Vector3> clearings = new List<Vector3>();
+            public VegetationPropOcclusion props;
             public bool Allows(Vector2 p)
             {
                 for (int y=-1;y<=1;y++) for (int x=-1;x<=1;x++)
@@ -109,7 +110,7 @@ namespace RoadOfTheOldKing.EditorTools
                        c.attachedRigidbody.bodyType==RigidbodyType2D.Static)) return false;
                 return true;
             }
-            public bool Allows(Vector2 p, Rect canopy)
+            public bool Allows(Vector2 p, Rect canopy, Rect rest)
             {
                 if(!Allows(p))return false;
                 // Root clearance alone misses tall leaves leaning sideways over a neighboring face.
@@ -118,7 +119,8 @@ namespace RoadOfTheOldKing.EditorTools
                 int y0=Mathf.FloorToInt(p.y+canopy.yMin), y1=Mathf.FloorToInt(p.y+canopy.yMax-.0001f);
                 for(int y=y0;y<=y1;y++)for(int x=x0;x<=x1;x++)
                     if(structure.Contains(new Vector2Int(x,y)))return false;
-                return true;
+                // Leaves reaching up into a prop in front of them would draw behind it.
+                return props==null||!props.Covers(p,rest);
             }
             public bool NearWater(Vector2 p)
             {
@@ -228,6 +230,7 @@ namespace RoadOfTheOldKing.EditorTools
             }
             // Keep both precision bays entirely quiet; also preserve the arrival's existing decoration.
             for(int y=61;y<=94;y++)for(int x=2;x<=13;x++)mask.excluded.Add(new Vector2Int(x,y));
+            mask.props=VegetationPropOcclusion.Read(SceneManager.GetActiveScene());
             Physics2D.SyncTransforms();
             return mask;
         }
@@ -338,6 +341,7 @@ namespace RoadOfTheOldKing.EditorTools
             if(density.width!=Width||density.height!=Height)throw new InvalidDataException("Density must be 172 x 174.");
             var speciesMetadata=ReadSpecies();
             var canopyBounds=speciesMetadata.Select(CanopyBounds).ToArray();
+            var restBounds=VegetationPropOcclusion.Rest(speciesMetadata);
             var layout=AssetDatabase.LoadAssetAtPath<VegetationLayout>(LayoutPath);
             int seed=layout!=null?layout.seed:1703;
             var plants=new List<VegetationLayout.Plant>();
@@ -368,7 +372,7 @@ namespace RoadOfTheOldKing.EditorTools
                 float v=Random01(key+3);
                 int species=v<.32f?0:v<.88f?1:v<.94f?2:3;
                 if(mask.NearWater(p))species=4;
-                if(!mask.Allows(p,canopyBounds[species])||!FarEnough(p,buckets))continue;
+                if(!mask.Allows(p,canopyBounds[species],restBounds[species])||!FarEnough(p,buckets))continue;
                 plants.Add(new VegetationLayout.Plant{position=p,species=species,phase=Random01(key+4)*Mathf.PI*2});
                 var cell=Vector2Int.FloorToInt(p/Spacing);
                 if(!buckets.TryGetValue(cell,out var list))buckets.Add(cell,list=new List<Vector2>());
@@ -420,10 +424,11 @@ namespace RoadOfTheOldKing.EditorTools
             if(layout.plants==null||layout.plants.Length==0)return "Invalid regional layout: 0 plants. Check density and scene masks.";
             int invalid=0,overlap=0;var buckets=new Dictionary<Vector2Int,List<Vector2>>();
             var canopyBounds=layout.species.Select(CanopyBounds).ToArray();
+            var restBounds=VegetationPropOcclusion.Rest(layout.species);
             foreach(var p in layout.plants)
             {
                 if(p.species<0||p.species>=layout.species.Length||
-                   !mask.Allows(p.position,canopyBounds[p.species]))invalid++;
+                   !mask.Allows(p.position,canopyBounds[p.species],restBounds[p.species]))invalid++;
                 if(!FarEnough(p.position,buckets))overlap++;
                 var c=Vector2Int.FloorToInt(p.position/Spacing);
                 if(!buckets.TryGetValue(c,out var list))buckets.Add(c,list=new List<Vector2>());list.Add(p.position);

@@ -32,6 +32,9 @@ if(phase==8||phase==10){
 }else{
     var player=GameObject.Find("Player").GetComponent<RoadOfTheOldKing.Player.PlayerHealth>();
     var combat=player.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();
+    // An unfocused editor switches player input off, which blocks interaction too (as in ThrowAimPlayModeChecks).
+    var combatInput=player.GetComponent<RoadOfTheOldKing.Input.PlayerCombatInput>();
+    if(combatInput!=null){combatInput.GetType().GetField("focused",flags).SetValue(combatInput,true);combatInput.SendMessage("Update",SendMessageOptions.DontRequireReceiver);combat.SendMessage("Update",SendMessageOptions.DontRequireReceiver);}
     var body=player.GetComponent<Rigidbody2D>();
     var interaction=player.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>();
     var flask=player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>();

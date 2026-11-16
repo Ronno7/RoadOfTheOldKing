@@ -36,6 +36,7 @@ namespace RoadOfTheOldKing.EditorTools
             if (!File.Exists(DensityPath)) WriteSeed(mask);
             var density = ImportDensity();
             var species = ReadSpecies();
+            mask.rests = VegetationPropOcclusion.Rest(species);
             var layout = AssetDatabase.LoadAssetAtPath<VegetationLayout>(LayoutPath);
             if (layout == null)
             {
@@ -94,12 +95,13 @@ namespace RoadOfTheOldKing.EditorTools
             var mask = ReadMask();
             var layout = AssetDatabase.LoadAssetAtPath<VegetationLayout>(LayoutPath);
             if (layout == null) return "No vegetation layout is baked.";
+            mask.rests = VegetationPropOcclusion.Rest(layout.species);
             int invalid = 0, overlaps = 0;
             var occupied = new Dictionary<Vector2Int, List<Vector2>>();
             foreach (var plant in layout.plants)
             {
-                if (!mask.Allows(plant.position, SurfaceClearance) || plant.species < 0 ||
-                    plant.species >= layout.species.Length) invalid++;
+                if (plant.species < 0 || plant.species >= layout.species.Length ||
+                    !mask.Allows(plant.position, SurfaceClearance) || mask.InFrontOfProp(plant.position, plant.species)) invalid++;
                 if (!FarEnough(plant.position, occupied)) overlaps++;
                 AddPosition(plant.position, occupied);
             }
@@ -126,11 +128,11 @@ namespace RoadOfTheOldKing.EditorTools
                     var p = new Vector2(x + .25f + (slot % 2) * .5f + (Random01(key + 1) - .5f) * .3f,
                         y + .25f + (slot / 2) * .5f + (Random01(key + 2) - .5f) * .3f);
                     p = new Vector2(Mathf.Round(p.x * 16f) / 16f, Mathf.Round(p.y * 16f) / 16f);
-                    if (!mask.Allows(p, SurfaceClearance) || !FarEnough(p, occupied)) continue;
                     float variety = Random01(key + 3);
                     int kind = variety < .58f ? 0 : variety < .92f ? 1 : 2;
                     if (fan >= 0 && variety > .965f) kind = fan;
                     if (reeds >= 0 && variety > .72f && mask.NearWater(x, y)) kind = reeds;
+                    if (!mask.Allows(p, SurfaceClearance) || mask.InFrontOfProp(p, kind) || !FarEnough(p, occupied)) continue;
                     plants.Add(new VegetationLayout.Plant { position = p, species = kind,
                         phase = Random01(key + 4) * Mathf.PI * 2f });
                     AddPosition(p, occupied);
@@ -359,6 +361,10 @@ namespace RoadOfTheOldKing.EditorTools
             public readonly bool[] water = new bool[Size * Size];
             public readonly List<Collider2D>[] colliders = new List<Collider2D>[Size * Size];
             public readonly List<Vector3> clearings = new List<Vector3>(); // x, y, radius
+            public VegetationPropOcclusion props;
+            public Rect[] rests; // each species' leaves at rest, from its root
+            public bool InFrontOfProp(Vector2 p, int species) =>
+                props != null && rests != null && species >= 0 && species < rests.Length && props.Covers(p, rests[species]);
             public bool CellAllowed(int x, int y) => x >= 1 && y >= 1 && x < Size - 1 && y < Size - 1 && allowed[x + y * Size];
             public bool NearWater(int x, int y)
             {
@@ -420,6 +426,7 @@ namespace RoadOfTheOldKing.EditorTools
                     }
                 }
             }
+            mask.props = VegetationPropOcclusion.Read(scene);
             Physics2D.SyncTransforms();
             foreach (var root in scene.GetRootGameObjects())
             {

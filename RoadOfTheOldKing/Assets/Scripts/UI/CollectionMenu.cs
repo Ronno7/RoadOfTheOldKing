@@ -205,7 +205,7 @@ namespace RoadOfTheOldKing.UI
             switch (tool)
             {
                 case WorldTool.RopeKit: return "A reusable rope kit. Secure a crossing at a suitable anchor.";
-                case WorldTool.MaintenanceCrank: return "A bronze crank for compatible old machinery.";
+                case WorldTool.MaintenanceCrank: return "A maintenance crank for compatible old machinery.";
                 case WorldTool.ProtectedLantern: return "A sheltered light for dark passages.";
                 default: return "";
             }

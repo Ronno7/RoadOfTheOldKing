@@ -420,6 +420,7 @@ GameObject:
   - component: {fileID: 7971848037570184970}
   - component: {fileID: 1508952276851286200}
   - component: {fileID: 8253118023331280965}
+  - component: {fileID: 5294737944037788010}
   m_Layer: 0
   m_Name: Above Player
   m_TagString: Untagged
@@ -598,6 +599,19 @@ TilemapRenderer:
   m_SortOrder: 0
   m_Mode: 0
   m_DetectChunkCullingBounds: 0
+--- !u!114 &5294737944037788010
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7386365739314105439}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f64907a8847f4eb429e2afb75cac63d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.WorldPropDepth
+  groundAnchor: {fileID: 7502480674782002223}
 --- !u!1 &8168737312192205426
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,7 +1,6 @@
 using System.Collections;
 using RoadOfTheOldKing.Progression;
 using UnityEngine;
-using UnityEngine.Tilemaps;
 
 namespace RoadOfTheOldKing.Tutorial
 {
@@ -9,15 +8,21 @@ namespace RoadOfTheOldKing.Tutorial
     public sealed class RecallSealGate : MonoBehaviour, IProgressParticipant
     {
         [SerializeField] private RecallAwakeningStone stone;
+        [Tooltip("The gate: its art and collision sink and fade together.")]
         [SerializeField] private GameObject barrier;
-        [SerializeField] private Tilemap stonework;
         [SerializeField] private SpriteRenderer groundShadow;
         [SerializeField] private float openingSeconds = .8f;
         public bool IsOpen { get; private set; }
         private Coroutine opening;
         private Vector3 closedPosition;
+        private SpriteRenderer[] art = System.Array.Empty<SpriteRenderer>();
 
-        private void Awake() { if (barrier != null) closedPosition = barrier.transform.localPosition; }
+        private void Awake()
+        {
+            if (barrier == null) return;
+            closedPosition = barrier.transform.localPosition;
+            art = barrier.GetComponentsInChildren<SpriteRenderer>(true);
+        }
         private void OnEnable() { if (stone != null) stone.Awakened += Open; }
         private void Start()
         {
@@ -36,8 +41,8 @@ namespace RoadOfTheOldKing.Tutorial
             {
                 float t = Mathf.Clamp01(elapsed / Mathf.Max(.01f, openingSeconds));
                 barrier.transform.localPosition = closedPosition + Vector3.down * t;
-                if (stonework != null) stonework.color = new Color(1, 1, 1, 1 - t);
-                // The gate sinks; its ground contact stays fixed and fades with the stonework.
+                foreach (var r in art) r.color = new Color(1, 1, 1, 1 - t);
+                // The gate sinks; its ground contact stays fixed and fades with the gate.
                 if (groundShadow != null) groundShadow.color = new Color(1, 1, 1, 1 - t);
                 yield return null;
             }

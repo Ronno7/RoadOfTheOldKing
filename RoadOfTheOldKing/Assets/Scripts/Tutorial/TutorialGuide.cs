@@ -231,8 +231,9 @@ namespace RoadOfTheOldKing.Tutorial
             if (index < 0 || Time.time < completedUntil || (steps[index].id == "flask" && Time.time - safeSince < .5f))
             { HudNotifications.ClearHint(); return; }
             var current = steps[index];
-            // The bonfire owns proximity-sensitive [F] Light / [F] Rest prompts.
-            if (current.id == "rest") { HudNotifications.ClearHint(); return; }
+            // The bonfire owns proximity-sensitive [F] Light / [F] Rest prompts; route landmarks without text leave the
+            // way for the player to find (user, 15 Nov).
+            if (current.id == "rest" || string.IsNullOrEmpty(current.hint)) { HudNotifications.ClearHint(); return; }
             if (current.id == "move") moveHintSeconds += Time.deltaTime;
             Vector3? position = current.cueAtPlayer ? player.transform.position + (Vector3)current.cueOffset :
                 current.cueTarget != null ? current.cueTarget.position + (Vector3)current.cueOffset : (Vector3?)null;
@@ -259,23 +260,23 @@ namespace RoadOfTheOldKing.Tutorial
         }
 
         // Default route for Tutorial.unity. Tune text and order in the Inspector; ids are save data.
-        // Hints stay short: a few words plus the key (user, 3 Oct).
+        // Hints stay short: a few words plus the key (user, 3 Oct). Controls only: route landmarks carry no directions.
         public static List<TutorialStep> DefaultSteps() => new List<TutorialStep>
         {
-            new TutorialStep("move", "Head into the village {move}", TutorialCondition.Moved) { amount = 3f },
+            new TutorialStep("move", "Move {move}", TutorialCondition.Moved) { amount = 3f },
             new TutorialStep("dodge", "Dodge {dash}", TutorialCondition.Dodged),
             new TutorialStep("take-axe", "It's dangerous to go alone! Take this. {interact}", TutorialCondition.HasAxe),
             new TutorialStep("throw", "Throw at a target {throw}, then pick it up", TutorialCondition.Milestone) { milestone = "tutorial/lesson/throw-retrieve" },
             new TutorialStep("melee", "Strike the dummy {attack}", TutorialCondition.Milestone) { milestone = "tutorial/lesson/melee" },
             new TutorialStep("sprint", "Sprint {sprint}", TutorialCondition.Sprinted) { amount = 4f },
             new TutorialStep("look", "Hold {look} to look around", TutorialCondition.Looked) { cueAtPlayer = true },
-            new TutorialStep("road", "Follow the road south to the bridge", TutorialCondition.ReachArea) { area = new Vector2(72f, 27.5f), radius = 5f },
+            new TutorialStep("road", "", TutorialCondition.ReachArea) { area = new Vector2(72f, 27.5f), radius = 5f },
             new TutorialStep("first-wolf", "A wolf guards the ruins. Dodge its lunge {dash}", TutorialCondition.Milestone) { milestone = "tutorial/enemy/first-wolf" },
             new TutorialStep("flask", "Drink a flask {heal}", TutorialCondition.DrankFlask),
             new TutorialStep("stone", "The stone seals the way\nThrow {throw}", TutorialCondition.RecallUnlocked),
-            new TutorialStep("first-shard", "Follow the trail north", TutorialCondition.Milestone) { milestone = RewardKeys.ShardCollected("tutorial/first-enemy") },
+            new TutorialStep("first-shard", "Take the Sun Shard {interact}", TutorialCondition.Milestone) { milestone = RewardKeys.ShardCollected("tutorial/first-enemy") },
             new TutorialStep("rest", "", TutorialCondition.Rested) { milestone = "tutorial/roadside-fire" },
-            new TutorialStep("exit", "Take the road northeast", TutorialCondition.Milestone) { milestone = "tutorial/complete" },
+            new TutorialStep("exit", "", TutorialCondition.Milestone) { milestone = "tutorial/complete" },
         };
     }
 }

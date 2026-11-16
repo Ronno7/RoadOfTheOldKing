@@ -30,7 +30,8 @@ namespace RoadOfTheOldKing.UI
             var flask = player.GetComponent<PlayerFlask>();
             if (flask != null) Add("Flasks", "flask", flask.Charges + "/" + flask.MaxCharges);
             if (state.OwnsTool(WorldTool.RopeKit)) Add("Rope kit", "rope");
-            if (state.OwnsTool(WorldTool.MaintenanceCrank)) Add("Maintenance crank", "crank");
+            // Carried only: once placed in a socket it stays in the machine until taken out.
+            if (state.OwnsTool(WorldTool.MaintenanceCrank) && string.IsNullOrEmpty(state.crankSocket)) Add("Maintenance crank", "crank");
             if (state.OwnsTool(WorldTool.ProtectedLantern)) Add("Protected lantern", "lantern");
             int lore = ForgeInscriptionProgression.Count(state);
             if (lore > 0) Add("Smiths' knowledge", "knowledge",

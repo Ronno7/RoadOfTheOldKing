@@ -15,6 +15,16 @@ namespace RoadOfTheOldKing.World
             public Transform receiver;
             public SpriteRenderer visual;
             public bool crank;
+            [Tooltip("Its latch sound's pitch, so parts struck a moment apart still sound like two.")]
+            public float pitch = 1f;
+            [System.NonSerialized] public AudioSource speaker;
+            [Tooltip("A Recall target: it twinkles now and then while its stage still needs it (user, 15 Nov).")]
+            public bool hint;
+            [System.NonSerialized] public SluiceCrank crankFitting;
+            [System.NonSerialized] public SluiceTarget target;
+            [System.NonSerialized] public SpriteRenderer[] hintMarks;
+            [System.NonSerialized] public float hintOffset;
+            [System.NonSerialized] public Sprite full;
             [System.NonSerialized] public Vector3 rest;
             [System.NonSerialized] public Quaternion rotation;
             [System.NonSerialized] public float age = 1f, cooldown;
@@ -24,6 +34,11 @@ namespace RoadOfTheOldKing.World
 
         [SerializeField] private Fitting[] fittings = System.Array.Empty<Fitting>();
         [SerializeField] private Sprite sparkSprite;
+        [Tooltip("A crank's bare socket, shown until the player owns the maintenance crank.")]
+        [SerializeField] private Sprite bareSocket;
+        [Tooltip("Seconds between a Recall target's twinkles; each one lasts .42 s, like a pickup's.")]
+        [SerializeField, Min(1f)] private float hintInterval = 3.6f;
+        private float hintClock;
         [SerializeField] private SluiceWaterReveal serviceWater, pondWater;
         [SerializeField] private Transform counterweight;
         [SerializeField] private Transform[] passageLeaves = System.Array.Empty<Transform>();
@@ -52,7 +67,27 @@ namespace RoadOfTheOldKing.World
             {
                 if (f.visual == null) continue;
                 f.rest = f.visual.transform.localPosition;
+                f.full = f.visual.sprite;
+                if (f.crank && f.receiver != null) f.crankFitting = f.receiver.GetComponent<SluiceCrank>();
                 f.rotation = f.visual.transform.localRotation;
+                // Its own speaker: re-pitching the shared one would bend a latch that's still ringing.
+                if (!Mathf.Approximately(f.pitch, 1f))
+                {
+                    f.speaker = Speaker("Fitting latch", false);
+                    f.speaker.pitch = f.pitch;
+                }
+                if (f.hint && f.receiver != null)
+                {
+                    f.target = f.receiver.GetComponent<SluiceTarget>();
+                    f.hintMarks = new SpriteRenderer[2];
+                    for (int i = 0; i < f.hintMarks.Length; i++)
+                    {
+                        f.hintMarks[i] = PickupPresentation.MakeSprite("Recall hint", transform, sparkSprite, f.visual);
+                        PickupPresentation.BindSolidTexture(f.hintMarks[i]);
+                    }
+                    // Spread over the cycle, so neighbouring vanes don't blink in unison.
+                    f.hintOffset = hintInterval * Mathf.Repeat(f.receiver.position.x * .37f + f.receiver.position.y * .13f, 1f);
+                }
                 f.sparks = new SpriteRenderer[4];
                 for (int i = 0; i < f.sparks.Length; i++)
                 {
@@ -82,11 +117,12 @@ namespace RoadOfTheOldKing.World
             return camera == null ? 0f : Mathf.Clamp01(1f - Vector2.Distance(camera.transform.position, at) / 18f);
         }
 
-        private void Sound(AudioClip clip, Vector3 at, float volume)
+        private void Sound(AudioClip clip, Vector3 at, float volume, AudioSource speaker = null)
         {
-            if (clip == null || impacts == null || Time.timeScale <= 0f) return;
+            if (speaker == null) speaker = impacts;
+            if (clip == null || speaker == null || Time.timeScale <= 0f) return;
             float gain = Audibility(at) * volume;
-            if (gain > .001f) impacts.PlayOneShot(clip, gain);
+            if (gain > .001f) speaker.PlayOneShot(clip, gain);
         }
 
         public void Respond(SluiceResponse response, Transform receiver)
@@ -100,7 +136,8 @@ namespace RoadOfTheOldKing.World
                 f.cooldown = .18f;
                 f.response = response;
                 Sound(response == SluiceResponse.Rejected ? blockedSound : latchSound,
-                    receiver.position, response == SluiceResponse.Rejected ? .55f : .65f);
+                    receiver.position, response == SluiceResponse.Rejected ? .55f : .65f,
+                    response == SluiceResponse.Rejected ? null : f.speaker);
                 if (response == SluiceResponse.Turned) motionTail = .65f;
                 return;
             }
@@ -122,6 +159,7 @@ namespace RoadOfTheOldKing.World
         {
             if (!initialized || seconds <= 0f || float.IsNaN(seconds) || float.IsInfinity(seconds)) return;
             motionTail = Mathf.Max(0f, motionTail - seconds);
+            hintClock += seconds;
             foreach (var f in fittings)
             {
                 f.age += seconds;
@@ -175,14 +213,19 @@ namespace RoadOfTheOldKing.World
         private void Draw(Fitting f)
         {
             if (f.visual == null) return;
+            // A socket shows the crank only while the one crank sits in it; otherwise its bare hub.
+            if (f.crankFitting != null && bareSocket != null) f.visual.sprite = f.crankFitting.HoldsCrank ? f.full : bareSocket;
             bool rejected = f.response == SluiceResponse.Rejected;
-            float duration = f.crank && !rejected ? .6f : .32f;
+            // Only a real turn spins a crank; seating or taking it out just clicks.
+            bool turning = f.crank && f.response == SluiceResponse.Turned;
+            float duration = turning ? .6f : .32f;
             float t = Mathf.Clamp01(f.age / duration);
             float recoil = t < 1f ? Mathf.Sin(t * Mathf.PI * (rejected ? 4f : 2f)) * (1f - t) : 0f;
             // Only the visual child moves. Pixel steps keep the fixed receiver honest.
             f.visual.transform.localPosition = f.rest + Vector3.right * (Mathf.Round(recoil * 2f) / 16f);
-            float rotation = f.crank && !rejected && t < 1f ? Mathf.Round(t * 24f) * 15f : 0f;
+            float rotation = turning && t < 1f ? Mathf.Round(t * 24f) * 15f : 0f;
             f.visual.transform.localRotation = f.rotation * Quaternion.Euler(0f, 0f, rotation);
+            DrawHint(f);
             if (f.sparks == null) return;
             for (int i = 0; i < f.sparks.Length; i++)
             {
@@ -203,6 +246,46 @@ namespace RoadOfTheOldKing.World
             }
         }
 
+        // Is this target still part of the puzzle? Nothing glints while the guardian holds the controls, and the second
+        // bay's two vanes glint together, never in order, so the order stays the player's to find.
+        private bool HintWanted(Fitting f)
+        {
+            if (owner == null || f.target == null || owner.IsGuarded) return false;
+            switch (f.target.Part)
+            {
+                case SluicePart.DistributorVane: return owner.Stage == SluiceStage.High;
+                case SluicePart.BrakeVane:
+                case SluicePart.CatchVane: return owner.Stage == SluiceStage.ServiceDiverted;
+                default: return owner.Stage < SluiceStage.PondLow;
+            }
+        }
+
+        // A pickup's twinkle (PickupPresentation): a warm cross at the part's upper corner, grown for a moment, then gone.
+        private void DrawHint(Fitting f)
+        {
+            if (f.hintMarks == null) return;
+            float cycle = Mathf.Repeat(hintClock + f.hintOffset, hintInterval);
+            bool shine = sparkSprite != null && cycle < .42f && FeedbackSettings.FlashScale > 0f && HintWanted(f) &&
+                f.visual.enabled && !f.visual.forceRenderingOff && f.visual.gameObject.activeInHierarchy;
+            var bounds = f.visual.bounds;
+            Vector3 tip = new Vector3(Mathf.Round((bounds.center.x + bounds.extents.x * .6f) * 16f) / 16f,
+                Mathf.Round((bounds.center.y + bounds.extents.y * .6f) * 16f) / 16f, bounds.center.z);
+            int length = cycle > .09f && cycle < .28f ? 3 : 1;
+            var accent = PickupPresentation.Warm;
+            accent.a = Mathf.Clamp01(FeedbackSettings.FlashScale) * f.visual.color.a;
+            for (int i = 0; i < f.hintMarks.Length; i++)
+            {
+                var mark = f.hintMarks[i];
+                mark.enabled = shine;
+                if (!shine) continue;
+                mark.transform.position = tip;
+                PickupPresentation.Size(mark, (i == 0 ? new Vector2(length, 1) : new Vector2(1, length)) / 16f);
+                mark.color = accent;
+                mark.sortingLayerID = f.visual.sortingLayerID;
+                mark.sortingOrder = f.visual.sortingOrder + 2;
+            }
+        }
+
         public void ResetPresentation()
         {
             if (!initialized) return;
@@ -213,6 +296,7 @@ namespace RoadOfTheOldKing.World
                 Draw(f);
             }
             impacts.Stop(); machinery.Stop(); water.Stop();
+            foreach (var f in fittings) if (f.speaker != null) f.speaker.Stop();
             machinery.volume = water.volume = 0f;
             wasMoving = weightFalling = paused = false;
             motionTail = 0f;
@@ -229,9 +313,12 @@ namespace RoadOfTheOldKing.World
         {
             foreach (var f in fittings)
                 if (f.sparks != null) foreach (var mark in f.sparks) if (mark != null) Destroy(mark.gameObject);
+            foreach (var f in fittings)
+                if (f.hintMarks != null) foreach (var mark in f.hintMarks) if (mark != null) Destroy(mark.gameObject);
             if (impacts != null) Destroy(impacts.gameObject);
             if (machinery != null) Destroy(machinery.gameObject);
             if (water != null) Destroy(water.gameObject);
+            foreach (var f in fittings) if (f.speaker != null) Destroy(f.speaker.gameObject);
         }
     }
 }

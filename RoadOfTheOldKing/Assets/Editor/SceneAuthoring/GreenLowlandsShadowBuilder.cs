@@ -533,7 +533,10 @@ namespace RoadOfTheOldKing.EditorTools
                     AssetDatabase.LoadAssetAtPath<Tile>("Assets/Art/Tiles/Shared/Environment/Trees/Tiles/Oak_1_0.asset").sprite))
                     .OfType<Sprite>().Where(s => s.name == "Oak" || s.name == "Birch" || s.name == "Apple_Tree")
                     .ToDictionary(s => s.name);
-                foreach (var map in maps.Where(m => m.name == "Forest trunks" && m.gameObject.activeInHierarchy &&
+                // Forest-edge bushes (15 Nov) are stamped the same way, one Hedgerow per centre base slice.
+                treeSprites["Hedgerow"] = AssetDatabase.LoadAllAssetsAtPath("Assets/Art/Tiles/Tutorial/Environment/TutorialStructures16.png")
+                    .OfType<Sprite>().Single(s => s.name == "Hedgerow");
+                foreach (var map in maps.Where(m => (m.name == "Forest trunks" || m.name == "Forest edge undergrowth") && m.gameObject.activeInHierarchy &&
                     m.GetComponent<TilemapRenderer>() != null && m.GetComponent<TilemapRenderer>().enabled))
                     foreach (var c in map.cellBounds.allPositionsWithin)
                     {

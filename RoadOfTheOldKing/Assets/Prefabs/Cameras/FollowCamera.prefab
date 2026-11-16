@@ -129,6 +129,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Cameras.CameraZoom2D
   minSize: 5
   maxSize: 12
+  defaultSize: 8
   scrollSensitivity: 0.5
   controllerZoomSpeed: 4
   smoothTime: 0.08
@@ -159,6 +160,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Cameras.CameraFreelook2D
   inputSource: {fileID: 6831975874592833725}
   maxDistance: 5
+  stickSeconds: 0.5
+  returnSmoothing: 0.8
 --- !u!114 &5953028763477543244
 MonoBehaviour:
   m_ObjectHideFlags: 0

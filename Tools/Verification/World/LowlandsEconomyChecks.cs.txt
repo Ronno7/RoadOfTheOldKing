@@ -145,16 +145,29 @@ if(SessionState.GetBool("Lowlands.Economy.Art",false)){
         check(sprite.transform.localPosition==at&&sprite.transform.lossyScale==scale&&scale==Vector3.one,"lid animation keeps native registration and scale");
         view.PlayOpening();reward.RestoreProgress(game.Progress);
         check(!view.enabled&&sprite.sprite.name=="TimberChest_Open","restoring progress snaps to final open state");
+        // Sprites and prefab overhead halves sort on their anchor; a bush map (no anchor) on the base row the hero overlaps.
         foreach(var depth in UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.WorldPropDepth>(FindObjectsSortMode.None)){
             var anchor=(Transform)depth.GetType().GetField("groundAnchor",flags).GetValue(depth);
-            var art=depth.GetComponent<SpriteRenderer>();var hero=player.GetComponentInChildren<SpriteRenderer>();
-            pose((Vector2)anchor.position+Vector2.up*.5f);depth.GetType().GetMethod("LateUpdate",flags).Invoke(depth,null);
-            check(art.sortingLayerID==hero.sortingLayerID&&art.sortingOrder>hero.sortingOrder,"north-side player behind "+anchor.name);
-            pose((Vector2)anchor.position-Vector2.up*.5f);depth.GetType().GetMethod("LateUpdate",flags).Invoke(depth,null);
-            check(art.sortingOrder<hero.sortingOrder,"south-side player in front of "+anchor.name);
+            var art=depth.GetComponent<Renderer>();var hero=player.GetComponentInChildren<SpriteRenderer>();
+            var map=depth.GetComponent<UnityEngine.Tilemaps.Tilemap>();
+            Vector2 ground;string label;
+            if(anchor!=null){ground=new Vector2(map!=null?art.bounds.center.x:anchor.position.x,anchor.position.y);label=anchor.name;}
+            else if(map==null){ground=depth.transform.position;label=depth.transform.parent!=null?depth.transform.parent.name:depth.name;}
+            else{
+                // The lowest bush of a stack: nothing under it for two rows, so the south pose stands in front of it alone.
+                var cells=new System.Collections.Generic.List<Vector3Int>();foreach(var c in map.cellBounds.allPositionsWithin)cells.Add(c);
+                var cell=cells.First(c=>map.GetSprite(c)!=null&&map.GetSprite(c).name.EndsWith("_1_0")&&
+                    Enumerable.Range(-1,3).All(dx=>!map.HasTile(c+new Vector3Int(dx,-1,0))&&!map.HasTile(c+new Vector3Int(dx,-2,0))));
+                var corner=map.CellToWorld(cell);ground=new Vector2(corner.x+.5f,corner.y+.5f);label=depth.name+" "+cell;
+            }
+            pose(ground+Vector2.up*.6f);depth.GetType().GetMethod("LateUpdate",flags).Invoke(depth,null);
+            check(art.sortingLayerID==hero.sortingLayerID&&art.sortingOrder>hero.sortingOrder,"north-side player behind "+label);
+            pose(ground-Vector2.up*.6f);depth.GetType().GetMethod("LateUpdate",flags).Invoke(depth,null);
+            check(art.sortingOrder<hero.sortingOrder,"south-side player in front of "+label);
         }
         var practice=source("practice-pot");var pot=practice.GetComponentInChildren<RoadOfTheOldKing.Combat.Breakable>(true);
-        check(pot.GetComponentsInChildren<SpriteRenderer>(true).Count(r=>r.enabled)==1,"native pot replaces both placeholder renderers");
+        // Its baked contact shadow rides along on Ground; only the pot art counts.
+        check(pot.GetComponentsInChildren<SpriteRenderer>(true).Count(r=>r.enabled&&r.sortingLayerName!="Ground")==1,"native pot replaces both placeholder renderers");
         pose(new Vector2(17.5f,3.5f));player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>().Restore();
         check(axe.TryThrow(Vector2.up),"throw at native practice pot accepted");
         for(int i=0;i<80;i++){axe.GetType().GetMethod("Simulate",flags).Invoke(axe,new object[]{.02f});Physics2D.SyncTransforms();}
