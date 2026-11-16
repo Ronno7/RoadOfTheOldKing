@@ -27,7 +27,7 @@
 - New fence art at chest height (23 px, was 29), in four styles.
 - Fence collision is 0.375 tiles deep (was 1), so you can stand right behind one.
 - Three new carts replace the single cart.
-- New art for the mill bridge, the stone fence posts, fallen logs and the Tutorial's sealed gate.
+- New art for the mill bridge, stone fence posts, fallen logs, woodpiles, the axe stump, the training dummy and the Tutorial's sealed gate.
 - Drink a flask with R (was Q).
 - The dodge bursts out head down, then bobs up as it eases into walking speed (was a steady 8.9 u/s).
 - The title screen shows the logo over animated paintings of Ardan's Edge, Barrow Woods and the Storm Highlands, with a plain text menu.
@@ -35,6 +35,7 @@
 - Puzzle parts that Recall can strike twinkle now and then.
 - The maintenance crank is one part: place it in a socket, turn it, then take it to the next.
 - Tutorial prompts teach controls only, without route directions.
+- Menus keep a description only where it adds something.
 
 **Fixed**
 - Fences, bushes and fallen logs no longer draw over a hero standing in front of them.

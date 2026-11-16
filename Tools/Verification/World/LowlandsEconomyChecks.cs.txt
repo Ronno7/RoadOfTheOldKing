@@ -271,8 +271,11 @@ if(phase==0||phase==10){
     System.Action<int> tick=count=>{for(int i=0;i<count;i++){sluice.GetType().GetMethod("FixedUpdate",flags).Invoke(sluice,null);Physics2D.SyncTransforms();axe.GetType().GetMethod("Simulate",flags).Invoke(axe,new object[]{.02f});}};
     System.Action<Vector2> lodge=p=>{pose(p);player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>().Restore();check(axe.TryThrow(Vector2.right),"sluice throw accepted");tick(90);check(axe.State==RoadOfTheOldKing.Weapons.AxeState.Stuck,"sluice actual lodging");};
     System.Action<Vector2> recall=p=>{stand(p);player.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>().Restore();check(axe.TryPlayerRecall(),"sluice Recall accepted");tick(80);};
-    lodge(new Vector2(5,86));recall(new Vector2(6,90));stand(new Vector2(6,88));check(interaction.TryInteract()&&sluice.Stage==RoadOfTheOldKing.World.SluiceStage.ServiceDiverted,"owned crank F diverts service water");
-    lodge(new Vector2(5,74));stand(new Vector2(4.5f,76));check(interaction.TryInteract(),"owned crank F moves lodged carriage");tick(60);recall(new Vector2(4.5f,78));check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.PondLow,"owned-tool puzzle reaches permanent low water");
+    // One crank (15 Nov): F places it in a socket, F turns it there, F takes it out for the other socket.
+    lodge(new Vector2(5,86));recall(new Vector2(6,90));stand(new Vector2(6,88));check(interaction.TryInteract()&&game.Progress.crankSocket=="green-lowlands/crank/distributor","owned crank F places it in the distributor socket");
+    check(interaction.TryInteract()&&sluice.Stage==RoadOfTheOldKing.World.SluiceStage.ServiceDiverted,"owned crank F diverts service water");
+    check(interaction.TryInteract()&&string.IsNullOrEmpty(game.Progress.crankSocket),"F takes the crank out after its work");
+    lodge(new Vector2(5,74));stand(new Vector2(4.5f,76));check(interaction.TryInteract()&&interaction.TryInteract(),"owned crank F places it and moves lodged carriage");tick(60);recall(new Vector2(4.5f,78));check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.PondLow,"owned-tool puzzle reaches permanent low water");
 
     // Temporary hit receivers exercise the real group event; no enemy asset is imported or authored.
     var group=new GameObject("Verification guards");group.SetActive(false);
