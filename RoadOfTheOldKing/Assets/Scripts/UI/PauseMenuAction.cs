@@ -25,12 +25,12 @@ namespace RoadOfTheOldKing.UI
         // Return to bonfire (user, 17 Oct): death is the way back to the last rest.
         public static PauseMenuAction[] CreateDefault(Action openSettings = null, Action openControls = null) => new[]
         {
-            new PauseMenuAction("Resume", "Back to the road.", null),
-            new PauseMenuAction("Controls", "Keyboard and controller.", openControls, openControls != null, closeOnExecute: false),
-            new PauseMenuAction("Settings", "Sound, display and HUD options.", openSettings, openSettings != null, closeOnExecute: false),
+            new PauseMenuAction("Resume", "", null),
+            new PauseMenuAction("Controls", "", openControls, openControls != null, closeOnExecute: false),
+            new PauseMenuAction("Settings", "", openSettings, openSettings != null, closeOnExecute: false),
             new PauseMenuAction("Main Menu", "Save and return to the title.\nContinue resumes here.",
                 () => GameSession.Instance?.ReturnToTitle(), GameSession.Instance != null && GameSession.Instance.CanReturnToTitle),
-            new PauseMenuAction("Quit", "Leave the game.", Quit)
+            new PauseMenuAction("Quit", "", Quit)
         };
 
         private static void Quit()
@@ -55,15 +55,15 @@ namespace RoadOfTheOldKing.UI
             return new OptionList.Row[]
             {
                 new OptionList.Header("SOUND"),
-                new OptionList.Slider("Volume", "All game sound.", () => SoundSettings.Volume, SoundSettings.SetVolume, 10, Percent),
+                new OptionList.Slider("Volume", "", () => SoundSettings.Volume, SoundSettings.SetVolume, 10, Percent),
                 new OptionList.Header("DISPLAY"),
-                new OptionList.Choice("Window", "Fill the screen or play in a window.", new[] { "Fullscreen", "Windowed" },
+                new OptionList.Choice("Window", "", new[] { "Fullscreen", "Windowed" },
                     () => full ? 0 : 1, i => { full = i == 0; Screen.fullScreenMode = full ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed; }),
-                new OptionList.Choice("Atmosphere", "Light, haze and weather: quiet and crisp, or stronger.", new[] { "Restrained", "Cinematic" },
+                new OptionList.Choice("Atmosphere", "Light, haze and weather.", new[] { "Restrained", "Cinematic" },
                     () => AtmosphereSettings.Cinematic ? 1 : 0, i => AtmosphereSettings.Cinematic = i == 1),
                 new OptionList.Header("COMFORT"),
                 new OptionList.Slider("Screen flashes", "Hit flashes and the low health pulse.", () => FeedbackSettings.FlashScale, FeedbackSettings.SetFlash, 10, Percent),
-                new OptionList.Slider("Screen shake", "Camera kicks and shakes.", () => FeedbackSettings.ShakeScale, FeedbackSettings.SetShake, 10, Percent),
+                new OptionList.Slider("Screen shake", "", () => FeedbackSettings.ShakeScale, FeedbackSettings.SetShake, 10, Percent),
                 new OptionList.Choice("Vitals", "Health, stamina and flasks in the corner.", new[] { "When needed", "Always" },
                     () => HudSettings.AlwaysShowVitals ? 1 : 0, i => HudSettings.AlwaysShowVitals = i == 1),
                 new OptionList.Command("Back", "", back)

@@ -38,6 +38,9 @@ namespace RoadOfTheOldKing.Cameras
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetSession() => sessionSize = null;
 
+        // The player's own chosen size, not an override; the Tutorial watches it to see a zoom.
+        public float PlayerSize => targetSize;
+
         private void Awake()
         {
             viewCamera = GetComponent<Camera>();

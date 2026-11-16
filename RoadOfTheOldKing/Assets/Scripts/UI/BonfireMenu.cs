@@ -149,7 +149,7 @@ namespace RoadOfTheOldKing.UI
                     // Sitting down already rested (PlayerBonfireInteraction.Open), as at a Souls bonfire,
                     // so the menu offers only what resting unlocks.
                     status.text = session.Status;
-                    items.Add(new PauseMenuAction("Upgrades", locked || nextTier == null ? requirement : "View the next choices.",
+                    items.Add(new PauseMenuAction("Upgrades", locked || nextTier == null ? requirement : "",
                         () => Show(Page.Upgrades), locked: locked));
                     bool travel = false;
                     // Every discovered fire, including those in other scenes; names refresh when rested at.
@@ -164,7 +164,7 @@ namespace RoadOfTheOldKing.UI
                             () => { if (session.Checkpoints.Travel(target, fire)) interaction.Close(); }));
                     }
                     if (!travel) items.Add(new PauseMenuAction("Travel", "Light another fire first.", null, false));
-                    items.Add(new PauseMenuAction("Leave", "Back to the road.", interaction.Close));
+                    items.Add(new PauseMenuAction("Leave", "", interaction.Close));
                     break;
 
                 case Page.Upgrades:
@@ -200,7 +200,7 @@ namespace RoadOfTheOldKing.UI
                         "Spend " + current.shardCost + " shards? The others are lost.");
                     status.EnableInClassList("warning", locked);
                     // The safe choice comes first so Enter never buys by accident.
-                    items.Add(new PauseMenuAction("Back", "Keep your shards.", () => Show(Page.Upgrades)));
+                    items.Add(new PauseMenuAction("Back", "", () => Show(Page.Upgrades)));
                     if (current != null && pending != null)
                         items.Add(new PauseMenuAction("Buy (" + current.shardCost + ")", pending.description,
                             () => { session.Rewards.TryPurchaseUpgrade(fire, pending); pending = null; Show(Page.Upgrades); status.text = session.Status; },

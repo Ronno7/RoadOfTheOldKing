@@ -24,6 +24,7 @@ namespace RoadOfTheOldKing.Tutorial
         ReachArea,      // came within `radius` of `area`
         DrankFlask,     // recovered safely after the first wolf
         Looked,         // held Alt to look around
+        Zoomed,         // changed the camera zoom, or read the note for a few seconds
     }
 
     [Serializable]
@@ -70,7 +71,9 @@ namespace RoadOfTheOldKing.Tutorial
         private PlayerBonfireInteraction interaction;
         private UI.PauseMenuController pauseMenu;
         private Vector2 lastPosition;
-        private float moved, sprinted, moveHintSeconds;
+        private float moved, sprinted, moveHintSeconds, zoomHintSeconds;
+        private float? zoomStart;
+        private bool zoomed;
         private int dashes, drinks;
         private bool looked;
         private float safeSince = -1f;
@@ -162,6 +165,12 @@ namespace RoadOfTheOldKing.Tutorial
             }
             var look = Camera.main != null ? Camera.main.GetComponent<CameraFreelook2D>() : null;
             if (look != null && look.IsLooking) looked = true;
+            var zoom = Camera.main != null ? Camera.main.GetComponent<CameraZoom2D>() : null;
+            if (zoom != null)
+            {
+                if (zoomStart == null) zoomStart = zoom.PlayerSize;
+                else if (Mathf.Abs(zoom.PlayerSize - zoomStart.Value) > .05f) zoomed = true;
+            }
             if (EncounterState.InCombat) safeSince = -1f;
             else if (safeSince < 0f) safeSince = Time.time;
         }
@@ -190,6 +199,8 @@ namespace RoadOfTheOldKing.Tutorial
                         flask != null && !flask.IsDrinking &&
                         (drinks >= 1 || player.Health.Health >= player.Health.MaxHealth || flask.Charges == 0);
                 case TutorialCondition.Looked: return looked || (progress != null && progress.Has(StepPrefix + "road"));
+                // A quick note (user, 15 Nov): zooming completes it, or it steps aside for the next lesson after 6 s.
+                case TutorialCondition.Zoomed: return zoomed || zoomHintSeconds >= 6f;
                 case TutorialCondition.ReachArea: return player.IsAlive && ((Vector2)player.transform.position - step.area).sqrMagnitude <= step.radius * step.radius;
                 default: return false;
             }
@@ -235,6 +246,7 @@ namespace RoadOfTheOldKing.Tutorial
             // way for the player to find (user, 15 Nov).
             if (current.id == "rest" || string.IsNullOrEmpty(current.hint)) { HudNotifications.ClearHint(); return; }
             if (current.id == "move") moveHintSeconds += Time.deltaTime;
+            if (current.condition == TutorialCondition.Zoomed) zoomHintSeconds += Time.deltaTime;
             Vector3? position = current.cueAtPlayer ? player.transform.position + (Vector3)current.cueOffset :
                 current.cueTarget != null ? current.cueTarget.position + (Vector3)current.cueOffset : (Vector3?)null;
             string teaching = current.hint;
@@ -264,6 +276,7 @@ namespace RoadOfTheOldKing.Tutorial
         public static List<TutorialStep> DefaultSteps() => new List<TutorialStep>
         {
             new TutorialStep("move", "Move {move}", TutorialCondition.Moved) { amount = 3f },
+            new TutorialStep("zoom", "Zoom out {zoom}", TutorialCondition.Zoomed),
             new TutorialStep("dodge", "Dodge {dash}", TutorialCondition.Dodged),
             new TutorialStep("take-axe", "It's dangerous to go alone! Take this. {interact}", TutorialCondition.HasAxe),
             new TutorialStep("throw", "Throw at a target {throw}, then pick it up", TutorialCondition.Milestone) { milestone = "tutorial/lesson/throw-retrieve" },

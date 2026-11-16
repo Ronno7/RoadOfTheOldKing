@@ -60,6 +60,7 @@ namespace RoadOfTheOldKing.UI
         private bool backdropFading;
         private Texture2D shadeTexture;
         private VisualElement titleRoot, backdropRoot, shadeRoot;
+        private Label descriptionLabel;
         // The hood as hue, saturation and brightness, the bars Stardew Valley's creator uses, plus swatches for
         // quick, sensible picks. Track segments divide the 200-point bar evenly: 25 for hue, 10 for the others.
         private const int HueSteps = 24, ShadeSteps = 9;
@@ -108,7 +109,8 @@ namespace RoadOfTheOldKing.UI
             optionsArea = root.Q("options");
             panelHeading = root.Q<Label>("panel-heading");
             hint = root.Q<Label>("hint");
-            options = new OptionList(optionsArea, root.Q<Label>("description"));
+            descriptionLabel = root.Q<Label>("description");
+            options = new OptionList(optionsArea, descriptionLabel);
             titleRoot = root.Q("title-root");
             backdropRoot = root.Q("backdrop"); shadeRoot = root.Q("title-shade");
             var panelSettings = GetComponent<UIDocument>().panelSettings;
@@ -178,9 +180,9 @@ namespace RoadOfTheOldKing.UI
             {
                 new PauseMenuAction("Continue", Session != null && Session.HasResumePoint ? "Resume where you left off." : "Resume at your last rest.",
                     () => Session.Continue(), HasSave),
-                new PauseMenuAction("New Game", "Begin a new journey.", NewGame, Session != null),
-                new PauseMenuAction("Settings", "Sound, display and HUD options.", () => ShowSettings(0)),
-                new PauseMenuAction("Quit", "Leave the game.", Quit)
+                new PauseMenuAction("New Game", "", NewGame, Session != null),
+                new PauseMenuAction("Settings", "", () => ShowSettings(0)),
+                new PauseMenuAction("Quit", "", Quit)
             }, select >= 0 ? select : HasSave ? 0 : NewGameRow);
         }
 
@@ -189,7 +191,7 @@ namespace RoadOfTheOldKing.UI
             if (!HasSave) { BeginPrologue(); return; }
             Show(Page.Confirm, new[]
             {
-                new PauseMenuAction("Keep my save", "Go back.", () => ShowMain(NewGameRow)),
+                new PauseMenuAction("Keep my save", "", () => ShowMain(NewGameRow)),
                 new PauseMenuAction("Erase and begin", "This erases your save.", BeginPrologue)
             }, 0);
         }
@@ -220,6 +222,8 @@ namespace RoadOfTheOldKing.UI
             SetVisible(panelHeading, true); panelHeading.text = heading;
             SetVisible(hoodView, preview);
             SetVisible(actionsArea, false); SetVisible(optionsArea, true);
+            // A page whose rows explain nothing keeps no empty space for an explanation.
+            SetVisible(descriptionLabel, System.Array.Exists(rows, r => !string.IsNullOrEmpty(r.Description)));
             panel.AddToClassList("options-open");
             panel.RemoveFromClassList("title-plain");
             titleRoot?.AddToClassList("options-mode");
@@ -230,7 +234,7 @@ namespace RoadOfTheOldKing.UI
         private void ShowListLayout()
         {
             SetVisible(logo, true); SetVisible(panelHeading, false); SetVisible(hoodView, false);
-            SetVisible(actionsArea, true); SetVisible(optionsArea, false);
+            SetVisible(actionsArea, true); SetVisible(optionsArea, false); SetVisible(descriptionLabel, true);
             panel.RemoveFromClassList("options-open");
             // The main and confirm pages are plain text over the painting's shade, as title screens usually are.
             panel.AddToClassList("title-plain");
@@ -304,14 +308,14 @@ namespace RoadOfTheOldKing.UI
             page = Page.Hood;
             ShowOptionsPage("YOUR CLOAK", new OptionList.Row[]
             {
-                new OptionList.Swatches("Colour", "Ready-made colours. The first is the cloak as drawn.", HoodSwatches, () => hoodSwatch, SetSwatch),
-                new OptionList.Slider("Hue", "Around the colour wheel.", () => hoodHue, v => SetHood(v, hoodSaturation, hoodBrightness), HueSteps,
+                new OptionList.Swatches("Colour", "", HoodSwatches, () => hoodSwatch, SetSwatch),
+                new OptionList.Slider("Hue", "", () => hoodHue, v => SetHood(v, hoodSaturation, hoodBrightness), HueSteps,
                     null, i => Color.HSVToRGB(i / (float)HueSteps % 1f, 1f, 1f)),
-                new OptionList.Slider("Saturation", "From grey to full colour.", () => hoodSaturation, v => SetHood(hoodHue, v, hoodBrightness), ShadeSteps,
+                new OptionList.Slider("Saturation", "", () => hoodSaturation, v => SetHood(hoodHue, v, hoodBrightness), ShadeSteps,
                     null, i => Color.HSVToRGB(hoodHue, i / (float)ShadeSteps, Mathf.Max(.4f, hoodBrightness))),
-                new OptionList.Slider("Brightness", "From dark to light.", () => hoodBrightness, v => SetHood(hoodHue, hoodSaturation, v), ShadeSteps,
+                new OptionList.Slider("Brightness", "", () => hoodBrightness, v => SetHood(hoodHue, hoodSaturation, v), ShadeSteps,
                     null, i => Color.HSVToRGB(hoodHue, hoodSaturation, i / (float)ShadeSteps)),
-                new OptionList.Command("Begin", "Your cloak keeps this colour for the whole journey.", StartRun)
+                new OptionList.Command("Begin", "", StartRun)
             }, 0, true, "↑↓ Choose · ←→ Change · Enter Select", "D-pad Choose · ←→ Change · A Select");
             RecolorHood();
         }
