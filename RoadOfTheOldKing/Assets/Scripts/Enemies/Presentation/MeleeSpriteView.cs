@@ -54,6 +54,8 @@ namespace RoadOfTheOldKing.Enemies
             if (!health.IsAlive) { deathTime += Time.deltaTime; if (Has(animations.death)) { clip = animations.death; progress = deathTime / clip.Duration(octant); } }
             // A dormant guardian holds the wake clip's first frame (its resting pose) and rises through it.
             else if ((enemy.IsDormant || enemy.IsWaking) && Has(animations.wake)) { clip = animations.wake; progress = enemy.IsDormant ? 0f : enemy.StateProgress; }
+            // Dazed against a wall: its own pose, so a plain recovery doesn't look like a crash.
+            else if (enemy.IsWallStunned && Has(animations.stunned)) { clip = animations.stunned; progress = enemy.StateProgress; }
             // Standing its ground between attacks reads as the same fight, so it keeps the attack's stance.
             else if ((windup || strikePose || enemy.State == PursuitState.Recovering || (enemy.State == PursuitState.Holding && distance <= .0001f)) && Has(AttackClip))
             {

@@ -10,6 +10,8 @@ namespace RoadOfTheOldKing.Enemies
         public DirectionalSpriteAnimation rotations, idle, walk, run, attack, hurt, death;
         [Tooltip("Optional second attack (the brain's close attack). Empty uses the attack clip.")]
         public DirectionalSpriteAnimation closeAttack;
+        [Tooltip("Optional pose while stunned against a wall (a boar that charged into one). Empty keeps the attack's recovery frames.")]
+        public DirectionalSpriteAnimation stunned;
         [Tooltip("Optional rise from a dormant pose (a sleeping guardian waking). Its first frame is the dormant pose.")]
         public DirectionalSpriteAnimation wake;
         [Min(.1f)] public float walkCycleLength = 2f;
