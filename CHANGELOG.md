@@ -6,27 +6,39 @@
 - Pause menu lists every control for keyboard and controller.
 - Sun Shards, heart fragments, tools and chest contents are held up over the hero's head for about a second when taken.
 - Axe hits on wood, stone, brush and pottery have their own sound and flecks; pots break with a ceramic sound.
-- Boars have animations for the charge windup, the recovery, the tusk sweep and death.
+- Boars have additional animations.
+- Settings page with sliders for volume, screen flashes and screen shake, and a window mode choice.
+- Choose your cloak's colour after the prologue, from swatches or hue, saturation and brightness.
+- Undergrowth lines the arrival forest edge where the hero met invisible walls (30 bushes).
 
 **Changed**
-- Enemies move faster: scavengers 4.8 u/s (was 3.3), boars 4 (was 2.8), rats 5.5 (was 4.2), trotting wolves 5 (was 4.2).
+- Enemies overall move faster.
+- Scavengers, boars and rats move at their full speed: 4.8, 4 and 5.5 u/s (were held to about 4.1, 3.4 and 4.7).
 - Scavenger, boar and wolf attacks lock their aim about 0.15 s before they land (were 0.3 to 0.5 s).
 - One chop no longer interrupts a scavenger or boar; a full combo does.
 - Scavengers pause 0.4 s between attacks (was 0.8 s), stand closer and engage after 0.5 s of sight (was 0.9 s).
 - Rats take two chops (20 health, was 10) and pause 0.5 s between darts (was 0.9 s).
 - Wolves dodge, feint and punish more often.
+- Wolves run at their full 6.5 u/s (was held to 5), keep sight of you to 18 units (was 13.5) and chase up to 40 units from home (was 24).
 - Scavengers and rats press in when you drink, throw or recover from a chop; boars charge 25% sooner.
 - Scavengers sometimes sidestep thrown axes.
+- Boars sweep their tusks whenever you're within reach (1.6 units, was 1.2).
 - Removed the small sage bushes that looked like breakable ones.
 - New fence art at chest height (23 px, was 29), in four styles.
 - Fence collision is 0.375 tiles deep (was 1), so you can stand right behind one.
 - Three new carts replace the single cart.
-- New art for the mill bridge and the stone fence posts.
+- New art for the mill bridge, the stone fence posts, fallen logs and the Tutorial's sealed gate.
 - Drink a flask with R (was Q).
-- The dodge bursts out and eases into walking speed (was a steady 8.9 u/s).
+- The dodge bursts out head down, then bobs up as it eases into walking speed (was a steady 8.9 u/s).
+- The title screen shows the logo over animated paintings of Ardan's Edge, Barrow Woods and the Storm Highlands, with a plain text menu.
+- The waterworks' two wheels sound different when struck.
+- Puzzle parts that Recall can strike twinkle now and then.
+- The maintenance crank is one part: place it in a socket, turn it, then take it to the next.
+- Tutorial prompts teach controls only, without route directions.
 
 **Fixed**
-- Fences no longer draw over a hero standing in front of them.
+- Fences, bushes and fallen logs no longer draw over a hero standing in front of them.
+- Grass in front of rocks and props no longer draws behind them (129 Tutorial and 32 Lowlands plants removed).
 - The rope no longer offers a climb while its way is blocked.
 
 ## 0.5 — Full production

@@ -193,7 +193,7 @@ flowchart LR
 - **Openings are promises.** At most one follow-up, and recovery is never cancelled.
 - **Reading the player.** `PlayerRead` tells both brains what they can see the player doing: drinking, axe away, recovering from a chop. After a 0.15 s beat, scavengers and rats press in and boars start their charge sooner. It never cuts a recovery short.
 - **No shared attack turn.** Each enemy attacks on its own rhythm. Groups are shaped by placement and notice radius, so a careful player can pull one at a time.
-- **Leash.** An enemy breaks off when it loses sight, or once past its leash with the player out of notice range, then walks home. A hit, or the player coming close, turns it back. All of this lives in `EnemyBody`.
+- **Leash.** An enemy breaks off when it loses sight, or once past its leash with the player out of notice range, then walks home. A hit, or the player coming close, turns it back. All of this lives in `EnemyBody`. Wolves hunt instead of guarding: past the leash they give up only once the player is out of a longer sight range (`huntReach`), or 2.5 leashes from home (`huntLeashes`).
 - **Mending.** Out of the fight an enemy heals 10% of its health per second. A boss back on its seat is whole at once.
 - **Boss arena.** While its boss is awake, `BossArena` stands fog walls on a rectangle. They hold the boss in, and the player too once fully inside. Only a seated or fallen boss drops them, so any reset reopens the way.
 
@@ -289,7 +289,7 @@ One verb per space. Each lesson completes from a real outcome, not a key press.
 
 - **UI kit:** every panel, menu and chip shares `UI/Kit.uss` and the RotOK pixel fonts, at 2 reference pixels per UI pixel on a 960x540 canvas.
 - **World meters:** enemy bars and the charge bar are small world-space documents, so they scale with what they measure.
-- **Menus:** `MenuStack` routes input to the top menu. Title, pause, bonfire and defeat screens share one theme. Pause lists every control for both devices from `ControlLabels`, the source the prompts use.
+- **Menus:** `MenuStack` routes input to the top menu. Title, pause, bonfire and defeat screens share one theme. Pause lists every control for both devices from `ControlLabels`, the source the prompts use. Settings (volume, window, flashes, shake) live outside the save. After the prologue, New Game picks a cloak colour that `EnemyFlash` applies to the hero's blues. The title shows the region paintings behind its logo.
 - **Atmosphere:** `RegionAtmosphere` lays a grade, cloud shadows and motes over each region, with Restrained (default) and Cinematic looks.
 - **Feedback:** `PlayerHitFeedback` flashes, kicks the camera and blinks the hero; `FeedbackSettings` scales it down for players who prefer less.
 
@@ -300,7 +300,7 @@ One verb per space. Each lesson completes from a real outcome, not a key press.
 - **F4 Developer Tools:** restore, grants, god mode, no collision, show collision, game speed, reset enemies and fallen bosses, and travel to any fire or arrival point.
 - [Tools](../Tools/README.md): art exporters, pacing simulator, release packaging and regression checks.
 
-Limits today: Barrow Woods and later regions are unbuilt, Settings is small, and some body attack animations are still pending.
+Limits today: Barrow Woods and later regions are unbuilt, and settings have no key rebinding.
 
 ## Key files
 
