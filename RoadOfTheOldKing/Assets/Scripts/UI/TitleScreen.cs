@@ -1,5 +1,6 @@
 using System;
 using System.Text.RegularExpressions;
+using RoadOfTheOldKing.Player;
 using RoadOfTheOldKing.Progression;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -15,6 +16,8 @@ namespace RoadOfTheOldKing.UI
     // Opening (user, 17 Oct): when the game boots into this scene, the logo waits for any button before the menu
     // appears. New Game plays the text prologue (pages from a TextAsset) before the run starts; Escape/Start skips it.
     // The prologue touches no save: an existing one is only erased when the run actually starts.
+    // After it, the hoodie picker (user, 22 Oct; reworked 15 Nov): swatches plus hue, saturation and brightness bars over a
+    // live preview of the hero, fixed for the run. Settings and the picker are option pages (OptionList).
     [DisallowMultipleComponent, RequireComponent(typeof(UIDocument), typeof(PauseMenuInput))]
     public sealed class TitleScreen : MonoBehaviour, IModalMenu
     {
@@ -22,14 +25,56 @@ namespace RoadOfTheOldKing.UI
         [SerializeField] private TextAsset prologue;
         [Tooltip("Seconds for a prologue page to fade in (and for the last one to fade out).")]
         [SerializeField, Min(.05f)] private float pageFade = .8f;
+        [Tooltip("The hero's standing south view, recoloured live by the hoodie picker. Empty skips the picker.")]
+        [SerializeField] private Sprite hoodPreview;
+        [Tooltip("Screen pixels per art pixel for the preview, in UI points (the kit draws 2 points per pixel).")]
+        [SerializeField, Min(1)] private int hoodPreviewScale = 4;
+
+        [System.Serializable]
+        private sealed class Banner
+        {
+            public Texture2D[] frames = System.Array.Empty<Texture2D>();
+            [Tooltip("Seconds each frame shows, in order. A shorter list repeats its last value.")]
+            public float[] seconds = { .17f };
+        }
+
+        [Header("Backdrop")]
+        [Tooltip("The README paintings, cycling behind the logo and menu (user, 15 Nov), at the whole screen-pixel scale that fills the width.")]
+        [SerializeField] private Banner[] backdrop = System.Array.Empty<Banner>();
+        [SerializeField, Min(1f)] private float backdropHold = 8f;
+        [SerializeField, Min(.1f)] private float backdropFade = 1.2f;
+        [Tooltip("The painting is the title's centrepiece; the menu reads over a stepped shade instead of dimming it.")]
+        [SerializeField, Range(0f, 1f)] private float backdropOpacity = 1f;
 
         private PauseMenuInput input;
         private MenuList list;
-        private enum Page { Press, Main, Confirm, Settings, Prologue }
+        private enum Page { Press, Main, Confirm, Settings, Prologue, Hood }
         private Page page;
         private PauseMenuAction[] current = new PauseMenuAction[0];
-        private VisualElement panel, prologueRoot;
-        private Label press, prologueText;
+        private VisualElement panel, prologueRoot, hoodView, logo, actionsArea, optionsArea;
+        private Label press, prologueText, panelHeading, hint;
+        private OptionList options;
+        private BannerLayer backdropFront, backdropBack;
+        private int backdropIndex;
+        private float backdropTime;
+        private bool backdropFading;
+        private Texture2D shadeTexture;
+        private VisualElement titleRoot, backdropRoot, shadeRoot;
+        // The hood as hue, saturation and brightness, the bars Stardew Valley's creator uses, plus swatches for
+        // quick, sensible picks. Track segments divide the 200-point bar evenly: 25 for hue, 10 for the others.
+        private const int HueSteps = 24, ShadeSteps = 9;
+        private float hoodHue, hoodSaturation, hoodBrightness;
+        private int hoodSwatch;
+        // Untouched (or back on the first swatch), the run keeps the drawn blue exactly: its ramp isn't a pure shade.
+        private bool hoodChanged;
+        private static readonly Color[] HoodSwatches =
+        {
+            HoodieColor.Drawn, new Color32(0xA2, 0x3B, 0x3B, 255), new Color32(0xB5, 0x60, 0x2F, 255), new Color32(0xC4, 0x9A, 0x3C, 255),
+            new Color32(0x5F, 0x7A, 0x3A, 255), new Color32(0x2F, 0x5E, 0x3E, 255), new Color32(0x2E, 0x7C, 0x7A, 255),
+            new Color32(0x6E, 0x4A, 0x80, 255), new Color32(0x5B, 0x66, 0x70, 255), new Color32(0x34, 0x36, 0x3C, 255)
+        };
+        private Texture2D hoodSource, hoodShown;
+        private Color32[] hoodPixels;
         private IDisposable anyButton;
         private int revealedFrame = -1;
         private string[] pages = new string[0];
@@ -57,9 +102,23 @@ namespace RoadOfTheOldKing.UI
             press = root.Q<Label>("press");
             prologueRoot = root.Q("prologue");
             prologueText = root.Q<Label>("prologue-text");
+            hoodView = root.Q("hood-preview");
+            logo = root.Q("title");
+            actionsArea = root.Q("actions");
+            optionsArea = root.Q("options");
+            panelHeading = root.Q<Label>("panel-heading");
+            hint = root.Q<Label>("hint");
+            options = new OptionList(optionsArea, root.Q<Label>("description"));
+            titleRoot = root.Q("title-root");
+            backdropRoot = root.Q("backdrop"); shadeRoot = root.Q("title-shade");
+            var panelSettings = GetComponent<UIDocument>().panelSettings;
+            backdropFront = new BannerLayer(root.Q("backdrop-a"), panelSettings);
+            backdropBack = new BannerLayer(root.Q("backdrop-b"), panelSettings);
+            BuildShade(root.Q("title-shade"));
+            backdropIndex = 0; backdropTime = 0f; backdropFading = false;
+            if (backdrop.Length > 0) backdropFront.Show(backdrop[0], backdropOpacity);
             // The prologue covers the menu and takes clicks too: a click turns the page like A/Enter.
             prologueRoot.RegisterCallback<PointerDownEvent>(_ => { if (page == Page.Prologue) AdvancePrologue(); });
-            ControlLabels.Bind(root.Q<Label>("hint"), "↑↓ Choose · Enter Select", "D-pad Choose · A Select");
             ControlLabels.Bind(press, "Press Enter", "Press A");
             ControlLabels.Bind(root.Q<Label>("prologue-hint"), "Enter Next · Esc Skip", "A Next · Start Skip");
             var version = root.Q<Label>("version");
@@ -68,6 +127,7 @@ namespace RoadOfTheOldKing.UI
             input.BackRequested += Back;
             input.NavigationRequested += Navigate;
             input.SubmitRequested += Submit;
+            input.AdjustRequested += Adjust;
             MenuStack.Push(this);
             if (!pressed && bootScene == gameObject.scene.path) ShowPress();
             else ShowMain();
@@ -79,7 +139,11 @@ namespace RoadOfTheOldKing.UI
             input.BackRequested -= Back;
             input.NavigationRequested -= Navigate;
             input.SubmitRequested -= Submit;
+            input.AdjustRequested -= Adjust;
             anyButton?.Dispose(); anyButton = null;
+            if (hoodSource != null) Destroy(hoodSource);
+            if (hoodShown != null) Destroy(hoodShown);
+            if (shadeTexture != null) Destroy(shadeTexture);
             MenuStack.Remove(this);
         }
 
@@ -115,7 +179,7 @@ namespace RoadOfTheOldKing.UI
                 new PauseMenuAction("Continue", Session != null && Session.HasResumePoint ? "Resume where you left off." : "Resume at your last rest.",
                     () => Session.Continue(), HasSave),
                 new PauseMenuAction("New Game", "Begin a new journey.", NewGame, Session != null),
-                new PauseMenuAction("Settings", "Display and HUD options.", () => ShowSettings(0)),
+                new PauseMenuAction("Settings", "Sound, display and HUD options.", () => ShowSettings(0)),
                 new PauseMenuAction("Quit", "Leave the game.", Quit)
             }, select >= 0 ? select : HasSave ? 0 : NewGameRow);
         }
@@ -130,30 +194,54 @@ namespace RoadOfTheOldKing.UI
             }, 0);
         }
 
-        // Rebuilt per show so toggles name their current state.
-        private void ShowSettings(int select) =>
-            Show(Page.Settings, SettingsCommands.Create(() => ShowMain(SettingsRow)), select);
+        private void ShowSettings(int select)
+        {
+            page = Page.Settings;
+            ShowOptionsPage("SETTINGS", SettingsOptions.Create(() => ShowMain(SettingsRow)), select, false,
+                "↑↓ Choose · ←→ Change · Esc Back", "D-pad Choose · ←→ Change · B Back");
+        }
 
         private void Show(Page next, PauseMenuAction[] actions, int select)
         {
             page = next;
             current = actions;
+            ShowListLayout();
             list.Show(actions, select);
         }
 
-        // A settings toggle stays on its row; anything that changed page already rebuilt the list.
-        private void Run(PauseMenuAction action)
+        private void Run(PauseMenuAction action) => action.Execute();
+
+        private bool OnOptionsPage => page == Page.Settings || page == Page.Hood;
+
+        // Option pages (settings, the hood) drop the logo for a heading and a wider panel; list pages bring it back.
+        private void ShowOptionsPage(string heading, OptionList.Row[] rows, int select, bool preview, string keysHint, string padHint)
         {
-            var shown = current;
-            action.Execute();
-            if (page == Page.Settings && ReferenceEquals(shown, current))
-                ShowSettings(Array.IndexOf(current, action));
+            SetVisible(logo, false);
+            SetVisible(panelHeading, true); panelHeading.text = heading;
+            SetVisible(hoodView, preview);
+            SetVisible(actionsArea, false); SetVisible(optionsArea, true);
+            panel.AddToClassList("options-open");
+            panel.RemoveFromClassList("title-plain");
+            titleRoot?.AddToClassList("options-mode");
+            options.Show(rows, select);
+            ControlLabels.Bind(hint, keysHint, padHint);
+        }
+
+        private void ShowListLayout()
+        {
+            SetVisible(logo, true); SetVisible(panelHeading, false); SetVisible(hoodView, false);
+            SetVisible(actionsArea, true); SetVisible(optionsArea, false);
+            panel.RemoveFromClassList("options-open");
+            // The main and confirm pages are plain text over the painting's shade, as title screens usually are.
+            panel.AddToClassList("title-plain");
+            titleRoot?.RemoveFromClassList("options-mode");
+            ControlLabels.Bind(hint, "↑↓ Choose · Enter Select", "D-pad Choose · A Select");
         }
 
         private void BeginPrologue()
         {
             pages = Pages(prologue);
-            if (pages.Length == 0) { StartRun(); return; }
+            if (pages.Length == 0) { ShowHood(); return; }
             page = Page.Prologue;
             pageIndex = 0; leavingAt = -1f;
             SetVisible(prologueRoot, true);
@@ -179,6 +267,7 @@ namespace RoadOfTheOldKing.UI
 
         private void Update()
         {
+            AnimateBackdrop(Time.unscaledDeltaTime);
             if (page == Page.Press)
             {
                 // A slow blink, as on old title screens.
@@ -190,7 +279,7 @@ namespace RoadOfTheOldKing.UI
             {
                 float t = (Time.unscaledTime - leavingAt) / pageFade;
                 prologueText.style.opacity = Mathf.Clamp01(1f - t);
-                if (t >= 1f) StartRun();
+                if (t >= 1f) ShowHood();
                 return;
             }
             prologueText.style.opacity = Mathf.Clamp01((Time.unscaledTime - pageShownAt) / pageFade);
@@ -200,7 +289,182 @@ namespace RoadOfTheOldKing.UI
         {
             if (runStarted || Session == null) return;
             runStarted = true;
-            Session.StartNewRun();
+            Session.StartNewRun(page == Page.Hood && hoodChanged ? HoodieColor.ToHex(HoodColor) : "");
+        }
+
+        // The hoodie picker: the hero in the colour being chosen, over swatches, hue, saturation and brightness, and Begin.
+        private void ShowHood()
+        {
+            if (runStarted || Session == null) return;
+            if (hoodPreview == null || !BuildHoodPreview()) { StartRun(); return; }
+            SetSwatch(0);
+            SetVisible(prologueRoot, false);
+            // The hero alone on the ink field: the paintings belong to the title, not the choice.
+            SetVisible(backdropRoot, false); SetVisible(shadeRoot, false);
+            page = Page.Hood;
+            ShowOptionsPage("YOUR CLOAK", new OptionList.Row[]
+            {
+                new OptionList.Swatches("Colour", "Ready-made colours. The first is the cloak as drawn.", HoodSwatches, () => hoodSwatch, SetSwatch),
+                new OptionList.Slider("Hue", "Around the colour wheel.", () => hoodHue, v => SetHood(v, hoodSaturation, hoodBrightness), HueSteps,
+                    null, i => Color.HSVToRGB(i / (float)HueSteps % 1f, 1f, 1f)),
+                new OptionList.Slider("Saturation", "From grey to full colour.", () => hoodSaturation, v => SetHood(hoodHue, v, hoodBrightness), ShadeSteps,
+                    null, i => Color.HSVToRGB(hoodHue, i / (float)ShadeSteps, Mathf.Max(.4f, hoodBrightness))),
+                new OptionList.Slider("Brightness", "From dark to light.", () => hoodBrightness, v => SetHood(hoodHue, hoodSaturation, v), ShadeSteps,
+                    null, i => Color.HSVToRGB(hoodHue, hoodSaturation, i / (float)ShadeSteps)),
+                new OptionList.Command("Begin", "Your cloak keeps this colour for the whole journey.", StartRun)
+            }, 0, true, "↑↓ Choose · ←→ Change · Enter Select", "D-pad Choose · ←→ Change · A Select");
+            RecolorHood();
+        }
+
+        private Color HoodColor => Color.HSVToRGB(hoodHue, hoodSaturation, hoodBrightness);
+
+        private void SetSwatch(int index)
+        {
+            hoodSwatch = index;
+            Color.RGBToHSV(HoodSwatches[index], out hoodHue, out hoodSaturation, out hoodBrightness);
+            hoodChanged = index != 0;
+            RecolorHood();
+        }
+
+        private void SetHood(float hue, float saturation, float brightness)
+        {
+            hoodHue = Mathf.Clamp01(hue); hoodSaturation = Mathf.Clamp01(saturation); hoodBrightness = Mathf.Clamp01(brightness);
+            hoodSwatch = -1;
+            hoodChanged = true;
+            RecolorHood();
+        }
+
+        private void Adjust(int direction)
+        {
+            if (!OnOptionsPage || MenuStack.Top != (IModalMenu)this) return;
+            options.Adjust(direction);
+        }
+
+        // The sprite isn't readable on the CPU, so it's copied once through a render texture.
+        private bool BuildHoodPreview()
+        {
+            if (hoodView == null) return false;
+            if (hoodSource == null)
+            {
+                var texture = hoodPreview.texture;
+                var rect = hoodPreview.textureRect;
+                var copy = RenderTexture.GetTemporary(texture.width, texture.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
+                var previous = RenderTexture.active;
+                Graphics.Blit(texture, copy);
+                RenderTexture.active = copy;
+                hoodSource = new Texture2D((int)rect.width, (int)rect.height, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point };
+                hoodSource.ReadPixels(new Rect(rect.x, rect.y, rect.width, rect.height), 0, 0);
+                hoodSource.Apply();
+                RenderTexture.active = previous;
+                RenderTexture.ReleaseTemporary(copy);
+                hoodShown = new Texture2D(hoodSource.width, hoodSource.height, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point };
+                hoodPixels = new Color32[hoodSource.width * hoodSource.height];
+            }
+            hoodView.style.width = hoodSource.width * hoodPreviewScale;
+            hoodView.style.height = hoodSource.height * hoodPreviewScale;
+            hoodView.style.backgroundImage = new StyleBackground(hoodShown);
+            return true;
+        }
+
+        private void RecolorHood()
+        {
+            if (hoodSource == null) return;
+            var source = hoodSource.GetPixels32();
+            var chosen = HoodColor;
+            for (int i = 0; i < source.Length; i++) hoodPixels[i] = hoodChanged ? HoodieColor.Recolor(source[i], chosen) : source[i];
+            hoodShown.SetPixels32(hoodPixels);
+            hoodShown.Apply();
+            hoodView.MarkDirtyRepaint();
+        }
+
+        // A stepped ink fade up from the bottom edge, so the plain menu reads over the painting: eight hard bands, no blur.
+        private void BuildShade(VisualElement shade)
+        {
+            if (shade == null) return;
+            const int bands = 8;
+            shadeTexture = new Texture2D(1, bands, TextureFormat.RGBA32, false) { filterMode = FilterMode.Point, wrapMode = TextureWrapMode.Clamp };
+            for (int y = 0; y < bands; y++)
+                shadeTexture.SetPixel(0, y, new Color(23f / 255f, 28f / 255f, 27f / 255f, Mathf.Lerp(.9f, 0f, y / (float)(bands - 1))));
+            shadeTexture.Apply();
+            shade.style.backgroundImage = new StyleBackground(shadeTexture);
+        }
+
+        // One painting animates for backdropHold seconds, then the next fades in over it.
+        private void AnimateBackdrop(float seconds)
+        {
+            if (backdrop.Length == 0 || backdropFront == null) return;
+            backdropTime += seconds;
+            backdropFront.Step(seconds);
+            if (backdrop.Length < 2 || backdropTime < backdropHold) return;
+            if (!backdropFading)
+            {
+                backdropFading = true;
+                backdropBack.Show(backdrop[(backdropIndex + 1) % backdrop.Length], 0f);
+            }
+            backdropBack.Step(seconds);
+            float fade = Mathf.Clamp01((backdropTime - backdropHold) / backdropFade);
+            backdropFront.SetOpacity(backdropOpacity * (1f - fade));
+            backdropBack.SetOpacity(backdropOpacity * fade);
+            if (fade < 1f) return;
+            (backdropFront, backdropBack) = (backdropBack, backdropFront);
+            backdropBack.Hide();
+            backdropIndex = (backdropIndex + 1) % backdrop.Length;
+            backdropTime = 0f;
+            backdropFading = false;
+        }
+
+        private sealed class BannerLayer
+        {
+            private readonly VisualElement element;
+            private readonly PanelSettings panelSettings;
+            private Banner banner;
+            private int frame;
+            private float time;
+
+            public BannerLayer(VisualElement element, PanelSettings panelSettings) { this.element = element; this.panelSettings = panelSettings; Hide(); }
+
+            public void Show(Banner shown, float opacity)
+            {
+                if (element == null || shown == null || shown.frames.Length == 0 || shown.frames[0] == null) return;
+                banner = shown; frame = 0; time = 0f;
+                // The smallest whole number of screen pixels per art pixel that fills the width (5 at 1080p); a wider painting
+                // crops a little at the sides rather than blur.
+                var first = shown.frames[0];
+                int scale = Mathf.Max(1, Mathf.CeilToInt(Screen.width / (float)first.width));
+                float perPoint = PixelsPerPoint();
+                element.style.width = first.width * scale / perPoint;
+                element.style.height = first.height * scale / perPoint;
+                element.style.display = DisplayStyle.Flex;
+                SetOpacity(opacity);
+                Apply();
+            }
+
+            public void Step(float seconds)
+            {
+                if (banner == null) return;
+                time += seconds;
+                float hold = Hold();
+                while (time >= hold) { time -= hold; frame = (frame + 1) % banner.frames.Length; hold = Hold(); }
+                Apply();
+            }
+
+            public void SetOpacity(float opacity) { if (element != null) element.style.opacity = opacity; }
+            public void Hide() { banner = null; if (element != null) element.style.display = DisplayStyle.None; }
+
+            // From the panel's settings, not its layout, which isn't resolved on the frame a layer first shows.
+            private float PixelsPerPoint()
+            {
+                if (panelSettings == null) return 2f;
+                if (panelSettings.scaleMode == PanelScaleMode.ConstantPixelSize) return Mathf.Max(.01f, panelSettings.scale);
+                if (panelSettings.scaleMode != PanelScaleMode.ScaleWithScreenSize) return 2f;
+                var reference = panelSettings.referenceResolution;
+                float wide = Mathf.Log(Screen.width / (float)Mathf.Max(1, reference.x), 2f);
+                float tall = Mathf.Log(Screen.height / (float)Mathf.Max(1, reference.y), 2f);
+                return Mathf.Pow(2f, Mathf.Lerp(wide, tall, panelSettings.match)) * panelSettings.scale;
+            }
+
+            private float Hold() => banner.seconds.Length > 0 ? Mathf.Max(.02f, banner.seconds[Mathf.Min(frame, banner.seconds.Length - 1)]) : .17f;
+            private void Apply() { if (banner.frames[frame] != null) element.style.backgroundImage = new StyleBackground(banner.frames[frame]); }
         }
 
         // Pages are paragraphs; '#' lines are notes for writers, and line breaks inside a page are only wrapping.
@@ -243,16 +507,19 @@ namespace RoadOfTheOldKing.UI
         {
             if (page == Page.Confirm) ShowMain(NewGameRow);
             else if (page == Page.Settings) ShowMain(SettingsRow);
+            // The hood page has no way back: the prologue is over and the run is about to begin.
         }
         public void Navigate(int direction)
         {
             if (MenuStack.Top != (IModalMenu)this || Time.frameCount == revealedFrame) return;
-            if (page != Page.Press && page != Page.Prologue) list.Navigate(direction);
+            if (OnOptionsPage) options.Navigate(direction);
+            else if (page != Page.Press && page != Page.Prologue) list.Navigate(direction);
         }
         public void Submit()
         {
             if (MenuStack.Top != (IModalMenu)this || Session == null || Session.IsLoading || Time.frameCount == revealedFrame) return;
             if (page == Page.Prologue) AdvancePrologue();
+            else if (OnOptionsPage) options.Submit();
             else if (page != Page.Press) list.Submit();
         }
     }

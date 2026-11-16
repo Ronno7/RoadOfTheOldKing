@@ -33,3 +33,37 @@ Label { margin: 0; padding: 0; -unity-font-style: normal; }
 .menu-hint { margin-top: 12px; font-size: 20px; color: var(--kit-muted); -unity-text-align: middle-center; white-space: normal; }
 /* The crest sits on a skinned frame's top edge; plain panels hide it. */
 .menu-crest { display: none; position: absolute; left: 50%; }
+
+/* Option pages (settings, the hood picker; OptionList): a wider panel, small gold group headings, rows with the label on
+   the left and the control on the right. A bar is 200 px of evenly divided segments, so 10 and 25 steps stay whole
+   pixels. Selected rows reuse the kit row's bronze bar and cursor. */
+.menu-panel.options-open { width: 540px; }
+.option-list { display: none; margin: 0 8px; overflow: visible; }
+.option-header { color: var(--kit-gold); margin: 6px 0 2px 8px; -unity-text-align: middle-left; }
+.option-row { flex-direction: row; align-items: center; justify-content: space-between; }
+.option-label { -unity-text-align: middle-left; color: var(--kit-text); }
+.option-row.selected .option-label, .option-row:hover .option-label { color: var(--kit-gold); }
+.option-control { flex-direction: row; align-items: center; }
+.option-arrow { width: 16px; -unity-text-align: middle-center; color: var(--kit-muted); }
+.option-row.selected .option-arrow { color: var(--kit-gold); }
+.option-track { flex-direction: row; align-items: center; width: 200px; height: 20px; }
+.option-segment {
+    flex-grow: 1; flex-basis: 0; height: 12px; margin-right: 2px;
+    background-color: var(--kit-inset); border-width: 0;
+}
+.option-segment.on { background-color: var(--kit-trim); }
+.option-row.selected .option-segment.on { background-color: var(--kit-gold); }
+.option-swatch-segment { margin-right: 0; height: 12px; }
+.option-swatch-segment.picked {
+    height: 20px; border-width: 2px; border-color: var(--kit-ink);
+    border-top-color: var(--kit-gold); border-bottom-color: var(--kit-gold);
+}
+.option-value { width: 52px; -unity-text-align: middle-right; color: var(--kit-muted); }
+.option-row.selected .option-value { color: var(--kit-gold); }
+.option-choice { width: 140px; -unity-text-align: middle-center; }
+.option-swatch {
+    width: 16px; height: 16px; margin: 0 2px; border-width: 2px; border-color: var(--kit-ink);
+}
+.option-swatch.picked { width: 20px; height: 20px; border-color: var(--kit-gold); }
+.option-command { -unity-text-align: middle-center; justify-content: center; margin-top: 8px; }
+.option-command > Label { -unity-text-align: middle-center; }

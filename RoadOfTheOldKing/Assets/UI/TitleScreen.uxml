@@ -2,10 +2,18 @@
     <ui:Style src="MenuTheme.uss" />
     <ui:Style src="TitleScreen.uss" />
     <ui:VisualElement name="title-root" class="menu-overlay">
-        <ui:Label name="title" text="ROAD OF THE&#10;OLD KING" class="title-logo" />
+        <ui:VisualElement name="backdrop" picking-mode="Ignore">
+            <ui:VisualElement name="backdrop-a" class="backdrop-layer" picking-mode="Ignore" />
+            <ui:VisualElement name="backdrop-b" class="backdrop-layer" picking-mode="Ignore" />
+        </ui:VisualElement>
+        <ui:VisualElement name="title-shade" picking-mode="Ignore" />
+        <ui:VisualElement name="title" class="title-logo" />
         <ui:Label name="press" class="title-press" />
         <ui:VisualElement name="title-panel" class="menu-panel">
+            <ui:Label name="panel-heading" class="menu-heading" />
+            <ui:VisualElement name="hood-preview" />
             <ui:VisualElement name="actions" />
+            <ui:VisualElement name="options" class="option-list" />
             <ui:Label name="description" class="menu-description" />
             <ui:Label name="hint" text="↑↓ Choose · Enter Select" class="menu-hint" />
         </ui:VisualElement>

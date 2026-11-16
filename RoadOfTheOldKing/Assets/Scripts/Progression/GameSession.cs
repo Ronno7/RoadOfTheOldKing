@@ -133,6 +133,7 @@ namespace RoadOfTheOldKing.Progression
                 Combat.UnlockRecall();
             foreach (var participant in Participants<IProgressParticipant>())
                 participant.RestoreProgress(Progress);
+            HoodieColor.Apply(Player.gameObject, Progress.hoodieColor);
             // Continue from a resume point: the exact spot, with the health and flasks the player left with.
             // Validate only after saved geometry (drained water, opened passages, cleared obstacles) is restored;
             // scene objects start in their authored state, which would wrongly reject such a spot.
@@ -187,14 +188,15 @@ namespace RoadOfTheOldKing.Progression
         // Completed puzzles are permanent without moving the last rest/respawn point.
         public void SaveProgress() => CaptureAndSave("Progress saved.");
 
-        public void StartNewRun()
+        // hoodieColor: RRGGBB from the New Game picker; empty keeps the drawn blue.
+        public void StartNewRun(string hoodieColor = "")
         {
             if (loading)
                 return;
             try { store.Clear(); }
             catch (Exception) { Status = "Could not clear the save."; return; }
             loadFailed = false;
-            Progress = new ProgressState();
+            Progress = new ProgressState { hoodieColor = hoodieColor ?? "" };
             Visits.Clear();
             resume = pendingResume = null;
             resumeWritePending = resumeClearPending = false; // store.Clear removed the stored resume too.

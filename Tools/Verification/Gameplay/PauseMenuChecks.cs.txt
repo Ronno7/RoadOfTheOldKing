@@ -74,6 +74,29 @@ try {
     // Settings paging with the default list: Back returns to the main page on the Settings row, then closes.
     menu.Open();menu.Navigate(2);menu.Submit();
     check(menu.IsOpen&&(bool)menu.GetType().GetField("inSettings",flags).GetValue(menu),"Settings opens a page without closing");
+    // Settings rows step through their values and stay on their row; the player's own settings are put back after.
+    var settingKeys=new[]{"RoadOfTheOldKing.Settings.Volume","RoadOfTheOldKing.Settings.FlashScale","RoadOfTheOldKing.Settings.ShakeScale"};
+    var settingsBefore=settingKeys.Select(k=>PlayerPrefs.HasKey(k)?(float?)PlayerPrefs.GetFloat(k):null).ToArray();
+    float flashBefore=RoadOfTheOldKing.UI.FeedbackSettings.FlashScale,shakeBefore=RoadOfTheOldKing.UI.FeedbackSettings.ShakeScale,listenerBefore=AudioListener.volume;
+    try{
+     var options=((RoadOfTheOldKing.UI.PauseMenuView)menu.GetType().GetField("view",flags).GetValue(menu)).Options;
+     Func<List<string>> rowLabels=()=>options.Rows.Where(r=>r.Selectable).Select(r=>r.Label).ToList();
+     var expected=new[]{"Volume","Window","Atmosphere","Screen flashes","Screen shake","Vitals","Back"};
+     check(rowLabels().SequenceEqual(expected)&&options.Rows.Count(r=>!r.Selectable)==3,"Settings: sound, display and comfort groups ("+string.Join(" | ",rowLabels().ToArray())+")");
+     RoadOfTheOldKing.UI.SoundSettings.SetVolume(1f);RoadOfTheOldKing.UI.FeedbackSettings.SetFlash(1f);
+     menu.Back();menu.Submit();
+     check(options.SelectedRow!=null&&options.SelectedRow.Label=="Volume","Settings opens on Volume");
+     menu.Adjust(-1);menu.Adjust(-1);
+     check(Mathf.Approximately(RoadOfTheOldKing.UI.SoundSettings.Volume,.8f)&&Mathf.Approximately(AudioListener.volume,.8f),"Left steps the volume down 10% at a time and sets the listener");
+     menu.Navigate(1);menu.Navigate(1);menu.Navigate(1);menu.Adjust(-1);
+     check(options.SelectedRow.Label=="Screen flashes"&&Mathf.Approximately(RoadOfTheOldKing.UI.FeedbackSettings.FlashScale,.9f)&&(bool)menu.GetType().GetField("inSettings",flags).GetValue(menu),"Down skips the group headings; left lowers flashes and stays on the page");
+     menu.Navigate(1);menu.Navigate(1);menu.Navigate(1);check(options.SelectedRow.Label=="Back","The last row is Back");
+     menu.Submit();check(menu.IsOpen&&!(bool)menu.GetType().GetField("inSettings",flags).GetValue(menu),"The Back row returns to the main page");
+     menu.Submit();
+    }finally{
+     for(int i=0;i<settingKeys.Length;i++){if(settingsBefore[i].HasValue)PlayerPrefs.SetFloat(settingKeys[i],settingsBefore[i].Value);else PlayerPrefs.DeleteKey(settingKeys[i]);}
+     PlayerPrefs.Save();RoadOfTheOldKing.UI.FeedbackSettings.FlashScale=flashBefore;RoadOfTheOldKing.UI.FeedbackSettings.ShakeScale=shakeBefore;AudioListener.volume=listenerBefore;
+    }
     menu.Back();check(menu.IsOpen&&!(bool)menu.GetType().GetField("inSettings",flags).GetValue(menu),"Back from Settings returns to the main page");
     menu.Back();check(!menu.IsOpen,"Back on the main page closes");nextFrame();
 

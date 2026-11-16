@@ -1,16 +1,21 @@
-/* Title: the game's logo above the shared menu panel. The logo keeps RotOK Title 32 (the only use of a second
-   face) at 64 px, so one font pixel is one 2 px UI pixel like the rest of the kit. */
-#title-root { background-color: var(--kit-ink); flex-direction: column; }
+/* Title: the game's logo above the shared menu panel, the README's Title.png (RotOK Title 32 lettering with a crown and
+   divider), at 2 UI px per art pixel like the rest of the kit. */
+#title-root { background-color: var(--kit-ink); flex-direction: column; justify-content: space-between; padding: 4px 0 16px 0; }
+/* Option pages (settings, the hood) centre their framed panel over the painting. */
+#title-root.options-mode { justify-content: center; padding: 0; }
 .title-logo {
-    font-size: 64px; color: var(--kit-gold); -unity-text-align: middle-center; white-space: normal;
-    margin: 0 0 32px 0; -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKTitle32.asset");
+    width: 768px; height: 176px; margin: 0 0 16px 0; align-self: center;
+    background-image: url("project://database/Assets/Art/UI/Title.png"); -unity-background-scale-mode: scale-to-fit;
 }
 /* Two description lines are reserved so the hint stays put while the selection moves. */
 #title-panel .menu-description { min-height: 40px; }
 .title-version { position: absolute; right: 12px; bottom: 8px; font-size: 20px; color: var(--kit-disabled); }
 /* "Press Enter / Press A" over the menu's place (the hidden panel keeps its space, so the logo never moves),
    shown once when the game boots here; TitleScreen blinks it. */
-.title-press { display: none; position: absolute; left: 0; right: 0; top: 66%; color: var(--kit-text); -unity-text-align: middle-center; }
+.title-press {
+    display: none; position: absolute; left: 0; right: 0; top: 82%; color: var(--kit-text); -unity-text-align: middle-center;
+    text-shadow: 2px 2px 0px rgb(23, 28, 27);
+}
 
 /* Prologue after New Game: body text on the ink field, a left-aligned block centred on screen, one page at a time.
    It covers the menu (and takes its clicks) until the run starts. */
@@ -20,3 +25,25 @@
 }
 .prologue-text { width: 600px; max-width: 90%; white-space: normal; color: var(--kit-text); -unity-text-align: middle-left; }
 .prologue-hint { position: absolute; left: 0; right: 0; bottom: 24px; color: var(--kit-disabled); -unity-text-align: middle-center; }
+
+/* Option pages on the title (settings, the hood after the prologue): the logo hides and the panel takes a heading.
+   The hood page shows the hero, recoloured live, above its rows; TitleScreen sizes the preview to whole pixels. */
+#panel-heading { display: none; margin: 0 0 12px 0; }
+#hood-preview { display: none; align-self: center; margin: 0 0 12px 0; -unity-background-scale-mode: scale-to-fit; }
+
+/* Backdrop: the README paintings cycle behind the main pages (TitleScreen sizes each layer to whole screen pixels per
+   art pixel), centred a little above the middle; the prologue's ink field covers it and the hood page hides it. */
+#backdrop { position: absolute; left: 0; right: 0; top: 0; bottom: 0; }
+.backdrop-layer {
+    position: absolute; left: 50%; top: 47%; translate: -50% -50%;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* The main and confirm pages drop the framed panel: plain rows with a hard pixel shadow over the shade, the selected
+   row still in the kit's bronze bar. TitleScreen adds title-plain. */
+#title-shade { position: absolute; left: 0; right: 0; bottom: 0; height: 48%; -unity-background-scale-mode: stretch-to-fill; }
+#title-panel.title-plain { background-image: none; padding: 0; }
+#title-panel.title-plain .kit-row, #title-panel.title-plain .menu-description, #title-panel.title-plain .menu-hint,
+.title-version { text-shadow: 2px 2px 0px rgb(23, 28, 27); }
+#title-panel.title-plain .menu-description { min-height: 20px; }
+#title-panel.title-plain .menu-hint { margin-top: 8px; }

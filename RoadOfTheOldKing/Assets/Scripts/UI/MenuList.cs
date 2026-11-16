@@ -17,6 +17,7 @@ namespace RoadOfTheOldKing.UI
         private readonly List<Button> buttons = new List<Button>();
         private IReadOnlyList<PauseMenuAction> actions = Array.Empty<PauseMenuAction>();
         private int selected;
+        public int Selected => selected;
 
         public MenuList(VisualElement container, Label description, Action<PauseMenuAction> invoke)
         {

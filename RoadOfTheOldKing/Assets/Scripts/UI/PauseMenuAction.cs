@@ -27,7 +27,7 @@ namespace RoadOfTheOldKing.UI
         {
             new PauseMenuAction("Resume", "Back to the road.", null),
             new PauseMenuAction("Controls", "Keyboard and controller.", openControls, openControls != null, closeOnExecute: false),
-            new PauseMenuAction("Settings", "Display and HUD options.", openSettings, openSettings != null, closeOnExecute: false),
+            new PauseMenuAction("Settings", "Sound, display and HUD options.", openSettings, openSettings != null, closeOnExecute: false),
             new PauseMenuAction("Main Menu", "Save and return to the title.\nContinue resumes here.",
                 () => GameSession.Instance?.ReturnToTitle(), GameSession.Instance != null && GameSession.Instance.CanReturnToTitle),
             new PauseMenuAction("Quit", "Leave the game.", Quit)
@@ -44,31 +44,32 @@ namespace RoadOfTheOldKing.UI
         }
     }
 
-    // The settings page, shared by the pause menu and the title. Settings live outside the save slot
-    // (PlayerPrefs), so they apply to every run. Each entry stays on the page; Back returns to the caller.
-    public static class SettingsCommands
+    // The settings page, shared by the pause menu and the title: grouped rows with sliders and choices (user, 15 Nov).
+    // Settings live outside the save slot (PlayerPrefs), so they apply to every run.
+    public static class SettingsOptions
     {
-        public static PauseMenuAction[] Create(Action back) => new[]
+        public static OptionList.Row[] Create(Action back)
         {
-            new PauseMenuAction(HudSettings.AlwaysShowVitals ? "Vitals: always shown" : "Vitals: when needed",
-                HudSettings.AlwaysShowVitals ? "Show vitals only when needed." : "Show vitals all the time.",
-                ToggleVitals, closeOnExecute: false),
-            new PauseMenuAction(AtmosphereSettings.Cinematic ? "Atmosphere: cinematic" : "Atmosphere: restrained",
-                AtmosphereSettings.Cinematic ? "Return to the quieter, pixel-crisp atmosphere." : "Stronger light, haze and weather.",
-                ToggleAtmosphere, closeOnExecute: false),
-            new PauseMenuAction("Back", "", back, closeOnExecute: false)
-        };
-
-        private static void ToggleAtmosphere()
-        {
-            AtmosphereSettings.Cinematic = !AtmosphereSettings.Cinematic;
-            HudNotifications.Post(AtmosphereSettings.Cinematic ? "Cinematic atmosphere" : "Restrained atmosphere");
+            // Screen.fullScreen only reports a switch on the next frame, so the row keeps its own copy.
+            bool full = Screen.fullScreen;
+            return new OptionList.Row[]
+            {
+                new OptionList.Header("SOUND"),
+                new OptionList.Slider("Volume", "All game sound.", () => SoundSettings.Volume, SoundSettings.SetVolume, 10, Percent),
+                new OptionList.Header("DISPLAY"),
+                new OptionList.Choice("Window", "Fill the screen or play in a window.", new[] { "Fullscreen", "Windowed" },
+                    () => full ? 0 : 1, i => { full = i == 0; Screen.fullScreenMode = full ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed; }),
+                new OptionList.Choice("Atmosphere", "Light, haze and weather: quiet and crisp, or stronger.", new[] { "Restrained", "Cinematic" },
+                    () => AtmosphereSettings.Cinematic ? 1 : 0, i => AtmosphereSettings.Cinematic = i == 1),
+                new OptionList.Header("COMFORT"),
+                new OptionList.Slider("Screen flashes", "Hit flashes and the low health pulse.", () => FeedbackSettings.FlashScale, FeedbackSettings.SetFlash, 10, Percent),
+                new OptionList.Slider("Screen shake", "Camera kicks and shakes.", () => FeedbackSettings.ShakeScale, FeedbackSettings.SetShake, 10, Percent),
+                new OptionList.Choice("Vitals", "Health, stamina and flasks in the corner.", new[] { "When needed", "Always" },
+                    () => HudSettings.AlwaysShowVitals ? 1 : 0, i => HudSettings.AlwaysShowVitals = i == 1),
+                new OptionList.Command("Back", "", back)
+            };
         }
 
-        private static void ToggleVitals()
-        {
-            HudSettings.AlwaysShowVitals = !HudSettings.AlwaysShowVitals;
-            HudNotifications.Post(HudSettings.AlwaysShowVitals ? "Vitals always shown" : "Vitals shown when needed");
-        }
+        private static string Percent(float value) => value <= .001f ? "Off" : Mathf.RoundToInt(value * 100f) + "%";
     }
 }

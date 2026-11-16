@@ -38,7 +38,7 @@ namespace RoadOfTheOldKing.UI
         private void OnEnable()
         {
             input.ToggleRequested += Toggle; input.NavigationRequested += RouteNavigate; input.SubmitRequested += RouteSubmit;
-            input.BackRequested += RouteBack;
+            input.BackRequested += RouteBack; input.AdjustRequested += RouteAdjust;
         }
 
         // Composition seam for additional commands and save-free verification.
@@ -62,6 +62,9 @@ namespace RoadOfTheOldKing.UI
         private void RouteBack() { if (restoring == null) MenuStack.Top?.Back(); }
         private void RouteNavigate(int direction) => MenuStack.Top?.Navigate(direction);
         private void RouteSubmit() => MenuStack.Top?.Submit();
+        // Left/right: only pages with values to change (settings) take it.
+        private void RouteAdjust(int direction) { if (MenuStack.Top is PauseMenuController menu) menu.Adjust(direction); }
+        public void Adjust(int direction) { if (IsOpen && inSettings) view.Adjust(direction); }
 
         public bool Open()
         {
@@ -114,12 +117,11 @@ namespace RoadOfTheOldKing.UI
             view.ShowControls(actions, Execute, combat != null && combat.CanRecall);
         }
 
-        // Rebuilt per show so toggles name their current state.
+        // Option rows that show and change their own values; Back returns to the Settings row.
         private void ShowSettings(int selected)
         {
             inSettings = true;
-            actions = SettingsCommands.Create(() => ShowMain(SettingsRow));
-            view.Show(actions, Execute, selected, "SETTINGS");
+            view.ShowOptions(SettingsOptions.Create(() => ShowMain(SettingsRow)), "SETTINGS", selected);
         }
         public void Navigate(int direction) => view.Navigate(direction);
         public void Submit() => view.Submit();
@@ -132,16 +134,15 @@ namespace RoadOfTheOldKing.UI
             int selected = 0;
             for (int i = 0; i < actions.Count; i++) if (ReferenceEquals(actions[i], action)) { selected = i; break; }
             action.Execute();
-            // A setting stays on its row; a command that opened another page already rebuilt the view.
-            if (!IsOpen || !ReferenceEquals(previous, actions)) return;
-            if (inSettings) ShowSettings(selected);
-            else ShowMain(selected);
+            // A command that opened another page (settings, controls) already rebuilt the view.
+            if (!IsOpen || inSettings || !ReferenceEquals(previous, actions)) return;
+            ShowMain(selected);
         }
 
         private void OnDisable()
         {
             input.ToggleRequested -= Toggle; input.NavigationRequested -= RouteNavigate; input.SubmitRequested -= RouteSubmit;
-            input.BackRequested -= RouteBack;
+            input.BackRequested -= RouteBack; input.AdjustRequested -= RouteAdjust;
             if (restoring != null) { StopCoroutine(restoring); restoring = null; }
             MenuStack.Remove(this);
             view.Hide(); pause?.Dispose(); pause = null;

@@ -7,6 +7,7 @@
             <ui:VisualElement name="divider" class="menu-divider"><ui:VisualElement class="kit-gem" picking-mode="Ignore" /></ui:VisualElement>
             <ui:VisualElement name="controls" class="controls-table" />
             <ui:VisualElement name="actions" />
+            <ui:VisualElement name="options" class="option-list" />
             <ui:Label name="description" class="menu-description" />
             <ui:Label text="Esc Resume" name="hint" class="menu-hint" />
         </ui:VisualElement>

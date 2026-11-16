@@ -209,6 +209,100 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.UI.TitleScreen
   prologue: {fileID: 4900000, guid: a50946787ac463f4aaa2eacb01195010, type: 3}
   pageFade: 0.8
+  hoodPreview: {fileID: 21300000, guid: 50c0cc9685183704bae1ba50be6c4d90, type: 3}
+  hoodPreviewScale: 4
+  backdrop:
+  - frames:
+    - {fileID: 2800000, guid: 222d2508da5f83d4fbc5b5a1f7234706, type: 3}
+    - {fileID: 2800000, guid: 59aa957911d0d53459589ffb7de463b2, type: 3}
+    - {fileID: 2800000, guid: 379092bc8440c2a4a9ee13167fdc0953, type: 3}
+    - {fileID: 2800000, guid: 41f6a16305f55ae42b97f9cc09b6c1c0, type: 3}
+    - {fileID: 2800000, guid: 0dabf97c785fee64295b86d1d0f56898, type: 3}
+    - {fileID: 2800000, guid: 05b9b6451f90e7941a1b27b55d0aba0c, type: 3}
+    - {fileID: 2800000, guid: ae5015ab492bc654e87f6b0238d7c5f2, type: 3}
+    - {fileID: 2800000, guid: 0b6e6e8d0a3f0f24e871dd3d2ca5e7cb, type: 3}
+    - {fileID: 2800000, guid: 56a0495a6495a2c4a852ced301e8b425, type: 3}
+    - {fileID: 2800000, guid: 19b815696b739fc448019567e289f0d4, type: 3}
+    - {fileID: 2800000, guid: 70eb8364a68e3fe43a3cab29ab95e588, type: 3}
+    - {fileID: 2800000, guid: e070de32f8538d441a86544b994961fb, type: 3}
+    - {fileID: 2800000, guid: 9195741c449ee1147b10203bc6bcae3d, type: 3}
+    - {fileID: 2800000, guid: b6c07379d0dae30428a8f744ffddbaea, type: 3}
+    - {fileID: 2800000, guid: bb4c2815bb0a7464a9dc4d7fe687eda7, type: 3}
+    - {fileID: 2800000, guid: cc387c6a9e2248a40a4ebd55ed20467a, type: 3}
+    - {fileID: 2800000, guid: cce00e097aa1b3b48ba7424b40461132, type: 3}
+    - {fileID: 2800000, guid: ec6bec3aa9a772740b162e61fdafac78, type: 3}
+    - {fileID: 2800000, guid: facabfe6ab15d9d4cbd17a2e12d359d8, type: 3}
+    - {fileID: 2800000, guid: 6adbeed9077a95b419f3d12260358579, type: 3}
+    - {fileID: 2800000, guid: 4024a77f87e84504a88387525f9581d3, type: 3}
+    - {fileID: 2800000, guid: 47d5b9346d9ce8f4b9f108a83f8c558f, type: 3}
+    - {fileID: 2800000, guid: 3f84ddab18fbd6943a6c435b1d876320, type: 3}
+    - {fileID: 2800000, guid: 383ee07122deb6c40a8034daa5da9c9e, type: 3}
+    seconds:
+    - 0.17
+    - 0.16
+    - 0.17
+    - 0.17
+    - 0.16
+    - 0.17
+    - 0.17
+    - 0.16
+    - 0.17
+    - 0.17
+    - 0.16
+    - 0.17
+    - 0.17
+    - 0.16
+    - 0.17
+    - 0.17
+    - 0.16
+    - 0.17
+    - 0.17
+    - 0.16
+    - 0.17
+    - 0.17
+    - 0.16
+    - 0.17
+  - frames:
+    - {fileID: 2800000, guid: 21d9d67b8e91638418485ecb0cae6bb7, type: 3}
+    - {fileID: 2800000, guid: b10b2c57f13180c40a19211487b45190, type: 3}
+    - {fileID: 2800000, guid: af12e05fe11e2e8459103fe770ee5924, type: 3}
+    - {fileID: 2800000, guid: 2a4ceacdc4484b942bd7bee419a54307, type: 3}
+    - {fileID: 2800000, guid: befee5bf47215d5459e7378669c20a5f, type: 3}
+    - {fileID: 2800000, guid: 7933aa406cb7f9e4ab73636878095e18, type: 3}
+    - {fileID: 2800000, guid: c1163cc923ed8c945925e2ae2934c601, type: 3}
+    - {fileID: 2800000, guid: 664061972bd28bf43a72e4ef1bf2cdeb, type: 3}
+    - {fileID: 2800000, guid: 6d001c02cb1f45c46abc135ca898d989, type: 3}
+    - {fileID: 2800000, guid: 89ca566142d3f924c85eb65e962113da, type: 3}
+    - {fileID: 2800000, guid: 41eed36087d5986438fb5b88120c661d, type: 3}
+    - {fileID: 2800000, guid: 0eddf967c46206840b0c02207f85c484, type: 3}
+    seconds:
+    - 0.17
+    - 0.16
+    - 0.17
+    - 0.17
+    - 0.16
+    - 0.17
+    - 0.17
+    - 0.16
+    - 0.17
+    - 0.17
+    - 0.16
+    - 0.17
+  - frames:
+    - {fileID: 2800000, guid: 3be37eef3575db944a680978a0ccbbb8, type: 3}
+    - {fileID: 2800000, guid: 91cd62f4920c4a040ac47e67b304c15f, type: 3}
+    - {fileID: 2800000, guid: 403ba3cd064e6894e90a34a361bd3f79, type: 3}
+    - {fileID: 2800000, guid: 9899324e35d973a43aacf80ee167bccc, type: 3}
+    - {fileID: 2800000, guid: 9adf281373864e64e8877344550776ed, type: 3}
+    seconds:
+    - 4.5
+    - 0.09
+    - 0.14
+    - 0.27
+    - 3
+  backdropHold: 8
+  backdropFade: 1.2
+  backdropOpacity: 0.45
 --- !u!114 &1271274615
 MonoBehaviour:
   m_ObjectHideFlags: 0

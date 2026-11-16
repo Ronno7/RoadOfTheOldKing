@@ -24,6 +24,10 @@ namespace RoadOfTheOldKing.Progression
         public List<WorldTool> ownedTools = new List<WorldTool>();
         public List<CoinSourceRecord> coinSources = new List<CoinSourceRecord>();
         public List<UpgradeSelection> upgrades = new List<UpgradeSelection>();
+        // The hoodie colour chosen at New Game, as RRGGBB; empty keeps the drawn blue. Optional: older saves read it empty.
+        public string hoodieColor = "";
+        // The socket holding the one maintenance crank (SluiceCrank.socketId); empty while carried. Optional, like hoodieColor.
+        public string crankSocket = "";
 
         public bool OwnsTool(WorldTool tool) => tool != WorldTool.None && ownedTools.Contains(tool);
         public CoinSourceRecord FindCoinSource(string id) => string.IsNullOrEmpty(id) ? null : coinSources.Find(s => s.id == id);

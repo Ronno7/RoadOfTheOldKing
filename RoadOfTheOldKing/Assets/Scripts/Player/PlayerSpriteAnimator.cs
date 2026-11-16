@@ -16,6 +16,7 @@ namespace RoadOfTheOldKing.Player
 
         [SerializeField] private SpriteRenderer body;
         [SerializeField] private PlayerAnimationSet animations;
+        public SpriteRenderer Body => body;
         [Tooltip("Ground distance covered by one complete walk cycle, so feet never slide.")]
         [SerializeField, Min(0.1f)] private float walkCycleLength = 3f;
         [SerializeField, Min(0.1f)] private float runCycleLength = 4.5f;

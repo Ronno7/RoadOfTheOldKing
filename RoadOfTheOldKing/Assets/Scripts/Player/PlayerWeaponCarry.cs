@@ -25,6 +25,7 @@ namespace RoadOfTheOldKing.Player
         }
 
         private const float PixelsPerUnit = 16f;
+        private static readonly int HoodieId = Shader.PropertyToID("_HoodieColor");
 
         [SerializeField] private SpriteRenderer body;
         [Tooltip("Cloak fold drawn over the grip, authored for a weapon left of the body and mirrored " +
@@ -36,6 +37,7 @@ namespace RoadOfTheOldKing.Player
         private PlayerSpriteAnimator animator;
         private SpriteRenderer fold;
         private int appliedFrame = -1;
+        private MaterialPropertyBlock bodyBlock, foldBlock;
 
         private void Awake()
         {
@@ -77,9 +79,21 @@ namespace RoadOfTheOldKing.Player
                 fold.color = body.color;
                 fold.sortingLayerID = body.sortingLayerID;
                 fold.sortingOrder = body.sortingOrder + 2;
+                MatchHoodie();
             }
             appliedFrame = Time.frameCount;
             return true;
+        }
+
+        // The fold is cloak, so it takes the hoodie colour the body carries (HoodieColor).
+        private void MatchHoodie()
+        {
+            bodyBlock ??= new MaterialPropertyBlock();
+            foldBlock ??= new MaterialPropertyBlock();
+            body.GetPropertyBlock(bodyBlock);
+            fold.GetPropertyBlock(foldBlock);
+            foldBlock.SetColor(HoodieId, bodyBlock.HasColor(HoodieId) ? bodyBlock.GetColor(HoodieId) : Color.clear);
+            fold.SetPropertyBlock(foldBlock);
         }
 
         // Script order puts this after the weapon's view: hide the fold on frames it was not carried.
