@@ -4,7 +4,7 @@ How the hero is drawn and animated.
 
 [Systems overview](SystemsOverview.md) · [World and tilemaps](World.md)
 
-The hero is an arm-less wanderer in a blue hooded cloak, drawn in eight directions with [PixelLab](https://www.pixellab.ai/) at 16 pixels per unit, the same density as the world tiles.
+The hero is an arm-less wanderer in a hooded cloak, drawn blue in eight directions with [PixelLab](https://www.pixellab.ai/) at 16 pixels per unit, the same density as the world tiles.
 
 ![Hero standing views](Art/Player/Hero-Rotations.png)
 
@@ -44,6 +44,7 @@ The hero has no arms, so the bronze halberd is always a separate sprite, never p
 ![Halberd carry in each direction, standing and mid-stride](Art/Player/Hero-Halberd-Carry.png)
 
 - **Carry:** `PlayerWeaponCarry` holds one whole-pixel grip per facing, in front of or behind the body. A small cloak fold wraps the grip so a hidden hand appears to hold it.
+- **Cloak colour:** chosen at New Game and kept in the save. The `EnemyFlash` shader turns the body's and the grip fold's blues into that colour by their brightness, so shading survives; an empty choice keeps the drawn blue.
 - **Attacks:** procedural sweeps and thrusts, sampled from the same clock and geometry as the damage.
 - **Recall:** the returning axe keeps its silhouette in translucent cyan with a short trail, then turns solid on the catch.
 - **Hit pause:** a confirmed hit pauses only the weapon's clock, and body frames freeze with it because they sample that clock.

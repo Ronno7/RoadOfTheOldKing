@@ -1,4 +1,4 @@
-// Trader-menu input is covered by LowlandsTraderChecks; this fixture buys through the original transaction.
+// This fixture buys through the original transaction; trader-menu input has no kept check.
 // Use GreenLowlandsGameplayChecks setup ONLY, Play, Continue, then LeaveScene to GreenLowlands.
 // Set Lowlands.Rope.Phase=0. Run phases 0-2 around their real reload/death transitions.
 // Stop/re-enter the SAME isolated bootstrap and Continue for phase 3. Once it reaches Title,

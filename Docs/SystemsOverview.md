@@ -193,7 +193,7 @@ flowchart LR
 - **Openings are promises.** Scavengers follow up at most once and boars never; a wolf may lunge again after each miss. Recovery is never cancelled.
 - **Reading the player.** `PlayerRead` tells both brains what they can see the player doing: drinking, axe away, recovering from a chop. After a 0.15 s beat, scavengers and rats press in and boars start their charge sooner. It never cuts a recovery short.
 - **No shared attack turn.** Each enemy attacks on its own rhythm. Groups are shaped by placement and notice radius, so a careful player can pull one at a time.
-- **Leash.** An enemy breaks off when it loses sight, or once past its leash with the player out of notice range, then walks home. A hit, or the player coming close, turns it back. All of this lives in `EnemyBody`. Wolves hunt instead of guarding: past the leash they give up only once the player is out of a longer sight range (`huntReach`), or 2.5 leashes from home (`huntLeashes`).
+- **Leash.** An enemy breaks off when it loses sight, or once past its leash with the player out of notice range, then walks home. A hit, or the player coming close, turns it back. All of this lives in `EnemyBody`. Wolves hunt: past the leash they give up only beyond a longer sight range (`huntReach`) or 2.5 leashes from home (`huntLeashes`).
 - **Mending.** Out of the fight an enemy heals 10% of its health per second. A boss back on its seat is whole at once.
 - **Boss arena.** While its boss is awake, `BossArena` stands fog walls on a rectangle. They hold the boss in, and the player too once fully inside. Only a seated or fallen boss drops them, so any reset reopens the way.
 
@@ -243,13 +243,15 @@ Level construction is in [World and tilemaps](World.md).
 | Bonfires | `Bonfire` | First use lights it and unlocks travel. Next use rests: heals, refills, resets enemies, sets the respawn point. |
 | Place names | `AreaName` | The smallest zone containing the player names the place, shown once per save. |
 | Pots and chests | `Breakable`, `CoinSource`, `RewardChest` | Each result saves once, including empty rolls. |
-| Hold-up | `RewardHoldUp` | A shard, fragment, tool or chest's contents rises over the hero for about a second while the world stops. The reward is saved first, so it only presents. |
-| Material feedback | `SurfaceTag`, `AxeSurfaceFeedback` | A prefab's tag names what it's made of. The axe reports what it strikes, at most one plain object per attack, and the feedback plays that material's sound and flecks. Untagged objects stay silent. |
+| Hold-up | `RewardHoldUp` | A taken reward rises over the hero for about a second while the world stops. It is already saved. |
+| Material feedback | `SurfaceTag`, `AxeSurfaceFeedback` | A tag names what an object is made of; the axe's first plain strike per attack plays that material's sound and flecks. Untagged objects stay silent. |
 | Trader | `Trader`, `ShopOffer`, `CollectionMenu` | Talk, then trade. A purchase saves coins, item and stock together. |
 | Rope | `RopeAnchor`, `RopeRoute` | A bought kit secures a saved two-way route. |
 | Inscriptions | `ForgeInscription`, `InscriptionReader` | Reading saves the knowledge; the carving stays. |
 | End card | `EndCard`, `InscriptionReader` | A rereadable card where a build stops, offered after a milestone. |
 | Recall puzzles | `RecallAwakeningStone`, `RecallSluice`, `RecallRelease` | Bind a lodged axe and its return hits to one flight. |
+| Sluice crank | `SluiceCrank` | One carried part, saved with the socket it sits in: place, turn, take out. |
+| Prop depth | `WorldPropDepth` | Low props and edge bushes draw in front of or behind the hero by their ground line. |
 | Gates and bridges | `PermanentPassage` | One-time. Collision holds until the animation ends and restores on load. |
 | Roofs | `BuildingCutaway` | Roofs fade while the player's feet are inside authored rectangles. |
 | Dark interiors | `DarkInterior` | Global light is zero. The lantern is a 2D light with wall shadows; a cover shader blacks out unlit pixels. |
@@ -260,7 +262,7 @@ One verb per space. Each lesson completes from a real outcome, not a key press.
 
 | Beat | Teaches | Completed by |
 | --- | --- | --- |
-| Village well | Movement, zoom, dodge | Distance walked; a zoom, or the note's few seconds; a dodge |
+| Village well | Movement, zoom, dodge | Distance walked; a zoom or a short wait; a dodge |
 | Axe stump | Pickup | Owning the axe |
 | Shrubs, throw stands | Swing, throw, retrieve | Clearing a shrub; a thrown hit, then the axe back in hand |
 | Practice dummy, cracked stone | Combo, cleave | Three melee hits; a full-charge break |

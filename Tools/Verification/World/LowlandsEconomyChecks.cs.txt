@@ -1,4 +1,4 @@
-// Trader-menu input is covered by LowlandsTraderChecks; purchase phases here call original transactions at merchant reach.
+// Purchase phases call original transactions at merchant reach; trader-menu input has no kept check.
 // Run stopped first for migration/geometry-independent checks. Live phases require the existing
 // GreenLowlandsGameplayChecks unsaved isolated bootstrap, Continued into GreenLowlands.
 // Execute phase 0, allow drainage, then phase 10, allow its real reload, then phase 1,

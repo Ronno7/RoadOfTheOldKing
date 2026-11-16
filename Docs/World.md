@@ -46,7 +46,7 @@ Art and collision are independent: a water or cliff tile isn't an obstacle until
 
 Every scene shares one hierarchy. The region root (a Grid) holds `Collision`, the ground and path maps, `Terrain`, `Scenery`, `Gameplay`, `Encounters` and editor-only `Authoring` guides. `Player`, `Game Session`, `Cameras` and `Lighting` sit at the scene root.
 
-Trees and buildings are prefabs with separate base, overhead and collision parts, so the hero can walk behind a canopy but not through a trunk.
+Trees and buildings are prefabs with separate base, overhead and collision parts, so the hero can walk behind a canopy but not through a trunk. Low props (fences, carts, logs, woodpiles, stumps) are single sprites instead: `WorldPropDepth` draws each in front of or behind the hero by its ground line, and does the same for bush tile maps along forest edges.
 
 ## Elevation
 
@@ -82,6 +82,7 @@ Grass, flowers and reeds sway, bend away from the player and get cut by real wea
 - `InteractiveVegetation` draws baked `VegetationLayout` data in small mesh chunks: no object or collider per plant.
 - Leaves rotate on the GPU around their roots. This deliberately smooth motion is an exception to the pixel grid.
 - Depth follows each plant's root against the player's feet, using an extra draw only in nearby chunks.
+- The bake leaves out plants whose leaves would reach up into a prop standing behind them, since the field draws under props.
 - Cut plants stay cleared through scene visits and regrow on rest. Debris uses a fixed particle pool.
 
 ## Light and shadow
