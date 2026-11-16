@@ -203,6 +203,10 @@ namespace RoadOfTheOldKing.Progression
             Rewards.OnProgressReplaced();
             Checkpoints.Forget();
             Status = "";
+            // Store the fresh record now. Until something else saves progress, quitting writes only the resume point,
+            // and a cold Continue would load default progress without the chosen cloak (found 15 Nov). Nothing is
+            // captured: the scene still loaded belongs to the old run.
+            Save("");
             Load(SceneLoader.CanLoad(newGameScene) ? newGameScene : SceneLoader.ActivePath, null);
         }
 

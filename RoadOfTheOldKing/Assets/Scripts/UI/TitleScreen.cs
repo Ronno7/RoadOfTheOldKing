@@ -424,6 +424,7 @@ namespace RoadOfTheOldKing.UI
             private Banner banner;
             private int frame;
             private float time;
+            private Vector2Int sizedFor;
 
             public BannerLayer(VisualElement element, PanelSettings panelSettings) { this.element = element; this.panelSettings = panelSettings; Hide(); }
 
@@ -431,13 +432,7 @@ namespace RoadOfTheOldKing.UI
             {
                 if (element == null || shown == null || shown.frames.Length == 0 || shown.frames[0] == null) return;
                 banner = shown; frame = 0; time = 0f;
-                // The smallest whole number of screen pixels per art pixel that fills the width (5 at 1080p); a wider painting
-                // crops a little at the sides rather than blur.
-                var first = shown.frames[0];
-                int scale = Mathf.Max(1, Mathf.CeilToInt(Screen.width / (float)first.width));
-                float perPoint = PixelsPerPoint();
-                element.style.width = first.width * scale / perPoint;
-                element.style.height = first.height * scale / perPoint;
+                Resize();
                 element.style.display = DisplayStyle.Flex;
                 SetOpacity(opacity);
                 Apply();
@@ -446,6 +441,8 @@ namespace RoadOfTheOldKing.UI
             public void Step(float seconds)
             {
                 if (banner == null) return;
+                // A window or fullscreen change resizes the painting on screen now, not at the next one.
+                if (sizedFor.x != Screen.width || sizedFor.y != Screen.height) Resize();
                 time += seconds;
                 float hold = Hold();
                 while (time >= hold) { time -= hold; frame = (frame + 1) % banner.frames.Length; hold = Hold(); }
@@ -455,16 +452,33 @@ namespace RoadOfTheOldKing.UI
             public void SetOpacity(float opacity) { if (element != null) element.style.opacity = opacity; }
             public void Hide() { banner = null; if (element != null) element.style.display = DisplayStyle.None; }
 
-            // From the panel's settings, not its layout, which isn't resolved on the frame a layer first shows.
+            // The smallest whole number of screen pixels per art pixel that fills the width (5 at 1080p); a wider painting
+            // crops a little at the sides rather than blur.
+            private void Resize()
+            {
+                var first = banner.frames[0];
+                int scale = Mathf.Max(1, Mathf.CeilToInt(Screen.width / (float)first.width));
+                float perPoint = PixelsPerPoint();
+                element.style.width = first.width * scale / perPoint;
+                element.style.height = first.height * scale / perPoint;
+                sizedFor = new Vector2Int(Screen.width, Screen.height);
+            }
+
+            // The panel's own scale when it has one; otherwise worked out from its settings the way Unity does, including
+            // the screen match mode (the title's panel uses Expand, the smaller of the two ratios; on 21:9 the
+            // width-matched figure left bars at the sides, found 15 Nov).
             private float PixelsPerPoint()
             {
+                if (element.panel != null && element.panel.scaledPixelsPerPoint > 0f) return element.panel.scaledPixelsPerPoint;
                 if (panelSettings == null) return 2f;
                 if (panelSettings.scaleMode == PanelScaleMode.ConstantPixelSize) return Mathf.Max(.01f, panelSettings.scale);
                 if (panelSettings.scaleMode != PanelScaleMode.ScaleWithScreenSize) return 2f;
                 var reference = panelSettings.referenceResolution;
-                float wide = Mathf.Log(Screen.width / (float)Mathf.Max(1, reference.x), 2f);
-                float tall = Mathf.Log(Screen.height / (float)Mathf.Max(1, reference.y), 2f);
-                return Mathf.Pow(2f, Mathf.Lerp(wide, tall, panelSettings.match)) * panelSettings.scale;
+                float wide = Screen.width / (float)Mathf.Max(1, reference.x), tall = Screen.height / (float)Mathf.Max(1, reference.y);
+                float ratio = panelSettings.screenMatchMode == PanelScreenMatchMode.Expand ? Mathf.Min(wide, tall) :
+                    panelSettings.screenMatchMode == PanelScreenMatchMode.Shrink ? Mathf.Max(wide, tall) :
+                    Mathf.Pow(2f, Mathf.Lerp(Mathf.Log(wide, 2f), Mathf.Log(tall, 2f), panelSettings.match));
+                return ratio * panelSettings.scale;
             }
 
             private float Hold() => banner.seconds.Length > 0 ? Mathf.Max(.02f, banner.seconds[Mathf.Min(frame, banner.seconds.Length - 1)]) : .17f;

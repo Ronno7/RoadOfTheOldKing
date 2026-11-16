@@ -2,6 +2,7 @@ using System;
 using RoadOfTheOldKing.Combat;
 using RoadOfTheOldKing.Player;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 namespace RoadOfTheOldKing.Enemies
 {
@@ -126,8 +127,35 @@ namespace RoadOfTheOldKing.Enemies
             var other = hit.collider;
             if (other.GetComponentInParent<IEnemy>() != null || other.GetComponentInParent<PlayerHealth>() != null ||
                 other.GetComponentInParent<IHitReceiver>() != null) return false;
-            var renderer = other.GetComponentInParent<Renderer>();
-            return renderer != null && renderer.enabled;
+            // The wall must be drawn where it was met. Props keep their art beside or under the collider, not
+            // above it: tile props on a sibling map next to a hidden collision map, sprite props on an Art child
+            // (found 15 Nov; boars never stunned on boulders, logs or fences). So look at the collider's own object
+            // and parents, then everything under its parent, for art covering the point just inside the obstacle.
+            Vector2 point = hit.point + Direction * .1f;
+            for (var t = other.transform; t != null; t = t.parent)
+            {
+                var own = t.GetComponent<Renderer>();
+                if (own != null && Draws(own, point)) return true;
+            }
+            var prop = other.transform.parent != null ? other.transform.parent : other.transform;
+            foreach (var renderer in prop.GetComponentsInChildren<Renderer>())
+                if (Draws(renderer, point)) return true;
+            return false;
+        }
+
+        private static readonly int GroundLayer = SortingLayer.NameToID("Ground");
+
+        // Enabled art above the ground (not grass, decals or shadows) that covers the point.
+        private static bool Draws(Renderer renderer, Vector2 point)
+        {
+            if (!renderer.enabled || renderer.sortingLayerID == GroundLayer) return false;
+            if (renderer is TilemapRenderer)
+            {
+                var map = renderer.GetComponent<Tilemap>();
+                return map != null && map.color.a > .05f && map.HasTile(map.WorldToCell(point));
+            }
+            var bounds = renderer.bounds;
+            return point.x >= bounds.min.x && point.x <= bounds.max.x && point.y >= bounds.min.y && point.y <= bounds.max.y;
         }
 
         public void Cancel(bool stopMovement = true)

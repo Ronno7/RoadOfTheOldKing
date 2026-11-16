@@ -138,13 +138,20 @@ try {
     Func<GameObject,bool> chargeInto=(obstacle)=>{resetBoar();move(boarHome+Vector2.right*5);Physics2D.SyncTransforms();pursuit.TryBeginAttack(spec,player,Vector2.right);charge.Tick(spec.windup);
         for(int i=0;i<45&&charge.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Active;i++){charge.Tick(.02f);Physics2D.Simulate(.02f);}
         bool stunned=charge.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Recovery&&pursuit.IsWallStunned;obstacle.SetActive(false);return stunned;};
-    var rock=new GameObject("Ability verification rock");created.Add(rock);rock.transform.position=boarHome+Vector2.right*3;rock.AddComponent<BoxCollider2D>().size=new Vector2(.5f,4);rock.AddComponent<SpriteRenderer>();Physics2D.SyncTransforms();
+    // It must draw where it is met (15 Nov): a white square scaled to the same .5 x 4 footprint as its collider.
+    var rock=new GameObject("Ability verification rock");created.Add(rock);rock.transform.position=boarHome+Vector2.right*3;rock.transform.localScale=new Vector3(.5f,4,1);rock.AddComponent<BoxCollider2D>().size=Vector2.one;rock.AddComponent<SpriteRenderer>().sprite=AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Sprites/WhiteSquare.png");Physics2D.SyncTransforms();
     resetBoar();move(boarHome+Vector2.right*5);pursuit.TryBeginAttack(spec,player,Vector2.right);charge.Tick(spec.windup);
     for(int i=0;i<45&&charge.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Active;i++){charge.Tick(.02f);Physics2D.Simulate(.02f);}
     check(charge.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Recovery&&pursuit.IsWallStunned&&player.Health.Health==player.Health.MaxHealth,"head-on charge into a visible wall stuns the boar");
     charge.Tick(spec.recovery+.05f);check(charge.IsRunning&&boarBody.linearVelocity==Vector2.zero,"wall stun outlasts the normal recovery");
     charge.Tick(spec.wallStunRecovery-spec.recovery);check(!charge.IsRunning&&!pursuit.IsWallStunned,"wall stun ends at its authored length");
     rock.SetActive(true);rock.transform.rotation=Quaternion.Euler(0,0,50);check(!chargeInto(rock),"a grazing wall contact does not stun");rock.transform.rotation=Quaternion.identity;
+    // Real props keep their art beside the collider (15 Nov): a boulder's on a sibling map next to its hidden collision
+    // map, a fence's on an Art child. Each is placed so its face is square across the charge, 3 units out.
+    var boulder=spawn("Assets/Prefabs/Environment/Shared/Boulder.prefab",boarHome+new Vector2(3,-.5f));Physics2D.SyncTransforms();
+    check(chargeInto(boulder),"a head-on charge into a real boulder stuns the boar");charge.Tick(spec.wallStunRecovery+.05f);
+    var fence=spawn("Assets/Prefabs/Environment/Shared/Fence_Vertical.prefab",boarHome+new Vector2(3-.47f+.155f,-1.25f));Physics2D.SyncTransforms();
+    check(chargeInto(fence),"a head-on charge into a real fence stuns the boar");charge.Tick(spec.wallStunRecovery+.05f);
     var blocker=spawn("Assets/Prefabs/Combat/MossbackBoar.prefab",boarHome+Vector2.right*3);blocker.GetComponent<RoadOfTheOldKing.Enemies.PursuitBrain>().enabled=false;Physics2D.SyncTransforms();
     check(!chargeInto(blocker),"running into another enemy does not stun");
     resetBoar();move(boarHome+Vector2.right*4);pursuitTick.Invoke(pursuit,new object[]{.02f});pursuitTick.Invoke(pursuit,new object[]{spec.trackingTime});

@@ -190,7 +190,7 @@ flowchart LR
   W["Windup: tracks you"] --> L["Lock: direction fixed, telegraph changes"] --> A["Active: can hit"] --> R["Recovery: your opening"]
 ```
 
-- **Openings are promises.** At most one follow-up, and recovery is never cancelled.
+- **Openings are promises.** Scavengers follow up at most once and boars never; a wolf may lunge again after each miss. Recovery is never cancelled.
 - **Reading the player.** `PlayerRead` tells both brains what they can see the player doing: drinking, axe away, recovering from a chop. After a 0.15 s beat, scavengers and rats press in and boars start their charge sooner. It never cuts a recovery short.
 - **No shared attack turn.** Each enemy attacks on its own rhythm. Groups are shaped by placement and notice radius, so a careful player can pull one at a time.
 - **Leash.** An enemy breaks off when it loses sight, or once past its leash with the player out of notice range, then walks home. A hit, or the player coming close, turns it back. All of this lives in `EnemyBody`. Wolves hunt instead of guarding: past the leash they give up only once the player is out of a longer sight range (`huntReach`), or 2.5 leashes from home (`huntLeashes`).
@@ -260,10 +260,10 @@ One verb per space. Each lesson completes from a real outcome, not a key press.
 
 | Beat | Teaches | Completed by |
 | --- | --- | --- |
-| Village well | Movement | Distance walked |
+| Village well | Movement, zoom, dodge | Distance walked; a zoom, or the note's few seconds; a dodge |
 | Axe stump | Pickup | Owning the axe |
 | Shrubs, throw stands | Swing, throw, retrieve | Clearing a shrub; a thrown hit, then the axe back in hand |
-| Practice dummy, cracked stone | Combo, dodge, cleave | Three melee hits; a dodge; a full-charge break |
+| Practice dummy, cracked stone | Combo, cleave | Three melee hits; a full-charge break |
 | Forest road | Sprint | Distance sprinted |
 | Ruins | First fight, healing | A lone wolf; a flask heal |
 | Ancient stone | Recall | A thrown hit once the wolf is dead and you've recovered |

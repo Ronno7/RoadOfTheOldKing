@@ -36,7 +36,13 @@ namespace RoadOfTheOldKing.World
         }
 
         private void OnEnable() => zones.Add(this);
-        private void OnDisable() => zones.Remove(this);
+        // Leaving the last zone behind (a scene change, the title) forgets the current place, so a new run that
+        // starts in the same place still gets its announcement.
+        private void OnDisable()
+        {
+            zones.Remove(this);
+            if (zones.Count == 0) current = null;
+        }
 
         // Any enabled zone may drive the shared check; the clock keeps it to one pass per interval.
         private void Update()

@@ -32,8 +32,10 @@ namespace RoadOfTheOldKing.UI
             down.AddBinding(GamepadLayout.MenuStickDown);
             left = actions.AddAction("Left", InputActionType.Button, "<Keyboard>/leftArrow");
             left.AddBinding(GamepadLayout.MenuLeft);
+            left.AddBinding(GamepadLayout.MenuStickLeft);
             right = actions.AddAction("Right", InputActionType.Button, "<Keyboard>/rightArrow");
             right.AddBinding(GamepadLayout.MenuRight);
+            right.AddBinding(GamepadLayout.MenuStickRight);
             submit = actions.AddAction("Submit", InputActionType.Button, "<Keyboard>/enter");
             submit.AddBinding(GamepadLayout.Submit);
         }
