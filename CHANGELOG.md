@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.5 — Full production
+
+### 0.5.0 — 2026-11-15 · The Green Lowlands
+
+**Windows build**
+
 **Added**
 - Pause menu lists every control for keyboard and controller.
 - Sun Shards, heart fragments, tools and chest contents are held up over the hero's head for about a second when taken.
@@ -41,8 +47,6 @@
 - Fences, bushes and fallen logs no longer draw over a hero standing in front of them.
 - Grass in front of rocks and props no longer draws behind them (129 Tutorial and 32 Lowlands plants removed).
 - The rope no longer offers a climb while its way is blocked.
-
-## 0.5 — Full production
 
 ### 0.5.0-dev.2 — 2026-11-03 · Development build: the Broken Watcher, a bigger Lowlands and Windows
 
