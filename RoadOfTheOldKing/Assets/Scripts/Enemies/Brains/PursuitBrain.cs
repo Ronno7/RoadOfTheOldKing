@@ -193,6 +193,7 @@ namespace RoadOfTheOldKing.Enemies
 
         private void Tick(float deltaTime)
         {
+            step = deltaTime;
             if (State == PursuitState.Defeated)
             {
                 SlideCorpse(deltaTime);
@@ -440,7 +441,7 @@ namespace RoadOfTheOldKing.Enemies
             State = PursuitState.Holding;
             if (toTarget.sqrMagnitude > .001f) FacingDirection = toTarget.normalized;
             float gap = distance - holdDistance;
-            body.linearVelocity = gap > .3f ? FacingDirection * moveSpeed : gap < -.3f ? -FacingDirection * moveSpeed * .6f : Vector2.zero;
+            body.linearVelocity = gap > .3f ? FacingDirection * Walk : gap < -.3f ? -FacingDirection * Walk * .6f : Vector2.zero;
         }
 
         private void Engage()
@@ -457,8 +458,13 @@ namespace RoadOfTheOldKing.Enemies
         private void Move(Vector2 direction)
         {
             FacingDirection = direction.normalized;
-            body.linearVelocity = FacingDirection * moveSpeed;
+            body.linearVelocity = FacingDirection * Walk;
         }
+
+        // moveSpeed is what it actually covers: the body's damping takes 1/(1 + step × damping) of each physics step's
+        // velocity, which held a 4.8 scavenger to about 4.1 (found 15 Nov; user: "make them move at their stated speeds").
+        private float step = .02f;
+        private float Walk => moveSpeed * (1f + step * body.linearDamping);
 
         private bool HasLineOfSight(Vector2 point) => actor.CanSee(point, target != null ? target.transform : null, false);
 

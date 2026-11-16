@@ -354,7 +354,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.SimpleMeleeEnemy
   target: {fileID: 0}
   attack: {fileID: 11400000, guid: 4baa19513d1a8534b9d9db64ab5c4a92, type: 2}
-  moveSpeed: 2.7
+  moveSpeed: 2.33
   noticeRadius: 12
   watchDuration: 0
   forgetDuration: 0.6
@@ -380,6 +380,14 @@ MonoBehaviour:
   holdDistance: 0
   attackCooldown: 0.2
   cooldownJitter: 0.3
+  exposedCooldownRate: 1
+  exposedWindupScale: 1
+  reactionDelay: 0.15
+  sidestepChance: 0
+  sidestepDistance: 1.8
+  sidestepDuration: 0.25
+  sidestepCooldown: 2.5
+  throwThreatAngle: 25
 --- !u!114 &2751467187380559122
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -470,6 +478,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Enemies.EnemySlamView
   shader: {fileID: 4800000, guid: 6b1b4e34081b85449a5772eceeb8b0af, type: 3}
+  ghostShader: {fileID: 0}
   afterglow: 1.1
   heavy: 1
 --- !u!1 &4943360059327782604

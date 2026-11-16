@@ -30,6 +30,11 @@ namespace RoadOfTheOldKing.Enemies
         [SerializeField, Min(0f)] private float alertDuration = .4f;
         [Tooltip("Seconds without line of sight before it loses the player.")]
         [SerializeField, Min(0f)] private float loseSightTime = 2.5f;
+        [Tooltip("Hunting, it keeps a player in sight this many notice radii away, and past its leash gives up only beyond " +
+            "that. Wolves hunt rather than guard (user, 15 Nov), so outrunning one costs most of a stamina bar.")]
+        [SerializeField, Min(1f)] private float huntReach = 2f;
+        [Tooltip("This many leashes from home it gives up even beside the player, so it can't be led across the map.")]
+        [SerializeField, Min(1f)] private float huntLeashes = 2.5f;
 
         [Header("Movement")]
         [SerializeField, Min(.1f)] private float stalkSpeed = 2.6f;
@@ -226,7 +231,7 @@ namespace RoadOfTheOldKing.Enemies
             Vector2 toTarget = targetAlive ? (Vector2)target.transform.position - body.position : Vector2.zero;
             float distance = toTarget.magnitude;
             Vector2 toward = distance > .001f ? toTarget / distance : FacingDirection;
-            bool sees = targetAlive && actor.Sees(target.transform, noticeRadius, true);
+            bool sees = targetAlive && actor.Sees(target.transform, noticeRadius, true, IsAware ? huntReach : EnemyBody.SightReach);
 
             // Read the player once per tick; reactions trigger on the moment a swing or an opening begins.
             bool swinging = targetAlive && PlayerSwinging, exposed = targetAlive && PlayerExposed;
@@ -254,7 +259,7 @@ namespace RoadOfTheOldKing.Enemies
             }
 
             actor.TickChase(dt);
-            if (IsAware && (!targetAlive || actor.ShouldBreakOff(leashRadius, loseSightTime, distance, noticeRadius)))
+            if (IsAware && (!targetAlive || actor.ShouldBreakOff(leashRadius, loseSightTime, distance, noticeRadius * huntReach, huntLeashes)))
             {
                 LoseTarget();
                 Enter(PredatorState.Return);
@@ -276,7 +281,7 @@ namespace RoadOfTheOldKing.Enemies
                     if (elapsed >= alertDuration) Enter(distance > chaseDistance ? PredatorState.Chase : PredatorState.Stalk);
                     break;
                 case PredatorState.Chase:
-                    Move(toward, runSpeed, dt);
+                    Run(toward, dt);
                     if (distance <= circleRadius + circleTolerance) Enter(PredatorState.Stalk);
                     break;
                 case PredatorState.Stalk:
@@ -297,7 +302,7 @@ namespace RoadOfTheOldKing.Enemies
                 case PredatorState.Return:
                     Vector2 toHome = actor.Home - body.position;
                     // Followed back into its ground, or the player right beside it: take them up again.
-                    if (sees && actor.ShouldTurnBack(leashRadius, distance, noticeRadius)) Notice();
+                    if (sees && actor.ShouldTurnBack(leashRadius, distance, noticeRadius, huntLeashes)) Notice();
                     else if (toHome.magnitude <= .15f || actor.SettleIfStuck(dt)) { Brake(dt); Enter(PredatorState.Idle); }
                     else Move(toHome.normalized, trotSpeed, dt);
                     break;
@@ -353,7 +358,7 @@ namespace RoadOfTheOldKing.Enemies
         {
             if (distance > chaseDistance) { Enter(PredatorState.Chase); return; }
             // Unarmed player (axe away): close in at a run instead of circling.
-            if (PlayerAxeAway && distance > lungeRange.y * .9f) { Move(toward, runSpeed, dt); return; }
+            if (PlayerAxeAway && distance > lungeRange.y * .9f) { Run(toward, dt); return; }
             bool hugged = distance < snapRange * .8f;
             float patience = exposed || PlayerTired ? stalkFor * pressureScale : stalkFor;
             if (sees && (elapsed >= patience || hugged))
@@ -468,6 +473,17 @@ namespace RoadOfTheOldKing.Enemies
         private void Move(Vector2 direction, float speed, float dt)
         {
             body.linearVelocity = Vector2.MoveTowards(body.linearVelocity, direction * speed, acceleration * dt);
+            if (direction.sqrMagnitude > .0001f) FacingDirection = direction.normalized;
+        }
+
+        // The run holds runSpeed against the body's damping, which otherwise caps any move at acceleration ÷ damping
+        // (5 u/s on the wolf, under its 6.5 run; found 15 Nov). It adds only what damping takes, so it still gathers
+        // pace at about its acceleration. Stalking and trotting keep their damped feel.
+        private void Run(Vector2 direction, float dt)
+        {
+            float damping = body.linearDamping;
+            float loss = body.linearVelocity.magnitude * damping;
+            body.linearVelocity = Vector2.MoveTowards(body.linearVelocity, direction * runSpeed * (1f + dt * damping), (acceleration + loss) * dt);
             if (direction.sqrMagnitude > .0001f) FacingDirection = direction.normalized;
         }
 

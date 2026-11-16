@@ -17,8 +17,11 @@ namespace RoadOfTheOldKing.Enemies
         private const float ReengageFraction = .6f;
         // Walking home, it turns on a player this close wherever it is.
         private const float TurnOnPlayerDistance = 3f;
-        // This many leashes out it gives up even beside the player, so it can't be led across the map.
-        private const float HardLeashFactor = 1.5f;
+        // This many leashes out it gives up even beside the player, so it can't be led across the map. A hunter (the
+        // wolf) passes its own, larger cap.
+        public const float HardLeashFactor = 1.5f;
+        // Sight reaches half again past the notice radius by default; a hunter keeps a player in sight farther.
+        public const float SightReach = 1.5f;
         // A hit keeps it on the player this long, whatever the leash or sight say; each hit restarts it.
         private const float ProvokedChaseSeconds = 5f;
         // A walk home that covers almost no ground in this long has met a wall.
@@ -56,12 +59,12 @@ namespace RoadOfTheOldKing.Enemies
             return true;
         }
 
-        // Sight reaches half again past the notice radius, so an aware enemy keeps a player it is chasing.
+        // Sight reaches past the notice radius (SightReach of it), so an aware enemy keeps a player it is chasing.
         // Seeing the target records the time for LostSight.
-        public bool Sees(Transform target, float noticeRadius, bool ignoreDynamicBodies)
+        public bool Sees(Transform target, float noticeRadius, bool ignoreDynamicBodies, float reach = SightReach)
         {
             Vector2 point = target.position;
-            bool sees = Vector2.Distance(Rigidbody.position, point) <= noticeRadius * 1.5f && CanSee(point, target, ignoreDynamicBodies);
+            bool sees = Vector2.Distance(Rigidbody.position, point) <= noticeRadius * reach && CanSee(point, target, ignoreDynamicBodies);
             if (sees) MarkSeen();
             return sees;
         }
@@ -77,19 +80,20 @@ namespace RoadOfTheOldKing.Enemies
         public void Provoke() => provokedChase = ProvokedChaseSeconds;
         public void TickChase(float dt) => provokedChase = Mathf.Max(0f, provokedChase - dt);
 
-        // Past the leash it breaks off only once the player has got away: never with its back to a fight.
-        public bool ShouldBreakOff(float leashRadius, float loseSightTime, float toPlayer, float noticeRadius)
+        // Past the leash it breaks off only once the player has got away (beyond giveUpDistance, the notice radius for
+        // most): never with its back to a fight.
+        public bool ShouldBreakOff(float leashRadius, float loseSightTime, float toPlayer, float giveUpDistance, float hardLeashes = HardLeashFactor)
         {
             if (provokedChase > 0f) return false;
             if (LostSight(loseSightTime)) return true;
             if (!OutsideLeash(leashRadius)) return false;
-            return toPlayer > noticeRadius || OutsideLeash(leashRadius * HardLeashFactor);
+            return toPlayer > giveUpDistance || OutsideLeash(leashRadius * hardLeashes);
         }
 
         // For a visible player, while walking home.
-        public bool ShouldTurnBack(float leashRadius, float toPlayer, float noticeRadius) =>
+        public bool ShouldTurnBack(float leashRadius, float toPlayer, float noticeRadius, float hardLeashes = HardLeashFactor) =>
             (toPlayer <= noticeRadius && CanReengage(leashRadius)) ||
-            (toPlayer <= TurnOnPlayerDistance && !OutsideLeash(leashRadius * HardLeashFactor));
+            (toPlayer <= TurnOnPlayerDistance && !OutsideLeash(leashRadius * hardLeashes));
 
         // True when a wall has stopped the walk home: it settles there until the next rest, not walking on the spot.
         public bool SettleIfStuck(float dt)

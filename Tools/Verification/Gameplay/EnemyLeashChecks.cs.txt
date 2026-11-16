@@ -109,19 +109,22 @@ try{
  var wolf=wolfObj.GetComponent<RoadOfTheOldKing.Enemies.PredatorBrain>();var wb=wolfObj.GetComponent<Rigidbody2D>();var wt=wolf.GetType();
  wt.GetField("target",flags).SetValue(wolf,player);var wtick=wt.GetMethod("Tick",flags);var wHome=wb.position;
  float wNotice=(float)wt.GetField("noticeRadius",flags).GetValue(wolf),wLeash=(float)wt.GetField("leashRadius",flags).GetValue(wolf),wLose=(float)wt.GetField("loseSightTime",flags).GetValue(wolf);
+ float wReach=(float)wt.GetField("huntReach",flags).GetValue(wolf),wCap=(float)wt.GetField("huntLeashes",flags).GetValue(wolf);
  var senses=wt.GetField("actor",flags).GetValue(wolf);var seen=senses.GetType().GetField("lastSeen",flags);
  Action<int> wrun=n=>{for(int i=0;i<n;i++){wtick.Invoke(wolf,new object[]{.02f});Physics2D.Simulate(.02f);}};
  Action<Vector2> wput=pos=>{wb.position=pos;wolfObj.transform.position=pos;Physics2D.SyncTransforms();};
  wolf.ResetOnRest();put(wHome+Vector2.right*(wNotice-1));Physics2D.SyncTransforms();wrun(1);
  check(wolf.IsAware&&wolf.State==RoadOfTheOldKing.Enemies.PredatorState.Alert,"wolf notices a visible player inside notice range");
- put(wHome+Vector2.right*(wNotice*1.5f+2));Physics2D.SyncTransforms();wrun(1);
+ put(wHome+Vector2.right*(wNotice*wReach+2));Physics2D.SyncTransforms();wrun(1);
  check(wolf.IsAware,"wolf keeps hunting briefly after losing sight");
  seen.SetValue(senses,Time.time-wLose-.1f);wrun(1);
  // Still at home, so Return settles straight into Idle within the same tick.
  check(!wolf.IsAware&&wolf.State==RoadOfTheOldKing.Enemies.PredatorState.Idle,"wolf gives up after its lose-sight time");
  wolf.ResetOnRest();put(wHome+Vector2.right*(wNotice-1));Physics2D.SyncTransforms();wrun(1);
  wput(wHome+Vector2.right*(wLeash+.5f));put(wb.position+Vector2.right*(wNotice+1));Physics2D.SyncTransforms();wrun(1);
- check(!wolf.IsAware&&wolf.State==RoadOfTheOldKing.Enemies.PredatorState.Return,"wolf gives up past its own leash");
+ check(wolf.IsAware,"past its leash the wolf keeps hunting a player inside its hunt reach (user, 15 Nov)");
+ put(wb.position+Vector2.right*(wNotice*wReach+1));Physics2D.SyncTransforms();wrun(1);
+ check(!wolf.IsAware&&wolf.State==RoadOfTheOldKing.Enemies.PredatorState.Return,"wolf gives up past its own leash once the player is beyond its hunt reach");
  wput(wHome+Vector2.right*(wLeash*.7f));put(wb.position+Vector2.right*5);Physics2D.SyncTransforms();wrun(1);
  check(!wolf.IsAware,"wolf ignores the player outside 60% of its leash");
  wput(wHome+Vector2.right*(wLeash*.5f));put(wb.position+Vector2.right*2);Physics2D.SyncTransforms();wrun(1);
@@ -134,6 +137,24 @@ try{
  check(wolf.IsAware&&wolf.State!=RoadOfTheOldKing.Enemies.PredatorState.Return,"a hit from past its leash draws the wolf back");
  wolf.ResetOnRest();wput(wHome+Vector2.right*(wLeash+1));put(wb.position+Vector2.right*1.5f);Physics2D.SyncTransforms();wt.GetMethod("Notice",flags).Invoke(wolf,null);wrun(1);
  check(wolf.IsAware,"beside the player past its leash the wolf keeps fighting");
+ wolf.ResetOnRest();wput(wHome+Vector2.right*(wLeash*wCap+.5f));put(wb.position+Vector2.right*1.5f);Physics2D.SyncTransforms();wt.GetMethod("Notice",flags).Invoke(wolf,null);wrun(1);
+ check(!wolf.IsAware,"past its hunt cap the wolf gives up even beside the player");
+ // Runner (15 Nov): straight away from the notice edge, sprinting until the bar is empty, then walking, with the
+ // wolf's real alert pause and acceleration. Outrunning a wolf should cost most of the bar; the hunt still ends.
+ {
+  var hero=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Player/Player.prefab");
+  var mv=hero.GetComponent<RoadOfTheOldKing.Player.PlayerMovement>();var st=hero.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>();
+  float walk=(float)mv.GetType().GetField("moveSpeed",flags).GetValue(mv),sprint=walk*(float)mv.GetType().GetField("sprintMultiplier",flags).GetValue(mv);
+  float cost=(float)mv.GetType().GetField("sprintCostPerSecond",flags).GetValue(mv),bar=(float)st.GetType().GetField("maximum",flags).GetValue(st);
+  wolf.ResetOnRest();wput(wHome);var runner=wHome+Vector2.right*(wNotice-.25f);put(runner);Physics2D.SyncTransforms();wrun(1);
+  check(wolf.IsAware,"runner case: the wolf notices at the edge of its notice radius");
+  float stamina=bar,clock=0f;
+  while(wolf.IsAware&&clock<30f){float speed=stamina>0f?sprint:walk;stamina=Mathf.Max(0f,stamina-(stamina>0f?cost*.02f:0f));runner+=Vector2.right*speed*.02f;put(runner);Physics2D.SyncTransforms();wrun(1);clock+=.02f;}
+  float spent=bar-stamina,far=Vector2.Distance(wb.position,wHome);
+  check(!wolf.IsAware,"runner case: the hunt ends ("+clock.ToString("0.0")+" s)");
+  check(spent>=bar*.8f,"runner case: escaping cost "+spent.ToString("0")+" of "+bar+" stamina in "+clock.ToString("0.0")+" s");
+  check(far<=wLeash*wCap+.5f,"runner case: the wolf stopped within its hunt cap ("+far.ToString("0.0")+" of "+(wLeash*wCap)+")");
+ }
  // Boss arena: the fog holds an awake boss in, and the player once inside; only a seated or fallen boss drops it.
  var aHome=home+Vector2.down*300;
  var bossObj=UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Combat/BrokenWatcher.prefab"),aHome,Quaternion.identity);created.Add(bossObj);
