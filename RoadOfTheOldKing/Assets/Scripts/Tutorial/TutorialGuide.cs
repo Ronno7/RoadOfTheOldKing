@@ -44,6 +44,12 @@ namespace RoadOfTheOldKing.Tutorial
         public Transform cueTarget;
         public bool cueAtPlayer;
         public Vector2 cueOffset = new Vector2(0, 2.5f);
+        [Tooltip("Show only while the hero is within this many units of the cue target, with no screen fallback. 0: anywhere.")]
+        [Min(0f)] public float nearRadius;
+        [Tooltip("Seconds after the step becomes the hint before its text appears.")]
+        [Min(0f)] public float appearDelay;
+        [Tooltip("Seconds the text stays once shown, even if a fight starts (teaching text otherwise steps aside in combat).")]
+        [Min(0f)] public float minShowSeconds;
 
         public TutorialStep() { }
         public TutorialStep(string id, string hint, TutorialCondition condition) { this.id = id; this.hint = hint; this.condition = condition; }
@@ -84,6 +90,8 @@ namespace RoadOfTheOldKing.Tutorial
         private float showAfter;
         private string completedHint;
         private float completedUntil;
+        private int hintIndex = -2, shownIndex = -2;
+        private float hintSince, shownUntil;
 
         public IReadOnlyList<TutorialStep> Steps => steps;
         public bool IsFinished => steps.Count > 0 && CurrentIndex < 0;
@@ -226,12 +234,14 @@ namespace RoadOfTheOldKing.Tutorial
         {
             bool blocked = !player.IsAlive || UI.MenuStack.IsAnyOpen || (interaction != null && interaction.IsOpen) ||
                 (pauseMenu != null && pauseMenu.BlocksGameplay) || Time.time < showAfter ||
-                // Defer teaching text while fighting; prompts and receipts still show.
-                EncounterState.InCombat || (stone != null && stone.IsAwakening) || (flask != null && flask.IsDrinking);
+                (stone != null && stone.IsAwakening) || (flask != null && flask.IsDrinking);
             if (blocked) { HudNotifications.ClearHint(); return; }
+            // Defer teaching text while fighting; prompts and receipts still show.
+            bool fighting = EncounterState.InCombat;
             if (Time.time < completedUntil && completedHint != null)
             {
-                HudNotifications.SetHint(ControlLabels.Format(completedHint), true, completedPosition);
+                if (fighting) HudNotifications.ClearHint();
+                else HudNotifications.SetHint(ControlLabels.Format(completedHint), true, completedPosition);
                 return;
             }
             int index = HintIndex;
@@ -239,12 +249,24 @@ namespace RoadOfTheOldKing.Tutorial
             if (stone != null && stone.IsReady && !stone.IsAwakened &&
                 Vector2.Distance(player.transform.position, stone.transform.position) < 12f)
                 index = steps.FindIndex(s => s.id == "stone");
+            if (index != hintIndex) { hintIndex = index; hintSince = Time.time; }
             if (index < 0 || Time.time < completedUntil || (steps[index].id == "flask" && Time.time - safeSince < .5f))
             { HudNotifications.ClearHint(); return; }
             var current = steps[index];
+            // A step that teaches its fight (minShowSeconds) may appear in it and holds its text for that long; others step
+            // aside (user, 16 Nov: the wolf text "leaves too quickly").
+            bool holding = index == shownIndex ? Time.time < shownUntil : current.minShowSeconds > 0f;
+            if (fighting && !holding) { HudNotifications.ClearHint(); return; }
+            // ...and wait a moment before appearing (the same note: it "pops up too fast").
+            if (Time.time - hintSince < current.appearDelay) { HudNotifications.ClearHint(); return; }
             // The bonfire owns proximity-sensitive [F] Light / [F] Rest prompts; route landmarks without text leave the
             // way for the player to find (user, 15 Nov).
             if (current.id == "rest" || string.IsNullOrEmpty(current.hint)) { HudNotifications.ClearHint(); return; }
+            // Spatial only: nothing until the hero is near the target (user, 16 Nov, the axe's hint).
+            if (current.nearRadius > 0f && (current.cueTarget == null ||
+                Vector2.Distance(player.transform.position, current.cueTarget.position) > current.nearRadius))
+            { HudNotifications.ClearHint(); return; }
+            if (shownIndex != index) { shownIndex = index; shownUntil = Time.time + current.minShowSeconds; }
             if (current.id == "move") moveHintSeconds += Time.deltaTime;
             if (current.condition == TutorialCondition.Zoomed) zoomHintSeconds += Time.deltaTime;
             Vector3? position = current.cueAtPlayer ? player.transform.position + (Vector3)current.cueOffset :
@@ -278,13 +300,13 @@ namespace RoadOfTheOldKing.Tutorial
             new TutorialStep("move", "Move {move}", TutorialCondition.Moved) { amount = 3f },
             new TutorialStep("zoom", "Zoom out {zoom}", TutorialCondition.Zoomed),
             new TutorialStep("dodge", "Dodge {dash}", TutorialCondition.Dodged),
-            new TutorialStep("take-axe", "It's dangerous to go alone! Take this. {interact}", TutorialCondition.HasAxe),
+            new TutorialStep("take-axe", "It's dangerous to go alone! Take this. {interact}", TutorialCondition.HasAxe) { nearRadius = 4f },
             new TutorialStep("throw", "Throw at a target {throw}, then pick it up", TutorialCondition.Milestone) { milestone = "tutorial/lesson/throw-retrieve" },
             new TutorialStep("melee", "Strike the dummy {attack}", TutorialCondition.Milestone) { milestone = "tutorial/lesson/melee" },
             new TutorialStep("sprint", "Sprint {sprint}", TutorialCondition.Sprinted) { amount = 4f },
             new TutorialStep("look", "Hold {look} to look around", TutorialCondition.Looked) { cueAtPlayer = true },
             new TutorialStep("road", "", TutorialCondition.ReachArea) { area = new Vector2(72f, 27.5f), radius = 5f },
-            new TutorialStep("first-wolf", "A wolf guards the ruins. Dodge its lunge {dash}", TutorialCondition.Milestone) { milestone = "tutorial/enemy/first-wolf" },
+            new TutorialStep("first-wolf", "A wolf guards the ruins. Dodge its lunge {dash}", TutorialCondition.Milestone) { milestone = "tutorial/enemy/first-wolf", appearDelay = .75f, minShowSeconds = 4f },
             new TutorialStep("flask", "Drink a flask {heal}", TutorialCondition.DrankFlask),
             new TutorialStep("stone", "The stone seals the way\nThrow {throw}", TutorialCondition.RecallUnlocked),
             new TutorialStep("first-shard", "Take the Sun Shard {interact}", TutorialCondition.Milestone) { milestone = RewardKeys.ShardCollected("tutorial/first-enemy") },

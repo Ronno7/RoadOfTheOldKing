@@ -323570,6 +323570,9 @@ MonoBehaviour:
     cueTarget: {fileID: 0}
     cueAtPlayer: 0
     cueOffset: {x: 0, y: 2.5}
+    nearRadius: 0
+    appearDelay: 0
+    minShowSeconds: 0
   - id: zoom
     hint: Zoom out {zoom}
     condition: 10
@@ -323580,6 +323583,9 @@ MonoBehaviour:
     cueTarget: {fileID: 0}
     cueAtPlayer: 0
     cueOffset: {x: 0, y: 2.5}
+    nearRadius: 0
+    appearDelay: 0
+    minShowSeconds: 0
   - id: dodge
     hint: Dodge {dash}
     condition: 2
@@ -323590,6 +323596,9 @@ MonoBehaviour:
     cueTarget: {fileID: 0}
     cueAtPlayer: 0
     cueOffset: {x: 0, y: 2.5}
+    nearRadius: 0
+    appearDelay: 0
+    minShowSeconds: 0
   - id: take-axe
     hint: It's dangerous to go alone! Take this. {interact}
     condition: 3
@@ -323600,6 +323609,9 @@ MonoBehaviour:
     cueTarget: {fileID: 372979671}
     cueAtPlayer: 0
     cueOffset: {x: 0, y: 2.5}
+    nearRadius: 4
+    appearDelay: 0
+    minShowSeconds: 0
   - id: clear-brush
     hint: Cut through the brush {attack}
     condition: 6
@@ -323610,6 +323622,9 @@ MonoBehaviour:
     cueTarget: {fileID: 1292707003}
     cueAtPlayer: 0
     cueOffset: {x: 0, y: 2.5}
+    nearRadius: 0
+    appearDelay: 0
+    minShowSeconds: 0
   - id: throw
     hint: Throw at a target {throw}
     condition: 6
@@ -323620,6 +323635,9 @@ MonoBehaviour:
     cueTarget: {fileID: 3774003839998786242}
     cueAtPlayer: 0
     cueOffset: {x: 0, y: 2.5}
+    nearRadius: 0
+    appearDelay: 0
+    minShowSeconds: 0
   - id: melee
     hint: Strike the dummy {attack}
     condition: 6
@@ -323630,6 +323648,9 @@ MonoBehaviour:
     cueTarget: {fileID: 5372894448406703902}
     cueAtPlayer: 0
     cueOffset: {x: 0, y: 2.5}
+    nearRadius: 0
+    appearDelay: 0
+    minShowSeconds: 0
   - id: cleave
     hint: Hold {cleave}, then release to split cracked stone
     condition: 6
@@ -323640,6 +323661,9 @@ MonoBehaviour:
     cueTarget: {fileID: 204502253}
     cueAtPlayer: 0
     cueOffset: {x: 0, y: 2.5}
+    nearRadius: 0
+    appearDelay: 0
+    minShowSeconds: 0
   - id: sprint
     hint: Sprint {sprint}
     condition: 1
@@ -323650,6 +323674,9 @@ MonoBehaviour:
     cueTarget: {fileID: 0}
     cueAtPlayer: 1
     cueOffset: {x: 0, y: 2.5}
+    nearRadius: 0
+    appearDelay: 0
+    minShowSeconds: 0
   - id: look
     hint: Hold {look} to look around
     condition: 9
@@ -323660,6 +323687,9 @@ MonoBehaviour:
     cueTarget: {fileID: 0}
     cueAtPlayer: 1
     cueOffset: {x: 0, y: 2.5}
+    nearRadius: 0
+    appearDelay: 0
+    minShowSeconds: 0
   - id: road
     hint: 
     condition: 7
@@ -323670,6 +323700,9 @@ MonoBehaviour:
     cueTarget: {fileID: 0}
     cueAtPlayer: 0
     cueOffset: {x: 0, y: 2.5}
+    nearRadius: 0
+    appearDelay: 0
+    minShowSeconds: 0
   - id: first-wolf
     hint: Dodge the lunge {dash}
     condition: 6
@@ -323680,6 +323713,9 @@ MonoBehaviour:
     cueTarget: {fileID: 94945414}
     cueAtPlayer: 0
     cueOffset: {x: 0, y: 2.5}
+    nearRadius: 0
+    appearDelay: 0.75
+    minShowSeconds: 4
   - id: flask
     hint: Drink a flask {heal}
     condition: 8
@@ -323690,6 +323726,9 @@ MonoBehaviour:
     cueTarget: {fileID: 0}
     cueAtPlayer: 1
     cueOffset: {x: 0, y: 2.5}
+    nearRadius: 0
+    appearDelay: 0
+    minShowSeconds: 0
   - id: stone
     hint: 'The stone seals the way
 
@@ -323702,6 +323741,9 @@ MonoBehaviour:
     cueTarget: {fileID: 762919696}
     cueAtPlayer: 0
     cueOffset: {x: 0, y: 3}
+    nearRadius: 0
+    appearDelay: 0
+    minShowSeconds: 0
   - id: pack
     hint: 
     condition: 6
@@ -323712,6 +323754,9 @@ MonoBehaviour:
     cueTarget: {fileID: 0}
     cueAtPlayer: 0
     cueOffset: {x: 0, y: 2.5}
+    nearRadius: 0
+    appearDelay: 0
+    minShowSeconds: 0
   - id: first-shard
     hint: Take the Sun Shard {interact}
     condition: 6
@@ -323722,6 +323767,9 @@ MonoBehaviour:
     cueTarget: {fileID: 9001000009}
     cueAtPlayer: 0
     cueOffset: {x: 0, y: 1.75}
+    nearRadius: 0
+    appearDelay: 0
+    minShowSeconds: 0
   - id: rest
     hint: 
     condition: 5
@@ -323732,6 +323780,9 @@ MonoBehaviour:
     cueTarget: {fileID: 0}
     cueAtPlayer: 0
     cueOffset: {x: 0, y: 2.5}
+    nearRadius: 0
+    appearDelay: 0
+    minShowSeconds: 0
   - id: exit
     hint: 
     condition: 6
@@ -323742,6 +323793,9 @@ MonoBehaviour:
     cueTarget: {fileID: 0}
     cueAtPlayer: 0
     cueOffset: {x: 0, y: 2.5}
+    nearRadius: 0
+    appearDelay: 0
+    minShowSeconds: 0
   completedHold: 1.2
   startDelay: 1.5
 --- !u!4 &1705023482

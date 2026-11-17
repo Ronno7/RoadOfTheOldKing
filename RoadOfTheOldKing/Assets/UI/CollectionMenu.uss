@@ -29,7 +29,7 @@ Label { margin: 0; padding: 0; -unity-font-style: normal; white-space: normal; }
     background-image: url("project://database/Assets/Art/Sprites/UI/Kit/Inset.png");
     -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2;
 }
-.pack-item.selected, .pack-item:hover {
+.pack-item.selected {
     background-image: url("project://database/Assets/Art/Sprites/UI/Kit/Selected.png");
 }
 .pack-icon { flex-shrink: 0; }

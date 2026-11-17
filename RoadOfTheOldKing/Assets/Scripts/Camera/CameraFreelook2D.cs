@@ -13,7 +13,7 @@ namespace RoadOfTheOldKing.Cameras
         [Tooltip("Maximum camera displacement from its normal player-follow position, in world units (tiles).")]
         [SerializeField, Min(0f)] private float maxDistance = 3f;
         [Tooltip("Seconds of full stick tilt to go from centre to the limit.")]
-        [SerializeField, Min(.05f)] private float stickSeconds = .5f;
+        [SerializeField, Min(.05f)] private float stickSeconds = .3f;
         [Tooltip("Smoothing as the view eases back to centre once the player moves; larger is slower. It settles in about three times this.")]
         [SerializeField, Min(.05f)] private float returnSmoothing = .8f;
         private Camera view;

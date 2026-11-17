@@ -4,6 +4,9 @@
    skin class and kit sprites here, with no other changes. */
 #bonfire-overlay { align-items: flex-end; padding-right: 8%; background-color: rgba(15, 19, 18, 0.2); }
 #bonfire-panel { width: 384px; }
+/* Upgrade descriptions wrap to three lines (20 px each); reserving them keeps the panel from resizing as the selection
+   moves between rows with and without one. */
+#bonfire-panel .menu-description { min-height: 60px; }
 /* Short of the next upgrade's shards (or at a fire that cannot sell them): the count and requirement turn red. */
 #shards.lacking, #status.warning { color: var(--kit-red); }
 
