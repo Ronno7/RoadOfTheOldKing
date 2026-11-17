@@ -7,11 +7,23 @@ namespace RoadOfTheOldKing.UI
     // reads or writes gameplay state.
     //  Receipts: short, queued confirmations (rewards, unlocks, lessons); bounded, oldest dropped.
     //  Hint: the single current teaching hint owned by the Tutorial guide.
-    //  Banner: one large, brief milestone line across the screen (for example "BONFIRE LIT").
+    //  Announcements: place names and milestone events in one queue, shown one at a time in one place and motion (user
+    //  approved, 17 Nov): a region's name largest, a landmark's or an event's ("BONFIRE LIT") a size down.
     //  Speech: one short line spoken by someone in the world, shown over their head (the trader's barks).
-    //  Area: the name of a place the player just entered, shown large and quiet (AreaName zones).
+    public enum AnnouncementTier { Region, Landmark, Event }
+
+    public readonly struct Announcement
+    {
+        public readonly string Text; public readonly AnnouncementTier Tier;
+        public Announcement(string text, AnnouncementTier tier) { Text = text; Tier = tier; }
+    }
+
     public static class HudNotifications
     {
+        public const int MaxAnnouncements = 3;
+        private static readonly List<Announcement> announcements = new List<Announcement>();
+        public static int AnnouncementCount => announcements.Count;
+
         public const int MaxReceipts = 3;
         public readonly struct Receipt
         {
@@ -28,14 +40,6 @@ namespace RoadOfTheOldKing.UI
         public static bool HintCompleted { get; private set; }
         public static int HintVersion { get; private set; }
 
-        public static string Banner { get; private set; }
-        public static float BannerStartedAt { get; private set; } = float.NegativeInfinity;
-        public static int BannerVersion { get; private set; }
-
-        public static string Area { get; private set; }
-        public static bool AreaIsLandmark { get; private set; }
-        public static int AreaVersion { get; private set; }
-
         public static Transform Speaker { get; private set; }
         public static string Speech { get; private set; }
         public static float SpeechHeight { get; private set; }
@@ -45,8 +49,7 @@ namespace RoadOfTheOldKing.UI
         private static void Reset()
         {
             receipts.Clear(); HintWorldPosition = null; Hint = null; HintCompleted = false; Version++; HintVersion++;
-            Banner = null; BannerStartedAt = float.NegativeInfinity; BannerVersion++;
-            Area = null; AreaVersion++;
+            announcements.Clear();
             Speaker = null; Speech = null; SpeechUntil = float.NegativeInfinity;
             UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
             UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
@@ -56,7 +59,7 @@ namespace RoadOfTheOldKing.UI
         // entered elsewhere (the storehouse showed "Green Lowlands"). Its own zones announce after this.
         private static void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
         {
-            if (mode == UnityEngine.SceneManagement.LoadSceneMode.Single) { Area = null; AreaVersion++; }
+            if (mode == UnityEngine.SceneManagement.LoadSceneMode.Single) announcements.RemoveAll(a => a.Tier != AnnouncementTier.Event);
         }
 
         // A line over a speaker's head for a few seconds (real time); a newer line replaces it.
@@ -70,20 +73,29 @@ namespace RoadOfTheOldKing.UI
 
         public static void ClearSpeech(Transform speaker) { if (Speaker == speaker) SpeechUntil = float.NegativeInfinity; }
 
-        // Replaces any banner already showing; the HUD fades it in, holds and fades it out on unscaled time.
-        public static void ShowBanner(string text)
+        // A milestone event ("BONFIRE LIT"): queued behind anything already showing.
+        public static void ShowBanner(string text) => Announce(text, AnnouncementTier.Event);
+
+        // A place just entered. The HUD starts it once nothing covers it (a menu, a scripted moment, a scene fade).
+        public static void ShowArea(string name, bool landmark = false) =>
+            Announce(name, landmark ? AnnouncementTier.Landmark : AnnouncementTier.Region);
+
+        // One queue, so two announcements never overlap; a repeat moves to the back, and the oldest drops past the cap.
+        public static void Announce(string text, AnnouncementTier tier)
         {
             if (string.IsNullOrEmpty(text)) return;
-            Banner = text; BannerStartedAt = Time.unscaledTime; BannerVersion++;
+            announcements.RemoveAll(a => a.Text == text);
+            announcements.Add(new Announcement(text, tier));
+            while (announcements.Count > MaxAnnouncements) announcements.RemoveAt(0);
         }
 
-        // The HUD starts the place name once nothing covers it (a milestone banner, a menu, a scene fade).
-        // Regions use the title face; a landmark within a region is announced a tier smaller.
-        public static void ShowArea(string name, bool landmark = false)
+        public static bool TryPeekAnnouncement(out Announcement next)
         {
-            if (string.IsNullOrEmpty(name)) return;
-            Area = name; AreaIsLandmark = landmark; AreaVersion++;
+            next = announcements.Count > 0 ? announcements[0] : default;
+            return announcements.Count > 0;
         }
+
+        public static void TakeAnnouncement() { if (announcements.Count > 0) announcements.RemoveAt(0); }
 
         public static void Post(string text, float seconds = 3.5f)
         {

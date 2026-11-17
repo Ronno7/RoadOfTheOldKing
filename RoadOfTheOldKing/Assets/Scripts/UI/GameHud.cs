@@ -63,13 +63,10 @@ namespace RoadOfTheOldKing.UI
         // Corner art is authored in art pixels and drawn at 2 reference px each: the kit's UI pixel (Kit.uss).
         private const float HudPixel = 2f;
         private VisualElement root, vignette, vitals, healthBar, healthFill, staminaRow, staminaBar, staminaFill, staminaDebt, flaskRow;
-        private VisualElement weaponAway, chargeFill, receipts, hint, banner;
-        private Label bannerText;
-        // Milestone banner timing in seconds (unscaled: lighting a fire does not pause the world).
-        private const float BannerIn = .3f, BannerHold = 1.6f, BannerOut = .7f;
-        // Place names (AreaName): slower and quieter than a milestone, in the title face. The name waits until
-        // nothing covers it, then runs on unscaled time; a newer name replaces it.
-        private const float AreaIn = .8f, AreaHold = 2.6f, AreaOut = 1.2f;
+        private VisualElement weaponAway, chargeFill, receipts, hint;
+        // Announcements (place names and events, HudNotifications): one element, one fade on unscaled time (lighting
+        // a fire does not pause the world); the hold shortens down the tiers.
+        private const float AnnounceIn = .6f, AnnounceOut = 1f, RegionHold = 2.6f, LandmarkHold = 2.2f, EventHold = 1.6f;
         private VisualElement areaBanner;
         // Boss bar (Dark Souls style): name and a long bar along the bottom while a boss is fought. A pale segment
         // trails each hit and drains after a short hold; on defeat the bar empties, holds, then fades.
@@ -79,9 +76,8 @@ namespace RoadOfTheOldKing.UI
         private RoadOfTheOldKing.Enemies.BossHealthBar boss;
         private float bossShown = 1f, bossLagged = 1f, bossLagFrom, bossDefeatedAt = -1f;
         private readonly List<Label> areaLabels = new List<Label>();
-        private int areaVersion;
-        private float areaStartedAt = float.NegativeInfinity;
-        private bool areaPending;
+        private Announcement? announcing;
+        private float announcedAt = float.NegativeInfinity;
         private readonly List<VisualElement> flaskIcons = new List<VisualElement>();
         private WorldUIDocument charge, staminaArc;
         private VisualElement promptChip, cueChip, speechChip;
@@ -165,15 +161,12 @@ namespace RoadOfTheOldKing.UI
             receipts = root.Q("receipts");
             hint = root.Q("hint"); hintText = root.Q<Label>("hint-text");
             foreach (var label in new[] { weaponAwayText, hintText }) label.enableRichText = true;
-            banner = new VisualElement { name = "banner", pickingMode = PickingMode.Ignore };
-            bannerText = new Label { name = "banner-text", pickingMode = PickingMode.Ignore };
-            banner.Add(bannerText); root.Add(banner);
             BuildAreaBanner();
             promptChip = AnchoredChip("prompt-chip", out promptText);
             cueChip = AnchoredChip("cue-chip", out tutorialText);
             speechChip = AnchoredChip("speech-chip", out speechText);
             charge.Show(false); staminaArc.Show(false); SetVisible(hint, false);
-            SetVisible(weaponAway, false); SetVisible(banner, false); SetVisible(areaBanner, false);
+            SetVisible(weaponAway, false); SetVisible(areaBanner, false);
             BuildBossBar();
             BuildVignette();
             return true;
@@ -307,57 +300,49 @@ namespace RoadOfTheOldKing.UI
             UpdateVignette(alive);
             bool scripted = GetComponent<PlayerControlLocks>()?.IsLocked == true && !menuOpen;
             UpdateWeaponAway(alive && !menuOpen && !scripted && !HudNotifications.HintCompleted && !HudNotifications.HintWorldPosition.HasValue);
-            // The banner owns the moment: the next prompt (Rest after lighting) waits until it has faded.
-            UpdatePrompt(alive && !menuOpen && !scripted && !BannerShowing());
+            // An event owns the moment: the next prompt (Rest after lighting) waits until it has faded.
+            UpdatePrompt(alive && !menuOpen && !scripted && !EventShowing());
             UpdateCharge(alive && !menuOpen);
             UpdateReceipts();
             SetVisible(receipts, alive && !menuOpen && !scripted && !EncounterState.InCombat && !HudNotifications.HintCompleted);
             UpdateHint(alive && !menuOpen && !scripted);
             UpdateSpeech(alive && !menuOpen && !scripted);
-            UpdateBanner(alive);
             var game = GameSession.Instance;
-            UpdateArea(alive && !menuOpen && !scripted && !BannerShowing() && (game == null || !game.IsLoading));
+            // An event may play through a scripted moment (lighting a fire); a place name waits for a clear screen.
+            UpdateAnnouncement(alive && !menuOpen, alive && !menuOpen && !scripted && (game == null || !game.IsLoading));
             UpdateBoss(alive && !menuOpen);
         }
 
-        private void UpdateArea(bool clear)
+        private static float Hold(AnnouncementTier tier) =>
+            tier == AnnouncementTier.Region ? RegionHold : tier == AnnouncementTier.Landmark ? LandmarkHold : EventHold;
+
+        private bool EventShowing() => announcing.HasValue && announcing.Value.Tier == AnnouncementTier.Event &&
+            Time.unscaledTime - announcedAt <= AnnounceIn + EventHold + AnnounceOut;
+
+        // One at a time from the queue: fade in, hold, fade out. Hidden (its clock still running) while something covers it.
+        private void UpdateAnnouncement(bool clearForEvents, bool clearForPlaces)
         {
-            if (HudNotifications.AreaVersion != areaVersion)
+            if (announcing.HasValue && Time.unscaledTime - announcedAt > AnnounceIn + Hold(announcing.Value.Tier) + AnnounceOut)
+                announcing = null;
+            if (!announcing.HasValue && HudNotifications.TryPeekAnnouncement(out var next) &&
+                (next.Tier == AnnouncementTier.Event ? clearForEvents : clearForPlaces))
             {
-                areaVersion = HudNotifications.AreaVersion;
-                areaPending = !string.IsNullOrEmpty(HudNotifications.Area);
-                areaStartedAt = float.NegativeInfinity;
-                foreach (var label in areaLabels) label.text = HudNotifications.Area;
-                areaBanner.EnableInClassList("landmark", HudNotifications.AreaIsLandmark);
+                HudNotifications.TakeAnnouncement();
+                announcing = next; announcedAt = Time.unscaledTime;
+                foreach (var label in areaLabels) label.text = next.Text;
+                areaBanner.EnableInClassList("landmark", next.Tier != AnnouncementTier.Region);
+                areaBanner.EnableInClassList("event", next.Tier == AnnouncementTier.Event);
             }
-            if (areaPending && clear) { areaPending = false; areaStartedAt = Time.unscaledTime; }
-            float t = Time.unscaledTime - areaStartedAt;
-            float alpha = !clear || t < 0f || t > AreaIn + AreaHold + AreaOut ? 0f
-                : t < AreaIn ? t / AreaIn
-                : t < AreaIn + AreaHold ? 1f
-                : 1f - (t - AreaIn - AreaHold) / AreaOut;
+            if (!announcing.HasValue) { SetVisible(areaBanner, false); return; }
+            var tier = announcing.Value.Tier;
+            float t = Time.unscaledTime - announcedAt, hold = Hold(tier);
+            bool clear = tier == AnnouncementTier.Event ? clearForEvents : clearForPlaces;
+            float alpha = !clear ? 0f
+                : t < AnnounceIn ? t / AnnounceIn
+                : t < AnnounceIn + hold ? 1f
+                : 1f - (t - AnnounceIn - hold) / AnnounceOut;
             SetVisible(areaBanner, alpha > 0f);
             if (alpha > 0f) areaBanner.style.opacity = alpha;
-        }
-
-        private static bool BannerShowing()
-        {
-            float t = Time.unscaledTime - HudNotifications.BannerStartedAt;
-            return !string.IsNullOrEmpty(HudNotifications.Banner) && t >= 0f && t <= BannerIn + BannerHold + BannerOut;
-        }
-
-        // Milestone banner: fade in, hold, fade out. A newer banner replaces the current one.
-        private void UpdateBanner(bool alive)
-        {
-            float t = Time.unscaledTime - HudNotifications.BannerStartedAt;
-            float alpha = !alive || !BannerShowing() ? 0f
-                : t < BannerIn ? t / BannerIn
-                : t < BannerIn + BannerHold ? 1f
-                : 1f - (t - BannerIn - BannerHold) / BannerOut;
-            SetVisible(banner, alpha > 0f);
-            if (alpha <= 0f) return;
-            bannerText.text = HudNotifications.Banner;
-            banner.style.opacity = alpha;
         }
 
         // Corner cluster: health, then stamina (only with the always-visible setting; otherwise stamina is

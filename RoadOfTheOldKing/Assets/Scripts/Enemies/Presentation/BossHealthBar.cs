@@ -9,6 +9,8 @@ namespace RoadOfTheOldKing.Enemies
     public sealed class BossHealthBar : MonoBehaviour
     {
         [SerializeField] private string bossName = "Broken Watcher";
+        [Tooltip("Announced when it falls in a fight (user, 17 Nov). Empty: nothing.")]
+        [SerializeField] private string defeatAnnouncement = "GUARDIAN FALLEN";
         private Damageable health;
         private PursuitBrain brain;
 
@@ -36,6 +38,19 @@ namespace RoadOfTheOldKing.Enemies
             else if (Engaged == this) Engaged = null;
         }
 
-        private void OnDisable() { if (Engaged == this) Engaged = null; }
+        private void OnEnable() => health.Defeated += Announce;
+
+        private void OnDisable()
+        {
+            health.Defeated -= Announce;
+            if (Engaged == this) Engaged = null;
+        }
+
+        // Only a fall in the fight: a boss restored as already fallen was never engaged.
+        private void Announce()
+        {
+            if (Engaged == this && !string.IsNullOrEmpty(defeatAnnouncement))
+                RoadOfTheOldKing.UI.HudNotifications.ShowBanner(defeatAnnouncement);
+        }
     }
 }

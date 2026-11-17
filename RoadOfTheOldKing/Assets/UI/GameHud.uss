@@ -79,15 +79,7 @@ Label { margin: 0; padding: 0; -unity-font-style: normal; }
 }
 #hint.completed #hint-text { color: var(--kit-gold); }
 
-/* Milestone banner ("BONFIRE LIT"): a dark band across the screen with bronze edges and display-size text
-   (40 px = 4 reference px per font pixel). It sits in the upper third: the hero and the fire are at screen centre. */
-#banner {
-    position: absolute; left: 0; right: 0; top: 18%; height: 64px; align-items: center; justify-content: center;
-    background-color: rgba(23, 28, 27, 0.78); border-top-width: 2px; border-bottom-width: 2px; border-color: var(--kit-trim);
-}
-#banner-text { font-size: 40px; margin: 0; padding: 0; color: var(--kit-gold); -unity-text-align: middle-center; white-space: nowrap; }
-
-/* Place names (AreaName), Dark Souls style. Regions: RotOK Title32 at 64 px (one font pixel = one UI pixel) with the
+/* Announcements: place names (AreaName) and events, Dark Souls style. Regions: RotOK Title32 at 64 px (one font pixel = one UI pixel) with the
    kit divider. Landmarks within a region: RotOK Heading16 at 32 px, no divider. Both are stone-light with a one-UI-pixel
    ink outline (eight offset copies) over a soft ink band: four stacked layers, each 16 UI px narrower, compose to
    about 12/25/41/62% opacity from the ends inwards, a stepped pixel-art falloff instead of a blur. */
@@ -110,5 +102,8 @@ Label { margin: 0; padding: 0; -unity-font-style: normal; }
     font-size: 32px; -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKHeading16.asset");
 }
 #area-banner.landmark #area-rule { display: none; }
+/* Events ("BONFIRE LIT") share the place names' spot, band, outline and fade at the landmark size, in sun gold (user
+   approved one announcement style, 17 Nov). */
+#area-banner.event #area-text { color: var(--kit-gold); }
 /* The low-health flash, on the heartbeat. */
 .health-fill.health-low-beat { background-color: rgb(236, 96, 78); border-top-color: rgb(255, 176, 150); }
