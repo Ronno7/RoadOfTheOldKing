@@ -301828,6 +301828,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 1
 --- !u!1001 &109130388
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -303046,6 +303047,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1 &141415356
 GameObject:
   m_ObjectHideFlags: 0
@@ -313519,6 +313521,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1001 &212930708
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -318467,6 +318470,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1001 &230337871
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -319736,6 +319740,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1 &268720347
 GameObject:
   m_ObjectHideFlags: 0
@@ -331336,6 +331341,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 315400676}
+  - component: {fileID: 315400677}
   m_Layer: 0
   m_Name: Landforms and rock enclosure
   m_TagString: Untagged
@@ -331367,6 +331373,43 @@ Transform:
   - {fileID: 142762493}
   m_Father: {fileID: 1836361081}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &315400677
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 315400675}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dac2a655b44399b47a1666e5e670a507, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.ElevationLevels
+  layers:
+  - map: {fileID: 1788639206}
+    level: 0
+    face: 0
+  - map: {fileID: 96202406}
+    level: 1
+    face: 0
+  - map: {fileID: 1892166146}
+    level: 2
+    face: 0
+  - map: {fileID: 1152048469}
+    level: 3
+    face: 0
+  - map: {fileID: 151767776}
+    level: 0
+    face: 1
+  - map: {fileID: 223118560}
+    level: 1
+    face: 1
+  - map: {fileID: 1957756369}
+    level: 2
+    face: 1
+  - map: {fileID: 142762495}
+    level: 3
+    face: 1
 --- !u!1 &319205947
 GameObject:
   m_ObjectHideFlags: 0
@@ -331763,6 +331806,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1001 &325861147
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -374551,6 +374595,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1001 &405164958
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -375218,6 +375263,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1001 &414167724
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -630585,6 +630631,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1 &488773155
 GameObject:
   m_ObjectHideFlags: 0
@@ -770168,6 +770215,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1001 &510574659
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -805690,6 +805738,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 1
+  onlyWhenRisingAbove: 0
 --- !u!1 &520548050
 GameObject:
   m_ObjectHideFlags: 0
@@ -1203159,6 +1203208,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1 &578309516
 GameObject:
   m_ObjectHideFlags: 0
@@ -1227028,6 +1227078,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 1
 --- !u!1 &582362707
 GameObject:
   m_ObjectHideFlags: 0
@@ -1234977,6 +1235028,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 1
+  onlyWhenRisingAbove: 0
 --- !u!1001 &608847474
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1240028,6 +1240080,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 1
+  onlyWhenRisingAbove: 0
 --- !u!1001 &648652608
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1240181,6 +1240234,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1 &649563074
 GameObject:
   m_ObjectHideFlags: 0
@@ -1258992,6 +1259046,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1 &733090517
 GameObject:
   m_ObjectHideFlags: 0
@@ -1259513,6 +1259568,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1001 &747740027
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1299852,6 +1299908,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1 &948330870
 GameObject:
   m_ObjectHideFlags: 0
@@ -1304253,6 +1304310,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1001 &1034203578
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1346155,6 +1346213,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1 &1176576358
 GameObject:
   m_ObjectHideFlags: 0
@@ -1358124,6 +1358183,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1001 &1416249221
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1396092,6 +1396152,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1001 &1432889033
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1397616,6 +1397677,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1 &1476932430
 GameObject:
   m_ObjectHideFlags: 0
@@ -1805282,6 +1805344,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1001 &1622005279
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1821458,6 +1821521,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1 &1688268265
 GameObject:
   m_ObjectHideFlags: 0
@@ -1822427,6 +1822491,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1 &1720018775
 GameObject:
   m_ObjectHideFlags: 0
@@ -1826004,6 +1826069,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1 &1776436289
 GameObject:
   m_ObjectHideFlags: 0
@@ -2127767,6 +2127833,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 1
+  onlyWhenRisingAbove: 0
 --- !u!1 &1794278967
 GameObject:
   m_ObjectHideFlags: 0
@@ -2127919,6 +2127986,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1001 &1799663219
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2129302,6 +2129370,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1 &1829507901
 GameObject:
   m_ObjectHideFlags: 0
@@ -2129349,6 +2129418,15 @@ MonoBehaviour:
   heading: THE ROAD GOES ON
   text: 'Past these logs the King''s Road runs on to the Barrow. That stretch isn''t
     built yet, so this is where version 0.5 ends.
+
+
+    Thank you for playing.'
+  steamDemoText: 'Past these logs the King''s Road runs on to the Barrow. This is
+    where the demo ends.
+
+
+    Wishlist Road of the Old King on Steam to walk the
+    rest of the road.
 
 
     Thank you for playing.'
@@ -2175110,7 +2175188,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 7.5, y: 1}
+  m_Size: {x: 14, y: 1}
   m_EdgeRadius: 0
 --- !u!1 &1920390774
 GameObject:
@@ -2175204,6 +2175282,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1001 &1920532783
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2216981,6 +2217060,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1001 &1966311359
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2219215,6 +2219295,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1 &2035002029
 GameObject:
   m_ObjectHideFlags: 0
@@ -2249617,6 +2249698,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
 --- !u!1001 &2100221389
 PrefabInstance:
   m_ObjectHideFlags: 0

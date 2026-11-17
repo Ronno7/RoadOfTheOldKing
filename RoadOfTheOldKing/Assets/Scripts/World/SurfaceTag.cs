@@ -10,7 +10,20 @@ namespace RoadOfTheOldKing.World
     public sealed class SurfaceTag : MonoBehaviour
     {
         [SerializeField] private SurfaceMaterial material;
+        [Tooltip("Cliffs and elevation edges: answer only when the struck rock rises above the striker's ground " +
+            "(the scene's ElevationLevels). Swung at from on top, over the drop, they stay silent.")]
+        [SerializeField] private bool onlyWhenRisingAbove;
         public SurfaceMaterial Material => material;
+
+        // Whether a blow from someone standing at `from` that met this surface at `point` should sound.
+        public bool Answers(Vector2 from, Vector2 point, Vector2 direction)
+        {
+            if (!onlyWhenRisingAbove) return true;
+            Vector2 inside = point + (direction.sqrMagnitude > .0001f ? direction.normalized : Vector2.zero) * .1f;
+            if (!ElevationLevels.TryGround(from, out int ground) || !ElevationLevels.TryStruck(inside, out int rock))
+                return true;
+            return rock > ground;
+        }
     }
 
     public readonly struct SurfaceStrike

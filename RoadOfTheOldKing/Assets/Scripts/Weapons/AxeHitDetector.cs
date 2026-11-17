@@ -84,7 +84,7 @@ namespace RoadOfTheOldKing.Weapons
         {
             if (solidStruck) return;
             var surface = collider.GetComponentInParent<SurfaceTag>();
-            if (surface == null) return;
+            if (surface == null || !surface.Answers(owner.position, point, direction)) return;
             solidStruck = true;
             surfaceStruck?.Invoke(new SurfaceStrike(surface.Material, point, direction, false));
         }

@@ -11,6 +11,8 @@ namespace RoadOfTheOldKing.World
     {
         [SerializeField] private string heading = "THE ROAD GOES ON";
         [SerializeField, TextArea(3, 10)] private string text;
+        [Tooltip("Read instead in Steam demo builds: the Windows Steam build profile defines ROTOK_STEAM_DEMO.")]
+        [SerializeField, TextArea(3, 10)] private string steamDemoText;
         [SerializeField] private string requiredMilestone;
         [SerializeField] private string prompt = "Look down the road";
         [Tooltip("How far off it can be read: wide enough for the whole blocked road.")]
@@ -19,15 +21,21 @@ namespace RoadOfTheOldKing.World
         public override string Prompt => prompt;
         protected override float PickupDistance => reach;
 
+#if ROTOK_STEAM_DEMO
+        private string Text => string.IsNullOrWhiteSpace(steamDemoText) ? text : steamDemoText;
+#else
+        private string Text => text;
+#endif
+
         public override bool CanCollect(PlayerHealth player)
         {
             var session = GameSession.Instance;
-            return base.CanCollect(player) && !string.IsNullOrWhiteSpace(text) && session != null && !session.IsLoading &&
+            return base.CanCollect(player) && !string.IsNullOrWhiteSpace(Text) && session != null && !session.IsLoading &&
                 session.Player == player && (string.IsNullOrEmpty(requiredMilestone) || session.Progress.Has(requiredMilestone)) &&
                 player.TryGetComponent<InscriptionReader>(out var reader) && reader.CanOpen;
         }
 
         public override bool TryCollect(PlayerHealth player) =>
-            CanCollect(player) && player.GetComponent<InscriptionReader>().TryOpen(this, heading, text);
+            CanCollect(player) && player.GetComponent<InscriptionReader>().TryOpen(this, heading, Text);
     }
 }
