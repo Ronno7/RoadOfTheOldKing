@@ -90,7 +90,7 @@ Prompts follow whichever device was used last.
 | Alt (hold) | LB (hold) + right stick | Look around |
 | Wheel | D-pad up/down | Zoom |
 | Esc | Start | Pause |
-| F3 / F4 | | Debug panel / developer tools |
+| F2 / F3 / F4 | | Hide HUD / debug panel / developer tools (playtest builds) |
 
 ### Movement
 
@@ -244,7 +244,8 @@ Level construction is in [World and tilemaps](World.md).
 | Place names | `AreaName` | The smallest zone containing the player names the place, shown once per save. |
 | Pots and chests | `Breakable`, `CoinSource`, `RewardChest` | Each result saves once, including empty rolls. |
 | Hold-up | `RewardHoldUp` | A taken reward rises over the hero for about a second while the world stops. It is already saved. |
-| Material feedback | `SurfaceTag`, `AxeSurfaceFeedback` | A tag names what an object is made of; the axe's first plain strike per attack plays that material's sound and flecks. Untagged objects stay silent. |
+| Sound channels | `AudioChannels`, `Resources/Audio/Mixer` | Every sound plays through a Music, Ambience or Effects group; the settings sliders set each group's volume. |
+| Material feedback | `SurfaceTag`, `AxeSurfaceFeedback`, `ElevationLevels` | A tag names what an object is made of; the axe's first plain strike per attack plays that material's sound and flecks. Untagged objects stay silent; cliffs answer only when the rock rises above the striker. |
 | Trader | `Trader`, `ShopOffer`, `CollectionMenu` | Talk, then trade. A purchase saves coins, item and stock together. |
 | Rope | `RopeAnchor`, `RopeRoute` | A bought kit secures a saved two-way route. |
 | Inscriptions | `ForgeInscription`, `InscriptionReader` | Reading saves the knowledge; the carving stays. |
@@ -300,6 +301,8 @@ One verb per space. Each lesson completes from a real outcome, not a key press.
 - **Combat Effects Preview** (Unity menu): replays attacks against a target with slow motion and frame stepping.
 - **F3 Debug Panel:** read-only performance, player, world and save readouts.
 - **F4 Developer Tools:** restore, grants, god mode, no collision, show collision, game speed, reset enemies and fallen bosses, and travel to any fire or arrival point.
+- **F2 Hide HUD:** clean frames for screenshots and footage; menus and dialogue still show.
+- **Build profiles:** *Windows Playtest* keeps these tools; *Windows Steam* leaves them out and defines `ROTOK_STEAM_DEMO`, which gives the end card its demo text.
 - [Tools](../Tools/README.md): art exporters, pacing simulator, release packaging and regression checks.
 
 Limits today: Barrow Woods and later regions are unbuilt, and settings have no key rebinding.
