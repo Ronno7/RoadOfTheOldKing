@@ -242,6 +242,7 @@ Level construction is in [World and tilemaps](World.md).
 | Interaction (F) | `PlayerBonfireInteraction` | Picks one nearby target. The HUD prompt reads the same selection. |
 | Bonfires | `Bonfire` | First use lights it and unlocks travel. Next use rests: heals, refills, resets enemies, sets the respawn point. |
 | Place names | `AreaName` | The smallest zone containing the player names the place, shown once per save. |
+| Announcements | `HudNotifications`, `GameHud` | Place names and events queue, one at a time in one spot; regions largest. |
 | Pots and chests | `Breakable`, `CoinSource`, `RewardChest` | Each result saves once, including empty rolls. |
 | Hold-up | `RewardHoldUp` | A taken reward rises over the hero for about a second while the world stops. It is already saved. |
 | Sound channels | `AudioChannels`, `Resources/Audio/Mixer` | Every sound plays through a Music, Ambience or Effects group; the settings sliders set each group's volume. |

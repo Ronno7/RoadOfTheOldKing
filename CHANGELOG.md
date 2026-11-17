@@ -5,13 +5,17 @@
 **Added**
 - Volume sliders for music, ambience and effects.
 - Game icon for the window and taskbar.
+- "GUARDIAN FALLEN" marks a boss's defeat.
 
 **Changed**
-- The hero carries a new double-bladed axe, still spiked for the thrust.
-- The game opens fullscreen; Windowed takes three quarters of the screen.
+- The hero carries a new double-bladed axe sprite.
+- Free look is two-thirds faster on a controller.
+- Place names and "BONFIRE LIT" share one style and never overlap.
+- Upgrade bonfires burn a larger gold flame in a bronze brazier.
 
 **Fixed**
-- Cliffs no longer clank when you swing from on top of them.
+- Cliffs no longer make noise when you swing from on top of them.
+- The upgrade menu keeps its size as you browse.
 
 ## 0.5 — Full production
 
