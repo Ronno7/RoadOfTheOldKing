@@ -55,10 +55,13 @@ namespace RoadOfTheOldKing.UI
             return new OptionList.Row[]
             {
                 new OptionList.Header("SOUND"),
-                new OptionList.Slider("Volume", "", () => SoundSettings.Volume, SoundSettings.SetVolume, 10, Percent),
+                new OptionList.Slider("Master", "", () => SoundSettings.Volume, SoundSettings.SetVolume, 10, Percent),
+                Channel("Music", Audio.AudioChannel.Music),
+                Channel("Ambience", Audio.AudioChannel.Ambience),
+                Channel("Effects", Audio.AudioChannel.Effects),
                 new OptionList.Header("DISPLAY"),
                 new OptionList.Choice("Window", "", new[] { "Fullscreen", "Windowed" },
-                    () => full ? 0 : 1, i => { full = i == 0; Screen.fullScreenMode = full ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed; }),
+                    () => full ? 0 : 1, i => { full = i == 0; SetWindow(full); }),
                 new OptionList.Choice("Atmosphere", "Light, haze and weather.", new[] { "Restrained", "Cinematic" },
                     () => AtmosphereSettings.Cinematic ? 1 : 0, i => AtmosphereSettings.Cinematic = i == 1),
                 new OptionList.Header("COMFORT"),
@@ -71,5 +74,19 @@ namespace RoadOfTheOldKing.UI
         }
 
         private static string Percent(float value) => value <= .001f ? "Off" : Mathf.RoundToInt(value * 100f) + "%";
+
+        private static OptionList.Row Channel(string label, Audio.AudioChannel channel) =>
+            new OptionList.Slider(label, "", () => SoundSettings.ChannelVolume(channel), v => SoundSettings.SetChannelVolume(channel, v), 10, Percent);
+
+        // Fullscreen fills the display at its own resolution (the first-launch default);
+        // a window takes three quarters of it, so it never opens as large as the screen.
+        private static void SetWindow(bool fullscreen)
+        {
+            var display = Screen.mainWindowDisplayInfo;
+            int width = display.width > 0 ? display.width : Screen.currentResolution.width;
+            int height = display.height > 0 ? display.height : Screen.currentResolution.height;
+            if (fullscreen) Screen.SetResolution(width, height, FullScreenMode.FullScreenWindow);
+            else Screen.SetResolution(Mathf.RoundToInt(width * .75f), Mathf.RoundToInt(height * .75f), FullScreenMode.Windowed);
+        }
     }
 }

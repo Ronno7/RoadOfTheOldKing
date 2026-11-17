@@ -36,6 +36,7 @@ namespace RoadOfTheOldKing.Enemies
             child.layer = gameObject.layer;
             child.transform.SetParent(transform, false);
             speaker = child.AddComponent<AudioSource>();
+            Audio.AudioChannels.Route(speaker, Audio.AudioChannel.Effects);
             speaker.playOnAwake = false;
             speaker.spatialBlend = 0f;
             speaker.Stop();

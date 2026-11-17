@@ -105,6 +105,7 @@ namespace RoadOfTheOldKing.World
             var go = new GameObject(label) { hideFlags = HideFlags.DontSave };
             go.transform.SetParent(transform, false);
             var source = go.AddComponent<AudioSource>();
+            Audio.AudioChannels.Route(source, Audio.AudioChannel.Effects);
             source.playOnAwake = false;
             source.loop = loop;
             source.spatialBlend = 0f; // 2D camera: attenuate in the map plane, not camera Z.

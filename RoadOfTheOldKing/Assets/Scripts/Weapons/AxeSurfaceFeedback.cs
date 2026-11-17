@@ -38,6 +38,7 @@ namespace RoadOfTheOldKing.Weapons
             child.layer = gameObject.layer;
             child.transform.SetParent(transform, false);
             speaker = child.AddComponent<AudioSource>();
+            Audio.AudioChannels.Route(speaker, Audio.AudioChannel.Effects);
             speaker.playOnAwake = false;
             speaker.spatialBlend = 0f;
             flecks = child.AddComponent<ParticleSystem>();

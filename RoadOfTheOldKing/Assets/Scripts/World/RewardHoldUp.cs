@@ -76,6 +76,7 @@ namespace RoadOfTheOldKing.World
             root.layer = gameObject.layer;
             root.transform.SetParent(transform, false);
             speaker = root.AddComponent<AudioSource>();
+            Audio.AudioChannels.Route(speaker, Audio.AudioChannel.Effects);
             speaker.playOnAwake = false;
             speaker.spatialBlend = 0f;
             item = PickupPresentation.MakeSprite("Held item", root.transform, null, template);

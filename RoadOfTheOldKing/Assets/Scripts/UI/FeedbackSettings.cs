@@ -33,10 +33,12 @@ namespace RoadOfTheOldKing.UI
         }
     }
 
-    // Master volume, outside the save slot like the other settings.
+    // Master volume on the listener and one volume per mixer channel, outside the save slot like the other settings.
     public static class SoundSettings
     {
         private const string VolumeKey = "RoadOfTheOldKing.Settings.Volume";
+        private static readonly string[] ChannelKeys =
+            { "RoadOfTheOldKing.Settings.MusicVolume", "RoadOfTheOldKing.Settings.AmbienceVolume", "RoadOfTheOldKing.Settings.EffectsVolume" };
         public static float Volume => Mathf.Clamp01(PlayerPrefs.GetFloat(VolumeKey, 1f));
 
         public static void SetVolume(float volume)
@@ -46,7 +48,33 @@ namespace RoadOfTheOldKing.UI
             AudioListener.volume = Volume;
         }
 
+        public static float ChannelVolume(Audio.AudioChannel channel) => Mathf.Clamp01(PlayerPrefs.GetFloat(ChannelKeys[(int)channel], 1f));
+
+        public static void SetChannelVolume(Audio.AudioChannel channel, float volume)
+        {
+            PlayerPrefs.SetFloat(ChannelKeys[(int)channel], Mathf.Clamp01(volume));
+            PlayerPrefs.Save();
+            Audio.AudioChannels.SetVolume(channel, ChannelVolume(channel));
+        }
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void Load() => AudioListener.volume = Volume;
+        private static void Load()
+        {
+            AudioListener.volume = Volume;
+            // A mixer ignores SetFloat before its first frame, so the channel volumes go on from a Start.
+            var host = new GameObject("Sound settings") { hideFlags = HideFlags.HideAndDontSave };
+            Object.DontDestroyOnLoad(host);
+            host.AddComponent<ChannelVolumesOnStart>();
+        }
+
+        private sealed class ChannelVolumesOnStart : MonoBehaviour
+        {
+            private void Start()
+            {
+                foreach (Audio.AudioChannel channel in System.Enum.GetValues(typeof(Audio.AudioChannel)))
+                    Audio.AudioChannels.SetVolume(channel, ChannelVolume(channel));
+                Destroy(gameObject);
+            }
+        }
     }
 }

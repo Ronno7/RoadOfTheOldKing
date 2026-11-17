@@ -60,6 +60,7 @@ namespace RoadOfTheOldKing.Weapons
             if (chargeReadySound != null)
             {
                 speaker = gameObject.AddComponent<AudioSource>();
+                Audio.AudioChannels.Route(speaker, Audio.AudioChannel.Effects);
                 speaker.playOnAwake = false;
                 speaker.spatialBlend = 0f;
             }

@@ -223,6 +223,7 @@ namespace RoadOfTheOldKing.World
             var go = new GameObject("Reward reveal sound");
             go.transform.position = at;
             var audio = go.AddComponent<AudioSource>();
+            Audio.AudioChannels.Route(audio, Audio.AudioChannel.Effects);
             audio.spatialBlend = 0f;
             audio.volume = .5f;
             audio.PlayOneShot(clip);

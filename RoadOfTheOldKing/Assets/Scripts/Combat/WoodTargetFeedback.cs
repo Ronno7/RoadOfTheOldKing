@@ -31,6 +31,7 @@ namespace RoadOfTheOldKing.Combat
             restPosition = visual.localPosition;
             restRotation = visual.localRotation;
             audioSource = gameObject.AddComponent<AudioSource>();
+            Audio.AudioChannels.Route(audioSource, Audio.AudioChannel.Effects);
             audioSource.playOnAwake = false;
             audioSource.volume = 0.3f;
             chips = new SpriteRenderer[5];

@@ -277,6 +277,7 @@ namespace RoadOfTheOldKing.UI
             if (coinSpeaker == null)
             {
                 coinSpeaker = gameObject.AddComponent<AudioSource>();
+                Audio.AudioChannels.Route(coinSpeaker, Audio.AudioChannel.Effects);
                 coinSpeaker.playOnAwake = false;
                 coinSpeaker.spatialBlend = 0f;
             }

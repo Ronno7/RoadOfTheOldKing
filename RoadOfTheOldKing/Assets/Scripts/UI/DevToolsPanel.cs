@@ -25,7 +25,7 @@ namespace RoadOfTheOldKing.UI
         private VisualElement overlay, playerPage, itemsPage, travelPage, destinations;
         private Label summary, status, marker, inventory;
         private Label effects;
-        private Toggle god, infinite, collision, showCollision, chalkWarnings, pauseToggle;
+        private Toggle god, infinite, collision, showCollision, chalkWarnings, hideHud, pauseToggle;
         private VisualElement noteBox;
         private TextField noteField;
         private bool noteOpen;
@@ -119,6 +119,7 @@ namespace RoadOfTheOldKing.UI
             }
             if (!IsOpen && keyboard.f6Key.wasPressedThisFrame) { OpenNote(); return; }
 #endif
+            if (keyboard.f2Key.wasPressedThisFrame) Run(() => commands.SetHudHidden(!commands.HudHidden));
             if (keyboard.f4Key.wasPressedThisFrame) { if (IsOpen) Close(); else Open(); }
             else if (IsOpen && keyboard.escapeKey.wasPressedThisFrame) Close();
         }
@@ -276,6 +277,9 @@ namespace RoadOfTheOldKing.UI
             collision = AddToggle(playerPage, "No collision", value => commands.SetCollision(!value));
             showCollision = AddToggle(playerPage, "Show collision", commands.SetShowCollision);
             chalkWarnings = AddToggle(playerPage, "Chalk attack warnings", commands.SetChalkWarnings);
+            hideHud = new Toggle("Hide HUD (F2)");
+            hideHud.RegisterValueChangedCallback(e => Run(() => commands.SetHudHidden(e.newValue)));
+            playerPage.Add(hideHud);
             speed = AddSlider(playerPage, "Move speed", .25f, 4f, 1f, commands.SetSpeed);
             var testing = new Foldout { text = "Combat & simulation", value = false }; playerPage.Add(testing);
             row = Row(testing);
@@ -411,7 +415,7 @@ namespace RoadOfTheOldKing.UI
             if (!Mathf.Approximately(SimulationPause.UnpausedTimeScale, 1)) modifiers.Add($"TIME {SimulationPause.UnpausedTimeScale:0.##}x");
             string flags = modifiers.Count > 0 ? string.Join(" · ", modifiers) : "No runtime overrides";
             effects.text = flags;
-            effects.style.display = !IsOpen && modifiers.Count > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+            effects.style.display = !IsOpen && modifiers.Count > 0 && !commands.HudHidden ? DisplayStyle.Flex : DisplayStyle.None;
             if (!IsOpen) return;
             if (commands.HasPlayer)
             {
@@ -435,6 +439,7 @@ namespace RoadOfTheOldKing.UI
             speed.SetEnabled(ready);
             god.SetValueWithoutNotify(commands.GodMode); infinite.SetValueWithoutNotify(commands.InfiniteStamina);
             collision.SetValueWithoutNotify(commands.NoCollision); showCollision.SetValueWithoutNotify(commands.ShowCollision); chalkWarnings.SetValueWithoutNotify(commands.ChalkWarnings);
+            hideHud.SetValueWithoutNotify(commands.HudHidden);
             speed.SetValueWithoutNotify(commands.SpeedMultiplier); time.SetValueWithoutNotify(SimulationPause.UnpausedTimeScale);
             marker.text = commands.Marker.HasValue ? $"Marker: {commands.Marker.Value.x:0.0}, {commands.Marker.Value.y:0.0}" : "No marker set";
             status.text = commands.LastResult; status.EnableInClassList("error", !commands.LastSucceeded);
