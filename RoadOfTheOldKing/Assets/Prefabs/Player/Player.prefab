@@ -295,6 +295,8 @@ MonoBehaviour:
   staminaCost: 18
   cooldown: 0
   dodgeWindow: 0.24
+  easeOut: 2
+  exitSpeed: 4.5
 --- !u!114 &8164189053318432841
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -583,7 +585,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.UI.CollectionMenu
   layout: {fileID: 9197481963319205126, guid: 398d2198fab6e404a8d77d3a128f3406, type: 3}
   panelSettings: {fileID: 11400000, guid: e8d13b02f4a53d441b064a4b1cf6e2bf, type: 2}
-  axeIcon: {fileID: 21300000, guid: 533f4b17ec0bd3d46a8307ce3d495a7e, type: 3}
+  axeIcon: {fileID: 21300000, guid: 085a81957fb8c684395435100e94138c, type: 3}
   flaskIcon: {fileID: 21300000, guid: 4ead64faa597b454b93204277f28ffd8, type: 3}
   coinIcon: {fileID: -542859086, guid: e239aee09e432fc4485ba79d78f0430b, type: 3}
   shardIcon: {fileID: -400719020, guid: e239aee09e432fc4485ba79d78f0430b, type: 3}

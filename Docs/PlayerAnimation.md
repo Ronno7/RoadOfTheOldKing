@@ -39,11 +39,11 @@ The importer sets 16 PPU point filtering, pins each direction's pivot to its low
 
 ## Weapon
 
-The hero has no arms, so the bronze halberd is always a separate sprite, never part of the body frames.
+The hero has no arms, so the bronze axe (a double-bitted head with a thrusting spike) is always a separate sprite, never part of the body frames.
 
-![Halberd carry in each direction, standing and mid-stride](Art/Player/Hero-Halberd-Carry.png)
+![Axe carry in each direction, standing and mid-stride](Art/Player/Hero-Axe-Carry.png)
 
-- **Carry:** `PlayerWeaponCarry` holds one whole-pixel grip per facing, in front of or behind the body. A small cloak fold wraps the grip so a hidden hand appears to hold it.
+- **Carry:** `PlayerWeaponCarry` holds one whole-pixel grip per facing, in front of or behind the body. A small cloak fold wraps the grip so a hidden hand appears to hold it. Facing south and south-east, the blade on his side of the haft draws behind his hood, as if slung over his shoulder; facing east and north-east the whole axe stays in his right hand, in front of him. The axe bobs with each step; seen from behind, where the hood doesn't rise and fall, it lifts a pixel as the feet pass.
 - **Cloak colour:** chosen at New Game and kept in the save. The `EnemyFlash` shader turns the body's and the grip fold's blues into that colour by their brightness, so shading survives; an empty choice keeps the drawn blue.
 - **Attacks:** procedural sweeps and thrusts, sampled from the same clock and geometry as the damage.
 - **Recall:** the returning axe keeps its silhouette in translucent cyan with a short trail, then turns solid on the catch.

@@ -44,15 +44,32 @@ namespace RoadOfTheOldKing.Player
         public PlayerAnimationSet Animations => animations;
 
         // Pixels the shown figure stands above (+) or below (-) its standing view, so carried items
-        // bob with the step. Zero when either height was not measured.
+        // bob with the step. Zero when either height was not measured. Seen from behind (N, NE, NW)
+        // the walk's body never rises or falls, only the legs move, so there a carried item lifts one
+        // pixel as the feet pass under the body (the moment any walk is highest) and settles as a foot plants.
         public int Lift
         {
             get
             {
                 if (currentClip == null || animations == null || animations.rotations == null) return 0;
+                if (currentClip == animations.walk && Flat(currentClip, Octant))
+                    return System.Array.IndexOf(walkPassingFrames, Frame) >= 0 ? 1 : 0;
                 int now = currentClip.Height(Octant, Frame), rest = animations.rotations.Height(Octant, 0);
                 return now < 0 || rest < 0 ? 0 : Mathf.Clamp(now - rest, -2, 2);
             }
+        }
+
+        [Tooltip("Walk frames where the feet pass each other in the back views (N, NE, NW), whose body " +
+            "never rises: a carried item lifts one pixel on them. Read from the frames: the feet plant at 0 and 4.")]
+        [SerializeField] private int[] walkPassingFrames = { 2, 6 };
+
+        private static bool Flat(DirectionalSpriteAnimation clip, int octant)
+        {
+            int count = clip.FrameCount(octant);
+            if (count < 2) return false;
+            int first = clip.Height(octant, 0);
+            for (int i = 1; i < count; i++) if (clip.Height(octant, i) != first) return false;
+            return true;
         }
 
         private DirectionalSpriteAnimation currentClip;

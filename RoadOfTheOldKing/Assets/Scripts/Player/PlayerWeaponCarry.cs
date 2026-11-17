@@ -33,9 +33,17 @@ namespace RoadOfTheOldKing.Player
         [SerializeField] private Sprite gripFold;
         [Tooltip("Octants counterclockwise from east: E, NE, N, NW, W, SW, S, SE.")]
         [SerializeField] private Hold[] holds = DefaultHolds();
+        [Tooltip("Columns of the weapon sprite on the body's side of the haft. In the facings ticked below they draw " +
+            "behind the body, so the double-bitted axe's inner blade tucks behind the hood, as if slung over his " +
+            "shoulder. The holds' mirroring puts this side at the sprite's left in every facing. 0 turns the split off.")]
+        [SerializeField, Min(0)] private int innerColumns = 9;
+        [Tooltip("Per octant (E, NE, N, NW, W, SW, S, SE): tuck the inner blade behind the body. Only the views " +
+            "facing the camera (S, SE); in E and NE the axe stays whole in his right hand, in front of him (user, 16 Nov).")]
+        [SerializeField] private bool[] tuckInnerBlade = { false, false, false, false, false, false, true, true };
 
         private PlayerSpriteAnimator animator;
-        private SpriteRenderer fold;
+        private SpriteRenderer fold, innerBlade, swapped;
+        private Sprite whole, outer, inner;
         private int appliedFrame = -1;
         private MaterialPropertyBlock bodyBlock, foldBlock;
 
@@ -53,6 +61,9 @@ namespace RoadOfTheOldKing.Player
             fold.sharedMaterial = body.sharedMaterial;
             fold.sprite = gripFold;
             fold.enabled = false;
+            innerBlade = new GameObject("Weapon Inner Blade").AddComponent<SpriteRenderer>();
+            innerBlade.transform.SetParent(transform, false);
+            innerBlade.enabled = false;
         }
 
         // Called by the weapon's view while it is held out of combat.
@@ -69,6 +80,8 @@ namespace RoadOfTheOldKing.Player
             weaponSprite.flipX = hold.flipX;
             weaponSprite.sortingLayerID = body.sortingLayerID;
             weaponSprite.sortingOrder = body.sortingOrder + (hold.inFront ? 1 : -1);
+            int octant = animator.Octant;
+            SplitInnerBlade(weaponSprite, hold.inFront && tuckInnerBlade != null && octant < tuckInnerBlade.Length && tuckInnerBlade[octant]);
 
             bool folded = !resting && hold.inFront && hold.coverGrip && gripFold != null;
             fold.enabled = folded;
@@ -96,15 +109,70 @@ namespace RoadOfTheOldKing.Player
             fold.SetPropertyBlock(foldBlock);
         }
 
-        // Script order puts this after the weapon's view: hide the fold on frames it was not carried.
+        // Tucked, the weapon shows only the haft and its outer side in front; the inner side draws just behind
+        // the body. Untucked, behind the body, or out of the carry, the weapon is whole again.
+        private void SplitInnerBlade(SpriteRenderer weaponSprite, bool tuck)
+        {
+            if (!tuck || innerColumns <= 0 || !Prepare(weaponSprite))
+            {
+                RestoreWeapon();
+                return;
+            }
+            swapped = weaponSprite;
+            weaponSprite.sprite = outer;
+            innerBlade.sprite = inner;
+            innerBlade.flipX = weaponSprite.flipX;
+            innerBlade.color = weaponSprite.color;
+            innerBlade.sharedMaterial = weaponSprite.sharedMaterial;
+            innerBlade.sortingLayerID = body.sortingLayerID;
+            innerBlade.sortingOrder = body.sortingOrder - 1;
+            var t = weaponSprite.transform;
+            innerBlade.transform.SetPositionAndRotation(t.position, t.rotation);
+            innerBlade.transform.localScale = Vector3.one;
+            innerBlade.enabled = true;
+        }
+
+        // Cuts the weapon's own sprite at the haft once; both halves keep its pivot, so they line up when mirrored.
+        private bool Prepare(SpriteRenderer weaponSprite)
+        {
+            var current = weaponSprite.sprite;
+            if (current == null) return false;
+            if (current == outer) return true;
+            if (current != whole)
+            {
+                whole = current;
+                var r = whole.rect;
+                if (innerColumns >= r.width) return false;
+                float ppu = whole.pixelsPerUnit, pivotX = whole.pivot.x, pivotY = whole.pivot.y;
+                outer = Sprite.Create(whole.texture, new Rect(r.x + innerColumns, r.y, r.width - innerColumns, r.height),
+                    new Vector2((pivotX - innerColumns) / (r.width - innerColumns), pivotY / r.height), ppu, 0, SpriteMeshType.FullRect);
+                inner = Sprite.Create(whole.texture, new Rect(r.x, r.y, innerColumns, r.height),
+                    new Vector2(pivotX / innerColumns, pivotY / r.height), ppu, 0, SpriteMeshType.FullRect);
+                outer.name = whole.name + " (outer)";
+                inner.name = whole.name + " (inner)";
+            }
+            return true;
+        }
+
+        private void RestoreWeapon()
+        {
+            if (swapped != null && swapped.sprite == outer) swapped.sprite = whole;
+            swapped = null;
+            if (innerBlade != null) innerBlade.enabled = false;
+        }
+
+        // Script order puts this after the weapon's view: hide the fold and make the weapon whole on frames it was not carried.
         private void LateUpdate()
         {
-            if (appliedFrame != Time.frameCount && fold != null) fold.enabled = false;
+            if (appliedFrame == Time.frameCount) return;
+            if (fold != null) fold.enabled = false;
+            RestoreWeapon();
         }
 
         private void OnDisable()
         {
             if (fold != null) fold.enabled = false;
+            RestoreWeapon();
         }
 
         // Camera-side holds sit 3 px low (a depth cue) so the grip meets hand height (11 px): on the
