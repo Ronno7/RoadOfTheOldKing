@@ -1,10 +1,19 @@
 fileFormatVersion: 2
-guid: 533f4b17ec0bd3d46a8307ce3d495a7e
+guid: 4cd7a5bfe9fe4c344a50473b85fb1349
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4513575230155698136
-    second: Halberd_0
+      213: 990559114312045421
+    second: BonfireFlame16_0
+  - first:
+      213: 4082921808816597563
+    second: BonfireFlame16_1
+  - first:
+      213: 7627342768002411743
+    second: BonfireFlame16_2
+  - first:
+      213: -1249211156633264659
+    second: BonfireFlame16_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,11 +55,11 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 0
-  alignment: 9
-  spritePivot: {x: 0.5, y: 0.34146342}
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 16
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 0
@@ -113,23 +122,89 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Halberd_0
+      name: BonfireFlame_0
       rect:
         serializedVersion: 2
-        x: 4
+        x: 0
         y: 0
-        width: 17
-        height: 41
+        width: 16
+        height: 24
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 8dfae6402c073ae30800000000000000
-      internalID: 4513575230155698136
+      spriteID: ac9953320e4129f4c85f4aa6dd0700e3
+      internalID: -941108509
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BonfireFlame_1
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 0
+        width: 16
+        height: 24
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f1d503e2fab2fcf4ab4cb9cc9942bf8e
+      internalID: 1025973287
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BonfireFlame_2
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 0
+        width: 16
+        height: 24
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2980827701669a94f9e2b58e132c20dd
+      internalID: -86002312
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BonfireFlame_3
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 0
+        width: 16
+        height: 24
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 54cce9f82bb7d6b459dbc6ff0596f34d
+      internalID: 1092945482
       vertices: []
       indices: 
       edges: []
@@ -138,7 +213,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 602fa4ea2dca36b4c82899f8561c5d00
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +223,10 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Halberd_0: 4513575230155698136
+      BonfireFlame_0: -941108509
+      BonfireFlame_1: 1025973287
+      BonfireFlame_2: -86002312
+      BonfireFlame_3: 1092945482
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

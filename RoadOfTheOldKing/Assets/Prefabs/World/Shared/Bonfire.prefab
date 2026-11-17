@@ -193,6 +193,15 @@ MonoBehaviour:
   smokeMaterial: {fileID: 2100000, guid: fff51d38d364400408fd09f2b58c0521, type: 2}
   glow: {fileID: 515284337829485524}
   glowFlicker: 0.15
+  upgradeFrames:
+  - {fileID: -941108509, guid: 4cd7a5bfe9fe4c344a50473b85fb1349, type: 3}
+  - {fileID: 1025973287, guid: 4cd7a5bfe9fe4c344a50473b85fb1349, type: 3}
+  - {fileID: -86002312, guid: 4cd7a5bfe9fe4c344a50473b85fb1349, type: 3}
+  - {fileID: 1092945482, guid: 4cd7a5bfe9fe4c344a50473b85fb1349, type: 3}
+  upgradeGlowColor: {r: 1, g: 0.84, b: 0.48, a: 1}
+  upgradeFlameScale: 1.25
+  baseRenderer: {fileID: 6576237360567007531}
+  upgradeBase: {fileID: 2020160982, guid: 959eba0c2cca6544d8572659105e162c, type: 3}
 --- !u!1 &8362247623293773798
 GameObject:
   m_ObjectHideFlags: 0
