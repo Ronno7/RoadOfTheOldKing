@@ -19,6 +19,15 @@ var body=player==null?null:player.GetComponent<Rigidbody2D>();
 var interaction=player==null?null:player.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>();
 System.Action<Vector2> pose=p=>{body.position=p;body.linearVelocity=Vector2.zero;player.transform.position=p;Physics2D.SyncTransforms();};
 string region="Assets/Scenes/GreenLowlands.unity";
+// Emitters by name: an upgrade fire has smoke and gold embers (#90), an ordinary fire smoke only.
+System.Func<Component,string,ParticleSystem> emitter=(f,n)=>f.GetComponentsInChildren<ParticleSystem>(true).FirstOrDefault(e=>e.name==n);
+System.Func<ParticleSystem,float> bright=e=>{var b=new MaterialPropertyBlock();e.GetComponent<ParticleSystemRenderer>().GetPropertyBlock(b);return b.GetFloat("_Bright");};
+System.Func<ParticleSystem,float> ramp=e=>{var b=new MaterialPropertyBlock();e.GetComponent<ParticleSystemRenderer>().GetPropertyBlock(b);return b.GetFloat("_Ramp");};
+// The ignition when a fire is lit (18 Nov): the flame's size against its resting size, and the light's flare.
+var viewFlags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+System.Func<Component,float> flameShare=f=>{var v=f.GetComponent<RoadOfTheOldKing.World.BonfireSpriteView>();var fl=(SpriteRenderer)v.GetType().GetField("flame",viewFlags).GetValue(v);var rest=(Vector3)v.GetType().GetField("restFlameScale",viewFlags).GetValue(v);return fl.transform.localScale.y/rest.y;};
+System.Func<Component,float> igniting=f=>{var v=f.GetComponent<RoadOfTheOldKing.World.BonfireSpriteView>();return (float)v.GetType().GetField("igniteAge",viewFlags).GetValue(v);};
+System.Action<Component,float> advance=(f,dt)=>{var v=f.GetComponent<RoadOfTheOldKing.World.BonfireSpriteView>();v.GetType().GetMethod("Refresh",viewFlags).Invoke(v,new object[]{dt});};
 var store=new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(game.StorageKey);
 if(phase==0)check(game.Continue(),"Continue into Tutorial");
 else if(phase==1){
@@ -97,6 +106,10 @@ else if(phase==1){
  var fire=game.Checkpoints.Fires.First();pose(fire.transform.position);
  check(!interaction.Open(fire),"unlit fire cannot open rest directly");
  check(game.Checkpoints.Light(fire),"Tutorial fire lights");
+ check(emitter(fire,"Bonfire embers")==null&&emitter(fire,"Bonfire smoke")!=null&&bright(emitter(fire,"Bonfire smoke"))==0f,"an ordinary fire has no embers and ordinary smoke");
+ var ordinaryBurst=emitter(fire,"Bonfire burst");
+ check(ordinaryBurst!=null&&ordinaryBurst.particleCount==12&&ramp(ordinaryBurst)==1f&&flameShare(fire)<.5f&&igniting(fire)>=0f,"lighting an ordinary fire bursts 12 orange sparks from a small flame");
+ advance(fire,1f);check(Mathf.Approximately(flameShare(fire),1f)&&igniting(fire)<0f,"the ignition settles to the resting flame");
  check(game.Checkpoints.Rest(fire),"Tutorial rest establishes old checkpoint");
  SessionState.SetString(prefix+"OldFire",fire.Id);
  check(game.Checkpoints.LeaveScene(region,"from-tutorial"),"enter Lowlands");
@@ -114,8 +127,16 @@ else if(phase==2){
  interaction.GetType().GetMethod("RefreshNearby",flags).Invoke(interaction,null);
  check(interaction.Prompt.Contains("Light"),"unlit prompt says Light");
  check(!fire.IsDiscovered&&!game.Checkpoints.Rest(fire),"unlit fire rejects direct Rest");
- var smoke=fire.GetComponentInChildren<ParticleSystem>();check(smoke!=null&&!smoke.isPlaying&&smoke.particleCount==0,"unlit fire produces no smoke");
+ var smoke=emitter(fire,"Bonfire smoke");check(smoke!=null&&!smoke.isPlaying&&smoke.particleCount==0,"unlit fire produces no smoke");
+ var unlitEmbers=emitter(fire,"Bonfire embers");check(unlitEmbers!=null&&!unlitEmbers.isPlaying&&unlitEmbers.particleCount==0,"an unlit upgrade fire shows no embers");
  check(interaction.TryInteract(),"first real F interaction lights fire");
+ {
+  var upgradeBurst=emitter(fire,"Bonfire burst");var view=fire.GetComponent<RoadOfTheOldKing.World.BonfireSpriteView>();
+  var glow=(UnityEngine.Rendering.Universal.Light2D)view.GetType().GetField("glow",viewFlags).GetValue(view);float resting=(float)view.GetType().GetField("glowIntensity",viewFlags).GetValue(view);
+  check(upgradeBurst!=null&&upgradeBurst.particleCount==22&&ramp(upgradeBurst)==0f&&flameShare(fire)<.5f&&(glow==null||RoadOfTheOldKing.UI.FeedbackSettings.FlashScale<=0f||glow.intensity>resting*1.5f),"lighting an upgrade fire bursts 22 gold sparks from a small flame, with the light flared");
+  advance(fire,.15f);check(flameShare(fire)>1f,"the upgrade flame overshoots on its way up");
+  advance(fire,1f);check(Mathf.Approximately(flameShare(fire),1f)&&igniting(fire)<0f&&(glow==null||glow.intensity<=resting*1.001f),"and settles to its resting flame and light");
+ }
  check(fire.IsDiscovered&&!interaction.IsOpen&&!player.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>().IsLocked,"lighting neither opens menu nor locks controls");
  check(player.Health.Health==47&&flask.Charges==1&&stamina.Current==80,"lighting preserves health flasks stamina");
  check(hp.Health==7&&plants.CutCount==1,"lighting preserves wounded enemies and cut grass");
@@ -136,15 +157,21 @@ else if(phase==3){
 }
 else if(phase==4){
  var fire=game.Checkpoints.Fires.Single(f=>f.Id=="green-lowlands/arrival-fire");
- var smoke=fire.GetComponentInChildren<ParticleSystem>();
+ var smoke=emitter(fire,"Bonfire smoke");var embers=emitter(fire,"Bonfire embers");
  check(fire.IsDiscovered&&smoke!=null&&smoke.isPlaying,"lit smoke restores after scene load");
+ check(embers!=null&&embers.isPlaying&&bright(smoke)==1f,"a lit upgrade fire gives off embers and brighter smoke");
+ check(emitter(fire,"Bonfire burst").particleCount==0&&igniting(fire)<0f&&Mathf.Approximately(flameShare(fire),1f),"a fire already lit on load doesn't replay the burst");
  smoke.Simulate(4f,true,false);check(smoke.particleCount>0&&smoke.particleCount<=12,"smoke visible and bounded");smoke.Play();
  var renderer=smoke.GetComponent<ParticleSystemRenderer>();
  var view=fire.GetComponent<RoadOfTheOldKing.World.BonfireSpriteView>();
  var flame=(SpriteRenderer)view.GetType().GetField("flame",flags).GetValue(view);
  check(flame.enabled&&renderer.sortingLayerID==flame.sortingLayerID&&renderer.sortingOrder==flame.sortingOrder,"smoke shares lit flame depth");
- view.enabled=false;check(smoke.particleCount==0&&!smoke.isPlaying,"disable clears smoke");view.enabled=true;
- check(fire.GetComponentsInChildren<ParticleSystem>().Length==1&&smoke.isPlaying,"reenable reuses one emitter");
+ var emberRenderer=embers.GetComponent<ParticleSystemRenderer>();
+ check(emberRenderer.sortingLayerID==flame.sortingLayerID&&emberRenderer.sortingOrder==flame.sortingOrder+1&&Mathf.Approximately(embers.main.startSize.constant,1f/16f),"embers are single pixels drawn over the flame");
+ embers.Simulate(2f,true,false);var sparks=new ParticleSystem.Particle[embers.main.maxParticles];int sparkCount=embers.GetParticles(sparks);
+ check(sparkCount>0&&sparkCount<=10&&System.Linq.Enumerable.Range(0,sparkCount).All(i=>sparks[i].position.y>fire.transform.position.y+.5f&&Mathf.Abs(sparks[i].position.x-fire.transform.position.x)<1.5f),"embers rise above the fire, bounded ("+sparkCount+")");embers.Play();
+ view.enabled=false;check(smoke.particleCount==0&&!smoke.isPlaying&&embers.particleCount==0&&!embers.isPlaying,"disable clears smoke and embers");view.enabled=true;
+ check(fire.GetComponentsInChildren<ParticleSystem>().Count(e=>e.name=="Bonfire smoke")==1&&fire.GetComponentsInChildren<ParticleSystem>().Count(e=>e.name=="Bonfire embers")==1&&smoke.isPlaying&&embers.isPlaying,"reenable reuses one emitter each");
  pose(new Vector2(15.5f,3));combat.GetType().GetField("controlsActive",flags).SetValue(combat,true);
  player.Health.SetHealth(47);player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().SetCharges(1);
  check(interaction.TryInteract()&&interaction.IsOpen,"second interaction rests and opens real menu");
@@ -170,7 +197,7 @@ else if(phase==6)check(game.Continue(),"Continue lit/rested save");
 else if(phase==7){
  var fire=game.Checkpoints.Fires.Single(f=>f.Id=="green-lowlands/arrival-fire");
  check(fire.IsDiscovered&&game.Progress.checkpointId==fire.Id,"Continue restores lighting and the rest checkpoint");
- check(fire.GetComponentInChildren<ParticleSystem>().isPlaying,"Continue restores smoke");
+ check(emitter(fire,"Bonfire smoke").isPlaying&&emitter(fire,"Bonfire embers").isPlaying,"Continue restores smoke and embers");
 }
 SessionState.SetInt(prefix+"Phase",phase+1);SessionState.SetInt(prefix+"Passed",SessionState.GetInt(prefix+"Passed",0)+checks.Count);
 return new{phase=phase,passed=checks.Count,total=SessionState.GetInt(prefix+"Passed",0),checks=checks.ToArray()};

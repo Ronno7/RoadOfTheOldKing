@@ -23,6 +23,9 @@ namespace RoadOfTheOldKing.World
         public string Region => AreaName.RegionAt(transform.position);
         public Vector2 SpawnPosition => spawnPoint != null ? (Vector2)spawnPoint.position : (Vector2)transform.position;
         public bool IsDiscovered => GameSession.Instance != null && GameSession.Instance.Progress.HasFire(id);
+        // The moment the player lights it (never on load or travel): BonfireSpriteView plays the ignition.
+        public event System.Action Lit;
+        internal void NotifyLit() => Lit?.Invoke();
         public bool CanUse(Transform player) => !string.IsNullOrEmpty(id) && player != null &&
             Vector2.Distance(player.position, transform.position) <= interactionRadius;
 

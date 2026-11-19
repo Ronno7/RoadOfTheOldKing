@@ -38,6 +38,7 @@ namespace RoadOfTheOldKing.Progression
             progress.scenePath = SceneLoader.ActivePath;
             session.CaptureAndSave("Bonfire lit. Saved.");
             session.ClearResume();
+            fire.NotifyLit();
             return true;
         }
 

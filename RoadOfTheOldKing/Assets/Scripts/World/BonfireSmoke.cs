@@ -10,6 +10,7 @@ namespace RoadOfTheOldKing.World
         private readonly ParticleSystem particles;
         private readonly ParticleSystemRenderer renderer;
         private bool emitting;
+        private static readonly int BrightId = Shader.PropertyToID("_Bright");
 
         public BonfireSmoke(Transform parent, Material material, string name, Vector3 localPosition)
         {
@@ -54,6 +55,15 @@ namespace RoadOfTheOldKing.World
             renderer.receiveShadows = false;
         }
 
+        // An upgrade fire's smoke, lit by its gold flame, reads one step lighter (#90).
+        public void SetBright(bool bright)
+        {
+            var block = new MaterialPropertyBlock();
+            renderer.GetPropertyBlock(block);
+            block.SetFloat(BrightId, bright ? 1f : 0f);
+            renderer.SetPropertyBlock(block);
+        }
+
         public void SetHeight(float localY)
         {
             var position = root.transform.localPosition;
@@ -71,6 +81,13 @@ namespace RoadOfTheOldKing.World
             emitting = lit;
             if (lit) particles.Play();
             else particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
+
+        // A few puffs at once (lighting).
+        public void Burst(int count)
+        {
+            if (!particles.isPlaying) return;
+            particles.Emit(count);
         }
 
         public void Stop()
