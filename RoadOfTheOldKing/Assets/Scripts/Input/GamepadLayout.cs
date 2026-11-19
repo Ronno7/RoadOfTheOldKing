@@ -7,8 +7,7 @@ namespace RoadOfTheOldKing.Input
     {
         public const string Move = "<Gamepad>/leftStick";
         public const string Aim = "<Gamepad>/rightStick";
-        // Click to sprint; it stops when the left stick returns to rest or on a second click.
-        public const string Sprint = "<Gamepad>/leftStickPress";
+        // Dark Souls: tap to dodge (on release), hold to sprint (PlayerMovementInput). The stick click no longer sprints.
         public const string Dash = "<Gamepad>/buttonEast";
         public const string LightAttack = "<Gamepad>/rightShoulder";
         public const string Cleave = "<Gamepad>/rightTrigger";

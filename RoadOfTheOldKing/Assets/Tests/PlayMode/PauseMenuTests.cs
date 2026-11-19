@@ -225,7 +225,7 @@ public sealed class PauseMenuTests
             try{
              var options=((RoadOfTheOldKing.UI.PauseMenuView)menu.GetType().GetField("view",flags).GetValue(menu)).Options;
              Func<List<string>> rowLabels=()=>options.Rows.Where(r=>r.Selectable).Select(r=>r.Label).ToList();
-             var expected=new[]{"Master","Music","Ambience","Effects","Window","Atmosphere","Screen flashes","Screen shake","Vitals","Back"};
+             var expected=new[]{"Master","Music","Ambience","Effects","Window","Atmosphere","Screen flashes","Screen shake","Vibration","Vitals","Back"};
              check(rowLabels().SequenceEqual(expected)&&options.Rows.Count(r=>!r.Selectable)==3,"Settings: sound, display and comfort groups ("+string.Join(" | ",rowLabels().ToArray())+")");
              RoadOfTheOldKing.UI.SoundSettings.SetVolume(1f);RoadOfTheOldKing.UI.FeedbackSettings.SetFlash(1f);
              menu.Back();menu.Submit();
@@ -238,7 +238,7 @@ public sealed class PauseMenuTests
              RoadOfTheOldKing.UI.SoundSettings.SetChannelVolume(RoadOfTheOldKing.Audio.AudioChannel.Music,1f);
              menu.Navigate(1);menu.Navigate(1);menu.Navigate(1);menu.Navigate(1);menu.Navigate(1);menu.Adjust(-1);
              check(options.SelectedRow.Label=="Screen flashes"&&Mathf.Approximately(RoadOfTheOldKing.UI.FeedbackSettings.FlashScale,.9f)&&(bool)menu.GetType().GetField("inSettings",flags).GetValue(menu),"Down skips the group headings; left lowers flashes and stays on the page");
-             menu.Navigate(1);menu.Navigate(1);menu.Navigate(1);check(options.SelectedRow.Label=="Back","The last row is Back");
+             menu.Navigate(1);menu.Navigate(1);menu.Navigate(1);menu.Navigate(1);check(options.SelectedRow.Label=="Back","The last row is Back");
              menu.Submit();check(menu.IsOpen&&!(bool)menu.GetType().GetField("inSettings",flags).GetValue(menu),"The Back row returns to the main page");
              menu.Submit();
             }finally{

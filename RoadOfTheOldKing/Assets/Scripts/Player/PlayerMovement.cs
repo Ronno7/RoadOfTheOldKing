@@ -163,7 +163,7 @@ namespace RoadOfTheOldKing.Player
             {
                 IsSprinting = false;
                 FacingDirection = combat.ActionFacing;
-                body.linearVelocity = direction * MoveSpeed * combat.ActionMovementScale + actionDisplacement / Time.fixedDeltaTime;
+                body.linearVelocity = direction * MoveSpeed * movementInput.MoveAmount * combat.ActionMovementScale + actionDisplacement / Time.fixedDeltaTime;
                 return;
             }
 
@@ -179,7 +179,8 @@ namespace RoadOfTheOldKing.Player
 
             // Velocity is units per second. Unity applies the physics time step.
             // Moving the Rigidbody, instead of the Transform, preserves collisions.
-            Vector2 target = direction * (IsSprinting ? SprintSpeed : MoveSpeed) * (drinking ? flask.MoveScale : 1f);
+            // A sprint is always full speed; walking follows the stick's tilt (MoveAmount is 1 on keys).
+            Vector2 target = direction * (IsSprinting ? SprintSpeed : MoveSpeed * movementInput.MoveAmount) * (drinking ? flask.MoveScale : 1f);
             if (bounceRemaining > 0f)
             {
                 // Let the rebound play out under friction before input steers again.

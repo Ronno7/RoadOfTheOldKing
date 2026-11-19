@@ -15,6 +15,10 @@ namespace RoadOfTheOldKing.Player
         [SerializeField, Min(0.01f)] private float chevronHalfWidth = 0.13f;
         [SerializeField, Min(0.01f)] private float strokeWidth = 0.045f;
         [SerializeField] private Color color = new Color(0.96f, 0.89f, 0.66f, 0.9f);
+        // Above everything drawn in front of the hero (roof fronts and canopies, "Above Player" maps up to 500) but
+        // under the region atmosphere (1000) and darkness: the chevron is a reading aid, never hidden by scenery
+        // (user, 18 Nov: "aim indicator is getting layered behind the world art").
+        private const int OverlayOrder = 600;
         private PlayerCombatController combat;
         private LineRenderer outline;
         private LineRenderer marker;
@@ -64,16 +68,16 @@ namespace RoadOfTheOldKing.Player
             Vector3 tip = transform.position + (Vector3)centerOffset + direction * orbitRadius;
             Vector3 rear = tip - direction * chevronLength;
             Draw(outline, rear + side * chevronHalfWidth, tip,
-                rear - side * chevronHalfWidth, strokeWidth + 0.04f, 3);
+                rear - side * chevronHalfWidth, strokeWidth + 0.04f, OverlayOrder);
             Draw(marker, rear + side * chevronHalfWidth, tip,
-                rear - side * chevronHalfWidth, strokeWidth, 4);
+                rear - side * chevronHalfWidth, strokeWidth, OverlayOrder + 1);
         }
 
         private void Draw(LineRenderer line, Vector3 a, Vector3 b, Vector3 c, float width, int order)
         {
             line.startWidth = line.endWidth = width;
             line.sortingLayerID = body.sortingLayerID;
-            line.sortingOrder = body.sortingOrder + order;
+            line.sortingOrder = order;
             line.SetPosition(0, a);
             line.SetPosition(1, b);
             line.SetPosition(2, c);

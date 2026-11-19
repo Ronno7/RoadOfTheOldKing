@@ -7,7 +7,8 @@ namespace RoadOfTheOldKing.UI
 {
     // One place for the key names shown in prompts and hints. Text uses {tokens} such as
     // "Press {interact}". Labels follow the last-used device (ActiveInput): keyboard/mouse names mirror
-    // the adapters' keyboard bindings, controller names mirror GamepadLayout (Xbox names). When
+    // the adapters' keyboard bindings, controller names mirror GamepadLayout (Xbox names). On a PlayStation pad
+    // every controller label and hint swaps the Xbox button words for its own (Cross, Circle, L1...). When
     // rebinding arrives, update Set() from the actions instead of editing hint text.
     public static class ControlLabels
     {
@@ -20,23 +21,32 @@ namespace RoadOfTheOldKing.UI
         };
         private static readonly Dictionary<string, string> gamepad = new Dictionary<string, string>
         {
-            { "move", "LS" }, { "sprint", "L3" }, { "dash", "B" }, { "interact", "A" },
+            { "move", "LS" }, { "sprint", "Hold B" }, { "dash", "B" }, { "interact", "A" },
             { "attack", "RB" }, { "cleave", "RT" }, { "throw", "LT" },
             { "recall", "LT" }, { "pause", "Start" }, { "status", "View" }, { "look", "LB + RS" }, { "heal", "X" },
             { "aim", "RS" }, { "zoom", "D-pad" }, { "select", "A" }, { "back", "B" },
         };
+        private static readonly Dictionary<string, string> playStation = new Dictionary<string, string>
+        {
+            { "A", "Cross" }, { "B", "Circle" }, { "X", "Square" }, { "Y", "Triangle" }, { "LB", "L1" }, { "RB", "R1" },
+            { "LT", "L2" }, { "RT", "R2" }, { "View", "Create" }, { "Start", "Options" },
+        };
+        private static readonly System.Text.RegularExpressions.Regex XboxWords =
+            new System.Text.RegularExpressions.Regex(@"\b(A|B|X|Y|LB|RB|LT|RT|View|Start)\b");
         private static readonly List<(Label label, string keys, string pad)> bound = new List<(Label, string, string)>();
         private static bool subscribed;
 
-        private static Dictionary<string, string> Active => ActiveInput.UsingGamepad ? gamepad : keyboard;
-
-        public static string Get(string token) => Active.TryGetValue(token, out var label) ? label : token;
+        public static string Get(string token) => ActiveInput.UsingGamepad ? GamepadLabel(token) : KeyboardLabel(token);
         // Both devices at once, for the controls page.
         public static string KeyboardLabel(string token) => keyboard.TryGetValue(token, out var label) ? label : token;
-        public static string GamepadLabel(string token) => gamepad.TryGetValue(token, out var label) ? label : token;
+        public static string GamepadLabel(string token) => gamepad.TryGetValue(token, out var label) ? ForPad(label) : token;
 
         // Plain menu hint lines (user rule, 4 Oct: key names stay out of buttons) for each device.
-        public static string Pick(string keyboardText, string gamepadText) => ActiveInput.UsingGamepad ? gamepadText : keyboardText;
+        public static string Pick(string keyboardText, string gamepadText) => ActiveInput.UsingGamepad ? ForPad(gamepadText) : keyboardText;
+
+        // Xbox button words as the pad in use names them.
+        private static string ForPad(string text) => !ActiveInput.PlayStationPad || string.IsNullOrEmpty(text) ? text :
+            XboxWords.Replace(text, match => playStation[match.Value]);
 
         // Shows the matching hint now and whenever the active device changes; rebinding a label replaces it.
         public static void Bind(Label label, string keyboardText, string gamepadText)

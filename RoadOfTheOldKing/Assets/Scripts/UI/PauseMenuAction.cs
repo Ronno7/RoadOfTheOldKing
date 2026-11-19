@@ -67,6 +67,7 @@ namespace RoadOfTheOldKing.UI
                 new OptionList.Header("COMFORT"),
                 new OptionList.Slider("Screen flashes", "Hit flashes and the low health pulse.", () => FeedbackSettings.FlashScale, FeedbackSettings.SetFlash, 10, Percent),
                 new OptionList.Slider("Screen shake", "", () => FeedbackSettings.ShakeScale, FeedbackSettings.SetShake, 10, Percent),
+                new OptionList.Slider("Vibration", "Controller rumble.", () => RoadOfTheOldKing.Input.Rumble.Scale, RoadOfTheOldKing.Input.Rumble.SetScale, 10, Percent),
                 new OptionList.Choice("Vitals", "Health, stamina and flasks in the corner.", new[] { "When needed", "Always" },
                     () => HudSettings.AlwaysShowVitals ? 1 : 0, i => HudSettings.AlwaysShowVitals = i == 1),
                 new OptionList.Command("Back", "", back)

@@ -52,7 +52,10 @@ namespace RoadOfTheOldKing.Enemies
             // A ground slam shakes the screen once as it lands.
             if (strike && !wasStriking && enemy.ImpactShake > 0f && Camera.main != null &&
                 Camera.main.TryGetComponent(out RoadOfTheOldKing.Cameras.CameraFollow2D follow))
+            {
                 follow.Kick(Vector2.down, enemy.ImpactShake);
+                RoadOfTheOldKing.Input.Rumble.Pulse(.8f, .5f, .3f);
+            }
             wasStriking = strike;
             if (!health.IsAlive) { deathTime += Time.deltaTime; if (Has(animations.death)) { clip = animations.death; progress = deathTime / clip.Duration(octant); } }
             // A dormant guardian holds the wake clip's first frame (its resting pose) and rises through it.

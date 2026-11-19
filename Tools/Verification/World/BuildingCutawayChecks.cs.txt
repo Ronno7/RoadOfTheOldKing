@@ -88,7 +88,8 @@ try{
  var oldFocus=(bool)input.GetType().GetField("hasFocus",f).GetValue(input);var oldPaused=(bool)input.GetType().GetField("paused",f).GetValue(input);
  var simulation=Physics2D.simulationMode;var interpolation=body.interpolation;
  var oldFacing=player.FacingDirection;var oldSprinting=player.GetType().GetProperty("IsSprinting").GetValue(player,null);
- System.Action<Vector2> motorInput=direction=>{move.SetValue(input,direction,null);motorStep.Invoke(player,null);Physics2D.Simulate(Time.fixedDeltaTime);cut.EvaluateAt(body.position);step(Time.fixedDeltaTime);};
+ var amount=input.GetType().GetProperty("MoveAmount"); // full tilt, as on keys (18 Nov)
+ System.Action<Vector2> motorInput=direction=>{move.SetValue(input,direction,null);amount.SetValue(input,direction==Vector2.zero?0f:1f,null);motorStep.Invoke(player,null);Physics2D.Simulate(Time.fixedDeltaTime);cut.EvaluateAt(body.position);step(Time.fixedDeltaTime);};
  try{
   input.GetType().GetField("hasFocus",f).SetValue(input,true);input.GetType().GetField("paused",f).SetValue(input,false);
   input.GetType().GetField("dashQueuedUntil",f).SetValue(input,-1f);sprint.SetValue(input,false,null);move.SetValue(input,Vector2.zero,null);

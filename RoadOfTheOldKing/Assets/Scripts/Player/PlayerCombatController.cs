@@ -17,6 +17,13 @@ namespace RoadOfTheOldKing.Player
         [SerializeField, Min(0f)] private float lightInputBuffer = 0.25f;
         [Tooltip("Charge share after which the charged cleave has hyper-armor (hits still hurt but cannot stagger), through the spin.")]
         [SerializeField, Range(0f, 1f)] private float heavyArmorCharge = 0.5f;
+        [Header("Aim assist (controller only)")]
+        [Tooltip("A light chop or cleave bends toward a live enemy within this many degrees of the aim and this reach.")]
+        [SerializeField, Range(0f, 90f)] private float meleeAssistAngle = 40f;
+        [SerializeField, Min(0f)] private float meleeAssistRange = 2.6f;
+        [Tooltip("A throw bends toward a live enemy within this many degrees of the aim, up to the throw's range.")]
+        [SerializeField, Range(0f, 45f)] private float throwAssistAngle = 15f;
+        [SerializeField, Min(0f)] private float throwAssistRange = 6f;
         private ICombatInput input;
         private float queuedLightUntil = -1f;
         private PlayerDash dash;
@@ -110,7 +117,7 @@ namespace RoadOfTheOldKing.Player
             if (frame.ThrowReleased)
             {
                 if (throwIntent == ThrowIntent.Throw && CanStartAttack)
-                    Weapon.TryReleaseThrow(AimDirection);
+                    Weapon.TryReleaseThrow(Assisted(true));
                 throwIntent = ThrowIntent.None;
             }
             else if (!frame.ThrowHeld && !frame.ThrowPressed)
@@ -131,7 +138,7 @@ namespace RoadOfTheOldKing.Player
             // A rejected E press must not swallow the release of an existing cleave.
             if (Weapon.State == AxeState.Charging)
             {
-                if (frame.ChargeReleased && !chargeBlocked) Weapon.TryReleaseCharge(AimDirection);
+                if (frame.ChargeReleased && !chargeBlocked) Weapon.TryReleaseCharge(Assisted(false));
                 else if (!frame.ChargeHeld) Weapon.CancelCharge();
             }
             if (actionInputBlocked)
@@ -147,9 +154,14 @@ namespace RoadOfTheOldKing.Player
             }
             if (frame.LightPressed && (Weapon.State == AxeState.Held || Weapon.State == AxeState.LightChop))
                 queuedLightUntil = Time.time + lightInputBuffer;
-            if (queuedLightUntil >= Time.time && Weapon.TryLightChop(AimDirection))
+            if (queuedLightUntil >= Time.time && Weapon.TryLightChop(Assisted(false)))
                 queuedLightUntil = -1f;
         }
+
+        // The committed direction: the aim, bent toward an enemy on a controller (AimAssist).
+        private Vector2 Assisted(bool throwing) => !ActiveInput.UsingGamepad ? AimDirection :
+            AimAssist.Toward(transform.position, AimDirection, throwing ? throwAssistRange : meleeAssistRange,
+                throwing ? throwAssistAngle : meleeAssistAngle);
 
         private void UpdateAim(CombatInputFrame frame)
         {

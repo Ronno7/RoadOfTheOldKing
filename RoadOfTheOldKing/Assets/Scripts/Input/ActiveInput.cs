@@ -16,6 +16,9 @@ namespace RoadOfTheOldKing.Input
         private static bool subscribed;
 
         public static bool UsingGamepad { get; private set; }
+        // The pad in use is a PlayStation one (DualShock 4 or DualSense), so labels use its button names.
+        // Changed also fires when this flips between pads.
+        public static bool PlayStationPad { get; private set; }
         public static event Action Changed;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -23,7 +26,7 @@ namespace RoadOfTheOldKing.Input
         {
             if (subscribed) InputSystem.onAfterUpdate -= Poll;
             subscribed = false;
-            UsingGamepad = false;
+            UsingGamepad = PlayStationPad = false;
             Changed = null;
         }
 
@@ -44,11 +47,24 @@ namespace RoadOfTheOldKing.Input
             Changed?.Invoke();
         }
 
+        // Explicit pad family for verification; normal play reads it from the pad being used.
+        public static void SetPlayStation(bool playStation)
+        {
+            if (PlayStationPad == playStation) return;
+            PlayStationPad = playStation;
+            if (UsingGamepad) Changed?.Invoke();
+        }
+
         private static void Poll()
         {
             if ((InputState.currentUpdateType & InputUpdateType.Editor) != 0) return;
-            if (!UsingGamepad) { if (GamepadUsed()) Set(true); }
-            else if (KeyboardOrMouseUsed()) Set(false);
+            if (GamepadUsed())
+            {
+                bool playStation = Gamepad.current is UnityEngine.InputSystem.DualShock.DualShockGamepad;
+                if (!UsingGamepad) { PlayStationPad = playStation; Set(true); }
+                else SetPlayStation(playStation);
+            }
+            else if (UsingGamepad && KeyboardOrMouseUsed()) Set(false);
         }
 
         private static bool GamepadUsed()

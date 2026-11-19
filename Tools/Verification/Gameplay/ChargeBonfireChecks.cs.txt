@@ -36,6 +36,7 @@ else if(phase==1){
   combat.GetType().GetField("controlsActive",flags).SetValue(combat,true);
   input.GetType().GetField("hasFocus",flags).SetValue(input,true);
   input.GetType().GetProperty("MoveDirection").SetValue(input,Vector2.right,null);
+  input.GetType().GetProperty("MoveAmount").SetValue(input,1f,null); // full tilt, as on keys (18 Nov)
   input.GetType().GetProperty("SprintHeld").SetValue(input,true,null);
   pose(new Vector2(1000,1000));weapon.CancelAction();stamina.Restore();
   check(weapon.TryBeginCharge(),"charge starts");
@@ -88,6 +89,7 @@ else if(phase==1){
   if(target!=null)UnityEngine.Object.DestroyImmediate(target);
   weapon.CancelAction();stamina.Restore();pose(original);
   input.GetType().GetProperty("MoveDirection").SetValue(input,Vector2.zero,null);
+  input.GetType().GetProperty("MoveAmount").SetValue(input,0f,null);
   input.GetType().GetProperty("SprintHeld").SetValue(input,false,null);
   input.GetType().GetField("hasFocus",flags).SetValue(input,focus);
   combat.GetType().GetField("controlsActive",flags).SetValue(combat,controls);

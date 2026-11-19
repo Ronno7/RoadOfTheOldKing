@@ -8,7 +8,8 @@ namespace RoadOfTheOldKing.Player
     // Presentation only: makes taking a hit unmistakable. A red flash on the sprite, a tiny global
     // hit-stop, a capped camera kick along the blow, then the classic 16-bit blink for the rest of the
     // post-hit invulnerability. The HUD adds the screen-edge vignette; the animator plays the flinch.
-    // As the body's only flash writer it also shows the heal and the full-charge moment.
+    // As the body's only flash writer it also shows the heal and the full-charge moment. On a controller it also
+    // rumbles: hits taken and landed, the full charge and the axe's catch (Input.Rumble).
     [DisallowMultipleComponent, RequireComponent(typeof(PlayerHealth))]
     [DefaultExecutionOrder(150)] // after PlayerSpriteAnimator, before PlayerWeaponCarry copies the body colour
     public sealed class PlayerHitFeedback : MonoBehaviour
@@ -37,6 +38,7 @@ namespace RoadOfTheOldKing.Player
         private PlayerFlask flask;
         private PlayerCombatController combat;
         private bool chargeFull;
+        private RoadOfTheOldKing.Weapons.AxeWeapon heard;
 
         private void Awake()
         {
@@ -52,7 +54,34 @@ namespace RoadOfTheOldKing.Player
         {
             if (health != null) health.HitReceived += OnHit;
             if (flask != null) flask.Healed += OnHealed;
+            if (combat != null) { combat.WeaponEquipped += ListenToWeapon; ListenToWeapon(); }
         }
+
+        private void ListenToWeapon()
+        {
+            var weapon = combat != null ? combat.Weapon : null;
+            if (weapon == heard) return;
+            if (heard != null) { heard.HitConfirmed -= OnHitLanded; heard.ReturnedToHand -= OnCaught; }
+            heard = weapon;
+            if (heard != null) { heard.HitConfirmed += OnHitLanded; heard.ReturnedToHand += OnCaught; }
+        }
+
+        // Stronger for heavier blows: a light chop ticks, the finisher and a throw knock, a cleave thumps.
+        private void OnHitLanded(CombatHit hit)
+        {
+            switch (hit.Kind)
+            {
+                case AttackKind.ChargedCleave: RoadOfTheOldKing.Input.Rumble.Pulse(.5f, .75f, .14f); break;
+                case AttackKind.Throw: RoadOfTheOldKing.Input.Rumble.Pulse(.2f, .4f, .08f); break;
+                case AttackKind.Recall: RoadOfTheOldKing.Input.Rumble.Pulse(.15f, .35f, .07f); break;
+                default:
+                    if (heard != null && heard.IsLightThrust) RoadOfTheOldKing.Input.Rumble.Pulse(.25f, .45f, .09f);
+                    else RoadOfTheOldKing.Input.Rumble.Pulse(.1f, .3f, .06f);
+                    break;
+            }
+        }
+
+        private void OnCaught() => RoadOfTheOldKing.Input.Rumble.Pulse(.08f, .22f, .05f);
 
         private void OnHealed() { currentFlash = healFlashColor; flashUntil = Time.unscaledTime + healFlashDuration; }
 
@@ -60,6 +89,8 @@ namespace RoadOfTheOldKing.Player
         {
             if (health != null) health.HitReceived -= OnHit;
             if (flask != null) flask.Healed -= OnHealed;
+            if (combat != null) combat.WeaponEquipped -= ListenToWeapon;
+            if (heard != null) { heard.HitConfirmed -= OnHitLanded; heard.ReturnedToHand -= OnCaught; heard = null; }
             flashUntil = 0f;
             Apply(0f, 1f);
         }
@@ -72,13 +103,20 @@ namespace RoadOfTheOldKing.Player
             HitStop.Freeze(hitStop);
             var cam = Camera.main != null ? Camera.main.GetComponent<CameraFollow2D>() : null;
             if (cam != null) cam.Kick(hit.Direction, cameraKick);
+            // A blow worth a third of full health or more rumbles at full strength.
+            float weight = Mathf.Clamp01(hit.Damage / Mathf.Max(1f, health != null ? health.MaxHealth / 3f : 30f));
+            RoadOfTheOldKing.Input.Rumble.Pulse(Mathf.Lerp(.35f, .9f, weight), Mathf.Lerp(.5f, .9f, weight), Mathf.Lerp(.16f, .3f, weight));
         }
 
         private void LateUpdate()
         {
             var weapon = combat != null ? combat.Weapon : null;
             bool full = weapon != null && weapon.State == RoadOfTheOldKing.Weapons.AxeState.Charging && weapon.Charge01 >= 1f;
-            if (full && !chargeFull) { currentFlash = chargeFlashColor; flashUntil = Time.unscaledTime + chargeFlashDuration; }
+            if (full && !chargeFull)
+            {
+                currentFlash = chargeFlashColor; flashUntil = Time.unscaledTime + chargeFlashDuration;
+                RoadOfTheOldKing.Input.Rumble.Pulse(.1f, .3f, .06f);
+            }
             chargeFull = full;
             float flash = Time.unscaledTime < flashUntil ? Mathf.Clamp01(FeedbackSettings.FlashScale) : 0f;
             bool blink = player.IsAlive && player.IsRecoveringFromHit && Mathf.Repeat(Time.time / blinkInterval, 2f) >= 1f;

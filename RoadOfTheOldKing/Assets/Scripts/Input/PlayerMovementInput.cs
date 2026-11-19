@@ -6,26 +6,34 @@ namespace RoadOfTheOldKing.Input
     [DisallowMultipleComponent]
     public sealed class PlayerMovementInput : MonoBehaviour, IMovementInput
     {
+        // Super Mario 64 style (user, 18 Nov): walking speed follows the stick's tilt on a curve, fine near the
+        // centre, full speed at the rim. The walk cycle already advances with distance, so slower steps don't slide.
+        [Tooltip("Controller: share of walking speed at the smallest tilt past the deadzone. Full tilt is full speed.")]
+        [SerializeField, Range(0f, 1f)] private float slowestTilt = .2f;
+        // Dark Souls on the controller's B (user, 18 Nov): a tap dodges as it's let go, a hold sprints and never dodges.
+        [Tooltip("Controller: B let go sooner than this (real seconds) dodges; held longer, it sprints instead.")]
+        [SerializeField, Min(0.05f)] private float dodgeTapTime = .25f;
         private InputActionMap actions;
         private InputAction move;
         private InputAction sprint;
         private InputAction dash;
-        private InputAction sprintToggle;
-        private bool sprintLatched;
+        private InputAction padDodge;
+        // When the B press being held began (unscaled), or -1: only a press made in play counts, so B still held
+        // from closing a menu neither sprints nor dodges.
+        private float padPressedAt = -1f;
         private float dashQueuedUntil = -1f;
         private bool hasFocus = true;
         private bool paused;
 
         public Vector2 MoveDirection { get; private set; }
+        public float MoveAmount { get; private set; }
         public bool SprintHeld { get; private set; }
         public bool IsActive => isActiveAndEnabled && hasFocus && !paused && !RoadOfTheOldKing.UI.SimulationPause.BlocksPlay && (locks == null || !locks.IsLocked);
         private RoadOfTheOldKing.Player.PlayerControlLocks locks;
-        private RoadOfTheOldKing.Player.PlayerStamina stamina;
 
         private void Awake()
         {
             locks = GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>();
-            stamina = GetComponent<RoadOfTheOldKing.Player.PlayerStamina>();
             actions = new InputActionMap("Player Movement");
             move = actions.AddAction("Move", InputActionType.Value, expectedControlLayout: "Vector2");
 
@@ -46,9 +54,8 @@ namespace RoadOfTheOldKing.Input
             sprint = actions.AddAction("Sprint", InputActionType.Button);
             sprint.AddBinding("<Keyboard>/leftShift");
             sprint.AddBinding("<Keyboard>/rightShift");
-            sprintToggle = actions.AddAction("Sprint Toggle", InputActionType.Button, GamepadLayout.Sprint);
             dash = actions.AddAction("Dash", InputActionType.Button, "<Keyboard>/space");
-            dash.AddBinding(GamepadLayout.Dash);
+            padDodge = actions.AddAction("Dodge or Sprint", InputActionType.Button, GamepadLayout.Dash);
         }
 
         private void OnEnable() => actions.Enable();
@@ -63,11 +70,20 @@ namespace RoadOfTheOldKing.Input
 
             Vector2 value = move.ReadValue<Vector2>();
             MoveDirection = value.sqrMagnitude > 0.0001f ? value.normalized : Vector2.zero;
-            // L3 latches sprint the way holding Shift sustains it; stopping or a second click ends it.
-            if (sprintToggle.WasPressedThisFrame()) sprintLatched = !sprintLatched;
-            // Running out of stamina also ends it: a latched sprint must not restart on its own once stamina refills.
-            if (MoveDirection == Vector2.zero || (stamina != null && stamina.Current <= RoadOfTheOldKing.Player.PlayerStamina.Empty)) sprintLatched = false;
-            SprintHeld = sprint.IsPressed() || sprintLatched;
+            // Keys give unit vectors; the stick's deadzone processor rescales its tilt to 0..1 past the deadzone.
+            float tilt = Mathf.Clamp01(value.magnitude);
+            MoveAmount = MoveDirection == Vector2.zero ? 0f : Mathf.Lerp(slowestTilt, 1f, tilt * tilt);
+            // Keys: Space dodges on press and Shift sprints. B: held past the tap time it sprints; let go sooner, it
+            // dodges then. A press and release inside one frame is a tap.
+            float now = Time.unscaledTime;
+            if (padDodge.WasPressedThisFrame()) padPressedAt = now;
+            bool padSprint = padPressedAt >= 0f && padDodge.IsPressed() && now - padPressedAt >= dodgeTapTime;
+            if (padPressedAt >= 0f && !padDodge.IsPressed())
+            {
+                if (now - padPressedAt < dodgeTapTime) dashQueuedUntil = Time.time + 0.12f;
+                padPressedAt = -1f;
+            }
+            SprintHeld = sprint.IsPressed() || padSprint;
             if (dash.WasPressedThisFrame())
                 dashQueuedUntil = Time.time + 0.12f;
         }
@@ -103,8 +119,9 @@ namespace RoadOfTheOldKing.Input
         private void ClearInput()
         {
             MoveDirection = Vector2.zero;
+            MoveAmount = 0f;
             SprintHeld = false;
-            sprintLatched = false;
+            padPressedAt = -1f;
             dashQueuedUntil = -1f;
         }
     }
