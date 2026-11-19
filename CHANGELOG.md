@@ -12,9 +12,11 @@
 - Free look is two-thirds faster on a controller.
 - Place names and "BONFIRE LIT" share one style and never overlap.
 - Upgrade bonfires burn a larger gold flame in a bronze brazier.
-- An attack clicked late in a dodge lands as the dodge ends.
+- A light attack queued late in a dodge starts when the dodge ends.
 - Recall can't start while you drink.
 - Resting at a bonfire brings the camera in closer.
+- Lighting a bonfire makes it your respawn point.
+- Bonfire travel lists fires by region.
 
 **Fixed**
 - Cliffs no longer make noise when you swing from on top of them.

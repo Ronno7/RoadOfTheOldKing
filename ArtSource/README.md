@@ -4,14 +4,14 @@ Source art and import inputs, kept outside Unity's runtime assets. Runtime sprit
 
 | Folder | Holds | Imported with |
 | --- | --- | --- |
-| `Player/` | Hero exports from PixelLab, as delivered | **Animation Import > Player** |
+| `Player/` | Hero exports from PixelLab, as delivered | Copy approved frames into the Unity project's player sprite slots, then select **Player** in **Animation Import**. [Player import steps](../Docs/PlayerAnimation.md#import) |
 | `Enemies/` | Enemy exports, recorded in `LowlandsManifest.json`; the wolf in its own folder | **Animation Import**, per character |
-| `NPCs/TravelingTrader/` | Merchant frames and source record | **Animation Import > Traveling Trader** |
+| `NPCs/TravelingTrader/` | Merchant frames and source record | Select **Traveling Trader** in **Animation Import** |
 | `Shared/` | Trees, vegetation, props, bonfire, decoration, palette | **Advanced > Asset Maintenance** |
 | `Tutorial/` | Village buildings and recipes | **Advanced > Asset Maintenance** |
 | `GreenLowlands/` | Buildings, fittings, elevation data, provenance | **Advanced > Asset Maintenance** |
 | `GreenLowlands/Environment/Waterworks/` | Sluice, canal, culvert and drain sources, with one manifest per set | **Animation Import** |
 | `GreenLowlands/Environment/Hayfields/` | Beam and release mechanism | **Animation Import** |
-| `Weapons/` | Halberd and scavenger spear | Copied into `Assets/Art/Sprites` |
+| `Weapons/` | Scavenger spear sources and the retired halberd | The spear sprites and the hero's current `Axe.png` live in `Assets/Art/Sprites/Weapons/`. |
 
 Keep only what an import reads, plus its provenance. Review material doesn't belong here.

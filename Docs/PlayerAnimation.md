@@ -32,10 +32,11 @@ Empty slots fall back instead of blocking: run uses walk, actions use locomotion
 
 ## Import
 
-1. Put frames in `Assets/Art/Sprites/Player/<Slot>/<direction>/`, the layout PixelLab exports.
-2. Run **Road of the Old King > Animation Import > Player**.
+1. Keep the original PixelLab export in `ArtSource/Player/` at the repository root.
+2. In the Unity project, copy the approved standing views to `Assets/Art/Sprites/Player/Rotations/<direction>.png` and numbered animation frames to `Assets/Art/Sprites/Player/<Slot>/<direction>/`.
+3. Open **Road of the Old King > Animation Import**, choose **Player** in the **Character** list, then click **Import selected character**.
 
-The importer sets 16 PPU point filtering, pins each direction's pivot to its lowest opaque row so feet stay on the ground line, and fills the slot. Playback rate, looping and contact frames live on the animation asset and survive re-imports.
+The importer sets sprites to 16 PPU with point filtering. For each direction, the lowest opaque row across the slot's frames sets their shared ground line. The throw release uses the standing rotation's ground line so the forward step stays visible. Playback rate, looping and contact frames survive re-imports.
 
 ## Weapon
 
@@ -47,4 +48,4 @@ The hero has no arms, so the bronze axe (a double-bitted head with a thrusting s
 - **Cloak colour:** chosen at New Game and kept in the save. The `EnemyFlash` shader turns the body's and the grip fold's blues into that colour by their brightness, so shading survives; an empty choice keeps the drawn blue.
 - **Attacks:** procedural sweeps and thrusts, sampled from the same clock and geometry as the damage.
 - **Recall:** the returning axe keeps its silhouette in translucent cyan with a short trail, then turns solid on the catch.
-- **Hit pause:** a confirmed hit pauses only the weapon's clock, and body frames freeze with it because they sample that clock.
+- **Hit pause.** A light hit pauses the weapon clock and any body frames driven by it. A hit on the player or an enemy's death can also briefly freeze the whole simulation.

@@ -165,7 +165,7 @@ stateDiagram-v2
 Values live in `Assets/Settings/Weapons/AxeSettings.asset`.
 
 - **What you see is what hits.** Damage, the ground footprint and the weapon pose all read one action clock: windup, active, recovery.
-- **Hit pause** stops only the weapon's clock (0.045 s, 1.8x on the finisher). Enemies keep moving.
+- **Hit pause.** A light hit pauses the axe's action clock for 0.045 s (1.8× on the finisher). When the player takes a hit or an enemy dies, impact feedback can also briefly freeze the whole simulation.
 - **Reactions.** `HitReaction` turns accepted hits into stagger and knockback. Enemies can have poise, which breaks only past a threshold; thrown and Recall hits count half.
 
 ## Enemies
@@ -212,25 +212,27 @@ sequenceDiagram
   Note over S: each scene load
   S->>S: place player, re-equip axe
   S->>P: RestoreProgress(state)
-  Note over S: rest, reward, lesson, unlock
+  Note over S: when saving permanent progress
   S->>P: CaptureProgress(state)
   S->>St: Save(state)
 ```
 
-| Event | Checkpoint | Heals, resets enemies | Saves |
+| Event | Checkpoint | Heals and resets enemies | What reaches disk |
 | --- | --- | --- | --- |
-| Rest at a bonfire | Set to that fire | Yes | Yes |
-| Permanent gain (reward, lesson, puzzle) | Unchanged | No | Yes |
-| Quit, closing the window | Unchanged | No | Yes, with the exact spot |
-| Pause, focus loss | Unchanged | No | Exact spot only |
-| Leave through a scene exit | Unchanged | No; health and flasks carry over | Yes |
-| Death | Unchanged | Through the reload | Yes |
-| New Game | Cleared | Through the reload | Save deleted |
+| Light a bonfire | The lit fire | No | Permanent progress, including the newly discovered fire |
+| Rest or travel by bonfire | Resting or destination fire | Yes | Permanent progress |
+| Collect a reward, finish a combat lesson or solve a puzzle | Unchanged | No | Permanent progress |
+| Complete an ordinary tutorial guide step | Unchanged | No | Step recorded with the next permanent save |
+| Quit or close the window | Unchanged | No | Permanent progress, plus a resume point if alive |
+| Pause or lose focus | Unchanged | No | Resume point if alive |
+| Leave through a scene exit | Unchanged | No | Permanent progress. Health and flasks carry into the next scene in memory. |
+| Die, then retry | Unchanged | On respawn | Death clears the resume point. Retry saves permanent progress. |
+| Start a new game | Cleared | Fresh run | Fresh progress record with the chosen cloak colour |
 
 - **What's saved:** axe and Recall, checkpoint, discovered fires, shards and upgrades, coins and tools, and a list of permanent string IDs for lessons, rewards and puzzles. Shipped IDs never change.
-- **Resume point:** a small record of scene, position, health and flasks, so Continue returns to the exact spot. It is checked against solid collision on load.
+- **Resume point.** Continue restores the saved scene, position, health and flasks. If solid terrain blocks the position, the player stays at the checkpoint or scene arrival.
 - **Old saves:** `ProgressMigrations` upgrades them step by step.
-- **Visits:** `SceneVisitState` keeps defeated enemies and cut grass in memory across scene exits, until you rest or die.
+- **Visits.** `SceneVisitState` keeps defeated enemies and cut grass in memory across ordinary scene exits. Rest, bonfire travel, death and Continue clear these visits.
 
 **Rewards are three pieces**, so a fight-gated chest is scene setup, not new code: `EncounterUnlock` (the condition), `RewardPickup` (the object in the world) and `RewardService.TryGrant` (the saved record).
 
@@ -243,7 +245,7 @@ Level construction is in [World and tilemaps](World.md).
 | System | Owner | Behaviour |
 | --- | --- | --- |
 | Interaction (F) | `PlayerBonfireInteraction` | Picks one nearby target. The HUD prompt reads the same selection. |
-| Bonfires | `Bonfire` | First use lights it and unlocks travel. Next use rests: heals, refills, resets enemies, sets the respawn point. |
+| Bonfires | `Bonfire` | First use lights it, sets the respawn point and unlocks travel. Next use rests: heals, refills, resets enemies, sets the respawn point. Travel lists fires by region. |
 | Place names | `AreaName` | The smallest zone containing the player names the place, shown once per save. |
 | Announcements | `HudNotifications`, `GameHud` | Place names and events queue, one at a time in one spot; regions largest. |
 | Pots and chests | `Breakable`, `CoinSource`, `RewardChest` | Each result saves once, including empty rolls. |

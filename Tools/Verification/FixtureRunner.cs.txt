@@ -1,7 +1,7 @@
 // Runs a large .cs.txt fixture through the Editor bridge without pasting it (17 Oct). Set SessionState
 // "Runner.File" to the fixture's absolute path and "Runner.Skip" to the 0-based line where its method body starts
-// (for example 225 for GreenLowlandsLayoutChecks' Edit branch), then execute this with compiler=codedom and replay
-// it between frames. It compiles the file fresh on every call, so fixture edits apply immediately.
+// (for GreenLowlandsLayoutChecks' Edit branch, use the line containing the "Use Edit Mode." guard minus one).
+// Execute with compiler=codedom and replay between frames. Each call recompiles the file so fixture edits apply immediately.
 var all=System.IO.File.ReadAllLines(SessionState.GetString("Runner.File",""));
 string body=string.Join("\n",all.Skip(SessionState.GetInt("Runner.Skip",0)).ToArray());
 string src="using System;using System.Linq;using System.Collections.Generic;using UnityEngine;using UnityEditor;\npublic static class FixtureRunner{public static object Run(){\n"+body+"\n}}";
