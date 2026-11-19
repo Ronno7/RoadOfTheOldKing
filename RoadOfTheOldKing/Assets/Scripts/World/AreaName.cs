@@ -77,6 +77,22 @@ namespace RoadOfTheOldKing.World
             if (game != null && game.Progress.MarkAreaSeen(shown.Text)) game.SaveProgress();
         }
 
+        // The region (not a landmark) a point lies in: the smallest containing one, else the largest loaded, since
+        // each scene names one region (Ardan's Edge, Green Lowlands). Empty when the scene names none.
+        public static string RegionAt(Vector2 point)
+        {
+            AreaName inside = null, any = null;
+            foreach (var zone in zones)
+            {
+                if (zone.landmark || string.IsNullOrWhiteSpace(zone.displayName)) continue;
+                float area = zone.size.x * zone.size.y;
+                if (zone.Bounds.Contains(point) && (inside == null || area < inside.size.x * inside.size.y)) inside = zone;
+                if (any == null || area > any.size.x * any.size.y) any = zone;
+            }
+            var region = inside != null ? inside : any;
+            return region != null ? region.displayName.Trim() : "";
+        }
+
         private static AreaName Containing(Vector2 point)
         {
             AreaName best = null; float bestArea = float.PositiveInfinity;

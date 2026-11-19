@@ -19,6 +19,8 @@ namespace RoadOfTheOldKing.World
         public string Id => id;
         public string DisplayName => displayName;
         public int DisplayOrder => displayOrder;
+        // Travel groups fires by the region they stand in.
+        public string Region => AreaName.RegionAt(transform.position);
         public Vector2 SpawnPosition => spawnPoint != null ? (Vector2)spawnPoint.position : (Vector2)transform.position;
         public bool IsDiscovered => GameSession.Instance != null && GameSession.Instance.Progress.HasFire(id);
         public bool CanUse(Transform player) => !string.IsNullOrEmpty(id) && player != null &&

@@ -12,11 +12,12 @@ namespace RoadOfTheOldKing.UI
 {
     // The bonfire's menu (UI Toolkit). Presentation only: it follows PlayerBonfireInteraction's
     // open/close events and calls GameSession for resting, travel and upgrades; the
-    // session validates everything. Pages: main, upgrade choices and purchase confirmation. Escape steps back a page and closes from the main page.
+    // session validates everything. Pages: main, upgrade choices and purchase confirmation, and travel by region then fire
+    // (as in Dark Souls 3). Escape steps back a page and closes from the main page.
     [DisallowMultipleComponent, RequireComponent(typeof(PlayerBonfireInteraction))]
     public sealed class BonfireMenu : MonoBehaviour, IModalMenu
     {
-        private enum Page { Main, Upgrades, Confirm }
+        private enum Page { Main, Upgrades, Confirm, Travel, Region }
 
         [SerializeField] private VisualTreeAsset layout;
         [SerializeField] private PanelSettings panelSettings;
@@ -34,6 +35,9 @@ namespace RoadOfTheOldKing.UI
         private Bonfire fire;
         private AxeUpgrade pending;
         private Page page;
+        private string region;
+        // Row order on the main page; Back from travel returns to the Travel row.
+        private const int UpgradesRow = 0, TravelRow = 1;
 
         public bool IsOpen => overlay != null && overlay.style.display.value != DisplayStyle.None;
 
@@ -107,6 +111,7 @@ namespace RoadOfTheOldKing.UI
             FrameCamera(false);
             if (overlay != null) overlay.style.display = DisplayStyle.None;
             pending = null;
+            region = null;
             fire = null;
         }
 
@@ -116,14 +121,37 @@ namespace RoadOfTheOldKing.UI
             {
                 case Page.Main: interaction.Close(); break;
                 case Page.Confirm: Show(Page.Upgrades); break;
-                default: Show(Page.Main); break;
+                case Page.Region: Show(Page.Travel, RegionRow(region)); break;
+                case Page.Travel: Show(Page.Main, TravelRow); break;
+                default: Show(Page.Main, UpgradesRow); break;
             }
         }
 
         public void Navigate(int direction) => list?.Navigate(direction);
         public void Submit() => list?.Submit();
 
-        private void Show(Page next)
+        // Discovered fires other than this one, by region in world order (each region by its first fire's place in
+        // the menu order). A record from an older save has no region until its scene loads again: it joins a region
+        // known for the same scene, else the scene's own name.
+        private List<(string name, List<FireRecord> fires)> Destinations(GameSession session)
+        {
+            var known = session.Progress.fires.Where(f => !string.IsNullOrEmpty(f.region))
+                .GroupBy(f => f.scenePath).ToDictionary(g => g.Key, g => g.First().region);
+            return session.Progress.fires.Where(f => f.id != fire.Id)
+                .GroupBy(f => !string.IsNullOrEmpty(f.region) ? f.region :
+                    known.TryGetValue(f.scenePath, out var name) ? name : System.IO.Path.GetFileNameWithoutExtension(f.scenePath))
+                .OrderBy(g => g.Min(f => f.displayOrder))
+                .Select(g => (g.Key, g.OrderBy(f => f.displayOrder).ToList())).ToList();
+        }
+
+        private int RegionRow(string name)
+        {
+            var session = GameSession.Instance;
+            int row = session == null || fire == null ? -1 : Destinations(session).FindIndex(r => r.name == name);
+            return Mathf.Max(0, row);
+        }
+
+        private void Show(Page next, int select = 0)
         {
             var session = GameSession.Instance;
             if (session == null || fire == null) { interaction.Close(); return; }
@@ -140,6 +168,7 @@ namespace RoadOfTheOldKing.UI
                 "Choose one for " + nextTier.shardCost + " shards.";
             shards.text = "Sun Shards " + have + (nextTier != null ? " / " + nextTier.shardCost : "");
             shards.EnableInClassList("lacking", lacking);
+            shards.style.display = next == Page.Travel || next == Page.Region ? DisplayStyle.None : DisplayStyle.Flex;
             status.EnableInClassList("warning", false);
             var items = new List<PauseMenuAction>();
             switch (next)
@@ -151,20 +180,37 @@ namespace RoadOfTheOldKing.UI
                     status.text = session.Status;
                     items.Add(new PauseMenuAction("Upgrades", locked || nextTier == null ? requirement : "",
                         () => Show(Page.Upgrades), locked: locked));
-                    bool travel = false;
-                    // Every discovered fire, including those in other scenes; names refresh when rested at.
-                    foreach (var destination in session.Progress.fires.OrderBy(f => f.displayOrder))
+                    bool travel = Destinations(session).Count > 0;
+                    items.Add(new PauseMenuAction("Travel", travel ? "" : "Light another fire first.",
+                        () => Show(Page.Travel), travel));
+                    items.Add(new PauseMenuAction("Leave", "", interaction.Close));
+                    break;
+
+                case Page.Travel:
+                    heading.text = "TRAVEL";
+                    status.text = "";
+                    foreach (var destination in Destinations(session))
                     {
-                        if (destination.id == fire.Id) continue;
-                        travel = true;
+                        string name = destination.name;
+                        items.Add(new PauseMenuAction(name, "", () => { region = name; Show(Page.Region); }));
+                    }
+                    items.Add(new PauseMenuAction("Back", "", () => Show(Page.Main, TravelRow)));
+                    break;
+
+                case Page.Region:
+                    heading.text = (region ?? "").ToUpperInvariant();
+                    status.text = "";
+                    var fires = Destinations(session).FirstOrDefault(r => r.name == region).fires;
+                    if (fires == null) { Show(Page.Travel); return; }
+                    foreach (var destination in fires)
+                    {
                         var target = destination;
                         string name = !string.IsNullOrEmpty(target.displayName) ? target.displayName :
                             session.Checkpoints.Fires.FirstOrDefault(f => f.Id == target.id)?.DisplayName ?? target.id;
-                        items.Add(new PauseMenuAction(name, "Travel here.",
+                        items.Add(new PauseMenuAction(name, "",
                             () => { if (session.Checkpoints.Travel(target, fire)) interaction.Close(); }));
                     }
-                    if (!travel) items.Add(new PauseMenuAction("Travel", "Light another fire first.", null, false));
-                    items.Add(new PauseMenuAction("Leave", "", interaction.Close));
+                    items.Add(new PauseMenuAction("Back", "", () => Show(Page.Travel, RegionRow(region))));
                     break;
 
                 case Page.Upgrades:
@@ -208,7 +254,7 @@ namespace RoadOfTheOldKing.UI
                     break;
 
             }
-            list.Show(items);
+            list.Show(items, Mathf.Clamp(select, 0, items.Count - 1));
         }
     }
 }

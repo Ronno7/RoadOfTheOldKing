@@ -24,15 +24,20 @@ namespace RoadOfTheOldKing.Progression
         // Fires in the active scene, in menu order. Discovered fires in any scene are in Progress.fires.
         public Bonfire[] Fires { get; private set; } = Array.Empty<Bonfire>();
 
-        // Discovery is permanent, but lighting alone does not rest or move the checkpoint.
+        // As in Dark Souls (user, 18 Nov): lighting a fire saves and makes it the respawn point, but only resting
+        // heals, refills the flask and brings enemies back.
         public bool Light(Bonfire fire)
         {
             var player = session.Player;
             if (session.IsLoading || player == null || !player.IsAlive || fire == null ||
                 !Fires.Contains(fire) || !fire.CanUse(player.transform) || fire.IsDiscovered)
                 return false;
-            session.Progress.DiscoverFire(fire.Id, SceneLoader.ActivePath, fire.DisplayName, fire.DisplayOrder);
+            var progress = session.Progress;
+            progress.DiscoverFire(fire.Id, SceneLoader.ActivePath, fire.DisplayName, fire.DisplayOrder, fire.Region);
+            progress.checkpointId = fire.Id;
+            progress.scenePath = SceneLoader.ActivePath;
             session.CaptureAndSave("Bonfire lit. Saved.");
+            session.ClearResume();
             return true;
         }
 
@@ -43,7 +48,7 @@ namespace RoadOfTheOldKing.Progression
                 !Fires.Contains(fire) || !fire.IsDiscovered || !fire.CanUse(player.transform))
                 return false;
             var progress = session.Progress;
-            progress.DiscoverFire(fire.Id, SceneLoader.ActivePath, fire.DisplayName, fire.DisplayOrder);
+            progress.DiscoverFire(fire.Id, SceneLoader.ActivePath, fire.DisplayName, fire.DisplayOrder, fire.Region);
             progress.checkpointId = fire.Id;
             progress.scenePath = SceneLoader.ActivePath;
             session.Capture();
@@ -129,6 +134,15 @@ namespace RoadOfTheOldKing.Progression
 
         internal void FindFires() => Fires = UnityEngine.Object.FindObjectsByType<Bonfire>(FindObjectsSortMode.None)
             .OrderBy(f => f.DisplayOrder).ToArray();
+
+        // Lit fires in this scene refresh their saved name, order and region, so older saves gain regions for travel.
+        internal void RefreshFireRecords()
+        {
+            var progress = session.Progress;
+            foreach (var fire in Fires)
+                if (progress.HasFire(fire.Id))
+                    progress.DiscoverFire(fire.Id, SceneLoader.ActivePath, fire.DisplayName, fire.DisplayOrder, fire.Region);
+        }
 
         // A named arrival (spawn point, or a fire for travel) wins; otherwise the checkpoint fire if it is
         // in this scene; otherwise the player stays where the scene placed them.

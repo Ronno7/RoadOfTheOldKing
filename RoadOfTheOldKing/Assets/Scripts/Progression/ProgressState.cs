@@ -56,7 +56,7 @@ namespace RoadOfTheOldKing.Progression
         }
 
         // Records (or refreshes) a lit fire so travel can list it from any scene.
-        public void DiscoverFire(string id, string scene, string displayName, int displayOrder)
+        public void DiscoverFire(string id, string scene, string displayName, int displayOrder, string region)
         {
             if (string.IsNullOrEmpty(id)) return;
             var fire = FindFire(id);
@@ -64,6 +64,7 @@ namespace RoadOfTheOldKing.Progression
             fire.scenePath = scene;
             fire.displayName = displayName;
             fire.displayOrder = displayOrder;
+            if (!string.IsNullOrEmpty(region)) fire.region = region;
         }
     }
 
@@ -90,7 +91,8 @@ namespace RoadOfTheOldKing.Progression
         public bool collected;
     }
 
-    // A discovered bonfire. Name and order are copied so fires in unloaded scenes can be listed.
+    // A discovered bonfire. Name, order and region are copied so fires in unloaded scenes can be listed.
+    // Saves from before 18 Nov have no region until the fire's scene is next loaded.
     [Serializable]
     public sealed class FireRecord
     {
@@ -98,6 +100,7 @@ namespace RoadOfTheOldKing.Progression
         public string scenePath = "";
         public string displayName = "";
         public int displayOrder;
+        public string region = "";
     }
 
     public interface IProgressParticipant

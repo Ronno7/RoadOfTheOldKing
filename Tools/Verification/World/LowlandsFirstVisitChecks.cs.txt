@@ -40,8 +40,8 @@ if(!EditorApplication.isPlaying)throw new System.Exception("Isolated Play requir
   }else if(fvPhase==2){
    check(fg.Progress.sunShards==1&&fg.Progress.bronzeCoins==0,"arrival retains only earned S1");
    var arrivalFire=fg.Checkpoints.Fires.Single(f=>f.Id=="green-lowlands/arrival-fire");
-   fpose(new Vector2(15.5f,3));string oldCheckpoint=fg.Progress.checkpointId;
-   check(fi.TryInteract()&&arrivalFire.IsDiscovered&&!fi.IsOpen&&fg.Progress.checkpointId==oldCheckpoint,"first F lights without rest or checkpoint change");
+   fpose(new Vector2(15.5f,3));
+   check(fi.TryInteract()&&arrivalFire.IsDiscovered&&!fi.IsOpen&&fg.Progress.checkpointId==arrivalFire.Id,"first F lights and sets the respawn point without resting");
    var practiceSource=fsource("practice-pot");var practiceBreakable=practiceSource.GetComponentInChildren<RoadOfTheOldKing.Combat.Breakable>(true);
    fpose(new Vector2(17.5f,3.5f));fp.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>().Restore();
    check(fa.TryThrow(Vector2.up),"throw toward practice pot");

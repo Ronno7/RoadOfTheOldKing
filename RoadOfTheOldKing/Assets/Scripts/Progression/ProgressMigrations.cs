@@ -86,7 +86,7 @@ namespace RoadOfTheOldKing.Progression
             // A version 1 save belonged to one scene, and fires are only discovered by resting,
             // so every discovered fire lives in the checkpoint's scene. Names refresh on the next rest.
             foreach (var id in old.discoveredFires)
-                state.DiscoverFire(id, state.scenePath, "", 0);
+                state.DiscoverFire(id, state.scenePath, "", 0, "");
             return state;
         }
 
@@ -106,6 +106,7 @@ namespace RoadOfTheOldKing.Progression
             foreach (var source in state.coinSources)
                 if (!sourceIds.Add(source.id)) throw new InvalidOperationException("Duplicate coin source.");
             state.fires.RemoveAll(f => f == null || string.IsNullOrEmpty(f.id));
+            foreach (var fire in state.fires) fire.region ??= "";
             state.checkpointId ??= "";
             state.scenePath ??= "";
         }

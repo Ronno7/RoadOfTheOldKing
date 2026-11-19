@@ -128,6 +128,7 @@ namespace RoadOfTheOldKing.Progression
             }
 
             Checkpoints.PlaceArrivingPlayer(scene, transitions.ArrivalId);
+            Checkpoints.RefreshFireRecords();
             // Dying returns to the fire, so a death clears the resume point at once (even if the game is closed
             // on the defeat screen).
             Player.Health.Defeated += ClearResume;

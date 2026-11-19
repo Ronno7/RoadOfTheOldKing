@@ -19,7 +19,7 @@ namespace RoadOfTheOldKing.Tutorial
         Dodged,         // dashed `amount` times (at least once)
         HasAxe,         // owns the axe
         RecallUnlocked, // the stone awakened Recall
-        Rested,         // has rested at any bonfire (a checkpoint exists)
+        Rested,         // a fire is the respawn point: lit or rested at (a checkpoint exists)
         Milestone,      // progress contains `milestone` (lessons, rewards, exits...)
         ReachArea,      // came within `radius` of `area`
         DrankFlask,     // recovered safely after the first wolf

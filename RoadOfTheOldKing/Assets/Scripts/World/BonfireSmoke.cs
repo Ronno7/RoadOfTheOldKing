@@ -11,8 +11,6 @@ namespace RoadOfTheOldKing.World
         private readonly ParticleSystemRenderer renderer;
         private bool emitting;
 
-        public BonfireSmoke(Transform parent, Material material) : this(parent, material, "Bonfire smoke", new Vector3(0f, 1.5f, 0f)) { }
-
         public BonfireSmoke(Transform parent, Material material, string name, Vector3 localPosition)
         {
             root = new GameObject(name) { hideFlags = HideFlags.DontSave };
@@ -54,6 +52,13 @@ namespace RoadOfTheOldKing.World
             renderer.renderMode = ParticleSystemRenderMode.Billboard;
             renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             renderer.receiveShadows = false;
+        }
+
+        public void SetHeight(float localY)
+        {
+            var position = root.transform.localPosition;
+            position.y = localY;
+            root.transform.localPosition = position;
         }
 
         public void Refresh(bool lit, SpriteRenderer flame) => Refresh(lit, flame.sortingLayerID, flame.sortingOrder);

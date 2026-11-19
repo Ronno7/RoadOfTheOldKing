@@ -117,7 +117,9 @@ else if(phase==2){
  check(fire.IsDiscovered&&!interaction.IsOpen&&!player.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>().IsLocked,"lighting neither opens menu nor locks controls");
  check(player.Health.Health==47&&flask.Charges==1&&stamina.Current==80,"lighting preserves health flasks stamina");
  check(hp.Health==7&&plants.CutCount==1,"lighting preserves wounded enemies and cut grass");
- check(game.Progress.checkpointId==SessionState.GetString(prefix+"OldFire","")&&game.Progress.scenePath.EndsWith("Tutorial.unity"),"lighting leaves previous rest checkpoint");
+ // As in Dark Souls (18 Nov): lighting moves the respawn point; only resting heals and resets.
+ check(game.Progress.checkpointId==fire.Id&&game.Progress.scenePath==region&&store.Load().checkpointId==fire.Id,"lighting makes the fire the respawn point and saves it");
+ check(game.Progress.FindFire(fire.Id).region=="Green Lowlands"&&game.Progress.FindFire(SessionState.GetString(prefix+"OldFire","")).region=="Ardan's Edge","fires record their regions");
  check(store.Load().HasFire(fire.Id),"lighting saved discovery immediately");
  check(!game.Checkpoints.Light(fire)&&game.Progress.fires.Count==2,"lighting cannot duplicate discovery");
  check(interaction.Prompt.Contains("Rest at"),"lit prompt changes to Rest");
@@ -126,9 +128,9 @@ else if(phase==2){
  game.Checkpoints.Respawn();
 }
 else if(phase==3){
- check(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name=="Tutorial","death after lighting returns to old rest");
+ var fire=game.Checkpoints.Fires.Single(f=>f.Id=="green-lowlands/arrival-fire");
+ check(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name=="GreenLowlands"&&Vector2.Distance(player.transform.position,fire.SpawnPosition)<.5f,"death after lighting returns to the lit fire");
  check(game.Progress.HasFire("green-lowlands/arrival-fire"),"lighting persists through death");
- check(game.Checkpoints.LeaveScene(region,"from-tutorial"),"revisit lit Lowlands");
 }
 else if(phase==4){
  var fire=game.Checkpoints.Fires.Single(f=>f.Id=="green-lowlands/arrival-fire");
@@ -146,6 +148,16 @@ else if(phase==4){
  check(interaction.TryInteract()&&interaction.IsOpen,"second interaction rests and opens real menu");
  check(player.Health.Health==player.Health.MaxHealth&&player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().Charges==player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().MaxCharges,"rest heals and refills");
  check(game.Progress.checkpointId==fire.Id&&store.Load().checkpointId==fire.Id,"rest saves new checkpoint");
+ // Travel goes by region, then fire (18 Nov); Back returns to the row it came from.
+ var menu=player.GetComponent<RoadOfTheOldKing.UI.BonfireMenu>();
+ System.Func<string> page=()=>menu.GetType().GetField("page",flags).GetValue(menu).ToString();
+ var list=menu.GetType().GetField("list",flags).GetValue(menu);
+ System.Func<int> selected=()=>(int)list.GetType().GetProperty("Selected").GetValue(list,null);
+ var heading=(UnityEngine.UIElements.Label)menu.GetType().GetField("heading",flags).GetValue(menu);
+ menu.Navigate(1);menu.Submit();check(page()=="Travel"&&heading.text=="TRAVEL","Travel row opens the region list");
+ menu.Submit();check(page()=="Region"&&heading.text=="ARDAN'S EDGE","the Tutorial fire is listed under Ardan's Edge");
+ menu.Back();check(page()=="Travel"&&selected()==0,"Back returns to the region list at its row");
+ menu.Back();check(page()=="Main"&&selected()==1,"Back returns to the main page at Travel");
  interaction.Close();check(!interaction.IsOpen&&player.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>().IsLocked,"closing rest keeps the closing press out of gameplay this frame");
 }
 else if(phase==5){
@@ -155,7 +167,7 @@ else if(phase==5){
 else if(phase==6)check(game.Continue(),"Continue lit/rested save");
 else if(phase==7){
  var fire=game.Checkpoints.Fires.Single(f=>f.Id=="green-lowlands/arrival-fire");
- check(fire.IsDiscovered&&game.Progress.checkpointId==fire.Id,"Continue restores lighting and separate rest checkpoint");
+ check(fire.IsDiscovered&&game.Progress.checkpointId==fire.Id,"Continue restores lighting and the rest checkpoint");
  check(fire.GetComponentInChildren<ParticleSystem>().isPlaying,"Continue restores smoke");
 }
 SessionState.SetInt(prefix+"Phase",phase+1);SessionState.SetInt(prefix+"Passed",SessionState.GetInt(prefix+"Passed",0)+checks.Count);

@@ -37,6 +37,8 @@ namespace RoadOfTheOldKing.World
         private bool captured;
         private float frameClock, glowIntensity = -1f;
         private BonfireSmoke smoke;
+        // Where smoke starts above a usual fire's root: seven art pixels above the top of its 24-pixel flame canvas.
+        private const float SmokeHeight = 1.5f;
 
         // Match Tutorial: three native pixels above the fixed 24-pixel flame canvas.
         // Use its authored transform so differing fire roots and animation frames cannot shift the gap.
@@ -48,7 +50,7 @@ namespace RoadOfTheOldKing.World
         {
             fire = GetComponent<Bonfire>();
             if (Application.isPlaying && flame != null && smokeMaterial != null && smoke == null)
-                smoke = new BonfireSmoke(transform, smokeMaterial);
+                smoke = new BonfireSmoke(transform, smokeMaterial, "Bonfire smoke", new Vector3(0f, SmokeHeight, 0f));
             if (glow != null && glowIntensity < 0f) { glowIntensity = glow.intensity; usualGlow = glow.color; usualGlowRadius = glow.pointLightOuterRadius; }
             if (baseRenderer != null && usualBase == null) usualBase = stoneBase != null ? stoneBase : baseRenderer.sprite;
             if (flame != null && !captured) { usualFlameScale = flame.transform.localScale; usualFlamePosition = flame.transform.localPosition; captured = true; }
@@ -67,6 +69,10 @@ namespace RoadOfTheOldKing.World
             float pivotUnits = frames != null && frames.Length > 0 && frames[0] != null ? frames[0].pivot.y / frames[0].pixelsPerUnit : 0f;
             float lift = Golden ? upgradeFlameLift / 16f : 0f;
             flame.transform.localPosition = usualFlamePosition + Vector3.up * (pivotUnits * usualFlameScale.y * (factor - 1f) + lift);
+            // Smoke keeps the same gap above a larger flame's canvas top; it sat on the gold flame's tips (user, 18 Nov:
+            // "the smoke particles on the fire are a little low").
+            float canvas = frames != null && frames.Length > 0 && frames[0] != null ? frames[0].rect.height / frames[0].pixelsPerUnit : 0f;
+            smoke?.SetHeight(SmokeHeight + canvas * usualFlameScale.y * (factor - 1f) + lift);
             if (glow != null && usualGlowRadius > 0f) glow.pointLightOuterRadius = usualGlowRadius * factor;
         }
 
