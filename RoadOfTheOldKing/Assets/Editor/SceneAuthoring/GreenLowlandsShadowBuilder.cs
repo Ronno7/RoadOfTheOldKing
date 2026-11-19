@@ -519,7 +519,7 @@ namespace RoadOfTheOldKing.EditorTools
                 root.transform.SetParent(world.Find("Scenery"), false); output = root.transform;
                 string[] families = { "Oak", "Birch", "Apple_Tree", "Farmhouse_Weathered", "Workshop_Weathered", "Watermill", "Woodshed_Weathered",
                     "Well_Disused", "Farm_Cart", "Farm_Cart_Looted", "Farm_Cart_Sacks", "Plank_Bridge", "Fence_Weathered", "Reused_Stone_Post", "Boulder", "Boulder_Cluster",
-                    "Fallen_Log", "Hedgerow", "Collapsed_Crate", "WoodenBucket", "SmallSageBush",
+                    "Fallen_Log", "Hedgerow", "Collapsed_Crate", "WoodenBucket",
                     "Firewood_Rack", "Axe_Stump", "Fence_Horizontal", "Fence_Post", "GrainSack", "ClayJar" };
                 foreach (var t in world.Find("Scenery").GetComponentsInChildren<Transform>(true).ToArray())
                 {

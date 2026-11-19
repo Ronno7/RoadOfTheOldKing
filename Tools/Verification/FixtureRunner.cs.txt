@@ -8,7 +8,7 @@ string src="using System;using System.Linq;using System.Collections.Generic;usin
 var provider=new Microsoft.CSharp.CSharpCodeProvider();
 var p=new System.CodeDom.Compiler.CompilerParameters{GenerateInMemory=true};
 // Only these references: adding every loaded assembly duplicates the facade types.
-foreach(var a in AppDomain.CurrentDomain.GetAssemblies()){try{if(a.IsDynamic||string.IsNullOrEmpty(a.Location))continue;string n=a.GetName().Name;if(n.StartsWith("UnityEngine")||n.StartsWith("UnityEditor")||n.StartsWith("Unity.")||n.StartsWith("Assembly-CSharp")||n=="System"||n=="System.Core"||n=="netstandard"||n=="Newtonsoft.Json")p.ReferencedAssemblies.Add(a.Location);}catch{}}
+foreach(var a in AppDomain.CurrentDomain.GetAssemblies()){try{if(a.IsDynamic||string.IsNullOrEmpty(a.Location))continue;string n=a.GetName().Name;if(n.StartsWith("UnityEngine")||n.StartsWith("UnityEditor")||n.StartsWith("Unity.")||n.StartsWith("Assembly-CSharp")||n.StartsWith("RoadOfTheOldKing")||n=="System"||n=="System.Core"||n=="netstandard"||n=="Newtonsoft.Json")p.ReferencedAssemblies.Add(a.Location);}catch{}}
 var res=provider.CompileAssemblyFromSource(p,src);
 if(res.Errors.HasErrors){var e=new System.Text.StringBuilder();foreach(System.CodeDom.Compiler.CompilerError er in res.Errors)if(!er.IsWarning)e.Append(er.Line+": "+er.ErrorText+"\n");return "COMPILE: "+e.ToString().Substring(0,Math.Min(1200,e.Length));}
 object result;

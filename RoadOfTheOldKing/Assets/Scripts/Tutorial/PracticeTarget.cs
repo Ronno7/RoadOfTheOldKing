@@ -15,7 +15,6 @@ namespace RoadOfTheOldKing.Tutorial
         [SerializeField] private string displayName = "DUMMY";
         [SerializeField, Min(0.5f)] private float resetDelay = 4f;
         private Damageable health;
-        private ShieldProtection shield;
         private HitReaction reaction;
         private Rigidbody2D body;
         private Collider2D bodyCollider;
@@ -27,7 +26,6 @@ namespace RoadOfTheOldKing.Tutorial
         private void Awake()
         {
             health = GetComponent<Damageable>();
-            shield = GetComponent<ShieldProtection>();
             reaction = GetComponent<HitReaction>();
             body = GetComponent<Rigidbody2D>();
             bodyCollider = GetComponent<Collider2D>();
@@ -40,20 +38,15 @@ namespace RoadOfTheOldKing.Tutorial
         {
             health.HitReceived += OnHit;
             health.Defeated += OnDefeated;
-            if (shield != null)
-                shield.Blocked += OnBlocked;
         }
 
         private void OnDisable()
         {
             health.HitReceived -= OnHit;
             health.Defeated -= OnDefeated;
-            if (shield != null)
-                shield.Blocked -= OnBlocked;
         }
 
         private void OnHit(CombatHit hit) => flashUntil = Time.time + 0.12f;
-        private void OnBlocked() => flashUntil = Time.time + 0.12f;
         private void OnDefeated()
         {
             resetAt = Time.time + resetDelay;
@@ -74,8 +67,7 @@ namespace RoadOfTheOldKing.Tutorial
             if (healthFill != null)
                 healthFill.localScale = new Vector3((float)health.Health / health.MaxHealth, 1f, 1f);
             if (label != null)
-                label.text = !health.IsAlive ? "RESETTING..." : displayName + (shield != null && shield.IsIntact ? " / GUARDED" : "")
-                    + "\n" + health.Health + "/" + health.MaxHealth;
+                label.text = !health.IsAlive ? "RESETTING..." : displayName + "\n" + health.Health + "/" + health.MaxHealth;
         }
 
         public void ResetTarget()
@@ -84,8 +76,6 @@ namespace RoadOfTheOldKing.Tutorial
             health.RestoreHealth();
             if (reaction != null)
                 reaction.Clear();
-            if (shield != null)
-                shield.Restore();
             if (body != null)
             {
                 body.position = home;

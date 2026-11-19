@@ -1017,7 +1017,7 @@ def main():
     for name,x,y in (('Well',24,532),('Cart',96,532),('Bridge',192,516),
                       ('StonePost',332,548),('Fence',356,548),('Fence',396,548)):
         preview.alpha_composite(sources['Farm_'+name],(x,y))
-    preview.resize((1536,1184),Image.Resampling.NEAREST).save(OUT/'ArchitecturePreview.png')
+    (ROOT/'DeveloperNotes/Previews/Shared').mkdir(parents=True,exist_ok=True); preview.resize((1536,1184),Image.Resampling.NEAREST).save(ROOT/'DeveloperNotes/Previews/Shared/ArchitecturePreview.png')
     # This is source-data verification, not Unity import or in-game visual approval.
     assert len(entries) == len({e['name'] for e in entries})
     assert len({p[:3] for key in ('Roof_Main','Wall_Face_1','Timber_Post')

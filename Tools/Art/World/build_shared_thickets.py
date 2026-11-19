@@ -1,12 +1,11 @@
 """Reproduce the foliage source atlas; import only the retained Bramble B.
 
 Historical wall pixels remain stable in the atlas, but their unused tile assets
-and slices are retired. Whole small bushes use --small-bush-only.
+and slices are retired.
 """
 from pathlib import Path
 import json
 import random
-import sys
 from PIL import Image, ImageDraw
 import shared_palette as zone
 
@@ -174,36 +173,5 @@ def main():
     print(f'Preserved source atlas; exported {len(retained)} retained Bramble B tiles; motif seams verified.')
 
 
-def small_bush():
-    """Prepare the generated whole shrub at native game scale, not wall tiles."""
-    source = Image.open(ROOT/'ArtSource/Shared/Vegetation/SmallBush_Source.png').convert('RGBA')
-    alpha = source.getchannel('A').point(lambda a: 255 if a >= 128 else 0)
-    bounds = alpha.getbbox()
-    if bounds is None:
-        raise ValueError('Small bush source is empty')
-    cropped = source.crop(bounds)
-    width = 24
-    height = round(cropped.height*width/cropped.width)
-    sampled = cropped.resize((width,height), Image.Resampling.NEAREST)
-    colors = zone.ramp('ink','deepgreen','leafshade','grass','leaflight','deepsoil')
-    native = Image.new('RGBA',(26,height+2))
-    for y in range(height):
-        for x in range(width):
-            pixel = sampled.getpixel((x,y))
-            if pixel[3] < 128:
-                continue
-            color = min(colors,key=lambda c:sum((pixel[k]-c[k])**2 for k in range(3)))
-            native.putpixel((x+1,y+1),color)
-    zone.validate(native)
-    folder = ROOT/'RoadOfTheOldKing/Assets/Art/Sprites/World/Shared/Vegetation'
-    folder.mkdir(parents=True,exist_ok=True)
-    native.save(folder/'SmallSageBush.png')
-    shadow = Image.new('RGBA',(24,6))
-    ImageDraw.Draw(shadow).ellipse((2,1,21,4),fill=zone.COLORS['ink'])
-    shadow.save(folder/'SmallBushContact.png')
-    print(f'Prepared whole bush {native.size}, six shared colors; separate native contact shadow.')
-
-
 if __name__=='__main__':
-    if '--small-bush-only' in sys.argv: small_bush()
-    else: main()
+    main()
