@@ -29,7 +29,6 @@ namespace RoadOfTheOldKing.World
         public float ReleaseProgress => IsReleased ? release : 0f;
         public bool IsArmed => ValidAttempt() && attempt.State == AxeState.Stuck;
         public string ProgressId => progressId;
-        public event System.Action Changed;
 
         private bool ValidAttempt() => attempt != null && attempt.isActiveAndEnabled &&
             attempt.Owner != null && attempt.Owner.isActiveAndEnabled && attempt.Owner.Weapon == attempt &&
@@ -45,7 +44,6 @@ namespace RoadOfTheOldKing.World
                 weapon.Owner == null || weapon.Owner.Weapon != weapon) return;
             attempt = weapon;
             attemptFlight = weapon.FlightSequence;
-            Changed?.Invoke();
         }
 
         public bool ReceiveRelease(CombatHit hit)
@@ -61,7 +59,6 @@ namespace RoadOfTheOldKing.World
                 GameSession.Instance.Progress.Complete(progressId);
                 GameSession.Instance.SaveProgress();
             }
-            Changed?.Invoke();
             return true;
         }
 
@@ -102,7 +99,6 @@ namespace RoadOfTheOldKing.World
             release = IsReleased ? 1f : 0f;
             attempt = null;
             Present();
-            Changed?.Invoke();
         }
 
         public void ResetOnRest()

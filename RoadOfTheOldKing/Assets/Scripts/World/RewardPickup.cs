@@ -10,7 +10,6 @@ namespace RoadOfTheOldKing.World
     // when it may appear belongs to an optional EncounterUnlock and/or a required milestone; what is saved
     // belongs to RewardService and RewardKeys. The pickup itself only presents, checks reach and asks for the grant.
     //  unlock: the encounter whose defeat makes it appear (optionally where the last guard fell).
-    //  awardImmediately: granted the moment it unlocks, with nothing to pick up.
     public abstract class RewardPickup : WorldPickup, IProgressParticipant
     {
         [Tooltip("Unique reward id: save data, never rename a shipped one.")]
@@ -22,8 +21,6 @@ namespace RoadOfTheOldKing.World
         [SerializeField] protected EncounterUnlock unlock;
         [Tooltip("With an unlock: lie in the fallen guard's body (where the last one fell, and with the body after a reload or a corpse slide).")]
         [SerializeField] protected bool appearWhereLastFell;
-        [Tooltip("With an unlock: grant immediately, with nothing to pick up.")]
-        [SerializeField] protected bool awardImmediately;
         [FormerlySerializedAs("pickupVisual")]
         [SerializeField] protected GameObject visual;
 
@@ -59,16 +56,15 @@ namespace RoadOfTheOldKing.World
             IsAvailable = true;
             if (appearWhereLastFell && source.LastFallen.HasValue) transform.position = source.LastFallen.Value;
             followFallen = appearWhereLastFell;
-            if (awardImmediately) Grant(null);
             Refresh();
             // Only a live unlock announces itself; RestoreProgress shows the reward quietly.
-            if (!awardImmediately && !IsCollected) PickupPresentation.Revealed(visual);
+            if (!IsCollected) PickupPresentation.Revealed(visual);
         }
 
         public override bool CanCollect(PlayerHealth player)
         {
             var game = GameSession.Instance;
-            return base.CanCollect(player) && IsAvailable && !IsCollected && !awardImmediately &&
+            return base.CanCollect(player) && IsAvailable && !IsCollected &&
                 !string.IsNullOrWhiteSpace(rewardId) && game != null && !game.IsLoading &&
                 (!requireClearAccess || HasClearAccess(player)) &&
                 (string.IsNullOrEmpty(requiredMilestone) || game.Progress.Has(requiredMilestone));
@@ -80,7 +76,7 @@ namespace RoadOfTheOldKing.World
         {
             var game = GameSession.Instance;
             if (game == null || !game.Rewards.TryGrant(Kind, rewardId, CoinAmount, GrantedTool)) return false;
-            if (!awardImmediately && !HoldUp(player)) PickupPresentation.Collected(visual, player);
+            if (!HoldUp(player)) PickupPresentation.Collected(visual, player);
             Refresh();
             return true;
         }
@@ -100,7 +96,7 @@ namespace RoadOfTheOldKing.World
 
         protected void Refresh()
         {
-            bool shown = IsAvailable && !IsCollected && !awardImmediately;
+            bool shown = IsAvailable && !IsCollected;
             if (visual != null) visual.SetActive(shown);
             OnRefresh(shown);
         }
@@ -131,7 +127,6 @@ namespace RoadOfTheOldKing.World
         {
             IsAvailable = unlock == null || unlock.IsUnlocked(state);
             followFallen = appearWhereLastFell && unlock != null && IsAvailable;
-            if (IsAvailable && awardImmediately && !RewardKeys.IsGranted(state, Kind, rewardId, GrantedTool)) Grant(null);
             Refresh();
         }
     }

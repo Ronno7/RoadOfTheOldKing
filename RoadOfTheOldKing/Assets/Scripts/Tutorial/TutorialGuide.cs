@@ -94,8 +94,6 @@ namespace RoadOfTheOldKing.Tutorial
         private float hintSince, shownUntil;
 
         public IReadOnlyList<TutorialStep> Steps => steps;
-        public bool IsFinished => steps.Count > 0 && CurrentIndex < 0;
-        public int CurrentIndex { get { for (int i = 0; i < steps.Count; i++) if (!done.Contains(steps[i].id)) return i; return -1; } }
         public bool IsDone(string stepId) => done.Contains(stepId);
 
         // The step the hint teaches: the first incomplete one after the furthest route landmark reached.
@@ -115,7 +113,6 @@ namespace RoadOfTheOldKing.Tutorial
 
         private static bool IsLandmark(TutorialCondition condition) =>
             condition == TutorialCondition.ReachArea || condition == TutorialCondition.RecallUnlocked || condition == TutorialCondition.Rested;
-        public event Action<TutorialStep> StepCompleted;
 
         private void Awake()
         {
@@ -227,7 +224,6 @@ namespace RoadOfTheOldKing.Tutorial
                 completedPosition = player.transform.position + Vector3.up * 2.5f;
                 completedUntil = Time.time + (step.id == "stone" ? 4f : step.id == "flask" ? 0f : completedHold);
             }
-            StepCompleted?.Invoke(step);
         }
 
         private void Present()

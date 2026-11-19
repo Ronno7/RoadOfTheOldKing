@@ -42,7 +42,6 @@ namespace RoadOfTheOldKing.World
         public bool BrakeLifted => brakeLifted;
         public string LowWaterId => puzzleId + "/pond-low";
         public string Feedback { get; private set; } = "";
-        public event System.Action Changed;
 
         // Presentation follows the owned, current throw, never a historical fork hit.
         public bool IsForkArmed(SluicePart fork) => attemptFork == fork && ValidAttempt() &&
@@ -80,7 +79,6 @@ namespace RoadOfTheOldKing.World
             if (IsGuarded)
             {
                 Feedback = "The mechanism is held fast.";
-                Changed?.Invoke();
                 return;
             }
             if (!isActiveAndEnabled || weapon == null || weapon.State != AxeState.Stuck ||
@@ -91,7 +89,6 @@ namespace RoadOfTheOldKing.World
             attemptFlight = weapon.FlightSequence;
             attemptFork = fork;
             Feedback = "The blade settles into the fork.";
-            Changed?.Invoke();
         }
 
         public bool ReceiveVane(SluicePart part, CombatHit hit)
@@ -109,7 +106,6 @@ namespace RoadOfTheOldKing.World
                 brakeLifted = true;
                 Feedback = "The brake lifts.";
                 ApplyBrake();
-                Changed?.Invoke();
                 return true;
             }
             if (part != SluicePart.CatchVane) return false;
@@ -117,7 +113,6 @@ namespace RoadOfTheOldKing.World
             {
                 Feedback = "The catch strains against the brake.";
                 if (mechanismView != null) mechanismView.Strain();
-                Changed?.Invoke();
                 return false;
             }
             CompleteStage(SluiceStage.PondLow, "The counterweight falls. Water leaves the basin.");
@@ -140,7 +135,6 @@ namespace RoadOfTheOldKing.World
             {
                 drawing = !drawing;
                 Feedback = "The carriage rolls along its rails.";
-                Changed?.Invoke();
             }
             return true;
         }
@@ -154,7 +148,6 @@ namespace RoadOfTheOldKing.World
             // Save before the reveal; a load restores the completed configuration.
             if (GameSession.Instance != null) GameSession.Instance.SaveProgress();
             ApplyState(true);
-            Changed?.Invoke();
         }
 
         private void ClearAttempt()
@@ -217,7 +210,6 @@ namespace RoadOfTheOldKing.World
             Feedback = "";
             ApplyState();
             if (actionFeedback != null) actionFeedback.ResetPresentation();
-            Changed?.Invoke();
         }
 
         private void OnDisable()

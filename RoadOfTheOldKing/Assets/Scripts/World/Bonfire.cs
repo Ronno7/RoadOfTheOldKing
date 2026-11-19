@@ -23,5 +23,10 @@ namespace RoadOfTheOldKing.World
         public bool IsDiscovered => GameSession.Instance != null && GameSession.Instance.Progress.HasFire(id);
         public bool CanUse(Transform player) => !string.IsNullOrEmpty(id) && player != null &&
             Vector2.Distance(player.position, transform.position) <= interactionRadius;
+
+#if UNITY_EDITOR
+        // Ticking or unticking upgrades swaps the saved base between the stone ring and the bronze brazier.
+        private void OnValidate() { if (TryGetComponent(out BonfireSpriteView view)) view.SyncSavedBase(); }
+#endif
     }
 }

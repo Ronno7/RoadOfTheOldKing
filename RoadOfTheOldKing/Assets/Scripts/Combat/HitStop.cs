@@ -29,7 +29,7 @@ namespace RoadOfTheOldKing.Combat
         private IEnumerator Run(float seconds)
         {
             active = true;
-            pause = RoadOfTheOldKing.UI.SimulationPause.Acquire();
+            pause = RoadOfTheOldKing.UI.SimulationPause.Freeze();
             yield return new WaitForSecondsRealtime(seconds);
             Restore();
         }

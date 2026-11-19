@@ -28,8 +28,6 @@ namespace RoadOfTheOldKing.Combat
         public bool IsStaggered => Time.time < staggerUntil;
         // Hyper-armor, set by the owner's AI during committed attacks: hits still damage but never stagger.
         public bool Armored { get; set; }
-        public float Poise => poise;
-        public float PoiseRemaining => poise > 0f ? Mathf.Max(0f, poise - poiseDamage) : 0f;
         // Raised when a hit actually staggers (poise broken or no poise).
         public event Action<CombatHit> Staggered;
 

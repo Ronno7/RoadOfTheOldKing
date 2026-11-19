@@ -97,16 +97,6 @@ namespace RoadOfTheOldKing.Cameras
             transform.position = basePosition + (Vector3)kick;
         }
 
-        // The camera needs only a Transform, so it can later follow another subject.
-        public void SetTarget(Transform newTarget, bool snap = true)
-        {
-            target = newTarget;
-            if (freelook != null) freelook.ResetLook();
-            velocity = Vector3.zero;
-            if (snap)
-                SnapToTarget();
-        }
-
         [ContextMenu("Snap To Target")]
         public void SnapToTarget()
         {

@@ -21,6 +21,7 @@ namespace RoadOfTheOldKing.Enemies
         private Damageable health;
         private Vector2 previousPosition;
         private float gait, speed, idleTime, hurtTime, deathTime, flashUntil;
+        private const float SettledDeath = 1000f; // Seconds: well past any death clip and fade.
         private bool wasAlive;
         private int octant = 6, resetVersion;
         private MaterialPropertyBlock flashProperties;
@@ -52,7 +53,9 @@ namespace RoadOfTheOldKing.Enemies
             previousPosition = transform.position;
             wasAlive = health.IsAlive;
             resetVersion = wolf.ResetVersion;
-            gait = speed = idleTime = hurtTime = deathTime = flashUntil = 0f;
+            gait = speed = idleTime = hurtTime = flashUntil = 0f;
+            // Restored already dead (a revisit, a rest): hold the last death frame instead of falling again.
+            deathTime = health.IsAlive ? 0f : SettledDeath;
         }
 
         private void OnHit(CombatHit hit)

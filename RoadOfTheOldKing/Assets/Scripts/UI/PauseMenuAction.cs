@@ -35,7 +35,7 @@ namespace RoadOfTheOldKing.UI
 
         private static void Quit()
         {
-            GameSession.Instance?.RecordResume();
+            GameSession.Instance?.SaveOnExit();
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
 #else

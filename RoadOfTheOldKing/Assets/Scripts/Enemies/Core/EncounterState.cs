@@ -13,7 +13,6 @@ namespace RoadOfTheOldKing.Enemies
         private static bool engaged;
 
         public static bool InCombat { get { Update(); return engaged || Time.time - lastThreatAt < GraceSeconds; } }
-        public static bool HasActiveThreat { get { Update(); return engaged; } }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void Reset() { lastThreatAt = float.NegativeInfinity; frame = -1; engaged = false; }

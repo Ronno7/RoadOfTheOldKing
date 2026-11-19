@@ -91,7 +91,8 @@ namespace RoadOfTheOldKing.UI
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetStatics() { bootScene = null; pressed = false; }
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        // Before the first scene's Awake/OnEnable: an AfterSceneLoad hook ran too late, so the gate never showed.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void RecordBootScene() => bootScene = SceneManager.GetActiveScene().path;
 
         private void OnEnable()
@@ -188,11 +189,13 @@ namespace RoadOfTheOldKing.UI
 
         private void NewGame()
         {
-            if (!HasSave) { BeginPrologue(); return; }
+            // A save this version can't read still belongs to the player (it may be from a newer build): confirm too.
+            bool unreadable = Session != null && Session.SaveUnreadable;
+            if (!HasSave && !unreadable) { BeginPrologue(); return; }
             Show(Page.Confirm, new[]
             {
-                new PauseMenuAction("Keep my save", "", () => ShowMain(NewGameRow)),
-                new PauseMenuAction("Erase and begin", "This erases your save.", BeginPrologue)
+                new PauseMenuAction("Keep my save", unreadable ? "This version can't read your save." : "", () => ShowMain(NewGameRow)),
+                new PauseMenuAction("Erase and begin", unreadable ? "This replaces the save it can't read." : "This erases your save.", BeginPrologue)
             }, 0);
         }
 
@@ -292,8 +295,8 @@ namespace RoadOfTheOldKing.UI
         private void StartRun()
         {
             if (runStarted || Session == null) return;
-            runStarted = true;
-            Session.StartNewRun(page == Page.Hood && hoodChanged ? HoodieColor.ToHex(HoodColor) : "");
+            // A refused start (a load already under way, a save that can't be cleared) leaves Begin pressable again.
+            runStarted = Session.StartNewRun(page == Page.Hood && hoodChanged ? HoodieColor.ToHex(HoodColor) : "");
         }
 
         // The hoodie picker: the hero in the colour being chosen, over swatches, hue, saturation and brightness, and Begin.

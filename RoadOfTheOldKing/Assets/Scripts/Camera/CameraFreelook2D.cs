@@ -51,8 +51,12 @@ namespace RoadOfTheOldKing.Cameras
             else if (deltaTime <= 0f || (movementInput != null && !movementInput.IsActive))
             {
                 // A menu or a pause holds the view; it can't start a look until the key has been let go.
-                IsLooking = false;
-                requireRelease = true;
+                // A hit-stop only holds it: a look in progress carries on afterwards.
+                if (RoadOfTheOldKing.UI.SimulationPause.BlocksPlay || (movementInput != null && !movementInput.IsActive))
+                {
+                    IsLooking = false;
+                    requireRelease = true;
+                }
                 return LookOffset;
             }
             if (!frame.Held) requireRelease = false;

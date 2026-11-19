@@ -21,8 +21,6 @@ namespace RoadOfTheOldKing.World
         private readonly LeafShape[] leaves=new LeafShape[2];
         private int nextBlade, nextMote, leafCount;
         private bool active;
-        private int activeCount;
-        public int ActiveCount => activeCount;
         private static readonly int WindowId=Shader.PropertyToID("_PlantDepthWindow");
         private struct LeafShape { public Vector2 size; public Rect uv; }
         private struct Particle
@@ -177,7 +175,7 @@ namespace RoadOfTheOldKing.World
                 }
                 count++;
             }
-            activeCount=count;active=count>0;
+            active=count>0;
             backRenderer.enabled=frontRenderer.enabled=active;
             mesh.SetTriangles(indices,0,count*6,0,false);
             if(!active)return;
@@ -187,7 +185,7 @@ namespace RoadOfTheOldKing.World
 
         public void Clear()
         {
-            System.Array.Clear(particles,0,particles.Length);active=false;activeCount=0;nextBlade=nextMote=0;
+            System.Array.Clear(particles,0,particles.Length);active=false;nextBlade=nextMote=0;
             backRenderer.enabled=frontRenderer.enabled=false;mesh.SetTriangles(indices,0,0,0,false);
         }
         public void Dispose()

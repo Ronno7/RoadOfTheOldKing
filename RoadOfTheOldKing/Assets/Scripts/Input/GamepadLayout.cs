@@ -33,8 +33,7 @@ namespace RoadOfTheOldKing.Input
         public const string MenuStickLeft = "<Gamepad>/leftStick/left";
         public const string MenuStickRight = "<Gamepad>/leftStick/right";
 
-        // Stick tilt below this reads as rest (movement) or as no aim (right stick).
-        public const float MoveDeadzone = .2f;
+        // Stick tilt below these reads as no aim (right stick) or as rest (movement: the min in its processors).
         public const float AimDeadzone = .35f;
         public const string MoveProcessors = "stickDeadzone(min=0.2,max=0.925)";
     }

@@ -105,7 +105,8 @@ namespace RoadOfTheOldKing.World
         {
             bool finish = IsDraining;
             RestoreMaterials();
-            if (finish) gameObject.SetActive(false);
+            // Only a disabled component can finish this way: during teardown or a parent's deactivation Unity refuses SetActive.
+            if (finish && gameObject.activeInHierarchy) gameObject.SetActive(false);
         }
     }
 }

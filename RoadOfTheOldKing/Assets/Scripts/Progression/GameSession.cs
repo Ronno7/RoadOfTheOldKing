@@ -62,6 +62,8 @@ namespace RoadOfTheOldKing.Progression
             Progress.completedIds.Count > 0 || Progress.bronzeCoins > 0 || Progress.ownedTools.Count > 0 || Progress.coinSources.Count > 0);
         // Continue resumes at this exact spot instead of the last fire.
         public bool HasResumePoint => !loadFailed && resume != null;
+        // The stored save exists but this build can't read it (corrupt, or written by a newer version).
+        public bool SaveUnreadable => loadFailed;
         public bool CanReturnToTitle => SceneLoader.CanLoad(titleScene) && SceneLoader.ActivePath != titleScene;
         public string Status { get; private set; } = "";
         internal PlayerHealth Player { get; private set; }
@@ -188,13 +190,14 @@ namespace RoadOfTheOldKing.Progression
         // Completed puzzles are permanent without moving the last rest/respawn point.
         public void SaveProgress() => CaptureAndSave("Progress saved.");
 
-        // hoodieColor: RRGGBB from the New Game picker; empty keeps the drawn blue.
-        public void StartNewRun(string hoodieColor = "")
+        // hoodieColor: RRGGBB from the New Game picker; empty keeps the drawn blue. False when the run couldn't start,
+        // so the title can let the player try again.
+        public bool StartNewRun(string hoodieColor = "")
         {
-            if (loading)
-                return;
+            if (IsLoading)
+                return false;
             try { store.Clear(); }
-            catch (Exception) { Status = "Could not clear the save."; return; }
+            catch (Exception) { Status = "Could not clear the save."; return false; }
             loadFailed = false;
             Progress = new ProgressState { hoodieColor = hoodieColor ?? "" };
             Visits.Clear();
@@ -207,7 +210,7 @@ namespace RoadOfTheOldKing.Progression
             // and a cold Continue would load default progress without the chosen cloak (found 15 Nov). Nothing is
             // captured: the scene still loaded belongs to the old run.
             Save("");
-            Load(SceneLoader.CanLoad(newGameScene) ? newGameScene : SceneLoader.ActivePath, null);
+            return Load(SceneLoader.CanLoad(newGameScene) ? newGameScene : SceneLoader.ActivePath, null);
         }
 
         // Title: resume at the exact spot the player left; otherwise at the checkpoint's fire, or at the start of
@@ -251,7 +254,16 @@ namespace RoadOfTheOldKing.Progression
 
         // Moments a player may be leaving: the window loses focus, or the application quits.
         private void OnApplicationFocus(bool focused) { if (!focused) { RecordResume(); FlushResume(); } }
-        private void OnApplicationQuit() { RecordResume(); FlushResume(); }
+        private void OnApplicationQuit() => SaveOnExit();
+
+        // Leaving the game (pause-menu Quit, or the window closing) keeps what Main Menu keeps: permanent progress and
+        // the exact spot. It used to keep only the spot, so lessons and milestones since the last save were lost.
+        public void SaveOnExit()
+        {
+            if (Player != null && Player.IsAlive && !loading) CaptureAndSave("");
+            RecordResume();
+            FlushResume();
+        }
 
         // Records where Continue resumes. Called directly by the pause menu, Main Menu and Quit.
         public void RecordResume() => RecordResume(force: true);

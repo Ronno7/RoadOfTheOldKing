@@ -1,5 +1,6 @@
 using RoadOfTheOldKing.Player;
 using RoadOfTheOldKing.Weapons;
+using UnityEngine;
 
 namespace RoadOfTheOldKing.Enemies
 {
@@ -11,6 +12,7 @@ namespace RoadOfTheOldKing.Enemies
         private PlayerCombatController combat;
         private PlayerStamina stamina;
         private PlayerFlask flask;
+        private uint lastFlight;
 
         public void Bind(PlayerHealth target)
         {
@@ -60,6 +62,30 @@ namespace RoadOfTheOldKing.Enemies
         }
 
         public bool AxeAway => Weapon != null && Weapon.IsAway;
+
+        // True once per throw: on the first read after the axe leaves the hand. Read it once a tick.
+        public bool ThrowLaunched()
+        {
+            var w = Weapon;
+            bool launched = w != null && w.FlightSequence != lastFlight && w.State == AxeState.Flying;
+            if (w != null) lastFlight = w.FlightSequence;
+            return launched;
+        }
+
+        // The axe's flight line points at this enemy: within a throw's reach (plus a step), and no more than
+        // maxAngle off the line to it. stepAside leaves the line to the side the enemy already stands on.
+        public bool ThrowAimedAt(float distance, Vector2 toPlayer, float maxAngle, out Vector2 stepAside)
+        {
+            stepAside = Vector2.zero;
+            var w = Weapon;
+            if (w == null || distance > w.Settings.throwRange + 1f) return false;
+            Vector2 line = w.AttackDirection, fromPlayer = -toPlayer.normalized;
+            if (Vector2.Angle(line, fromPlayer) > maxAngle) return false;
+            float side = line.x * fromPlayer.y - line.y * fromPlayer.x;
+            if (Mathf.Abs(side) < .001f) side = Random.value < .5f ? -1f : 1f;
+            stepAside = new Vector2(-line.y, line.x) * Mathf.Sign(side);
+            return true;
+        }
         public bool StaminaBelow(float limit) => stamina != null && stamina.Current < limit;
     }
 }

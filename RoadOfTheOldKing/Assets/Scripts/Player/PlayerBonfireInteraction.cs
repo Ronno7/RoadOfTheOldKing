@@ -58,7 +58,7 @@ namespace RoadOfTheOldKing.Player
                 (locks == null || !locks.IsLocked);
             if (IsOpen && Nearby != ActiveFire)
                 Close();
-            else if (Time.timeScale > 0f && Application.isFocused && (keyPressed || padPressed))
+            else if (!RoadOfTheOldKing.UI.SimulationPause.BlocksPlay && Application.isFocused && (keyPressed || padPressed))
                 TryInteract();
         }
 
@@ -97,7 +97,7 @@ namespace RoadOfTheOldKing.Player
         // One key press commits one interaction. No trigger collection or held-key repeats.
         public bool TryInteract()
         {
-            if (Time.timeScale <= 0f || health == null || !health.IsAlive) return false;
+            if (RoadOfTheOldKing.UI.SimulationPause.BlocksPlay || health == null || !health.IsAlive) return false;
             if (IsOpen) { Close(); return true; }
             if (!CanInteract) return false;
             RefreshNearby();

@@ -41,27 +41,32 @@ namespace RoadOfTheOldKing.Player
         public string State { get; private set; } = "Idle";
         public int Octant { get; private set; } = 6;
         public int Frame { get; private set; }
-        public PlayerAnimationSet Animations => animations;
 
         // Pixels the shown figure stands above (+) or below (-) its standing view, so carried items
         // bob with the step. Zero when either height was not measured. Seen from behind (N, NE, NW)
-        // the walk's body never rises or falls, only the legs move, so there a carried item lifts one
-        // pixel as the feet pass under the body (the moment any walk is highest) and settles as a foot plants.
+        // the walk's head never rises or falls, so there the lift comes from the per-frame tables below.
         public int Lift
         {
             get
             {
                 if (currentClip == null || animations == null || animations.rotations == null) return 0;
                 if (currentClip == animations.walk && Flat(currentClip, Octant))
-                    return System.Array.IndexOf(walkPassingFrames, Frame) >= 0 ? 1 : 0;
+                {
+                    var table = Octant == 2 ? northWalkLift : Octant == 1 || Octant == 3 ? backDiagonalWalkLift : null;
+                    return table != null && Frame >= 0 && Frame < table.Length ? table[Frame] : 0;
+                }
                 int now = currentClip.Height(Octant, Frame), rest = animations.rotations.Height(Octant, 0);
                 return now < 0 || rest < 0 ? 0 : Mathf.Clamp(now - rest, -2, 2);
             }
         }
 
-        [Tooltip("Walk frames where the feet pass each other in the back views (N, NE, NW), whose body " +
-            "never rises: a carried item lifts one pixel on them. Read from the frames: the feet plant at 0 and 4.")]
-        [SerializeField] private int[] walkPassingFrames = { 2, 6 };
+        // Read from the walk frames (18 Nov). North: the hem lifts as the feet pass, on frames 2 and 6. The back
+        // diagonals were drawn with one bob per cycle: legs together and the cloak tallest on frames 0-1, legs
+        // apart and the cloak squashed wide on 4-5. Using north's frames there put the bob off the step (#91).
+        [Tooltip("Carried-item lift per walk frame facing north, where the body never rises.")]
+        [SerializeField] private int[] northWalkLift = { 0, 0, 1, 0, 0, 0, 1, 0 };
+        [Tooltip("Carried-item lift per walk frame facing north-east and north-west (mirror images).")]
+        [SerializeField] private int[] backDiagonalWalkLift = { 1, 1, 0, 0, 0, 0, 0, 0 };
 
         private static bool Flat(DirectionalSpriteAnimation clip, int octant)
         {

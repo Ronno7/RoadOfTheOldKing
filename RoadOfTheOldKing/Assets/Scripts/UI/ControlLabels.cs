@@ -31,8 +31,6 @@ namespace RoadOfTheOldKing.UI
         private static Dictionary<string, string> Active => ActiveInput.UsingGamepad ? gamepad : keyboard;
 
         public static string Get(string token) => Active.TryGetValue(token, out var label) ? label : token;
-        public static void Set(string token, string label) => Active[token] = label;
-
         // Both devices at once, for the controls page.
         public static string KeyboardLabel(string token) => keyboard.TryGetValue(token, out var label) ? label : token;
         public static string GamepadLabel(string token) => gamepad.TryGetValue(token, out var label) ? label : token;

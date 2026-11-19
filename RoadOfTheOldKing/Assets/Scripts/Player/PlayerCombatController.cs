@@ -34,7 +34,7 @@ namespace RoadOfTheOldKing.Player
         public IStamina Stamina { get; private set; }
         public bool IsAttacking => Weapon != null && Weapon.IsAttacking;
         public bool CanContinueAction => isActiveAndEnabled && controlsActive &&
-            inputSource != null && inputSource.isActiveAndEnabled && Time.timeScale > 0f &&
+            inputSource != null && inputSource.isActiveAndEnabled && !RoadOfTheOldKing.UI.SimulationPause.BlocksPlay &&
             (health == null || health.IsAlive) && (reaction == null || !reaction.IsStaggered);
         public bool CanStartAttack => CanContinueAction && (dash == null || !dash.IsDashing) && (flask == null || !flask.IsDrinking);
         public bool CanCancelThrowAim => Weapon != null && Weapon.CanCancelThrowAim;
@@ -42,7 +42,6 @@ namespace RoadOfTheOldKing.Player
         public float ActionMovementScale => Weapon != null ? Weapon.ActionMovementScale : 1f;
         public Vector2 ActionFacing => Weapon != null ? Weapon.ActionFacing : AimDirection;
         public event Action WeaponEquipped;
-        public event Action RecallUnlocked;
 
         private void Awake()
         {
@@ -136,7 +135,13 @@ namespace RoadOfTheOldKing.Player
             }
             if (actionInputBlocked)
             {
-                queuedLightUntil = -1f;
+                // Only a dodge keeps a click: pressed in its last moments, it lands as the dodge ends (user, 18 Nov:
+                // "it should carry through for seamless combat"). Anything else that blocks attacks drops it.
+                bool onlyDodging = dash != null && dash.IsDashing && CanContinueAction && (flask == null || !flask.IsDrinking) &&
+                    !Weapon.IsThrowing && !throwInput;
+                if (!onlyDodging) queuedLightUntil = -1f;
+                else if (frame.LightPressed && (Weapon.State == AxeState.Held || Weapon.State == AxeState.LightChop))
+                    queuedLightUntil = Time.time + lightInputBuffer;
                 return;
             }
             if (frame.LightPressed && (Weapon.State == AxeState.Held || Weapon.State == AxeState.LightChop))
@@ -194,7 +199,6 @@ namespace RoadOfTheOldKing.Player
             if (recallUnlocked)
                 return;
             recallUnlocked = true;
-            RecallUnlocked?.Invoke();
         }
 
         public void CancelThrowAim()

@@ -47,14 +47,9 @@ namespace RoadOfTheOldKing.World
         private static readonly ProfilerMarker UpdateMarker = new ProfilerMarker("Vegetation.Update");
         private static readonly ProfilerMarker CutMarker = new ProfilerMarker("Vegetation.Cut");
 
-        public int PlantCount => layout != null ? layout.plants.Length : 0;
         public int CutCount { get; private set; }
         // Actual newly cut roots only; restoring visit state or regrowing a field emits nothing.
         public event System.Action<Vector2> PlantCut;
-        public int ChunkCount => chunks.Count;
-        public int LastCandidates { get; private set; }
-        public int LastCutCount { get; private set; }
-        public int VisibleChunks { get { int n=0; foreach(var c in chunks) if(c.renderer.isVisible||c.front.isVisible)n++; return n; } }
         public bool IsCut(int index) => cut != null && index >= 0 && index < cut.Length && cut[index];
 
         private sealed class Chunk
@@ -342,7 +337,6 @@ namespace RoadOfTheOldKing.World
             if(sweep.Source.transform!=interactor && !sweep.Source.transform.IsChildOf(interactor))return;
             using(CutMarker.Auto())
             {
-                LastCandidates=LastCutCount=0;
                 Vector2 a=transform.InverseTransformPoint(sweep.Origin),b=transform.InverseTransformPoint(sweep.End);
                 float reach=sweep.Radius+.2f;
                 var min=Cell(Vector2.Min(a,b)-Vector2.one*reach); var max=Cell(Vector2.Max(a,b)+Vector2.one*reach);
@@ -352,10 +346,9 @@ namespace RoadOfTheOldKing.World
                     foreach(var chunk in list)foreach(int i in chunk.plants)
                     {
                         if(cut[i])continue;
-                        LastCandidates++;
                         Vector2 point=transform.TransformPoint(layout.plants[i].position);
                         if(!Contains(sweep,point) || (sweep.CanReach!=null && !sweep.CanReach(point)))continue;
-                        cut[i]=true; CutCount++; LastCutCount++; dirty.Add(chunk);
+                        cut[i]=true; CutCount++; dirty.Add(chunk);
                         PlantCut?.Invoke(point);
                         var species=layout.species[layout.plants[i].species];
                         debris?.Emit(point,sweep.Aim,species.debrisColor,layout.plants[i].phase);

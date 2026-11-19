@@ -177,26 +177,15 @@ namespace RoadOfTheOldKing.UI
             return Report(loaded, loaded ? "Travelling to " + destination.label + "." : "Could not load destination.");
         }
 
-        public bool DamagePlayer(int amount, bool bypassProtection = true)
+        public bool DamagePlayer(int amount)
         {
             if (!RequireAlive()) return false;
             if (amount <= 0) return Report(false, "Damage must be greater than zero.");
             var hit = new CombatHit(gameObject, AttackKind.EnemyMelee, amount, Vector2.down, 3f, .2f);
-            bool accepted = bypassProtection ? Player.Health.DebugReceiveHit(hit) : Player.Health.ReceiveHit(hit);
+            bool accepted = Player.Health.DebugReceiveHit(hit);
             return Report(accepted, accepted ? $"Dealt {amount} damage to player." : "Hit blocked by god mode or invulnerability.");
         }
         public bool KillPlayer() => RequireAlive() && DamagePlayer(Player.Health.Health);
-        public bool HealPlayer()
-        {
-            if (!RequireAlive()) return false;
-            Player.Health.Heal(Player.Health.MaxHealth);
-            return Report(true, "Health restored.");
-        }
-        public bool RefillFlasks()
-        {
-            if (!RequireAlive() || Flask == null) return false;
-            Flask.Refill(); return Report(true, "Flasks refilled; any drink cancelled.");
-        }
         public bool RestorePlayer()
         {
             if (!RequireAlive()) return false;
@@ -305,7 +294,6 @@ namespace RoadOfTheOldKing.UI
             Physics2D.SyncTransforms();
             Camera.main?.GetComponent<CameraFollow2D>()?.SnapToTarget();
         }
-        public int NearbyCount(float radius) => NearbyEnemies(radius).Count(e => !e.IsDefeated);
         private IEnemy[] NearbyEnemies(float radius)
         {
             if (!HasPlayer || !Finite(radius) || radius <= 0f) return Array.Empty<IEnemy>();

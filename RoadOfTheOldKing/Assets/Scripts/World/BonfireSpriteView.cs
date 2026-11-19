@@ -22,8 +22,12 @@ namespace RoadOfTheOldKing.World
         [SerializeField] private Color upgradeGlowColor = new Color(1f, .84f, .48f);
         [Tooltip("The gold flame and its light are a little larger (user, 17 Nov: \"slightly larger\"); the flame grows up from its base.")]
         [SerializeField, Min(1f)] private float upgradeFlameScale = 1.25f;
+        [Tooltip("Art pixels the gold flame sits higher, clear of the brazier's rim (user, 17 Nov: \"needs to move up a couple pixels\").")]
+        [SerializeField, Min(0)] private int upgradeFlameLift = 2;
         [Tooltip("The fire's base, and the bronze brazier ring an upgrade fire shows instead (empty: the usual base).")]
         [SerializeField] private SpriteRenderer baseRenderer;
+        [Tooltip("The usual stone base. Held here because an upgrade fire's renderer is saved showing the brazier.")]
+        [SerializeField] private Sprite stoneBase;
         [SerializeField] private Sprite upgradeBase;
         private Bonfire fire;
         private Sprite usualBase;
@@ -46,7 +50,7 @@ namespace RoadOfTheOldKing.World
             if (Application.isPlaying && flame != null && smokeMaterial != null && smoke == null)
                 smoke = new BonfireSmoke(transform, smokeMaterial);
             if (glow != null && glowIntensity < 0f) { glowIntensity = glow.intensity; usualGlow = glow.color; usualGlowRadius = glow.pointLightOuterRadius; }
-            if (baseRenderer != null && usualBase == null) usualBase = baseRenderer.sprite;
+            if (baseRenderer != null && usualBase == null) usualBase = stoneBase != null ? stoneBase : baseRenderer.sprite;
             if (flame != null && !captured) { usualFlameScale = flame.transform.localScale; usualFlamePosition = flame.transform.localPosition; captured = true; }
             frameClock = 0f;
             ApplySize();
@@ -61,9 +65,37 @@ namespace RoadOfTheOldKing.World
             flame.transform.localScale = usualFlameScale * factor;
             var frames = Frames;
             float pivotUnits = frames != null && frames.Length > 0 && frames[0] != null ? frames[0].pivot.y / frames[0].pixelsPerUnit : 0f;
-            flame.transform.localPosition = usualFlamePosition + Vector3.up * pivotUnits * usualFlameScale.y * (factor - 1f);
+            float lift = Golden ? upgradeFlameLift / 16f : 0f;
+            flame.transform.localPosition = usualFlamePosition + Vector3.up * (pivotUnits * usualFlameScale.y * (factor - 1f) + lift);
             if (glow != null && usualGlowRadius > 0f) glow.pointLightOuterRadius = usualGlowRadius * factor;
         }
+
+#if UNITY_EDITOR
+        // The base is saved with the scene, so an upgrade fire shows its brazier in the editor too, not only in play,
+        // and a fire that stops offering upgrades gets its stone base back. Bonfire calls this when its flag changes.
+        internal void SyncSavedBase()
+        {
+            if (Application.isPlaying || baseRenderer == null || stoneBase == null) return;
+            var bonfire = GetComponent<Bonfire>();
+            Sprite wanted = bonfire != null && bonfire.AllowsUpgrades && upgradeBase != null ? upgradeBase : stoneBase;
+            if (baseRenderer.sprite == wanted) return;
+            UnityEditor.EditorApplication.delayCall += () =>
+            {
+                if (this == null || baseRenderer == null || baseRenderer.sprite == wanted) return;
+                var sprite = new UnityEditor.SerializedObject(baseRenderer).FindProperty("m_Sprite");
+                // Back to stone on a prefab instance: drop the override rather than store the prefab's own value.
+                if (wanted == stoneBase && sprite.prefabOverride)
+                    UnityEditor.PrefabUtility.RevertPropertyOverride(sprite, UnityEditor.InteractionMode.UserAction);
+                else
+                {
+                    UnityEditor.Undo.RecordObject(baseRenderer, "Bonfire base");
+                    baseRenderer.sprite = wanted;
+                }
+            };
+        }
+
+        private void OnValidate() => SyncSavedBase();
+#endif
 
         private bool Golden => fire != null && fire.AllowsUpgrades;
         private Sprite[] Frames => Golden && upgradeFrames != null && upgradeFrames.Length > 0 ? upgradeFrames : litFrames;

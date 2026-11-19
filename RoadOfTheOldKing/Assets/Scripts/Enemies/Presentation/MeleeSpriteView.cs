@@ -16,6 +16,7 @@ namespace RoadOfTheOldKing.Enemies
         private Damageable health;
         private Vector2 previous;
         private float gait, idleTime, deathTime, flashUntil;
+        private const float SettledDeath = 1000f; // Seconds: well past any death clip and fade.
         private int octant = 6, resetVersion;
         private bool wasAlive, wasStriking;
         private MaterialPropertyBlock properties;
@@ -30,7 +31,9 @@ namespace RoadOfTheOldKing.Enemies
         private void OnHit(CombatHit hit) => flashUntil = Time.time + .1f;
         private void ResetPresentation()
         {
-            previous = transform.position; gait = idleTime = deathTime = flashUntil = 0;
+            previous = transform.position; gait = idleTime = flashUntil = 0;
+            // Restored already dead (a revisit, a rest, a fallen guardian): hold the last death frame instead of falling again.
+            deathTime = health.IsAlive ? 0f : SettledDeath;
             wasAlive = health.IsAlive; resetVersion = enemy.ResetVersion;
         }
         private static bool Has(DirectionalSpriteAnimation clip) => clip != null && !clip.IsEmpty;

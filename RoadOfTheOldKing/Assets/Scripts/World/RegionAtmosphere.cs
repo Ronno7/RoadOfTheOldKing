@@ -40,10 +40,8 @@ namespace RoadOfTheOldKing.World
         private bool hasApplied;
         private AtmosphereTier applied;
 
-        // Tooling (captures, checks) can force a tier without touching the saved preview or the player's setting.
-        public AtmosphereTier? Override { get; set; }
-        public AtmosphereTier Tier => Override ?? (!Application.isPlaying ? preview
-            : AtmosphereSettings.Cinematic ? AtmosphereTier.Cinematic : AtmosphereTier.Restrained);
+        public AtmosphereTier Tier => !Application.isPlaying ? preview
+            : AtmosphereSettings.Cinematic ? AtmosphereTier.Cinematic : AtmosphereTier.Restrained;
 
         private void OnEnable()
         {
@@ -117,11 +115,6 @@ namespace RoadOfTheOldKing.World
             }
         }
 
-        // Tooling: advance the motes so a still capture shows them settled.
-        public void Simulate(float seconds)
-        {
-            foreach (var system in motes) if (system != null) system.Simulate(seconds, true, true);
-        }
 
         private void Fit(ScriptableRenderContext context, Camera cam)
         {

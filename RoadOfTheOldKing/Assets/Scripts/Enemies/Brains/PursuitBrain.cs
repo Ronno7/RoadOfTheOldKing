@@ -80,7 +80,6 @@ namespace RoadOfTheOldKing.Enemies
         [SerializeField, Range(1f, 60f)] private float throwThreatAngle = 25f;
         private readonly PlayerRead read = new PlayerRead();
         private float exposedFor, sidestepWait;
-        private uint lastFlight;
         private EnemyBody actor;
         private Damageable health;
         private HitReaction reaction;
@@ -210,7 +209,8 @@ namespace RoadOfTheOldKing.Enemies
             {
                 IsAware = false;
                 EndSequence();
-                SetState(PursuitState.Idle);
+                // A dormant guardian stays seated: waking it here raised its arena walls over the death screen.
+                if (!IsDormant) SetState(PursuitState.Idle);
                 return;
             }
             // Do not overwrite weapon knockback, and never strike while staggered.
@@ -374,8 +374,7 @@ namespace RoadOfTheOldKing.Enemies
         {
             read.Bind(target);
             var weapon = read.Weapon;
-            throwLaunched = weapon != null && weapon.FlightSequence != lastFlight && weapon.State == AxeState.Flying;
-            if (weapon != null) lastFlight = weapon.FlightSequence;
+            throwLaunched = read.ThrowLaunched();
             bool reads = exposedCooldownRate > 1f || exposedWindupScale < 1f;
             bool seen = reads && IsAware && weapon != null && read.Exposed && actor.Sees(target.transform, noticeRadius, false);
             exposedFor = seen ? exposedFor + deltaTime : 0f;
@@ -396,14 +395,9 @@ namespace RoadOfTheOldKing.Enemies
         // moment, never out of an attack or its recovery.
         private bool TrySidestep(float distance, Vector2 toTarget, bool sees)
         {
-            var weapon = read.Weapon;
-            if (sidestepChance <= 0f || weapon == null || !IsAware || !sees || sidestepWait > 0f ||
-                distance > weapon.Settings.throwRange + 1f) return false;
-            Vector2 line = weapon.AttackDirection, fromPlayer = -toTarget.normalized;
-            if (Vector2.Angle(line, fromPlayer) > throwThreatAngle || Random.value >= sidestepChance) return false;
-            float side = line.x * fromPlayer.y - line.y * fromPlayer.x;
-            if (Mathf.Abs(side) < .001f) side = Random.value < .5f ? -1f : 1f;
-            if (!action.Begin(new EvadeAction(body, new Vector2(-line.y, line.x) * Mathf.Sign(side), sidestepDistance, sidestepDuration))) return false;
+            if (sidestepChance <= 0f || !IsAware || !sees || sidestepWait > 0f ||
+                !read.ThrowAimedAt(distance, toTarget, throwThreatAngle, out Vector2 stepAside) || Random.value >= sidestepChance) return false;
+            if (!action.Begin(new EvadeAction(body, stepAside, sidestepDistance, sidestepDuration))) return false;
             sidestepWait = sidestepCooldown;
             melee = null;
             State = PursuitState.Sidestepping;
@@ -536,6 +530,7 @@ namespace RoadOfTheOldKing.Enemies
         // A recorded guardian stays where it fell as a ruin: no rest or reload raises it again.
         private void StayFallen()
         {
+            ResetVersion++; // Presentation resets into the fallen pose instead of playing the fall again.
             health.RestoreVisitHealth(0);
             OnDefeated();
         }

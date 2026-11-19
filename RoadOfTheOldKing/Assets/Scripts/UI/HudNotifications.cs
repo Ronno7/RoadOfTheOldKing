@@ -22,7 +22,6 @@ namespace RoadOfTheOldKing.UI
     {
         public const int MaxAnnouncements = 3;
         private static readonly List<Announcement> announcements = new List<Announcement>();
-        public static int AnnouncementCount => announcements.Count;
 
         public const int MaxReceipts = 3;
         public readonly struct Receipt
@@ -38,7 +37,6 @@ namespace RoadOfTheOldKing.UI
         public static Vector3? HintWorldPosition { get; private set; }
         public static string Hint { get; private set; }
         public static bool HintCompleted { get; private set; }
-        public static int HintVersion { get; private set; }
 
         public static Transform Speaker { get; private set; }
         public static string Speech { get; private set; }
@@ -48,7 +46,7 @@ namespace RoadOfTheOldKing.UI
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void Reset()
         {
-            receipts.Clear(); HintWorldPosition = null; Hint = null; HintCompleted = false; Version++; HintVersion++;
+            receipts.Clear(); HintWorldPosition = null; Hint = null; HintCompleted = false; Version++;
             announcements.Clear();
             Speaker = null; Speech = null; SpeechUntil = float.NegativeInfinity;
             UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
@@ -119,7 +117,7 @@ namespace RoadOfTheOldKing.UI
         {
             HintWorldPosition = worldPosition;
             if (Hint == text && HintCompleted == completed) return;
-            Hint = text; HintCompleted = completed; HintVersion++;
+            Hint = text; HintCompleted = completed;
         }
 
         public static void ClearHint() => SetHint(null);

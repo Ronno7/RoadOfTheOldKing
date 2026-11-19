@@ -24,7 +24,7 @@ namespace RoadOfTheOldKing.Progression
         // Spawn point or fire id for the scene being loaded; GameSession reads it on arrival.
         public string ArrivalId { get; private set; }
 
-        // Built on first use: GameSession can start a covered launch load before this component's Awake.
+        // Built on first use: GameSession can start a load before this component's Awake.
         private void EnsureCurtain()
         {
             if (curtain != null || panelSettings == null) return;
@@ -41,26 +41,24 @@ namespace RoadOfTheOldKing.Progression
             document.rootVisualElement.Add(curtain);
         }
 
-        // covered: start fully black (used at launch, before the first scene has been seen).
-        public bool Begin(string scenePath, string arrivalId, PlayerControlLocks player, bool covered = false)
+        public bool Begin(string scenePath, string arrivalId, PlayerControlLocks player)
         {
             if (IsBusy || !SceneLoader.CanLoad(scenePath)) return false;
-            StartCoroutine(Run(scenePath, arrivalId, player, covered));
+            StartCoroutine(Run(scenePath, arrivalId, player));
             return true;
         }
 
         // Called by GameSession once the arriving player exists, so input stays locked through the fade-in.
         public void HoldArrivingPlayer(PlayerControlLocks player) { if (IsBusy) Hold(player); }
 
-        private IEnumerator Run(string scenePath, string arrivalId, PlayerControlLocks player, bool covered)
+        private IEnumerator Run(string scenePath, string arrivalId, PlayerControlLocks player)
         {
             IsBusy = true;
             Hold(player);
             var pause = SimulationPause.Acquire();
             try
             {
-                if (covered) SetCover(1f);
-                else yield return Fade(0f, 1f, fadeOutSeconds);
+                yield return Fade(0f, 1f, fadeOutSeconds);
                 ArrivalId = arrivalId;
                 var load = SceneLoader.LoadAsync(scenePath);
                 while (load != null && !load.isDone) yield return null;

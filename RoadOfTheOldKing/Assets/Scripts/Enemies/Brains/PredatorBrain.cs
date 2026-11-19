@@ -123,7 +123,6 @@ namespace RoadOfTheOldKing.Enemies
         private Damageable health;
         private HitReaction reaction;
         private Rigidbody2D body;
-        private Collider2D bodyCollider;
         private EnemyActionRunner action;
         private PredatorAttackAction attackAction;
         public EnemyActionRunner Action => action;
@@ -132,13 +131,14 @@ namespace RoadOfTheOldKing.Enemies
         private float elapsed, duration, stalkFor, blockedTime, actualSpeed, evadeReadyAt;
         private int circleSign = 1;
         private bool feint, hitPending, playerWasStriking, playerWasExposed;
-        private uint lastFlightSequence;
 
         public PredatorState State { get; private set; }
         public Vector2 FacingDirection { get; private set; } = Vector2.down;
         public float StateProgress => action != null && action.IsRunning ? action.Progress : duration > 0f ? Mathf.Clamp01(elapsed / duration) : 0f;
         public bool IsLungeAttack { get; private set; }
         public bool IsFeint => feint;
+        // A follow-up never earns another: one missed lunge chains at most one more attack.
+        public bool IsFollowUp { get; private set; }
         public Vector2 AttackDirection { get; private set; } = Vector2.down;
         // Where the lunge lane starts: the body until the leap begins, then fixed.
         public Vector2 AttackOrigin => State == PredatorState.Lunge ? action.Origin : body.position;
@@ -147,8 +147,6 @@ namespace RoadOfTheOldKing.Enemies
         public float TrackProgress => attackAction != null ? attackAction.TrackProgress : 0f;
         public float LaneLength => lungeDistance + snoutOffset + biteRadius;
         public float LaneWidth => biteRadius * 2f;
-        public float SnapReach => snapReach;
-        public float SnapArc => snapArc;
         public bool IsWindingUp => State == PredatorState.Windup;
         public bool IsStriking => State == PredatorState.Lunge || State == PredatorState.Snap;
         public float WindupProgress => StateProgress;
@@ -185,7 +183,7 @@ namespace RoadOfTheOldKing.Enemies
         private void Awake()
         {
             actor = new EnemyBody(gameObject);
-            health = actor.Health; reaction = actor.Reaction; body = actor.Rigidbody; bodyCollider = actor.Collider;
+            health = actor.Health; reaction = actor.Reaction; body = actor.Rigidbody;
             action = new EnemyActionRunner();
             previousPosition = body.position;
         }
@@ -241,10 +239,7 @@ namespace RoadOfTheOldKing.Enemies
             playerWasExposed = exposed;
             bool wasHit = hitPending;
             hitPending = false;
-            // A new throw launched this tick (flight sequence advanced).
-            var weapon = PlayerWeapon;
-            bool throwLaunched = weapon != null && weapon.FlightSequence != lastFlightSequence && weapon.State == AxeState.Flying;
-            if (weapon != null) lastFlightSequence = weapon.FlightSequence;
+            bool throwLaunched = read.ThrowLaunched();
 
             // Weapon knockback owns the body while staggered; then a short recovery before acting.
             if (State == PredatorState.Staggered)
@@ -313,19 +308,13 @@ namespace RoadOfTheOldKing.Enemies
         private bool Reacted(float distance, Vector2 toward, bool sees, bool swingStarted, bool openingStarted, bool wasHit, bool throwLaunched)
         {
             // An axe thrown straight at it: step off the line (the side it is already on).
-            var weapon = PlayerWeapon;
-            if (throwLaunched && weapon != null && Time.time >= evadeReadyAt && distance <= weapon.Settings.throwRange + 1f)
+            if (throwLaunched && Time.time >= evadeReadyAt && read.ThrowAimedAt(distance, toward, throwThreatAngle, out Vector2 stepAside) &&
+                Random.value < sidestepChance)
             {
-                Vector2 line = weapon.AttackDirection, fromPlayer = -toward;
-                if (Vector2.Angle(line, fromPlayer) <= throwThreatAngle && Random.value < sidestepChance)
-                {
-                    float side = line.x * fromPlayer.y - line.y * fromPlayer.x;
-                    if (Mathf.Abs(side) < .001f) side = Random.value < .5f ? -1f : 1f;
-                    evadeReadyAt = Time.time + evadeCooldown;
-                    evadeDirection = new Vector2(-line.y, line.x) * Mathf.Sign(side);
-                    Enter(PredatorState.Evade, evadeDuration);
-                    return true;
-                }
+                evadeReadyAt = Time.time + evadeCooldown;
+                evadeDirection = stepAside;
+                Enter(PredatorState.Evade, evadeDuration);
+                return true;
             }
             // Hit without breaking its poise: bite back.
             if (wasHit && distance <= snapRange + .3f && Random.value < retaliateChance)
@@ -379,7 +368,7 @@ namespace RoadOfTheOldKing.Enemies
         }
 
         // Quick attacks (punish, retaliation, follow-up) use short windups and never feint.
-        private void BeginAttack(bool lunge, Vector2 toward, bool quick)
+        private void BeginAttack(bool lunge, Vector2 toward, bool quick, bool followUp = false)
         {
             if (action.IsRunning) return;
             bool selectedFeint = lunge && !quick && Random.value < feintChance;
@@ -401,7 +390,7 @@ namespace RoadOfTheOldKing.Enemies
             };
             var next = new PredatorAttackAction(gameObject, body, reaction, target, HasLineOfSight, spec, toward);
             if (!action.Begin(next)) return;
-            attackAction = next; IsLungeAttack = lunge; feint = selectedFeint; AttackDirection = toward;
+            attackAction = next; IsLungeAttack = lunge; IsFollowUp = followUp; feint = selectedFeint; AttackDirection = toward;
             State = PredatorState.Windup; elapsed = duration = blockedTime = 0f;
         }
 
@@ -424,10 +413,10 @@ namespace RoadOfTheOldKing.Enemies
             AttackDirection = action.Direction; Face(AttackDirection);
             if (attackAction.Feinted)
             { Enter(PredatorState.Reposition); return; }
-            if (attackAction.FinishedActive && IsLungeAttack && !attackAction.HasContact && Random.value < followUpChance)
+            if (attackAction.FinishedActive && IsLungeAttack && !IsFollowUp && !attackAction.HasContact && Random.value < followUpChance)
             {
                 if (distance <= snapRange || (distance >= lungeRange.x && distance <= lungeRange.y))
-                { action.Cancel(false); BeginAttack(distance > snapRange, toward, true); return; }
+                { action.Cancel(false); BeginAttack(distance > snapRange, toward, true, followUp: true); return; }
             }
             if (!action.IsRunning)
             {
@@ -564,6 +553,7 @@ namespace RoadOfTheOldKing.Enemies
 
         public void ResetOnRest()
         {
+            if (actor == null) return; // Never woken (under an inactive parent): it starts fresh when shown.
             IsAware = false;
             ResetVersion++;
             actor.Reset();

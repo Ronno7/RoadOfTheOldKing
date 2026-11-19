@@ -59,7 +59,7 @@ namespace RoadOfTheOldKing.Player
         public bool TryDrink()
         {
             var weapon = combat != null ? combat.Weapon : null;
-            bool busy = IsDrinking || !player.IsAlive || Time.timeScale <= 0f ||
+            bool busy = IsDrinking || !player.IsAlive || RoadOfTheOldKing.UI.SimulationPause.BlocksPlay ||
                 (combat != null && !combat.CanStartAttack) || (weapon != null && weapon.IsAttacking) ||
                 (dash != null && dash.IsDashing) || (reaction != null && reaction.IsStaggered);
             if (busy) return false;

@@ -109,7 +109,8 @@ namespace RoadOfTheOldKing.Cameras
                 ? goal
                 : Mathf.SmoothDamp(viewCamera.orthographicSize, goal, ref zoomVelocity,
                     smoothing, Mathf.Infinity, Time.deltaTime);
-            viewCamera.orthographicSize = Mathf.Clamp(size, minSize, maxSize);
+            // The player's own zoom is held to the limits above; a close-up (rest, dialogue) may go nearer, and eases back.
+            viewCamera.orthographicSize = size;
         }
 
         private void OnValidate()

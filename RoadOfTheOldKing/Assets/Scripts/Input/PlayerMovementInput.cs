@@ -18,7 +18,7 @@ namespace RoadOfTheOldKing.Input
 
         public Vector2 MoveDirection { get; private set; }
         public bool SprintHeld { get; private set; }
-        public bool IsActive => isActiveAndEnabled && hasFocus && !paused && Time.timeScale > 0f && (locks == null || !locks.IsLocked);
+        public bool IsActive => isActiveAndEnabled && hasFocus && !paused && !RoadOfTheOldKing.UI.SimulationPause.BlocksPlay && (locks == null || !locks.IsLocked);
         private RoadOfTheOldKing.Player.PlayerControlLocks locks;
         private RoadOfTheOldKing.Player.PlayerStamina stamina;
 

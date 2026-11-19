@@ -29,10 +29,8 @@ namespace RoadOfTheOldKing.Player
         public bool IsDashing => isActiveAndEnabled && remaining > 0f;
         public bool HasDodgeProtection => IsDashing && duration - remaining < dodgeWindow;
         public Vector2 Direction { get; private set; }
-        public float CooldownRemaining => cooldownRemaining;
         // Read-only presentation samples; animation cannot extend movement or dodge protection.
         public float Progress => Mathf.Clamp01(1f - remaining / duration);
-        public float RecoverySeconds { get; private set; } = float.PositiveInfinity;
         public uint Sequence { get; private set; }
 
         private void Awake()
@@ -57,7 +55,6 @@ namespace RoadOfTheOldKing.Player
             if (combat != null) combat.CancelThrowAim();
             Direction = direction.normalized;
             remaining = duration;
-            RecoverySeconds = float.PositiveInfinity;
             Sequence++;
             cooldownRemaining = duration + cooldown;
             return true;
@@ -66,11 +63,7 @@ namespace RoadOfTheOldKing.Player
         // Called exactly once by the motor at the start of each physics step.
         public void Tick(float deltaTime)
         {
-            bool finishing = remaining > 0f;
-            float overshoot = Mathf.Max(0f, deltaTime - remaining);
             remaining = Mathf.Max(0f, remaining - deltaTime);
-            if (finishing && remaining == 0f) RecoverySeconds = overshoot;
-            else if (!finishing && !float.IsPositiveInfinity(RecoverySeconds)) RecoverySeconds += deltaTime;
             cooldownRemaining = Mathf.Max(0f, cooldownRemaining - deltaTime);
         }
 
@@ -94,7 +87,6 @@ namespace RoadOfTheOldKing.Player
         public void Cancel()
         {
             remaining = 0f;
-            RecoverySeconds = float.PositiveInfinity;
         }
 
         public void ResetAtRest()

@@ -236,7 +236,6 @@ namespace RoadOfTheOldKing.UI
         private int selected = -1;
 
         // Called after any row changes a value, so rows that depend on it (a hoodie track) can redraw.
-        public event Action<Row> ValueChanged;
 
         public OptionList(VisualElement container, Label description)
         {
@@ -297,7 +296,6 @@ namespace RoadOfTheOldKing.UI
 
         internal void RowChanged(Row row)
         {
-            ValueChanged?.Invoke(row);
             RefreshAll();
         }
 

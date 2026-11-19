@@ -51,27 +51,31 @@ namespace RoadOfTheOldKing.Progression
             return record;
         }
 
+        // Every coin reward goes through these two: a positive amount that can't overflow the purse, then the
+        // credit, the save and the announcement, in that order. A caller marks its own source before crediting.
+        private bool CanCredit(int amount) => CanAward && amount > 0 && session.Progress.bronzeCoins <= int.MaxValue - amount;
+
+        private void Credit(int amount, string message)
+        {
+            session.Progress.bronzeCoins += amount;
+            session.CaptureAndSave(message);
+            CoinsCollected?.Invoke(amount, session.Progress.bronzeCoins);
+        }
+
         public bool TryCollectCoinSource(string sourceId)
         {
-            var progress = session.Progress;
-            var record = progress.FindCoinSource(sourceId);
-            if (!CanAward || record == null || record.collected || record.amount <= 0 ||
-                progress.bronzeCoins > int.MaxValue - record.amount) return false;
+            var record = session.Progress.FindCoinSource(sourceId);
+            if (record == null || record.collected || !CanCredit(record.amount)) return false;
             record.collected = true;
-            progress.bronzeCoins += record.amount;
-            session.CaptureAndSave("Bronze Coins +" + record.amount);
-            CoinsCollected?.Invoke(record.amount, progress.bronzeCoins);
+            Credit(record.amount, "Bronze Coins +" + record.amount);
             return true;
         }
 
         // EnemyCoinDrop consumes its per-life receipt; no permanent GUID record per renewable defeat.
         internal bool TryCollectEnemyCoins(int amount)
         {
-            var progress = session.Progress;
-            if (!CanAward || (amount != 1 && amount != 5) || progress.bronzeCoins > int.MaxValue - amount) return false;
-            progress.bronzeCoins += amount;
-            session.CaptureAndSave("Bronze Coins +" + amount);
-            CoinsCollected?.Invoke(amount, progress.bronzeCoins);
+            if ((amount != 1 && amount != 5) || !CanCredit(amount)) return false;
+            Credit(amount, "Bronze Coins +" + amount);
             return true;
         }
 
@@ -91,13 +95,9 @@ namespace RoadOfTheOldKing.Progression
 
         public bool TryCollectCoinCache(string rewardId, int amount)
         {
-            var progress = session.Progress;
-            if (!CanAward || string.IsNullOrWhiteSpace(rewardId) || amount <= 0 ||
-                progress.Has(RewardKeys.CoinCache(rewardId)) || progress.bronzeCoins > int.MaxValue - amount) return false;
-            progress.Complete(RewardKeys.CoinCache(rewardId));
-            progress.bronzeCoins += amount;
-            session.CaptureAndSave("Bronze Coins +" + amount);
-            CoinsCollected?.Invoke(amount, progress.bronzeCoins);
+            if (string.IsNullOrWhiteSpace(rewardId) || session.Progress.Has(RewardKeys.CoinCache(rewardId)) || !CanCredit(amount)) return false;
+            session.Progress.Complete(RewardKeys.CoinCache(rewardId));
+            Credit(amount, "Bronze Coins +" + amount);
             return true;
         }
 
@@ -142,10 +142,8 @@ namespace RoadOfTheOldKing.Progression
         // Dev grants have no world-source receipt, so authored pickups remain collectible.
         public bool DebugGiveCoins(int amount)
         {
-            if (!CanAward || amount <= 0 || session.Progress.bronzeCoins > int.MaxValue - amount) return false;
-            session.Progress.bronzeCoins += amount;
-            session.CaptureAndSave("Bronze Coins granted.");
-            CoinsCollected?.Invoke(amount, session.Progress.bronzeCoins);
+            if (!CanCredit(amount)) return false;
+            Credit(amount, "Bronze Coins granted.");
             return true;
         }
 

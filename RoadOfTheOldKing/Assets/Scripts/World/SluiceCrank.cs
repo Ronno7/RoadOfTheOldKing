@@ -28,7 +28,7 @@ namespace RoadOfTheOldKing.World
         public override string Prompt =>
             !requiresOwnedCrank ? (Turnable ? TurnPrompt : sluice != null && sluice.IsMoving ? "Carriage moving" : "Crank locked") :
             HoldsCrank ? (sluice != null && sluice.IsMoving ? "Carriage moving" : Turnable ? TurnPrompt : StageOpen ? "Take crank (locked)" : "Take crank") :
-            Carried ? "Place crank" : "Requires maintenance crank";
+            Carried ? "Place crank" : Owned ? "Crank is in the other socket" : "Requires maintenance crank";
 
         public override bool CanCollect(PlayerHealth player)
         {

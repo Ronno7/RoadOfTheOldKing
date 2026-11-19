@@ -33,6 +33,5 @@ namespace RoadOfTheOldKing.UI
         }
 
         public static void Remove(IModalMenu menu) => stack.Remove(menu);
-        public static bool Contains(IModalMenu menu) => stack.Contains(menu);
     }
 }

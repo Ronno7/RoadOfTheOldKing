@@ -55,7 +55,7 @@ namespace RoadOfTheOldKing.Weapons
         {
             var phase = weapon.LightPhase;
             bool visible = weapon.isActiveAndEnabled && weapon.Owner != null &&
-                weapon.Owner.isActiveAndEnabled && Time.timeScale > 0f &&
+                weapon.Owner.isActiveAndEnabled && !RoadOfTheOldKing.UI.SimulationPause.BlocksPlay &&
                 (phase == MeleePhase.Windup || phase == MeleePhase.Active);
             surface.enabled = visible;
             if (!visible) return;

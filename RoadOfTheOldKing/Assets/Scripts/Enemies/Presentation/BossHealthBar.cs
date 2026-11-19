@@ -32,7 +32,8 @@ namespace RoadOfTheOldKing.Enemies
         private void Update()
         {
             // Engaged from the wake until it rests again; a fall keeps it engaged so the HUD can drain the bar.
-            bool fighting = brain == null ? health.IsAlive : !brain.IsDormant && (brain.IsWaking || brain.IsAware || brain.IsDefeated);
+            // The arena's own test, so the bar and the walls come and go together.
+            bool fighting = brain == null ? health.IsAlive : !brain.IsDormant;
             if (brain != null && brain.IsDefeated && Engaged != this) fighting = false; // already fallen before the fight
             if (fighting) Engaged = this;
             else if (Engaged == this) Engaged = null;

@@ -22,7 +22,6 @@ namespace RoadOfTheOldKing.Input
             padLook = new InputAction("Freelook Controller", InputActionType.Button, GamepadLayout.Look);
             stick = new InputAction("Freelook Stick", InputActionType.Value, GamepadLayout.Aim, expectedControlType: "Vector2");
         }
-        public bool IsLooking { get; private set; }
         private void OnEnable() { look.Enable(); padLook.Enable(); stick.Enable(); }
         private void OnDisable() { look?.Disable(); padLook?.Disable(); stick?.Disable(); requireRelease = true; }
         private void OnDestroy() { look?.Dispose(); padLook?.Dispose(); stick?.Dispose(); }
@@ -31,13 +30,12 @@ namespace RoadOfTheOldKing.Input
 
         public CameraLookInputFrame Read()
         {
-            IsLooking = false;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD || ROTOK_DEV_TOOLS
             if (RoadOfTheOldKing.UI.DevToolsPanel.CapturesInput) { requireRelease = true; return default; }
 #endif
             bool padHeld = padLook.IsPressed();
             bool keyHeld = look.IsPressed() && Mouse.current != null;
-            if (!isActiveAndEnabled || !focused || paused || Time.timeScale <= 0f)
+            if (!isActiveAndEnabled || !focused || paused || RoadOfTheOldKing.UI.SimulationPause.BlocksPlay)
             {
                 requireRelease = true;
                 return default;
@@ -48,7 +46,6 @@ namespace RoadOfTheOldKing.Input
                 if (!held) requireRelease = false;
                 return default;
             }
-            IsLooking = held;
             if (padHeld)
             {
                 Vector2 tilt = stick.ReadValue<Vector2>();

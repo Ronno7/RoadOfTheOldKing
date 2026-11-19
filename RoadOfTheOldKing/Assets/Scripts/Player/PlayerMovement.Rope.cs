@@ -36,7 +36,7 @@ namespace RoadOfTheOldKing.Player
 
         public bool CanStartRopeTraversal => isActiveAndEnabled && !IsTraversingRope &&
             ropeHealth != null && ropeHealth.IsAlive && ropeLocks != null && !ropeLocks.IsLocked &&
-            movementInput != null && movementInput.IsActive && Time.timeScale > 0f &&
+            movementInput != null && movementInput.IsActive && !RoadOfTheOldKing.UI.SimulationPause.BlocksPlay &&
             !EncounterState.InCombat && (hitReaction == null || !hitReaction.IsStaggered) &&
             !dash.IsDashing && (flask == null || !flask.IsDrinking) &&
             (combat == null || combat.CanStartAttack && !combat.IsAttacking && !combat.ControlsMovement &&

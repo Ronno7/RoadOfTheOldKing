@@ -22,7 +22,6 @@ namespace RoadOfTheOldKing.World
         [Tooltip("Optional world-space direction into a doorway. Zero keeps an ordinary overlap exit; otherwise the player's movement intent and body velocity must point inward.")]
         [SerializeField] private Vector2 inwardDirection = Vector2.zero;
         public bool IsComplete { get; private set; }
-        public event Action Completed;
 
         private void Reset() => GetComponent<Collider2D>().isTrigger = true;
 
@@ -48,7 +47,6 @@ namespace RoadOfTheOldKing.World
             if (!IsComplete && !string.IsNullOrEmpty(progressId))
             {
                 IsComplete = true;
-                Completed?.Invoke();
                 if (string.IsNullOrEmpty(targetScene)) session?.SaveProgress();
             }
             // LeaveScene captures and saves this milestone before loading.

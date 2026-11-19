@@ -47,7 +47,7 @@ namespace RoadOfTheOldKing.Input
 
         public CombatInputFrame Read()
         {
-            if (!isActiveAndEnabled || !focused || paused || Time.timeScale <= 0f || (locks != null && locks.IsLocked))
+            if (!isActiveAndEnabled || !focused || paused || RoadOfTheOldKing.UI.SimulationPause.BlocksPlay || (locks != null && locks.IsLocked))
                 return default;
 
             var frame = new CombatInputFrame
