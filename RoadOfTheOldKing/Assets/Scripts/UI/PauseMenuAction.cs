@@ -13,6 +13,8 @@ namespace RoadOfTheOldKing.UI
         public bool CloseOnExecute { get; }
         // Shown dimmed but still selectable, to browse something not yet within reach (e.g. upgrades without shards).
         public bool Locked { get; }
+        // An extra USS class for this row only (the upgrade fire's glowing Upgrades row).
+        public string StyleClass { get; set; }
         private readonly Action execute;
         public PauseMenuAction(string label, string description, Action execute, bool enabled = true, bool closeOnExecute = true, bool locked = false)
         { Label = label; Description = description; this.execute = execute; Enabled = enabled; CloseOnExecute = closeOnExecute; Locked = locked; }

@@ -27,6 +27,10 @@ System.Func<ParticleSystem,float> ramp=e=>{var b=new MaterialPropertyBlock();e.G
 var viewFlags=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
 System.Func<Component,float> flameShare=f=>{var v=f.GetComponent<RoadOfTheOldKing.World.BonfireSpriteView>();var fl=(SpriteRenderer)v.GetType().GetField("flame",viewFlags).GetValue(v);var rest=(Vector3)v.GetType().GetField("restFlameScale",viewFlags).GetValue(v);return fl.transform.localScale.y/rest.y;};
 System.Func<Component,float> igniting=f=>{var v=f.GetComponent<RoadOfTheOldKing.World.BonfireSpriteView>();return (float)v.GetType().GetField("igniteAge",viewFlags).GetValue(v);};
+// The bonfire menu's main rows, its panel and shard line (18 Nov: only upgrade fires list Upgrades, in their own frame).
+System.Func<System.Collections.Generic.List<UnityEngine.UIElements.Button>> menuRows=()=>{var m=player.GetComponent<RoadOfTheOldKing.UI.BonfireMenu>();var l=m.GetType().GetField("list",viewFlags).GetValue(m);return (System.Collections.Generic.List<UnityEngine.UIElements.Button>)l.GetType().GetField("buttons",viewFlags).GetValue(l);};
+System.Func<UnityEngine.UIElements.VisualElement> menuPanel=()=>{var m=player.GetComponent<RoadOfTheOldKing.UI.BonfireMenu>();var o=(UnityEngine.UIElements.VisualElement)m.GetType().GetField("overlay",viewFlags).GetValue(m);return UnityEngine.UIElements.UQueryExtensions.Q(o,"bonfire-panel",(string)null);};
+System.Func<bool> shardLine=()=>{var m=player.GetComponent<RoadOfTheOldKing.UI.BonfireMenu>();var s=(UnityEngine.UIElements.Label)m.GetType().GetField("shards",viewFlags).GetValue(m);return s.style.display.value!=UnityEngine.UIElements.DisplayStyle.None;};
 System.Action<Component,float> advance=(f,dt)=>{var v=f.GetComponent<RoadOfTheOldKing.World.BonfireSpriteView>();v.GetType().GetMethod("Refresh",viewFlags).Invoke(v,new object[]{dt});};
 var store=new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(game.StorageKey);
 if(phase==0)check(game.Continue(),"Continue into Tutorial");
@@ -111,6 +115,8 @@ else if(phase==1){
  check(ordinaryBurst!=null&&ordinaryBurst.particleCount==12&&ramp(ordinaryBurst)==1f&&flameShare(fire)<.5f&&igniting(fire)>=0f,"lighting an ordinary fire bursts 12 orange sparks from a small flame");
  advance(fire,1f);check(Mathf.Approximately(flameShare(fire),1f)&&igniting(fire)<0f,"the ignition settles to the resting flame");
  check(game.Checkpoints.Rest(fire),"Tutorial rest establishes old checkpoint");
+ check(interaction.Open(fire)&&string.Join("|",menuRows().Select(b=>b.text).ToArray())=="Travel|Leave"&&!menuPanel().ClassListContains("upgrade-fire")&&!shardLine(),"an ordinary fire's menu has no Upgrades row, shard line or upgrade frame");
+ interaction.Close();
  SessionState.SetString(prefix+"OldFire",fire.Id);
  check(game.Checkpoints.LeaveScene(region,"from-tutorial"),"enter Lowlands");
 }
@@ -175,6 +181,10 @@ else if(phase==4){
  pose(new Vector2(15.5f,3));combat.GetType().GetField("controlsActive",flags).SetValue(combat,true);
  player.Health.SetHealth(47);player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().SetCharges(1);
  check(interaction.TryInteract()&&interaction.IsOpen,"second interaction rests and opens real menu");
+ {
+  var rows=menuRows();
+  check(string.Join("|",rows.Select(b=>b.text).ToArray())=="Upgrades|Travel|Leave"&&rows[0].ClassListContains("upgrade-row")&&menuPanel().ClassListContains("upgrade-fire")&&shardLine(),"an upgrade fire's menu leads with a glowing Upgrades row in its own frame, with the shard line");
+ }
  check(player.Health.Health==player.Health.MaxHealth&&player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().Charges==player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().MaxCharges,"rest heals and refills");
  check(game.Progress.checkpointId==fire.Id&&store.Load().checkpointId==fire.Id,"rest saves new checkpoint");
  // Travel goes by region, then fire (18 Nov); Back returns to the row it came from.

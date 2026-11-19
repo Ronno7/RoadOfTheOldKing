@@ -132,6 +132,11 @@ def build_kit():
                 gem.putpixel((x, y), C["ink"] if d == 2 else C["gold"])
     kit["DividerGem"] = gem
     kit["HearthCrest"] = hearth_crest()
+    # Upgrade fires (user, 18 Nov: "a unique border for the upgrade bonfire UI and make the upgrade button glow gold
+    # or bronze"): the same frame size and slicing in bronze and gold, and a gold-edged selection bar.
+    kit["ForgePanel"] = forge_panel()                                                          # slice 12
+    kit["ForgeCrest"] = forge_crest()
+    kit["SelectedGold"] = frame(8, 8, 1, [C["gold"], C["inset"]])                              # slice 2
     return kit
 
 
@@ -215,6 +220,96 @@ def hearth_crest():
         "....rr...",
     ]
     colors = {"r": C["red"], "g": C["gold"], "p": hexrgb("FFF0B3")}
+    for y, row in enumerate(flame):
+        for x, ch in enumerate(row):
+            if ch in colors:
+                img.putpixel((6 + x, 5 + y), colors[ch])
+    return img
+
+
+def forge_panel():
+    """Upgrade-fire skin: the hearth frame's size and slicing, in bronze bands with a sun-gold inner line and riveted
+    bronze corner plates, each set with the kit's gold gem (the bronze brazier's metal, the gold flame's light).
+
+    32x32, 9-slice border 12. Band = 4 px (lit top/left edge, hammered body, shaded inner edge), then gold, ink, fill."""
+    size, band = 32, 4
+    img = Image.new("RGBA", (size, size), CLEAR)
+    for y in range(size):
+        for x in range(size):
+            sides = {"top": y, "left": x, "right": size - 1 - x, "bottom": size - 1 - y}
+            side = min(sides, key=sides.get)
+            edge = sides[side]
+            if edge == 0:
+                if (x in (0, size - 1)) and (y in (0, size - 1)):
+                    continue
+                img.putpixel((x, y), C["ink"])
+            elif edge <= band:
+                if edge == 1:
+                    color = C["trimLight"] if side in ("top", "left") else C["trim"]
+                elif edge == band:
+                    color = C["trimDark"]
+                else:
+                    along = x if side in ("top", "bottom") else y
+                    color = C["trimLight"] if (along * 5 + edge * 3) % 13 == 0 else C["trim"]
+                img.putpixel((x, y), color)
+            elif edge == band + 1:
+                img.putpixel((x, y), C["gold"])
+            elif edge == band + 2:
+                img.putpixel((x, y), C["ink"])
+            else:
+                img.putpixel((x, y), C["fill"])
+    # Corner plates: 10x10 bevelled bronze with an ink rim, a gold gem at the centre.
+    plate = 10
+    for ox, oy in ((0, 0), (size - plate, 0), (0, size - plate), (size - plate, size - plate)):
+        for y in range(plate):
+            for x in range(plate):
+                px, py = ox + x, oy + y
+                if (px in (0, size - 1)) and (py in (0, size - 1)):
+                    continue
+                if x in (0, plate - 1) or y in (0, plate - 1):
+                    color = C["ink"]
+                elif x == 1 or y == 1:
+                    color = C["trimLight"]
+                elif x == plate - 2 or y == plate - 2:
+                    color = C["trimDark"]
+                else:
+                    color = C["trim"]
+                img.putpixel((px, py), color)
+        for y in range(5):
+            for x in range(5):
+                d = abs(x - 2) + abs(y - 2)
+                if d <= 2:
+                    img.putpixel((ox + 2 + x, oy + 2 + y), C["ink"] if d == 2 else C["gold"])
+        img.putpixel((ox + 4, oy + 3), hexrgb("FFEDA6"))  # the gem's highlight, upper left
+    return img
+
+
+def forge_crest():
+    """Gold-rimmed bronze medallion with the gold flame, on the upgrade frame's top band."""
+    size = 21
+    img = Image.new("RGBA", (size, size), CLEAR)
+    c = (size - 1) / 2
+    for y in range(size):
+        for x in range(size):
+            r = ((x - c) ** 2 + (y - c) ** 2) ** 0.5
+            if r <= c + .3:
+                img.putpixel((x, y), C["ink"] if r > c - .8 else C["gold"] if r > c - 1.8 else
+                             C["trim"] if r > c - 2.8 else C["ink"] if r > c - 3.6 else C["inset"])
+    flame = [
+        "....r....",
+        "...rr....",
+        "...rrr...",
+        "..rrrr.r.",
+        "..rrgrrr.",
+        ".rrggrrr.",
+        ".rrgggrr.",
+        ".rggpggr.",
+        "..rgppgr.",
+        "...rggr..",
+        "....rr...",
+    ]
+    # The gold flame's own colours (BonfireFlameGold16): amber edge, gold body, pale core.
+    colors = {"r": hexrgb("D9962A"), "g": hexrgb("FFD45E"), "p": hexrgb("FFFBE3")}
     for y, row in enumerate(flame):
         for x, ch in enumerate(row):
             if ch in colors:

@@ -36,8 +36,12 @@ namespace RoadOfTheOldKing.UI
         private AxeUpgrade pending;
         private Page page;
         private string region;
-        // Row order on the main page; Back from travel returns to the Travel row.
-        private const int UpgradesRow = 0, TravelRow = 1;
+        // Row order on the main page; Back from travel returns to the Travel row. Only an upgrade fire lists Upgrades
+        // (user, 18 Nov: "upgrade is taken out of the menu screen of the regular bonfires to avoid player confusion").
+        private const int UpgradesRow = 0;
+        private int TravelRow => fire != null && fire.AllowsUpgrades ? 1 : 0;
+        // The upgrade fire's Upgrades row pulses between sun gold and pale flame gold.
+        private const long GlowMilliseconds = 700;
 
         public bool IsOpen => overlay != null && overlay.style.display.value != DisplayStyle.None;
 
@@ -68,6 +72,8 @@ namespace RoadOfTheOldKing.UI
             overlay = document.rootVisualElement.Q("bonfire-overlay");
             heading = overlay.Q<Label>("heading"); status = overlay.Q<Label>("status"); shards = overlay.Q<Label>("shards");
             list = new MenuList(overlay.Q("actions"), overlay.Q<Label>("description"), action => action.Execute());
+            overlay.schedule.Execute(() => overlay.Query(className: "upgrade-row").ForEach(row => row.ToggleInClassList("glow")))
+                .Every(GlowMilliseconds);
             return true;
         }
 
@@ -79,6 +85,9 @@ namespace RoadOfTheOldKing.UI
             var panel = overlay.Q("bonfire-panel");
             foreach (var skin in panel.GetClasses().Where(c => c.StartsWith("skin-")).ToList()) panel.RemoveFromClassList(skin);
             panel.AddToClassList("skin-" + fire.MenuSkin);
+            // An upgrade fire's own frame and crest, bronze and gold (user, 18 Nov: "a unique border for the upgrade
+            // bonfire UI").
+            panel.EnableInClassList("upgrade-fire", fire.AllowsUpgrades);
             overlay.style.display = DisplayStyle.Flex;
             ControlLabels.Bind(overlay.Q<Label>("hint"), "Esc Back · F Leave", "B Back");
             MenuStack.Push(this);
@@ -168,7 +177,8 @@ namespace RoadOfTheOldKing.UI
                 "Choose one for " + nextTier.shardCost + " shards.";
             shards.text = "Sun Shards " + have + (nextTier != null ? " / " + nextTier.shardCost : "");
             shards.EnableInClassList("lacking", lacking);
-            shards.style.display = next == Page.Travel || next == Page.Region ? DisplayStyle.None : DisplayStyle.Flex;
+            // Shards only matter where they can be spent.
+            shards.style.display = next == Page.Travel || next == Page.Region || !fire.AllowsUpgrades ? DisplayStyle.None : DisplayStyle.Flex;
             status.EnableInClassList("warning", false);
             var items = new List<PauseMenuAction>();
             switch (next)
@@ -178,8 +188,9 @@ namespace RoadOfTheOldKing.UI
                     // Sitting down already rested (PlayerBonfireInteraction.Open), as at a Souls bonfire,
                     // so the menu offers only what resting unlocks.
                     status.text = session.Status;
-                    items.Add(new PauseMenuAction("Upgrades", locked || nextTier == null ? requirement : "",
-                        () => Show(Page.Upgrades), locked: locked));
+                    if (fire.AllowsUpgrades)
+                        items.Add(new PauseMenuAction("Upgrades", locked || nextTier == null ? requirement : "",
+                            () => Show(Page.Upgrades), locked: locked) { StyleClass = "upgrade-row" });
                     bool travel = Destinations(session).Count > 0;
                     items.Add(new PauseMenuAction("Travel", travel ? "" : "Light another fire first.",
                         () => Show(Page.Travel), travel));
