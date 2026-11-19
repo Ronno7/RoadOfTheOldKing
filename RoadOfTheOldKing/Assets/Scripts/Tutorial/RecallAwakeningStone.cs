@@ -63,6 +63,15 @@ namespace RoadOfTheOldKing.Tutorial
 
         private void Awake()
         {
+            // The player walks behind the carving: excused before the scene's load restore, so Continue accepts a spot
+            // there (installed in Start, it came after the resume check, which sent the player to their fire; 18 Nov).
+            if (hitBody != null)
+            {
+                var player = FindFirstObjectByType<PlayerHealth>();
+                if (player != null)
+                    foreach (var own in player.GetComponentsInChildren<Collider2D>(true))
+                        Physics2D.IgnoreCollision(hitBody, own, true);
+            }
             if (topRenderer == null || glimmerSprite == null) return;
             for (int i = 0; i < glimmer.Length; i++)
             {
@@ -71,14 +80,6 @@ namespace RoadOfTheOldKing.Tutorial
             }
         }
 
-        private void Start()
-        {
-            if (hitBody == null) return;
-            var player = FindFirstObjectByType<PlayerHealth>();
-            if (player != null)
-                foreach (var own in player.GetComponentsInChildren<Collider2D>(true))
-                    Physics2D.IgnoreCollision(hitBody, own, true);
-        }
 
         public bool ReceiveHit(CombatHit hit)
         {

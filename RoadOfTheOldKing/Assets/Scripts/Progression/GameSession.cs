@@ -264,7 +264,8 @@ namespace RoadOfTheOldKing.Progression
         // the exact spot. It used to keep only the spot, so lessons and milestones since the last save were lost.
         public void SaveOnExit()
         {
-            if (Player != null && Player.IsAlive && !loading) CaptureAndSave("");
+            // Dead or alive, as Retry does: a lesson finished just before dying is kept (18 Nov). The spot needs life.
+            if (Player != null && !loading) CaptureAndSave("");
             RecordResume();
             FlushResume();
         }

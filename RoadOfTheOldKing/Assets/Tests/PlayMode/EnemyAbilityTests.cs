@@ -86,6 +86,17 @@ public sealed class EnemyAbilityTests
             for(int i=0;i<30&&brain.State==RoadOfTheOldKing.Enemies.PredatorState.Lunge;i++)step(.02f);
             check(brain.State==RoadOfTheOldKing.Enemies.PredatorState.Recover&&!reaction.Armored,"lunge ends in an unarmored punish window");
             step((float)brainType.GetField("lungeRecovery",flags).GetValue(brain)+.01f);check(brain.State==RoadOfTheOldKing.Enemies.PredatorState.Reposition,"recovery returns the wolf to repositioning");
+            // Codex, 18 Nov: the lunge's chalk ends where its bite can still land (the leap keeps its tuned damping).
+            {var heroShape=player.GetComponent<Collider2D>();
+             Func<float,bool> lungeAt=gap=>{reset();float lane=brain.LaneLength;move(home+Vector2.right*(lane+gap));float edge=heroShape.ClosestPoint(home).x-home.x;move(home+Vector2.right*(2f*(lane+gap)-edge));
+              int before=player.Health.Health;attack(true,false);for(int i=0;i<150&&brain.Action.IsRunning;i++)step(.02f);return player.Health.Health<before;};
+             check(!lungeAt(.05f),"a hero just past the lunge's chalk is safe (chalk "+brain.LaneLength.ToString("0.00")+")");check(lungeAt(-.15f),"a hero just inside the lunge's chalk is bitten");}
+            // Codex, 18 Nov: a poise break early in a missed lunge's recovery keeps the opening it owed (less the stagger).
+            reset();move(home+Vector2.right*9);attack(true,false);for(int i=0;i<120&&brain.State!=RoadOfTheOldKing.Enemies.PredatorState.Recover;i++)step(.02f);
+            step(.06f);hp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.LightChop,30,Vector2.left,0f,.3f));
+            step(.3f);reaction.Clear();step(.25f); // the stagger runs on Time.time, which a synchronous check never advances: end it by hand
+            check(brain.State==RoadOfTheOldKing.Enemies.PredatorState.Staggered,"a poise break early in its recovery keeps the opening it owed");
+            step(.15f);check(brain.State!=RoadOfTheOldKing.Enemies.PredatorState.Staggered,"and it acts again once that opening is spent (owed "+((float)brainType.GetField("owedRecovery",flags).GetValue(brain)).ToString("0.00")+", elapsed "+((float)brainType.GetField("elapsed",flags).GetValue(brain)).ToString("0.00")+", staggered "+reaction.IsStaggered+")");
             // 18 Nov: a snap tracks through its whole windup, so its ground cue stays unlocked until the bite.
             reset();move(home+Vector2.right*.9f);attack(false,true);step(.1f);move(home+new Vector2(.6f,.6f));step(.02f);groundRender.Invoke(predatorGround,null);
             check(brain.State==RoadOfTheOldKing.Enemies.PredatorState.Windup&&Vector2.Dot(brain.AttackDirection,new Vector2(.6f,.6f).normalized)>.99f&&!brain.IsAttackLocked&&predatorMark.GetFloat("_Locked")==0f,"a tracking snap windup doesn't show the locked cue");
@@ -147,6 +158,24 @@ public sealed class EnemyAbilityTests
             check(Mathf.Abs(travel-pursuit.ChargeDistance)<.15f,"the drawn charge ends where an open-ground charge stops (travel "+travel.ToString("0.00")+", drawn "+pursuit.ChargeDistance.ToString("0.00")+", speed x time "+(spec.chargeSpeed*spec.active).ToString("0.00")+", 18 Nov)");
             charge.Tick(spec.recovery-.01f);check(charge.IsRunning&&boarBody.linearVelocity==Vector2.zero,"charge recovery holds movement ownership");
             charge.Tick(.02f);check(!charge.IsRunning,"charge completion releases ownership");
+            // 18 Nov (Codex): the charge hurts no farther than its drawn tip. The hero's nearest edge stands just past it, then just inside.
+            {var heroShape=player.GetComponent<Collider2D>();float tip=spec.chargeSpeed*spec.active/(1f+Time.fixedDeltaTime*boarBody.linearDamping)+spec.reach;
+             Func<float,bool> chargeAt=gap=>{resetBoar();move(boarHome+Vector2.right*(tip+gap));float edge=heroShape.ClosestPoint(boarHome).x-boarHome.x;move(boarHome+Vector2.right*(2f*(tip+gap)-edge));
+              int before=player.Health.Health;pursuit.TryBeginAttack(spec,player,Vector2.right);charge.Tick(spec.windup);
+              for(int i=0;i<60&&charge.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Active;i++){charge.Tick(.02f);Physics2D.Simulate(.02f);}
+              charge.Cancel();return player.Health.Health<before;};
+             check(!chargeAt(.05f),"a hero just past the drawn tip is safe");check(chargeAt(-.15f),"a hero just inside the drawn tip is hit");
+             // Codex, 18 Nov: a thin post grazing the boar's shoulder on its final step ends the charge where it stands; the hit
+             // must reach from there, not from the step it planned. The post sits clear of the line to the hero.
+             float stopAt=tip-spec.reach;resetBoar();boarBody.position=boarHome+Vector2.right*stopAt;boar.transform.position=boarBody.position;Physics2D.SyncTransforms();
+             float lateral=.8f*boarShape.bounds.extents.y;Vector2 face=System.Array.Find(Physics2D.RaycastAll(new Vector2(boarShape.bounds.center.x+5f,boarShape.bounds.center.y+lateral),Vector2.left,10f),h=>h.collider==boarShape).point; // its front at shoulder height
+             var post=new GameObject("Ability verification graze post");created.Add(post);post.transform.position=new Vector2(face.x+.23f,boarShape.bounds.center.y+lateral); // inside the last step's sweep (.22), beyond the one before
+             post.AddComponent<BoxCollider2D>().size=new Vector2(.1f,.1f);resetBoar();Physics2D.SyncTransforms();
+             bool safe=!chargeAt(.05f);float stoppedAt=boarBody.position.x-boarHome.x;var sweep=new RaycastHit2D[4];
+             bool grazed=boarShape.Cast(Vector2.right,sweep,spec.chargeSpeed*Time.fixedDeltaTime+.02f)>0&&System.Array.Exists(sweep,h=>h.collider!=null&&h.collider.gameObject==post);
+             check(grazed&&Mathf.Abs(stoppedAt-stopAt)<.05f,"the post grazes the boar's shoulder on its last step, not before (stopped at "+stoppedAt.ToString("0.00")+")");
+             check(safe,"a charge ended by grazing a post on its last step can't hurt past the drawn tip");
+             UnityEngine.Object.DestroyImmediate(post);Physics2D.SyncTransforms();}
             resetBoar();move(boarHome+Vector2.right*4);var copy=spec;pursuit.TryBeginAttack(copy,player,Vector2.right);copy.windup=100;charge.Tick(spec.windup);
             check(charge.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Active&&definition.settings.windup==spec.windup,"commitment snapshots tuning without mutating its asset");
             resetBoar();move(boarHome+Vector2.right*3);pursuit.TryBeginAttack(spec,player,Vector2.right);charge.Tick(spec.windup);

@@ -78,6 +78,7 @@ namespace RoadOfTheOldKing.UI
         private Color32[] hoodPixels;
         private IDisposable anyButton;
         private int revealedFrame = -1;
+        private UnityEngine.InputSystem.Controls.ButtonControl revealOnRelease;
         private string[] pages = new string[0];
         private int pageIndex;
         private float pageShownAt, leavingAt = -1f;
@@ -162,7 +163,13 @@ namespace RoadOfTheOldKing.UI
             page = Page.Press;
             // Hidden but still laid out, so the logo stays put when the menu appears.
             panel.style.visibility = Visibility.Hidden; SetVisible(press, true);
-            anyButton = InputSystem.onAnyButtonPress.CallOnce(_ => Reveal());
+            // A mouse button reveals on its release: revealed on the press, the release landed on the row now under the
+            // cursor (18 Nov). Keys and pad buttons reveal at once; their submit is guarded by revealedFrame.
+            anyButton = InputSystem.onAnyButtonPress.CallOnce(control =>
+            {
+                if (control.device is Mouse && control is UnityEngine.InputSystem.Controls.ButtonControl button) revealOnRelease = button;
+                else Reveal();
+            });
         }
 
         // The button that reveals the menu must not also choose from it this frame (PauseMenuInput reads it too).
@@ -275,6 +282,7 @@ namespace RoadOfTheOldKing.UI
         private void Update()
         {
             AnimateBackdrop(Time.unscaledDeltaTime);
+            if (revealOnRelease != null && !revealOnRelease.isPressed) { revealOnRelease = null; Reveal(); }
             if (page == Page.Press)
             {
                 // A slow blink, as on old title screens.

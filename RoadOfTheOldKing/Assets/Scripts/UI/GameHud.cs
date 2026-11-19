@@ -77,6 +77,8 @@ namespace RoadOfTheOldKing.UI
         private float bossShown = 1f, bossLagged = 1f, bossLagFrom, bossDefeatedAt = -1f;
         private readonly List<Label> areaLabels = new List<Label>();
         private Announcement? announcing;
+        private bool announcingSeen;
+        private int announcingVisibleFrame = -1;
         private float announcedAt = float.NegativeInfinity;
         private readonly List<VisualElement> flaskIcons = new List<VisualElement>();
         private WorldUIDocument charge, staminaArc;
@@ -328,7 +330,7 @@ namespace RoadOfTheOldKing.UI
                 (next.Tier == AnnouncementTier.Event ? clearForEvents : clearForPlaces))
             {
                 HudNotifications.TakeAnnouncement();
-                announcing = next; announcedAt = Time.unscaledTime;
+                announcing = next; announcedAt = Time.unscaledTime; announcingSeen = false; announcingVisibleFrame = -1;
                 foreach (var label in areaLabels) label.text = next.Text;
                 areaBanner.EnableInClassList("landmark", next.Tier != AnnouncementTier.Region);
                 areaBanner.EnableInClassList("event", next.Tier == AnnouncementTier.Event);
@@ -343,6 +345,12 @@ namespace RoadOfTheOldKing.UI
                 : 1f - (t - AnnounceIn - hold) / AnnounceOut;
             SetVisible(areaBanner, alpha > 0f);
             if (alpha > 0f) areaBanner.style.opacity = alpha;
+            // Reported once it has really been drawn: visible here and still visible a frame later, so F2 pressed on the
+            // banner's first visible frame (hidden in that frame's LateUpdate, before it renders) doesn't count (18 Nov).
+            bool hudShown = root.panel != null && root.panel.visualTree.resolvedStyle.display != DisplayStyle.None;
+            if (alpha <= 0f || !hudShown) announcingVisibleFrame = -1;
+            else if (announcingVisibleFrame < 0) announcingVisibleFrame = Time.frameCount;
+            else if (!announcingSeen && Time.frameCount > announcingVisibleFrame) { announcingSeen = true; HudNotifications.ReportShown(announcing.Value); }
         }
 
         // Corner cluster: health, then stamina (only with the always-visible setting; otherwise stamina is
@@ -549,6 +557,7 @@ namespace RoadOfTheOldKing.UI
             SetVisible(cueChip, spatial);
             cueAnchor = spatial ? anchor : null;
             SetVisible(hint, show && !spatial && !HudNotifications.HintSpatialOnly);
+            HudNotifications.HintOnScreen = show && (spatial || !HudNotifications.HintSpatialOnly);
             if (!show) return;
             if (spatial)
             {

@@ -113,8 +113,16 @@ namespace RoadOfTheOldKing.Enemies
                 body.linearVelocity = Direction * (allowed / dt);
             }
             else body.linearVelocity = Vector2.zero;
+            // A charge hurts from where its body really is after this step: the body's damping takes its share of the
+            // step, and a step that ends the charge (time up, or anything in its path, even a post grazing its shoulder)
+            // doesn't move at all, since Enter zeroes the velocity. Reaching from the planned step hit up to three art
+            // pixels past the drawn warning (18 Nov).
+            Vector2 reachFrom = next;
+            if (IsCharge)
+                reachFrom = blocked || clock.Elapsed >= spec.active ? body.position
+                    : body.position + (next - body.position) / (1f + dt * body.linearDamping);
             if (!HasContact)
-                HasContact = EnemyMeleeDelivery.Arc(owner, target, next, Direction, spec.reach, spec.arc,
+                HasContact = EnemyMeleeDelivery.Arc(owner, target, reachFrom, Direction, spec.reach, spec.arc,
                     spec.damage, spec.knockback, spec.stagger, clear);
             if (clock.Elapsed >= spec.active || (IsCharge && (blocked || HasContact))) Enter(EnemyAttackPhase.Recovery);
         }

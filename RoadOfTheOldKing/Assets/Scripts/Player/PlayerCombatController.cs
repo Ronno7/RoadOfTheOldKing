@@ -94,7 +94,8 @@ namespace RoadOfTheOldKing.Player
                 if (Weapon.IsAway)
                 {
                     throwIntent = ThrowIntent.Recall;
-                    if (CanRecall) Weapon.TryPlayerRecall();
+                    // Drinking is a commitment: no Recall starts mid-swig (18 Nov). A dodge still allows one.
+                    if (CanRecall && (flask == null || !flask.IsDrinking)) Weapon.TryPlayerRecall();
                 }
                 else if (CanStartAttack && Weapon.TryBeginThrow(AimDirection))
                     throwIntent = ThrowIntent.Throw;

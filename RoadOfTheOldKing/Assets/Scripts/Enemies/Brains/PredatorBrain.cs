@@ -128,7 +128,7 @@ namespace RoadOfTheOldKing.Enemies
         public EnemyActionRunner Action => action;
         private readonly PlayerRead read = new PlayerRead();
         private Vector2 previousPosition, repositionPoint, evadeDirection;
-        private float elapsed, duration, stalkFor, blockedTime, actualSpeed, evadeReadyAt;
+        private float elapsed, duration, stalkFor, blockedTime, actualSpeed, evadeReadyAt, owedRecovery;
         private int circleSign = 1;
         private bool feint, hitPending, playerWasStriking, playerWasExposed;
 
@@ -145,7 +145,9 @@ namespace RoadOfTheOldKing.Enemies
         public bool IsLaneLocked => action != null && action.IsRunning && attackAction != null && attackAction.IsLocked;
         // Progress through the tracking part of a lunge windup (before the lock).
         public float TrackProgress => attackAction != null ? attackAction.TrackProgress : 0f;
-        public float LaneLength => lungeDistance + snoutOffset + biteRadius;
+        // The chalk ends where the bite can still land: the leap loses the body's damping share of every physics step
+        // (the motion is kept as tuned), so the full lungeDistance drew about half a unit past any bite (18 Nov).
+        public float LaneLength => lungeDistance / (1f + Time.fixedDeltaTime * (body != null ? body.linearDamping : 0f)) + snoutOffset + biteRadius;
         public float LaneWidth => biteRadius * 2f;
         public bool IsWindingUp => State == PredatorState.Windup;
         public bool IsStriking => State == PredatorState.Lunge || State == PredatorState.Snap;
@@ -247,7 +249,7 @@ namespace RoadOfTheOldKing.Enemies
             if (State == PredatorState.Staggered)
             {
                 if (reaction.IsStaggered) { elapsed = 0f; return; }
-                if (elapsed < hitRecovery) return;
+                if (elapsed < Mathf.Max(hitRecovery, owedRecovery)) return;
                 if (targetAlive && distance <= snapRange && Random.value < counterChance)
                     BeginAttack(false, toward, true);
                 else
@@ -484,6 +486,7 @@ namespace RoadOfTheOldKing.Enemies
 
         private void Enter(PredatorState state, float stateDuration = 0f)
         {
+            owedRecovery = 0f;
             State = state;
             elapsed = 0f;
             duration = stateDuration;
@@ -526,7 +529,11 @@ namespace RoadOfTheOldKing.Enemies
         private void OnStaggered(CombatHit hit)
         {
             if (!health.IsAlive) return;
+            // A break never shortens a promised opening (as with the pursuit enemies): whatever recovery was left, less
+            // the stagger itself, still stands after it (18 Nov: a break early in a missed lunge's 0.7 s cut it to ~0.35 s).
+            float owed = attackAction != null && action.IsRunning ? attackAction.RecoveryLeft - hit.StaggerDuration : 0f;
             Enter(PredatorState.Staggered);
+            owedRecovery = owed;
         }
 
         private void OnDefeated()

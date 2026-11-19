@@ -34,6 +34,7 @@ namespace RoadOfTheOldKing.Enemies
         public Vector2 Origin { get; private set; }
         public bool HasContact { get; private set; }
         public bool IsCharge => spec.lunge;
+        public float RecoveryLeft => Phase == EnemyAttackPhase.Recovery ? clock.Remaining : 0f;
         public bool IsLocked => spec.lunge && (Phase != EnemyAttackPhase.Windup || clock.Elapsed >= spec.attack.windup - spec.lockLead);
         public float TrackProgress => Mathf.Clamp01(clock.Elapsed / Mathf.Max(.01f, spec.attack.windup - spec.lockLead));
 

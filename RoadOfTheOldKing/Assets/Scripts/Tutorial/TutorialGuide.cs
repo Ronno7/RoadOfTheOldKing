@@ -264,7 +264,8 @@ namespace RoadOfTheOldKing.Tutorial
             { HudNotifications.ClearHint(); return; }
             if (shownIndex != index) { shownIndex = index; shownUntil = Time.time + current.minShowSeconds; }
             if (current.id == "move") moveHintSeconds += Time.deltaTime;
-            if (current.condition == TutorialCondition.Zoomed) zoomHintSeconds += Time.deltaTime;
+            // Only time the player could read it counts toward the 6 s: behind the axe's prompt it isn't showing (18 Nov).
+            if (current.condition == TutorialCondition.Zoomed && HudNotifications.HintOnScreen) zoomHintSeconds += Time.deltaTime;
             Vector3? position = current.cueAtPlayer ? player.transform.position + (Vector3)current.cueOffset :
                 current.cueTarget != null ? current.cueTarget.position + (Vector3)current.cueOffset : (Vector3?)null;
             string teaching = current.hint;

@@ -213,8 +213,10 @@ namespace RoadOfTheOldKing.Progression
                 Mathf.Abs(player.transform.lossyScale.x), Mathf.Abs(player.transform.lossyScale.y)));
             Physics2D.OverlapBox(position + offset, size, player.transform.eulerAngles.z,
                 new ContactFilter2D { useTriggers = false }, overlaps);
+            // A collider the player is excused from (the Recall stone's tall carving) isn't solid for them; overlap queries
+            // don't consult those exceptions, so ask.
             foreach (var hit in overlaps)
-                if (hit != null && !hit.transform.IsChildOf(player.transform)) return false;
+                if (hit != null && !hit.transform.IsChildOf(player.transform) && !Physics2D.GetIgnoreCollision(hit, shape)) return false;
             MoveTo(position);
             return true;
         }

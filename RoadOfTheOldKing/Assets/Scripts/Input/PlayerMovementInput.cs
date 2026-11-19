@@ -66,7 +66,7 @@ namespace RoadOfTheOldKing.Input
             // L3 latches sprint the way holding Shift sustains it; stopping or a second click ends it.
             if (sprintToggle.WasPressedThisFrame()) sprintLatched = !sprintLatched;
             // Running out of stamina also ends it: a latched sprint must not restart on its own once stamina refills.
-            if (MoveDirection == Vector2.zero || (stamina != null && stamina.Current <= 0f)) sprintLatched = false;
+            if (MoveDirection == Vector2.zero || (stamina != null && stamina.Current <= RoadOfTheOldKing.Player.PlayerStamina.Empty)) sprintLatched = false;
             SprintHeld = sprint.IsPressed() || sprintLatched;
             if (dash.WasPressedThisFrame())
                 dashQueuedUntil = Time.time + 0.12f;

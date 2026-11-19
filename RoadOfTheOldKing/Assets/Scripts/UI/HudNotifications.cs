@@ -47,7 +47,7 @@ namespace RoadOfTheOldKing.UI
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void Reset()
         {
-            receipts.Clear(); HintWorldPosition = null; HintSpatialOnly = false; Hint = null; HintCompleted = false; Version++;
+            receipts.Clear(); HintWorldPosition = null; HintSpatialOnly = false; HintOnScreen = false; Hint = null; HintCompleted = false; Version++;
             announcements.Clear();
             Speaker = null; Speech = null; SpeechUntil = float.NegativeInfinity;
             UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
@@ -94,16 +94,13 @@ namespace RoadOfTheOldKing.UI
             return announcements.Count > 0;
         }
 
-        // Raised when the HUD takes an announcement to show it: a place is only remembered as seen once its name is shown.
+        // Raised on the first frame an announcement is actually on screen (not merely taken from the queue, nor playing
+        // behind a hidden HUD): a place is only remembered as seen once its name has been seen (18 Nov).
         public static event Action<Announcement> AnnouncementShown;
 
-        public static void TakeAnnouncement()
-        {
-            if (announcements.Count == 0) return;
-            var shown = announcements[0];
-            announcements.RemoveAt(0);
-            AnnouncementShown?.Invoke(shown);
-        }
+        public static void TakeAnnouncement() { if (announcements.Count > 0) announcements.RemoveAt(0); }
+
+        public static void ReportShown(Announcement shown) => AnnouncementShown?.Invoke(shown);
 
         // Going to the title ends the run's queue: an event from the old run (BONFIRE LIT) must not greet a new one.
         public static void ClearAnnouncements() => announcements.Clear();
@@ -128,6 +125,8 @@ namespace RoadOfTheOldKing.UI
 
         // A spatial-only hint shows beside its world point or not at all; it never falls back to the bottom of the screen.
         public static bool HintSpatialOnly { get; private set; }
+        // Set by the HUD each frame: the hint is actually showing (not hidden behind an interaction prompt or a menu).
+        public static bool HintOnScreen { get; set; }
 
         public static void SetHint(string text, bool completed = false, Vector3? worldPosition = null, bool spatialOnly = false)
         {

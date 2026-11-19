@@ -24,6 +24,8 @@ namespace RoadOfTheOldKing.Player
         // Clamped to 0..1 for meters; Current itself can be negative.
         public float Normalized => Mathf.Clamp01(Current / maximum);
         public bool IsExhausted => Current < 0f;
+        // Below this a drain fails; the sprint latch uses the same line, so a tiny remainder can't restart a sprint.
+        public const float Empty = .001f;
         public bool WasSpendRejected => Time.unscaledTime < rejectedUntil;
 #if UNITY_EDITOR || DEVELOPMENT_BUILD || ROTOK_DEV_TOOLS
         public bool DebugInfinite { get; set; }
@@ -62,7 +64,7 @@ namespace RoadOfTheOldKing.Player
             if (DebugInfinite) { Restore(); return true; }
 #endif
             // Any positive stamina is enough to act; continuous sprinting leaves tiny float remainders.
-            if (Current <= 0.001f)
+            if (Current <= Empty)
             {
                 rejectedUntil = Time.unscaledTime + 0.35f;
                 return false;
@@ -81,7 +83,7 @@ namespace RoadOfTheOldKing.Player
 #if UNITY_EDITOR || DEVELOPMENT_BUILD || ROTOK_DEV_TOOLS
             if (DebugInfinite) { Restore(); return true; }
 #endif
-            if (Current <= 0.001f) return false;
+            if (Current <= Empty) return false;
             if (amount > 0f)
             {
                 Current = Mathf.Max(0f, Current - amount);

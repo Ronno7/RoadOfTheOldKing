@@ -20,6 +20,7 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = ROOT / "ArtSource/Enemies/LowlandsManifest.json"
 JOURNAL = MANIFEST.with_name("fit_enemy_frames.pending.json")
+LOCK = ROOT / "tmp/fit_enemy_frames.lock"  # ignored by git; the OS lock on it is what counts
 ROOTS = (ROOT / "ArtSource/Enemies", ROOT / "RoadOfTheOldKing/Assets/Art/Sprites/Enemies")
 DARK = 48
 SAMPLES = 6
@@ -135,16 +136,66 @@ def commit(writes, operation):
 
 
 def finish():
-    """Make the journal's swaps, skipping those already made, then drop it. Returns the journalled operation."""
+    """Make the journal's swaps, skipping those already made, then drop it. Returns the journalled operation.
+    Every staged file is checked against its recorded hash before any target is touched, so a damaged stage can't
+    replace either art copy; the journal then stays for a person to look at."""
     journal = json.loads(JOURNAL.read_bytes())
-    for temp, target, digest in journal["replace"]:
-        temp, target = ROOT / temp, ROOT / target
+    entries = [(ROOT / temp, ROOT / target, digest) for temp, target, digest in journal["replace"]]
+    for temp, target, digest in entries:
+        source = temp if temp.exists() else target
+        if not source.exists() or hashlib.sha256(source.read_bytes()).hexdigest() != digest:
+            sys.exit(f"Cannot finish {JOURNAL}: {source} doesn't match its recorded hash. Nothing was replaced.")
+    for temp, target, _ in entries:
         if temp.exists():
             os.replace(temp, target)
-        elif not target.exists() or hashlib.sha256(target.read_bytes()).hexdigest() != digest:
-            sys.exit(f"Cannot finish {JOURNAL}: {target} is neither staged nor written.")
     JOURNAL.unlink()
     return journal["operation"]
+
+
+class FitLock:
+    """One fit at a time: every fit rewrites the shared manifest from what it read, so two at once would put back each
+    other's old hashes (18 Nov). The OS lock dies with the process, so a crash never leaves it held."""
+
+    def __enter__(self):
+        LOCK.parent.mkdir(parents=True, exist_ok=True)
+        self.file = open(LOCK, "a+b")
+        try:
+            if os.name == "nt":
+                import msvcrt
+                self.file.seek(0)
+                msvcrt.locking(self.file.fileno(), msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(self.file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            self.file.close()
+            sys.exit("Another fit is changing the enemy manifest; run this one once it has finished.")
+        return self
+
+    def __exit__(self, *exc):
+        try:
+            if os.name == "nt":
+                import msvcrt
+                self.file.seek(0)
+                msvcrt.locking(self.file.fileno(), msvcrt.LK_UNLCK, 1)
+        finally:
+            self.file.close()
+
+
+def normalized(operation):
+    """A journal from before 18 Nov kept the command as typed ('.75'); compare it in today's spelling."""
+    parts = operation.split()
+    if len(parts) == 4:
+        try:
+            parts[3] = f"{float(parts[3]):g}"
+        except ValueError:
+            pass
+    return " ".join(parts)
+
+
+def operation_key(args):
+    """One spelling per operation, so '0.75' and '.75' are the same shrink."""
+    return " ".join([args.mode, args.character, args.slot] + ([f"{args.factor:g}"] if args.factor is not None else []))
 
 
 def main():
@@ -156,8 +207,20 @@ def main():
     args = parser.parse_args()
     if args.mode == "shrink" and args.factor is None:
         parser.error("shrink needs a factor")
+    with FitLock():
+        fit(args)
+
+
+def fit(args):
+    # An interrupted run is finished first. If it was this very operation, that completes the request: success, and
+    # nothing is applied a second time (a caller that retries on failure would otherwise shrink twice, 18 Nov).
+    # A different interrupted operation is finished, then the requested one runs.
     if JOURNAL.exists():
-        sys.exit(f"Finished the interrupted '{finish()}'; nothing else was done. Run again only if still needed.")
+        recovered = finish()
+        if normalized(recovered) == operation_key(args):
+            print(f"Finished the interrupted '{recovered}'; it is complete.")
+            return
+        print(f"Finished the interrupted '{recovered}' first.")
     manifest = json.loads(MANIFEST.read_bytes())
     character = next(c for c in manifest["characters"] if c["name"] == args.character)
     count = 0
@@ -181,7 +244,7 @@ def main():
         frame["sha256"] = hashlib.sha256(data).hexdigest()
         count += 1
     writes.append((MANIFEST, (json.dumps(manifest, indent=1) + "\n").encode("utf-8")))
-    commit(writes, " ".join(sys.argv[1:]))
+    commit(writes, operation_key(args))
     print(f"{args.mode}: {count} frames of {args.character}")
 
 

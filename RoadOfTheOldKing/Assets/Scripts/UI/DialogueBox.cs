@@ -22,6 +22,8 @@ namespace RoadOfTheOldKing.UI
         [SerializeField, Min(1f)] private float charactersPerSecond = 48f;
         [Tooltip("Camera size while talking (half the visible height).")]
         [SerializeField, Min(.5f)] private float closeUpSize = 4.75f;
+        [Tooltip("Where the hero sits on screen while talking (viewport 0..1).")]
+        [SerializeField] private Vector2 heroOnScreen = new Vector2(.5f, .5f);
 
         private PlayerHealth player;
         private PlayerControlLocks locks;
@@ -76,6 +78,8 @@ namespace RoadOfTheOldKing.UI
             locks.Lock(this); MenuStack.Push(this);
             var zoom = Camera.main != null ? Camera.main.GetComponent<CameraZoom2D>() : null;
             if (zoom != null) zoom.SetOverride(this, closeUpSize);
+            // Framing suspends free look: a look held up before talking left the hero's feet at the box's edge (18 Nov).
+            if (Camera.main != null && Camera.main.TryGetComponent(out RoadOfTheOldKing.Cameras.CameraFollow2D follow)) follow.SetFraming(this, heroOnScreen);
             Say(say, then);
             return true;
         }
@@ -110,6 +114,7 @@ namespace RoadOfTheOldKing.UI
             if (overlay != null) overlay.style.display = DisplayStyle.None;
             var zoom = Camera.main != null ? Camera.main.GetComponent<CameraZoom2D>() : null;
             if (zoom != null) zoom.ClearOverride(this);
+            if (Camera.main != null && Camera.main.TryGetComponent(out RoadOfTheOldKing.Cameras.CameraFollow2D follow)) follow.ClearFraming(this);
         }
 
         private IEnumerator UnlockNextFrame() { yield return null; locks?.Unlock(this); releasing = null; }

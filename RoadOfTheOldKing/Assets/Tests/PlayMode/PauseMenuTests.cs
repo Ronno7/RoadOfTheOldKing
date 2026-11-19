@@ -17,6 +17,60 @@ public sealed class PauseMenuTests
         CheckRun.Expect(Run());
     }
 
+    // 18 Nov (Codex): a place is remembered only once its name has been on screen. Behind the hidden HUD (F2 sets the
+    // panel to display: none) the banner may play, but it's reported shown on the first frame the HUD is visible.
+    [UnityEngine.TestTools.UnityTest]
+    public System.Collections.IEnumerator HiddenHudDoesntReportAPlaceSeen()
+    {
+        yield return CheckRun.Settle();
+        var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+        // Before the HUD exists: an earlier test's GUARDIAN FALLEN may still be queued, and the HUD would take it first.
+        RoadOfTheOldKing.UI.HudNotifications.ClearAnnouncements();
+        var player = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Player/Player.prefab"), new Vector3(900f, 900f), Quaternion.identity);
+        var shown = new List<string>();
+        Action<RoadOfTheOldKing.UI.Announcement> listen = a => shown.Add(a.Text);
+        RoadOfTheOldKing.UI.HudNotifications.AnnouncementShown += listen;
+        UnityEngine.UIElements.VisualElement tree = null;
+        try
+        {
+            yield return null;
+            var root = (UnityEngine.UIElements.VisualElement)typeof(RoadOfTheOldKing.UI.GameHud).GetField("root", flags).GetValue(player.GetComponent<RoadOfTheOldKing.UI.GameHud>());
+            tree = root.panel.visualTree;
+            tree.style.display = UnityEngine.UIElements.DisplayStyle.None; // what F2 does
+            RoadOfTheOldKing.UI.HudNotifications.ShowArea("Test landmark", true);
+            for (float until = Time.unscaledTime + .8f; Time.unscaledTime < until;) yield return null;
+            var locks = player.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>();
+            NUnit.Framework.Assert.IsFalse(RoadOfTheOldKing.UI.HudNotifications.TryPeekAnnouncement(out _), "the hidden HUD took the banner from the queue (menu open " + RoadOfTheOldKing.UI.MenuStack.IsAnyOpen + ", controls locked " + (locks != null && locks.IsLocked) + ", alive " + player.GetComponent<RoadOfTheOldKing.Player.PlayerHealth>().IsAlive + ", session " + (RoadOfTheOldKing.Progression.GameSession.Instance != null) + ", dev panel captures " + RoadOfTheOldKing.UI.DevToolsPanel.CapturesInput + ", HUDs " + UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.UI.GameHud>(FindObjectsSortMode.None).Length + ", this HUD announcing " + typeof(RoadOfTheOldKing.UI.GameHud).GetField("announcing", flags).GetValue(player.GetComponent<RoadOfTheOldKing.UI.GameHud>()) + ", HUD enabled " + player.GetComponent<RoadOfTheOldKing.UI.GameHud>().isActiveAndEnabled + ")");
+            NUnit.Framework.Assert.IsEmpty(shown, "a banner behind the hidden HUD isn't reported seen");
+            tree.style.display = UnityEngine.UIElements.StyleKeyword.Null;
+            for (int i = 0; i < 10 && shown.Count == 0; i++) yield return null;
+            NUnit.Framework.Assert.AreEqual(new[] { "Test landmark" }, shown.ToArray(), "reported on its first visible frame");
+
+            // Codex, 18 Nov: F2 pressed on the banner's first visible frame. The hider acts in LateUpdate, after the HUD's
+            // Update and before anything is drawn; a test coroutine resumes in the same gap, so hiding here is that order.
+            var banner = (UnityEngine.UIElements.VisualElement)typeof(RoadOfTheOldKing.UI.GameHud).GetField("areaBanner", flags).GetValue(player.GetComponent<RoadOfTheOldKing.UI.GameHud>());
+            for (float until = Time.unscaledTime + 8f; Time.unscaledTime < until && banner.style.display == UnityEngine.UIElements.DisplayStyle.Flex;) yield return null; // the first banner ends
+            shown.Clear();
+            RoadOfTheOldKing.UI.HudNotifications.ShowArea("Second landmark", true);
+            for (int i = 0; i < 300 && banner.style.display != UnityEngine.UIElements.DisplayStyle.Flex; i++) yield return null;
+            NUnit.Framework.Assert.AreEqual(UnityEngine.UIElements.DisplayStyle.Flex, banner.style.display.value, "the second banner became visible");
+            tree.style.display = UnityEngine.UIElements.DisplayStyle.None; // F2 on that very frame
+            for (int i = 0; i < 10; i++) yield return null;
+            NUnit.Framework.Assert.IsEmpty(shown, "a banner hidden on its first visible frame, before it was drawn, isn't reported seen");
+            tree.style.display = UnityEngine.UIElements.StyleKeyword.Null;
+            for (int i = 0; i < 10 && shown.Count == 0; i++) yield return null;
+            NUnit.Framework.Assert.AreEqual(new[] { "Second landmark" }, shown.ToArray(), "and is reported once it has really been drawn");
+        }
+        finally
+        {
+            RoadOfTheOldKing.UI.HudNotifications.AnnouncementShown -= listen;
+            if (tree != null) tree.style.display = UnityEngine.UIElements.StyleKeyword.Null;
+            RoadOfTheOldKing.UI.HudNotifications.ClearAnnouncements();
+            UnityEngine.Object.Destroy(player);
+        }
+        Debug.Log("PASS hidden HUD: the place was reported seen only once visible");
+    }
+
     // 18 Nov: the Screen flashes setting scales what actually renders. Enemy hit flashes (wolf and melee views) and the
     // low-health bar's heartbeat, read back from the renderer and the HUD element at Off, half and full.
     [UnityEngine.TestTools.UnityTest]
