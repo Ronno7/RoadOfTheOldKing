@@ -47,8 +47,10 @@ namespace RoadOfTheOldKing.Weapons
             return distance;
         }
 
+        // Low cover (World.ThrowOver) stops the hero but never the axe.
         private bool IsCandidate(Collider2D collider) => collider != null &&
             !collider.transform.IsChildOf(owner) && !collider.transform.IsChildOf(weapon) &&
+            !collider.TryGetComponent<RoadOfTheOldKing.World.ThrowOver>(out _) &&
             (!collider.isTrigger ||
                 (collider.TryGetComponent<EnemyHurtbox>(out var hurtbox) && hurtbox.CanReceiveHits));
 

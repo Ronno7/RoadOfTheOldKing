@@ -89,14 +89,14 @@ if(phase==8||phase==10){
             lone.GetComponent<RoadOfTheOldKing.Combat.Damageable>().ReceiveHit(hit);
             check(session.Progress.Has("tutorial/enemy/first-wolf")&&!reward.IsAvailable,"Lone wolf saves milestone, not pack reward");
             check(!stone.IsReady&&glimmers.All(r=>!r.enabled),"Recall and glimmer wait for safe recovery");
-            move(new Vector2(81.5f,28.5f));
+            move(new Vector2(90.4f,30f)); // beside the hedge, 3.5 units from the stone (18 Nov)
             check(player.Health.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(lone.gameObject,RoadOfTheOldKing.Combat.AttackKind.EnemyMelee,30,Vector2.down,0,0)),"Recovery damage accepted");
         }else if(phase==2){
             if(flask.Charges==flask.MaxCharges){check(flask.TryDrink(),"Real flask drink starts after hit-stop");return "WAIT: allow the real drink and safe recovery to finish, then repeat phase 2.";}
             check(!flask.IsDrinking&&player.Health.Health==player.Health.MaxHealth&&flask.Charges==flask.MaxCharges-1,"Flask heals with one charge spent");
             check(session.Progress.Has("tutorial/step/flask")&&stone.IsReady,"Safe recovery makes stone ready");
             check(!gate.IsOpen&&!combat.CanRecall,"Gate closed before awakening");
-            move(new Vector2(81.5f,28.5f));tick(.1f);check(combat.Weapon.TryThrow(Vector2.up),"Actual Recall-stone throw starts");tick(.7f);
+            move(new Vector2(90.4f,30f));tick(.1f);check(combat.Weapon.TryThrow(Vector2.right),"Actual Recall-stone throw over the hedge starts");tick(.7f);
             check(stone.IsAwakening&&player.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>().IsLockedBy(stone)&&glimmers.All(r=>!r.enabled),"Stone hit starts awakening, hides idle glimmer and locks controls");
         }else if(phase==3){
             check(stone.IsAwakened&&!stone.IsAwakening&&combat.CanRecall&&!combat.Weapon.IsAway&&glimmers.All(r=>!r.enabled),"Awakening recalls axe and restores control without idle glimmer");
