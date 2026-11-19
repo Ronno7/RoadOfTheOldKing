@@ -7,23 +7,27 @@
 - Game icon for the window and taskbar.
 - "GUARDIAN FALLEN" marks a boss's defeat.
 - Controller rumble, with a Vibration setting.
-- On a controller, swings lean up to 40° and throws up to 15° toward a nearby enemy.
+- Controller aim assist: swings lean up to 40°, throws up to 15°.
 - PlayStation controllers show their own button names.
-- Lighting a bonfire bursts it into flame with a shower of sparks, bigger and gold at upgrade bonfires.
+- Bonfires burst into flame and sparks when lit.
+- A small flame blinks in the top-right corner while saving.
 
 **Changed**
 - The hero carries a new double-bladed axe sprite.
 - Free look is two-thirds faster on a controller.
 - Place names and "BONFIRE LIT" share one style and never overlap.
-- Upgrade bonfires burn a larger gold flame in a bronze brazier, with rising embers and brighter smoke.
+- Upgrade bonfires burn a larger gold flame, with embers and a bigger burst.
+- Upgrade bonfires have their own menu; Upgrades glows when affordable.
+- Other bonfires no longer list Upgrades.
 - A light attack queued late in a dodge starts when the dodge ends.
 - Recall can't start while you drink.
 - Resting at a bonfire brings the camera in closer.
 - Lighting a bonfire makes it your respawn point.
 - Bonfire travel lists fires by region.
-- Upgrade bonfires have their own menu frame and a glowing Upgrades option; other bonfires no longer list Upgrades.
-- On a controller, walking speed follows how far you tilt the stick.
-- On a controller, sprint and dodge share one button as in Dark Souls: hold it to sprint, tap it to dodge.
+- Standing in a bonfire's flame burns a little.
+- Interaction prompts are smaller.
+- Controller walking speed follows how far you tilt the stick.
+- Controller: hold dodge to sprint, tap it to dodge, as in Dark Souls.
 
 **Fixed**
 - Cliffs no longer make noise when you swing from on top of them.
