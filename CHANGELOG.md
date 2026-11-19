@@ -45,6 +45,7 @@
 - Talking after a free look keeps the hero in view.
 - Clicking to open the title menu no longer picks a row.
 - The aim marker no longer hides behind roofs and trees.
+- The hero no longer slips under hedges where two of them meet.
 - The Steam demo keeps its own save, apart from playtest builds.
 
 ## 0.5 — Full production

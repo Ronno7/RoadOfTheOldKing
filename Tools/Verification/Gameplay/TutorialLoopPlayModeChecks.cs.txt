@@ -96,7 +96,7 @@ if(phase==8||phase==10){
             check(!flask.IsDrinking&&player.Health.Health==player.Health.MaxHealth&&flask.Charges==flask.MaxCharges-1,"Flask heals with one charge spent");
             check(session.Progress.Has("tutorial/step/flask")&&stone.IsReady,"Safe recovery makes stone ready");
             check(!gate.IsOpen&&!combat.CanRecall,"Gate closed before awakening");
-            move(new Vector2(90.4f,30f));tick(.1f);check(combat.Weapon.TryThrow(Vector2.right),"Actual Recall-stone throw over the hedge starts");tick(.7f);
+            move(new Vector2(90.4f,30f));tick(.1f);check(combat.Weapon.TryThrow(Vector2.right),"Actual Recall-stone throw over the hedge starts");tick(1f);
             check(stone.IsAwakening&&player.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>().IsLockedBy(stone)&&glimmers.All(r=>!r.enabled),"Stone hit starts awakening, hides idle glimmer and locks controls");
         }else if(phase==3){
             check(stone.IsAwakened&&!stone.IsAwakening&&combat.CanRecall&&!combat.Weapon.IsAway&&glimmers.All(r=>!r.enabled),"Awakening recalls axe and restores control without idle glimmer");

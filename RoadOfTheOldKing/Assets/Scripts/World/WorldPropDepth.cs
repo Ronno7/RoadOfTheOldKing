@@ -21,6 +21,10 @@ namespace RoadOfTheOldKing.World
 
         // The hero's art is about a tile wide and two tall from the feet; a bush's art reaches two rows up from its base.
         private const float HalfWidth = .5f, Height = 2f, ArtHeight = 2f;
+        // A base his art only grazes at the side doesn't decide. In the inside corner of two stamps (one beside him with
+        // a lower base, one behind him), a 0.1-unit graze of the side stamp put the whole map, and so the stamp behind
+        // him, over the hero (user, 18 Nov, Tutorial (85.6, 52.6) and (91.6, 92.6): "able to walk under it").
+        private const float SideGraze = .25f;
 
         private void Start()
         {
@@ -75,6 +79,8 @@ namespace RoadOfTheOldKing.World
                     float bottom = tiles.CellToWorld(cell).y;
                     // Only art that overlaps the hero decides; a bush he has already passed doesn't.
                     if (bottom + ArtHeight <= feet.y || bottom >= feet.y + Height) continue;
+                    float left = tiles.CellToWorld(cell).x;
+                    if (Mathf.Min(feet.x + HalfWidth, left + tiles.cellSize.x) - Mathf.Max(feet.x - HalfWidth, left) < SideGraze) continue;
                     float ground = bottom + tiles.cellSize.y * .5f;
                     any = true;
                     if (feet.y > ground) { behind = true; break; }
