@@ -75,13 +75,13 @@ Code builds as three assemblies: `RoadOfTheOldKing` (`Assets/Scripts`), `RoadOfT
 
 ### Controls
 
-Prompts follow whichever device was used last.
+Prompts follow whichever device was used last, with Xbox or PlayStation button names to match the pad.
 
 | Keyboard / mouse | Controller | Action |
 | --- | --- | --- |
 | WASD / arrows | Left stick | Move |
-| Shift (hold) | L3 (click) | Sprint |
-| Space | B | Dodge |
+| Shift (hold) | B (hold) | Sprint |
+| Space | B (tap; dodges as you let go) | Dodge |
 | Left click | RB | Light combo: sweep, reverse sweep, thrust |
 | Right click (hold, release) | RT (hold, release) | Charged cleave |
 | E | LT | Tap to throw, hold to aim; while the axe is away, Recall |
@@ -102,9 +102,11 @@ Prompts follow whichever device was used last.
 2. **Controls lost** (menu, death): the body stops.
 3. **Dodge:** 3.2 units over 0.36 s in a locked direction, bursting out and easing to walking speed.
 4. **Weapon action:** attacks and throws scale walking speed; the finisher adds a lunge.
-5. **Free movement:** momentum toward the input velocity (walk 4.5 u/s, sprint 7.2 u/s).
+5. **Free movement:** momentum toward the input velocity (walk 4.5 u/s, sprint 7.2 u/s). On a controller, walking speed follows the stick's tilt (20% to full, on a squared curve).
 
 Rope crossings are a separate motor mode between authored anchors.
+
+**Controller only:** swings bend toward a live enemy within 40° of the aim and 2.6 units, throws within 15° and 6. Rumble marks hits, the full charge, the catch and slams; Settings › Vibration scales it.
 
 ### Stamina, dodge and flasks
 

@@ -6,6 +6,9 @@
 - Volume sliders for music, ambience and effects.
 - Game icon for the window and taskbar.
 - "GUARDIAN FALLEN" marks a boss's defeat.
+- Controller rumble, with a Vibration setting.
+- On a controller, swings lean up to 40° and throws up to 15° toward a nearby enemy.
+- PlayStation controllers show their own button names.
 
 **Changed**
 - The hero carries a new double-bladed axe sprite.
@@ -17,6 +20,8 @@
 - Resting at a bonfire brings the camera in closer.
 - Lighting a bonfire makes it your respawn point.
 - Bonfire travel lists fires by region.
+- On a controller, walking speed follows how far you tilt the stick.
+- On a controller, sprint and dodge share one button as in Dark Souls: hold it to sprint, tap it to dodge.
 
 **Fixed**
 - Cliffs no longer make noise when you swing from on top of them.
@@ -32,14 +37,14 @@
 - Breaking a wolf's poise no longer shortens its opening.
 - The Watcher's slam pushes you away from it, never into it.
 - Wolf snaps no longer look locked while still turning toward you.
-- Continue no longer moves you off the fallen Watcher's seat or from behind the Recall stone.
+- Continue no longer moves you off the fallen Watcher's seat.
 - Place names and banners no longer go missing or carry into a new game.
 - The inventory hides Recall until you awaken it.
 - The axe hint no longer jumps to the bottom of the screen.
 - The zoom lesson no longer passes while its text is hidden.
 - Talking after a free look keeps the hero in view.
-- A controller sprint no longer restarts on its own after running dry.
 - Clicking to open the title menu no longer picks a row.
+- The aim marker no longer hides behind roofs and trees.
 - The Steam demo keeps its own save, apart from playtest builds.
 
 ## 0.5 — Full production
