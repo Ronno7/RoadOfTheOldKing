@@ -24,6 +24,15 @@
 - Quitting from the pause menu or the window keeps your progress.
 - New Game asks before replacing a save it can't read.
 - The title waits for a key press at launch.
+- Screen flashes Off now also covers enemy hits and the low-health bar.
+- The boar's charge warning ends where the charge stops.
+- The Watcher's slam pushes you away from it, never into it.
+- Wolf snaps no longer look locked while still turning toward you.
+- Continue no longer moves you off the fallen Watcher's seat.
+- Place names and banners no longer go missing or carry into a new game.
+- The inventory hides Recall until you awaken it.
+- The axe hint no longer jumps to the bottom of the screen.
+- The Steam demo keeps its own save, apart from playtest builds.
 
 ## 0.5 — Full production
 
