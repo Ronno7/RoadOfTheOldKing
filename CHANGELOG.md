@@ -21,6 +21,7 @@
 - Resting at a bonfire brings the camera in closer.
 - Lighting a bonfire makes it your respawn point.
 - Bonfire travel lists fires by region.
+- Upgrade bonfires have their own menu frame and a glowing Upgrades option; other bonfires no longer list Upgrades.
 - On a controller, walking speed follows how far you tilt the stick.
 - On a controller, sprint and dodge share one button as in Dark Souls: hold it to sprint, tap it to dodge.
 
