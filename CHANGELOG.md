@@ -9,12 +9,13 @@
 - Controller rumble, with a Vibration setting.
 - On a controller, swings lean up to 40° and throws up to 15° toward a nearby enemy.
 - PlayStation controllers show their own button names.
+- Lighting a bonfire bursts it into flame with a shower of sparks, bigger and gold at upgrade bonfires.
 
 **Changed**
 - The hero carries a new double-bladed axe sprite.
 - Free look is two-thirds faster on a controller.
 - Place names and "BONFIRE LIT" share one style and never overlap.
-- Upgrade bonfires burn a larger gold flame in a bronze brazier.
+- Upgrade bonfires burn a larger gold flame in a bronze brazier, with rising embers and brighter smoke.
 - A light attack queued late in a dodge starts when the dodge ends.
 - Recall can't start while you drink.
 - Resting at a bonfire brings the camera in closer.
