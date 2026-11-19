@@ -247,7 +247,8 @@ Level construction is in [World and tilemaps](World.md).
 | System | Owner | Behaviour |
 | --- | --- | --- |
 | Interaction (F) | `PlayerBonfireInteraction` | Picks one nearby target. The HUD prompt reads the same selection. |
-| Bonfires | `Bonfire` | First use lights it, sets the respawn point and unlocks travel. Next use rests: heals, refills, resets enemies, sets the respawn point. Travel lists fires by region. |
+| Bonfires | `Bonfire` | First use lights it (a burst of flame and sparks), sets the respawn point and unlocks travel. Next use rests: heals, refills, resets enemies, sets the respawn point. Travel lists fires by region. A lit flame burns a hero standing in it, 2 every 1.5 s, without knockback. |
+| Upgrade fires | `Bonfire.allowsUpgrades` | A larger gold flame in a bronze brazier, with embers. Only their menu, in its own frame, lists Upgrades. |
 | Place names | `AreaName` | The smallest zone containing the player names the place, shown once per save. |
 | Announcements | `HudNotifications`, `GameHud` | Place names and events queue, one at a time in one spot; regions largest. |
 | Pots and chests | `Breakable`, `CoinSource`, `RewardChest` | Each result saves once, including empty rolls. |
@@ -293,16 +294,17 @@ One verb per space. Each lesson completes from a real outcome, not a key press.
 | --- | --- |
 | Vitals | Health and flasks on damage, healing or combat; a setting keeps them on |
 | Stamina arc | Pixel arc over the hero whenever stamina is below full |
-| Prompt | One `[F] verb` chip above the selected target |
+| Prompt | One `F verb` chip above the selected target, key in gold |
+| Saving | A small flame blinking in the top-right corner |
 | Boss bar | Name and long health bar along the bottom during a boss fight |
 | Hints and receipts | One guide hint; up to three reward notices |
 | Inventory | Tab: resource counts, tools and discovered knowledge |
 
 - **UI kit:** every panel, menu and chip shares `UI/Kit.uss` and the RotOK pixel fonts, at 2 reference pixels per UI pixel on a 960x540 canvas.
 - **World meters:** enemy bars and the charge bar are small world-space documents, so they scale with what they measure.
-- **Menus:** `MenuStack` routes input to the top menu. Title, pause, bonfire and defeat screens share one theme. Pause lists every control for both devices from `ControlLabels`, the source the prompts use. Settings (volume, window, flashes, shake) live outside the save. After the prologue, New Game picks a cloak colour that `EnemyFlash` applies to the hero's blues. The title shows the region paintings behind its logo.
+- **Menus:** `MenuStack` routes input to the top menu. Title, pause, bonfire and defeat screens share one theme. Pause lists every control for both devices from `ControlLabels`, the source the prompts use. Settings (volume, window, flashes, shake, vibration) live outside the save. After the prologue, New Game picks a cloak colour that `EnemyFlash` applies to the hero's blues. The title shows the region paintings behind its logo.
 - **Atmosphere:** `RegionAtmosphere` lays a grade, cloud shadows and motes over each region, with Restrained (default) and Cinematic looks.
-- **Feedback:** `PlayerHitFeedback` flashes, kicks the camera and blinks the hero; `FeedbackSettings` scales it down for players who prefer less.
+- **Feedback:** `PlayerHitFeedback` flashes, kicks the camera, blinks the hero and rumbles a controller; `FeedbackSettings` and `Rumble` scale it down for players who prefer less.
 
 ## Tools
 
