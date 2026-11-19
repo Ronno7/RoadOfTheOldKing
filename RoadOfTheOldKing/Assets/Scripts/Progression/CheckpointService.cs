@@ -36,7 +36,7 @@ namespace RoadOfTheOldKing.Progression
             progress.DiscoverFire(fire.Id, SceneLoader.ActivePath, fire.DisplayName, fire.DisplayOrder, fire.Region);
             progress.checkpointId = fire.Id;
             progress.scenePath = SceneLoader.ActivePath;
-            session.CaptureAndSave("Bonfire lit. Saved.");
+            session.CaptureAndSave("Bonfire lit.");
             session.ClearResume();
             fire.NotifyLit();
             return true;
@@ -54,7 +54,7 @@ namespace RoadOfTheOldKing.Progression
             progress.scenePath = SceneLoader.ActivePath;
             session.Capture();
             RestoreCombatArea();
-            session.Save("Rested. Saved.");
+            session.Save("Rested.");
             session.ClearResume();
             return true;
         }
@@ -74,7 +74,7 @@ namespace RoadOfTheOldKing.Progression
             session.Capture();
             progress.checkpointId = destination.id;
             progress.scenePath = local != null ? SceneLoader.ActivePath : destination.scenePath;
-            session.Save("Travelled. Saved.");
+            session.Save("Travelled.");
             session.ClearResume();
             if (local == null)
             {

@@ -51,6 +51,7 @@ namespace RoadOfTheOldKing.Combat
 
         private void React(CombatHit hit)
         {
+            if (hit.Kind == AttackKind.Burn) return; // a fire's tick never staggers or pushes (user: "not getting thrown off")
             // Health is already reduced when HitReceived fires, so a dead target took the killing blow.
             bool lethal = !health.IsAlive;
             bool staggers = hit.StaggerDuration > 0f && (lethal || !Armored);

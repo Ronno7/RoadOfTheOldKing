@@ -104,7 +104,7 @@ try{
  var cranks=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SluiceCrank>(FindObjectsInactive.Include,FindObjectsSortMode.None);var dCrank=cranks.First(c=>c.name=="Distributor crank");var cCrank=cranks.First(c=>c.name=="Carriage crank");
  var feedback=s.GetComponent<RoadOfTheOldKing.World.SluiceFeedback>();System.Func<RoadOfTheOldKing.World.SluiceCrank,string> shows=c=>{feedback.GetType().GetMethod("Advance",f).Invoke(feedback,new object[]{.02f});return c.transform.Find("Native fitting visual").GetComponent<SpriteRenderer>().sprite.name;};
  check(dCrank.Prompt=="Place crank"&&cCrank.Prompt=="Place crank"&&shows(dCrank)=="CrankSocket"&&shows(cCrank)=="CrankSocket","Carried, the crank is in neither socket and both offer a place for it");
- check(turn(false)&&game.Progress.crankSocket=="green-lowlands/crank/distributor"&&dCrank.HoldsCrank&&!cCrank.HoldsCrank&&cCrank.Prompt=="Requires maintenance crank"&&shows(dCrank)=="Machine_Crank"&&shows(cCrank)=="CrankSocket","Placing puts the one crank in the distributor only");
+ check(turn(false)&&game.Progress.crankSocket=="green-lowlands/crank/distributor"&&dCrank.HoldsCrank&&!cCrank.HoldsCrank&&cCrank.Prompt=="Crank is in the other socket"&&shows(dCrank)=="Machine_Crank"&&shows(cCrank)=="CrankSocket","Placing puts the one crank in the distributor only");
  check(turn(false),"Owned crank and contextual interaction divert service");
  check(dCrank.Prompt=="Take crank","With its work done, the distributor offers the crank back");
  check(glinting()=="Brake vane,Catch vane","Second bay: both its vanes glint together, never in order ("+glinting()+")");

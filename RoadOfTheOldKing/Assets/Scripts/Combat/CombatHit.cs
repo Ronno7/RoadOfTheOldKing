@@ -2,7 +2,9 @@ using UnityEngine;
 
 namespace RoadOfTheOldKing.Combat
 {
-    public enum AttackKind { LightChop, ChargedCleave, Throw, Recall, EnemyMelee }
+    // Burn: standing in a lit fire (user, 19 Nov: like a World of Warcraft campfire). Every damage effect on the hero
+    // (flinch, flash, shake, blink, HUD, rumble) but never a stagger or push.
+    public enum AttackKind { LightChop, ChargedCleave, Throw, Recall, EnemyMelee, Burn }
 
     public readonly struct CombatHit
     {

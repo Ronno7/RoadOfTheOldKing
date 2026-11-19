@@ -55,6 +55,10 @@ namespace RoadOfTheOldKing.World
         private Vector3 restFlameScale, restFlamePosition;
         private float pivotUnits;
         private float igniteAge = -1f; // seconds since lighting, or -1
+        // Where a lit fire burns (Bonfire): the hero's feet anywhere over the drawn flame, from its base up through
+        // most of its height, in this root's space. Follows the gold flame's size.
+        internal Rect HeatArea { get; private set; }
+        private const float HeatReach = .7f; // share of the flame's drawn height, from its base
         // Embers are born across the upper gold flame: this far below its canvas top.
         private const float EmberDrop = .55f;
         // Where smoke starts above a usual fire's root: seven art pixels above the top of its 24-pixel flame canvas.
@@ -96,6 +100,15 @@ namespace RoadOfTheOldKing.World
             flame.transform.localPosition = usualFlamePosition + Vector3.up * (pivotUnits * usualFlameScale.y * (factor - 1f) + lift);
             restFlameScale = flame.transform.localScale;
             restFlamePosition = flame.transform.localPosition;
+            if (frames != null && frames.Length > 0 && frames[0] != null)
+            {
+                // The flame art fills its canvas less a pixel each side, from the bottom row up to three rows short of the top.
+                var frame0 = frames[0];
+                float half = (frame0.rect.width * .5f - 1f) / frame0.pixelsPerUnit * restFlameScale.x;
+                float bottom = restFlamePosition.y - frame0.pivot.y / frame0.pixelsPerUnit * restFlameScale.y;
+                float height = (frame0.rect.height - 3f) / frame0.pixelsPerUnit * restFlameScale.y;
+                HeatArea = new Rect(restFlamePosition.x - half, bottom, half * 2f, height * HeatReach);
+            }
             // Sparks leap from the flame's base.
             burst?.SetBase(flame.transform.localPosition.y - pivotUnits * restFlameScale.y);
             // Smoke keeps the same gap above a larger flame's canvas top; it sat on the gold flame's tips (user, 18 Nov:

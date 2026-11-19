@@ -137,6 +137,7 @@ def build_kit():
     kit["ForgePanel"] = forge_panel()                                                          # slice 12
     kit["ForgeCrest"] = forge_crest()
     kit["SelectedGold"] = frame(8, 8, 1, [C["gold"], C["inset"]])                              # slice 2
+    kit["SaveFlame"] = save_flame()
     return kit
 
 
@@ -314,6 +315,36 @@ def forge_crest():
         for x, ch in enumerate(row):
             if ch in colors:
                 img.putpixel((6 + x, 5 + y), colors[ch])
+    return img
+
+
+def save_flame():
+    """The saving indicator (user, 19 Nov): the crests' flame in the gold flame's colours with a one-pixel ink outline,
+    so it reads over any scenery in the HUD's top-right corner. 11x13."""
+    flame = [
+        "....r....",
+        "...rr....",
+        "...rrr...",
+        "..rrrr.r.",
+        "..rrgrrr.",
+        ".rrggrrr.",
+        ".rrgggrr.",
+        ".rggpggr.",
+        "..rgppgr.",
+        "...rggr..",
+        "....rr...",
+    ]
+    colors = {"r": hexrgb("D9962A"), "g": hexrgb("FFD45E"), "p": hexrgb("FFFBE3")}
+    img = Image.new("RGBA", (11, 13), CLEAR)
+    filled = {(x + 1, y + 1) for y, row in enumerate(flame) for x, ch in enumerate(row) if ch in colors}
+    for x, y in filled:
+        for ox, oy in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+            if (x + ox, y + oy) not in filled:
+                img.putpixel((x + ox, y + oy), C["ink"])
+    for y, row in enumerate(flame):
+        for x, ch in enumerate(row):
+            if ch in colors:
+                img.putpixel((x + 1, y + 1), colors[ch])
     return img
 
 

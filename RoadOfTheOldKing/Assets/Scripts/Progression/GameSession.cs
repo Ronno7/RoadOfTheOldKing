@@ -66,6 +66,10 @@ namespace RoadOfTheOldKing.Progression
         public bool SaveUnreadable => loadFailed;
         public bool CanReturnToTitle => SceneLoader.CanLoad(titleScene) && SceneLoader.ActivePath != titleScene;
         public string Status { get; private set; } = "";
+        // The last save attempt failed or the save can't be read: only then do menus show Status.
+        public bool SaveFailed { get; private set; }
+        // Each time permanent progress reaches disk: the HUD's save icon blinks (FromSoftware style, user 19 Nov).
+        public static event Action ProgressSaved;
         internal PlayerHealth Player { get; private set; }
         internal PlayerCombatController Combat { get; private set; }
 
@@ -180,10 +184,12 @@ namespace RoadOfTheOldKing.Progression
             if (loadFailed)
             {
                 Status = "Progress is session-only: unreadable save. Use New Game to replace it.";
+                SaveFailed = true;
                 return;
             }
-            try { store.Save(Progress); Status = successMessage; }
-            catch (Exception) { Status = "Progress is session-only: saving failed."; }
+            try { store.Save(Progress); Status = successMessage; SaveFailed = false; }
+            catch (Exception) { Status = "Progress is session-only: saving failed."; SaveFailed = true; return; }
+            ProgressSaved?.Invoke();
         }
 
         internal void CaptureAndSave(string successMessage)

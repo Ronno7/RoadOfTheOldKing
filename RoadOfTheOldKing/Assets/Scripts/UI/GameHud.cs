@@ -83,6 +83,11 @@ namespace RoadOfTheOldKing.UI
         private readonly List<VisualElement> flaskIcons = new List<VisualElement>();
         private WorldUIDocument charge, staminaArc;
         private VisualElement promptChip, cueChip, speechChip;
+        // Saving (FromSoftware style, user 19 Nov: "have it actually pop up on screen somewhere"): a small gold flame
+        // blinks faintly in the top-right corner while progress reaches disk.
+        private VisualElement saveFlame;
+        private float savedAt = float.NegativeInfinity;
+        private const float SaveShow = 1.6f, SaveBlinks = 2f;
         private Label speechText;
         private Vector3? promptAnchor, cueAnchor;
         private Label tutorialText;
@@ -122,11 +127,23 @@ namespace RoadOfTheOldKing.UI
             if (flask != null) flask.DrinkRefused += OnFlaskEmpty;
             Subscribe();
             Reveal();
+            GameSession.ProgressSaved += OnProgressSaved;
+        }
+
+        private void OnProgressSaved() => savedAt = Time.unscaledTime;
+
+        // Two faint blinks, then gone.
+        private void UpdateSaveFlame()
+        {
+            float t = Time.unscaledTime - savedAt;
+            float blink = t < 0f || t > SaveShow ? 0f : Mathf.Sin(Mathf.Clamp01(t / SaveShow) * Mathf.PI * SaveBlinks);
+            saveFlame.style.opacity = blink * blink * .85f;
         }
 
         private void OnDisable()
         {
             if (Active == this) Active = null;
+            GameSession.ProgressSaved -= OnProgressSaved;
             if (playerDamageable != null) playerDamageable.HitReceived -= OnPlayerHit;
             if (flask != null) flask.DrinkRefused -= OnFlaskEmpty;
             Unsubscribe();
@@ -165,6 +182,8 @@ namespace RoadOfTheOldKing.UI
             foreach (var label in new[] { weaponAwayText, hintText }) label.enableRichText = true;
             BuildAreaBanner();
             promptChip = AnchoredChip("prompt-chip", out promptText);
+            saveFlame = new VisualElement { name = "save-flame", pickingMode = PickingMode.Ignore };
+            root.Add(saveFlame); saveFlame.style.opacity = 0f;
             cueChip = AnchoredChip("cue-chip", out tutorialText);
             speechChip = AnchoredChip("speech-chip", out speechText);
             charge.Show(false); staminaArc.Show(false); SetVisible(hint, false);
@@ -264,7 +283,12 @@ namespace RoadOfTheOldKing.UI
             session = null;
         }
 
-        private void OnPlayerHit(CombatHit hit) { EncounterState.ReportThreat(); Reveal(); if (hit.Damage > 0) hurtAmount = 1f; }
+        // Every hit shows on the HUD; only a fire's burn isn't reported as a fight (it would hold back tutorial hints).
+        private void OnPlayerHit(CombatHit hit)
+        {
+            if (hit.Kind != AttackKind.Burn) EncounterState.ReportThreat();
+            Reveal(); if (hit.Damage > 0) hurtAmount = 1f;
+        }
         private void OnCoins(int amount, int total)
         {
             HudNotifications.Post("Bronze Coins +" + amount + " · " + total);
@@ -313,6 +337,7 @@ namespace RoadOfTheOldKing.UI
             // An event may play through a scripted moment (lighting a fire); a place name waits for a clear screen.
             UpdateAnnouncement(alive && !menuOpen, alive && !menuOpen && !scripted && (game == null || !game.IsLoading));
             UpdateBoss(alive && !menuOpen);
+            UpdateSaveFlame();
         }
 
         private static float Hold(AnnouncementTier tier) =>
@@ -516,7 +541,8 @@ namespace RoadOfTheOldKing.UI
             if (target == null) { promptAnchor = null; return; }
             var fireView = interaction.NearbyPickup == null ? target.GetComponent<BonfireSpriteView>() : null;
             promptAnchor = fireView != null ? fireView.PromptPosition : target.position + Vector3.up * promptHeight;
-            promptText.text = ControlLabels.Format("{interact} ") + verb;
+            // The smaller heading face (user, 19 Nov: "reduce the "Rest" text size ... experiment with the header font").
+            promptText.text = ControlLabels.FormatBare("{interact} ") + verb;
         }
 
         private void UpdateCharge(bool allowed)

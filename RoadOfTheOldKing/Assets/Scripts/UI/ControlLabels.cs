@@ -69,7 +69,12 @@ namespace RoadOfTheOldKing.UI
 
         // Replaces {token} with a gold [key] in UI Toolkit rich text; unknown tokens stay readable. No bold:
         // the pixel font has one weight.
-        public static string Format(string text, string keyColor = "#E7B85C")
+        public static string Format(string text, string keyColor = "#E7B85C") => Format(text, keyColor, true);
+
+        // Without the brackets: for text in a face that lacks them (RotOK Heading16), the gold alone marks the key.
+        public static string FormatBare(string text, string keyColor = "#E7B85C") => Format(text, keyColor, false);
+
+        private static string Format(string text, string keyColor, bool brackets)
         {
             if (string.IsNullOrEmpty(text) || text.IndexOf('{') < 0) return text;
             var result = new StringBuilder(text.Length + 32);
@@ -78,7 +83,8 @@ namespace RoadOfTheOldKing.UI
                 int end = text[i] == '{' ? text.IndexOf('}', i + 1) : -1;
                 if (end < 0) { result.Append(text[i]); continue; }
                 string token = text.Substring(i + 1, end - i - 1);
-                result.Append("<color=").Append(keyColor).Append(">[").Append(Get(token)).Append("]</color>");
+                result.Append("<color=").Append(keyColor).Append(brackets ? ">[" : ">").Append(Get(token))
+                    .Append(brackets ? "]</color>" : "</color>");
                 i = end;
             }
             return result.ToString();

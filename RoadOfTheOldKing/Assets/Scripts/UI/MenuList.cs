@@ -45,7 +45,8 @@ namespace RoadOfTheOldKing.UI
                 button.Add(cursor);
                 button.SetEnabled(actions[i].Enabled);
                 button.EnableInClassList("locked", actions[i].Locked);
-                if (!string.IsNullOrEmpty(actions[i].StyleClass)) button.AddToClassList(actions[i].StyleClass);
+                if (!string.IsNullOrEmpty(actions[i].StyleClass))
+                    foreach (var style in actions[i].StyleClass.Split(' ')) button.AddToClassList(style);
                 // Not focusable: UI Toolkit's built-in controller/keyboard navigation moves focus even when its
                 // events are stopped, which would step a second row. The "selected" class is the highlight.
                 button.focusable = false;

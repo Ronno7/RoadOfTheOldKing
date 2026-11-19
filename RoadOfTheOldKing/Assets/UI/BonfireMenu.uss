@@ -31,10 +31,12 @@
     display: flex; width: 42px; height: 42px; margin-left: -20px; top: -20px;
     background-image: url("project://database/Assets/Art/Sprites/UI/Kit/ForgeCrest.png");
 }
-/* Its Upgrades row ("make the upgrade button glow gold"): gold even when short of shards, pulsing to pale flame gold
-   (BonfireMenu toggles .glow), and a gold-edged bar when selected. */
-#bonfire-panel .kit-row.upgrade-row { color: var(--kit-gold); transition-property: color; transition-duration: 0.7s; }
-#bonfire-panel .kit-row.upgrade-row.glow { color: rgb(255, 237, 166); }
+/* Its Upgrades row: gold even when short of shards, in a gold-edged bar when selected. Only when an upgrade can be
+   bought (.available) does it pulse to pale flame gold and very slightly larger (BonfireMenu toggles .glow; user,
+   19 Nov: "save the strobing ... for when an upgrade is actually available ... subtly pulse in scale"). */
+#bonfire-panel .kit-row.upgrade-row { color: var(--kit-gold); }
+#bonfire-panel .kit-row.upgrade-row.available { transition-property: color, scale; transition-duration: 0.7s; }
+#bonfire-panel .kit-row.upgrade-row.available.glow { color: rgb(255, 237, 166); scale: 1.06 1.06; }
 #bonfire-panel .kit-row.upgrade-row.selected {
     background-image: url("project://database/Assets/Art/Sprites/UI/Kit/SelectedGold.png");
     -unity-slice-left: 2; -unity-slice-right: 2; -unity-slice-top: 2; -unity-slice-bottom: 2;

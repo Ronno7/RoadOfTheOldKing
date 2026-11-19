@@ -31,6 +31,9 @@ System.Func<Component,float> igniting=f=>{var v=f.GetComponent<RoadOfTheOldKing.
 System.Func<System.Collections.Generic.List<UnityEngine.UIElements.Button>> menuRows=()=>{var m=player.GetComponent<RoadOfTheOldKing.UI.BonfireMenu>();var l=m.GetType().GetField("list",viewFlags).GetValue(m);return (System.Collections.Generic.List<UnityEngine.UIElements.Button>)l.GetType().GetField("buttons",viewFlags).GetValue(l);};
 System.Func<UnityEngine.UIElements.VisualElement> menuPanel=()=>{var m=player.GetComponent<RoadOfTheOldKing.UI.BonfireMenu>();var o=(UnityEngine.UIElements.VisualElement)m.GetType().GetField("overlay",viewFlags).GetValue(m);return UnityEngine.UIElements.UQueryExtensions.Q(o,"bonfire-panel",(string)null);};
 System.Func<bool> shardLine=()=>{var m=player.GetComponent<RoadOfTheOldKing.UI.BonfireMenu>();var s=(UnityEngine.UIElements.Label)m.GetType().GetField("shards",viewFlags).GetValue(m);return s.style.display.value!=UnityEngine.UIElements.DisplayStyle.None;};
+// Fire heat (19 Nov): Bonfire.Burn with an explicit step; a point in the drawn flame (BonfireSpriteView.HeatArea).
+System.Action<Component,float> burn=(f,dt)=>typeof(RoadOfTheOldKing.World.Bonfire).GetMethod("Burn",viewFlags).Invoke(f,new object[]{dt});
+System.Func<Component,Vector2> pit=f=>{var v=f.GetComponent<RoadOfTheOldKing.World.BonfireSpriteView>();var a=(Rect)v.GetType().GetProperty("HeatArea",viewFlags).GetValue(v,null);return f.transform.TransformPoint(a.center);};
 System.Action<Component,float> advance=(f,dt)=>{var v=f.GetComponent<RoadOfTheOldKing.World.BonfireSpriteView>();v.GetType().GetMethod("Refresh",viewFlags).Invoke(v,new object[]{dt});};
 var store=new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(game.StorageKey);
 if(phase==0)check(game.Continue(),"Continue into Tutorial");
@@ -135,7 +138,10 @@ else if(phase==2){
  check(!fire.IsDiscovered&&!game.Checkpoints.Rest(fire),"unlit fire rejects direct Rest");
  var smoke=emitter(fire,"Bonfire smoke");check(smoke!=null&&!smoke.isPlaying&&smoke.particleCount==0,"unlit fire produces no smoke");
  var unlitEmbers=emitter(fire,"Bonfire embers");check(unlitEmbers!=null&&!unlitEmbers.isPlaying&&unlitEmbers.particleCount==0,"an unlit upgrade fire shows no embers");
+ pose(pit(fire));burn(fire,1f);check(player.Health.Health==47,"an unlit fire never burns");pose(new Vector2(15.5f,3));
+ int saves=0;System.Action countSave=()=>saves++;RoadOfTheOldKing.Progression.GameSession.ProgressSaved+=countSave;
  check(interaction.TryInteract(),"first real F interaction lights fire");
+ RoadOfTheOldKing.Progression.GameSession.ProgressSaved-=countSave;check(saves>0&&!game.Status.Contains("Saved"),"lighting raises the save signal for the corner flame, without the word in the status");
  {
   var upgradeBurst=emitter(fire,"Bonfire burst");var view=fire.GetComponent<RoadOfTheOldKing.World.BonfireSpriteView>();
   var glow=(UnityEngine.Rendering.Universal.Light2D)view.GetType().GetField("glow",viewFlags).GetValue(view);float resting=(float)view.GetType().GetField("glowIntensity",viewFlags).GetValue(view);
@@ -183,7 +189,14 @@ else if(phase==4){
  check(interaction.TryInteract()&&interaction.IsOpen,"second interaction rests and opens real menu");
  {
   var rows=menuRows();
-  check(string.Join("|",rows.Select(b=>b.text).ToArray())=="Upgrades|Travel|Leave"&&rows[0].ClassListContains("upgrade-row")&&menuPanel().ClassListContains("upgrade-fire")&&shardLine(),"an upgrade fire's menu leads with a glowing Upgrades row in its own frame, with the shard line");
+  check(string.Join("|",rows.Select(b=>b.text).ToArray())=="Upgrades|Travel|Leave"&&rows[0].ClassListContains("upgrade-row")&&menuPanel().ClassListContains("upgrade-fire")&&shardLine(),"an upgrade fire's menu leads with a gold Upgrades row in its own frame, with the shard line");
+  var menuView=player.GetComponent<RoadOfTheOldKing.UI.BonfireMenu>();var statusLabel=(UnityEngine.UIElements.Label)menuView.GetType().GetField("status",viewFlags).GetValue(menuView);
+  check(statusLabel.text=="","resting says nothing in the menu: saving shows as the corner flame");
+  System.Action showMain=()=>{var pages=menuView.GetType().GetNestedType("Page",viewFlags);menuView.GetType().GetMethod("Show",viewFlags).Invoke(menuView,new object[]{System.Enum.Parse(pages,"Main"),0});};
+  check(!rows[0].ClassListContains("available"),"short of shards, the Upgrades row is gold but still");
+  int shardsBefore=game.Progress.sunShards;game.Progress.sunShards=3;showMain();
+  check(menuRows()[0].ClassListContains("available"),"with an upgrade affordable, the Upgrades row pulses");
+  game.Progress.sunShards=shardsBefore;showMain();
  }
  check(player.Health.Health==player.Health.MaxHealth&&player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().Charges==player.GetComponent<RoadOfTheOldKing.Player.PlayerFlask>().MaxCharges,"rest heals and refills");
  check(game.Progress.checkpointId==fire.Id&&store.Load().checkpointId==fire.Id,"rest saves new checkpoint");
@@ -198,6 +211,18 @@ else if(phase==4){
  menu.Back();check(page()=="Travel"&&selected()==0,"Back returns to the region list at its row");
  menu.Back();check(page()=="Main"&&selected()==1,"Back returns to the main page at Travel");
  interaction.Close();check(!interaction.IsOpen&&player.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>().IsLocked,"closing rest keeps the closing press out of gameplay this frame");
+ {
+  var heroReaction=player.GetComponent<RoadOfTheOldKing.Combat.HitReaction>();
+  var heroAnimator=player.GetComponentInChildren<RoadOfTheOldKing.Player.PlayerSpriteAnimator>();
+  System.Action clearInvulnerable=()=>player.GetType().GetField("invulnerableUntil",viewFlags).SetValue(player,0f);
+  clearInvulnerable();int before=player.Health.Health;pose(pit(fire));burn(fire,0f);
+  bool flinched=(float)heroAnimator.GetType().GetField("hurtUntil",viewFlags).GetValue(heroAnimator)>Time.time;
+  check(player.Health.Health==before-2&&flinched&&player.IsRecoveringFromHit&&!heroReaction.IsStaggered&&body.linearVelocity==Vector2.zero,"standing in a lit fire's flame burns 2 as a real hit (flinch, blink) without a stagger or push ("+before+" to "+player.Health.Health+")");
+  int burnt=player.Health.Health;clearInvulnerable();burn(fire,1f);check(player.Health.Health==burnt,"not again within the 1.5 s burn interval");
+  burn(fire,.6f);check(player.Health.Health==burnt-2,"and again after it");burnt=player.Health.Health;clearInvulnerable();
+  pose((Vector2)fire.transform.TransformPoint(new Vector3(0f,-.65f,0f)));burn(fire,1f);check(player.Health.Health==burnt,"the stones below the flame don't burn");
+  pose(new Vector2(15.5f,3));burn(fire,1f);check(player.Health.Health==burnt,"nothing away from the fire");
+ }
 }
 else if(phase==5){
  check(!player.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>().IsLocked,"closing rest releases control lock next frame");

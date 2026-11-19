@@ -186,11 +186,14 @@ namespace RoadOfTheOldKing.UI
                 case Page.Main:
                     heading.text = fire.DisplayName.ToUpperInvariant();
                     // Sitting down already rested (PlayerBonfireInteraction.Open), as at a Souls bonfire,
-                    // so the menu offers only what resting unlocks.
-                    status.text = session.Status;
+                    // so the menu offers only what resting unlocks. Saving shows as the HUD's corner flame, not
+                    // words (user, 19 Nov); the line speaks only when a save failed.
+                    status.text = session.SaveFailed ? session.Status : "";
                     if (fire.AllowsUpgrades)
                         items.Add(new PauseMenuAction("Upgrades", locked || nextTier == null ? requirement : "",
-                            () => Show(Page.Upgrades), locked: locked) { StyleClass = "upgrade-row" });
+                            () => Show(Page.Upgrades), locked: locked)
+                        // Gold at an upgrade fire; it pulses only when an upgrade can be bought (user, 19 Nov).
+                        { StyleClass = locked || nextTier == null ? "upgrade-row" : "upgrade-row available" });
                     bool travel = Destinations(session).Count > 0;
                     items.Add(new PauseMenuAction("Travel", travel ? "" : "Light another fire first.",
                         () => Show(Page.Travel), travel));
