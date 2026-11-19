@@ -65,7 +65,9 @@ flowchart LR
 | `World` | Pickups, bonfires, puzzles, passages, water |
 | `Tutorial` | Lessons, Recall awakening, guide |
 | `UI` | HUD, menus, F3 and F4 panels |
-| `Camera`, `Development` | Follow, zoom, freelook; preview and proof drivers |
+| `Camera`, `Development` | Follow, zoom, freelook; the combat preview driver |
+
+Code builds as three assemblies: `RoadOfTheOldKing` (`Assets/Scripts`), `RoadOfTheOldKing.Editor` (`Assets/Editor`) and `RoadOfTheOldKing.Tests` (`Assets/Tests`, PlayMode tests run from Unity's Test Runner, never shipped).
 
 ## Player
 
@@ -219,7 +221,8 @@ sequenceDiagram
 | --- | --- | --- | --- |
 | Rest at a bonfire | Set to that fire | Yes | Yes |
 | Permanent gain (reward, lesson, puzzle) | Unchanged | No | Yes |
-| Quit, pause, focus loss | Unchanged | No | Resume point only |
+| Quit, closing the window | Unchanged | No | Yes, with the exact spot |
+| Pause, focus loss | Unchanged | No | Exact spot only |
 | Leave through a scene exit | Unchanged | No; health and flasks carry over | Yes |
 | Death | Unchanged | Through the reload | Yes |
 | New Game | Cleared | Through the reload | Save deleted |

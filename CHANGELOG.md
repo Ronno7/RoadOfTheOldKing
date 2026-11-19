@@ -12,10 +12,18 @@
 - Free look is two-thirds faster on a controller.
 - Place names and "BONFIRE LIT" share one style and never overlap.
 - Upgrade bonfires burn a larger gold flame in a bronze brazier.
+- An attack clicked late in a dodge lands as the dodge ends.
+- Resting at a bonfire brings the camera in closer.
 
 **Fixed**
 - Cliffs no longer make noise when you swing from on top of them.
 - The upgrade menu keeps its size as you browse.
+- Killing blows and hits no longer cancel your combo or charge.
+- A missed wolf lunge chains at most one follow-up.
+- Defeated enemies no longer fall again when you return or rest.
+- Quitting from the pause menu or the window keeps your progress.
+- New Game asks before replacing a save it can't read.
+- The title waits for a key press at launch.
 
 ## 0.5 — Full production
 
