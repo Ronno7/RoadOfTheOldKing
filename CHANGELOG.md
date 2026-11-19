@@ -13,6 +13,7 @@
 - Place names and "BONFIRE LIT" share one style and never overlap.
 - Upgrade bonfires burn a larger gold flame in a bronze brazier.
 - An attack clicked late in a dodge lands as the dodge ends.
+- Recall can't start while you drink.
 - Resting at a bonfire brings the camera in closer.
 
 **Fixed**
@@ -21,17 +22,22 @@
 - Killing blows and hits no longer cancel your combo or charge.
 - A missed wolf lunge chains at most one follow-up.
 - Defeated enemies no longer fall again when you return or rest.
-- Quitting from the pause menu or the window keeps your progress.
+- Quitting, even from the defeat screen, keeps your progress.
 - New Game asks before replacing a save it can't read.
 - The title waits for a key press at launch.
 - Screen flashes Off now also covers enemy hits and the low-health bar.
-- The boar's charge warning ends where the charge stops.
+- Boar and wolf warnings show exactly how far their attacks reach.
+- Breaking a wolf's poise no longer shortens its opening.
 - The Watcher's slam pushes you away from it, never into it.
 - Wolf snaps no longer look locked while still turning toward you.
-- Continue no longer moves you off the fallen Watcher's seat.
+- Continue no longer moves you off the fallen Watcher's seat or from behind the Recall stone.
 - Place names and banners no longer go missing or carry into a new game.
 - The inventory hides Recall until you awaken it.
 - The axe hint no longer jumps to the bottom of the screen.
+- The zoom lesson no longer passes while its text is hidden.
+- Talking after a free look keeps the hero in view.
+- A controller sprint no longer restarts on its own after running dry.
+- Clicking to open the title menu no longer picks a row.
 - The Steam demo keeps its own save, apart from playtest builds.
 
 ## 0.5 — Full production

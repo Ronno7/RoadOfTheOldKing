@@ -192,7 +192,7 @@ flowchart LR
   W["Windup: tracks you"] --> L["Lock: direction fixed, telegraph changes"] --> A["Active: can hit"] --> R["Recovery: your opening"]
 ```
 
-- **Openings are promises.** Scavengers follow up at most once and boars never; a wolf may lunge again after each miss. Recovery is never cancelled.
+- **Openings are promises.** Scavengers and wolves follow up at most once, boars never. Recovery is never cancelled, and breaking an enemy's poise never shortens what it owed.
 - **Reading the player.** `PlayerRead` tells both brains what they can see the player doing: drinking, axe away, recovering from a chop. After a 0.15 s beat, scavengers and rats press in and boars start their charge sooner. It never cuts a recovery short.
 - **No shared attack turn.** Each enemy attacks on its own rhythm. Groups are shaped by placement and notice radius, so a careful player can pull one at a time.
 - **Leash.** An enemy breaks off when it loses sight, or once past its leash with the player out of notice range, then walks home. A hit, or the player coming close, turns it back. All of this lives in `EnemyBody`. Wolves hunt: past the leash they give up only beyond a longer sight range (`huntReach`) or 2.5 leashes from home (`huntLeashes`).
