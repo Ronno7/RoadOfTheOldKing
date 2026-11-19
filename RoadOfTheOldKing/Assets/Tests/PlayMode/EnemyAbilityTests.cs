@@ -86,6 +86,9 @@ public sealed class EnemyAbilityTests
             for(int i=0;i<30&&brain.State==RoadOfTheOldKing.Enemies.PredatorState.Lunge;i++)step(.02f);
             check(brain.State==RoadOfTheOldKing.Enemies.PredatorState.Recover&&!reaction.Armored,"lunge ends in an unarmored punish window");
             step((float)brainType.GetField("lungeRecovery",flags).GetValue(brain)+.01f);check(brain.State==RoadOfTheOldKing.Enemies.PredatorState.Reposition,"recovery returns the wolf to repositioning");
+            // 18 Nov: a snap tracks through its whole windup, so its ground cue stays unlocked until the bite.
+            reset();move(home+Vector2.right*.9f);attack(false,true);step(.1f);move(home+new Vector2(.6f,.6f));step(.02f);groundRender.Invoke(predatorGround,null);
+            check(brain.State==RoadOfTheOldKing.Enemies.PredatorState.Windup&&Vector2.Dot(brain.AttackDirection,new Vector2(.6f,.6f).normalized)>.99f&&!brain.IsAttackLocked&&predatorMark.GetFloat("_Locked")==0f,"a tracking snap windup doesn't show the locked cue");
             reset();move(home+Vector2.right*.9f);attack(false,true);step(.28f);step(.02f);
             check(player.Health.Health==player.Health.MaxHealth-(int)brainType.GetField("snapDamage",flags).GetValue(brain),"snap delivers authored damage");
             player.HealAtRest();step(.02f);check(player.Health.Health==player.Health.MaxHealth,"snap cannot repeat its contact attempt");
@@ -141,6 +144,7 @@ public sealed class EnemyAbilityTests
             for(int i=0;i<45&&charge.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Active;i++){charge.Tick(.02f);Physics2D.Simulate(.02f);}
             var travel=Vector2.Distance(boarBody.position,boarHome);
             check(charge.Phase==RoadOfTheOldKing.Enemies.EnemyAttackPhase.Recovery&&travel>6&&travel<=8.01f&&player.Health.Health==player.Health.MaxHealth,"sidestep avoids bounded charge travel");
+            check(Mathf.Abs(travel-pursuit.ChargeDistance)<.15f,"the drawn charge ends where an open-ground charge stops (travel "+travel.ToString("0.00")+", drawn "+pursuit.ChargeDistance.ToString("0.00")+", speed x time "+(spec.chargeSpeed*spec.active).ToString("0.00")+", 18 Nov)");
             charge.Tick(spec.recovery-.01f);check(charge.IsRunning&&boarBody.linearVelocity==Vector2.zero,"charge recovery holds movement ownership");
             charge.Tick(.02f);check(!charge.IsRunning,"charge completion releases ownership");
             resetBoar();move(boarHome+Vector2.right*4);var copy=spec;pursuit.TryBeginAttack(copy,player,Vector2.right);copy.windup=100;charge.Tick(spec.windup);
@@ -370,6 +374,10 @@ public sealed class EnemyAbilityTests
             move(wHome+Vector2.down*5);wstep(.02f);check(watcher.IsWaking&&!watcher.Action.IsRunning,"coming near wakes it");
             move(wHome+Vector2.down*3.2f);wstep(wakeTime*.5f);check(watcher.IsWaking&&!watcher.Action.IsRunning,"it cannot attack while it rises, even with the player in reach");
             wstep(wakeTime);wstep(.02f);check(watcher.IsAware&&watcher.State==RoadOfTheOldKing.Enemies.PursuitState.Windup&&!watcher.IsCloseAttack&&watcher.AttackArc==360&&watcher.ImpactShake>0,"risen, it slams: a full circle that shakes the screen, answered by backing off");
+            // 18 Nov: the slam is a full circle, so it pushes a player standing behind it away, not along its facing into it.
+            { var pb=player.GetComponent<Rigidbody2D>();player.HealAtRest();int before=player.Health.Health;move(wHome+Vector2.up*2.5f);pb.linearVelocity=Vector2.zero;
+              for(int i=0;i<150&&player.Health.Health==before;i++){wstep(.02f);if(player.Health.Health==before)pb.linearVelocity=Vector2.zero;}
+              check(player.Health.Health<before&&pb.linearVelocity.y>.01f,"a slam pushes a player behind it away from it (push "+pb.linearVelocity+")"); }
             watcher.ResetOnRest();check(watcher.IsDormant&&wHp.Health==wHp.MaxHealth,"a reset puts it back to sleep at full health");
             move(wHome+Vector2.down*9);wHp.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(victim,RoadOfTheOldKing.Combat.AttackKind.Throw,15,Vector2.up,0,0));wstep(.02f);check(watcher.IsWaking,"striking it from range wakes it");
             watcher.ResetOnRest();move(wHome+Vector2.down*1.2f);wstep(.02f);wstep(wakeTime+.02f);wstep(.02f);

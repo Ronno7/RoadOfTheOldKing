@@ -274,7 +274,8 @@ namespace RoadOfTheOldKing.Tutorial
                 teaching = "Walk to your axe";
                 position = combat.Weapon.transform.position + Vector3.up;
             }
-            HudNotifications.SetHint(ControlLabels.Format(teaching), false, position);
+            // A step with a near radius is spatial only (the axe's hint, user 16 Nov): off screen it waits, never at the bottom.
+            HudNotifications.SetHint(ControlLabels.Format(teaching), false, position, current.nearRadius > 0f);
         }
 
         private void OnDisable() => HudNotifications.ClearHint();

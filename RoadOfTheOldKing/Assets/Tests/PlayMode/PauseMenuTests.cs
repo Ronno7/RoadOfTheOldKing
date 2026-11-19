@@ -17,6 +17,75 @@ public sealed class PauseMenuTests
         CheckRun.Expect(Run());
     }
 
+    // 18 Nov: the Screen flashes setting scales what actually renders. Enemy hit flashes (wolf and melee views) and the
+    // low-health bar's heartbeat, read back from the renderer and the HUD element at Off, half and full.
+    [UnityEngine.TestTools.UnityTest]
+    public System.Collections.IEnumerator ScreenFlashesSettingScalesWhatRenders()
+    {
+        yield return CheckRun.Settle();
+        var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+        float saved = RoadOfTheOldKing.UI.FeedbackSettings.FlashScale;
+        var made = new List<GameObject>();
+        var results = new List<string>();
+        try
+        {
+            foreach (var name in new[] { "Wolf", "RoadScavenger" })
+            {
+                var enemy = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Combat/" + name + ".prefab"), new Vector3(800f + made.Count * 20f, 800f), Quaternion.identity);
+                made.Add(enemy);
+                MonoBehaviour view = enemy.GetComponent<RoadOfTheOldKing.Enemies.PredatorSpriteView>();
+                if (view == null) view = enemy.GetComponent<RoadOfTheOldKing.Enemies.MeleeSpriteView>(); // not ??: a missing component is a Unity fake null
+                var sprite = (SpriteRenderer)view.GetType().GetField("bodyVisual", flags).GetValue(view);
+                var render = view.GetType().GetMethod("LateUpdate", flags);
+                var health = enemy.GetComponent<RoadOfTheOldKing.Combat.Damageable>();
+                foreach (float scale in new[] { 0f, .5f, 1f })
+                {
+                    RoadOfTheOldKing.UI.FeedbackSettings.FlashScale = scale;
+                    health.RestoreHealth();
+                    health.DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(enemy, RoadOfTheOldKing.Combat.AttackKind.LightChop, 1, Vector2.up, 0f, 0f));
+                    render.Invoke(view, null);
+                    var block = new MaterialPropertyBlock();
+                    sprite.GetPropertyBlock(block);
+                    float shown = block.GetFloat("_FlashAmount");
+                    NUnit.Framework.Assert.AreEqual(scale, shown, 1e-4f, name + " hit flash at " + scale);
+                    results.Add(name + " flash " + scale + " -> " + shown);
+                }
+            }
+
+            var player = UnityEngine.Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Player/Player.prefab"), new Vector3(860f, 800f), Quaternion.identity);
+            made.Add(player);
+            yield return null;
+            var hud = player.GetComponent<RoadOfTheOldKing.UI.GameHud>();
+            var fill = (UnityEngine.UIElements.VisualElement)typeof(RoadOfTheOldKing.UI.GameHud).GetField("healthFill", flags).GetValue(hud);
+            var body = player.GetComponent<RoadOfTheOldKing.Player.PlayerHealth>().Health;
+            body.SetHealth(Mathf.Max(1, body.MaxHealth / 20)); // 5%: well inside the low-health beat
+            Color rest = new Color32(178, 72, 64, 255), beat = new Color32(236, 96, 78, 255);
+            foreach (float scale in new[] { 0f, .5f, 1f })
+            {
+                RoadOfTheOldKing.UI.FeedbackSettings.FlashScale = scale;
+                float brightest = 0f;
+                bool styled = false;
+                for (float until = Time.unscaledTime + 1.4f; Time.unscaledTime < until;) // longer than one 1.1 s heartbeat
+                {
+                    yield return null;
+                    var colour = fill.style.backgroundColor;
+                    if (colour.keyword == UnityEngine.UIElements.StyleKeyword.Null) continue; // cleared: the stylesheet's resting red
+                    styled = true;
+                    brightest = Mathf.Max(brightest, Mathf.InverseLerp(rest.r, beat.r, colour.value.r));
+                }
+                if (scale == 0f) NUnit.Framework.Assert.IsFalse(styled, "Off: the health bar never beats");
+                else NUnit.Framework.Assert.AreEqual(scale, brightest, .02f, "the health bar beats as bright as the setting (" + scale + ")");
+                results.Add("health beat " + scale + " -> " + brightest);
+            }
+        }
+        finally
+        {
+            RoadOfTheOldKing.UI.FeedbackSettings.FlashScale = saved;
+            foreach (var go in made) if (go != null) UnityEngine.Object.Destroy(go);
+        }
+        Debug.Log("PASS screen flashes: " + string.Join("; ", results.ToArray()));
+    }
+
     private static object Run()
     {
         // Pause menu lifecycle (rewritten 21 Oct for MenuStack, owner-scoped control/pause leases and the current
@@ -121,7 +190,10 @@ public sealed class PauseMenuTests
             }finally{
              for(int i=0;i<settingKeys.Length;i++){if(settingsBefore[i].HasValue)PlayerPrefs.SetFloat(settingKeys[i],settingsBefore[i].Value);else PlayerPrefs.DeleteKey(settingKeys[i]);}
              PlayerPrefs.Save();RoadOfTheOldKing.UI.FeedbackSettings.FlashScale=flashBefore;RoadOfTheOldKing.UI.FeedbackSettings.ShakeScale=shakeBefore;AudioListener.volume=listenerBefore;
+             // The live mixer too, not only the stored preference (18 Nov: Music stayed at full for the rest of the session).
+             foreach(RoadOfTheOldKing.Audio.AudioChannel channel in Enum.GetValues(typeof(RoadOfTheOldKing.Audio.AudioChannel)))RoadOfTheOldKing.Audio.AudioChannels.SetVolume(channel,RoadOfTheOldKing.UI.SoundSettings.ChannelVolume(channel));
             }
+            {var liveMixer=Resources.Load<UnityEngine.Audio.AudioMixer>("Audio/Mixer");float liveDb;check(liveMixer!=null&&liveMixer.GetFloat("MusicVolume",out liveDb)&&Mathf.Abs(liveDb-20f*Mathf.Log10(Mathf.Max(.0001f,RoadOfTheOldKing.UI.SoundSettings.ChannelVolume(RoadOfTheOldKing.Audio.AudioChannel.Music))))<.6f,"the live music mix is back at the player's own setting");}
             menu.Back();check(menu.IsOpen&&!(bool)menu.GetType().GetField("inSettings",flags).GetValue(menu),"Back from Settings returns to the main page");
             menu.Back();check(!menu.IsOpen,"Back on the main page closes");nextFrame();
 

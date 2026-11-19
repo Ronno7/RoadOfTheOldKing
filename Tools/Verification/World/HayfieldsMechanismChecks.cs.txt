@@ -23,7 +23,6 @@ if(command=="setup"){
     string keyName="RoadOfTheOldKing.Verification.Hayfields."+System.Guid.NewGuid().ToString("N");
     SessionState.SetString(p+"Key",keyName);SessionState.SetInt(p+"Phase",0);SessionState.SetBool(p+"Active",true);SessionState.SetString(p+"Command","advance");
     UnityEditor.SceneManagement.EditorSceneManager.playModeStartScene=null;
-    Application.runInBackground=true;
     UnityEditor.SceneManagement.EditorSceneManager.OpenScene(path,UnityEditor.SceneManagement.OpenSceneMode.Single);
     var session=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Progression.GameSession>();
     var so=new SerializedObject(session);so.FindProperty("saveKey").stringValue=keyName;so.FindProperty("legacySaveKeys").arraySize=0;so.ApplyModifiedPropertiesWithoutUndo();
@@ -56,6 +55,7 @@ if(command=="cleanup"){
     return new{passed=SessionState.GetInt(p+"Passed",0),protectedEntriesChanged=changed.ToArray(),testKeysRemoved=!PlayerPrefs.HasKey(key)&&!PlayerPrefs.HasKey(key+".Resume"),restored=UnityEngine.SceneManagement.SceneManager.GetActiveScene().path,dirty=UnityEngine.SceneManagement.SceneManager.GetActiveScene().isDirty};
 }
 if(!EditorApplication.isPlaying)throw new System.Exception("Enter Play for live checks.");
+Application.runInBackground=true; // only inside Play: set in Edit Mode it is written into ProjectSettings on the next save (18 Nov)
 var game=RoadOfTheOldKing.Progression.GameSession.Instance;
 if(game==null||game.StorageKey!=SessionState.GetString(p+"Key",""))throw new System.Exception("Wrong save. Refusing live checks.");
 if(game.IsLoading)return "Wait for the scene fade to finish.";

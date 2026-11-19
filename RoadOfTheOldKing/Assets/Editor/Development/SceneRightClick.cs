@@ -173,15 +173,23 @@ namespace RoadOfTheOldKing.EditorTools
             store.Save(progress);
             PlayerPrefs.Save();
             DevPlayFromHere.Arm(spot);
+            // Play starts in the open scene; a configured start scene comes back when the session ends.
+            SessionState.SetString(PreviousStart, AssetDatabase.GetAssetPath(EditorSceneManager.playModeStartScene));
             EditorSceneManager.playModeStartScene = null;
             EditorApplication.isPlaying = true;
         }
+
+        private const string PreviousStart = "RoadOfTheOldKing.PlayFromHere.PreviousStart";
 
         private static void EndSession()
         {
             DevPlayFromHere.Disarm();
             ClearSave();
             PlayerPrefs.Save();
+            // Until 18 Nov a Play Mode start scene set in the editor was cleared here for good.
+            string previous = SessionState.GetString(PreviousStart, "");
+            SessionState.EraseString(PreviousStart);
+            if (!string.IsNullOrEmpty(previous)) EditorSceneManager.playModeStartScene = AssetDatabase.LoadAssetAtPath<SceneAsset>(previous);
         }
 
         private static void ClearSave()

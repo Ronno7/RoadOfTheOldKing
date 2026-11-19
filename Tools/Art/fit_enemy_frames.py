@@ -5,16 +5,21 @@
   snap <character> <slot>              Move any pixel off the standing views' colours to the nearest of them.
 
 Run the downloader first, then once on the newly downloaded slot: shrinking a slot twice shrinks it twice.
+An interrupted run leaves a journal; the next run only finishes it, so nothing is applied twice.
 """
 import argparse
 import hashlib
+import io
 import json
+import os
+import sys
 from pathlib import Path
 
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = ROOT / "ArtSource/Enemies/LowlandsManifest.json"
+JOURNAL = MANIFEST.with_name("fit_enemy_frames.pending.json")
 ROOTS = (ROOT / "ArtSource/Enemies", ROOT / "RoadOfTheOldKing/Assets/Art/Sprites/Enemies")
 DARK = 48
 SAMPLES = 6
@@ -91,15 +96,55 @@ def snapped(image, palette):
     return result
 
 
-def rewrite(character, frame, image):
-    relative = Path(character["name"]) / frame["slot"] / frame["file"]
-    paths = [base / relative for base in ROOTS]
-    for path in paths:
-        image.save(path)
-    # Both copies must be byte-identical for the manifest audit.
-    data = paths[0].read_bytes()
-    paths[1].write_bytes(data)
-    frame["sha256"] = hashlib.sha256(data).hexdigest()
+def png(image):
+    buffer = io.BytesIO()
+    image.save(buffer, "PNG")
+    return buffer.getvalue()
+
+
+def staged(path):
+    """The temporary file beside a target; the leading dot keeps Unity from importing it."""
+    return path.with_name(f".{path.name}.tmp")
+
+
+def write_synced(path, data):
+    with open(path, "wb") as file:
+        file.write(data)
+        file.flush()
+        os.fsync(file.fileno())
+
+
+def commit(writes, operation):
+    """Stage every new file beside its target, journal the swaps, then make them. Until the journal lands nothing has
+    changed and the staged files are removed; once it has, the swaps are owed and finish() makes them, now or next run."""
+    temps = [staged(path) for path, _ in writes] + [staged(JOURNAL)]
+    try:
+        entries = []
+        for path, data in writes:
+            write_synced(staged(path), data)
+            entries.append([staged(path).relative_to(ROOT).as_posix(), path.relative_to(ROOT).as_posix(),
+                            hashlib.sha256(data).hexdigest()])
+        write_synced(staged(JOURNAL), json.dumps({"operation": operation, "replace": entries}, indent=1).encode("utf-8"))
+        os.replace(staged(JOURNAL), JOURNAL)
+    except BaseException:
+        if not JOURNAL.exists():
+            for temp in temps:
+                temp.unlink(missing_ok=True)
+        raise
+    finish()
+
+
+def finish():
+    """Make the journal's swaps, skipping those already made, then drop it. Returns the journalled operation."""
+    journal = json.loads(JOURNAL.read_bytes())
+    for temp, target, digest in journal["replace"]:
+        temp, target = ROOT / temp, ROOT / target
+        if temp.exists():
+            os.replace(temp, target)
+        elif not target.exists() or hashlib.sha256(target.read_bytes()).hexdigest() != digest:
+            sys.exit(f"Cannot finish {JOURNAL}: {target} is neither staged nor written.")
+    JOURNAL.unlink()
+    return journal["operation"]
 
 
 def main():
@@ -111,24 +156,32 @@ def main():
     args = parser.parse_args()
     if args.mode == "shrink" and args.factor is None:
         parser.error("shrink needs a factor")
+    if JOURNAL.exists():
+        sys.exit(f"Finished the interrupted '{finish()}'; nothing else was done. Run again only if still needed.")
     manifest = json.loads(MANIFEST.read_bytes())
     character = next(c for c in manifest["characters"] if c["name"] == args.character)
     count = 0
     palette = {c[:3] for view in (ROOTS[0] / character["name"] / "Rotations").glob("*.png")
                for c in Image.open(view).convert("RGBA").get_flattened_data() if c[3]} if args.mode == "snap" else None
+    writes = []
     for frame in character["files"]:
         if frame["slot"] != args.slot:
             continue
-        path = ROOTS[0] / character["name"] / frame["slot"] / frame["file"]
+        relative = Path(character["name"]) / frame["slot"] / frame["file"]
+        path = ROOTS[0] / relative
         if args.mode == "shrink":
-            rewrite(character, frame, shrink(Image.open(path), args.factor))
+            data = png(shrink(Image.open(path), args.factor))
         elif args.mode == "snap":
-            rewrite(character, frame, snapped(Image.open(path), palette))
+            data = png(snapped(Image.open(path), palette))
         else:
             standing = Image.open(ROOTS[0] / character["name"] / "Rotations" / (frame["direction"] + ".png"))
-            rewrite(character, frame, planted(Image.open(path), standing))
+            data = png(planted(Image.open(path), standing))
+        # Both copies must be byte-identical for the manifest audit.
+        writes += [(base / relative, data) for base in ROOTS]
+        frame["sha256"] = hashlib.sha256(data).hexdigest()
         count += 1
-    MANIFEST.write_bytes((json.dumps(manifest, indent=1) + "\n").encode("utf-8"))
+    writes.append((MANIFEST, (json.dumps(manifest, indent=1) + "\n").encode("utf-8")))
+    commit(writes, " ".join(sys.argv[1:]))
     print(f"{args.mode}: {count} frames of {args.character}")
 
 

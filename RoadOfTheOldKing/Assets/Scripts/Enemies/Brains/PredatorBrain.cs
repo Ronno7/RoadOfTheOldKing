@@ -150,7 +150,9 @@ namespace RoadOfTheOldKing.Enemies
         public bool IsWindingUp => State == PredatorState.Windup;
         public bool IsStriking => State == PredatorState.Lunge || State == PredatorState.Snap;
         public float WindupProgress => StateProgress;
-        public bool IsAttackLocked => IsLaneLocked || !IsLungeAttack;
+        // A lunge locks its lane before the leap. A snap keeps tracking through its whole windup, so it only reads as
+        // locked once the bite comes (the locked cue on a still-tracking snap misled a strafing player, 18 Nov).
+        public bool IsAttackLocked => IsLaneLocked || (!IsLungeAttack && action != null && action.IsRunning && State != PredatorState.Windup);
         public bool IsDrawing => false;
         public float AttackReach => snapReach;
         public float AttackArc => snapArc;

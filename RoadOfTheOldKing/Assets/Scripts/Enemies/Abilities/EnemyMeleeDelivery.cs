@@ -27,7 +27,10 @@ namespace RoadOfTheOldKing.Enemies
             Vector2 point = collider.ClosestPoint(origin), direction = point - origin;
             if (direction.magnitude > reach ||
                 (direction.sqrMagnitude > .001f && Vector2.Angle(facing, direction) > arc * .5f) || !clear(point)) return false;
-            target.Health.ReceiveHit(new CombatHit(source, AttackKind.EnemyMelee, damage, facing,
+            // A full circle (the Watcher's slam) pushes away from its centre wherever the player stands; along the
+            // facing, a player circling behind was pushed into the boss (18 Nov). An arc pushes along its swing.
+            Vector2 push = arc >= 360f && direction.sqrMagnitude > .0001f ? direction.normalized : facing;
+            target.Health.ReceiveHit(new CombatHit(source, AttackKind.EnemyMelee, damage, push,
                 knockback, stagger, false, point));
             // A defended/dodged contact still consumes the attack's one attempt.
             return true;

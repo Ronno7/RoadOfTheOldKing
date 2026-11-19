@@ -2,7 +2,8 @@
 // sluice controls unguard, and both survive a scene reload separately (leave before taking it: still there).
 // Run with FixtureRunner (compiler=codedom, Runner.Skip 0).
 // 1. Shared GreenLowlandsGameplayChecks SETUP (stopped). 2. Stopped: run once to seed the isolated save.
-// 3. Play, then run between frames: Continue -> travel -> defeat -> re-enter -> take -> re-enter -> DONE.
+// 3. Play, then run between frames: Continue -> travel -> defeat -> re-enter -> take -> re-enter -> Continue from
+//    its seat (18 Nov) -> DONE.
 // 4. Stop and run the shared cleanup. Only the isolated key is touched.
 RoadOfTheOldKing.World.RewardHoldUp.SkipForChecks=true; // Staged checks step time themselves.
 string key=SessionState.GetString("GreenLowlands.Gameplay.Key","");
@@ -37,6 +38,7 @@ else if(phase==2){
  check(!shard.IsAvailable&&!visual(shard).activeSelf&&!record.IsUnlocked(g.Progress),"before the fight the shard is hidden");
  check(guarded(),"the sluice controls are held fast while it stands");
  pose((Vector2)shard.transform.position+Vector2.down*.6f);check(!shard.TryCollect(player),"nothing to take at its seat yet");
+ var seat=new Vector2(24.5f,95f);check(Vector2.Distance(watcher.transform.position,seat)<.6f&&Physics2D.OverlapCircleAll(seat,.3f).Any(c=>!c.isTrigger&&c.attachedRigidbody==watcher.GetComponent<Rigidbody2D>()),"its seat is solid while it stands");
  var fallAt=(Vector2)watcher.transform.position+new Vector2(1.5f,-1f);watcher.transform.position=fallAt;watcher.GetComponent<Rigidbody2D>().position=fallAt;Physics2D.SyncTransforms();
  record.Guards[0].DebugReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(player.gameObject,RoadOfTheOldKing.Combat.AttackKind.LightChop,999,Vector2.up,0,0));
  check(record.IsUnlocked(g.Progress)&&watcher.IsDefeated,"defeat records the milestone");
@@ -58,6 +60,14 @@ else if(phase==2){
  var shard=shardOf();
  check(shard.IsCollected&&!visual(shard).activeSelf&&g.Progress.sunShards==2,"taken stays taken");
  check(watcherOf().IsDefeated&&!guarded(),"defeat and sluice access persist");
+ // 18 Nov: Continue validated the spot while the fallen Watcher's body still blocked its seat, and fell back to a fire.
+ pose(new Vector2(24.5f,95f));g.RecordResume();
+ check(g.HasResumePoint&&g.Continue(),"stand on its seat, then quit and Continue");
+}else if(phase==6){
+ var seat=new Vector2(24.5f,95f);var at=(Vector2)player.transform.position;var watcher=watcherOf();
+ check(Vector2.Distance(at,seat)<.1f,"Continue puts the hero back on the fallen Watcher's seat, not at a fire (at "+at+")");
+ check(watcher.IsDefeated&&Vector2.Distance(watcher.transform.position,seat)<.6f,"the fallen Watcher lies on its seat");
+ check(shardOf().IsCollected&&!guarded()&&g.Progress.sunShards==2,"its reward and the sluice access survive the Continue");
 }else return "DONE";
 SessionState.SetInt("WatcherReward.Phase",phase+1);
 return new{phase,passed=checks.Count,checks=checks.ToArray()};

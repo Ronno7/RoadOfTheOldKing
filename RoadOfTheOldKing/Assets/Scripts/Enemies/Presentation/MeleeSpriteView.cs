@@ -79,7 +79,8 @@ namespace RoadOfTheOldKing.Enemies
             if (clip != null) bodyVisual.sprite = clip.Sample(octant, progress, out _);
             float alpha = health.IsAlive || Has(animations.death) ? 1 : 1 - Mathf.Clamp01(deathTime / animations.deathFadeDuration);
             bodyVisual.color = new Color(1, 1, 1, alpha); bodyVisual.flipX = false;
-            bodyVisual.GetPropertyBlock(properties); properties.SetFloat("_FlashAmount", Time.time < flashUntil ? 1 : 0); bodyVisual.SetPropertyBlock(properties);
+            // The hit flash is scaled by the Screen flashes setting (Off: none).
+            bodyVisual.GetPropertyBlock(properties); properties.SetFloat("_FlashAmount", Time.time < flashUntil ? Mathf.Clamp01(RoadOfTheOldKing.UI.FeedbackSettings.FlashScale) : 0); bodyVisual.SetPropertyBlock(properties);
             wasAlive = health.IsAlive;
         }
     }

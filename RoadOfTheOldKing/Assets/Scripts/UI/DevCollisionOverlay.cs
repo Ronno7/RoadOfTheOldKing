@@ -124,8 +124,7 @@ namespace RoadOfTheOldKing.UI
                         AddCircle(outline.Points, shapePoints[0], shape.radius);
                         break;
                     case PhysicsShapeType2D.Capsule:
-                        AddCircle(outline.Points, shapePoints[0], shape.radius);
-                        AddCircle(outline.Points, shapePoints[1], shape.radius);
+                        AddCapsule(outline.Points, shapePoints[0], shapePoints[1], shape.radius);
                         break;
                     case PhysicsShapeType2D.Polygon:
                         for (int v = 0; v < shapePoints.Count; v++)
@@ -152,6 +151,30 @@ namespace RoadOfTheOldKing.UI
             for (int i = 0; i < CircleSides; i++)
             {
                 float a = i * Mathf.PI * 2f / CircleSides, b = (i + 1) * Mathf.PI * 2f / CircleSides;
+                points.Add(center + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * radius);
+                points.Add(center + new Vector2(Mathf.Cos(b), Mathf.Sin(b)) * radius);
+            }
+        }
+
+        // A capsule's outline: the two straight sides and a half circle round each end (two whole circles left the
+        // sides out, 18 Nov). Equal ends are a circle.
+        private static void AddCapsule(List<Vector2> points, Vector2 a, Vector2 b, float radius)
+        {
+            Vector2 along = b - a;
+            if (along.sqrMagnitude < .000001f) { AddCircle(points, a, radius); return; }
+            Vector2 side = new Vector2(-along.y, along.x).normalized * radius;
+            points.Add(a + side); points.Add(b + side);
+            points.Add(a - side); points.Add(b - side);
+            AddArc(points, b, radius, Mathf.Atan2(side.y, side.x), -Mathf.PI); // round the far end, from +side to -side
+            AddArc(points, a, radius, Mathf.Atan2(-side.y, -side.x), -Mathf.PI); // and the near end, from -side to +side
+        }
+
+        private static void AddArc(List<Vector2> points, Vector2 center, float radius, float from, float sweep)
+        {
+            int steps = Mathf.Max(2, CircleSides / 2);
+            for (int i = 0; i < steps; i++)
+            {
+                float a = from + sweep * i / steps, b = from + sweep * (i + 1) / steps;
                 points.Add(center + new Vector2(Mathf.Cos(a), Mathf.Sin(a)) * radius);
                 points.Add(center + new Vector2(Mathf.Cos(b), Mathf.Sin(b)) * radius);
             }

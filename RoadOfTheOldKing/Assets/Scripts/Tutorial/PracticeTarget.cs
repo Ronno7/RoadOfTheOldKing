@@ -62,7 +62,7 @@ namespace RoadOfTheOldKing.Tutorial
                 ResetTarget();
             if (bodyVisual != null)
                 bodyVisual.color = !health.IsAlive ? new Color(0.25f, 0.25f, 0.25f, 0.5f)
-                    : Time.time < flashUntil ? Color.white
+                    : Time.time < flashUntil ? Color.Lerp(originalColor, Color.white, Mathf.Clamp01(RoadOfTheOldKing.UI.FeedbackSettings.FlashScale))
                     : reaction != null && reaction.IsStaggered ? new Color(1f, 0.6f, 0.2f) : originalColor;
             if (healthFill != null)
                 healthFill.localScale = new Vector3((float)health.Health / health.MaxHealth, 1f, 1f);

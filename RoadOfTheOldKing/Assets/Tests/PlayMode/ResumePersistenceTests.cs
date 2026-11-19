@@ -17,6 +17,54 @@ public sealed class ResumePersistenceTests
         CheckRun.Expect(Run());
     }
 
+    // 18 Nov: the Steam demo and the playtest build share PlayerPrefs on one Windows account. Each profile starting
+    // over (New Game clears its store) must leave the other's progress, resume point and older keys alone. The keys
+    // follow SaveProfile's rule on a disposable root, so no real save is read or written.
+    [UnityEngine.TestTools.UnityTest]
+    public System.Collections.IEnumerator SaveProfilesStayApart()
+    {
+        yield return CheckRun.Settle();
+        string root = "RoadOfTheOldKing.Verification.Profile." + Guid.NewGuid().ToString("N"), legacy = root + ".Legacy";
+        string playtestKey = RoadOfTheOldKing.Progression.SaveProfile.Key(root, false), demoKey = RoadOfTheOldKing.Progression.SaveProfile.Key(root, true);
+        var playtest = new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(playtestKey, RoadOfTheOldKing.Progression.SaveProfile.LegacyKeys(new[] { legacy }, false));
+        var demo = new RoadOfTheOldKing.Progression.PlayerPrefsProgressStore(demoKey, RoadOfTheOldKing.Progression.SaveProfile.LegacyKeys(new[] { legacy }, true));
+        var touched = new[] { playtestKey, playtestKey + ".Resume", demoKey, demoKey + ".Resume", legacy };
+        var protectedKeys = new[] { "RoadOfTheOldKing.Save", "RoadOfTheOldKing.Save.Resume", "RoadOfTheOldKing.Save.Demo", "RoadOfTheOldKing.Save.Demo.Resume", "RoadOfTheOldKing.Tutorial.Save.v1" };
+        Func<string> snapshot = () => string.Join("|", protectedKeys.Select(k => k + "=" + (PlayerPrefs.HasKey(k) ? PlayerPrefs.GetString(k) : "<none>")).ToArray());
+        string before = snapshot();
+        try
+        {
+            NUnit.Framework.Assert.AreNotEqual(playtestKey, demoKey, "the demo has its own progress key");
+            NUnit.Framework.Assert.IsEmpty(RoadOfTheOldKing.Progression.SaveProfile.LegacyKeys(new[] { legacy }, true), "the demo migrates no older key");
+            playtest.Save(new RoadOfTheOldKing.Progression.ProgressState { bronzeCoins = 7 });
+            playtest.SaveResume(new RoadOfTheOldKing.Progression.ResumePoint { scenePath = "Playtest", x = 1f });
+            demo.Save(new RoadOfTheOldKing.Progression.ProgressState { bronzeCoins = 3 });
+            demo.SaveResume(new RoadOfTheOldKing.Progression.ResumePoint { scenePath = "Demo", x = 2f });
+            PlayerPrefs.SetString(legacy, "older save");
+
+            demo.Clear(); // the demo starts over
+            NUnit.Framework.Assert.AreEqual(7, playtest.Load().bronzeCoins, "a demo New Game keeps the playtest progress");
+            NUnit.Framework.Assert.AreEqual("Playtest", playtest.LoadResume().scenePath, "a demo New Game keeps the playtest resume point");
+            NUnit.Framework.Assert.AreEqual("older save", PlayerPrefs.GetString(legacy), "a demo New Game keeps the older key");
+            NUnit.Framework.Assert.AreEqual(0, demo.Load().bronzeCoins, "the demo starts fresh, not from the playtest run");
+            NUnit.Framework.Assert.IsNull(demo.LoadResume(), "the demo can't Continue the playtest spot");
+
+            demo.Save(new RoadOfTheOldKing.Progression.ProgressState { bronzeCoins = 3 });
+            demo.SaveResume(new RoadOfTheOldKing.Progression.ResumePoint { scenePath = "Demo", x = 2f });
+            playtest.Clear(); // the playtest build starts over
+            NUnit.Framework.Assert.AreEqual(3, demo.Load().bronzeCoins, "a playtest New Game keeps the demo progress");
+            NUnit.Framework.Assert.AreEqual("Demo", demo.LoadResume().scenePath, "a playtest New Game keeps the demo resume point");
+            NUnit.Framework.Assert.AreEqual(0, playtest.Load().bronzeCoins, "the playtest run starts fresh");
+        }
+        finally
+        {
+            foreach (var key in touched) PlayerPrefs.DeleteKey(key);
+            PlayerPrefs.Save();
+        }
+        NUnit.Framework.Assert.AreEqual(before, snapshot(), "real saves untouched");
+        Debug.Log("PASS save profiles stay apart");
+    }
+
     private static object Run()
     {
         // Resume persistence under store failure (21 Oct). Empty, unsaved Play Mode scene without a GameSession; run through

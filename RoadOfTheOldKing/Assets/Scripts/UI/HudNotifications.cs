@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -46,7 +47,7 @@ namespace RoadOfTheOldKing.UI
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void Reset()
         {
-            receipts.Clear(); HintWorldPosition = null; Hint = null; HintCompleted = false; Version++;
+            receipts.Clear(); HintWorldPosition = null; HintSpatialOnly = false; Hint = null; HintCompleted = false; Version++;
             announcements.Clear();
             Speaker = null; Speech = null; SpeechUntil = float.NegativeInfinity;
             UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
@@ -93,7 +94,19 @@ namespace RoadOfTheOldKing.UI
             return announcements.Count > 0;
         }
 
-        public static void TakeAnnouncement() { if (announcements.Count > 0) announcements.RemoveAt(0); }
+        // Raised when the HUD takes an announcement to show it: a place is only remembered as seen once its name is shown.
+        public static event Action<Announcement> AnnouncementShown;
+
+        public static void TakeAnnouncement()
+        {
+            if (announcements.Count == 0) return;
+            var shown = announcements[0];
+            announcements.RemoveAt(0);
+            AnnouncementShown?.Invoke(shown);
+        }
+
+        // Going to the title ends the run's queue: an event from the old run (BONFIRE LIT) must not greet a new one.
+        public static void ClearAnnouncements() => announcements.Clear();
 
         public static void Post(string text, float seconds = 3.5f)
         {
@@ -113,9 +126,13 @@ namespace RoadOfTheOldKing.UI
             return removed > 0;
         }
 
-        public static void SetHint(string text, bool completed = false, Vector3? worldPosition = null)
+        // A spatial-only hint shows beside its world point or not at all; it never falls back to the bottom of the screen.
+        public static bool HintSpatialOnly { get; private set; }
+
+        public static void SetHint(string text, bool completed = false, Vector3? worldPosition = null, bool spatialOnly = false)
         {
             HintWorldPosition = worldPosition;
+            HintSpatialOnly = spatialOnly && worldPosition.HasValue;
             if (Hint == text && HintCompleted == completed) return;
             Hint = text; HintCompleted = completed;
         }

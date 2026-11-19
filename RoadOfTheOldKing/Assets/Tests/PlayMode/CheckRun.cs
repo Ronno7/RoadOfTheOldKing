@@ -26,7 +26,7 @@ public static class CheckRun
         var failed = split.Where(l => l.StartsWith("FAIL")).ToArray();
         Assert.IsEmpty(failed, string.Join("\n", failed));
         Assert.IsTrue(split.Any(l => l.StartsWith("PASS")), text);
-        Debug.Log(split[0]);
+        Debug.Log(text);
     }
 }
 #endif

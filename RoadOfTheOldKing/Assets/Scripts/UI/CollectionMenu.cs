@@ -164,7 +164,8 @@ namespace RoadOfTheOldKing.UI
             var axe = combat != null ? combat.Weapon : null;
             var settings = axe != null ? axe.Settings : null;
             overlay.Q<Label>("stats-axe").text = settings == null ? "" :
-                $"Chop {settings.lightDamage}\nFinisher {axe.FinisherDamage}\nCleave up to {settings.cleaveDamage}\nThrow {settings.throwDamage}\nRecall {settings.recallDamage}";
+                $"Chop {settings.lightDamage}\nFinisher {axe.FinisherDamage}\nCleave up to {settings.cleaveDamage}\nThrow {settings.throwDamage}" +
+                (combat.CanRecall ? $"\nRecall {settings.recallDamage}" : ""); // Recall stays unnamed until it awakens
         }
 
         private VisualElement CreateIcon(string id)

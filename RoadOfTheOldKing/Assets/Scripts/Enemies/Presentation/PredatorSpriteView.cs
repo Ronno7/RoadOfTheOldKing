@@ -187,7 +187,8 @@ namespace RoadOfTheOldKing.Enemies
         {
             if (bodyVisual == null || flashProperties == null) return;
             bodyVisual.GetPropertyBlock(flashProperties);
-            flashProperties.SetFloat("_FlashAmount", active ? 1f : 0f);
+            // The Screen flashes setting scales hit flashes everywhere, enemies included (Off: none).
+            flashProperties.SetFloat("_FlashAmount", active ? Mathf.Clamp01(RoadOfTheOldKing.UI.FeedbackSettings.FlashScale) : 0f);
             bodyVisual.SetPropertyBlock(flashProperties);
         }
     }

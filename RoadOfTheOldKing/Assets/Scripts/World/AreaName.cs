@@ -33,6 +33,8 @@ namespace RoadOfTheOldKing.World
         private static void ResetStatics()
         {
             zones.Clear(); seenWithoutSession.Clear(); current = null; nextCheck = 0f; player = null;
+            HudNotifications.AnnouncementShown -= Remember;
+            HudNotifications.AnnouncementShown += Remember;
         }
 
         private void OnEnable() => zones.Add(this);
@@ -60,12 +62,19 @@ namespace RoadOfTheOldKing.World
             if (FirstVisit(name, game)) HudNotifications.ShowArea(name, zone.landmark);
         }
 
+        // Queued while this run hasn't seen it; remembered and saved only once its banner shows (Remember), so a scene
+        // exit crossed while it waits behind another banner doesn't lose it for the save (18 Nov).
         private static bool FirstVisit(string name, GameSession game)
         {
             if (game == null) return seenWithoutSession.Add(name);
-            if (!game.Progress.MarkAreaSeen(name)) return false;
-            game.SaveProgress();
-            return true;
+            return game.Progress.seenAreas == null || !game.Progress.seenAreas.Contains(name);
+        }
+
+        private static void Remember(Announcement shown)
+        {
+            if (shown.Tier == AnnouncementTier.Event) return;
+            var game = GameSession.Instance;
+            if (game != null && game.Progress.MarkAreaSeen(shown.Text)) game.SaveProgress();
         }
 
         private static AreaName Containing(Vector2 point)

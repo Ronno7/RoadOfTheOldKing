@@ -10,7 +10,7 @@ namespace RoadOfTheOldKing.Enemies
 
     [DisallowMultipleComponent, RequireComponent(typeof(Damageable), typeof(HitReaction), typeof(Rigidbody2D))]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, "RoadOfTheOldKing.Combat", null, "SimpleMeleeEnemy")]
-    public sealed class PursuitBrain : MonoBehaviour, IEnemy, IEnemyFacing, IEnemyAttackShape, IResetOnRest, ISceneVisitParticipant
+    public sealed class PursuitBrain : MonoBehaviour, IEnemy, IEnemyFacing, IEnemyAttackShape, IResetOnRest, ISceneVisitParticipant, IProgressParticipant
     {
         [SerializeField] private PlayerHealth target;
         [Tooltip("Optional authored action. Unassigned legacy enemies retain their serialized melee tuning.")]
@@ -106,7 +106,10 @@ namespace RoadOfTheOldKing.Enemies
         public float ImpactShake => Shown.impactShake;
         public bool IsLaneLocked => action != null && action.IsLocked;
         public Vector2 AttackOrigin => action != null && State == PursuitState.Striking ? action.Origin : (Vector2)transform.position;
-        public float ChargeDistance => Shown.chargeSpeed * Shown.active;
+        // Where an open-ground charge really ends. The action sets its speed every physics step and the body's damping
+        // takes its share of each step (the approved motion keeps that), so speed × time drew the warning about a tile
+        // past the stop (18 Nov).
+        public float ChargeDistance => Shown.chargeSpeed * Shown.active / (1f + Time.fixedDeltaTime * (body != null ? body.linearDamping : 0f));
         public Vector2 AttackDirection => FacingDirection;
         public bool IsWindingUp => State == PursuitState.Windup;
         public bool IsStriking => State == PursuitState.Striking;
@@ -498,6 +501,19 @@ namespace RoadOfTheOldKing.Enemies
         }
 
         private void SlideCorpse(float dt) => actor.SlideCorpse(dt);
+
+        // A recorded defeat is restored while the scene loads, with the other saved world state, so the fallen body's
+        // collider is already off when Continue checks the resume spot (a spot at the Watcher's seat was rejected
+        // while this waited for the first physics tick after the fade, 18 Nov). The defeat itself is saved by the
+        // EncounterUnlock; there is nothing to capture here.
+        public void CaptureProgress(ProgressState state) { }
+
+        public void RestoreProgress(ProgressState state)
+        {
+            if (actor == null || recordChecked || defeatRecord == null || !defeatRecord.IsUnlocked(state)) return;
+            recordChecked = true;
+            StayFallen();
+        }
 
         public object CaptureVisitState() => actor.CaptureVisitState();
 

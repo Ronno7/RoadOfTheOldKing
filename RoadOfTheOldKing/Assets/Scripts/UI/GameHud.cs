@@ -447,20 +447,36 @@ namespace RoadOfTheOldKing.UI
             hurtAmount = Mathf.Max(0f, hurtAmount - Time.unscaledDeltaTime / hurtFade);
             var health = player.Health;
             float ratio = health != null && health.MaxHealth > 0 ? (float)health.Health / health.MaxHealth : 1f;
-            float pulse = 0f;
-            bool barBeat = false;
+            float pulse = 0f, barBeat = 0f;
             if (alive && ratio < lowHealth)
             {
                 // Two beats per period, like a heartbeat, stronger as health falls.
                 float t = Mathf.Repeat(Time.unscaledTime / heartbeatPeriod, 1f);
                 float beat = Mathf.Max(Mathf.Exp(-Mathf.Pow((t - .1f) / .06f, 2f)), .7f * Mathf.Exp(-Mathf.Pow((t - .3f) / .06f, 2f)));
                 pulse = lowHealthPulse * (.5f + .5f * (1f - ratio / lowHealth)) * (.35f + .65f * beat);
-                barBeat = beat > .35f && FeedbackSettings.FlashScale > 0f;
+                barBeat = beat > .35f ? Mathf.Clamp01(FeedbackSettings.FlashScale) : 0f;
             }
-            // The bar flashes on the same beat, in a hard step to its brighter red.
-            healthFill?.EnableInClassList("health-low-beat", barBeat);
+            // The bar flashes on the same beat, in a hard step to its brighter red, as bright as the flash setting.
+            SetBarBeat(barBeat);
             float opacity = Mathf.Max(hurtAmount * hurtAmount * hurtFlash, pulse) * Mathf.Clamp01(FeedbackSettings.FlashScale);
             vignette.style.opacity = opacity;
+        }
+
+        // The health fill's resting colours are in GameHud.uss (.health-fill); the beat blends toward a brighter red.
+        private static readonly Color BeatFill = new Color32(236, 96, 78, 255), BeatRim = new Color32(255, 176, 150, 255);
+        private static readonly Color RestFill = new Color32(178, 72, 64, 255), RestRim = new Color32(214, 112, 96, 255);
+
+        private void SetBarBeat(float strength)
+        {
+            if (healthFill == null) return;
+            if (strength <= 0f)
+            {
+                healthFill.style.backgroundColor = StyleKeyword.Null;
+                healthFill.style.borderTopColor = StyleKeyword.Null;
+                return;
+            }
+            healthFill.style.backgroundColor = Color.Lerp(RestFill, BeatFill, strength);
+            healthFill.style.borderTopColor = Color.Lerp(RestRim, BeatRim, strength);
         }
 
         private void UpdateWeaponAway(bool allowed)
@@ -532,7 +548,7 @@ namespace RoadOfTheOldKing.UI
             }
             SetVisible(cueChip, spatial);
             cueAnchor = spatial ? anchor : null;
-            SetVisible(hint, show && !spatial);
+            SetVisible(hint, show && !spatial && !HudNotifications.HintSpatialOnly);
             if (!show) return;
             if (spatial)
             {

@@ -84,6 +84,8 @@ namespace RoadOfTheOldKing.Progression
             if (!TryGetComponent(out transitions)) transitions = gameObject.AddComponent<SceneTransitions>();
             Checkpoints = new CheckpointService(this);
             Rewards = new RewardService(this, upgradeTiers);
+            saveKey = SaveProfile.Key(saveKey, SaveProfile.IsDemo);
+            legacySaveKeys = SaveProfile.LegacyKeys(legacySaveKeys, SaveProfile.IsDemo);
 #if UNITY_EDITOR
             if (DevPlayFromHere.IsActive) { saveKey = DevPlayFromHere.SaveKey; legacySaveKeys = Array.Empty<string>(); }
 #endif
@@ -120,6 +122,8 @@ namespace RoadOfTheOldKing.Progression
             if (Player == null)
             {
                 Checkpoints.Forget();
+                // The title: nothing queued in the old run (BONFIRE LIT, GUARDIAN FALLEN) may greet the next one.
+                RoadOfTheOldKing.UI.HudNotifications.ClearAnnouncements();
                 return;
             }
 
