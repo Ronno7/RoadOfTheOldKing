@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.5 — Full production
+
+### 0.5.1-dev.1 — 2026-11-22 · Bonfires and controllers
+
+*Windows · playtest build*
+
 **Added**
 - Volume sliders for music, ambience and effects.
 - Game icon for the window and taskbar.
@@ -13,7 +19,7 @@
 - A small flame blinks in the top-right corner while saving.
 
 **Changed**
-- The hero carries a new double-bladed axe sprite.
+- The hero carries a new double-bladed axe.
 - Free look is two-thirds faster on a controller.
 - Place names and "BONFIRE LIT" share one style and never overlap.
 - Upgrade bonfires burn a larger gold flame, with embers and a bigger burst.
@@ -34,7 +40,7 @@
 - The upgrade menu keeps its size as you browse.
 - Killing blows and hits no longer cancel your combo or charge.
 - A missed wolf lunge chains at most one follow-up.
-- Defeated enemies no longer fall again when you return or rest.
+- Defeated bosses no longer fall again when you return or rest.
 - Quitting, even from the defeat screen, keeps your progress.
 - New Game asks before replacing a save it can't read.
 - The title waits for a key press at launch.
@@ -53,8 +59,6 @@
 - The aim marker no longer hides behind roofs and trees.
 - The hero no longer slips under hedges where two of them meet.
 - The Steam demo keeps its own save, apart from playtest builds.
-
-## 0.5 — Full production
 
 ### 0.5.0 — 2026-11-15 · The Green Lowlands
 
