@@ -37,14 +37,14 @@ if(EditorApplication.isPlaying){
     bool highWalkOnly=SessionState.GetBool("Lowlands.Layout.HighWalk",false);
     if(!highWalkOnly){
     game.Progress.Complete("green-lowlands/watcher-defeated");
-    pose(new Vector2(5,91.3f));
+    pose(new Vector2(13.5f,93.5f));
     var crankPickup=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.World.ToolPickup>();
     check(game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank) || crankPickup.TryCollect(player),"maintenance crank available before puzzle");
     lodge(new Vector2(5,86));recall(new Vector2(6,90));
     check(sluice.Stage==RoadOfTheOldKing.World.SluiceStage.DistributorReleased,"translated distributor solves with actual axe");
     // One movable crank (16 Nov): the first F places it in a socket, the next turns it, then F takes it out.
     var crankF=player.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>();
-    stand(new Vector2(6,88));check(crankF.TryInteract()&&game.Progress.crankSocket=="green-lowlands/crank/distributor","regional distributor F places the crank");
+    stand(new Vector2(5,89.6f));check(crankF.TryInteract()&&game.Progress.crankSocket=="green-lowlands/crank/distributor","regional distributor F places the crank");
     check(crankF.TryInteract()&&sluice.Stage==RoadOfTheOldKing.World.SluiceStage.ServiceDiverted,"service channel opens");
     check(crankF.TryInteract()&&string.IsNullOrEmpty(game.Progress.crankSocket),"F takes the crank out after its work");
     lodge(new Vector2(5,74));stand(new Vector2(4.5f,76));

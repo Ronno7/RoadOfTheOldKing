@@ -76,7 +76,7 @@ namespace RoadOfTheOldKing.Progression
         public static string Display(WorldTool tool) => tool switch
         {
             WorldTool.RopeKit => "Rope kit",
-            WorldTool.MaintenanceCrank => "Maintenance crank",
+            WorldTool.MaintenanceCrank => "Crank",
             WorldTool.ProtectedLantern => "Protected lantern",
             _ => ""
         };

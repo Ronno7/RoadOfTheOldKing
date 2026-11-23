@@ -44,9 +44,19 @@ def render(name, duration, kind, loop=False):
         elif kind == 4:  # Filtered moving water with quiet rolling bubbles.
             v = smooth * 1.1 * (.78 + .12 * math.sin(2 * math.pi * 2 * t))
             v += math.sin(2 * math.pi * 96 * t + 1.4 * math.sin(2 * math.pi * 3 * t)) * .035
-        else:  # Short gate scrape with a wooden initial catch.
+        elif kind == 5:  # Short gate scrape with a wooden initial catch.
             v = smooth * .85 * math.sin(math.pi * min(1, t / duration))
             v += math.sin(2 * math.pi * 187 * t) * math.exp(-t * 25) * .25
+        else:  # A crank's locking pin knocked free: a low iron knock, the loose pin ringing, then it clatters down.
+            v = (math.sin(2 * math.pi * 96 * t) * .55 + smooth * .8) * math.exp(-t * 22)
+            u = t - .06
+            if u >= 0:
+                v += sum(math.sin(2 * math.pi * f * u) * math.exp(-u * decay)
+                         for f, decay in ((612, 7), (1043, 9), (1586, 12))) * .16
+            for offset, level in ((.36, .3), (.47, .18)):
+                u = t - offset
+                if u >= 0:
+                    v += (math.sin(2 * math.pi * 410 * u) * .6 + noise[i] * .5) * math.exp(-u * 60) * level
         if not loop:
             v *= min(1, t / .003, (duration - t) / .025)
         samples.append(v)
@@ -68,5 +78,5 @@ def render(name, duration, kind, loop=False):
 
 if __name__ == "__main__":
     for args in (("Latch", .35, 0), ("Blocked", .32, 1), ("Ratchet", 1, 2, True),
-                 ("Weight", .65, 3), ("Water", 2, 4, True), ("Gate", .55, 5)):
+                 ("Weight", .65, 3), ("Water", 2, 4, True), ("Gate", .55, 5), ("Unlatch", .75, 6)):
         render(*args)

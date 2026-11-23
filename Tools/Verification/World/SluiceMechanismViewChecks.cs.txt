@@ -56,7 +56,7 @@ System.Action<Vector2> recall=at=>{pose(at);stamina.Restore();check(a.TryPlayerR
 var hintFeedback=s.GetComponent<RoadOfTheOldKing.World.SluiceFeedback>();var hintFittings=(System.Array)hintFeedback.GetType().GetField("fittings",f).GetValue(hintFeedback);
 // Recall targets twinkle while their stage needs them (user, 15 Nov): the names of the vanes glinting now.
 System.Func<string> glinting=()=>{var on=new System.Collections.Generic.List<string>();foreach(var x in hintFittings){var rec=(Transform)x.GetType().GetField("receiver").GetValue(x);if(rec!=null&&(bool)hintFeedback.GetType().GetMethod("HintWanted",f).Invoke(hintFeedback,new object[]{x}))on.Add(rec.name);}on.Sort();return string.Join(",",on.ToArray());};
-System.Func<bool,bool> turn=carriage=>{pose(carriage?new Vector2(4.5f,76):new Vector2(6,88));return p.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>().TryInteract();};
+System.Func<bool,bool> turn=carriage=>{pose(carriage?new Vector2(4.5f,76):new Vector2(5,89.6f));return p.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>().TryInteract();};
 try{
  if(!game.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank))game.Progress.ownedTools.Add(RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank);game.Progress.crankSocket="";
  game.Progress.completedIds.RemoveAll(id=>id.StartsWith("green-lowlands/sluice/"));s.RestoreProgress(game.Progress);
@@ -103,11 +103,35 @@ try{
  // One crank (user, 15 Nov): carried, placed in a socket, turned there, then taken out for the other.
  var cranks=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.SluiceCrank>(FindObjectsInactive.Include,FindObjectsSortMode.None);var dCrank=cranks.First(c=>c.name=="Distributor crank");var cCrank=cranks.First(c=>c.name=="Carriage crank");
  var feedback=s.GetComponent<RoadOfTheOldKing.World.SluiceFeedback>();System.Func<RoadOfTheOldKing.World.SluiceCrank,string> shows=c=>{feedback.GetType().GetMethod("Advance",f).Invoke(feedback,new object[]{.02f});return c.transform.Find("Native fitting visual").GetComponent<SpriteRenderer>().sprite.name;};
- check(dCrank.Prompt=="Place crank"&&cCrank.Prompt=="Place crank"&&shows(dCrank)=="CrankSocket"&&shows(cCrank)=="CrankSocket","Carried, the crank is in neither socket and both offer a place for it");
- check(turn(false)&&game.Progress.crankSocket=="green-lowlands/crank/distributor"&&dCrank.HoldsCrank&&!cCrank.HoldsCrank&&cCrank.Prompt=="Crank is in the other socket"&&shows(dCrank)=="Machine_Crank"&&shows(cCrank)=="CrankSocket","Placing puts the one crank in the distributor only");
+ // A freed crank's lock pin comes out a moment after the targets' own click, with its own sound, and only then does it glint (user, 23 Nov).
+ System.Func<string,object> fitting=name=>{foreach(var x in hintFittings){var rec=(Transform)x.GetType().GetField("receiver").GetValue(x);if(rec!=null&&rec.name==name)return x;}return null;};
+ System.Func<object,string,object> get=(x,n)=>x.GetType().GetField(n).GetValue(x);
+ System.Func<object,string> cue=x=>get(x,"response")+"@"+((float)get(x,"age")).ToString("0.00");
+ System.Action<float> advance=x=>feedback.GetType().GetMethod("Advance",f).Invoke(feedback,new object[]{x});
+ var dFit=fitting("Distributor crank");var cFit=fitting("Carriage crank");var dPin=(SpriteRenderer)get(dFit,"pin");var cPin=(SpriteRenderer)get(cFit,"pin");
+ check(dPin!=null&&dPin.enabled&&cPin!=null&&cPin.enabled,"Both locked cranks show their lock pins");
+ advance(.3f);
+ check((bool)get(dFit,"wasLatched")&&dPin.enabled&&glinting()=="","Freed, the distributor crank keeps its pin a moment, clear of the targets' click ("+glinting()+")");
+ advance(.45f);
+ check(!(bool)get(dFit,"wasLatched")&&(float)get(dFit,"pinAge")<.1f&&cue(dFit).StartsWith("Accepted")&&dPin.enabled&&cPin.enabled,"Then its pin is knocked out, with its own sound; the carriage crank stays pinned ("+cue(dFit)+")");
+ advance(.5f);
+ check(!dPin.enabled&&glinting()=="Distributor crank","With its pin out, only the distributor crank glints ("+glinting()+")");
+ // Plain words (user, 23 Nov): insert, turn and remove crank; the other socket still says insert crank.
+ check(dCrank.Prompt=="Insert crank"&&cCrank.Prompt=="Insert crank"&&shows(dCrank)=="CrankSocket"&&shows(cCrank)=="CrankSocket","Carried, the crank is in neither socket and both say insert crank");
+ var dShadow=(SpriteRenderer)get(dFit,"shadow");check(dShadow!=null&&!dShadow.enabled,"An empty socket shows no crank shadow");
+ check(turn(false)&&game.Progress.crankSocket=="green-lowlands/crank/distributor"&&dCrank.HoldsCrank&&!cCrank.HoldsCrank&&cCrank.Prompt=="Insert crank"&&shows(dCrank)=="Machine_Crank"&&shows(cCrank)=="CrankSocket","Inserting puts the one crank in the distributor only; the other socket still says insert crank");
+ check(dShadow.enabled&&dCrank.Prompt=="Turn crank","The inserted crank brings its shadow and offers a turn");
+ var dVis=dCrank.transform.Find("Native fitting visual");var dRenderer=dVis.GetComponent<SpriteRenderer>();var crankFrames=(Sprite[])get(dFit,"turnFrames");
+ check(crankFrames.Length==8&&crankFrames[0].name=="CrankTurn_0","The crank has its eight turn frames");
  check(turn(false),"Owned crank and contextual interaction divert service");
- check(dCrank.Prompt=="Take crank","With its work done, the distributor offers the crank back");
- check(glinting()=="Brake vane,Catch vane","Second bay: both its vanes glint together, never in order ("+glinting()+")");
+ advance(.15f);
+ check(dRenderer.sprite==crankFrames[2]&&dVis.localRotation==Quaternion.identity,"A turn plays the crank's frames about its hub; the sprite never rotates (user, 23 Nov: \"weirdly skewed\")");
+ advance(.6f);
+ check(dRenderer.sprite.name=="Machine_Crank","It comes to rest on its resting sprite");
+ check(!(bool)get(cFit,"wasLatched")&&cue(cFit).StartsWith("Accepted"),"Diverting the service knocks out the carriage crank's pin ("+cue(cFit)+")");
+ check(dCrank.Prompt=="Remove crank","With its work done, the distributor offers to remove the crank");
+ advance(.5f);
+ check(glinting()=="Brake vane,Carriage crank,Catch vane","Second bay: both its vanes glint together, never in order, with its crank ("+glinting()+")");
  check(turn(false)&&string.IsNullOrEmpty(game.Progress.crankSocket)&&shows(dCrank)=="CrankSocket","Taking it out carries it again");
  check(turn(true)&&cCrank.HoldsCrank&&shows(cCrank)=="Machine_Crank","Placed in the carriage socket");
  check(serviceReveal.IsDraining&&serviceBlocker.enabled&&serviceLeaf.localPosition==serviceRest,"Service diversion starts drainage before moving its passage gate");

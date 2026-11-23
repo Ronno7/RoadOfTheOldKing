@@ -18,8 +18,18 @@ namespace RoadOfTheOldKing.World
             [Tooltip("Its latch sound's pitch, so parts struck a moment apart still sound like two.")]
             public float pitch = 1f;
             [System.NonSerialized] public AudioSource speaker;
-            [Tooltip("A Recall target: it twinkles now and then while its stage still needs it (user, 15 Nov).")]
+            [Tooltip("A Recall target: it twinkles now and then while its stage still needs it (user, 15 Nov). Cranks twinkle " +
+                "on their own while they can be turned.")]
             public bool hint;
+            [Tooltip("A crank's hub, in pixels from its sprite's pivot: its lock pin and glint sit on it.")]
+            public Vector2 axle;
+            [Tooltip("A crank's turn, frame by frame about its hub, with the resting sprite first. Pixel frames, not a " +
+                "rotated sprite, which sheared under its stretched parent (user, 22-23 Nov: \"weirdly skewed\").")]
+            public Sprite[] turnFrames = System.Array.Empty<Sprite>();
+            [System.NonSerialized] public SpriteRenderer pin, shadow;
+            [System.NonSerialized] public Vector3 pinRest;
+            [System.NonSerialized] public bool wasLatched;
+            [System.NonSerialized] public float unlatchIn = -1f, pinAge = 99f;
             [System.NonSerialized] public SluiceCrank crankFitting;
             [System.NonSerialized] public SluiceTarget target;
             [System.NonSerialized] public SpriteRenderer[] hintMarks;
@@ -34,7 +44,7 @@ namespace RoadOfTheOldKing.World
 
         [SerializeField] private Fitting[] fittings = System.Array.Empty<Fitting>();
         [SerializeField] private Sprite sparkSprite;
-        [Tooltip("A crank's bare socket, shown until the player owns the maintenance crank.")]
+        [Tooltip("A crank's bare socket, shown while the crank isn't in it.")]
         [SerializeField] private Sprite bareSocket;
         [Tooltip("Seconds between a Recall target's twinkles; each one lasts .42 s, like a pickup's.")]
         [SerializeField, Min(1f)] private float hintInterval = 3.6f;
@@ -43,6 +53,16 @@ namespace RoadOfTheOldKing.World
         [SerializeField] private Transform counterweight;
         [SerializeField] private Transform[] passageLeaves = System.Array.Empty<Transform>();
         [SerializeField] private AudioClip latchSound, blockedSound, ratchetSound, weightSound, waterSound, gateSound;
+        [Tooltip("A crank's iron lock pin, shown through its wheel until the puzzle frees it.")]
+        [SerializeField] private Sprite crankLock;
+        [Tooltip("The pin knocked free: a heavy knock and a ringing pin, unlike the parts' latch click.")]
+        [SerializeField] private AudioClip unlatchSound;
+        [Tooltip("Seconds after the stage frees a crank before its pin comes out, so it isn't lost in the targets' own click.")]
+        [SerializeField, Min(0f)] private float unlatchDelay = .7f;
+        private const float PinPop = .45f;
+        // Where the pin's centre lies, from the hub: its ring outside the rim, its shaft through the hub (CrankLock.png,
+        // 19 x 7, centre pivot; whole pixels with the wheel's).
+        private static readonly Vector2 PinFromHub = new Vector2(-4.5f, 0f);
         private RecallSluice owner;
         private SluiceMechanismView mechanism;
         private AudioSource impacts, machinery, water;
@@ -68,7 +88,27 @@ namespace RoadOfTheOldKing.World
                 if (f.visual == null) continue;
                 f.rest = f.visual.transform.localPosition;
                 f.full = f.visual.sprite;
-                if (f.crank && f.receiver != null) f.crankFitting = f.receiver.GetComponent<SluiceCrank>();
+                if (f.crank && f.receiver != null)
+                {
+                    f.crankFitting = f.receiver.GetComponent<SluiceCrank>();
+                    // The crank's own shadow belongs to the crank: it goes when the crank is taken out.
+                    foreach (var r in f.visual.GetComponentsInChildren<SpriteRenderer>(true))
+                        if (r != f.visual && r.name.StartsWith("Fitting-shadow")) f.shadow = r;
+                    if (crankLock != null)
+                    {
+                        f.pin = new GameObject("Crank lock pin") { hideFlags = HideFlags.DontSave }.AddComponent<SpriteRenderer>();
+                        f.pin.transform.SetParent(f.visual.transform, false);
+                        // In world pixels from the wheel's pivot, whatever the wheel's (stretched) scale; drawn at native size.
+                        var lossy = f.visual.transform.lossyScale;
+                        Vector2 offset = (f.axle + PinFromHub) / 16f;
+                        f.pinRest = new Vector3(offset.x / lossy.x, offset.y / lossy.y, 0f);
+                        f.pin.transform.localScale = new Vector3(1f / lossy.x, 1f / lossy.y, 1f);
+                        f.pin.sprite = crankLock;
+                        f.pin.sortingLayerID = f.visual.sortingLayerID;
+                        f.pin.sortingOrder = f.visual.sortingOrder + 1;
+                        f.pin.sharedMaterial = f.visual.sharedMaterial;
+                    }
+                }
                 f.rotation = f.visual.transform.localRotation;
                 // Its own speaker: re-pitching the shared one would bend a latch that's still ringing.
                 if (!Mathf.Approximately(f.pitch, 1f))
@@ -76,7 +116,7 @@ namespace RoadOfTheOldKing.World
                     f.speaker = Speaker("Fitting latch", false);
                     f.speaker.pitch = f.pitch;
                 }
-                if (f.hint && f.receiver != null)
+                if ((f.hint || f.crank) && f.receiver != null)
                 {
                     f.target = f.receiver.GetComponent<SluiceTarget>();
                     f.hintMarks = new SpriteRenderer[2];
@@ -165,6 +205,7 @@ namespace RoadOfTheOldKing.World
             {
                 f.age += seconds;
                 f.cooldown = Mathf.Max(0f, f.cooldown - seconds);
+                Unlatch(f, seconds);
                 Draw(f);
             }
             bool moving = owner != null && owner.IsMoving;
@@ -221,11 +262,16 @@ namespace RoadOfTheOldKing.World
             bool turning = f.crank && f.response == SluiceResponse.Turned;
             float duration = turning ? .6f : .32f;
             float t = Mathf.Clamp01(f.age / duration);
-            float recoil = t < 1f ? Mathf.Sin(t * Mathf.PI * (rejected ? 4f : 2f)) * (1f - t) : 0f;
+            // A click jolts the part sideways; a turn only spins, so the crank doesn't wobble off its axle.
+            float recoil = t < 1f && !turning ? Mathf.Sin(t * Mathf.PI * (rejected ? 4f : 2f)) * (1f - t) : 0f;
             // Only the visual child moves. Pixel steps keep the fixed receiver honest.
             f.visual.transform.localPosition = f.rest + Vector3.right * (Mathf.Round(recoil * 2f) / 16f);
-            float rotation = turning && t < 1f ? Mathf.Round(t * 24f) * 15f : 0f;
-            f.visual.transform.localRotation = f.rotation * Quaternion.Euler(0f, 0f, rotation);
+            f.visual.transform.localRotation = f.rotation;
+            // A turn plays the crank's frames about its hub, once round.
+            if (turning && t < 1f && f.turnFrames.Length > 0 && (f.crankFitting == null || f.crankFitting.HoldsCrank))
+                f.visual.sprite = f.turnFrames[Mathf.Min(f.turnFrames.Length - 1, (int)(t * f.turnFrames.Length))];
+            if (f.shadow != null) f.shadow.enabled = f.crankFitting == null || f.crankFitting.HoldsCrank;
+            DrawPin(f);
             DrawHint(f);
             if (f.sparks == null) return;
             for (int i = 0; i < f.sparks.Length; i++)
@@ -251,7 +297,10 @@ namespace RoadOfTheOldKing.World
         // bay's two vanes glint together, never in order, so the order stays the player's to find.
         private bool HintWanted(Fitting f)
         {
-            if (owner == null || f.target == null || owner.IsGuarded) return false;
+            if (owner == null || owner.IsGuarded) return false;
+            // A crank glints while its stage lets it turn: the puzzle's next step after its targets (user, 22 Nov).
+            if (f.crank) return f.crankFitting != null && f.crankFitting.ReadyToTurn && !f.wasLatched && f.pinAge >= PinPop;
+            if (f.target == null) return false;
             switch (f.target.Part)
             {
                 case SluicePart.DistributorVane: return owner.Stage == SluiceStage.High;
@@ -269,8 +318,10 @@ namespace RoadOfTheOldKing.World
             bool shine = sparkSprite != null && cycle < .42f && FeedbackSettings.FlashScale > 0f && HintWanted(f) &&
                 f.visual.enabled && !f.visual.forceRenderingOff && f.visual.gameObject.activeInHierarchy;
             var bounds = f.visual.bounds;
-            Vector3 tip = new Vector3(Mathf.Round((bounds.center.x + bounds.extents.x * .6f) * 16f) / 16f,
-                Mathf.Round((bounds.center.y + bounds.extents.y * .6f) * 16f) / 16f, bounds.center.z);
+            // A crank glints at its hub's upper edge, which the crank and the bare socket share; others at an upper corner.
+            Vector3 at = f.crank ? f.visual.transform.TransformPoint((Vector3)(f.axle / 16f)) + new Vector3(2.5f, 2.5f) / 16f
+                : bounds.center + Vector3.Scale(bounds.extents, new Vector3(.6f, .6f));
+            Vector3 tip = new Vector3(Mathf.Round(at.x * 16f) / 16f, Mathf.Round(at.y * 16f) / 16f, bounds.center.z);
             int length = cycle > .09f && cycle < .28f ? 3 : 1;
             var accent = PickupPresentation.Warm;
             accent.a = Mathf.Clamp01(FeedbackSettings.FlashScale) * f.visual.color.a;
@@ -287,6 +338,42 @@ namespace RoadOfTheOldKing.World
             }
         }
 
+        // A stage that frees a crank knocks its lock pin out, a moment after the targets' own click, with its own heavier
+        // sound and sparks; only then does the crank glint (user, 23 Nov: the click "plays at the same moment as the other
+        // click and it still isnt clear that the crank has unlocked"). A rest that pins it again puts the pin back.
+        private void Unlatch(Fitting f, float seconds)
+        {
+            if (!f.crank || f.crankFitting == null) return;
+            f.pinAge += seconds;
+            if (f.crankFitting.Latched) { f.wasLatched = true; f.unlatchIn = -1f; return; }
+            if (!f.wasLatched) return;
+            if (f.unlatchIn < 0f) f.unlatchIn = unlatchDelay;
+            f.unlatchIn -= seconds;
+            if (f.unlatchIn > 0f) return;
+            f.wasLatched = false;
+            f.unlatchIn = -1f;
+            f.pinAge = 0f;
+            f.age = 0f;
+            f.cooldown = .18f;
+            f.response = SluiceResponse.Accepted;
+            Sound(unlatchSound != null ? unlatchSound : latchSound, f.receiver.position, .8f);
+        }
+
+        // In while latched; knocked out, it slides back through its ring and drops away, fading.
+        private void DrawPin(Fitting f)
+        {
+            if (f.pin == null) return;
+            bool popping = !f.wasLatched && f.pinAge < PinPop;
+            f.pin.enabled = (f.wasLatched || popping) && f.visual.enabled && f.visual.gameObject.activeInHierarchy;
+            if (!f.pin.enabled) return;
+            float t = popping ? Mathf.Clamp01(f.pinAge / PinPop) : 0f;
+            var lossy = f.visual.transform.lossyScale;
+            f.pin.transform.localPosition = f.pinRest + new Vector3(-Mathf.Round(t * 7f) / 16f / lossy.x, -Mathf.Round(t * t * 5f) / 16f / lossy.y, 0f);
+            var color = f.visual.color;
+            color.a *= 1f - t * t;
+            f.pin.color = color;
+        }
+
         public void ResetPresentation()
         {
             if (!initialized) return;
@@ -294,6 +381,10 @@ namespace RoadOfTheOldKing.World
             {
                 f.age = 1f;
                 f.cooldown = 0f;
+                // As the scene loads or resets: pinned or free as the stage stands, with nothing to animate.
+                f.wasLatched = f.crankFitting != null && f.crankFitting.Latched;
+                f.unlatchIn = -1f;
+                f.pinAge = 99f;
                 Draw(f);
             }
             impacts.Stop(); machinery.Stop(); water.Stop();
@@ -316,6 +407,7 @@ namespace RoadOfTheOldKing.World
                 if (f.sparks != null) foreach (var mark in f.sparks) if (mark != null) Destroy(mark.gameObject);
             foreach (var f in fittings)
                 if (f.hintMarks != null) foreach (var mark in f.hintMarks) if (mark != null) Destroy(mark.gameObject);
+            foreach (var f in fittings) if (f.pin != null) Destroy(f.pin.gameObject);
             if (impacts != null) Destroy(impacts.gameObject);
             if (machinery != null) Destroy(machinery.gameObject);
             if (water != null) Destroy(water.gameObject);

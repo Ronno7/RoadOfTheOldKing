@@ -23,12 +23,19 @@ namespace RoadOfTheOldKing.World
         public bool HoldsCrank => !requiresOwnedCrank || (Owned && !string.IsNullOrEmpty(socketId) && Progress.crankSocket == socketId);
         private bool StageOpen => sluice != null && sluice.Stage < (carriage ? SluiceStage.PondLow : SluiceStage.ServiceDiverted);
         private bool Turnable => StageOpen && sluice.CanTurn(carriage);
-        private string TurnPrompt => carriage ? "Turn carriage crank" : "Turn distributor crank";
+        // This socket's stage lets its crank turn, whether or not the crank is in it yet (its glint, SluiceFeedback).
+        public bool ReadyToTurn => Turnable;
+        // Pinned until the puzzle frees this socket (or while the guardian holds the controls): its lock pin shows, and it
+        // comes out when the stage frees it (SluiceFeedback). A carriage that stops moving doesn't pin it again.
+        public bool Latched => sluice != null && (sluice.IsGuarded ||
+            sluice.Stage < (carriage ? SluiceStage.ServiceDiverted : SluiceStage.DistributorReleased));
 
+        // Plain words (user, 23 Nov: "just call it a crank, say requires crank, insert crank, remove crank"). A locked
+        // socket shows its pin rather than saying so; with the crank in the other socket it still says insert crank.
         public override string Prompt =>
-            !requiresOwnedCrank ? (Turnable ? TurnPrompt : sluice != null && sluice.IsMoving ? "Carriage moving" : "Crank locked") :
-            HoldsCrank ? (sluice != null && sluice.IsMoving ? "Carriage moving" : Turnable ? TurnPrompt : StageOpen ? "Take crank (locked)" : "Take crank") :
-            Carried ? "Place crank" : Owned ? "Crank is in the other socket" : "Requires maintenance crank";
+            !requiresOwnedCrank ? (sluice != null && sluice.IsMoving ? "Carriage moving" : "Turn crank") :
+            HoldsCrank ? (sluice != null && sluice.IsMoving ? "Carriage moving" : Turnable ? "Turn crank" : "Remove crank") :
+            Owned ? "Insert crank" : "Requires crank";
 
         public override bool CanCollect(PlayerHealth player)
         {

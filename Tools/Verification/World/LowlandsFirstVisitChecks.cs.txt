@@ -17,6 +17,9 @@ if(!EditorApplication.isPlaying)throw new System.Exception("Isolated Play requir
   var fp=UnityEngine.Object.FindFirstObjectByType<RoadOfTheOldKing.Player.PlayerHealth>();var fb=fp.GetComponent<Rigidbody2D>();
   var fc=fp.GetComponent<RoadOfTheOldKing.Player.PlayerCombatController>();var fa=fc.Weapon;
   var fi=fp.GetComponent<RoadOfTheOldKing.Player.PlayerBonfireInteraction>();
+  // An unfocused editor switches player input off, which blocks the rope and interactions (as in TutorialLoopPlayModeChecks).
+  var fmi=fp.GetComponent<RoadOfTheOldKing.Input.PlayerMovementInput>();if(fmi!=null)fmi.GetType().GetField("hasFocus",flags).SetValue(fmi,true);
+  var fci=fp.GetComponent<RoadOfTheOldKing.Input.PlayerCombatInput>();if(fci!=null){fci.GetType().GetField("focused",flags).SetValue(fci,true);fci.SendMessage("Update",SendMessageOptions.DontRequireReceiver);fc.SendMessage("Update",SendMessageOptions.DontRequireReceiver);}
   System.Action<Vector2> fmove=at=>{fb.position=at;fp.transform.position=at;fb.linearVelocity=Vector2.zero;fc.GetType().GetField("controlsActive",flags).SetValue(fc,true);Physics2D.SyncTransforms();};
   System.Action<Vector2> fpose=at=>{fi.Close();fa.CancelAction();fmove(at);};
   System.Action<RoadOfTheOldKing.Combat.Damageable> fkill=health=>{
@@ -73,10 +76,10 @@ if(!EditorApplication.isPlaying)throw new System.Exception("Isolated Play requir
    System.Action<Vector2> flodge=at=>{fpose(at);fp.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>().Restore();check(fa.TryThrow(Vector2.right),"real puzzle throw");ftick(90);check(fa.State==RoadOfTheOldKing.Weapons.AxeState.Stuck,"real fork lodging");};
    System.Action<Vector2> frecall=at=>{fmove(at);fp.GetComponent<RoadOfTheOldKing.Player.PlayerStamina>().Restore();check(fa.TryPlayerRecall(),"real puzzle Recall");ftick(180);};
    fg.Progress.Complete("green-lowlands/watcher-defeated");check(!fs.IsGuarded,"the Watcher's fall frees the controls");
-   fpose(new Vector2(5,91.3f));check(fi.TryInteract()&&fg.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank),"F collects required crank");
+   fpose(new Vector2(13.5f,93.5f));check(fi.TryInteract()&&fg.Progress.OwnsTool(RoadOfTheOldKing.Progression.WorldTool.MaintenanceCrank),"F collects required crank");
    flodge(new Vector2(5,86));frecall(new Vector2(6,90));check(fs.Stage==RoadOfTheOldKing.World.SluiceStage.DistributorReleased,"distributor released");
    // One crank (15 Nov): F places it in a socket, F turns it there, F takes it out for the other socket.
-   fmove(new Vector2(6,88));check(fi.TryInteract()&&fi.TryInteract()&&fs.Stage==RoadOfTheOldKing.World.SluiceStage.ServiceDiverted,"F places the crank and diverts service channel");
+   fmove(new Vector2(5,89.6f));check(fi.TryInteract()&&fi.TryInteract()&&fs.Stage==RoadOfTheOldKing.World.SluiceStage.ServiceDiverted,"F places the crank and diverts service channel");
    check(fi.TryInteract()&&string.IsNullOrEmpty(fg.Progress.crankSocket),"F takes the crank out after its work");
    flodge(new Vector2(5,74));fmove(new Vector2(4.5f,76));check(fi.TryInteract()&&fi.TryInteract(),"F places the crank and moves lodged carriage");ftick(60);frecall(new Vector2(4.5f,78));
    check(fs.Stage==RoadOfTheOldKing.World.SluiceStage.PondLow,"ordered return permanently lowers pond");
