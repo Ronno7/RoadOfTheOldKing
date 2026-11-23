@@ -43,38 +43,16 @@ namespace RoadOfTheOldKing.Player
         public int Frame { get; private set; }
 
         // Pixels the shown figure stands above (+) or below (-) its standing view, so carried items
-        // bob with the step. Zero when either height was not measured. Seen from behind (N, NE, NW)
-        // the walk's head never rises or falls, so there the lift comes from the per-frame tables below.
+        // bob with the step. Zero when either height was not measured. The back views' walk frames rise
+        // on their passing frames like the front ones (22 Nov, #91), so every direction uses the art.
         public int Lift
         {
             get
             {
                 if (currentClip == null || animations == null || animations.rotations == null) return 0;
-                if (currentClip == animations.walk && Flat(currentClip, Octant))
-                {
-                    var table = Octant == 2 ? northWalkLift : Octant == 1 || Octant == 3 ? backDiagonalWalkLift : null;
-                    return table != null && Frame >= 0 && Frame < table.Length ? table[Frame] : 0;
-                }
                 int now = currentClip.Height(Octant, Frame), rest = animations.rotations.Height(Octant, 0);
                 return now < 0 || rest < 0 ? 0 : Mathf.Clamp(now - rest, -2, 2);
             }
-        }
-
-        // Read from the walk frames (18 Nov). North: the hem lifts as the feet pass, on frames 2 and 6. The back
-        // diagonals were drawn with one bob per cycle: legs together and the cloak tallest on frames 0-1, legs
-        // apart and the cloak squashed wide on 4-5. Using north's frames there put the bob off the step (#91).
-        [Tooltip("Carried-item lift per walk frame facing north, where the body never rises.")]
-        [SerializeField] private int[] northWalkLift = { 0, 0, 1, 0, 0, 0, 1, 0 };
-        [Tooltip("Carried-item lift per walk frame facing north-east and north-west (mirror images).")]
-        [SerializeField] private int[] backDiagonalWalkLift = { 1, 1, 0, 0, 0, 0, 0, 0 };
-
-        private static bool Flat(DirectionalSpriteAnimation clip, int octant)
-        {
-            int count = clip.FrameCount(octant);
-            if (count < 2) return false;
-            int first = clip.Height(octant, 0);
-            for (int i = 1; i < count; i++) if (clip.Height(octant, i) != first) return false;
-            return true;
         }
 
         private DirectionalSpriteAnimation currentClip;
