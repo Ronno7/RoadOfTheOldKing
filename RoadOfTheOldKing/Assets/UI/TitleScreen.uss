@@ -25,6 +25,8 @@
 }
 .prologue-text { width: 600px; max-width: 90%; white-space: normal; color: var(--kit-text); -unity-text-align: middle-left; }
 .prologue-hint { position: absolute; left: 0; right: 0; bottom: 24px; color: var(--kit-disabled); -unity-text-align: middle-center; }
+/* Next at the bottom centre, Skip in the bottom-right corner (user, 23 Nov). */
+.prologue-skip { position: absolute; right: 32px; bottom: 24px; color: var(--kit-disabled); }
 
 /* Option pages on the title (settings, the hood after the prologue): the logo hides and the panel takes a heading.
    The hood page shows the hero, recoloured live, above its rows; TitleScreen sizes the preview to whole pixels. */

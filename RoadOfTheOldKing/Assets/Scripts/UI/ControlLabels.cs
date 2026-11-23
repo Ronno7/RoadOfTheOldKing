@@ -14,10 +14,11 @@ namespace RoadOfTheOldKing.UI
     {
         private static readonly Dictionary<string, string> keyboard = new Dictionary<string, string>
         {
-            { "move", "WASD" }, { "sprint", "Shift" }, { "dash", "Space" }, { "interact", "F" },
+            { "move", "WASD" }, { "sprint", "Hold Shift" }, { "dash", "Space" }, { "interact", "F" },
             { "attack", "LMB" }, { "cleave", "RMB" }, { "throw", "E" },
             { "recall", "E" }, { "pause", "Esc" }, { "status", "Tab" }, { "look", "Alt" }, { "heal", "R" },
             { "aim", "Mouse" }, { "zoom", "Wheel" }, { "select", "Enter" }, { "back", "Esc" },
+            { "skip", "Esc" },
         };
         private static readonly Dictionary<string, string> gamepad = new Dictionary<string, string>
         {
@@ -25,6 +26,7 @@ namespace RoadOfTheOldKing.UI
             { "attack", "RB" }, { "cleave", "RT" }, { "throw", "LT" },
             { "recall", "LT" }, { "pause", "Start" }, { "status", "View" }, { "look", "LB + RS" }, { "heal", "X" },
             { "aim", "RS" }, { "zoom", "D-pad" }, { "select", "A" }, { "back", "B" },
+            { "skip", "Start" },
         };
         private static readonly Dictionary<string, string> playStation = new Dictionary<string, string>
         {

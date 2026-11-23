@@ -24,7 +24,7 @@ namespace RoadOfTheOldKing.UI
             if (commands == null || commands.Count == 0 || !Open(title, false)) return false;
             invoke = onAction;
             bool paused = title == "PAUSED";
-            ControlLabels.Bind(overlay.Q<Label>("hint"), paused ? "Esc Resume" : "Esc Back", paused ? "B Resume" : "B Back");
+            ControlGlyphs.Bind(overlay.Q<Label>("hint"), "");
             list.Show(commands, selected);
             return true;
         }
@@ -34,7 +34,7 @@ namespace RoadOfTheOldKing.UI
         {
             if (rows == null || rows.Count == 0 || !Open(title, true)) return false;
             optionList.Show(rows, selected);
-            ControlLabels.Bind(overlay.Q<Label>("hint"), "↑↓ Choose · ←→ Change · Esc Back", "D-pad Choose · ←→ Change · B Back");
+            ControlGlyphs.Bind(overlay.Q<Label>("hint"), ""); // Rows show their own ‹ › arrows.
             return true;
         }
 

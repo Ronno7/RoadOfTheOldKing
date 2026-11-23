@@ -92,7 +92,7 @@ namespace RoadOfTheOldKing.UI
             knowledge.text = note;
             knowledge.style.display = string.IsNullOrEmpty(note) ? DisplayStyle.None : DisplayStyle.Flex;
             overlay.style.display = DisplayStyle.Flex;
-            ControlLabels.Bind(overlay.Q<Label>("hint"), "Esc / Enter Leave", "A / B Leave");
+            ControlGlyphs.Bind(overlay.Q<Label>("hint"), "");
             locks.Lock(this);
             pause = SimulationPause.Acquire();
             MenuStack.Push(this);

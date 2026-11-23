@@ -79,3 +79,27 @@
     background-image: url("project://database/Assets/Art/Sprites/UI/Kit/Cursor.png");
 }
 .kit-row.selected > .kit-cursor { display: flex; }
+
+/* Control glyphs (ControlGlyphs; user, 23 Nov): controls drawn as icons on a 12 UI px line, never "[F]" in brackets.
+   Keys and faceless pad buttons are a keycap holding the name in gold; pad face buttons are drawn sprites. */
+.glyph-line { flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; }
+.glyph-group { flex-direction: row; align-items: center; flex-shrink: 0; margin: 0 6px 0 0; }
+.glyph-word { margin: 0 6px 0 0; padding: 0; white-space: nowrap; }
+.glyph-group .glyph-word { margin-right: 4px; }
+.glyph { height: 24px; flex-shrink: 0; margin: 0 2px 0 0; }
+.glyph-key {
+    min-width: 20px; padding: 2px 6px 6px 6px; justify-content: center; align-items: center;
+    background-image: url("project://database/Assets/Art/Sprites/UI/Kit/KeyCap.png");
+    -unity-slice-left: 3; -unity-slice-right: 3; -unity-slice-top: 3; -unity-slice-bottom: 4;
+}
+.glyph-key Label { color: var(--kit-gold); margin: 0; padding: 0; -unity-text-align: middle-center; white-space: nowrap; }
+.glyph-face { width: 24px; }
+.glyph-a { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphA.png"); }
+.glyph-b { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphB.png"); }
+.glyph-x { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphX.png"); }
+.glyph-y { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphY.png"); }
+.glyph-cross { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphCross.png"); }
+.glyph-circle { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphCircle.png"); }
+.glyph-square { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphSquare.png"); }
+.glyph-triangle { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphTriangle.png"); }
+.next-arrow { width: 14px; height: 10px; background-image: url("project://database/Assets/Art/Sprites/UI/Kit/NextArrow.png"); }

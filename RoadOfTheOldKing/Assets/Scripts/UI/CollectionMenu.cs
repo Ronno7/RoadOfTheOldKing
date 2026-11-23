@@ -146,7 +146,7 @@ namespace RoadOfTheOldKing.UI
         {
             heading.text = "INVENTORY"; RefreshBalances();
             context.text = "";
-            ControlLabels.Bind(hint, "Tab / Esc", "View / B");
+            ControlGlyphs.Bind(hint, "");
             inventory.Show(player);
             ShowStats();
         }
@@ -206,7 +206,7 @@ namespace RoadOfTheOldKing.UI
             switch (tool)
             {
                 case WorldTool.RopeKit: return "A reusable rope kit. Secure a crossing at a suitable anchor.";
-                case WorldTool.MaintenanceCrank: return "A maintenance crank for compatible old machinery.";
+                case WorldTool.MaintenanceCrank: return "Turns old machinery.";
                 case WorldTool.ProtectedLantern: return "A sheltered light for dark passages.";
                 default: return "";
             }
@@ -219,7 +219,7 @@ namespace RoadOfTheOldKing.UI
         {
             confirming = null; heading.text = "TRAVELING TRADER"; RefreshBalances();
             overlay.Q<Button>("collection-close").text = "Leave";
-            ControlLabels.Bind(hint, "↑ ↓ Browse    Enter Select    Esc Leave", "D-pad Browse    A Select    B Leave");
+            ControlGlyphs.Bind(hint, "");
             var rows = new List<PauseMenuAction>();
             // Finite stock: a bought offer leaves the list (user, 17 Oct) rather than staying as "sold out".
             foreach (var offer in trader.Offers)
@@ -242,7 +242,7 @@ namespace RoadOfTheOldKing.UI
             bool affordable = state.bronzeCoins >= offer.Price;
             context.text = sold ? "Sold out." : affordable ? "Purchase for " + offer.Price + " Bronze Coins?"
                 : "You need " + (offer.Price - state.bronzeCoins) + " more Bronze Coins.";
-            ControlLabels.Bind(hint, "↑ ↓ Choose    Enter Select    Esc Back", "D-pad Choose    A Select    B Back");
+            ControlGlyphs.Bind(hint, "");
             list.Show(new[]{
                 new PauseMenuAction("Back", OfferDescription(offer), () => ShowStock()),
                 new PauseMenuAction("Buy  ·  " + offer.Price + " coins", OfferDescription(offer), () => Buy(offer),

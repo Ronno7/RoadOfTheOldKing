@@ -226,7 +226,8 @@ namespace RoadOfTheOldKing.Tutorial
             // No ✓ flash for steps a loaded save already satisfies.
             if (wasCurrent && restored && Time.time >= showAfter)
             {
-                completedHint = step.id == "stone" ? "Recall awakened\nThrow, then Recall {recall}" : null;
+                // The sealed gate teaches the Recall throw now (user, 23 Nov: "shorten ... to just "Recall Awakened!"").
+                completedHint = step.id == "stone" ? "Recall Awakened!" : null;
                 completedPosition = player.transform.position + Vector3.up * 2.5f;
                 completedUntil = Time.time + (step.id == "stone" ? 4f : step.id == "flask" ? 0f : completedHold);
             }
@@ -243,7 +244,7 @@ namespace RoadOfTheOldKing.Tutorial
             if (Time.time < completedUntil && completedHint != null)
             {
                 if (fighting) HudNotifications.ClearHint();
-                else HudNotifications.SetHint(ControlLabels.Format(completedHint), true, completedPosition);
+                else HudNotifications.SetHint(completedHint, true, completedPosition);
                 return;
             }
             int index = HintIndex;
@@ -268,6 +269,13 @@ namespace RoadOfTheOldKing.Tutorial
             if (fighting && !holding) { HudNotifications.ClearHint(); return; }
             // ...and wait a moment before appearing (the same note: it "pops up too fast").
             if (Time.time - hintSince < current.appearDelay) { HudNotifications.ClearHint(); return; }
+            // The throw lesson's axe, stuck in something, waits to be picked up; its sign is back where it was thrown.
+            if (current.id == "throw" && combat.Weapon != null && combat.Weapon.IsAway)
+            {
+                if (combat.Weapon.State != AxeState.Stuck) HudNotifications.ClearHint();
+                else HudNotifications.SetHint("Walk to your axe", false, combat.Weapon.transform.position + Vector3.up);
+                return;
+            }
             // The bonfire owns proximity-sensitive [F] Light / [F] Rest prompts; route landmarks without text leave the
             // way for the player to find (user, 15 Nov).
             if (current.id == "rest" || string.IsNullOrEmpty(current.hint)) { HudNotifications.ClearHint(); return; }
@@ -281,15 +289,8 @@ namespace RoadOfTheOldKing.Tutorial
             if (current.condition == TutorialCondition.Zoomed && HudNotifications.HintOnScreen) zoomHintSeconds += Time.deltaTime;
             Vector3? position = current.cueAtPlayer ? player.transform.position + (Vector3)current.cueOffset :
                 current.cueTarget != null ? current.cueTarget.position + (Vector3)current.cueOffset : (Vector3?)null;
-            string teaching = current.hint;
-            if (current.id == "throw" && combat.Weapon != null && combat.Weapon.IsAway)
-            {
-                if (combat.Weapon.State != AxeState.Stuck) { HudNotifications.ClearHint(); return; }
-                teaching = "Walk to your axe";
-                position = combat.Weapon.transform.position + Vector3.up;
-            }
             // A step with a near radius is spatial only (the axe's hint, user 16 Nov): off screen it waits, never at the bottom.
-            HudNotifications.SetHint(ControlLabels.Format(teaching), false, position, current.nearRadius > 0f);
+            HudNotifications.SetHint(current.hint, false, position, current.nearRadius > 0f);
         }
 
         private void OnDisable() => HudNotifications.ClearHint();

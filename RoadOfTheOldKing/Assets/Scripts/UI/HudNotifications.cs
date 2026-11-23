@@ -49,7 +49,7 @@ namespace RoadOfTheOldKing.UI
         {
             receipts.Clear(); HintWorldPosition = null; HintSpatialOnly = false; HintOnScreen = false; Hint = null; HintCompleted = false; Version++;
             announcements.Clear();
-            Speaker = null; Speech = null; SpeechUntil = float.NegativeInfinity;
+            Speaker = null; Speech = null; SpeechUntil = float.NegativeInfinity; Sign = null;
             UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
             UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
         }
@@ -128,6 +128,7 @@ namespace RoadOfTheOldKing.UI
         // Set by the HUD each frame: the hint is actually showing (not hidden behind an interaction prompt or a menu).
         public static bool HintOnScreen { get; set; }
 
+        // Text keeps its {tokens}: the HUD names the keys for the face each surface uses.
         public static void SetHint(string text, bool completed = false, Vector3? worldPosition = null, bool spatialOnly = false)
         {
             HintWorldPosition = worldPosition;
@@ -137,5 +138,11 @@ namespace RoadOfTheOldKing.UI
         }
 
         public static void ClearHint() => SetHint(null);
+
+        // The sign being read (LessonSign, one at a time): its text with {tokens}, or null. The HUD draws it in a small
+        // box at the bottom while the world plays on (user, 23 Nov: the modal reader was "garbage").
+        public static string Sign { get; private set; }
+        public static void ShowSign(string text) => Sign = text;
+        public static void ClearSign() => Sign = null;
     }
 }

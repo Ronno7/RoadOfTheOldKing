@@ -711,7 +711,8 @@ namespace RoadOfTheOldKing.EditorTools
                     }
                 foreach (var r in world.GetComponentsInChildren<SpriteRenderer>(true))
                     if (r.enabled && r.gameObject.activeInHierarchy && r.sprite != null &&
-                        (r.sprite.name == "Target_New" || r.sprite.name == "Target_Worn" || r.sprite.name == "Practice_Dummy"))
+                        (r.sprite.name == "Target_New" || r.sprite.name == "Target_Worn" || r.sprite.name == "Practice_Dummy" ||
+                         r.sprite.name.StartsWith("Sign_")))
                         Project(PathOf(r.transform), Shape(r.transform));
                 Project("Recall stone", Shape(Deep(world, "Recall Stone")));
                 var gate = Deep(world, "Recall Seal Gate");

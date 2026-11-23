@@ -6,9 +6,21 @@ using UnityEngine;
 
 namespace RoadOfTheOldKing.Editor
 {
-    // Borderless Game view covering the main monitor; the same shortcut closes it.
+    // Borderless Game view covering the main monitor; the same shortcut closes it, and so does leaving Play Mode
+    // (user, 23 Nov: "when we quit the game it closes fullscreen").
+    [InitializeOnLoad]
     public static class FullscreenGameView
     {
+        static FullscreenGameView()
+        {
+            EditorApplication.playModeStateChanged -= OnPlayModeChanged;
+            EditorApplication.playModeStateChanged += OnPlayModeChanged;
+        }
+
+        private static void OnPlayModeChanged(PlayModeStateChange change)
+        {
+            if (change == PlayModeStateChange.ExitingPlayMode || change == PlayModeStateChange.EnteredEditMode) CloseAll();
+        }
         private static readonly Type GameViewType = Type.GetType("UnityEditor.GameView,UnityEditor");
         private static readonly PropertyInfo ShowToolbar =
             GameViewType?.GetProperty("showToolbar", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
@@ -22,8 +34,21 @@ namespace RoadOfTheOldKing.Editor
                 return;
             }
 
-            // Identify our popups by their hidden toolbar: Windows clamps the size to the work area, and
-            // domain reloads clear static fields while the popup survives. Close every copy found.
+            if (CloseAll()) return;
+
+            var game = (EditorWindow)ScriptableObject.CreateInstance(GameViewType);
+            ShowToolbar?.SetValue(game, false);
+            game.ShowPopup();
+            game.position = MainScreenRect();
+            game.Focus();
+            CoverTaskbar();
+        }
+
+        // Identify our popups by their hidden toolbar: Windows clamps the size to the work area, and
+        // domain reloads clear static fields while the popup survives. Closes every copy found.
+        private static bool CloseAll()
+        {
+            if (GameViewType == null) return false;
             bool closed = false;
             foreach (var view in Resources.FindObjectsOfTypeAll(GameViewType))
             {
@@ -33,14 +58,7 @@ namespace RoadOfTheOldKing.Editor
                     closed = true;
                 }
             }
-            if (closed) return;
-
-            var game = (EditorWindow)ScriptableObject.CreateInstance(GameViewType);
-            ShowToolbar?.SetValue(game, false);
-            game.ShowPopup();
-            game.position = MainScreenRect();
-            game.Focus();
-            CoverTaskbar();
+            return closed;
         }
 
         private static Rect MainScreenRect()

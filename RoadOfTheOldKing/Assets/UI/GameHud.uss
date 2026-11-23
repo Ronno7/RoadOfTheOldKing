@@ -45,7 +45,10 @@ Label { margin: 0; padding: 0; -unity-font-style: normal; }
 
 /* The interaction prompt and tutorial cue: kit chips GameHud places over world points (bottom centre on the point).
    The charge bar and stamina arc stay world-space meters: WorldUI.uss. */
-.anchored-chip { position: absolute; translate: -50% -100%; margin-top: -4px; }
+/* Spatial chips sit over the world, so they take as little of it as they can (user, 23 Nov: "add opacity to the spatial UI
+   background, look ... how much of the hint is empty space"): a see-through frame and a tight fit around the words. */
+.anchored-chip { position: absolute; translate: -50% -100%; margin-top: -4px; padding: 2px 2px 2px 6px; -unity-background-image-tint-color: rgba(255, 255, 255, 0.72); }
+.anchored-chip .glyph-group, .anchored-chip .glyph-word { margin-right: 4px; }
 .anchored-chip Label { white-space: nowrap; -unity-text-align: middle-center; }
 /* The interaction prompt in the heading face at its own pixel size, smaller than body text (user, 19 Nov). Its pixels
    are half a UI pixel: an experiment against the one-pixel-size rule. */
@@ -56,7 +59,17 @@ Label { margin: 0; padding: 0; -unity-font-style: normal; }
     background-image: url("project://database/Assets/Art/Sprites/UI/Kit/SaveFlame.png");
 }
 #cue-chip Label { white-space: normal; max-width: 320px; }
+/* Spatial chips share the prompt's heading face and size (user, 23 Nov: "keep replacing spatial UI elements with header font"). */
+#cue-chip Label, #speech-chip Label { -unity-font-definition: url("project://database/Assets/UI/Fonts/RotOKHeading16.asset"); font-size: 16px; }
 #cue-chip.completed Label { color: var(--kit-gold); }
+/* A sign being read (user, 23 Nov): a small kit panel at the bottom centre sized to its words, the world still in view.
+   Each word once, controls as glyphs, short lines centred; it closes on the same press or when the hero walks off. */
+#sign-box {
+    position: absolute; bottom: 72px; left: 50%; translate: -50% 0; max-width: 440px; padding: 14px 20px 12px 20px;
+    background-image: url("project://database/Assets/Art/Sprites/UI/Kit/Panel.png");
+    -unity-slice-left: 6; -unity-slice-right: 6; -unity-slice-top: 6; -unity-slice-bottom: 6;
+}
+#sign-box .glyph-line { margin: 2px 0; }
 /* A spoken line over a speaker's head: the chip with the bronze ledge, gold like a key name. */
 #speech-chip { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/ChipEdge.png"); }
 #speech-chip Label { color: var(--kit-gold); }

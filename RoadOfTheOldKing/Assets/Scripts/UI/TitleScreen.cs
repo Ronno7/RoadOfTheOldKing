@@ -123,8 +123,9 @@ namespace RoadOfTheOldKing.UI
             if (backdrop.Length > 0) backdropFront.Show(backdrop[0], backdropOpacity);
             // The prologue covers the menu and takes clicks too: a click turns the page like A/Enter.
             prologueRoot.RegisterCallback<PointerDownEvent>(_ => { if (page == Page.Prologue) AdvancePrologue(); });
-            ControlLabels.Bind(press, "Press Enter", "Press A");
-            ControlLabels.Bind(root.Q<Label>("prologue-hint"), "Enter Next · Esc Skip", "A Next · Start Skip");
+            ControlGlyphs.Bind(press, "Press {select}");
+            ControlGlyphs.Bind(root.Q<Label>("prologue-hint"), "{select} Next");
+            ControlGlyphs.Bind(root.Q<Label>("prologue-skip"), "{skip} Skip");
             var version = root.Q<Label>("version");
             if (version != null) version.text = "v" + Application.version;
             input.ToggleRequested += OnToggle;
@@ -209,8 +210,7 @@ namespace RoadOfTheOldKing.UI
         private void ShowSettings(int select)
         {
             page = Page.Settings;
-            ShowOptionsPage("SETTINGS", SettingsOptions.Create(() => ShowMain(SettingsRow)), select, false,
-                "↑↓ Choose · ←→ Change · Esc Back", "D-pad Choose · ←→ Change · B Back");
+            ShowOptionsPage("SETTINGS", SettingsOptions.Create(() => ShowMain(SettingsRow)), select, false);
         }
 
         private void Show(Page next, PauseMenuAction[] actions, int select)
@@ -226,7 +226,7 @@ namespace RoadOfTheOldKing.UI
         private bool OnOptionsPage => page == Page.Settings || page == Page.Hood;
 
         // Option pages (settings, the hood) drop the logo for a heading and a wider panel; list pages bring it back.
-        private void ShowOptionsPage(string heading, OptionList.Row[] rows, int select, bool preview, string keysHint, string padHint)
+        private void ShowOptionsPage(string heading, OptionList.Row[] rows, int select, bool preview)
         {
             SetVisible(logo, false);
             SetVisible(panelHeading, true); panelHeading.text = heading;
@@ -238,7 +238,7 @@ namespace RoadOfTheOldKing.UI
             panel.RemoveFromClassList("title-plain");
             titleRoot?.AddToClassList("options-mode");
             options.Show(rows, select);
-            ControlLabels.Bind(hint, keysHint, padHint);
+            ControlGlyphs.Bind(hint, ""); // Rows show their own ‹ › arrows; confirm and back follow convention.
         }
 
         private void ShowListLayout()
@@ -249,7 +249,7 @@ namespace RoadOfTheOldKing.UI
             // The main and confirm pages are plain text over the painting's shade, as title screens usually are.
             panel.AddToClassList("title-plain");
             titleRoot?.RemoveFromClassList("options-mode");
-            ControlLabels.Bind(hint, "↑↓ Choose · Enter Select", "D-pad Choose · A Select");
+            ControlGlyphs.Bind(hint, "");
         }
 
         private void BeginPrologue()
@@ -327,7 +327,7 @@ namespace RoadOfTheOldKing.UI
                 new OptionList.Slider("Brightness", "", () => hoodBrightness, v => SetHood(hoodHue, hoodSaturation, v), ShadeSteps,
                     null, i => Color.HSVToRGB(hoodHue, hoodSaturation, i / (float)ShadeSteps)),
                 new OptionList.Command("Begin", "", StartRun)
-            }, 0, true, "↑↓ Choose · ←→ Change · Enter Select", "D-pad Choose · ←→ Change · A Select");
+            }, 0, true);
             RecolorHood();
         }
 

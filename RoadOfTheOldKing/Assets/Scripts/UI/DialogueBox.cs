@@ -30,6 +30,7 @@ namespace RoadOfTheOldKing.UI
         private UIDocument document;
         private VisualElement overlay, choicesRoot;
         private Label speaker, line, hint;
+        private VisualElement nextArrow;
         private MenuList list;
         private readonly List<string> lines = new List<string>();
         private IReadOnlyList<PauseMenuAction> choices = Array.Empty<PauseMenuAction>();
@@ -150,6 +151,7 @@ namespace RoadOfTheOldKing.UI
             if (!IsOpen) return;
             if (player == null || !player.IsAlive || GameSession.Instance == null || GameSession.Instance.IsLoading) { Close(); return; }
             Refresh();
+            if (nextArrow != null) nextArrow.style.opacity = Mathf.Repeat(Time.unscaledTime, 1f) < .6f ? 1f : 0f;
         }
 
         // The hidden rest of the line is laid out but transparent, so words never jump to the next row as they type.
@@ -171,9 +173,16 @@ namespace RoadOfTheOldKing.UI
             int state = showChoices ? 2 : shown >= text.Length ? 1 : 0;
             if (state == hintState) return;
             hintState = state;
-            if (state == 2) ControlLabels.Bind(hint, "↑↓ Choose · Enter Select", "D-pad Choose · A Select");
-            else if (state == 1) ControlLabels.Bind(hint, "Enter Next", "A Next");
-            else ControlLabels.Bind(hint, "", "");
+            // A finished line shows a blinking arrow, as dialogue boxes do; choices and typing show nothing.
+            ControlGlyphs.Flow(hint, "");
+            nextArrow = null;
+            if (state == 1)
+            {
+                nextArrow = new VisualElement { pickingMode = PickingMode.Ignore };
+                nextArrow.AddToClassList("next-arrow");
+                hint.Add(nextArrow);
+                hint.style.display = DisplayStyle.Flex;
+            }
         }
 
         private void FinishLine() => lineStartedAt = float.NegativeInfinity;

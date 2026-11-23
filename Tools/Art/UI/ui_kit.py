@@ -138,7 +138,78 @@ def build_kit():
     kit["ForgeCrest"] = forge_crest()
     kit["SelectedGold"] = frame(8, 8, 1, [C["gold"], C["inset"]])                              # slice 2
     kit["SaveFlame"] = save_flame()
+    kit.update(glyphs())
     return kit
+
+
+def glyphs():
+    """Control glyphs (user, 23 Nov: show controls as icons, not "Esc / Enter Leave" text). One UI pixel per sprite
+    pixel, 12 px tall to sit on a text line. Keyboard keys and pad buttons without a face (LB, D-pad, Start...) are a
+    keycap 9-slice with the key name in the UI's text; face buttons are drawn: Xbox letters on their colours, PlayStation
+    shapes on a dark button. Colours from the zone palette plus the sun gold."""
+    out = {}
+    face = Image.new("RGBA", (10, 12), CLEAR)          # keycap: ink outline, slate top light, dark lip below
+    for y in range(12):
+        for x in range(10):
+            corner = (x in (0, 9)) and (y in (0, 11))
+            if corner:
+                continue
+            edge = x in (0, 9) or y in (0, 11)
+            if edge:
+                face.putpixel((x, y), C["ink"])
+            elif y >= 9:
+                face.putpixel((x, y), C["ink"] if y == 10 else hexrgb(palette["rockshadow"]))
+            elif y == 1 or x == 1:
+                face.putpixel((x, y), hexrgb(palette["slate"]))
+            else:
+                face.putpixel((x, y), C["inset"])
+    out["KeyCap"] = face                                                                       # slice 3, 3, 3, 4
+    font = ImageFont.truetype(FONT, 10)
+
+    def disc(fill, rim):
+        img = Image.new("RGBA", (12, 12), CLEAR)
+        for y in range(12):
+            for x in range(12):
+                d = ((x - 5.5) ** 2 + (y - 5.5) ** 2) ** .5
+                if d <= 6.0:
+                    img.putpixel((x, y), C["ink"] if d > 4.9 else (rim if d > 4.0 and x + y < 11 else fill))
+        return img
+
+    def lettered(fill, rim, letter):
+        img = disc(fill, rim)
+        layer = Image.new("RGBA", (12, 12), CLEAR)
+        draw = ImageDraw.Draw(layer)
+        draw.fontmode = "1"
+        w = draw.textlength(letter, font=font)
+        draw.text(((12 - w) / 2, 2), letter, font=font, fill=C["ink"])
+        img.alpha_composite(layer)
+        return img
+
+    out["GlyphA"] = lettered(hexrgb(palette["grass"]), hexrgb(palette["leaflight"]), "A")
+    out["GlyphB"] = lettered(C["red"], hexrgb("D99A67"), "B")
+    out["GlyphX"] = lettered(hexrgb(palette["water"]), hexrgb(palette["waterlight"]), "X")
+    out["GlyphY"] = lettered(C["gold"], hexrgb(palette["soilshine"]), "Y")
+    dark = (C["inset"], hexrgb(palette["slate"]))
+    cross, circle, square, triangle = (disc(*dark) for _ in range(4))
+    for i in range(5):                                   # PlayStation shapes, 5 px, on the dark button
+        cross.putpixel((3 + i, 3 + i), hexrgb(palette["waterlight"])); cross.putpixel((7 - i, 3 + i), hexrgb(palette["waterlight"]))
+    for x, y in ((4, 3), (5, 3), (6, 3), (3, 4), (7, 4), (3, 5), (7, 5), (3, 6), (7, 6), (4, 7), (5, 7), (6, 7)):
+        circle.putpixel((x, y), C["red"])
+    for i in range(5):
+        for x, y in ((3 + i, 3), (3 + i, 7), (3, 3 + i), (7, 3 + i)):
+            square.putpixel((x, y), hexrgb(palette["soilshine"]))
+    for x, y in ((5, 3), (4, 4), (6, 4), (4, 5), (6, 5), (3, 6), (7, 6), (3, 7), (4, 7), (5, 7), (6, 7), (7, 7)):
+        triangle.putpixel((x, y), hexrgb(palette["leaflight"]))
+    out["GlyphCross"], out["GlyphCircle"], out["GlyphSquare"], out["GlyphTriangle"] = cross, circle, square, triangle
+    arrow = Image.new("RGBA", (7, 5), CLEAR)              # "more text": a gold down arrow, blinked by the HUD
+    for y in range(5):
+        for x in range(7):
+            reach = 3 - y
+            if abs(x - 3) <= reach + 1 and y < 4:
+                arrow.putpixel((x, y), C["ink"] if abs(x - 3) == reach + 1 or y == 0 else C["gold"])
+    arrow.putpixel((3, 4), C["ink"])
+    out["NextArrow"] = arrow
+    return out
 
 
 def hearth_panel():

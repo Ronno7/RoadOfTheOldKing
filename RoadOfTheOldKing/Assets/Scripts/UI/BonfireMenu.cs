@@ -89,7 +89,7 @@ namespace RoadOfTheOldKing.UI
             // bonfire UI").
             panel.EnableInClassList("upgrade-fire", fire.AllowsUpgrades);
             overlay.style.display = DisplayStyle.Flex;
-            ControlLabels.Bind(overlay.Q<Label>("hint"), "Esc Back · F Leave", "B Back");
+            ControlGlyphs.Bind(overlay.Q<Label>("hint"), "");
             MenuStack.Push(this);
             FrameCamera(true);
             Show(Page.Main);

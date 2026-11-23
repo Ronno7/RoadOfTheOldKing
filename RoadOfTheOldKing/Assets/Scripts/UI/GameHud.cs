@@ -67,7 +67,7 @@ namespace RoadOfTheOldKing.UI
         // Announcements (place names and events, HudNotifications): one element, one fade on unscaled time (lighting
         // a fire does not pause the world); the hold shortens down the tiers.
         private const float AnnounceIn = .6f, AnnounceOut = 1f, RegionHold = 2.6f, LandmarkHold = 2.2f, EventHold = 1.6f;
-        private VisualElement areaBanner;
+        private VisualElement areaBanner, areaColumn;
         // Boss bar (Dark Souls style): name and a long bar along the bottom while a boss is fought. A pale segment
         // trails each hit and drains after a short hold; on defeat the bar empties, holds, then fades.
         private const float BossBarWidth = 476f, BossLagHold = .55f, BossLagRate = .45f, BossDefeatHold = 1.8f;
@@ -83,6 +83,7 @@ namespace RoadOfTheOldKing.UI
         private readonly List<VisualElement> flaskIcons = new List<VisualElement>();
         private WorldUIDocument charge, staminaArc;
         private VisualElement promptChip, cueChip, speechChip;
+        private VisualElement signBox;
         // Saving (FromSoftware style, user 19 Nov: "have it actually pop up on screen somewhere"): a small gold flame
         // blinks faintly in the top-right corner while progress reaches disk.
         private VisualElement saveFlame;
@@ -186,6 +187,8 @@ namespace RoadOfTheOldKing.UI
             root.Add(saveFlame); saveFlame.style.opacity = 0f;
             cueChip = AnchoredChip("cue-chip", out tutorialText);
             speechChip = AnchoredChip("speech-chip", out speechText);
+            signBox = new VisualElement { name = "sign-box", pickingMode = PickingMode.Ignore };
+            root.Add(signBox); SetVisible(signBox, false);
             charge.Show(false); staminaArc.Show(false); SetVisible(hint, false);
             SetVisible(weaponAway, false); SetVisible(areaBanner, false);
             BuildBossBar();
@@ -225,6 +228,7 @@ namespace RoadOfTheOldKing.UI
             gem.AddToClassList("kit-gem");
             rule.Add(gem);
             column.Add(title); column.Add(rule); areaBanner.Add(column); root.Add(areaBanner);
+            areaColumn = column;
         }
 
         // A screen chip for a world-anchored label (prompt, tutorial cue): kit art at UI pixel size; LateUpdate places it.
@@ -261,6 +265,11 @@ namespace RoadOfTheOldKing.UI
             float screenPerPanel = Screen.height / Mathf.Max(1f, root.panel.visualTree.layout.height);
             chip.style.left = Mathf.Round(point.x * screenPerPanel) / screenPerPanel;
             chip.style.top = Mathf.Round(point.y * screenPerPanel) / screenPerPanel;
+            // A chip that would sit on a place name or event gives way while it shows, fading with it (23 Nov: a bonfire's
+            // "Light Bonfire" landed on "The Old Mill" as the hero walked in).
+            float bannerAlpha = areaColumn != null && areaBanner.resolvedStyle.display == DisplayStyle.Flex ? areaBanner.resolvedStyle.opacity : 0f;
+            bool under = bannerAlpha > 0f && chip.worldBound.Overlaps(areaColumn.worldBound);
+            chip.style.opacity = under ? 1f - bannerAlpha : 1f;
         }
 
         private void Subscribe()
@@ -331,7 +340,8 @@ namespace RoadOfTheOldKing.UI
             UpdateCharge(alive && !menuOpen);
             UpdateReceipts();
             SetVisible(receipts, alive && !menuOpen && !scripted && !EncounterState.InCombat && !HudNotifications.HintCompleted);
-            UpdateHint(alive && !menuOpen && !scripted);
+            UpdateSign(alive && !menuOpen && !scripted);
+            UpdateHint(alive && !menuOpen && !scripted && HudNotifications.Sign == null);
             UpdateSpeech(alive && !menuOpen && !scripted);
             var game = GameSession.Instance;
             // An event may play through a scripted moment (lighting a fire); a place name waits for a clear screen.
@@ -518,8 +528,8 @@ namespace RoadOfTheOldKing.UI
             bool away = allowed && weapon != null && weapon.IsAway;
             SetVisible(weaponAway, away);
             if (!away) return;
-            weaponAwayText.text = weapon.State == AxeState.Returning ? "Returning"
-                : combat.CanRecall ? ControlLabels.Format("{recall} Recall") : "Axe away";
+            Glyphs(weaponAwayText, weapon.State == AxeState.Returning ? "Returning"
+                : combat.CanRecall ? "{recall} Recall" : "Axe away");
         }
 
         private void UpdatePrompt(bool allowed)
@@ -536,13 +546,15 @@ namespace RoadOfTheOldKing.UI
                     verb = interaction.Nearby.IsDiscovered ? "Rest" : "Light Bonfire";
                 }
             }
+            // A pickup with nothing to say (an open sign, which the same press closes) shows no prompt.
+            if (string.IsNullOrEmpty(verb)) target = null;
             promptVisible = target != null;
             SetVisible(promptChip, promptVisible);
             if (target == null) { promptAnchor = null; return; }
             var fireView = interaction.NearbyPickup == null ? target.GetComponent<BonfireSpriteView>() : null;
             promptAnchor = fireView != null ? fireView.PromptPosition : target.position + Vector3.up * promptHeight;
             // The smaller heading face (user, 19 Nov: "reduce the "Rest" text size ... experiment with the header font").
-            promptText.text = ControlLabels.FormatBare("{interact} ") + verb;
+            Glyphs(promptText, "{interact} " + verb);
         }
 
         private void UpdateCharge(bool allowed)
@@ -587,12 +599,34 @@ namespace RoadOfTheOldKing.UI
             if (!show) return;
             if (spatial)
             {
-                tutorialText.text = HudNotifications.Hint;
+                // Beside its point, in the heading face like the interaction prompt (user, 23 Nov), controls as glyphs.
+                Glyphs(tutorialText, HudNotifications.Hint);
                 cueChip.EnableInClassList("completed", HudNotifications.HintCompleted);
             }
             hint.EnableInClassList("completed", HudNotifications.HintCompleted);
-            hintText.text = HudNotifications.Hint;
+            Glyphs(hintText, HudNotifications.Hint);
 
+        }
+
+        // A sign being read: its words once, controls as glyphs, in a small box at the bottom centre; rebuilt when the
+        // text or the device changes.
+        private void UpdateSign(bool allowed)
+        {
+            string text = allowed ? HudNotifications.Sign : null;
+            if (text == null) { SetVisible(signBox, false); return; }
+            Glyphs(signBox, text);
+            SetVisible(signBox, true);
+        }
+
+        // Lays out text with {tokens} as words and control glyphs, only when the text or the device changes.
+        private readonly Dictionary<VisualElement, string> glyphsShown = new Dictionary<VisualElement, string>();
+        private void Glyphs(VisualElement host, string text)
+        {
+            var input = RoadOfTheOldKing.Input.ActiveInput.UsingGamepad ? (RoadOfTheOldKing.Input.ActiveInput.PlayStationPad ? "ps|" : "pad|") : "key|";
+            string key = input + text;
+            if (glyphsShown.TryGetValue(host, out var shown) && shown == key) return;
+            glyphsShown[host] = key;
+            ControlGlyphs.Flow(host, text);
         }
 
         // Someone in the world speaking a short line (the trader's barks), over their head.
