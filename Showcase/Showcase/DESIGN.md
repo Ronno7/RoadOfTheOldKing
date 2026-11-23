@@ -11,7 +11,7 @@ A guided visual tour of Road of the Old King for peer developers, instructors an
 | Structure | **The Road plus a map.** One continuous scroll that walks the journey region by region. A rail with the walking hero and an overlay map (key `M`) allow quick travel. |
 | Audience | **Balanced.** The feel of the game leads, and one chapter (Architecture) gives architecture depth for developers and instructors. |
 | Mood | **Day to storm.** Warm Ardan's Edge, then the cool Lowlands, the firelit Barrow and finally the Storm Highlands. The whole page cross-fades as you walk. |
-| Hosting | **In the GitHub repository only, for now** (owner, 23 Nov). Not hosted on roadoftheoldking.com and not published (see [Publishing](#publishing)). |
+| Hosting | **GitHub Pages**, https://ronno7.github.io/RoadOfTheOldKing/ (owner, 23 Nov), linked from the README; not on roadoftheoldking.com (see [Publishing](#publishing)). |
 | Technology | **Vanilla HTML, CSS and JavaScript.** No build step and no external dependencies. |
 | Audio | **None.** |
 | Unbuilt regions | **Shown as "the road ahead":** concept art with honest status labels. |
@@ -103,7 +103,7 @@ The copy and the Roadmap were reconciled with the game and the local development
 
 ## Publishing
 
-Not published. The owner's decision (23 Nov): the showcase stays in the GitHub repository only for now and is not hosted on roadoftheoldking.com. The repository has no GitHub Pages workflow any more (web publishing was removed when Windows downloads replaced the browser build), so publishing later needs its own setup and the owner's go-ahead.
+Published on GitHub Pages at https://ronno7.github.io/RoadOfTheOldKing/ (owner, 23 Nov). `.github/workflows/showcase.yml` deploys this folder whenever it changes on `main` or `dev` (or by hand from the Actions tab); Pages is set to build from workflows, and the `github-pages` environment allows both branches. The README links it. It is not on roadoftheoldking.com.
 
 ## Files
 

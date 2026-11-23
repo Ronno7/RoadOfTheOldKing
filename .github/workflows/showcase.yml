@@ -1,0 +1,37 @@
+# Publishes the showcase (Showcase/Showcase) to GitHub Pages: https://ronno7.github.io/RoadOfTheOldKing/
+name: Showcase
+
+on:
+  push:
+    branches: [main, dev]
+    paths:
+      - "Showcase/Showcase/**"
+      - ".github/workflows/showcase.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      # Only the site folder: the Unity project is far larger and not needed.
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: Showcase/Showcase
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: Showcase/Showcase
+      - id: deployment
+        uses: actions/deploy-pages@v4

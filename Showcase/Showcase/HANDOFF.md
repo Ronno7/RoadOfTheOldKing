@@ -8,7 +8,7 @@ A standalone, art-led tour of Road of the Old King for peer developers, instruct
 
 - From the repository root, run `python -m http.server 8000 --directory Showcase/Showcase`, then open `http://localhost:8000/`. This inner folder contains the site; the outer folder contains pointers to these notes.
 - It is a **draft**. All twelve capture plates are filled (23 Nov); adding `class="is-draft"` to `<html>` would show dashed placeholders for any new, empty plate.
-- It **stays in the GitHub repository only, for now** (owner, 23 Nov): it is not hosted on roadoftheoldking.com and not published. See "Publishing" in `DESIGN.md`.
+- It is **published on GitHub Pages** at https://ronno7.github.io/RoadOfTheOldKing/ (owner, 23 Nov): a push that changes this folder on `main` or `dev` redeploys it. See "Publishing" in `DESIGN.md`.
 
 ## Owner's rules (from review feedback; follow them)
 
@@ -84,7 +84,7 @@ The page has no tests. To check a change:
 - Keep the Roadmap reconciled with the local development notes (rule 7); the 23 Nov reconciliation is recorded below.
 - Add the PixelLab art in an art session.
 - `assets/art/sprites/hero/rotations/north-east.png` and `north-west.png` predate the game's current hero art; re-copy them from `Assets/Art/Sprites/Player/Rotations` in an asset pass.
-- Publishing is on hold: the showcase stays in the repository (owner, 23 Nov). A README link is optional once it is published.
+- Published on GitHub Pages and linked from the README (23 Nov).
 - Two UI placements to confirm with the owner: the prompt chip (now anchored over the object, with a key or button icon) is under non-diegetic though it could be argued spatial, and the dialogue camera lean-in is under meta.
 - Open questions are listed in `DESIGN.md`.
 
