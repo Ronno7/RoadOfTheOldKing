@@ -25,6 +25,9 @@ namespace RoadOfTheOldKing.World
         // a lower base, one behind him), a 0.1-unit graze of the side stamp put the whole map, and so the stamp behind
         // him, over the hero (user, 18 Nov, Tutorial (85.6, 52.6) and (91.6, 92.6): "able to walk under it").
         private const float SideGraze = .25f;
+        // World z per unit of ground height for sprite props: farther north, farther from the camera (a 200-unit map
+        // stays within 0.2 of the plane).
+        private const float DepthPerUnit = .001f;
 
         private void Start()
         {
@@ -53,6 +56,12 @@ namespace RoadOfTheOldKing.World
             }
             body.sortingLayerID = playerBody.sortingLayerID;
             body.sortingOrder = playerBody.sortingOrder + (feet.y > ground ? 5 : -3);
+            // Props on the same side of the hero share an order, so two that overlap (trees in a grove) tie, and the
+            // 2D renderer's orthographic sort breaks a tie by distance to the camera: all at z 0, they swapped as the
+            // hero walked (user, 23 Nov). A z from the ground line keeps the nearer prop in front.
+            float depth = ground * DepthPerUnit;
+            var position = transform.position;
+            if (Mathf.Abs(position.z - depth) > 1e-5f) transform.position = new Vector3(position.x, position.y, depth);
         }
 
         // Behind: the authored order (the map was drawn as overhead). In front: just under the hero.

@@ -93,6 +93,22 @@ if(phase==8||phase==10){
             for(int i=0;i<3;i++){check(combat.Weapon.TryLightChop(Vector2.up),"Dummy chop starts "+i);tick(1f);}
             check(melee.IsComplete&&store.Load().Has("tutorial/lesson/melee"),"Three actual melee hits complete lesson");
             check(!combat.CanRecall&&!stone.IsReady,"Lessons alone do not unlock Recall");
+            // Signs read like Souls messages (23 Nov): F opens the sign's words in the HUD's small box while the world runs on;
+            // F again, or walking off, closes it. Any order, after the lesson too.
+            var signs=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Tutorial.LessonSign>(FindObjectsSortMode.None);
+            System.Func<string,string,bool> readSign=(name,expect)=>{
+                var s=signs.Single(x=>x.name=="Lesson sign - "+name);move((Vector2)s.transform.position+Vector2.left*.8f);
+                bool opened=s.Prompt=="Read sign"&&interaction.TryInteract()&&s.IsOpen&&RoadOfTheOldKing.UI.HudNotifications.Sign==s.Text&&s.Text.StartsWith(expect)&&s.Prompt==""&&Time.timeScale>0f;
+                bool closed=interaction.TryInteract()&&!s.IsOpen&&RoadOfTheOldKing.UI.HudNotifications.Sign==null;
+                bool walked=interaction.TryInteract()&&s.IsOpen;move((Vector2)s.transform.position+Vector2.left*3f);s.SendMessage("Update");
+                walked&=!s.IsOpen&&RoadOfTheOldKing.UI.HudNotifications.Sign==null;
+                return opened&&closed&&walked;};
+            check(signs.Length==9,"Nine lesson signs");
+            check(readSign("throw","Throw at a target"),"The finished throw lesson's sign opens and closes on F, and closes when walked off");
+            check(readSign("sprint","{sprint}"),"The sprint sign reads out of order, by the village");
+            check(readSign("bonfire","Rest at a bonfire"),"The bonfire sign says what resting and lighting do");
+            check(readSign("zoom","{zoom}"),"The zoom sign stands on the first road (23 Nov)");
+            check(!guide.Steps.Where(st=>st.id=="take-axe"||st.id=="dodge"||st.id=="throw"||st.id=="sprint").Any(st=>!string.IsNullOrEmpty(st.hint)),"Sign lessons leave no floating hint of their own");
             var ambushBrain=ambush.GetComponent<RoadOfTheOldKing.Enemies.PursuitBrain>();
             check(ambush.IsHidden&&ambushBrain.IsDormant&&!ambush.GetComponent<RoadOfTheOldKing.Enemies.MeleeSpriteView>().BodyVisual.enabled,"The ambush rat waits unseen in its bush");
             openRat.ReceiveHit(hit);check(!session.Progress.Has("tutorial/enemy/field-rats"),"One rat down doesn't end the road fight");

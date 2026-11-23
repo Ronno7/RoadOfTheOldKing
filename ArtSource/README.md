@@ -8,7 +8,7 @@ Source art and import inputs, kept outside Unity's runtime assets. Runtime sprit
 | `Enemies/` | Enemy exports, recorded in `LowlandsManifest.json`; the wolf in its own folder | **Animation Import**, per character |
 | `NPCs/TravelingTrader/` | Merchant frames and source record | Select **Traveling Trader** in **Animation Import** |
 | `Shared/` | Trees, vegetation, props, bonfire, decoration, palette | **Advanced > Asset Maintenance** |
-| `Tutorial/` | Village buildings and recipes | **Advanced > Asset Maintenance** |
+| `Tutorial/` | Village buildings, the stone bridge, recipes | **Advanced > Asset Maintenance** |
 | `GreenLowlands/` | Buildings, fittings, elevation data, provenance | **Advanced > Asset Maintenance** |
 | `GreenLowlands/Environment/Waterworks/` | Sluice, canal, culvert and drain sources, with one manifest per set | **Animation Import** |
 | `GreenLowlands/Environment/Hayfields/` | Beam and release mechanism | **Animation Import** |

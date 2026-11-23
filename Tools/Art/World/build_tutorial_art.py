@@ -15,6 +15,8 @@ OUT = terrain.ground.ROOT / 'RoadOfTheOldKing/Assets/Art/Tiles/Tutorial/Environm
 
 BUILDING_SOURCE = zone.ROOT / 'ArtSource/Tutorial/Buildings'
 BUILDING_RECIPE = json.loads((BUILDING_SOURCE / 'NativeRecipe.json').read_text(encoding='utf-8'))
+# PixelLab props on the Meadow palette, used as drawn (provenance in ArtSource/Tutorial/Provenance.json).
+PROP_SOURCE = zone.ROOT / 'ArtSource/Tutorial/Props'
 
 
 def building_source(kind):
@@ -79,7 +81,13 @@ def village_building(kind):
 def tutorial_prop(kind):
     """Native replacements on the original canvases, without cast shadows."""
     p = zone.COLORS
-    sizes = {'Stone_Bridge':(160,64), 'Old_Arch':(48,64), 'Broken_Pillar':(32,48),
+    if kind == 'Stone_Bridge':
+        # Deck between the parapets on the prefab's walking rows 1-2; its ends rest on the banks.
+        im = Image.open(PROP_SOURCE / 'Stone_Bridge.png').convert('RGBA')
+        assert im.size == (160, 64)
+        zone.validate(im)
+        return im
+    sizes = {'Old_Arch':(48,64), 'Broken_Pillar':(32,48),
              'Ruined_Wall':(48,32), 'Hedgerow':(48,32), 'Firewood_Rack':(48,32),
              'Fence_Vertical':(16,48), 'Fence_Repaired':(48,32), 'Fence_Post':(16,32),
              'Gate_Closed':(48,32), 'Target_New':(32,32), 'Target_Worn':(32,32),
@@ -93,27 +101,7 @@ def tutorial_prop(kind):
         rect((x+1,top+4,x+5,bottom-2),'soil')
         line((x+1,top+4,x+1,bottom-3),'soilmid')
         line((x+2,top+2,x+5,top+2),'soillight')
-    if kind == 'Stone_Bridge':
-        # Unbroken middle two rows are the actual walkable deck.
-        rect((0,12,159,52),'stonejoint'); rect((0,16,159,47),'stoneshade')
-        for row,y in enumerate((16,32)):
-            for x in range(-16 if row else 0,160,32):
-                rect((max(0,x+1),y,min(159,x+30),y+14),'stone' if (x//32+row)%4==1 else 'stoneshade')
-                line((max(0,x+2),y,min(159,x+29),y),'stone')
-        for y in (6,50):
-            rect((0,y,159,y+12),'ink'); rect((1,y+1,158,y+10),'stonejoint')
-            for x in range(2,158,20):
-                rect((x,y+1,min(x+17,158),y+6),'stone')
-                line((x,y+1,min(x+16,158),y+1),'stonelight')
-                line((x,y+7,min(x+17,158),y+7),'stoneshade')
-            # Two chipped coping stones, no holes through the deck.
-            rect((57,y+1,59,y+2),'stonejoint'); rect((120,y+1,122,y+1),'stonejoint')
-        for x in (0,150):
-            for y in (0,48):
-                rect((x,y+2,x+9,y+15),'ink'); rect((x+1,y+4,x+8,y+13),'stoneshade')
-                rect((x+1,y+2,x+8,y+5),'stone'); line((x+2,y+2,x+7,y+2),'stonelight')
-        assert all(im.getpixel((x,y))[3]==255 for x in range(160) for y in range(16,48))
-    elif kind == 'Old_Arch':
+    if kind == 'Old_Arch':
         # The middle 16px repeat across the scene's existing five-cell opening.
         poly(((2,63),(2,39),(5,32),(13,26),(16,24),(31,24),(39,27),(45,34),(46,63),
               (35,63),(35,39),(31,35),(16,35),(12,39),(12,63)),'ink')
@@ -200,16 +188,8 @@ def tutorial_prop(kind):
                     for dx,dy in ((-1,0),(1,0),(0,-1),(0,1))
                 ):
                     im.putpixel((x,y), p['stoneshade'])
-    # Attached wear preserves the intact walking deck and existing silhouettes.
-    if kind == 'Stone_Bridge':
-        for x, y in ((19,8),(73,10),(117,51),(34,54),(140,52)):
-            poly(((x,y),(x+5,y),(x+7,y+2),(x+4,y+3),(x,y+2)), 'leafshade')
-            line((x+1,y,x+4,y), 'grasspatch')
-        for x,y in ((42,23),(109,38)):
-            line((x,y,x+2,y+2,x+1,y+4,x+4,y+6), 'stonejoint')
-        rect((78,7,81,8), 'stonejoint')
-        rect((122,51,125,52), 'stoneshade')
-    elif kind == 'Broken_Pillar':
+    # Attached wear preserves existing silhouettes.
+    if kind == 'Broken_Pillar':
         poly(((9,35),(12,34),(13,38),(11,41),(16,42),(16,44),(7,44),(7,41)), 'leafshade')
         line((8,42,11,41,11,38), 'grasspatch')
         line((17,18,16,20,18,23), 'stonejoint')
