@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using RoadOfTheOldKing.Progression;
 using UnityEngine;
 
@@ -50,17 +51,27 @@ namespace RoadOfTheOldKing.UI
     // Settings live outside the save slot (PlayerPrefs), so they apply to every run.
     public static class SettingsOptions
     {
+        // The game has no music or ambience yet (user, 22 Nov: hide them until it does). The channels
+        // and their saved levels stay; turn this on with the sound pass.
+        private static readonly bool ShowMusicAndAmbience = false;
+
         public static OptionList.Row[] Create(Action back)
         {
             // Screen.fullScreen only reports a switch on the next frame, so the row keeps its own copy.
             bool full = Screen.fullScreen;
-            return new OptionList.Row[]
+            var sound = new System.Collections.Generic.List<OptionList.Row>
             {
                 new OptionList.Header("SOUND"),
-                new OptionList.Slider("Master", "", () => SoundSettings.Volume, SoundSettings.SetVolume, 10, Percent),
-                Channel("Music", Audio.AudioChannel.Music),
-                Channel("Ambience", Audio.AudioChannel.Ambience),
-                Channel("Effects", Audio.AudioChannel.Effects),
+                new OptionList.Slider("Master", "", () => SoundSettings.Volume, SoundSettings.SetVolume, 10, Percent)
+            };
+            if (ShowMusicAndAmbience)
+            {
+                sound.Add(Channel("Music", Audio.AudioChannel.Music));
+                sound.Add(Channel("Ambience", Audio.AudioChannel.Ambience));
+            }
+            sound.Add(Channel("Effects", Audio.AudioChannel.Effects));
+            return sound.Concat(new OptionList.Row[]
+            {
                 new OptionList.Header("DISPLAY"),
                 new OptionList.Choice("Window", "", new[] { "Fullscreen", "Windowed" },
                     () => full ? 0 : 1, i => { full = i == 0; SetWindow(full); }),
@@ -73,7 +84,7 @@ namespace RoadOfTheOldKing.UI
                 new OptionList.Choice("Vitals", "Health, stamina and flasks in the corner.", new[] { "When needed", "Always" },
                     () => HudSettings.AlwaysShowVitals ? 1 : 0, i => HudSettings.AlwaysShowVitals = i == 1),
                 new OptionList.Command("Back", "", back)
-            };
+            }).ToArray();
         }
 
         private static string Percent(float value) => value <= .001f ? "Off" : Mathf.RoundToInt(value * 100f) + "%";

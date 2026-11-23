@@ -225,18 +225,19 @@ public sealed class PauseMenuTests
             try{
              var options=((RoadOfTheOldKing.UI.PauseMenuView)menu.GetType().GetField("view",flags).GetValue(menu)).Options;
              Func<List<string>> rowLabels=()=>options.Rows.Where(r=>r.Selectable).Select(r=>r.Label).ToList();
-             var expected=new[]{"Master","Music","Ambience","Effects","Window","Atmosphere","Screen flashes","Screen shake","Vibration","Vitals","Back"};
+             var expected=new[]{"Master","Effects","Window","Atmosphere","Screen flashes","Screen shake","Vibration","Vitals","Back"};
              check(rowLabels().SequenceEqual(expected)&&options.Rows.Count(r=>!r.Selectable)==3,"Settings: sound, display and comfort groups ("+string.Join(" | ",rowLabels().ToArray())+")");
              RoadOfTheOldKing.UI.SoundSettings.SetVolume(1f);RoadOfTheOldKing.UI.FeedbackSettings.SetFlash(1f);
              menu.Back();menu.Submit();
              check(options.SelectedRow!=null&&options.SelectedRow.Label=="Master","Settings opens on Master");
              menu.Adjust(-1);menu.Adjust(-1);
              check(Mathf.Approximately(RoadOfTheOldKing.UI.SoundSettings.Volume,.8f)&&Mathf.Approximately(AudioListener.volume,.8f),"Left steps the volume down 10% at a time and sets the listener");
-             RoadOfTheOldKing.UI.SoundSettings.SetChannelVolume(RoadOfTheOldKing.Audio.AudioChannel.Music,1f);menu.Navigate(1);menu.Adjust(-1);
-             float musicDb;var mixer=Resources.Load<UnityEngine.Audio.AudioMixer>("Audio/Mixer");
-             check(options.SelectedRow.Label=="Music"&&Mathf.Approximately(RoadOfTheOldKing.UI.SoundSettings.ChannelVolume(RoadOfTheOldKing.Audio.AudioChannel.Music),.9f)&&mixer!=null&&mixer.GetFloat("MusicVolume",out musicDb)&&Mathf.Abs(musicDb-20f*Mathf.Log10(.9f))<.05f,"Music steps down 10% and sets the mixer channel in dB");
-             RoadOfTheOldKing.UI.SoundSettings.SetChannelVolume(RoadOfTheOldKing.Audio.AudioChannel.Music,1f);
-             menu.Navigate(1);menu.Navigate(1);menu.Navigate(1);menu.Navigate(1);menu.Navigate(1);menu.Adjust(-1);
+             // Music and Ambience are hidden until the game has them (22 Nov); Effects follows Master.
+             RoadOfTheOldKing.UI.SoundSettings.SetChannelVolume(RoadOfTheOldKing.Audio.AudioChannel.Effects,1f);menu.Navigate(1);menu.Adjust(-1);
+             float effectsDb;var mixer=Resources.Load<UnityEngine.Audio.AudioMixer>("Audio/Mixer");
+             check(options.SelectedRow.Label=="Effects"&&Mathf.Approximately(RoadOfTheOldKing.UI.SoundSettings.ChannelVolume(RoadOfTheOldKing.Audio.AudioChannel.Effects),.9f)&&mixer!=null&&mixer.GetFloat("EffectsVolume",out effectsDb)&&Mathf.Abs(effectsDb-20f*Mathf.Log10(.9f))<.05f,"Effects steps down 10% and sets the mixer channel in dB");
+             RoadOfTheOldKing.UI.SoundSettings.SetChannelVolume(RoadOfTheOldKing.Audio.AudioChannel.Effects,1f);
+             menu.Navigate(1);menu.Navigate(1);menu.Navigate(1);menu.Adjust(-1);
              check(options.SelectedRow.Label=="Screen flashes"&&Mathf.Approximately(RoadOfTheOldKing.UI.FeedbackSettings.FlashScale,.9f)&&(bool)menu.GetType().GetField("inSettings",flags).GetValue(menu),"Down skips the group headings; left lowers flashes and stays on the page");
              menu.Navigate(1);menu.Navigate(1);menu.Navigate(1);menu.Navigate(1);check(options.SelectedRow.Label=="Back","The last row is Back");
              menu.Submit();check(menu.IsOpen&&!(bool)menu.GetType().GetField("inSettings",flags).GetValue(menu),"The Back row returns to the main page");
@@ -244,10 +245,10 @@ public sealed class PauseMenuTests
             }finally{
              for(int i=0;i<settingKeys.Length;i++){if(settingsBefore[i].HasValue)PlayerPrefs.SetFloat(settingKeys[i],settingsBefore[i].Value);else PlayerPrefs.DeleteKey(settingKeys[i]);}
              PlayerPrefs.Save();RoadOfTheOldKing.UI.FeedbackSettings.FlashScale=flashBefore;RoadOfTheOldKing.UI.FeedbackSettings.ShakeScale=shakeBefore;AudioListener.volume=listenerBefore;
-             // The live mixer too, not only the stored preference (18 Nov: Music stayed at full for the rest of the session).
+             // The live mixer too, not only the stored preference (18 Nov: a channel stayed at full for the rest of the session).
              foreach(RoadOfTheOldKing.Audio.AudioChannel channel in Enum.GetValues(typeof(RoadOfTheOldKing.Audio.AudioChannel)))RoadOfTheOldKing.Audio.AudioChannels.SetVolume(channel,RoadOfTheOldKing.UI.SoundSettings.ChannelVolume(channel));
             }
-            {var liveMixer=Resources.Load<UnityEngine.Audio.AudioMixer>("Audio/Mixer");float liveDb;check(liveMixer!=null&&liveMixer.GetFloat("MusicVolume",out liveDb)&&Mathf.Abs(liveDb-20f*Mathf.Log10(Mathf.Max(.0001f,RoadOfTheOldKing.UI.SoundSettings.ChannelVolume(RoadOfTheOldKing.Audio.AudioChannel.Music))))<.6f,"the live music mix is back at the player's own setting");}
+            {var liveMixer=Resources.Load<UnityEngine.Audio.AudioMixer>("Audio/Mixer");float liveDb;check(liveMixer!=null&&liveMixer.GetFloat("EffectsVolume",out liveDb)&&Mathf.Abs(liveDb-20f*Mathf.Log10(Mathf.Max(.0001f,RoadOfTheOldKing.UI.SoundSettings.ChannelVolume(RoadOfTheOldKing.Audio.AudioChannel.Effects))))<.6f,"the live effects mix is back at the player's own setting");}
             menu.Back();check(menu.IsOpen&&!(bool)menu.GetType().GetField("inSettings",flags).GetValue(menu),"Back from Settings returns to the main page");
             menu.Back();check(!menu.IsOpen,"Back on the main page closes");nextFrame();
 
