@@ -41,8 +41,9 @@ namespace RoadOfTheOldKing.Tutorial
         [Tooltip("Catches throws aimed at the carving; the player walks behind it (collision ignored for the player only).")]
         [SerializeField] private Collider2D hitBody;
         [Header("Teaching cue")]
-        [Tooltip("Progress milestones before the stone glints and the guide points at it (the first wolf's defeat, " +
-            "then recovery). A throw that hits the stone awakens it at any time (user, 22 Nov: \"not waiting on anything\").")]
+        [Tooltip("Progress milestones before the stone glints and the guide points at it (the first wolf's defeat; recovery " +
+            "is empty since the flask moved to the road's rats, 22 Nov). A throw that hits the stone awakens it at any time " +
+            "(user, 22 Nov: \"not waiting on anything\").")]
         [SerializeField] private string requiredMilestone;
         [SerializeField, TextArea] private string awakenedNotice = "Recall awakened {recall}";
         [SerializeField] private string recoveryMilestone;

@@ -150,6 +150,8 @@ namespace RoadOfTheOldKing.Enemies
         public bool HasWatchingStage => watchDuration > 0f;
         public bool IsDefeated => State == PursuitState.Defeated;
         public bool IsDormant => State == PursuitState.Dormant;
+        // Springs a dormant enemy on the next tick, without the player in its wake radius or sight (an ambush, AmbushLeap).
+        public void Wake() { if (State == PursuitState.Dormant && health != null && health.IsAlive) provoked = true; }
         public bool IsWaking => State == PursuitState.Waking;
         // Where it settles when not fighting: a guardian goes dormant again.
         private PursuitState RestState => wakeRadius > 0f ? PursuitState.Dormant : PursuitState.Idle;

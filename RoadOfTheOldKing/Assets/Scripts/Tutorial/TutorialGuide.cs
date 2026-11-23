@@ -22,7 +22,7 @@ namespace RoadOfTheOldKing.Tutorial
         Rested,         // a fire is the respawn point: lit or rested at (a checkpoint exists)
         Milestone,      // progress contains `milestone` (lessons, rewards, exits...)
         ReachArea,      // came within `radius` of `area`
-        DrankFlask,     // recovered safely after the first wolf
+        DrankFlask,     // recovered safely after the fight named by `milestone` (empty: the first wolf)
         Looked,         // held Alt to look around
         Zoomed,         // changed the camera zoom, or read the note for a few seconds
     }
@@ -36,7 +36,8 @@ namespace RoadOfTheOldKing.Tutorial
         public string hint;
         public TutorialCondition condition;
         [Tooltip("Units for Moved/Sprinted, count for Dodged.")] public float amount = 1f;
-        [Tooltip("Progress id for Milestone; for Rested, the fire that counts (empty: any fire).")] public string milestone;
+        [Tooltip("Progress id for Milestone; for Rested, the fire that counts (empty: any fire); for DrankFlask, the fight " +
+            "it follows (empty: the first wolf).")] public string milestone;
         [Tooltip("World position for ReachArea (layout anchors are editor-only, so positions are stored).")] public Vector2 area;
         [Min(0.5f)] public float radius = 4f;
 
@@ -183,8 +184,13 @@ namespace RoadOfTheOldKing.Tutorial
         private void OnHealed()
         {
             var progress = GameSession.Instance?.Progress;
-            if (progress != null && progress.Has("tutorial/enemy/first-wolf")) drinks++;
+            var lesson = steps.Find(s => s.condition == TutorialCondition.DrankFlask);
+            if (progress != null && progress.Has(FlaskFight(lesson))) drinks++;
         }
+
+        // The fight the flask lesson follows: the road's rats since 22 Nov (user: take the flask out of the Recall courtyard).
+        private static string FlaskFight(TutorialStep step) =>
+            step != null && !string.IsNullOrEmpty(step.milestone) ? step.milestone : "tutorial/enemy/first-wolf";
 
         private bool IsMet(TutorialStep step)
         {
@@ -199,7 +205,7 @@ namespace RoadOfTheOldKing.Tutorial
                 case TutorialCondition.Rested: return progress != null && !string.IsNullOrEmpty(progress.checkpointId) && (string.IsNullOrEmpty(step.milestone) || progress.checkpointId == step.milestone);
                 case TutorialCondition.Milestone: return progress != null && progress.Has(step.milestone);
                 case TutorialCondition.DrankFlask:
-                    return progress != null && progress.Has("tutorial/enemy/first-wolf") &&
+                    return progress != null && progress.Has(FlaskFight(step)) &&
                         !EncounterState.InCombat && safeSince >= 0f && Time.time - safeSince >= .5f &&
                         flask != null && !flask.IsDrinking &&
                         (drinks >= 1 || player.Health.Health >= player.Health.MaxHealth || flask.Charges == 0);
@@ -241,12 +247,19 @@ namespace RoadOfTheOldKing.Tutorial
                 return;
             }
             int index = HintIndex;
+            // The flask follows its fight ahead of optional lessons still open before it (sprint, free look).
+            int flaskIndex = steps.FindIndex(s => s.condition == TutorialCondition.DrankFlask);
+            var progress = GameSession.Instance != null ? GameSession.Instance.Progress : null;
+            if (index >= 0 && flaskIndex > index && !done.Contains(steps[flaskIndex].id) && progress != null &&
+                progress.Has(FlaskFight(steps[flaskIndex])))
+                index = flaskIndex;
             // Local stone teaching takes precedence over skipped optional lessons in the courtyard.
             if (stone != null && stone.IsReady && !stone.IsAwakened &&
                 Vector2.Distance(player.transform.position, stone.transform.position) < 12f)
                 index = steps.FindIndex(s => s.id == "stone");
             if (index != hintIndex) { hintIndex = index; hintSince = Time.time; }
-            if (index < 0 || Time.time < completedUntil || (steps[index].id == "flask" && Time.time - safeSince < .5f))
+            if (index < 0 || Time.time < completedUntil || (steps[index].id == "flask" && Time.time - safeSince < .5f) ||
+                (steps[index].condition == TutorialCondition.DrankFlask && (progress == null || !progress.Has(FlaskFight(steps[index])))))
             { HudNotifications.ClearHint(); return; }
             var current = steps[index];
             // A step that teaches its fight (minShowSeconds) may appear in it and holds its text for that long; others step
@@ -303,9 +316,9 @@ namespace RoadOfTheOldKing.Tutorial
             new TutorialStep("melee", "Strike the dummy {attack}", TutorialCondition.Milestone) { milestone = "tutorial/lesson/melee" },
             new TutorialStep("sprint", "Sprint {sprint}", TutorialCondition.Sprinted) { amount = 4f },
             new TutorialStep("look", "Hold {look} to look around", TutorialCondition.Looked) { cueAtPlayer = true },
+            new TutorialStep("flask", "Drink a flask {heal}", TutorialCondition.DrankFlask) { milestone = "tutorial/enemy/field-rats" },
             new TutorialStep("road", "", TutorialCondition.ReachArea) { area = new Vector2(72f, 27.5f), radius = 5f },
             new TutorialStep("first-wolf", "A wolf guards the ruins. Dodge its lunge {dash}", TutorialCondition.Milestone) { milestone = "tutorial/enemy/first-wolf", appearDelay = .75f, minShowSeconds = 4f },
-            new TutorialStep("flask", "Drink a flask {heal}", TutorialCondition.DrankFlask),
             new TutorialStep("stone", "The stone seals the way\nThrow {throw}", TutorialCondition.RecallUnlocked),
             new TutorialStep("first-shard", "Take the Sun Shard {interact}", TutorialCondition.Milestone) { milestone = RewardKeys.ShardCollected("tutorial/first-enemy") },
             new TutorialStep("rest", "", TutorialCondition.Rested) { milestone = "tutorial/roadside-fire" },

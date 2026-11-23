@@ -62,6 +62,13 @@ if(phase==8||phase==10){
         var lone=wolves.Single(w=>w.GetComponent<RoadOfTheOldKing.Progression.DefeatMilestone>()!=null);
         var pack=wolves.Where(w=>w!=lone).OrderBy(w=>w.name).ToArray();
         check(wolves.Length==3&&pack.Length==2,"Lone wolf and two-wolf pack present");
+        // The road's field rats come before the Bridge Bonfire and carry the flask lesson (22 Nov).
+        var ratFight=UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.Progression.EncounterUnlock>(FindObjectsSortMode.None).Single(u=>u.Milestone=="tutorial/enemy/field-rats");
+        var rats=ratFight.Guards.ToArray();
+        check(rats.Length==2&&rats.All(r=>r!=null&&r.GetComponent<RoadOfTheOldKing.Enemies.PursuitBrain>()!=null),"Two field rats guard the forest road");
+        // One waits in a bush and leaps out at the hero (23 Nov); the other is in plain sight.
+        var ambush=rats.Select(r=>r.GetComponent<RoadOfTheOldKing.Enemies.AmbushLeap>()).Single(a=>a!=null);
+        var openRat=rats.Single(r=>r.GetComponent<RoadOfTheOldKing.Enemies.AmbushLeap>()==null);
         if(phase==0){
             check(!session.Checkpoints.HasCheckpoint&&!session.Progress.hasAxe&&!combat.CanRecall&&combat.Weapon==null,"Fresh equipment and checkpoint locked");
             check(Vector2.Distance(body.position,new Vector2(11.82f,36.92f))<.1f,"Fresh home spawn");
@@ -86,15 +93,26 @@ if(phase==8||phase==10){
             for(int i=0;i<3;i++){check(combat.Weapon.TryLightChop(Vector2.up),"Dummy chop starts "+i);tick(1f);}
             check(melee.IsComplete&&store.Load().Has("tutorial/lesson/melee"),"Three actual melee hits complete lesson");
             check(!combat.CanRecall&&!stone.IsReady,"Lessons alone do not unlock Recall");
+            var ambushBrain=ambush.GetComponent<RoadOfTheOldKing.Enemies.PursuitBrain>();
+            check(ambush.IsHidden&&ambushBrain.IsDormant&&!ambush.GetComponent<RoadOfTheOldKing.Enemies.MeleeSpriteView>().BodyVisual.enabled,"The ambush rat waits unseen in its bush");
+            openRat.ReceiveHit(hit);check(!session.Progress.Has("tutorial/enemy/field-rats"),"One rat down doesn't end the road fight");
+            check(player.Health.Health==player.Health.MaxHealth,"Unhurt before the bush");
+            move(new Vector2(58f,49.8f)); // walking down the road past the bush; real frames spring it
+        }else if(phase==2){
+            if(ambush.GetComponent<RoadOfTheOldKing.Combat.Damageable>().IsAlive){
+                check(!ambush.IsHidden&&!ambush.IsLeaping&&!ambush.GetComponent<RoadOfTheOldKing.Enemies.PursuitBrain>().IsDormant,"Passing the bush springs the hidden rat");
+                check(player.Health.Health<=player.Health.MaxHealth-20,"Its leap bites the hero (20)");
+                ambush.GetComponent<RoadOfTheOldKing.Combat.Damageable>().ReceiveHit(hit);
+                check(store.Load().Has("tutorial/enemy/field-rats")&&!stone.IsReady,"Both rats down saves the fight; the stone still waits for the wolf");
+                return "WAIT: let the fight settle, then repeat phase 2.";
+            }
+            if(flask.Charges==flask.MaxCharges){SessionState.SetInt("Tutorial.LoopBeforeDrink",player.Health.Health);check(flask.TryDrink(),"Real flask drink starts after hit-stop");return "WAIT: allow the real drink and safe recovery to finish, then repeat phase 2.";}
+            int before=SessionState.GetInt("Tutorial.LoopBeforeDrink",0);
+            check(!flask.IsDrinking&&player.Health.Health==Mathf.Min(player.Health.MaxHealth,before+flask.HealAmount)&&flask.Charges==flask.MaxCharges-1,"Flask heals with one charge spent");
+            check(session.Progress.Has("tutorial/step/flask")&&!stone.IsReady,"Drinking after the rats completes the flask lesson before the ruins");
             lone.GetComponent<RoadOfTheOldKing.Combat.Damageable>().ReceiveHit(hit);
             check(session.Progress.Has("tutorial/enemy/first-wolf")&&!reward.IsAvailable,"Lone wolf saves milestone, not pack reward");
-            check(!stone.IsReady&&glimmers.All(r=>!r.enabled),"Recall and glimmer wait for safe recovery");
-            move(new Vector2(90.4f,30f)); // beside the hedge, 3.5 units from the stone (18 Nov)
-            check(player.Health.ReceiveHit(new RoadOfTheOldKing.Combat.CombatHit(lone.gameObject,RoadOfTheOldKing.Combat.AttackKind.EnemyMelee,30,Vector2.down,0,0)),"Recovery damage accepted");
-        }else if(phase==2){
-            if(flask.Charges==flask.MaxCharges){check(flask.TryDrink(),"Real flask drink starts after hit-stop");return "WAIT: allow the real drink and safe recovery to finish, then repeat phase 2.";}
-            check(!flask.IsDrinking&&player.Health.Health==player.Health.MaxHealth&&flask.Charges==flask.MaxCharges-1,"Flask heals with one charge spent");
-            check(session.Progress.Has("tutorial/step/flask")&&stone.IsReady,"Safe recovery makes stone ready");
+            check(stone.IsReady,"The lone wolf's defeat alone readies the stone");
             check(!gate.IsOpen&&!combat.CanRecall,"Gate closed before awakening");
             // From the courtyard, out of normal range and a little off line (22 Nov): the stone draws the axe in.
             move(new Vector2(86.8f,29.1f));tick(.1f);check(combat.Weapon.TryThrow(new Vector2(1f,.15f).normalized),"Actual Recall-stone throw from the courtyard starts");tick(1.5f);
@@ -115,7 +133,8 @@ if(phase==8||phase==10){
         }else if(phase==4){
             check(player.IsAlive&&!session.Checkpoints.HasCheckpoint&&Vector2.Distance(body.position,new Vector2(11.82f,36.92f))<.1f,"Death before fire returns home");
             check(combat.Weapon!=null&&combat.CanRecall&&gate.IsOpen&&!gateShadow.enabled&&lesson.IsComplete&&melee.IsComplete,"Equipment, opened seal and lessons survive death");
-            check(wolves.All(w=>w.GetComponent<RoadOfTheOldKing.Combat.Damageable>().IsAlive)&&reward.IsAvailable&&!reward.IsCollected,"Wolves reset; pending shard preserved");
+            check(wolves.All(w=>w.GetComponent<RoadOfTheOldKing.Combat.Damageable>().IsAlive)&&rats.All(r=>r.IsAlive)&&reward.IsAvailable&&!reward.IsCollected,"Wolves and rats reset; pending shard preserved");
+            check(ambush.IsHidden&&ambush.GetComponent<RoadOfTheOldKing.Enemies.PursuitBrain>().IsDormant,"The ambush rat hides in its bush again");
             move((Vector2)reward.transform.position+Vector2.down*.8f);check(interaction.TryInteract()&&reward.IsCollected&&session.Progress.sunShards==1,"Real F interaction collects one shard");
             check(!reward.TryCollect(player)&&store.Load().sunShards==1,"Duplicate reward rejected and saved");
             move(fire.SpawnPosition+Vector2.down);check(interaction.TryInteract()&&fire.IsDiscovered,"Real F lights rebuilt bonfire");
@@ -141,7 +160,7 @@ if(phase==8||phase==10){
             var bridge=session.Checkpoints.Fires.Single(f=>f.Id=="tutorial/bridge-fire");
             move(bridge.SpawnPosition);check(interaction.TryInteract()&&bridge.IsDiscovered,"Real F lights the bridge fire");
             check(interaction.TryInteract()&&interaction.IsOpen&&session.Progress.checkpointId==bridge.Id,"Second F rests at the bridge");interaction.Close();updateGuide();
-            var wolfStep=System.Linq.Enumerable.ToList(guide.Steps).FindIndex(s=>s.id=="first-wolf");check(!guide.IsDone("rest")&&guide.HintIndex<=wolfStep,"Bridge rest keeps the wolf, flask and stone teaching ahead");
+            var flaskStep=System.Linq.Enumerable.ToList(guide.Steps).FindIndex(s=>s.id=="flask");check(!guide.IsDone("rest")&&guide.HintIndex<=flaskStep,"Bridge rest keeps the flask, wolf and stone teaching ahead");
         }else throw new Exception("All phases completed or unexpected phase "+phase);
     }
 }

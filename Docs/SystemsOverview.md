@@ -184,7 +184,7 @@ Values live in `Assets/Settings/Weapons/AxeSettings.asset`.
 | Wolf | Predator | 50 | Lunge, snap | Read the lock, then sidestep or punish the recovery |
 | Road Scavenger | Pursuit | 75 | Step-in, overhead | Keep your spacing; watches 0.5 s before it engages |
 | Mossback Boar | Pursuit | 90 | Charge, tusk sweep | Bait the charge; hitting a wall head-on stuns it 2.2 s |
-| Thorn Rat | Pursuit | 20 | Dart and nip | Don't get surrounded |
+| Thorn Rat, Field Rat | Pursuit | 20 | Dart and nip | Don't get surrounded |
 | Broken Watcher (boss) | Pursuit, guardian stage | 440 | 360° slam, close sweep, a draw from afar | Leave the ring, fight the pull, punish the recovery |
 
 Every attack follows the same contract, with values in `Assets/Settings/Enemies`:
@@ -276,9 +276,9 @@ One verb per space. Each lesson completes from a real outcome, not a key press.
 | Axe stump | Pickup | Owning the axe |
 | Shrubs, throw stands | Swing, throw, retrieve | Clearing a shrub; a thrown hit, then the axe back in hand |
 | Practice dummy, cracked stone | Combo, cleave | Three melee hits; a full-charge break |
-| Forest road | Sprint | Distance sprinted |
-| Ruins | First fight, healing | A lone wolf; a flask heal |
-| Ancient stone | Recall | A thrown hit once the wolf is dead and you've recovered |
+| Forest road | Sprint, first fight, healing | Distance sprinted; two field rats; a flask heal |
+| Ruins | Dodging a lunge | A lone wolf |
+| Ancient stone | Recall | A thrown hit; it glints once the wolf is dead |
 | Meadow | Wolf pack, first Sun Shard | Both wolves; collecting the shard |
 | Roadside bonfire | Rest | First rest |
 

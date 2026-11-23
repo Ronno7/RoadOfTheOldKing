@@ -12,6 +12,7 @@ namespace RoadOfTheOldKing.Enemies
         [SerializeField] private EnemyAnimationSet animations;
         [SerializeField] private SpriteRenderer bodyVisual;
         public EnemyAnimationSet Animations => animations;
+        public SpriteRenderer BodyVisual => bodyVisual;
         private PursuitBrain enemy;
         private Damageable health;
         private Vector2 previous;

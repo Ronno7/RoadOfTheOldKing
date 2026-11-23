@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+**Added**
+- Two field rats on the Tutorial's forest road, where you now learn to drink a flask.
+
 **Changed**
 - The Recall stone wakes the moment your axe strikes it.
 - The Tutorial's sealed gate now opens with your first Recall.

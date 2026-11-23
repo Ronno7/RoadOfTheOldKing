@@ -216030,6 +216030,79 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 646699f2df81e4844a5c581b020fb641, type: 3}
+--- !u!1001 &1024442602
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1732026137}
+    m_Modifications:
+    - target: {fileID: 1457853514096952128, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      propertyPath: m_Name
+      value: Field rat 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5957425210242104944, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5957425210242104944, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 5957425210242104944, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5957425210242104944, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5957425210242104944, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5957425210242104944, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5957425210242104944, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5957425210242104944, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5957425210242104944, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5957425210242104944, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+--- !u!4 &1024442603 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5957425210242104944, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+  m_PrefabInstance: {fileID: 1024442602}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1024442604 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5425725328800168542, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+  m_PrefabInstance: {fileID: 1024442602}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.Damageable
 --- !u!1001 &1029896992
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -283437,6 +283510,79 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 646699f2df81e4844a5c581b020fb641, type: 3}
+--- !u!1001 &1490070107
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1732026137}
+    m_Modifications:
+    - target: {fileID: 1262553338213922707, guid: 82176033076cef14f872e9a671dc0df9, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1262553338213922707, guid: 82176033076cef14f872e9a671dc0df9, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.3499985
+      objectReference: {fileID: 0}
+    - target: {fileID: 1262553338213922707, guid: 82176033076cef14f872e9a671dc0df9, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1262553338213922707, guid: 82176033076cef14f872e9a671dc0df9, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1262553338213922707, guid: 82176033076cef14f872e9a671dc0df9, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1262553338213922707, guid: 82176033076cef14f872e9a671dc0df9, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1262553338213922707, guid: 82176033076cef14f872e9a671dc0df9, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1262553338213922707, guid: 82176033076cef14f872e9a671dc0df9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1262553338213922707, guid: 82176033076cef14f872e9a671dc0df9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1262553338213922707, guid: 82176033076cef14f872e9a671dc0df9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8216971289928028050, guid: 82176033076cef14f872e9a671dc0df9, type: 3}
+      propertyPath: m_Name
+      value: Ambush bush
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 82176033076cef14f872e9a671dc0df9, type: 3}
+--- !u!4 &1490070108 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1262553338213922707, guid: 82176033076cef14f872e9a671dc0df9, type: 3}
+  m_PrefabInstance: {fileID: 1490070107}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1490070109 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6078019283705160083, guid: 82176033076cef14f872e9a671dc0df9, type: 3}
+  m_PrefabInstance: {fileID: 1490070107}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf11d1c95d47ac24ca9980ca8aa1d435, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.Breakable
 --- !u!1001 &1494018292
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -323025,6 +323171,19 @@ MonoBehaviour:
     nearRadius: 0
     appearDelay: 0
     minShowSeconds: 0
+  - id: flask
+    hint: Drink a flask {heal}
+    condition: 8
+    amount: 1
+    milestone: tutorial/enemy/field-rats
+    area: {x: 0, y: 0}
+    radius: 4
+    cueTarget: {fileID: 0}
+    cueAtPlayer: 1
+    cueOffset: {x: 0, y: 2.5}
+    nearRadius: 0
+    appearDelay: 0
+    minShowSeconds: 0
   - id: road
     hint: 
     condition: 7
@@ -323051,19 +323210,6 @@ MonoBehaviour:
     nearRadius: 0
     appearDelay: 0.75
     minShowSeconds: 4
-  - id: flask
-    hint: Drink a flask {heal}
-    condition: 8
-    amount: 1
-    milestone: 
-    area: {x: 0, y: 0}
-    radius: 4
-    cueTarget: {fileID: 0}
-    cueAtPlayer: 1
-    cueOffset: {x: 0, y: 2.5}
-    nearRadius: 0
-    appearDelay: 0
-    minShowSeconds: 0
   - id: stone
     hint: 'The stone seals the way
 
@@ -327728,6 +327874,57 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1b55b0e9400c14d479bc29738eab43d0, type: 3}
+--- !u!1 &1732026136
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1732026137}
+  - component: {fileID: 1732026138}
+  m_Layer: 0
+  m_Name: Road rats
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1732026137
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1732026136}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 57.5, y: 44.75, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1024442603}
+  - {fileID: 1959002850}
+  - {fileID: 1490070108}
+  m_Father: {fileID: 1922886471}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1732026138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1732026136}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e7d9145d69120844ab5b50a486bde95, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RoadOfTheOldKing::RoadOfTheOldKing.Progression.EncounterUnlock
+  milestone: tutorial/enemy/field-rats
+  guards:
+  - {fileID: 1024442604}
+  - {fileID: 1959002851}
 --- !u!1001 &1735901201
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -349541,7 +349738,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4270873863762072154, guid: 31a62b2efa1286646926cb8ce3585a28, type: 3}
       propertyPath: recoveryMilestone
-      value: tutorial/step/flask
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 4270873863762072154, guid: 31a62b2efa1286646926cb8ce3585a28, type: 3}
       propertyPath: requiredMilestone
@@ -363304,6 +363501,7 @@ Transform:
   m_Children:
   - {fileID: 1014446889}
   - {fileID: 94945414}
+  - {fileID: 1732026137}
   m_Father: {fileID: 8351447465323684189}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1937262332
@@ -363367,6 +363565,90 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 646699f2df81e4844a5c581b020fb641, type: 3}
+--- !u!1001 &1959002849
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1732026137}
+    m_Modifications:
+    - target: {fileID: 1457853514096952128, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      propertyPath: m_Name
+      value: Field rat 2 (ambush)
+      objectReference: {fileID: 0}
+    - target: {fileID: 2632014230872862715, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      propertyPath: wakeRadius
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2632014230872862715, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      propertyPath: wakeDuration
+      value: 0.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5957425210242104944, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5957425210242104944, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 4.549999
+      objectReference: {fileID: 0}
+    - target: {fileID: 5957425210242104944, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5957425210242104944, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5957425210242104944, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5957425210242104944, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5957425210242104944, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5957425210242104944, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5957425210242104944, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5957425210242104944, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 1457853514096952128, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2059324488}
+  m_SourcePrefab: {fileID: 100100000, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+--- !u!4 &1959002850 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5957425210242104944, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+  m_PrefabInstance: {fileID: 1959002849}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1959002851 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5425725328800168542, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+  m_PrefabInstance: {fileID: 1959002849}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2059324478}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6753448e6826e1a44b83095f963f2b89, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Combat.Damageable
 --- !u!1 &1960869853
 GameObject:
   m_ObjectHideFlags: 0
@@ -385400,6 +385682,32 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 665009490197319040, guid: 5f0af33ecc5d8e04286d6d104c0f3cdb, type: 3}
   m_PrefabInstance: {fileID: 2055791990}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2059324478 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1457853514096952128, guid: bb256b6db1c3acc499356de5de04ac98, type: 3}
+  m_PrefabInstance: {fileID: 1959002849}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2059324488
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2059324478}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa9604a2f64281b4dbaeed78447afed7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RoadOfTheOldKing::RoadOfTheOldKing.Enemies.AmbushLeap
+  cover: {fileID: 1490070109}
+  triggerRadius: 3.5
+  biteDamage: 20
+  biteReach: 1.2
+  biteKnockback: 2
+  biteStagger: 0.15
+  landShort: 0.45
+  arcHeight: 0.7
+  rustleSeconds: 0.35
 --- !u!1001 &2068259450
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -713343,7 +713651,7 @@ Tilemap:
       - {fileID: 1922039361, guid: 405c7d0154050bf478856281391a20e8, type: 3}
       - {fileID: -435753032, guid: 405c7d0154050bf478856281391a20e8, type: 3}
       - {fileID: -1497324419, guid: 405c7d0154050bf478856281391a20e8, type: 3}
-      m_AnimationSpeed: 1.2500001
+      m_AnimationSpeed: 1.25
       m_AnimationTimeOffset: 0
       m_Flags: 0
   - first: {x: 64, y: 86, z: 0}
