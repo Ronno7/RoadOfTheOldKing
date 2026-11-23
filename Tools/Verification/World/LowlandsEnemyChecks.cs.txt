@@ -25,7 +25,7 @@ else{
  };
  if(phase==2){
   check(enemies.Length==3&&drops.All(d=>d!=null&&d.PendingCoins==0),"three living orchard guards with empty per-life drops");
-  foreach(string name in new[]{"BriarWolf","RoadScavenger","MossbackBoar","BrokenWatcher","ThornRat"}){
+  foreach(string name in new[]{"BriarWolf","RoadScavenger","MossbackBoar","BrokenWatcher","ThornRat","FieldRat"}){
    var set=AssetDatabase.LoadAssetAtPath<RoadOfTheOldKing.Enemies.EnemyAnimationSet>("Assets/Animations/Enemies/"+name+"/AnimationSet.asset");
    check(set!=null&&Enumerable.Range(0,8).All(o=>set.rotations.ResolveOctant(o)==o&&set.rotations.FrameCount(o)==1),name+" has eight native standing directions");
    check(Enumerable.Range(0,8).All(o=>set.rotations.Frame(o,0).pixelsPerUnit==16),name+" uses 16 PPU");

@@ -71,7 +71,7 @@ namespace RoadOfTheOldKing.EditorTools
             DirectionalAnimationImporter.Targets.Add(Player);
             DirectionalAnimationImporter.Targets.Add(Wolf);
             DirectionalAnimationImporter.Targets.Add(Trader);
-            foreach (string name in new[] { "BriarWolf", "RoadScavenger", "MossbackBoar", "BrokenWatcher", "ThornRat" })
+            foreach (string name in new[] { "BriarWolf", "RoadScavenger", "MossbackBoar", "BrokenWatcher", "ThornRat", "FieldRat" })
                 DirectionalAnimationImporter.Targets.Add(new DirectionalAnimationImporter.Target
                 {
                     Name = name, ArtRoot = "Assets/Art/Sprites/Enemies/" + name,
