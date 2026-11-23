@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="en" data-region="edge">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Road of the Old King · Showcase</title>
+  <meta name="description" content="A guided tour of Road of the Old King, a top-down 2D action RPG built in Unity 6.3.">
+  <meta name="theme-color" content="#2f3d34">
+  <link rel="preload" href="assets/fonts/RotOKTitle32.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="assets/fonts/RotOKHeading16.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="assets/fonts/RotOKPixel.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="css/showcase.css">
+  <link rel="icon" href="assets/art/ui/Crown.png" type="image/png">
+  <script src="js/showcase.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#axe">Skip to the tour</a>
+
+  <!-- World layers: sky gradient, drifting cloud shadows, region particles. -->
+  <div class="world" aria-hidden="true">
+    <div class="world__sky"></div>
+    <div class="world__clouds"><i></i><i></i><i></i></div>
+    <canvas class="world__weather" id="weather"></canvas>
+    <div class="world__flash"></div>
+  </div>
+
+  <header class="topbar">
+    <a class="mark" href="#prologue" aria-label="Road of the Old King, back to the start">
+      <img src="assets/art/ui/Crown.png" alt="" width="16" height="12"><span>Road of the Old King</span>
+    </a>
+    <p class="topbar__chapter" aria-live="polite"><span data-chapter-numeral>I</span><span data-chapter-name>Prologue</span></p>
+    <nav class="topbar__actions" aria-label="Site">
+      <button class="btn btn--quiet" type="button" data-open-map aria-haspopup="dialog">Map <kbd>M</kbd></button>
+      <a class="btn btn--hearth" href="https://github.com/Ronno7/RoadOfTheOldKing/releases">Download</a>
+    </nav>
+  </header>
+
+  <!-- The road rail: chapter waypoints and a walking hero that tracks scroll progress. -->
+  <nav class="rail" aria-label="Chapters">
+    <svg class="rail__road" viewBox="0 0 40 1000" preserveAspectRatio="none" aria-hidden="true">
+      <path id="rail-path" d="M20 0 C 34 90, 6 170, 20 250 S 34 420, 20 500 S 6 670, 20 750 S 34 910, 20 1000" />
+    </svg>
+    <ol class="rail__stops"></ol>
+    <img class="rail__hero" src="assets/art/sprites/hero/walk-south-0.png" alt="" width="40" height="40">
+  </nav>
+
+  <div class="place" aria-hidden="true">
+    <p class="place__name"></p>
+    <span class="place__rule"><img src="assets/art/ui/DividerGem.png" alt="" width="5" height="5"></span>
+  </div>
+
+  <main id="tour">
+
+    <!-- ───────────────────────────── Prologue · Ardan's Edge ───────────────────────────── -->
+    <section id="prologue" class="chapter chapter--hero" data-region="edge" data-title="Prologue">
+      <div class="hero">
+        <h1 class="visually-hidden">Road of the Old King</h1>
+        <img class="pixel title-mark" data-fit="0.72" src="assets/art/Title.png" alt="Road of the Old King" width="384" height="88">
+        <p class="lede">A top-down 2D action RPG built in Unity 6.3.</p>
+        <figure class="diorama" data-pixellab="prologue-diorama">
+          <picture class="diorama__picture">
+            <source media="(prefers-reduced-motion: reduce)" srcset="assets/art/banners/Banner-Top-still.png">
+            <img class="pixel" data-fit="1" src="assets/art/banners/Banner-Top.gif" width="384" height="144"
+               alt="Chimney smoke rises over Ardan's Edge as the blue-cloaked traveler approaches a stone bridge.">
+          </picture>
+        </figure>
+        <p class="meta">Windows download · Tutorial and Green Lowlands</p>
+        <div class="hero__cta">
+          <a class="btn btn--hearth" href="https://github.com/Ronno7/RoadOfTheOldKing/releases">Download for Windows</a>
+          <a class="btn btn--quiet" href="#axe">Start the tour <span aria-hidden="true">↓</span></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ───────────────────────────── I · The Axe ───────────────────────────── -->
+    <section id="axe" class="chapter" data-region="edge" data-title="The Axe">
+      <header class="chapter__head">
+        <p class="kicker">Chapter I</p>
+        <h2>The Axe</h2>
+        <p class="sub">The player's only weapon, a bronze double-bladed axe: swung, thrown and recalled.</p>
+      </header>
+
+      <div class="preview" data-tabs>
+        <div class="verbs" role="tablist" aria-label="Axe actions">
+          <button role="tab" id="tab-throw" aria-controls="plate-throw" aria-selected="true"><b>Throw</b><span>Flies 7 units and lodges in what it hits, or where it lands.</span></button>
+          <button role="tab" id="tab-reposition" aria-controls="plate-reposition" aria-selected="false" tabindex="-1"><b>Reposition</b><span>The player moves freely while it's lodged. Walk over it to pick it up; past 10 units it returns.</span></button>
+          <button role="tab" id="tab-recall" aria-controls="plate-recall" aria-selected="false" tabindex="-1"><b>Recall</b><span>Pulls it back through terrain, hitting everything on the way except what it was lodged in.</span></button>
+        </div>
+        <figure class="plate is-filled" id="plate-throw" role="tabpanel" aria-labelledby="tab-throw" data-slot="axe-throw">
+          <img src="assets/captures/axe-throw.webp" alt="The hero throws the axe into a practice target, where it lodges." width="960" height="540" loading="lazy">
+        </figure>
+        <figure class="plate is-filled" id="plate-reposition" role="tabpanel" aria-labelledby="tab-reposition" data-slot="axe-reposition" hidden>
+          <img src="assets/captures/axe-reposition.webp" alt="The hero walks around the practice yard while the axe stays lodged in a target." width="960" height="540" loading="lazy">
+        </figure>
+        <figure class="plate is-filled" id="plate-recall" role="tabpanel" aria-labelledby="tab-recall" data-slot="axe-recall" hidden>
+          <img src="assets/captures/axe-recall.webp" alt="Recall pulls the lodged axe back to the hero along a glowing trail." width="960" height="540" loading="lazy">
+        </figure>
+      </div>
+
+      <ul class="features">
+        <li><b>Light combo</b>A sweep, a reversed sweep and a lunging thrust: 10, 10 and 25 damage.</li>
+        <li><b>Charged cleave</b>Hold to charge, release to spin a full circle for up to 30 damage. The charge can be held as long as you like.</li>
+        <li><b>One clock</b>Damage, the ground footprint and the weapon pose read one action clock: windup, active, recovery. A hit pauses that clock briefly.</li>
+        <li><b>Stamina</b>100 points for every action. Any action can start above zero and push into a deficit; attacks in deficit deal 60% damage.</li>
+        <li><b>Recall stone and gate</b>In the Tutorial, a throw that strikes the ancient stone awakens Recall, and the sealed gate opens when the axe is recalled out of it.</li>
+        <li><b>The sluice</b>In the Lowlands, a crank moves the lodged axe on a carriage, then one Recall must cross two locks in order to drain the pond.</li>
+      </ul>
+    </section>
+
+    <!-- ───────────────────────────── II · Art ───────────────────────────── -->
+    <section id="art" class="chapter" data-region="edge" data-title="Art">
+      <header class="chapter__head">
+        <p class="kicker">Chapter II</p>
+        <h2>Art</h2>
+        <p class="sub">Native pixel art on a 16-pixel grid, drawn from shared palettes.</p>
+      </header>
+
+      <ul class="features">
+        <li><b>16 PPU</b>World sprites use 16 pixels per unit. Terrain uses 16 × 16 tiles; characters and props span larger canvases.</li>
+        <li><b>Shared palettes</b>Terrain, foliage and architecture use shared environment palettes with per-piece colour budgets. Accepted character art keeps its own palette.</li>
+        <li><b>Characters</b>PixelLab supplies eight-direction character art. The hero has walk, run, dash, hurt, throw, drink, rest and ready-stance clips; attacks pair the ready stance with a procedural axe swing. Every enemy has movement and death clips, and most attacks have their own.</li>
+        <li><b>Separate weapon</b>The hero has no arms. The axe is its own sprite with one whole-pixel grip per facing, in front of or behind the body, where a cloak fold wraps the haft.</li>
+        <li><b>Cloak colour</b>Chosen at New Game. A shader recolours the cloak's blues by brightness, so the shading survives.</li>
+        <li><b>RuleTile terrain</b>RuleTiles choose edge, corner and junction sprites from their neighbours; five materials cover all 47 combinations. Paths overlap ground on separate maps.</li>
+        <li><b>Layers, not collision</b>Visual tilemaps and collision are independent. Trees and buildings split into base, overhead and collision, so the player can walk behind canopies.</li>
+        <li><b>Drawn height</b>Height is drawn, not simulated: one physics plane, one 16 px row of wall per level, and stairs and ramps as the only links.</li>
+        <li><b>Pipeline</b>PixelLab art and Python tile exporters feed editor importers. The game loads only ordinary Unity assets.</li>
+      </ul>
+
+      <figure class="specimen">
+        <ol class="turnaround"><li><img class="pixel" src="assets/art/sprites/hero/rotations/south.png" alt="Hero facing south" width="32" height="32"></li><li><img class="pixel" src="assets/art/sprites/hero/rotations/south-east.png" alt="Hero facing south east" width="32" height="32"></li><li><img class="pixel" src="assets/art/sprites/hero/rotations/east.png" alt="Hero facing east" width="32" height="32"></li><li><img class="pixel" src="assets/art/sprites/hero/rotations/north-east.png" alt="Hero facing north east" width="32" height="32"></li><li><img class="pixel" src="assets/art/sprites/hero/rotations/north.png" alt="Hero facing north" width="32" height="32"></li><li><img class="pixel" src="assets/art/sprites/hero/rotations/north-west.png" alt="Hero facing north west" width="32" height="32"></li><li><img class="pixel" src="assets/art/sprites/hero/rotations/west.png" alt="Hero facing west" width="32" height="32"></li><li><img class="pixel" src="assets/art/sprites/hero/rotations/south-west.png" alt="Hero facing south west" width="32" height="32"></li></ol>
+        <figcaption>The hero's eight standing directions, 32 × 32</figcaption>
+      </figure>
+
+      <figure class="specimen">
+          <div class="palette"><p>Tutorial · Hearth and Meadow</p><ol><li style="--c:#384b3c" title="Grass shadow · #384b3c"><span class="visually-hidden">Grass shadow #384b3c</span></li><li style="--c:#60724d" title="Grass shade · #60724d"><span class="visually-hidden">Grass shade #60724d</span></li><li style="--c:#8b9b5e" title="Grass base · #8b9b5e"><span class="visually-hidden">Grass base #8b9b5e</span></li><li style="--c:#beca82" title="Grass light · #beca82"><span class="visually-hidden">Grass light #beca82</span></li><li style="--c:#543f36" title="Deep timber · #543f36"><span class="visually-hidden">Deep timber #543f36</span></li><li style="--c:#826047" title="Timber · #826047"><span class="visually-hidden">Timber #826047</span></li><li style="--c:#b58c61" title="Dirt · #b58c61"><span class="visually-hidden">Dirt #b58c61</span></li><li style="--c:#dfc291" title="Dry earth / straw · #dfc291"><span class="visually-hidden">Dry earth / straw #dfc291</span></li><li style="--c:#794a41" title="Roof shadow · #794a41"><span class="visually-hidden">Roof shadow #794a41</span></li><li style="--c:#b86f50" title="Clay roof · #b86f50"><span class="visually-hidden">Clay roof #b86f50</span></li><li style="--c:#d99a67" title="Warm roof edge · #d99a67"><span class="visually-hidden">Warm roof edge #d99a67</span></li><li style="--c:#f1deb0" title="Cream plaster · #f1deb0"><span class="visually-hidden">Cream plaster #f1deb0</span></li><li style="--c:#77766a" title="Well stone shade · #77766a"><span class="visually-hidden">Well stone shade #77766a</span></li><li style="--c:#b2ae91" title="Well stone light · #b2ae91"><span class="visually-hidden">Well stone light #b2ae91</span></li><li style="--c:#6e9f9a" title="Muted water · #6e9f9a"><span class="visually-hidden">Muted water #6e9f9a</span></li><li style="--c:#e7b85c" title="Sun gold · #e7b85c"><span class="visually-hidden">Sun gold #e7b85c</span></li></ol></div>
+          <div class="palette"><p>Green Lowlands · Field and Old Road</p><ol><li style="--c:#304c42" title="Foliage shadow · #304c42"><span class="visually-hidden">Foliage shadow #304c42</span></li><li style="--c:#4f7050" title="Foliage shade · #4f7050"><span class="visually-hidden">Foliage shade #4f7050</span></li><li style="--c:#7f995a" title="Meadow base · #7f995a"><span class="visually-hidden">Meadow base #7f995a</span></li><li style="--c:#b5c97c" title="Meadow light · #b5c97c"><span class="visually-hidden">Meadow light #b5c97c</span></li><li style="--c:#543f36" title="Deep timber · #543f36"><span class="visually-hidden">Deep timber #543f36</span></li><li style="--c:#826047" title="Timber · #826047"><span class="visually-hidden">Timber #826047</span></li><li style="--c:#b58c61" title="Dirt · #b58c61"><span class="visually-hidden">Dirt #b58c61</span></li><li style="--c:#dfc291" title="Dry earth / straw · #dfc291"><span class="visually-hidden">Dry earth / straw #dfc291</span></li><li style="--c:#585f58" title="Ruins shadow · #585f58"><span class="visually-hidden">Ruins shadow #585f58</span></li><li style="--c:#7c8370" title="Weathered stone · #7c8370"><span class="visually-hidden">Weathered stone #7c8370</span></li><li style="--c:#a6aa8a" title="Stone light / lichen · #a6aa8a"><span class="visually-hidden">Stone light / lichen #a6aa8a</span></li><li style="--c:#d4ccaa" title="Sunlit stone / birch · #d4ccaa"><span class="visually-hidden">Sunlit stone / birch #d4ccaa</span></li><li style="--c:#395f66" title="Stream depth · #395f66"><span class="visually-hidden">Stream depth #395f66</span></li><li style="--c:#638c8e" title="Stream base · #638c8e"><span class="visually-hidden">Stream base #638c8e</span></li><li style="--c:#9bc0ae" title="Stream reflection · #9bc0ae"><span class="visually-hidden">Stream reflection #9bc0ae</span></li><li style="--c:#e7b85c" title="Sun gold · #e7b85c"><span class="visually-hidden">Sun gold #e7b85c</span></li></ol></div>
+        <figcaption>Region palettes, 16 colours each</figcaption>
+      </figure>
+    </section>
+
+    <!-- ───────────────────────────── III · Vegetation ───────────────────────────── -->
+    <section id="field" class="chapter" data-region="lowlands" data-title="Vegetation">
+      <header class="chapter__head">
+        <p class="kicker">Chapter III</p>
+        <h2>Vegetation</h2>
+        <p class="sub">Grass, flowers and reeds react to wind, the player and attacks.</p>
+      </header>
+
+      <div class="field" aria-hidden="true"><canvas class="pixel" width="320" height="40"></canvas></div>
+
+      <ul class="features">
+        <li><b>Wind</b>Each blade is two leaf sprites with staggered wind timing, rotating smoothly around a bottom pivot. No row deformation, stepped animation or UV distortion.</li>
+        <li><b>Movement</b>Grass, flowers and reeds bend away from the player's feet and settle after they pass.</li>
+        <li><b>Cutting</b>Swings, throws and Recall cut plants during the attack's damage window. Leaf fragments arc, bounce and fade from a fixed pool; cut plants stay cut between scene visits and regrow when the player rests.</li>
+        <li><b>Depth</b>Plants south of the player's feet draw in front and plants north draw behind. Only nearby chunks pay for the extra draw.</li>
+        <li><b>Rendering</b>One field owns small spatial mesh groups, with sway in the shader. Cutting removes triangle indices; there are no per-plant objects or colliders.</li>
+        <li><b>Placement</b>An editable density map places patches and keeps paths, water and interaction clearings open. Each region bakes its own field, leaving out plants that would reach into a prop behind them.</li>
+      </ul>
+      <p class="note">Per-plant root and phase data follows the GPU Gems grass animation approach.</p>
+
+      <figure class="plate is-filled" data-slot="lowlands-gameplay">
+          <img src="assets/captures/lowlands-gameplay.webp" alt="The hero walks into tall Lowlands grass as a cloud shadow drifts over the field." width="960" height="540" loading="lazy">
+      </figure>
+    </section>
+
+    <!-- ───────────────────────────── IV · Enemies ───────────────────────────── -->
+    <section id="foes" class="chapter" data-region="lowlands" data-title="Enemies">
+      <header class="chapter__head">
+        <p class="kicker">Chapter IV</p>
+        <h2>Enemies</h2>
+      </header>
+
+      <div class="preview" data-tabs>
+        <div class="foes" role="tablist" aria-label="Enemies">
+          <button class="foe" role="tab" id="tab-wolf" aria-controls="plate-wolf" aria-selected="true">
+            <span class="foe__art"><img class="pixel" src="assets/art/sprites/wolf.png" alt="" width="48" height="48"><img class="foe__mark" src="assets/art/ui/AwarenessMark.png" alt="" width="5" height="11"></span>
+            <b class="foe__name">Wolf</b>
+            <span class="foe__text">Circles the player, feints, then lunges along a locked lane. Hunts a runner past its leash.</span>
+            <span class="foe__tag">PredatorBrain</span>
+          </button>
+          <button class="foe" role="tab" id="tab-boar" aria-controls="plate-boar" aria-selected="false" tabindex="-1">
+            <span class="foe__art"><img class="pixel" src="assets/art/sprites/boar.png" alt="" width="48" height="48"><img class="foe__mark" src="assets/art/ui/AwarenessMark.png" alt="" width="5" height="11"></span>
+            <b class="foe__name">Mossback Boar</b>
+            <span class="foe__text">Charges along a locked lane and sweeps its tusks up close. A charge into a wall stuns it.</span>
+            <span class="foe__tag">PursuitBrain</span>
+          </button>
+          <button class="foe" role="tab" id="tab-scavenger" aria-controls="plate-scavenger" aria-selected="false" tabindex="-1">
+            <span class="foe__art"><img class="pixel" src="assets/art/sprites/scavenger.png" alt="" width="32" height="32"><img class="foe__mark" src="assets/art/ui/AwarenessMark.png" alt="" width="5" height="11"></span>
+            <b class="foe__name">Road Scavenger</b>
+            <span class="foe__text">Lunges with a thrust and follows a miss with an armoured overhead.</span>
+            <span class="foe__tag">PursuitBrain</span>
+          </button>
+        </div>
+        <figure class="plate is-filled" id="plate-wolf" role="tabpanel" aria-labelledby="tab-wolf" data-slot="wolf-gameplay">
+          <img src="assets/captures/wolf-gameplay.webp" alt="Two wolves close in on the hero, who dodges their lunges and strikes back." width="960" height="540" loading="lazy">
+        </figure>
+        <figure class="plate is-filled" id="plate-boar" role="tabpanel" aria-labelledby="tab-boar" data-slot="boar-gameplay" hidden>
+          <img src="assets/captures/boar-gameplay.webp" alt="A Mossback Boar charges by a barn; the hero sidesteps and strikes back." width="960" height="540" loading="lazy">
+        </figure>
+        <figure class="plate is-filled" id="plate-scavenger" role="tabpanel" aria-labelledby="tab-scavenger" data-slot="scavenger-gameplay" hidden>
+          <img src="assets/captures/scavenger-gameplay.webp" alt="Two Road Scavengers rush the hero in a workshop yard." width="960" height="540" loading="lazy">
+        </figure>
+      </div>
+      <ul class="features">
+        <li><b>Rats</b>Thorn Rats in the Lowlands and Field Rats in Ardan's Edge dart in, nip and back off. Their danger is numbers.</li>
+        <li><b>Broken Watcher</b>The first boss, guarding the sluice. It wakes when approached or struck, slams a full ring, sweeps close and drags a distant player in. Fog walls hold the fight.</li>
+        <li><b>One attack contract</b>Windup tracks you, the lock fixes the direction, active can hit, and recovery is your opening. Recovery is never cancelled.</li>
+        <li><b>Ground warnings</b>Attacks are chalked on the ground at their true reach and width: lanes for lunges and charges, wedges for swings.</li>
+        <li><b>No shared turn</b>Each enemy attacks on its own rhythm. Placement and notice range shape groups, so a careful player can pull one at a time.</li>
+        <li><b>Leash and mending</b>Enemies give up once the player gets away, walk home and heal 10% of their health per second out of the fight.</li>
+      </ul>
+      <p class="note">Every enemy runs one action at a time through one action runner. PredatorBrain chooses for wolves; PursuitBrain, with per-enemy data, for the rest.</p>
+      <p class="influence"><span>Inspired by</span>Dark Souls: poise that breaks under accumulated hits, armour during committed attacks, telegraphed windups, no shared attack turn, and a fog wall around the boss.</p>
+    </section>
+
+    <!-- ───────────────────────────── V · Bonfires ───────────────────────────── -->
+    <section id="bonfire" class="chapter chapter--dark" data-region="barrow" data-title="Bonfires">
+      <div class="lantern" aria-hidden="true"></div>
+      <header class="chapter__head">
+        <p class="kicker">Chapter V</p>
+        <h2>Bonfires</h2>
+        <p class="sub">Checkpoints where the player rests, travels and respawns.</p>
+      </header>
+
+      <figure class="diorama" data-pixellab="barrow-diorama">
+        <picture class="diorama__picture">
+          <source media="(prefers-reduced-motion: reduce)" srcset="assets/art/banners/Banner-Middle-still.png">
+          <img class="pixel" data-fit="1" src="assets/art/banners/Banner-Middle.gif" width="384" height="128"
+             alt="Barrow Woods concept art: a bonfire among roots and burial stones.">
+        </picture>
+      </figure>
+
+      <div class="fire" aria-hidden="true"><span class="fire__base"></span><span class="fire__flame"></span><span class="fire__glow"></span></div>
+
+      <ul class="rest">
+        <li><b>Light</b>First use lights the fire, saves and makes it the respawn point.</li>
+        <li><b>Heal</b>Resting restores health and refills the three flasks.</li>
+        <li><b>Reset</b>Enemies respawn and cut grass regrows.</li>
+        <li><b>Keep</b>Coins, tools, upgrades and opened shortcuts stay saved.</li>
+        <li><b>Travel</b>Any lit fire can be reached from another, listed by region.</li>
+        <li><b>Upgrade</b>Upgrade fires burn a larger gold flame and sell one of three exclusive weapon upgrades for three Sun Shards.</li>
+      </ul>
+      <p class="influence"><span>Inspired by</span>Dark Souls: bonfires that save, heal and connect by travel, flasks refilled by resting, and enemies that return when you rest.</p>
+    </section>
+
+    <!-- ───────────────────────────── VI · Atmosphere and Graphics ───────────────────────────── -->
+    <section id="atmosphere" class="chapter chapter--dark" data-region="barrow" data-title="Atmosphere and Graphics" data-short="Atmosphere">
+      <header class="chapter__head">
+        <p class="kicker">Chapter VI</p>
+        <h2>Atmosphere and Graphics</h2>
+        <p class="sub">Lighting, colour grading and atmosphere layered over native pixel art.</p>
+      </header>
+
+      <ul class="features">
+        <li><b>2D lighting</b>World art, characters and grass use lit materials under one Global Light 2D per scene. Bonfires add flickering local light to nearby ground, grass and characters.</li>
+        <li><b>Colour grade</b>Each region's grade sets contrast, white balance, split toning and a soft vignette, with no blur over pixel edges. Bloom is off in Restrained and low in Cinematic.</li>
+        <li><b>Region looks</b>One camera-fitted overlay draws cloud shade, sunlit breaks, light shafts and mist, with ambient motes. It eases to half strength during combat.</li>
+        <li><b>Two modes</b>Restrained, the default, keeps everything on the 16 PPU grid: the overlay snaps and steps its tones, and motes are single pixels. Cinematic adds soft light, glowing motes and bloom.</li>
+        <li><b>Baked shadows</b>Buildings, trees and props cast short shadows in one light direction into native 16 PPU masks. Terrain casts only from real height edges onto lower ground.</li>
+        <li><b>Water</b>Ripples, falls and foam are four-frame tiles. The draining pond retreats by a baked depth map in a shader, shallow edges first, with no fluid simulation.</li>
+        <li><b>Dark interiors</b>The global light stays near zero and a cover shader keeps every unlit pixel black. The lantern, once owned, is a 2D light with wall shadows.</li>
+        <li><b>Hit feedback</b>Hits flash, pause briefly and kick the camera along the blow; a controller rumbles. Axe strikes sound and fleck by material. Settings scale each effect down.</li>
+        <li><b>Rewards</b>New rewards fall in under a light and shimmer until taken, then rise over the hero for a moment while the world stops.</li>
+      </ul>
+
+      <figure class="compare" data-compare>
+        <img src="assets/captures/atmosphere-restrained.png" alt="A Lowlands bonfire by the mill in the default Restrained atmosphere." width="960" height="540" loading="lazy">
+        <img class="compare__after" src="assets/captures/atmosphere-cinematic.png" alt="The same moment in Cinematic atmosphere: warmer light, soft haze and bloom." width="960" height="540" loading="lazy">
+        <span class="compare__label compare__label--before" aria-hidden="true">Restrained</span>
+        <span class="compare__label compare__label--after" aria-hidden="true">Cinematic</span>
+        <span class="compare__handle" aria-hidden="true"></span>
+        <input class="compare__range" type="range" min="0" max="100" value="50" aria-label="Drag to compare Restrained, on the left, with Cinematic, on the right">
+      </figure>
+    </section>
+
+    <!-- ───────────────────────────── VII · Interface ───────────────────────────── -->
+    <section id="interface" class="chapter chapter--dark" data-region="barrow" data-title="Interface">
+      <header class="chapter__head">
+        <p class="kicker">Chapter VII</p>
+        <h2>Interface</h2>
+        <p class="sub">Interface elements sorted by whether they exist in the game world and whether they are part of its fiction.</p>
+      </header>
+
+      <div class="preview quad" data-tabs>
+        <div class="quad__grid" role="tablist" aria-label="Interface types">
+          <span class="quad__axis quad__axis--x1" aria-hidden="true">In the world space</span>
+          <span class="quad__axis quad__axis--x2" aria-hidden="true">Not in the world space</span>
+          <span class="quad__axis quad__axis--y1" aria-hidden="true">In the fiction</span>
+          <span class="quad__axis quad__axis--y2" aria-hidden="true">Not in the fiction</span>
+          <button class="quad__cell quad__cell--diegetic" role="tab" id="tab-ui-diegetic" aria-controls="panel-ui-diegetic" aria-selected="false" tabindex="-1">
+            <span class="quad__icon"><span class="quad__flame" aria-hidden="true"></span></span><b>Diegetic</b><span>Inside the world and the fiction</span>
+          </button>
+          <button class="quad__cell quad__cell--meta" role="tab" id="tab-ui-meta" aria-controls="panel-ui-meta" aria-selected="false" tabindex="-1">
+            <span class="quad__icon"><img class="pixel" src="assets/art/ui/Heart.png" alt="" width="9" height="8"></span><b>Meta</b><span>The hero's state, shown on the screen</span>
+          </button>
+          <button class="quad__cell quad__cell--spatial" role="tab" id="tab-ui-spatial" aria-controls="panel-ui-spatial" aria-selected="false" tabindex="-1">
+            <span class="quad__icon"><img class="pixel" src="assets/art/ui/AwarenessMark.png" alt="" width="5" height="11"></span><b>Spatial</b><span>In the world space, not the fiction</span>
+          </button>
+          <button class="quad__cell quad__cell--non-diegetic" role="tab" id="tab-ui-non-diegetic" aria-controls="panel-ui-non-diegetic" aria-selected="true">
+            <span class="quad__icon"><img class="pixel" src="assets/art/ui/Flask.png" alt="" width="9" height="11"></span><b>Non-diegetic</b><span>Outside the world and the fiction</span>
+          </button>
+        </div>
+        <div class="quad__panel" id="panel-ui-non-diegetic" role="tabpanel" aria-labelledby="tab-ui-non-diegetic">
+          <ul class="quad__list">
+            <li>Vitals: a health bar and one flask icon per charge. Contextual mode reveals them for damage, healing and combat; missing health keeps them visible. Settings also offer an always-visible HUD.</li>
+            <li>One prompt names the action, such as “Light Bonfire” or “Rest”, beside an icon of the key or button on the device last used.</li>
+            <li>Inventory, pause and settings menus built from one pixel UI kit.</li>
+            <li>A dialogue box, and the words of a sign being read, low on the screen while the world keeps moving.</li>
+            <li>Place names and events such as “BONFIRE LIT” share one queue and one position, regions largest.</li>
+            <li>A boss's name and long health bar along the bottom during its fight.</li>
+            <li>A small flame blinking in the top-right corner while the game saves.</li>
+          </ul>
+          <figure class="plate is-filled" data-slot="ui-non-diegetic">
+            <video src="assets/captures/ui-non-diegetic.mp4" poster="assets/captures/ui-non-diegetic-poster.png" width="960" height="540" autoplay muted loop playsinline aria-label="The HUD's health, stamina and flask vitals during a fight with two Road Scavengers, then the inventory panel."></video>
+          </figure>
+        </div>
+        <div class="quad__panel" id="panel-ui-diegetic" role="tabpanel" aria-labelledby="tab-ui-diegetic" hidden>
+          <ul class="quad__list">
+            <li>Bonfires: an unlit fire must be lit before it can be rested at; a lit fire's flame, smoke and light mark it. Upgrade fires burn a larger gold flame in a bronze brazier.</li>
+            <li>The Recall stone glints when its lesson is ready. Puzzle parts that Recall can strike sparkle now and then; a locked crank shows a pin that pops out when the puzzle frees it.</li>
+            <li>The axe is always visible: gripped in a fold of the cloak, lodged where it landed, translucent cyan while recalled.</li>
+            <li>Pickups announce themselves: hearts hover with a double beat, Sun Shards float, coins hop and turn.</li>
+            <li>Inscriptions are carvings in the world, read where they stand.</li>
+          </ul>
+          <figure class="plate is-filled" data-slot="ui-diegetic">
+            <video src="assets/captures/ui-diegetic.mp4" poster="assets/captures/ui-diegetic-poster.png" width="960" height="540" autoplay muted loop playsinline aria-label="The hero walks up to an unlit bonfire. Its prompt reads Light Bonfire; the fire springs up, BONFIRE LIT is announced and the prompt becomes Rest."></video>
+          </figure>
+        </div>
+        <div class="quad__panel" id="panel-ui-spatial" role="tabpanel" aria-labelledby="tab-ui-spatial" hidden>
+          <ul class="quad__list">
+            <li>A stamina arc over the hero whenever stamina is below full: ochre-gold, red in deficit, flashing when an action is refused.</li>
+            <li>A charge bar under the hero for the cleave.</li>
+            <li>Enemy health bars and the “!” awareness cue.</li>
+            <li>Swing footprints on the ground: an outline during windup, filled while active.</li>
+            <li>Enemy attack warnings chalked on the ground, following the attack until it locks.</li>
+            <li>An aim chevron, drawn above roofs and trees.</li>
+          </ul>
+          <figure class="plate is-filled" data-slot="ui-spatial">
+            <video src="assets/captures/ui-spatial.mp4" poster="assets/captures/ui-spatial-poster.png" width="960" height="540" autoplay muted loop playsinline aria-label="The stamina arc over the hero, the wolves' health bars and awareness marks, and their attack warnings on the ground during a fight."></video>
+          </figure>
+        </div>
+        <div class="quad__panel" id="panel-ui-meta" role="tabpanel" aria-labelledby="tab-ui-meta" hidden>
+          <ul class="quad__list">
+            <li>A red screen-edge vignette on damage that pulses like a heartbeat at low health.</li>
+            <li>Hit-stop and a camera kick along the blow.</li>
+            <li>The camera leans in during conversations; the bonfire menu frames the hero on the left third.</li>
+            <li>Controller rumble on hits, the full charge, the catch and slams.</li>
+            <li>Every flash, kick and rumble can be scaled down in Settings.</li>
+          </ul>
+          <figure class="plate is-filled" data-slot="ui-meta">
+            <video src="assets/captures/ui-meta.mp4" poster="assets/captures/ui-meta-poster.png" width="960" height="540" autoplay muted loop playsinline aria-label="At low health the screen's edges pulse red; each hit flashes, pauses briefly and kicks the camera."></video>
+          </figure>
+        </div>
+      </div>
+
+      <ul class="features">
+        <li><b>Contextual HUD</b>Contextual mode hides unneeded vitals during exploration. Damage, healing, combat and missing health reveal them; an always-visible mode is also available.</li>
+        <li><b>One kit</b>Panels, menus, chips and prompts share one kit and the game's pixel fonts. One UI pixel is 2 px on a 960 × 540 reference canvas.</li>
+        <li><b>Anchored chips</b>Chips tied to world points are placed after the camera moves and snap to whole screen pixels, so they never shimmer against the world.</li>
+        <li><b>Device prompts</b>Prompts and the pause menu's control list follow the last-used device, with Xbox or PlayStation button names, from one source of labels.</li>
+        <li><b>Menus</b>Input goes only to the top menu of a stack. Title, pause, bonfire and defeat screens share one theme.</li>
+        <li><b>Settings</b>Volume, window mode, screen flashes, shake and vibration, kept outside the save.</li>
+      </ul>
+      <p class="influence"><span>Inspired by</span>Dark Souls: place names, “BONFIRE LIT” and “GUARDIAN FALLEN” announced in one shared style.</p>
+    </section>
+
+    <!-- ───────────────────────────── VIII · Architecture ───────────────────────────── -->
+    <section id="craft" class="chapter chapter--dark" data-region="barrow" data-title="Architecture">
+      <header class="chapter__head">
+        <p class="kicker">Chapter VIII</p>
+        <h2>Architecture</h2>
+        <p class="sub">Gameplay owns state. Presentation only samples it.</p>
+      </header>
+
+      <div class="arch" id="arch">
+        <svg class="arch__wires" aria-hidden="true"></svg>
+        <div class="arch__col"><p class="arch__label">Input</p></div>
+        <div class="arch__col"><p class="arch__label">Gameplay</p></div>
+        <div class="arch__col"><p class="arch__label">Presentation</p></div>
+        <div class="arch__col"><p class="arch__label">Persistence</p></div>
+        <aside class="arch__detail frame" aria-live="polite">
+          <p class="arch__detail-kicker">Select a system</p>
+          <h3 data-arch-name>Every mechanic has one owner</h3>
+          <p data-arch-body>Click any component to see what it owns, what it emits and who listens.</p>
+        </aside>
+      </div>
+
+      <ul class="tenets">
+        <li><b>Single writers.</b> One component moves the player, one the camera, one sets the sprite.</li>
+        <li><b>Hits are data.</b> A weapon delivers a CombatHit and never knows what it struck.</li>
+        <li><b>Events for reactions.</b> Health raises; knockback, particles, HUD and rewards listen.</li>
+        <li><b>One action at a time.</b> A brain picks an enemy action; one runner owns its commitment and cancellation.</li>
+        <li><b>Leases, not flags.</b> Control locks, pauses and menus are held as leases, so overlapping ones never release each other.</li>
+        <li><b>Tuning in data.</b> Weapons, upgrades, enemy attacks and animation live in ScriptableObjects.</li>
+      </ul>
+      <p class="links"><a href="https://github.com/Ronno7/RoadOfTheOldKing/blob/main/Docs/SystemsOverview.md">Systems overview</a><a href="https://github.com/Ronno7/RoadOfTheOldKing/blob/main/Docs/PlayerAnimation.md">Player animation</a><a href="https://github.com/Ronno7/RoadOfTheOldKing/blob/main/Docs/World.md">World and tilemaps</a></p>
+    </section>
+
+    <!-- ───────────────────────────── IX · Roadmap ───────────────────────────── -->
+    <section id="ahead" class="chapter chapter--dark" data-region="highlands" data-title="Roadmap">
+      <header class="chapter__head">
+        <p class="kicker">Chapter IX</p>
+        <h2>Roadmap</h2>
+        <p class="sub">Implemented areas and approved direction, reviewed 23 November 2026. Planned content is not in the playable build, and its names can still change.</p>
+      </header>
+
+      <figure class="diorama diorama--storm" data-pixellab="highlands-diorama">
+        <picture class="diorama__picture">
+          <source media="(prefers-reduced-motion: reduce)" srcset="assets/art/banners/Banner-Bottom-still.png">
+          <img class="pixel" data-fit="1" src="assets/art/banners/Banner-Bottom.gif" width="400" height="156"
+             alt="Storm Highlands concept art: lightning illuminates the old causeway and a ruined fortress.">
+        </picture>
+      </figure>
+
+      <ol class="route">
+        <li class="is-done"><b>Ardan's Edge</b><span>Tutorial · playable</span></li>
+        <li class="is-active"><b>Green Lowlands</b><span>Playable · first boss, sluice and first upgrades</span></li>
+        <li><b>Barrow Woods</b><span>Planned for 0.6 · the lantern, burial field and vault</span></li>
+        <li><b>Storm Highlands</b><span>Planned · Stormworks machine trial</span></li>
+        <li><b>The Old King's Seat</b><span>Planned · final approach and the King</span></li>
+      </ol>
+
+      <p class="note">Next: polish and sound for a playable demo, then Barrow Woods. The Lowlands' storehouse and Old Drain stay dark until the lantern arrives. Barrow, the Highlands and the final area are unbuilt; their artwork here is concept art.</p>
+
+      <div class="log">
+        <h3 class="log__title">Build log</h3>
+        <ol class="log__list">
+          <li class="log__era"><span>0.6</span><b>Full production · planned</b></li>
+          <li class="is-upcoming"><p><b>0.6</b> <em>Planned</em><span>Barrow Woods, the lantern and the Lowlands' dark interiors</span></p></li>
+          <li class="log__era"><span>0.5</span><b>Full production</b></li>
+          <li class="is-upcoming"><p><b>Unreleased</b> <em>Next</em><span>Field rats and lesson signs in the Tutorial; Recall's first use opens the sealed gate</span></p></li>
+          <li class="is-latest"><time datetime="2026-11-22">Nov 22</time><p><b>0.5.1-dev.1</b> <em>Latest</em><span>Bonfires and controllers</span></p></li>
+          <li><time datetime="2026-11-15">Nov 15</time><p><b>0.5.0</b><span>The Green Lowlands</span></p></li>
+          <li><time datetime="2026-11-03">Nov 3</time><p><b>0.5.0-dev.2</b><span>The Broken Watcher and a bigger Lowlands</span></p></li>
+          <li><time datetime="2026-10-22">Oct 22</time><p><b>0.5.0-dev.1</b><span>Atmosphere, light and feedback</span></p></li>
+          <li class="log__era"><span>0.4</span><b>Vertical slice</b></li>
+          <li><time datetime="2026-10-20">Oct 20</time><p><b>0.4.9</b><span>Controller support and world polish</span></p></li>
+          <li><time datetime="2026-10-16">Oct 16</time><p><b>0.4.8</b><span>Green Lowlands, exploration and economy</span></p></li>
+          <li><time datetime="2026-10-03">Oct 3</time><p><b>0.4.7</b><span>Combat and Tutorial overhaul</span></p></li>
+          <li><time datetime="2026-09-29">Sep 29</time><p><b>0.4.6</b><span>Tutorial guide and movement feel</span></p></li>
+          <li><time datetime="2026-09-28">Sep 28</time><p><b>0.4.5</b><span>New hero and combat feel</span></p></li>
+          <li><time datetime="2026-09-27">Sep 27</time><p><b>0.4.4</b><span>Wolf enemy and Tutorial integration</span></p></li>
+          <li><time datetime="2026-09-26">Sep 26</time><p><b>0.4.3</b><span>Directional movement and combat</span></p></li>
+          <li><time datetime="2026-09-25">Sep 25</time><p><b>0.4.2</b><span>Player and axe integration</span></p></li>
+          <li><time datetime="2026-09-24">Sep 24</time><p><b>0.4.1</b><span>Tutorial world</span></p></li>
+          <li><time datetime="2026-09-23">Sep 23</time><p><b>0.4.0</b><span>World art kits</span></p></li>
+          <li class="log__era"><span>0.3</span><b>Gameplay loop prototype</b></li>
+          <li><time datetime="2026-09-22">Sep 22</time><p><b>0.3.1</b><span>Stamina and progression</span></p></li>
+          <li><time datetime="2026-09-21">Sep 21</time><p><b>0.3.0</b><span>Prototype loop</span></p></li>
+          <li class="log__era"><span>0.2</span><b>Core prototype</b></li>
+          <li><time datetime="2026-09-21">Sep 21</time><p><b>0.2.0</b><span>Axe combat</span></p></li>
+          <li class="log__era"><span>0.1</span><b>Pre-production</b></li>
+          <li><time datetime="2026-09-20">Sep 20</time><p><b>0.1.1</b><span>First tiles</span></p></li>
+          <li><time datetime="2026-09-14">Sep 14</time><p><b>0.1.0</b><span>Movement foundation</span></p></li>
+        </ol>
+        <a class="log__more" href="https://github.com/Ronno7/RoadOfTheOldKing/blob/main/CHANGELOG.md">Full changelog</a>
+      </div>
+
+      <div class="finale">
+        <img class="pixel" src="assets/art/ui/HearthCrest.png" alt="" width="21" height="21">
+        <p>The current build is a Windows download.</p>
+        <a class="btn btn--hearth" href="https://github.com/Ronno7/RoadOfTheOldKing/releases">Download for Windows</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>Road of the Old King · <a href="https://github.com/Ronno7/RoadOfTheOldKing">Source on GitHub</a></p>
+  </footer>
+
+  <!-- The map: a quick-travel overlay drawn as the road itself. -->
+  <dialog class="map frame" id="map" aria-labelledby="map-title">
+    <form method="dialog" class="map__close"><button class="btn btn--quiet" aria-label="Close map">Close <kbd>Esc</kbd></button></form>
+    <h2 id="map-title">Map</h2>
+    <div class="map__body">
+      <svg class="map__art" viewBox="0 0 400 160" preserveAspectRatio="none" aria-hidden="true">
+        <rect class="map__zone map__zone--edge" x="0" y="0" width="114" height="160" />
+        <rect class="map__zone map__zone--lowlands" x="114" y="0" width="80" height="160" />
+        <rect class="map__zone map__zone--barrow" x="194" y="0" width="151" height="160" />
+        <rect class="map__zone map__zone--highlands" x="345" y="0" width="55" height="160" />
+        <path class="map__road" d="M10 120 C 40 120, 50 60, 80 70 S 120 120, 150 100 S 190 40, 220 60 S 260 120, 290 90 S 340 30, 390 40" vector-effect="non-scaling-stroke" />
+      </svg>
+      <ol class="map__zones" aria-hidden="true"><li>Ardan's Edge</li><li>Green Lowlands</li><li>Barrow Woods</li><li>Highlands</li></ol>
+      <ol class="map__stops"></ol>
+    </div>
+  </dialog>
+</body>
+</html>

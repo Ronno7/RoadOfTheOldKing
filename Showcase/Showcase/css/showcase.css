@@ -1,0 +1,547 @@
+/* Road of the Old King · Showcase
+   Colours come only from the game's palettes (Docs/Art/Palettes). Each region
+   re-points the same tokens; registered properties let the whole page cross-fade
+   from day to storm as the reader walks down the road. */
+
+@font-face { font-family: "RotOK Title"; src: url("../assets/fonts/RotOKTitle32.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "RotOK Heading"; src: url("../assets/fonts/RotOKHeading16.ttf") format("truetype"); font-display: swap; }
+@font-face { font-family: "RotOK Pixel"; src: url("../assets/fonts/RotOKPixel.ttf") format("truetype"); font-display: swap; }
+
+@property --sky-top { syntax: "<color>"; inherits: true; initial-value: #f1deb0; }
+@property --sky-low { syntax: "<color>"; inherits: true; initial-value: #dfc291; }
+@property --ink { syntax: "<color>"; inherits: true; initial-value: #543f36; }
+@property --ink-soft { syntax: "<color>"; inherits: true; initial-value: #82604a; }
+@property --card { syntax: "<color>"; inherits: true; initial-value: #f1deb0; }
+@property --line { syntax: "<color>"; inherits: true; initial-value: #b58c61; }
+
+:root {
+  /* Palette: Tutorial "Hearth and Meadow" + Lowlands "Field and Old Road" */
+  --grass-shadow: #384b3c; --grass-shade: #60724d; --grass: #8b9b5e; --grass-light: #beca82;
+  --foliage-shadow: #304c42; --foliage-shade: #4f7050; --meadow: #7f995a; --meadow-light: #b5c97c;
+  --timber-deep: #543f36; --timber: #826047; --dirt: #b58c61; --straw: #dfc291;
+  --roof-shadow: #794a41; --roof: #b86f50; --roof-edge: #d99a67; --plaster: #f1deb0;
+  --ruin-shadow: #585f58; --stone: #7c8370; --lichen: #a6aa8a; --sunlit: #d4ccaa;
+  --stream-deep: #395f66; --stream: #638c8e; --reflection: #9bc0ae;
+  --gold: #e7b85c;
+  --spectral: #8fe3e8;
+
+  --px: 3px;                 /* one art pixel at the default UI scale */
+  --gutter: clamp(16px, 4vw, 48px);
+  --measure: 62rem;
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --shift: 1.6s;             /* region cross-fade */
+
+  color-scheme: light;
+  transition: --sky-top var(--shift) var(--ease), --sky-low var(--shift) var(--ease),
+              --ink var(--shift) var(--ease), --ink-soft var(--shift) var(--ease),
+              --card var(--shift) var(--ease), --line var(--shift) var(--ease);
+}
+
+/* Regions: warm day → cool day → firelit dusk → storm */
+:root[data-region="edge"]      { --sky-top: #f1deb0; --sky-low: #dfc291; --ink: #543f36; --ink-soft: #794a41; --card: #f6e8c6; --line: #b58c61; }
+:root[data-region="lowlands"]  { --sky-top: #d9e4c4; --sky-low: #9bc0ae; --ink: #304c42; --ink-soft: #4f7050; --card: #e7eccf; --line: #7f995a; }
+:root[data-region="barrow"]    { --sky-top: #1d2620; --sky-low: #2e3b30; --ink: #f1deb0; --ink-soft: #dfc291; --card: #26302a; --line: #826047; color-scheme: dark; }
+:root[data-region="highlands"] { --sky-top: #101418; --sky-low: #262d2e; --ink: #d4ccaa; --ink-soft: #a6aa8a; --card: #1b2125; --line: #585f58; color-scheme: dark; }
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 5rem; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--sky-low);
+  color: var(--ink);
+  font: 400 16px/1.75 "RotOK Pixel", monospace;
+}
+html, body { overflow-x: clip; }
+img { max-width: 100%; }
+a { color: inherit; text-decoration-color: color-mix(in srgb, var(--gold) 70%, transparent); text-underline-offset: .2em; }
+a:hover { text-decoration-color: var(--gold); }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+kbd { font: 16px/1 "RotOK Pixel", monospace; padding: 2px 4px; border: 1px solid currentColor; border-radius: 2px; opacity: .6; margin-left: .4em; }
+
+.pixel { image-rendering: pixelated; image-rendering: crisp-edges; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+h1.visually-hidden { font-size: 32px; }
+.skip { position: fixed; left: 1rem; top: -4rem; z-index: 50; background: var(--card); padding: .5rem 1rem; }
+.skip:focus { top: 1rem; }
+
+/* ── World layers ─────────────────────────────────────────── */
+.world { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+.world__sky { position: absolute; inset: 0; background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-low) 100%); }
+.world__weather { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+.world__flash { position: absolute; inset: 0; background: #d4ccaa; opacity: 0; mix-blend-mode: soft-light; }
+.world__flash.is-striking { animation: strike 1.1s ease-out; }
+@keyframes strike { 0% { opacity: 0 } 6% { opacity: .55 } 12% { opacity: .1 } 18% { opacity: .4 } 100% { opacity: 0 } }
+
+/* Cloud shadows drift across the Lowlands only. */
+.world__clouds { position: absolute; inset: 0; opacity: 0; transition: opacity var(--shift) var(--ease); }
+:root[data-region="lowlands"] .world__clouds { opacity: 1; }
+.world__clouds i {
+  position: absolute; width: 60vmax; height: 34vmax; border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(48 76 66 / .16), transparent);
+  animation: drift 48s linear infinite;
+}
+.world__clouds i:nth-child(1) { top: 5%; animation-delay: -6s; }
+.world__clouds i:nth-child(2) { top: 45%; animation-duration: 64s; animation-delay: -30s; }
+.world__clouds i:nth-child(3) { top: 70%; animation-duration: 56s; animation-delay: -44s; }
+@keyframes drift { from { transform: translateX(-70vmax) } to { transform: translateX(110vw) } }
+
+/* ── Buttons and frames (the game's own 9-slice UI kit) ───── */
+.btn {
+  --frame: url("../assets/art/ui/Panel.png");
+  display: inline-flex; align-items: center; gap: .4em;
+  min-height: 44px; padding: 0 1.1em;
+  font: 16px/1 "RotOK Heading", monospace; letter-spacing: .02em;
+  color: var(--ink); text-decoration: none; cursor: pointer;
+  background: none; border: 0;
+}
+.btn--quiet { border-bottom: 2px solid transparent; padding-inline: .4em; }
+.btn--quiet:hover { border-bottom-color: var(--gold); }
+.btn--hearth {
+  color: #f1deb0;
+  border: calc(4 * var(--px)) solid transparent;
+  border-image: url("../assets/art/ui/Panel.png") 4 fill / calc(4 * var(--px)) stretch;
+  image-rendering: pixelated;
+  padding: 0 1em; min-height: calc(16 * var(--px));
+  transition: transform .2s var(--ease), filter .2s var(--ease);
+}
+.btn--hearth:hover { transform: translateY(-2px); filter: brightness(1.12) drop-shadow(0 4px 0 rgb(0 0 0 / .18)); }
+.btn--hearth:active { transform: translateY(1px); }
+
+.frame {
+  border: calc(11 * var(--px)) solid transparent;
+  border-image: url("../assets/art/ui/HearthPanel.png") 11 fill / calc(11 * var(--px)) round;
+  image-rendering: pixelated;
+  color: #f1deb0;
+}
+
+/* ── Top bar ──────────────────────────────────────────────── */
+.topbar {
+  position: fixed; inset: 0 0 auto; z-index: 20;
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 1rem;
+  padding: .5rem var(--gutter);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--sky-top) 92%, transparent), transparent);
+  transition: transform .4s var(--ease);
+}
+.mark { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font: 16px/1 "RotOK Heading", monospace; color: var(--ink); white-space: nowrap; }
+.mark img { width: 32px; height: 24px; image-rendering: pixelated; }
+.topbar__chapter { margin: 0; text-align: center; font: 16px/1 "RotOK Heading", monospace; color: var(--ink-soft); opacity: 0; transition: opacity .4s; }
+.topbar__chapter.is-shown { opacity: 1; }
+.topbar__chapter span + span::before { content: "·"; margin: 0 .6em; color: var(--gold); }
+.topbar__actions { display: flex; gap: .5rem; align-items: center; }
+
+/* ── The road rail ────────────────────────────────────────── */
+.rail { position: fixed; z-index: 15; left: max(12px, calc(var(--gutter) - 20px)); top: 18vh; bottom: 10vh; width: 40px; }
+.rail__road { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.rail__road path { fill: none; stroke: var(--line); stroke-width: 2; stroke-dasharray: 2 6; vector-effect: non-scaling-stroke; opacity: .7; }
+.rail__stops { list-style: none; margin: 0; padding: 0; position: absolute; inset: 0; }
+.rail__stops li { position: absolute; transform: translate(-50%, -50%); }
+.rail__stops a {
+  display: grid; place-items: center; width: 28px; height: 28px; text-decoration: none;
+}
+.rail__stops a::before {
+  content: ""; width: 15px; height: 15px; background: url("../assets/art/ui/DividerGem.png") center / 15px 15px no-repeat;
+  image-rendering: pixelated; filter: grayscale(.6) opacity(.65); transition: filter .3s, transform .3s var(--ease);
+}
+.rail__stops a:hover::before, .rail__stops a[aria-current="true"]::before { filter: none; transform: scale(1.35); }
+.rail__stops span {
+  position: absolute; left: 34px; white-space: nowrap; font: 16px/1 "RotOK Heading", monospace; color: var(--ink);
+  opacity: 0; transform: translateX(-6px); transition: opacity .25s, transform .25s var(--ease); pointer-events: none;
+}
+.rail__stops a:hover span, .rail__stops a:focus-visible span { opacity: 1; transform: none; }
+.rail__hero {
+  position: absolute; left: 50%; top: 0; width: 80px; height: 80px; margin: -56px 0 0 -40px;
+  image-rendering: pixelated; filter: drop-shadow(0 3px 0 rgb(0 0 0 / .15));
+}
+
+/* ── Place-name card (as in-game when entering a region) ─── */
+.place {
+  position: fixed; z-index: 18; left: 50%; top: 76px; transform: translateX(-50%);
+  text-align: center; pointer-events: none; opacity: 0;
+}
+.place.is-shown { animation: place 3.6s var(--ease) forwards; }
+.place__name { margin: 0 0 .5rem; font: 32px/1 "RotOK Title", monospace; color: var(--ink); text-shadow: 0 3px 0 color-mix(in srgb, var(--sky-low) 70%, transparent); white-space: nowrap; }
+.place__rule { display: flex; align-items: center; gap: 12px; justify-content: center; }
+.place__rule::before, .place__rule::after { content: ""; width: 120px; height: 2px; background: var(--gold); opacity: .8; }
+.place__rule img { width: 15px; height: 15px; image-rendering: pixelated; }
+@keyframes place { 0% { opacity: 0; transform: translate(-50%, 8px) } 15%, 70% { opacity: 1; transform: translate(-50%, 0) } 100% { opacity: 0; transform: translate(-50%, -4px) } }
+
+/* ── Chapters ─────────────────────────────────────────────── */
+main { position: relative; }
+.chapter {
+  position: relative;
+  min-height: 100svh;
+  padding: 8rem var(--gutter) 6rem calc(var(--gutter) + 56px);
+  display: grid; justify-items: center; align-content: start; gap: 2.5rem;
+}
+.chapter > * { width: min(100%, var(--measure)); min-width: 0; }
+.chapter__head { text-align: center; }
+.kicker { margin: 0 0 .75rem; font: 16px/1 "RotOK Pixel", monospace; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-soft); }
+h2 { margin: 0; font: 400 64px/1.1 "RotOK Title", monospace; color: var(--ink); text-wrap: balance; }
+.sub { margin: 1rem auto 0; max-width: 52ch; font: 400 16px/1.6 "RotOK Heading", monospace; color: var(--ink-soft); text-wrap: pretty; }
+.note { max-width: 46ch; margin: 0 auto; text-align: center; color: var(--ink-soft); text-wrap: pretty; }
+h3 { margin: 0; font: 400 16px/1.2 "RotOK Heading", monospace; letter-spacing: .02em; }
+
+/* Reveal as chapters enter */
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity .9s var(--ease), transform .9s var(--ease); }
+.reveal.is-in { opacity: 1; transform: none; }
+
+/* ── Prologue ─────────────────────────────────────────────── */
+.chapter--hero { align-content: center; padding-top: 6rem; }
+.hero { display: grid; justify-items: center; gap: 1.25rem; text-align: center; }
+.title-mark { height: auto; }
+.lede { margin: 0; font: 400 16px/1.5 "RotOK Heading", monospace; color: var(--ink-soft); }
+.meta { margin: 0; font: 16px/1.4 "RotOK Pixel", monospace; color: var(--ink-soft); }
+.hero__cta { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; align-items: center; }
+
+.diorama { margin: 0; display: grid; justify-items: center; }
+.diorama__picture { display: contents; }
+.diorama img { display: block; height: auto; }
+
+/* ── Plates: reserved for gameplay captures (filled in the art session) ── */
+.plate {
+  margin: 0; aspect-ratio: 16 / 9; display: grid; place-items: center;
+  background: color-mix(in srgb, var(--card) 70%, transparent);
+  outline: 2px dashed color-mix(in srgb, var(--line) 70%, transparent); outline-offset: -10px;
+}
+.plate img, .plate video { width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
+.plate__empty { display: grid; justify-items: center; gap: .75rem; padding: 1rem; text-align: center; font: 16px/1.4 "RotOK Pixel", monospace; color: var(--ink-soft); }
+.plate__empty img { width: 42px; height: 42px; image-rendering: pixelated; opacity: .8; }
+:root:not(.is-draft) .plate:not(.is-filled) { display: none; }  /* drop .is-draft on <html> to hide unfilled slots */
+
+/* ── Select-to-preview tabs (Axe actions, Enemies) ───────── */
+.preview { display: grid; gap: 1.5rem; }
+.preview .plate[hidden] { display: none; }
+[role="tab"] { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; text-align: center; }
+
+.verbs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.verbs [role="tab"] {
+  display: grid; gap: .4rem; align-content: start; padding: 1rem .75rem;
+  border-bottom: 3px solid color-mix(in srgb, var(--line) 40%, transparent);
+  transition: border-color .25s, background-color .25s;
+}
+.verbs b { font: 400 32px/1 "RotOK Heading", monospace; }
+.verbs span { color: var(--ink-soft); }
+.verbs [role="tab"]:hover { background: color-mix(in srgb, var(--card) 50%, transparent); }
+.verbs [aria-selected="true"] { border-bottom-color: var(--gold); background: color-mix(in srgb, var(--card) 70%, transparent); }
+
+/* ── II · Vegetation ──────────────────────────────────────── */
+.field { margin: 0 0 0 calc(-1 * (var(--gutter) + 56px)); justify-self: start; width: 100vw !important; max-width: none; pointer-events: none; }
+.field canvas { display: block; width: 100%; height: auto; }
+
+/* ── III · Enemies ────────────────────────────────────────── */
+.foes { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1.5rem; }
+.foe {
+  display: grid; gap: .6rem; align-content: start;
+  padding: 1.5rem 1.25rem 1.25rem;
+  background: color-mix(in srgb, var(--card) 85%, transparent);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--line) 50%, transparent);
+  transition: transform .35s var(--ease), box-shadow .35s;
+}
+.foe:hover { transform: translateY(-3px); }
+.foe[aria-selected="true"] { box-shadow: inset 0 0 0 2px var(--gold); }
+.foe__art { position: relative; justify-self: center; height: 144px; display: grid; place-items: end center; }
+.foe__art .pixel { width: auto; height: calc(48 * var(--px)); }
+.foe__art .pixel[width="32"] { height: calc(32 * var(--px)); }
+.foe__mark { position: absolute; top: 0; left: 50%; width: 15px; height: 33px; image-rendering: pixelated; opacity: 0; transform: translate(-50%, 8px); transition: opacity .2s, transform .3s var(--ease); }
+.foe[aria-selected="true"] .foe__mark { opacity: 1; transform: translate(-50%, 0); }
+.foe__name { font: 400 16px/1.2 "RotOK Heading", monospace; }
+.foe__text { color: var(--ink-soft); }
+.foe__tag { font: 16px/1 "RotOK Pixel", monospace; opacity: .7; }
+
+/* ── Influence note ───────────────────────────────────────── */
+.influence {
+  justify-self: center; width: auto !important; max-width: 46rem; margin: 0;
+  display: flex; flex-wrap: wrap; gap: .5rem 1rem; align-items: baseline; justify-content: center;
+  padding: .75rem 1.25rem; text-align: center; color: var(--ink-soft);
+  border-top: 2px solid color-mix(in srgb, var(--line) 50%, transparent);
+  border-bottom: 2px solid color-mix(in srgb, var(--line) 50%, transparent);
+}
+.influence span { font: 16px/1 "RotOK Heading", monospace; color: var(--gold); }
+
+/* ── V · Atmosphere and Graphics ──────────────────────────── */
+.features { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem 2rem; color: var(--ink-soft); }
+.features li { padding-top: .9rem; border-top: 2px solid color-mix(in srgb, var(--line) 60%, transparent); }
+.features b { display: block; margin-bottom: .5rem; font: 400 16px/1.2 "RotOK Heading", monospace; color: var(--gold); }
+:root[data-region="edge"] .features b, :root[data-region="lowlands"] .features b { color: var(--ink); }
+/* Restrained and Cinematic: one frame in both looks, split by a draggable line (the range input covers the frame). */
+.compare { position: relative; margin: 0; aspect-ratio: 16 / 9; overflow: hidden; --split: 50%; }
+.compare img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
+.compare__after { clip-path: inset(0 0 0 var(--split)); }
+.compare__handle { position: absolute; top: 0; bottom: 0; left: var(--split); width: 2px; margin-left: -1px; background: var(--gold); pointer-events: none; }
+.compare__handle::after {
+  content: ""; position: absolute; top: 50%; left: 50%; width: 24px; height: 24px; transform: translate(-50%, -50%);
+  border: 2px solid var(--gold); background: color-mix(in srgb, var(--card) 85%, transparent);
+}
+.compare__label {
+  position: absolute; top: 12px; padding: 6px 10px; pointer-events: none;
+  font: 16px/1 "RotOK Heading", monospace; color: var(--ink); background: color-mix(in srgb, var(--card) 75%, transparent);
+}
+.compare__label--before { left: 12px; }
+.compare__label--after { right: 12px; }
+.compare__range { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; touch-action: pan-y; }
+.compare:focus-within .compare__handle::after { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+/* ── II · Art specimens ───────────────────────────────────── */
+.specimen { margin: 0; display: grid; gap: 1.25rem; justify-items: center; }
+.specimen figcaption { font: 16px/1 "RotOK Pixel", monospace; color: var(--ink-soft); }
+.turnaround { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem 1rem; }
+.turnaround img { display: block; width: calc(32 * var(--px)); height: calc(32 * var(--px)); }
+.palette { display: grid; gap: .5rem; width: min(100%, 40rem); }
+.palette p { margin: 0; font: 16px/1 "RotOK Heading", monospace; color: var(--ink); }
+.palette ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(16, 1fr); gap: 2px; }
+.palette li { aspect-ratio: 1; background: var(--c); box-shadow: inset 0 0 0 1px rgb(0 0 0 / .12); transition: transform .2s var(--ease); }
+.palette li:hover { transform: translateY(-3px); }
+@media (max-width: 640px) { .palette ol { grid-template-columns: repeat(8, 1fr); } }
+
+/* ── VII · Interface quadrant ─────────────────────────────── */
+.quad { gap: 2rem; }
+.quad__grid {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto 1fr 1fr; gap: .75rem;
+  width: min(100%, 44rem); justify-self: center;
+}
+.quad__axis { font: 16px/1.3 "RotOK Pixel", monospace; letter-spacing: .15em; text-transform: uppercase; color: var(--ink-soft); align-self: end; text-align: center; }
+.quad__axis--x1 { grid-area: 1 / 2; } .quad__axis--x2 { grid-area: 1 / 3; }
+.quad__axis--y1, .quad__axis--y2 { writing-mode: vertical-rl; transform: rotate(180deg); align-self: center; }
+.quad__axis--y1 { grid-area: 2 / 1; } .quad__axis--y2 { grid-area: 3 / 1; }
+.quad__cell--diegetic { grid-area: 2 / 2; } .quad__cell--meta { grid-area: 2 / 3; }
+.quad__cell--spatial { grid-area: 3 / 2; } .quad__cell--non-diegetic { grid-area: 3 / 3; }
+.quad__cell {
+  display: grid; gap: .4rem; justify-items: center; align-content: center; min-height: 9rem; padding: 1rem;
+  background: color-mix(in srgb, var(--card) 70%, transparent);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--line) 50%, transparent);
+  transition: box-shadow .25s, transform .25s var(--ease), background-color .25s;
+}
+.quad__cell:hover { transform: translateY(-2px); }
+.quad__cell[aria-selected="true"] { box-shadow: inset 0 0 0 2px var(--gold); background: var(--card); }
+.quad__cell b { font: 400 16px/1 "RotOK Heading", monospace; color: var(--ink); }
+.quad__cell[aria-selected="true"] b { color: var(--gold); }
+.quad__cell > span:last-child { color: var(--ink-soft); }
+.quad__icon { height: 33px; display: grid; place-items: end center; }
+.quad__icon img { width: auto; height: calc(var(--h, 11) * 3px); }
+.quad__icon img[height="8"] { --h: 8; }
+.quad__flame { display: block; width: 24px; height: 48px; background: url("../assets/art/sprites/BonfireFlame16.png") 0 0 / 400% 100%; image-rendering: pixelated; animation: flame .6s steps(4) infinite; margin-top: -15px; }
+.quad__panel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 2rem; align-items: start; }
+.quad__panel[hidden] { display: none; }
+.quad__list { margin: 0; padding: 0; list-style: none; display: grid; gap: .75rem; color: var(--ink-soft); }
+.quad__list li { padding-left: 1.25rem; position: relative; }
+.quad__list li::before { content: ""; position: absolute; left: 0; top: .65em; width: 6px; height: 6px; background: var(--gold); transform: rotate(45deg); }
+.quad__list code { font: inherit; color: var(--ink); }
+@media (max-width: 760px) {
+  .quad__panel { grid-template-columns: 1fr; }
+  .quad__grid { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; }
+  .quad__axis { display: none; }
+  .quad__cell--diegetic { grid-area: 1 / 1; } .quad__cell--meta { grid-area: 1 / 2; }
+  .quad__cell--spatial { grid-area: 2 / 1; } .quad__cell--non-diegetic { grid-area: 2 / 2; }
+  .quad__cell { min-height: 0; text-align: center; }
+}
+
+/* ── Next-chapter link ────────────────────────────────────── */
+.next {
+  justify-self: center; width: auto !important; margin-top: 2rem;
+  display: grid; justify-items: center; gap: .4rem; padding: .75rem 1.5rem; text-decoration: none; color: var(--ink-soft);
+}
+.next span { font: 16px/1 "RotOK Pixel", monospace; letter-spacing: .15em; text-transform: uppercase; }
+.next b { font: 400 32px/1 "RotOK Heading", monospace; color: var(--ink); }
+.next i { font-style: normal; color: var(--gold); transition: transform .3s var(--ease); }
+.next:hover i { transform: translateY(4px); }
+.next:hover b { color: var(--gold); }
+
+/* ── IV · The Bonfire ─────────────────────────────────────── */
+.chapter--dark { color: var(--ink); }
+/* The light spans the whole section (not the text column) and fades in and out as the pointer enters and leaves;
+   the mask softens it toward the section's top and bottom so it never ends on a hard line. */
+.chapter > .lantern { width: auto; }
+.lantern {
+  position: absolute; inset: 0; pointer-events: none; z-index: 0; opacity: 0;
+  background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 40%), rgb(231 184 92 / .16), transparent 70%);
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 14%, #000 86%, transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 14%, #000 86%, transparent);
+  transition: opacity .8s var(--ease);
+}
+.lantern.is-lit { opacity: 1; }
+@media (hover: none) { .lantern { display: none; } }
+.chapter--dark > :not(.lantern) { position: relative; z-index: 1; }
+.fire { position: relative; width: calc(32 * var(--px)); height: calc(40 * var(--px)); justify-self: center; }
+.fire__base { position: absolute; bottom: 0; left: 0; width: 100%; height: calc(32 * var(--px)); background: url("../assets/art/sprites/BonfireBase16.png") 0 0 / 100% 100%; image-rendering: pixelated; }
+.fire__flame {
+  position: absolute; left: 50%; bottom: calc(10 * var(--px)); width: calc(16 * var(--px)); height: calc(32 * var(--px)); margin-left: calc(-8 * var(--px));
+  background: url("../assets/art/sprites/BonfireFlame16.png") 0 0 / 400% 100%; image-rendering: pixelated;
+  animation: flame .6s steps(4) infinite;
+}
+@keyframes flame { to { background-position: 133.333% 0; } }
+.fire__glow {
+  position: absolute; left: 50%; bottom: 0; width: 520px; height: 260px; transform: translate(-50%, 40%);
+  background: radial-gradient(closest-side, rgb(231 184 92 / .35), rgb(184 111 80 / .12) 55%, transparent);
+  animation: flicker 2.4s ease-in-out infinite alternate; pointer-events: none; z-index: -1;
+}
+@keyframes flicker { 0% { opacity: .85; transform: translate(-50%, 40%) scale(1) } 40% { opacity: 1 } 60% { opacity: .9; transform: translate(-50%, 40%) scale(1.04) } 100% { opacity: 1; transform: translate(-50%, 40%) scale(.98) } }
+.rest { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; text-align: center; color: var(--ink-soft); }
+.rest b { display: block; font: 400 32px/1.2 "RotOK Heading", monospace; color: var(--gold); margin-bottom: .4rem; }
+
+/* ── V · The Craft ────────────────────────────────────────── */
+.arch { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.5rem 1rem; align-items: start; }
+.arch__wires { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.arch__wires path { fill: none; stroke: var(--line); stroke-width: 2; opacity: .55; transition: stroke .3s, opacity .3s; }
+.arch__wires path.is-dashed { stroke-dasharray: 4 6; }
+.arch__wires path.is-lit { stroke: var(--gold); opacity: 1; }
+.arch__wires path.is-dim { opacity: .15; }
+.arch__col { display: grid; gap: .75rem; justify-items: stretch; }
+.arch__label { margin: 0 0 .25rem; text-align: center; font: 16px/1 "RotOK Pixel", monospace; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-soft); }
+.node {
+  position: relative; z-index: 1;
+  min-height: 44px; padding: .55rem .6rem; text-align: center; cursor: pointer;
+  font: 16px/1.15 "RotOK Pixel", monospace; color: var(--ink); overflow-wrap: anywhere;
+  background: var(--card); border: 2px solid var(--line);
+  transition: border-color .25s, color .25s, transform .25s var(--ease), opacity .25s;
+}
+.node:hover { border-color: var(--gold); }
+.node[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); transform: translateY(-2px); }
+.arch.has-focus .node:not([aria-pressed="true"]):not(.is-linked) { opacity: .45; }
+.node.is-linked { border-color: color-mix(in srgb, var(--gold) 60%, var(--line)); }
+.arch__detail { grid-column: 1 / -1; margin-top: .5rem; padding: .25rem .5rem; min-height: 8.5rem; }
+.arch__detail-kicker { margin: 0 0 .4rem; font: 16px/1 "RotOK Pixel", monospace; color: #dfc291; opacity: .75; }
+.arch__detail h3 { font-size: 16px; overflow-wrap: anywhere; margin-bottom: .5rem; color: var(--gold); }
+.arch__detail p { margin: 0; }
+.arch__detail dl { display: grid; grid-template-columns: max-content 1fr; gap: .25rem 1rem; margin: .75rem 0 0; }
+.arch__detail dt { font: 16px/1.6 "RotOK Pixel", monospace; color: #dfc291; }
+.arch__detail dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.tenets { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem 2rem; color: var(--ink-soft); }
+.tenets b { color: var(--ink); font: 400 16px/1.75 "RotOK Heading", monospace; }
+.links { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; justify-content: center; margin: 0; font: 16px/1 "RotOK Pixel", monospace; }
+
+/* ── VI · The Road Ahead ──────────────────────────────────── */
+.route { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(5, 1fr); position: relative; text-align: center; }
+.route::before { content: ""; position: absolute; top: 9px; left: 10%; right: 10%; border-top: 2px dashed var(--line); }
+.route li { position: relative; display: grid; gap: .3rem; justify-items: center; padding: 0 .25rem; color: var(--ink-soft); }
+.route li::before { content: ""; width: 20px; height: 20px; background: var(--sky-low); border: 2px solid var(--line); transform: rotate(45deg) scale(.75); }
+.route li.is-done::before { background: var(--gold); border-color: var(--gold); }
+.route li.is-active::before { border-color: var(--gold); animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 6px rgb(231 184 92 / .2); } }
+.route b { font: 400 16px/1.2 "RotOK Heading", monospace; color: var(--ink); margin-top: .5rem; }
+.route span { font-size: 16px; }
+
+.log { display: grid; gap: 1.5rem; justify-items: center; }
+.log__title { margin: 0; font: 16px/1 "RotOK Pixel", monospace; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-soft); }
+
+/* A timeline: dates left of a dashed spine, builds right of it, grouped by milestone. */
+.log__list { --date: 5rem; --mark: 24px; position: relative; list-style: none; padding: 0; margin: 0; width: min(100%, 38rem); }
+.log__list::before {
+  content: ""; position: absolute; top: 12px; bottom: 12px; left: calc(var(--date) + 1rem + var(--mark) / 2 - 1px);
+  border-left: 2px dashed color-mix(in srgb, var(--line) 70%, transparent);
+}
+.log__list li { position: relative; display: grid; grid-template-columns: var(--date) var(--mark) 1fr; column-gap: 1rem; align-items: center; }
+.log__list li::before {  /* the marker sits on the spine */
+  content: ""; grid-column: 2; grid-row: 1; justify-self: center;
+  width: 10px; height: 10px; transform: rotate(45deg);
+  background: var(--sky-low); border: 2px solid var(--line); transition: background-color .25s, border-color .25s;
+}
+.log__list time { grid-column: 1; grid-row: 1; text-align: right; font: 16px/1 "RotOK Pixel", monospace; color: var(--ink-soft); }
+.log__list p {
+  grid-column: 3; grid-row: 1; margin: 0; padding: .6rem .9rem;
+  display: grid; grid-template-columns: auto 1fr; column-gap: .75rem; row-gap: .25rem; align-items: baseline;
+  border-left: 2px solid transparent; transition: background-color .25s, border-color .25s, transform .25s var(--ease);
+}
+.log__list p b { font: 400 16px/1 "RotOK Heading", monospace; color: var(--gold); }
+.log__list p span { grid-column: 1 / -1; color: var(--ink); }
+.log__list p em { justify-self: start; font: 16px/1 "RotOK Pixel", monospace; font-style: normal; letter-spacing: .15em; text-transform: uppercase; color: var(--gold); padding: 3px 6px; border: 1px solid var(--gold); }
+.log__list li:not(.log__era):hover p { background: color-mix(in srgb, var(--card) 80%, transparent); border-left-color: var(--line); transform: translateX(3px); }
+.log__list li:not(.log__era):hover::before { border-color: var(--gold); }
+.log__list li.is-latest::before { background: var(--gold); border-color: var(--gold); box-shadow: 0 0 0 5px rgb(231 184 92 / .18); }
+.log__list li.is-latest p { background: color-mix(in srgb, var(--card) 85%, transparent); border-left-color: var(--gold); }
+.log__list li.is-upcoming p span { color: var(--ink-soft); }  /* not released yet: no date, softer text */
+
+/* Milestones: the version family on the left, its name on the right. */
+.log__era { margin: 1.75rem 0 .5rem; }
+.log__era:first-child { margin-top: 0; }
+.log__era::before { width: 15px !important; height: 15px !important; transform: none !important; border: 0 !important; background: url("../assets/art/ui/DividerGem.png") center / 15px no-repeat !important; image-rendering: pixelated; }
+.log__era span { grid-column: 1; grid-row: 1; text-align: right; font: 400 32px/1 "RotOK Title", monospace; color: var(--ink); }
+.log__era b { grid-column: 3; grid-row: 1; font: 400 16px/1 "RotOK Pixel", monospace; letter-spacing: .15em; text-transform: uppercase; color: var(--ink-soft); }
+.log__more { font: 16px/1 "RotOK Pixel", monospace; }
+
+.finale { display: grid; justify-items: center; gap: 1rem; padding-top: 2rem; text-align: center; }
+.finale img { width: 63px; height: 63px; }
+.finale p { margin: 0; font: 400 16px/1.5 "RotOK Heading", monospace; }
+
+.foot { padding: 2rem var(--gutter) 3rem; text-align: center; font: 16px/1 "RotOK Pixel", monospace; color: var(--ink-soft); }
+
+/* ── Map dialog ───────────────────────────────────────────── */
+.map { width: min(94vw, 60rem); max-height: 92vh; padding: .5rem 1rem 1rem; background: none; overflow: visible; }
+.map::backdrop { background: rgb(16 20 24 / .7); backdrop-filter: blur(3px); }
+.map[open] { animation: unfold .35s var(--ease); }
+@keyframes unfold { from { opacity: 0; transform: translateY(12px) scale(.98) } }
+.map h2 { font-size: 32px; color: var(--gold); text-align: center; margin: 0 0 1rem; }
+.map__close { position: absolute; right: 0; top: 0; }
+.map__close .btn { color: #f1deb0; }
+.map__body { position: relative; aspect-ratio: 5 / 2; }
+.map__art { position: absolute; inset: 0; width: 100%; height: 100%; }
+.map__zone { opacity: .9; }
+.map__zone--edge { fill: #60724d; }
+.map__zone--lowlands { fill: #7f995a; }
+.map__zone--barrow { fill: #384b3c; }
+.map__zone--highlands { fill: #585f58; }
+.map__road { fill: none; stroke: #dfc291; stroke-width: 3; stroke-dasharray: 2 6; stroke-linecap: round; }
+.map__zones { list-style: none; margin: 0; padding: 0; position: absolute; inset: auto 0 6px; display: grid; grid-template-columns: 114fr 80fr 151fr 55fr; text-align: center; font: 16px/1 "RotOK Pixel", monospace; letter-spacing: .15em; text-transform: uppercase; color: #f1deb0; opacity: .7; }
+.map__stops { list-style: none; padding: 0; margin: 0; position: absolute; inset: 0; }
+.map__stops li { position: absolute; width: 0; height: 0; }
+.map__stops li::before { content: ""; position: absolute; left: -7px; top: -7px; width: 14px; height: 14px; background: url("../assets/art/ui/DividerGem.png") center / 15px no-repeat; image-rendering: pixelated; }
+.map__stops a {
+  position: absolute; left: 0; top: 14px; transform: translateX(-50%);
+  display: flex; align-items: center; gap: .4rem; min-height: 32px; padding: .2rem .5rem;
+  font: 16px/1 "RotOK Heading", monospace; color: #f1deb0; text-decoration: none; white-space: nowrap;
+  background: rgb(29 38 32 / .9); border: 2px solid #826047;
+  transition: border-color .2s, color .2s;
+}
+.map__stops li.is-above a { top: auto; bottom: 14px; }
+.map__stops a:hover, .map__stops a:focus-visible, .map__stops a[aria-current="true"] { border-color: var(--gold); color: var(--gold); }
+.map__stops em { font: 16px/1 "RotOK Pixel", monospace; font-style: normal; opacity: .7; }
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 960px) {
+  .rail { display: none; }
+  .chapter { padding-left: var(--gutter); }
+  .field { margin-left: calc(-1 * var(--gutter)); }
+  .topbar__chapter { display: none; }
+  .arch { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .features { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route { grid-template-columns: 1fr; gap: 1.25rem; text-align: left; }
+  .route::before { top: 10px; bottom: 10px; left: 9px; right: auto; border-top: 0; border-left: 2px dashed var(--line); }
+  .route li { grid-template-columns: 20px 1fr; justify-items: start; column-gap: 1rem; }
+  .route li::before { grid-row: span 2; }
+  .route b { margin-top: 0; }
+}
+@media (max-width: 1100px) { h2 { font-size: 48px; } }
+@media (max-width: 640px) {
+  h2 { font-size: 32px; }
+  .quad__cell { padding: .5rem; overflow-wrap: anywhere; }
+  :root { --px: 2px; }
+  .mark img { height: 32px; }
+  .verbs, .rest { grid-template-columns: 1fr; }
+  .verbs { gap: 0; }
+  .tenets, .features { grid-template-columns: 1fr; }
+  .topbar__actions kbd { display: none; }
+  .place__name { font-size: 32px; white-space: normal; }
+  .log__list { --date: 3.5rem; --mark: 16px; }
+  .log__list li { column-gap: .6rem; }
+  .log__era span { font-size: 32px; }
+  .mark span { display: none; }
+  .arch { grid-template-columns: minmax(0, 1fr); }
+  .node { font-size: 16px; }
+
+}
+
+@media (max-width: 1023px), (max-height: 600px) {
+  .map { overflow-y: auto; overflow-x: hidden; }
+  .map__close { position: sticky; top: 0; z-index: 1; display: flex; justify-content: flex-end; background: #1d2620; }
+  .map__body { aspect-ratio: auto; }
+  .map__art, .map__zones, .map__stops li::before { display: none; }
+  .map__stops { position: static; display: grid; gap: .5rem; }
+  .map__stops li { position: static; width: auto; height: auto; }
+  .map__stops a, .map__stops li.is-above a { position: static; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  .reveal { opacity: 1; transform: none; }
+  .world__clouds { display: none; }
+}
