@@ -41,12 +41,12 @@ Art and collision are independent: a water or cliff tile isn't an obstacle until
 | Environment | Trees, buildings, rocks, ruins |
 | Detail / Decoration | Ground accents, small props |
 | Collision | Invisible boundaries and footprints |
-| Above Player | Canopies, roofs |
+| Above Player | Forest canopy, lintels, bridge rails |
 | Gameplay / Encounters | GameObjects: pickups, puzzles, bonfires, enemies |
 
 Every scene shares one hierarchy. The region root (a Grid) holds `Collision`, the ground and path maps, `Terrain`, `Scenery`, `Gameplay`, `Encounters` and editor-only `Authoring` guides. `Player`, `Game Session`, `Cameras` and `Lighting` sit at the scene root.
 
-Trees and buildings are prefabs with separate base, overhead and collision parts, so the hero can walk behind a canopy but not through a trunk. Low props (fences, carts, logs, woodpiles, stumps) are single sprites instead: `WorldPropDepth` draws each in front of or behind the hero by its ground line, and does the same for bush tile maps along forest edges.
+Props, buildings and single trees are prefabs with one sprite and a collision footprint: `WorldPropDepth` draws each in front of or behind the hero by its ground line, and does the same for bush tile maps along forest edges. Forest masses and the pieces the hero walks under (bridges, arches, door lintels) keep an overhead layer, so he passes under a canopy but not through a trunk.
 
 ## Elevation
 

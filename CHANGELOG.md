@@ -4,17 +4,26 @@
 
 **Added**
 - Two field rats on the Tutorial's forest road, where you now learn to drink a flask.
+- Signs teach the Tutorial's lessons and its bonfires; read one any time.
+- Bushes burst into leaves, cracked stone into chips, and dodges and leaping rats kick up dust.
 
 **Changed**
 - The Recall stone wakes the moment your axe strikes it.
 - The Tutorial's sealed gate now opens with your first Recall.
 - Music and ambience sliders are hidden until the game has them.
+- A locked sluice crank shows a pin, which pops out with its own sound when the puzzle frees it.
+- The maintenance crank is now simply the crank, with plain prompts.
+- The old stone bridges have new stonework.
+- Controls show as key and button icons, and menus no longer list their controls along the bottom.
+- Prompts are lighter and slimmer, and no longer cover place names.
 
 **Fixed**
 - A throw at the Recall stone can no longer stick out of reach.
 - An axe lodged in something no longer draws behind it.
 - The carried axe bobs in step when walking away from the camera.
 - The hand on the carried axe stays on the cloak while walking, and now shows from behind too.
+- The sluice's cranks turn without skewing, and their shadows stay still.
+- The carried axe no longer pokes in and out of houses, wells, trees and rocks.
 
 ## 0.5 — Full production
 

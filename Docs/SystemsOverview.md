@@ -282,7 +282,7 @@ One verb per space. Each lesson completes from a real outcome, not a key press.
 | Meadow | Wolf pack, first Sun Shard | Both wolves; collecting the shard |
 | Roadside bonfire | Rest | First rest |
 
-`TutorialGuide` holds an ordered list of steps edited in the Inspector. It shows the first incomplete step past the furthest landmark reached, so skipped lessons stop following the player. Lessons only record milestones, so a new lesson needs no guide code.
+`TutorialGuide` holds an ordered list of steps edited in the Inspector. It shows the first incomplete step past the furthest landmark reached, so skipped lessons stop following the player. A `LessonSign` is read on interact, like a Dark Souls message: its lesson shows in a small HUD box with controls as glyphs (`ControlGlyphs`) while play continues; interact again or walking away closes it. Lessons only record milestones, so a new lesson needs no guide code.
 
 ## Camera and UI
 

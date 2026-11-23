@@ -5,7 +5,7 @@
 <img width="100%" alt="The journey begins: chimney smoke rises over Ardan's Edge as the blue-cloaked traveler approaches a stone bridge over the flowing river." src="Docs/Branding/Banner-Top.gif" />
 
 
-<p align="center">Top down 2D action RPG built in Unity 6.3.</p> 
+<p align="center">Top-down 2D action RPG built in Unity 6.3.</p> 
 
 <p align="center"><a href="Docs/SystemsOverview.md">Systems overview</a> · <a href="Docs/PlayerAnimation.md">Player animation</a> · <a href="Docs/World.md">World and tilemaps</a> · <a href="CHANGELOG.md">Changelog</a></p>
 
