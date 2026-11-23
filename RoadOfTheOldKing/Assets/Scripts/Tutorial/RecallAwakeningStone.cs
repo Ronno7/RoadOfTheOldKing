@@ -6,15 +6,17 @@ using RoadOfTheOldKing.Input;
 using RoadOfTheOldKing.Player;
 using RoadOfTheOldKing.Progression;
 using RoadOfTheOldKing.UI;
+using RoadOfTheOldKing.Weapons;
 using RoadOfTheOldKing.World;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace RoadOfTheOldKing.Tutorial
 {
     // A thrown axe that strikes the stone awakens Recall: brief control lock, the stone
     // wakes, the axe returns to hand on its own, then controls return and progress saves once.
     [DisallowMultipleComponent, DefaultExecutionOrder(250)]
-    public sealed class RecallAwakeningStone : MonoBehaviour, IHitReceiver, IProgressParticipant
+    public sealed class RecallAwakeningStone : MonoBehaviour, IHitReceiver, IProgressParticipant, IAxeFlightPull
     {
         public enum Look { Dormant, Glint, Charging, Awakening, Awakened }
 
@@ -38,17 +40,21 @@ namespace RoadOfTheOldKing.Tutorial
         [Header("Hit body")]
         [Tooltip("Catches throws aimed at the carving; the player walks behind it (collision ignored for the player only).")]
         [SerializeField] private Collider2D hitBody;
-        [Header("Waking condition")]
-        [Tooltip("Progress milestone the stone waits for (e.g. the first wolf's defeat). Until then it doesn't " +
-            "glint and a throw only shows silentNotice. Empty: ready from the start.")]
+        [Header("Teaching cue")]
+        [Tooltip("Progress milestones before the stone glints and the guide points at it (the first wolf's defeat, " +
+            "then recovery). A throw that hits the stone awakens it at any time (user, 22 Nov: \"not waiting on anything\").")]
         [SerializeField] private string requiredMilestone;
-        [SerializeField, TextArea] private string silentNotice = "The stone is cold.";
         [SerializeField, TextArea] private string awakenedNotice = "Recall awakened {recall}";
         [SerializeField] private string recoveryMilestone;
+        [Header("Drawing the axe in")]
+        [Tooltip("World area the hero can't walk into (the hedge corridor). Before awakening, a throw heading toward the " +
+            "stone inside it bends onto the stone and flies on until it strikes, so it never sticks out of reach " +
+            "(user, 22 Nov). Zero size: off.")]
+        [FormerlySerializedAs("missReturnArea")]
+        [SerializeField] private Rect pullArea;
         private PlayerControlLocks locks;
         private PlayerHealth lockedHealth;
         private Coroutine sequence;
-        private float silentNoticeAt = -10f;
         private readonly SpriteRenderer[] glimmer = new SpriteRenderer[4];
         private float readyAge, glimmerPhase;
 
@@ -88,15 +94,7 @@ namespace RoadOfTheOldKing.Tutorial
             var player = hit.Source.GetComponent<PlayerCombatController>();
             if (player == null || player.CanRecall || player.Weapon == null)
                 return false;
-            if (!IsReady)
-            {
-                if (!string.IsNullOrEmpty(silentNotice) && Time.time - silentNoticeAt > 4f)
-                {
-                    silentNoticeAt = Time.time;
-                    HudNotifications.Post(silentNotice);
-                }
-                return false;
-            }
+            // Any hit awakens it; IsReady only times the glint and the guide's cue (user, 22 Nov).
             sequence = StartCoroutine(Awaken(player));
             return true;
         }
@@ -170,6 +168,25 @@ namespace RoadOfTheOldKing.Tutorial
             }
         }
 
+        private void OnEnable() => AxeWeapon.AddFlightPull(this);
+
+        public bool TryPull(AxeWeapon axe, Vector2 position, out Vector2 target)
+        {
+            target = default;
+            if (IsAwakened || sequence != null || hitBody == null || pullArea.width <= 0f || pullArea.height <= 0f ||
+                axe == null || axe.Owner == null || axe.Owner.CanRecall || !pullArea.Contains(position)) return false;
+            target = hitBody.bounds.center;
+            // Only a throw already heading the stone's way; one aimed back out of the corridor flies on as thrown.
+            return Vector2.Dot(axe.AttackDirection, target - position) > 0f;
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            if (pullArea.width <= 0f || pullArea.height <= 0f) return;
+            Gizmos.color = new Color(.4f, .9f, 1f, .8f);
+            Gizmos.DrawWireCube(pullArea.center, pullArea.size);
+        }
+
         private void HideGlimmer()
         {
             foreach (var mark in glimmer) if (mark != null) mark.enabled = false;
@@ -211,6 +228,7 @@ namespace RoadOfTheOldKing.Tutorial
 
         private void OnDisable()
         {
+            AxeWeapon.RemoveFlightPull(this);
             if (sequence != null) Abort();
             readyAge = 0f;
             HideGlimmer();

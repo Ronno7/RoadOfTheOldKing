@@ -96,17 +96,25 @@ if(phase==8||phase==10){
             check(!flask.IsDrinking&&player.Health.Health==player.Health.MaxHealth&&flask.Charges==flask.MaxCharges-1,"Flask heals with one charge spent");
             check(session.Progress.Has("tutorial/step/flask")&&stone.IsReady,"Safe recovery makes stone ready");
             check(!gate.IsOpen&&!combat.CanRecall,"Gate closed before awakening");
-            move(new Vector2(90.4f,30f));tick(.1f);check(combat.Weapon.TryThrow(Vector2.right),"Actual Recall-stone throw over the hedge starts");tick(1f);
+            // From the courtyard, out of normal range and a little off line (22 Nov): the stone draws the axe in.
+            move(new Vector2(86.8f,29.1f));tick(.1f);check(combat.Weapon.TryThrow(new Vector2(1f,.15f).normalized),"Actual Recall-stone throw from the courtyard starts");tick(1.5f);
             check(stone.IsAwakening&&player.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>().IsLockedBy(stone)&&glimmers.All(r=>!r.enabled),"Stone hit starts awakening, hides idle glimmer and locks controls");
         }else if(phase==3){
             check(stone.IsAwakened&&!stone.IsAwakening&&combat.CanRecall&&!combat.Weapon.IsAway&&glimmers.All(r=>!r.enabled),"Awakening recalls axe and restores control without idle glimmer");
-            check(gate.IsOpen&&!gateShadow.enabled&&combat.CanStartAttack&&store.Load().recallUnlocked,"Seal opens, shadow hides and Recall persists");
+            // Recall's first use opens the seal (22 Nov): throw into the gate, then Recall the axe out of it.
+            check(!gate.IsOpen&&combat.CanStartAttack&&store.Load().recallUnlocked,"Seal stays shut after awakening; Recall persists");
+            var seal=gate.GetComponent<RoadOfTheOldKing.World.RecallRelease>();
+            move(new Vector2(84.5f,31f));tick(.1f);check(combat.Weapon.TryThrow(Vector2.up),"Throw into the seal starts");tick(.8f);
+            check(combat.Weapon.State==RoadOfTheOldKing.Weapons.AxeState.Stuck&&seal.IsArmed,"Axe lodges in the seal");
+            check(combat.Weapon.TryPlayerRecall(),"Recall out of the seal starts");tick(.05f);seal.SendMessage("FixedUpdate");
+            check(seal.IsReleased&&store.Load().Has("tutorial/seal/opened"),"Recalling the axe out of the seal opens it and saves");
+            tick(2f);check(!combat.Weapon.IsAway,"Axe back in hand after the seal");
             pack[0].GetComponent<RoadOfTheOldKing.Combat.Damageable>().ReceiveHit(hit);check(!reward.IsAvailable,"One pack defeat cannot release shard");
             pack[1].GetComponent<RoadOfTheOldKing.Combat.Damageable>().ReceiveHit(hit);check(reward.IsAvailable&&!reward.IsCollected&&session.Progress.sunShards==0,"Full pack unlocks physical uncollected shard");
             check(store.Load().Has("shard/available/tutorial/first-enemy"),"Uncollected shard saved before rest");die();
         }else if(phase==4){
             check(player.IsAlive&&!session.Checkpoints.HasCheckpoint&&Vector2.Distance(body.position,new Vector2(11.82f,36.92f))<.1f,"Death before fire returns home");
-            check(combat.Weapon!=null&&combat.CanRecall&&gate.IsOpen&&lesson.IsComplete&&melee.IsComplete,"Equipment, gate and lessons survive death");
+            check(combat.Weapon!=null&&combat.CanRecall&&gate.IsOpen&&!gateShadow.enabled&&lesson.IsComplete&&melee.IsComplete,"Equipment, opened seal and lessons survive death");
             check(wolves.All(w=>w.GetComponent<RoadOfTheOldKing.Combat.Damageable>().IsAlive)&&reward.IsAvailable&&!reward.IsCollected,"Wolves reset; pending shard preserved");
             move((Vector2)reward.transform.position+Vector2.down*.8f);check(interaction.TryInteract()&&reward.IsCollected&&session.Progress.sunShards==1,"Real F interaction collects one shard");
             check(!reward.TryCollect(player)&&store.Load().sunShards==1,"Duplicate reward rejected and saved");

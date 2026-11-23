@@ -8,6 +8,7 @@ namespace RoadOfTheOldKing.World
 {
     // The sluice's verb in a single step: lodge the owned throw in a receiver, then route that same
     // axe's Recall through a release. The Hayfields hay-loading beam uses it to fall across the breach.
+    // With releaseWhenRecalled, recalling the axe out of the receiver is the whole step: the Tutorial's seal gate.
     // The outcome is saved before it plays; a load or rest settles it instantly.
     [DisallowMultipleComponent]
     public sealed class RecallRelease : MonoBehaviour, IProgressParticipant, IResetOnRest
@@ -18,6 +19,8 @@ namespace RoadOfTheOldKing.World
         [SerializeField] private Transform movingPart;
         [SerializeField] private float releasedAngle = -90f;
         [SerializeField, Min(.05f)] private float releaseSeconds = .5f;
+        [Tooltip("Release as soon as the lodged axe is recalled out of the receiver; no separate release part.")]
+        [SerializeField] private bool releaseWhenRecalled;
         private AxeWeapon attempt;
         private uint attemptFlight;
         private Quaternion restRotation;
@@ -29,6 +32,7 @@ namespace RoadOfTheOldKing.World
         public float ReleaseProgress => IsReleased ? release : 0f;
         public bool IsArmed => ValidAttempt() && attempt.State == AxeState.Stuck;
         public string ProgressId => progressId;
+        public event System.Action Released;
 
         private bool ValidAttempt() => attempt != null && attempt.isActiveAndEnabled &&
             attempt.Owner != null && attempt.Owner.isActiveAndEnabled && attempt.Owner.Weapon == attempt &&
@@ -51,6 +55,12 @@ namespace RoadOfTheOldKing.World
             if (IsReleased || !isActiveAndEnabled || string.IsNullOrWhiteSpace(progressId) ||
                 hit.Kind != AttackKind.Recall || !ValidAttempt() ||
                 hit.Source != attempt.Owner.gameObject || attempt.State != AxeState.Returning) return false;
+            Release();
+            return true;
+        }
+
+        private void Release()
+        {
             attempt = null;
             IsReleased = true;
             release = 0f;
@@ -59,7 +69,7 @@ namespace RoadOfTheOldKing.World
                 GameSession.Instance.Progress.Complete(progressId);
                 GameSession.Instance.SaveProgress();
             }
-            return true;
+            Released?.Invoke();
         }
 
         private void Cache()
@@ -72,6 +82,8 @@ namespace RoadOfTheOldKing.World
         private void FixedUpdate()
         {
             if (attempt != null && !ValidAttempt()) attempt = null;
+            if (releaseWhenRecalled && !IsReleased && attempt != null && attempt.State == AxeState.Returning &&
+                !string.IsNullOrWhiteSpace(progressId)) Release();
             if (!IsMoving) return;
             release = Mathf.MoveTowards(release, 1f, Time.fixedDeltaTime / releaseSeconds);
             Present();

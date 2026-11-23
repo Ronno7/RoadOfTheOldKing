@@ -158,6 +158,7 @@ namespace RoadOfTheOldKing.Weapons
             if (useAnimatedGrip && weapon.IsAway && blade != null && originalSprite != null)
             {
                 DrawDetached();
+                SortAboveLodgedTarget();
                 return;
             }
 
@@ -232,6 +233,38 @@ namespace RoadOfTheOldKing.Weapons
                 trail.time = originalTrailTime; trail.widthMultiplier = originalTrailWidth;
             }
             wasFlying = wasReturning = false;
+        }
+
+        // An axe lodged in a sprite (the Recall stone, an enemy) draws just above it, so its buried blade
+        // never shows the sprite cutting through it (user, 22 Nov: "obvious clipping" at the stone).
+        private Transform sortedTarget;
+        private SpriteRenderer[] sortedTargetRenderers;
+
+        private void SortAboveLodgedTarget()
+        {
+            var target = weapon.StuckTarget;
+            if (target == null) { sortedTarget = null; return; }
+            if (target != sortedTarget)
+            {
+                sortedTarget = target;
+                var owner = target.GetComponentInParent<RoadOfTheOldKing.Combat.IHitReceiver>() as Component;
+                sortedTargetRenderers = (owner != null ? owner.transform : target).GetComponentsInChildren<SpriteRenderer>();
+            }
+            int layer = SortingLayer.GetLayerValueFromID(blade.sortingLayerID), order = blade.sortingOrder;
+            var drawn = blade.bounds;
+            foreach (var r in sortedTargetRenderers)
+            {
+                // Only sprites the drawn axe overlaps (a tree's canopy high above its trunk stays on top).
+                if (r == null || !r.enabled || r == blade) continue;
+                var b = r.bounds;
+                if (drawn.max.x < b.min.x || drawn.min.x > b.max.x || drawn.max.y < b.min.y || drawn.min.y > b.max.y) continue;
+                int value = SortingLayer.GetLayerValueFromID(r.sortingLayerID);
+                if (value < layer || (value == layer && r.sortingOrder < order)) continue;
+                layer = value;
+                blade.sortingLayerID = r.sortingLayerID;
+                order = r.sortingOrder + 1;
+            }
+            blade.sortingOrder = order;
         }
 
         private void DrawDetached()

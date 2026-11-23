@@ -81,6 +81,8 @@ namespace RoadOfTheOldKing.Weapons
         }
         public float CleaveRadius => settings.cleaveRadius + addedCleaveRadius;
         public bool IsAway => State == AxeState.Flying || State == AxeState.Stuck || State == AxeState.Returning;
+        // What a lodged axe is embedded in (a collider's transform), for drawing; null otherwise.
+        public Transform StuckTarget => State == AxeState.Stuck ? stuckTarget : null;
         public bool IsAttacking => throwAction.IsActive || State == AxeState.LightChop || State == AxeState.Charging || State == AxeState.Cleaving || IsCatching;
         // Just caught a recalled axe: no attack or dodge until this ends.
         public bool IsCatching => State == AxeState.Held && catchRecoveryRemaining > 0f;
@@ -432,9 +434,28 @@ namespace RoadOfTheOldKing.Weapons
 
         private int Exhausted(int damage) => exhaustedAttack ? Mathf.Max(1, Mathf.RoundToInt(damage * settings.exhaustedDamageMultiplier)) : damage;
 
+        // Things that bend an outward throw toward a point: the Recall stone draws the axe in before Recall
+        // exists, so a throw at it can never stick out of reach (user, 22 Nov).
+        private static readonly System.Collections.Generic.List<IAxeFlightPull> flightPulls =
+            new System.Collections.Generic.List<IAxeFlightPull>();
+        public static void AddFlightPull(IAxeFlightPull pull) { if (pull != null && !flightPulls.Contains(pull)) flightPulls.Add(pull); }
+        public static void RemoveFlightPull(IAxeFlightPull pull) => flightPulls.Remove(pull);
+
         private void FlyOut(float deltaTime)
         {
             Vector2 origin = transform.position;
+            for (int i = 0; i < flightPulls.Count; i++)
+            {
+                if (!flightPulls[i].TryPull(this, origin, out Vector2 target)) continue;
+                Vector2 toward = target - origin;
+                if (toward.sqrMagnitude > .0001f)
+                {
+                    attackDirection = toward.normalized;
+                    // Enough range left to arrive, however far the throw has already flown.
+                    travelled = Mathf.Min(travelled, settings.throwRange - toward.magnitude - 1f);
+                }
+                break;
+            }
             float distance = Mathf.Min(settings.throwSpeed * deltaTime, settings.throwRange - travelled);
             Vector2 destination = origin + attackDirection * distance;
             var hit = new CombatHit(owner.gameObject, AttackKind.Throw, Exhausted(settings.throwDamage), attackDirection, settings.throwKnockback, 0.15f);

@@ -4,10 +4,16 @@ using UnityEngine;
 
 namespace RoadOfTheOldKing.Tutorial
 {
-    // The courtyard's north seal is derived from the existing Recall unlock; no second save flag.
+    // The courtyard's north seal. With a seal release, Recall's first use opens it: throw the axe into the gate,
+    // then Recall it out (user, 22 Nov: new players didn't notice their new ability). Without one, it opens with
+    // the Recall unlock as before.
     public sealed class RecallSealGate : MonoBehaviour, IProgressParticipant
     {
         [SerializeField] private RecallAwakeningStone stone;
+        [Tooltip("Opens the gate when released; saves its own progress id.")]
+        [SerializeField] private RoadOfTheOldKing.World.RecallRelease seal;
+        [Tooltip("Saves from before the seal release that are already past the gate open it (a later Tutorial step).")]
+        [SerializeField] private string pastGateMilestone = "tutorial/step/pack";
         [Tooltip("The gate: its art and collision sink and fade together.")]
         [SerializeField] private GameObject barrier;
         [SerializeField] private SpriteRenderer groundShadow;
@@ -23,15 +29,22 @@ namespace RoadOfTheOldKing.Tutorial
             closedPosition = barrier.transform.localPosition;
             art = barrier.GetComponentsInChildren<SpriteRenderer>(true);
         }
-        private void OnEnable() { if (stone != null) stone.Awakened += Open; }
+        private void OnEnable()
+        {
+            if (seal != null) seal.Released += Open;
+            else if (stone != null) stone.Awakened += Open;
+        }
         private void Start()
         {
-            if (GameSession.Instance != null && GameSession.Instance.Progress.recallUnlocked)
+            if (GameSession.Instance != null && Opened(GameSession.Instance.Progress))
                 SetOpen();
         }
+        private bool Opened(ProgressState state) => seal == null ? state.recallUnlocked :
+            state.Has(seal.ProgressId) || (state.recallUnlocked && !string.IsNullOrEmpty(pastGateMilestone) && state.Has(pastGateMilestone));
         private void OnDisable()
         {
-            if (stone != null) stone.Awakened -= Open;
+            if (seal != null) seal.Released -= Open;
+            else if (stone != null) stone.Awakened -= Open;
             if (opening != null) { StopCoroutine(opening); opening = null; SetOpen(); }
         }
         private void Open() { if (!IsOpen && opening == null) opening = StartCoroutine(Lower()); }
@@ -56,6 +69,6 @@ namespace RoadOfTheOldKing.Tutorial
             if (groundShadow != null) groundShadow.enabled = false;
         }
         public void CaptureProgress(ProgressState state) { }
-        public void RestoreProgress(ProgressState state) { if (state.recallUnlocked) SetOpen(); }
+        public void RestoreProgress(ProgressState state) { if (Opened(state)) SetOpen(); }
     }
 }
