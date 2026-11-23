@@ -11,7 +11,9 @@ namespace RoadOfTheOldKing.World
     {
         [SerializeField] private string heading = "THE ROAD GOES ON";
         [SerializeField, TextArea(3, 10)] private string text;
-        [Tooltip("Read instead in Steam demo builds: the Windows Steam build profile defines ROTOK_STEAM_DEMO.")]
+        [Tooltip("Read instead in public demo builds (ROTOK_DEMO: the Windows Itch build profile).")]
+        [SerializeField, TextArea(3, 10)] private string demoText;
+        [Tooltip("Read instead in Steam demo builds (ROTOK_STEAM_DEMO: the Windows Steam build profile).")]
         [SerializeField, TextArea(3, 10)] private string steamDemoText;
         [SerializeField] private string requiredMilestone;
         [SerializeField] private string prompt = "Look down the road";
@@ -22,7 +24,9 @@ namespace RoadOfTheOldKing.World
         protected override float PickupDistance => reach;
 
 #if ROTOK_STEAM_DEMO
-        private string Text => string.IsNullOrWhiteSpace(steamDemoText) ? text : steamDemoText;
+        private string Text => !string.IsNullOrWhiteSpace(steamDemoText) ? steamDemoText : !string.IsNullOrWhiteSpace(demoText) ? demoText : text;
+#elif ROTOK_DEMO
+        private string Text => string.IsNullOrWhiteSpace(demoText) ? text : demoText;
 #else
         private string Text => text;
 #endif
