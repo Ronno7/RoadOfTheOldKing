@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5710097bc0b364148b511c299628860b, type: 3}
+  m_Name: DustKick
+  m_EditorClassIdentifier: RoadOfTheOldKing::RoadOfTheOldKing.World.SpriteBurst
+  frames:
+  - {fileID: 21300000, guid: f89a991f272ce6740bdf79fc001fc1dc, type: 3}
+  - {fileID: 21300000, guid: 5ca20de1da3b3e545b108b58b241ec42, type: 3}
+  - {fileID: 21300000, guid: 02192a43f49bcb74cb54d98c036651be, type: 3}
+  - {fileID: 21300000, guid: 29abd5e609fa6c84ca7755dabfb72aea, type: 3}
+  - {fileID: 21300000, guid: 0f45751c6be2a5f4291643edfe7d1423, type: 3}
+  - {fileID: 21300000, guid: 3763bd59f4e14594aa674b053d9937dc, type: 3}
+  framesPerSecond: 14
+  sortingLayer: Player
+  sortingOrder: 0

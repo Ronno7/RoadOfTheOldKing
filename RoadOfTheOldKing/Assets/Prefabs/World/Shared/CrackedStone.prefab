@@ -117,6 +117,7 @@ GameObject:
   - component: {fileID: 2604043166437233818}
   - component: {fileID: 7876312954112923009}
   - component: {fileID: 4951549804842920212}
+  - component: {fileID: 3085464710084345654}
   m_Layer: 0
   m_Name: CrackedStone
   m_TagString: Untagged
@@ -213,3 +214,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.World.SurfaceTag
   material: 2
+  onlyWhenRisingAbove: 0
+--- !u!114 &3085464710084345654
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4693480978675542281}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e52db797de72f6458f4209294cc1141, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RoadOfTheOldKing::RoadOfTheOldKing.World.BreakBurst
+  burst: {fileID: 11400000, guid: 6cd2bbe4d574adc48a607fdb33aa36e1, type: 2}
+  offset: {x: 0, y: 0.45}

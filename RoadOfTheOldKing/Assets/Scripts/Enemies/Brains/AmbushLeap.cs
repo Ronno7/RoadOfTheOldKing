@@ -24,6 +24,8 @@ namespace RoadOfTheOldKing.Enemies
         [SerializeField, Min(0f)] private float biteStagger = .15f;
         [Tooltip("It lands this far short of the player's feet.")]
         [SerializeField, Min(0f)] private float landShort = .45f;
+        [Tooltip("Dust kicked up where it lands (PixelLab VFX, user 23 Nov).")]
+        [SerializeField] private RoadOfTheOldKing.World.SpriteBurst landingDust;
         [Tooltip("Peak height of the leap, in world units. Its length is the brain's wake duration.")]
         [SerializeField, Min(0f)] private float arcHeight = .7f;
         [Tooltip("Seconds the cover shakes as it springs.")]
@@ -155,6 +157,7 @@ namespace RoadOfTheOldKing.Enemies
         private void Land()
         {
             EndLeap();
+            if (landingDust != null) landingDust.Play(rb.position);
             if (player == null || !player.IsAlive || health == null || !health.IsAlive) return;
             Vector2 toPlayer = (Vector2)player.transform.position - rb.position;
             if (toPlayer.sqrMagnitude > biteReach * biteReach) return;
