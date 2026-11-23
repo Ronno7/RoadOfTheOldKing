@@ -146,6 +146,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5d4da9ce03b5880a37a447244f0a788, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  slowestTilt: 0.2
+  dodgeTapTime: 0.25
 --- !u!114 &1006
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -203,6 +205,10 @@ MonoBehaviour:
   ownedAxePrefab: {fileID: 7539517240057443122, guid: 96841da30eeab44438912f0f4f453d59, type: 3}
   lightInputBuffer: 0.25
   heavyArmorCharge: 0.5
+  meleeAssistAngle: 40
+  meleeAssistRange: 2.6
+  throwAssistAngle: 15
+  throwAssistRange: 6
 --- !u!114 &4217139744019354931
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -333,8 +339,6 @@ MonoBehaviour:
   walkCycleLength: 2
   runCycleLength: 3
   diagonalReleaseGrace: 0.1
-  northWalkLift: 0000000000000000010000000000000000000000000000000100000000000000
-  backDiagonalWalkLift: 0100000001000000000000000000000000000000000000000000000000000000
 --- !u!114 &518245939509802014
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -358,22 +362,22 @@ MonoBehaviour:
     flipX: 0
     inFront: 1
     coverGrip: 1
-  - grip: {x: 8, y: 15}
+  - grip: {x: 8, y: 11}
     flipX: 0
     inFront: 0
-    coverGrip: 0
-  - grip: {x: 8, y: 15}
+    coverGrip: 1
+  - grip: {x: 8, y: 11}
     flipX: 0
     inFront: 0
-    coverGrip: 0
+    coverGrip: 1
   - grip: {x: 4, y: 15}
     flipX: 0
     inFront: 0
     coverGrip: 0
-  - grip: {x: -8, y: 15}
+  - grip: {x: -8, y: 11}
     flipX: 1
     inFront: 0
-    coverGrip: 0
+    coverGrip: 1
   - grip: {x: -8, y: 11}
     flipX: 1
     inFront: 1
@@ -612,6 +616,7 @@ MonoBehaviour:
   panelSettings: {fileID: 11400000, guid: e8d13b02f4a53d441b064a4b1cf6e2bf, type: 2}
   charactersPerSecond: 48
   closeUpSize: 5
+  heroOnScreen: {x: 0.5, y: 0.5}
 --- !u!114 &5315980139413701495
 MonoBehaviour:
   m_ObjectHideFlags: 0

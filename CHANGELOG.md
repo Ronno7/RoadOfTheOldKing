@@ -14,6 +14,7 @@
 - A throw at the Recall stone can no longer stick out of reach.
 - An axe lodged in something no longer draws behind it.
 - The carried axe bobs in step when walking away from the camera.
+- The hand on the carried axe stays on the cloak while walking, and now shows from behind too.
 
 ## 0.5 — Full production
 

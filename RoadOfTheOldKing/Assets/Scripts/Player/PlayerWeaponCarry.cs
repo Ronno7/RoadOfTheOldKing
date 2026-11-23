@@ -4,10 +4,10 @@ using UnityEngine;
 namespace RoadOfTheOldKing.Player
 {
     // Out-of-combat carry: the weapon rests upright at the hero's right side, butt down, on the edge
-    // of his silhouette, mirrored per facing and drawn in front of or behind the body. On the camera
-    // side a small fold of his cloak wraps the grip, so a hand hidden inside it appears to hold the
-    // haft. The hold rises and falls with the body's walk frames. Presentation only; the weapon keeps
-    // ownership, state and collision.
+    // of his silhouette, mirrored per facing and drawn in front of or behind the body. Wherever his right
+    // hand can be seen, a small fold of his cloak wraps the grip, drawn over the body, so a hand hidden
+    // inside it appears to hold the haft. The hold rises and falls with the body's walk frames.
+    // Presentation only; the weapon keeps ownership, state and collision.
     [DisallowMultipleComponent, RequireComponent(typeof(PlayerSpriteAnimator))]
     [DefaultExecutionOrder(210)]
     public sealed class PlayerWeaponCarry : MonoBehaviour
@@ -20,7 +20,7 @@ namespace RoadOfTheOldKing.Player
             public bool flipX;
             [Tooltip("Draw over the body: his right side faces the camera.")]
             public bool inFront;
-            [Tooltip("Wrap the grip in a fold of his cloak.")]
+            [Tooltip("Wrap the grip in a fold of his cloak, drawn over the body.")]
             public bool coverGrip;
         }
 
@@ -83,7 +83,7 @@ namespace RoadOfTheOldKing.Player
             int octant = animator.Octant;
             SplitInnerBlade(weaponSprite, hold.inFront && tuckInnerBlade != null && octant < tuckInnerBlade.Length && tuckInnerBlade[octant]);
 
-            bool folded = !resting && hold.inFront && hold.coverGrip && gripFold != null;
+            bool folded = !resting && hold.coverGrip && gripFold != null;
             fold.enabled = folded;
             if (folded)
             {
@@ -175,19 +175,20 @@ namespace RoadOfTheOldKing.Player
             RestoreWeapon();
         }
 
-        // Camera-side holds sit 3 px low (a depth cue) so the grip meets hand height (11 px): on the
-        // silhouette edge, except east, which runs in line with his back half. Far-side holds stand
-        // 1 px high behind him; west lines up with his body so it masks the haft, and north shows a
-        // strip of handle along his right side with the head over his shoulder. East and west mirror each other. Blades point away from the
-        // face (backward in side views).
+        // Every hold with a hand grips at hand height (11 px), so the hand sits at one place on the handle in
+        // every facing (user, 23 Nov): on the silhouette edge, except east, which runs in line with his back half.
+        // North, north-west and south-west draw the axe behind him with the hand over his cloak; north shows a
+        // strip of handle along his right side with the head over his shoulder. West, where his body hides the
+        // hand, stands 4 px higher so the head clears his hood. East and west mirror each other. Blades point
+        // away from the face (backward in side views).
         private static Hold[] DefaultHolds() => new[]
         {
             new Hold { grip = new Vector2Int(-4, 11), flipX = true, inFront = true, coverGrip = true },   // E
             new Hold { grip = new Vector2Int(7, 11), flipX = false, inFront = true, coverGrip = true },   // NE
-            new Hold { grip = new Vector2Int(8, 15), flipX = false, inFront = false, coverGrip = false }, // N
-            new Hold { grip = new Vector2Int(8, 15), flipX = false, inFront = false, coverGrip = false }, // NW
+            new Hold { grip = new Vector2Int(8, 11), flipX = false, inFront = false, coverGrip = true },  // N
+            new Hold { grip = new Vector2Int(8, 11), flipX = false, inFront = false, coverGrip = true },  // NW
             new Hold { grip = new Vector2Int(4, 15), flipX = false, inFront = false, coverGrip = false }, // W
-            new Hold { grip = new Vector2Int(-8, 15), flipX = true, inFront = false, coverGrip = false }, // SW
+            new Hold { grip = new Vector2Int(-8, 11), flipX = true, inFront = false, coverGrip = true },  // SW
             new Hold { grip = new Vector2Int(-8, 11), flipX = true, inFront = true, coverGrip = true },   // S
             new Hold { grip = new Vector2Int(-8, 11), flipX = true, inFront = true, coverGrip = true },   // SE
         };
