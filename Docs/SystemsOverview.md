@@ -253,13 +253,13 @@ Level construction is in [World and tilemaps](World.md).
 | Announcements | `HudNotifications`, `GameHud` | Place names and events queue, one at a time in one spot; regions largest. |
 | Pots and chests | `Breakable`, `CoinSource`, `RewardChest` | Each result saves once, including empty rolls. |
 | Hold-up | `RewardHoldUp` | A taken reward rises over the hero for about a second while the world stops. It is already saved. |
-| Sound channels | `AudioChannels`, `Resources/Audio/Mixer` | Every sound plays through a Music, Ambience or Effects group; the settings sliders set each group's volume. |
+| Sound channels | `AudioChannels`, `Resources/Audio/Mixer` | Every sound plays through a Music, Ambience or Effects group. Settings show Master and Effects; the Music and Ambience sliders return with music and ambience. |
 | Material feedback | `SurfaceTag`, `AxeSurfaceFeedback`, `ElevationLevels` | A tag names what an object is made of; the axe's first plain strike per attack plays that material's sound and flecks. Untagged objects stay silent; cliffs answer only when the rock rises above the striker. |
 | Trader | `Trader`, `ShopOffer`, `CollectionMenu` | Talk, then trade. A purchase saves coins, item and stock together. |
 | Rope | `RopeAnchor`, `RopeRoute` | A bought kit secures a saved two-way route. |
 | Inscriptions | `ForgeInscription`, `InscriptionReader` | Reading saves the knowledge; the carving stays. |
 | End card | `EndCard`, `InscriptionReader` | A rereadable card where a build stops, offered after a milestone. |
-| Recall puzzles | `RecallAwakeningStone`, `RecallSluice`, `RecallRelease` | Bind a lodged axe and its return hits to one flight. |
+| Recall puzzles | `RecallAwakeningStone`, `RecallSealGate`, `RecallSluice`, `RecallRelease` | Bind a lodged axe and its return to one flight. Before Recall exists, the stone draws a throw in (`IAxeFlightPull`); the Tutorial gate opens when the axe is recalled out of it. |
 | Sluice crank | `SluiceCrank` | One carried part, saved with the socket it sits in: place, turn, take out. |
 | Prop depth | `WorldPropDepth` | Low props and edge bushes draw in front of or behind the hero by their ground line. |
 | Gates and bridges | `PermanentPassage` | One-time. Collision holds until the animation ends and restores on load. |

@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+**Changed**
+- The Recall stone wakes the moment your axe strikes it.
+- The Tutorial's sealed gate now opens with your first Recall.
+- Music and ambience sliders are hidden until the game has them.
+
+**Fixed**
+- A throw at the Recall stone can no longer stick out of reach.
+- An axe lodged in something no longer draws behind it.
+- The carried axe bobs in step when walking away from the camera.
+
 ## 0.5 — Full production
 
 ### 0.5.1-dev.1 — 2026-11-22 · Bonfires and controllers
