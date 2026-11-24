@@ -92,7 +92,7 @@ Prompts follow whichever device was used last, with Xbox or PlayStation button n
 | Alt (hold) | LB (hold) + right stick | Free look |
 | Wheel | D-pad up/down | Zoom |
 | Esc | Start | Pause |
-| F2 / F3 / F4 | | Hide HUD / debug panel / developer tools (playtest builds) |
+| F2 / F3 / F4 | | Hide HUD / debug panel (every build) / developer tools (playtest builds only) |
 
 ### Movement
 
@@ -167,6 +167,7 @@ stateDiagram-v2
 Values live in `Assets/Settings/Weapons/AxeSettings.asset`.
 
 - **What you see is what hits.** Damage, the ground footprint and the weapon pose all read one action clock: windup, active, recovery.
+- **Throw aim.** `ThrowAimGuide` draws chalk dashes, one art pixel wide, from the flight preview to where the axe will stop, with an X where it meets something. A brighter pulse runs along them at the throw's speed.
 - **Hit pause.** A light hit pauses the axe's action clock for 0.045 s (1.8× on the finisher). When the player takes a hit or an enemy dies, impact feedback can also briefly freeze the whole simulation.
 - **Reactions.** `HitReaction` turns accepted hits into stagger and knockback. Enemies can have poise, which breaks only past a threshold; thrown and Recall hits count half.
 

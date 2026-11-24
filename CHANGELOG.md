@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+**Added**
+- F2 hides the HUD for screenshots, and F3 shows performance stats.
+
+**Changed**
+- Throw aiming shows pulsing chalk dashes and marks where the axe will hit.
+- The Comfort settings are now called Accessibility.
+
 ## 0.5 — Full production
 
 ### 0.5.1 — 2026-11-23 · Signs, depth and settings

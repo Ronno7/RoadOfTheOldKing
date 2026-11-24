@@ -371,10 +371,10 @@ public sealed class ThrowAimTests
 
             reset(); var wall=new GameObject("Throw verification wall"); created.Add(wall); wall.transform.position=new Vector3(100.6f,100,0);
             wall.AddComponent<BoxCollider2D>().size=new Vector2(.1f,1f); Physics2D.SyncTransforms(); press(); tick(.08f); viewTick.Invoke(view,null);
-            var arc=(LineRenderer)view.GetType().GetField("arc",flags).GetValue(view);
+            var guide=(RoadOfTheOldKing.Weapons.ThrowAimGuide)view.GetType().GetField("guide",flags).GetValue(view);
             // Box2D's contact tolerance can shift the cast by a few millimetres.
-            check(weapon.AimDistance>.35f && weapon.AimDistance<.40f && arc.enabled && arc.positionCount==2 &&
-                near(Vector3.Distance(arc.GetPosition(0),arc.GetPosition(1)),weapon.AimDistance), "Aim guide uses flight radius and stops before nearby wall");
+            check(weapon.AimDistance>.35f && weapon.AimDistance<.40f && guide!=null && guide.Showing && guide.Blocked &&
+                near(guide.Reach,weapon.AimDistance), "Aim guide uses flight radius and marks the nearby wall it stops at");
             release(); tick(.5f);
             check(weapon.State==RoadOfTheOldKing.Weapons.AxeState.Stuck && weapon.transform.position.x<100.6f, "Delayed launch cannot skip a wall next to the player");
             wall.SetActive(false); reset();

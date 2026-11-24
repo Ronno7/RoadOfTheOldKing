@@ -83,7 +83,8 @@ namespace RoadOfTheOldKing.UI
                     v => v > FrameSettings.MaxLimit ? "Unlimited" : v.ToString(), () => !FrameSettings.VSync),
                 new OptionList.Choice("Atmosphere", "Light, haze and weather.", new[] { "Restrained", "Cinematic" },
                     () => AtmosphereSettings.Cinematic ? 1 : 0, i => AtmosphereSettings.Cinematic = i == 1),
-                new OptionList.Header("COMFORT"),
+                // Accessibility, not "Comfort" (user, 18 Nov: "seperate accessability settings instead of "Comfort"").
+                new OptionList.Header("ACCESSIBILITY"),
                 new OptionList.Slider("Screen flashes", "Hit flashes and the low health pulse.", () => FeedbackSettings.FlashScale, FeedbackSettings.SetFlash, 10, Percent),
                 new OptionList.Slider("Screen shake", "", () => FeedbackSettings.ShakeScale, FeedbackSettings.SetShake, 10, Percent),
                 new OptionList.Slider("Vibration", "Controller rumble.", () => RoadOfTheOldKing.Input.Rumble.Scale, RoadOfTheOldKing.Input.Rumble.SetScale, 10, Percent),

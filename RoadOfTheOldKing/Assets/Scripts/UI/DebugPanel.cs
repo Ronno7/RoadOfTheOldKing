@@ -13,8 +13,9 @@ using UnityEngine.UIElements;
 
 namespace RoadOfTheOldKing.UI
 {
-    // F3 developer overlay: performance, player, world and save state. Installs itself in the
-    // Editor, development builds and tester builds; reads, never writes, gameplay.
+    // F3 overlay: performance, player, world and save state. Installs itself in every build (user, 23 Nov: "provide
+    // the F2 and F3 functions for all builds going forward, then only internal playtesters get access to F4"); reads,
+    // never writes, gameplay.
     public sealed class DebugPanel : MonoBehaviour
     {
         private const Key ToggleKey = Key.F3;
@@ -42,9 +43,6 @@ namespace RoadOfTheOldKing.UI
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void Install()
         {
-#if !ROTOK_DEV_TOOLS
-            if (!Application.isEditor && !Debug.isDebugBuild) return;
-#endif
             var host = new GameObject("Debug Panel (F3)");
             DontDestroyOnLoad(host);
             host.AddComponent<DebugPanel>();

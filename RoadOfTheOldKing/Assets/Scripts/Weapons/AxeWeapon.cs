@@ -96,6 +96,13 @@ namespace RoadOfTheOldKing.Weapons
         public Vector2 ActionFacing => CanCancelThrowAim || State == AxeState.Charging ? AimDirection : attackDirection;
         public float AimDistance => hits == null || owner == null ? 0f : hits.PreviewFlightDistance(
             owner.transform.position, AimDirection, settings.throwRange, settings.flightRadius);
+        // As AimDistance, plus the first thing the throw would meet (null at full range).
+        public float PreviewAim(out Collider2D first)
+        {
+            first = null;
+            return hits == null || owner == null ? 0f : hits.PreviewFlight(
+                owner.transform.position, AimDirection, settings.throwRange, settings.flightRadius, out first);
+        }
         public float ActionMovementScale => IsThrowing ? throwAction.MovementScale
             : State == AxeState.Charging ? Mathf.Lerp(settings.chargeStartMovementScale, settings.chargeFullMovementScale, Charge01)
             : State == AxeState.LightChop ? Mathf.Max(settings.lightMovementScale, Mathf.SmoothStep(0f, 1f,

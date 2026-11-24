@@ -355,12 +355,10 @@ namespace RoadOfTheOldKing.UI
             return Report(true, value ? "Showing collision: red solid, cyan bodies, yellow triggers, white what you're touching." : "Collision hidden.");
         }
         // Presentation only, so it survives scene loads and Reset, unlike the gameplay overrides.
-        public bool HudHidden => hudHider != null && hudHider.enabled;
-        private DevHudHider hudHider;
+        public bool HudHidden => HudHider.Hidden;
         public bool SetHudHidden(bool value)
         {
-            if (value && hudHider == null) hudHider = gameObject.AddComponent<DevHudHider>();
-            if (hudHider != null) hudHider.enabled = value;
+            HudHider.SetHidden(value);
             return Report(true, value ? "HUD hidden for captures; menus and dialogue still show. F2 brings it back." : "HUD shown.");
         }
         public bool ResetOverrides()

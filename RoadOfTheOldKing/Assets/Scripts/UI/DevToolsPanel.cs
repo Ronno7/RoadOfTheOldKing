@@ -119,7 +119,7 @@ namespace RoadOfTheOldKing.UI
             }
             if (!IsOpen && keyboard.f6Key.wasPressedThisFrame) { OpenNote(); return; }
 #endif
-            if (keyboard.f2Key.wasPressedThisFrame) Run(() => commands.SetHudHidden(!commands.HudHidden));
+            // F2 belongs to HudHider, in every build.
             if (keyboard.f4Key.wasPressedThisFrame) { if (IsOpen) Close(); else Open(); }
             else if (IsOpen && keyboard.escapeKey.wasPressedThisFrame) Close();
         }

@@ -40,6 +40,7 @@ namespace RoadOfTheOldKing.Weapons
         private AxeWeapon weapon;
         private Color originalBlade;
         private Sprite originalSprite;
+        private ThrowAimGuide guide;
         private Vector3 originalBladeScale;
         private float bladeForwardExtent = 0.45f;
         private bool wasFlying;
@@ -143,6 +144,8 @@ namespace RoadOfTheOldKing.Weapons
                 arc.enabled = false;
             if (weapon.ThrowPhase == ThrowPhase.Aim && weapon.Owner != null)
                 DrawThrowAim();
+            else if (guide != null)
+                guide.Hide();
             if (blade != null)
             {
                 blade.color = Color.Lerp(originalBlade, new Color(1f, 0.85f, 0.25f), weapon.Charge01);
@@ -223,8 +226,14 @@ namespace RoadOfTheOldKing.Weapons
             model.SetPositionAndRotation(transform.position + offset, Quaternion.Euler(0f, 0f, angle + spriteAngleOffset));
         }
 
+        private void OnDestroy()
+        {
+            if (guide != null) Destroy(guide.gameObject);
+        }
+
         private void OnDisable()
         {
+            if (guide != null) guide.Hide();
             if (blade != null) { blade.sharedMaterial = originalMaterial; blade.color = originalBlade; }
             if (trail != null)
             {
@@ -328,21 +337,12 @@ namespace RoadOfTheOldKing.Weapons
             return poseAngle;
         }
 
+        // Chalk dashes to where the axe will stop, pulsing out at its flight speed (ThrowAimGuide).
         private void DrawThrowAim()
         {
-            if (arc == null) return;
-            Vector3 origin = weapon.Owner.transform.position;
-            Vector3 direction = weapon.AimDirection;
-            float distance = weapon.AimDistance;
-            if (distance < 0.01f) return;
-            arc.enabled = true;
-            arc.widthCurve = ringWidth;
-            arc.widthMultiplier = 0.025f;
-            arc.startColor = new Color(1f, 0.94f, 0.74f, 0.1f);
-            arc.endColor = new Color(1f, 0.94f, 0.74f, 0.5f);
-            arc.positionCount = 2;
-            arc.SetPosition(0, origin);
-            arc.SetPosition(1, origin + direction * distance);
+            if (guide == null) guide = ThrowAimGuide.Create(originalMaterial != null ? originalMaterial : blade != null ? blade.sharedMaterial : null);
+            float reach = weapon.PreviewAim(out var first);
+            guide.Draw(weapon.Owner.transform.position, weapon.AimDirection, reach, first != null, weapon.Settings.throwSpeed);
         }
 
         private void DrawArc(Vector3 center, float radius, float startAngle, float sweep, Color color)

@@ -39,11 +39,16 @@ namespace RoadOfTheOldKing.Weapons
         public void Exclude(IHitReceiver receiver) { if (receiver != null) hitTargets.Add(receiver); }
 
         // The aim guide uses the same swept radius and exclusions as flight, without hits.
-        public float PreviewFlightDistance(Vector2 origin, Vector2 direction, float distance, float radius)
+        public float PreviewFlightDistance(Vector2 origin, Vector2 direction, float distance, float radius) =>
+            PreviewFlight(origin, direction, distance, radius, out _);
+
+        // Also reports the first thing in the way (null when the throw runs its full range).
+        public float PreviewFlight(Vector2 origin, Vector2 direction, float distance, float radius, out Collider2D first)
         {
+            first = null;
             Physics2D.CircleCast(origin, radius, direction, filter, casts, distance);
             foreach (var cast in casts)
-                if (IsCandidate(cast.collider)) distance = Mathf.Min(distance, cast.distance);
+                if (IsCandidate(cast.collider) && cast.distance < distance) { distance = cast.distance; first = cast.collider; }
             return distance;
         }
 

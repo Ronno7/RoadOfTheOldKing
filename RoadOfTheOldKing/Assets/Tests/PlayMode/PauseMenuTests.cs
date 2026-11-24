@@ -228,7 +228,7 @@ public sealed class PauseMenuTests
              var options=((RoadOfTheOldKing.UI.PauseMenuView)menu.GetType().GetField("view",flags).GetValue(menu)).Options;
              Func<List<string>> rowLabels=()=>options.Rows.Where(r=>r.Selectable).Select(r=>r.Label).ToList();
              var expected=new[]{"Master","Effects","Window","V-Sync","Frame rate limit","Atmosphere","Screen flashes","Screen shake","Vibration","Vitals","Back"};
-             check(rowLabels().SequenceEqual(expected)&&options.Rows.Count(r=>!r.Selectable)==3,"Settings: sound, display and comfort groups ("+string.Join(" | ",rowLabels().ToArray())+")");
+             check(rowLabels().SequenceEqual(expected)&&options.Rows.Count(r=>!r.Selectable)==3,"Settings: sound, display and accessibility groups ("+string.Join(" | ",rowLabels().ToArray())+")");
              RoadOfTheOldKing.UI.SoundSettings.SetVolume(1f);RoadOfTheOldKing.UI.FeedbackSettings.SetFlash(1f);
              menu.Back();menu.Submit();
              check(options.SelectedRow!=null&&options.SelectedRow.Label=="Master","Settings opens on Master");
