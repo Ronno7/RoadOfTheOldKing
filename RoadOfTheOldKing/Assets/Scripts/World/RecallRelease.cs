@@ -82,8 +82,9 @@ namespace RoadOfTheOldKing.World
         private void FixedUpdate()
         {
             if (attempt != null && !ValidAttempt()) attempt = null;
+            // Only the player's own Recall: an automatic return after walking away doesn't teach it (review, 23 Nov).
             if (releaseWhenRecalled && !IsReleased && attempt != null && attempt.State == AxeState.Returning &&
-                !string.IsNullOrWhiteSpace(progressId)) Release();
+                attempt.PlayerRecalled && !string.IsNullOrWhiteSpace(progressId)) Release();
             if (!IsMoving) return;
             release = Mathf.MoveTowards(release, 1f, Time.fixedDeltaTime / releaseSeconds);
             Present();

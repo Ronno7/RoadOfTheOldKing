@@ -210,8 +210,10 @@ namespace RoadOfTheOldKing.Tutorial
                         flask != null && !flask.IsDrinking &&
                         (drinks >= 1 || player.Health.Health >= player.Health.MaxHealth || flask.Charges == 0);
                 case TutorialCondition.Looked: return looked || (progress != null && progress.Has(StepPrefix + "road"));
-                // A quick note (user, 15 Nov): zooming completes it, or it steps aside for the next lesson after 6 s.
-                case TutorialCondition.Zoomed: return zoomed || zoomHintSeconds >= 6f;
+                // A quick note (user, 15 Nov): zooming completes it, or it steps aside for the next lesson after 6 s. Without
+                // text of its own (since 23 Nov its words are on the zoom sign) there is nothing to read, so it never holds up
+                // the lessons after it (review, 23 Nov: the brush and axe cues waited for a later landmark).
+                case TutorialCondition.Zoomed: return zoomed || zoomHintSeconds >= 6f || string.IsNullOrEmpty(step.hint);
                 case TutorialCondition.ReachArea: return player.IsAlive && ((Vector2)player.transform.position - step.area).sqrMagnitude <= step.radius * step.radius;
                 default: return false;
             }

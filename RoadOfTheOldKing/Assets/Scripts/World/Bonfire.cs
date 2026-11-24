@@ -25,6 +25,7 @@ namespace RoadOfTheOldKing.World
         [SerializeField, Min(.1f)] private float heatInterval = 1.5f;
         private float heatClock;
         private BonfireSpriteView view;
+        private RoadOfTheOldKing.Player.PlayerControlLocks locks;
         public string Id => id;
         public string DisplayName => displayName;
         public int DisplayOrder => displayOrder;
@@ -40,13 +41,17 @@ namespace RoadOfTheOldKing.World
 
         private void Update() => Burn(Time.deltaTime);
 
-        // The first touch burns at once; staying in burns again every heatInterval.
+        // The first touch burns at once; staying in burns again every heatInterval. Not while the hero can't step off: a
+        // bonfire menu, dialogue or transition holds his controls (review, 23 Nov: resting in the flame with Travel or
+        // Upgrades open kept burning him), and the clock restarts, so leaving the menu still in the flame burns at once.
         private void Burn(float elapsed)
         {
             var session = GameSession.Instance;
             var player = session != null ? session.Player : null;
             if (view == null) view = GetComponent<BonfireSpriteView>();
+            if (player != null && (locks == null || locks.gameObject != player.gameObject)) locks = player.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>();
             if (player == null || !player.IsAlive || heatDamage <= 0 || !IsDiscovered || view == null ||
+                (locks != null && locks.IsLocked) ||
                 !view.HeatArea.Contains((Vector2)transform.InverseTransformPoint(player.transform.position)))
             {
                 heatClock = 0f;

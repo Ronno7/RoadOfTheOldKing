@@ -170,6 +170,15 @@ public sealed class ResumePersistenceTests
             for(int i=0;i<5;i++)retry();check(get("saveCalls")==saves,"Superseded write is never retried");
             set("failSaves",0);
 
+            // 5b. A checkpoint (lighting, resting, travel, a scene exit) replaces Continue's spot only once it's saved: a failed
+            // save keeps the last good spot (review, 23 Nov).
+            Action clearIfSaved=()=>type.GetMethod("ClearResumeIfSaved",flags).Invoke(game,null);
+            move(new Vector2(18,4));game.RecordResume();set("failProgressSaves",1);
+            type.GetMethod("CaptureAndSave",flags).Invoke(game,new object[]{"Bonfire lit."});clearIfSaved();
+            check(game.SaveFailed&&game.HasResumePoint&&stored()!=null&&stored().x==18,"A failed checkpoint save keeps the stored resume");
+            type.GetMethod("CaptureAndSave",flags).Invoke(game,new object[]{"Bonfire lit."});clearIfSaved();
+            check(!game.SaveFailed&&!game.HasResumePoint&&stored()==null,"A saved checkpoint clears it");
+
             // 6. Failure AFTER the cache changed: the real PlayerPrefsProgressStore over a split backend, which holds this
             // second key itself, so PlayerPrefs are never touched.
             var splitType=typeof(ResumeSplitPrefs);var split=Activator.CreateInstance(splitType);
@@ -219,9 +228,9 @@ public sealed class ResumePersistenceTests
 // In-memory store double: counts calls and fails the next N saves/clears of the resume record.
 public sealed class ResumeFailingStore : RoadOfTheOldKing.Progression.IProgressStore
 {
-    public int failSaves, failClears, saveCalls, clearCalls; public RoadOfTheOldKing.Progression.ResumePoint stored;
+    public int failSaves, failClears, failProgressSaves, saveCalls, clearCalls; public RoadOfTheOldKing.Progression.ResumePoint stored;
     public RoadOfTheOldKing.Progression.ProgressState Load() { return new RoadOfTheOldKing.Progression.ProgressState(); }
-    public void Save(RoadOfTheOldKing.Progression.ProgressState s) {}
+    public void Save(RoadOfTheOldKing.Progression.ProgressState s) { if (failProgressSaves > 0) { failProgressSaves--; throw new Exception("save failed"); } }
     public void Clear() { stored = null; }
     public RoadOfTheOldKing.Progression.ResumePoint LoadResume() { return stored; }
     public void SaveResume(RoadOfTheOldKing.Progression.ResumePoint r) { saveCalls++; if (failSaves > 0) { failSaves--; throw new Exception("write failed"); }

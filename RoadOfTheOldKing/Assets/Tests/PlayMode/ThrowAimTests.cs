@@ -137,6 +137,22 @@ public sealed class ThrowAimTests
             NUnit.Framework.Assert.AreEqual(Vector2.right, commit(true), "a throw doesn't bend 30°");
             toWolf = place(10f, 5f);
             NUnit.Framework.Assert.Less(Vector2.Angle(commit(true), toWolf), .5f, "a throw bends to a wolf 10° off the aim within its range");
+            // While the throw is aimed, the guide shows the assisted line the release will take (review, 23 Nov).
+            var intent = combat.GetType().GetField("throwIntent", flags);
+            object idle = intent.GetValue(combat);
+            intent.SetValue(combat, System.Enum.Parse(intent.FieldType, "Throw"));
+            var shown = (Vector2)combat.GetType().GetProperty("ShownAim", flags).GetValue(combat);
+            intent.SetValue(combat, idle);
+            NUnit.Framework.Assert.Less(Vector2.Angle(shown, toWolf), .5f, "an aimed throw shows the assisted direction");
+            // A wall between the hero and the wolf: the axe couldn't reach it, so assist leaves the aim alone.
+            var wall = new GameObject("Assist wall");
+            created.Add(wall);
+            wall.transform.position = origin + (Vector2)(Quaternion.Euler(0, 0, 10f) * Vector2.right) * 2.5f;
+            wall.AddComponent<BoxCollider2D>().size = new Vector2(.4f, 2f);
+            Physics2D.SyncTransforms();
+            NUnit.Framework.Assert.AreEqual(Vector2.right, commit(true), "a throw doesn't bend to a wolf behind a wall");
+            wall.SetActive(false);
+            Physics2D.SyncTransforms();
             NUnit.Framework.Assert.AreEqual(Vector2.right, commit(false), "a swing ignores a wolf out of reach");
             place(60f, 2f);
             NUnit.Framework.Assert.AreEqual(Vector2.right, commit(false), "a swing ignores a wolf 60° off the aim");

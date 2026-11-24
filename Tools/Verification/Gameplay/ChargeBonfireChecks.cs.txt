@@ -215,11 +215,18 @@ else if(phase==4){
   var heroReaction=player.GetComponent<RoadOfTheOldKing.Combat.HitReaction>();
   var heroAnimator=player.GetComponentInChildren<RoadOfTheOldKing.Player.PlayerSpriteAnimator>();
   System.Action clearInvulnerable=()=>player.GetType().GetField("invulnerableUntil",viewFlags).SetValue(player,0f);
+  // The closing frame's lease (above) ends next frame in play; a held lease now stops the burn (23 Nov), so end it here.
+  player.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>().Unlock(interaction);
   clearInvulnerable();int before=player.Health.Health;pose(pit(fire));burn(fire,0f);
   bool flinched=(float)heroAnimator.GetType().GetField("hurtUntil",viewFlags).GetValue(heroAnimator)>Time.time;
   check(player.Health.Health==before-2&&flinched&&player.IsRecoveringFromHit&&!heroReaction.IsStaggered&&body.linearVelocity==Vector2.zero,"standing in a lit fire's flame burns 2 as a real hit (flinch, blink) without a stagger or push ("+before+" to "+player.Health.Health+")");
   int burnt=player.Health.Health;clearInvulnerable();burn(fire,1f);check(player.Health.Health==burnt,"not again within the 1.5 s burn interval");
   burn(fire,.6f);check(player.Health.Health==burnt-2,"and again after it");burnt=player.Health.Health;clearInvulnerable();
+  // Resting in the flame with Travel or Upgrades open holds the hero's controls; the fire leaves him alone (review, 23 Nov).
+  var heatLocks=player.GetComponent<RoadOfTheOldKing.Player.PlayerControlLocks>();object heatMenu=new object();heatLocks.Lock(heatMenu);
+  burn(fire,2f);burn(fire,2f);check(player.Health.Health==burnt,"no burn while a menu holds the hero in the flame");
+  heatLocks.Unlock(heatMenu);burn(fire,0f);check(player.Health.Health==burnt-2,"leaving the menu still in the flame burns at once");
+  burnt=player.Health.Health;clearInvulnerable();
   pose((Vector2)fire.transform.TransformPoint(new Vector3(0f,-.65f,0f)));burn(fire,1f);check(player.Health.Health==burnt,"the stones below the flame don't burn");
   pose(new Vector2(15.5f,3));burn(fire,1f);check(player.Health.Health==burnt,"nothing away from the fire");
  }

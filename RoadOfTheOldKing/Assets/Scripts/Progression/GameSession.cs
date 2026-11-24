@@ -303,6 +303,13 @@ namespace RoadOfTheOldKing.Progression
             FlushResume();
         }
 
+        // A checkpoint (lighting, resting, travel, a scene exit) replaces Continue's exact spot only once it is saved: after
+        // a failed save the stored checkpoint is still the old one, so the spot is the last good position (review, 23 Nov).
+        internal void ClearResumeIfSaved()
+        {
+            if (!SaveFailed) ClearResume();
+        }
+
         internal void ClearResume()
         {
             // A clear that failed earlier is not forgotten: later deaths/rests/travel try it again.

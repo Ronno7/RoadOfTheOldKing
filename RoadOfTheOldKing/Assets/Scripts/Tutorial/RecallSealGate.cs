@@ -36,8 +36,7 @@ namespace RoadOfTheOldKing.Tutorial
         }
         private void Start()
         {
-            if (GameSession.Instance != null && Opened(GameSession.Instance.Progress))
-                SetOpen();
+            if (GameSession.Instance != null) RestoreProgress(GameSession.Instance.Progress);
         }
         private bool Opened(ProgressState state) => seal == null ? state.recallUnlocked :
             state.Has(seal.ProgressId) || (state.recallUnlocked && !string.IsNullOrEmpty(pastGateMilestone) && state.Has(pastGateMilestone));
@@ -69,6 +68,13 @@ namespace RoadOfTheOldKing.Tutorial
             if (groundShadow != null) groundShadow.enabled = false;
         }
         public void CaptureProgress(ProgressState state) { }
-        public void RestoreProgress(ProgressState state) { if (Opened(state)) SetOpen(); }
+        public void RestoreProgress(ProgressState state)
+        {
+            if (!Opened(state)) return;
+            // A save from before the seal took a Recall (past the gate by its landmark) opens it without the seal's own
+            // milestone; record it, so the guide stops asking for the throw at an open gate (review, 23 Nov).
+            if (seal != null && !string.IsNullOrEmpty(seal.ProgressId)) state.Complete(seal.ProgressId);
+            SetOpen();
+        }
     }
 }

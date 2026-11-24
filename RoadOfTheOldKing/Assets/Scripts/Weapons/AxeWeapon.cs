@@ -304,8 +304,14 @@ namespace RoadOfTheOldKing.Weapons
         {
             if (!isActiveAndEnabled || owner == null || !owner.CanRecall || (State != AxeState.Flying && State != AxeState.Stuck))
                 return false;
-            return owner.Stamina.TrySpend(settings.recallStaminaCost) && TryRecall();
+            bool recalled = owner.Stamina.TrySpend(settings.recallStaminaCost) && TryRecall();
+            if (recalled) PlayerRecalled = true;
+            return recalled;
         }
+
+        // This return was the player's own Recall, not an automatic distance return or a script: what a lesson that
+        // teaches Recall waits for (review, 23 Nov: walking away from the lodged axe opened the Tutorial's seal).
+        public bool PlayerRecalled { get; private set; }
 
         // Free Recall: automatic distance returns and scripted sequences.
         public bool TryRecall()
@@ -313,6 +319,7 @@ namespace RoadOfTheOldKing.Weapons
             if (!isActiveAndEnabled || owner == null || !owner.CanRecall ||
                 (State != AxeState.Flying && State != AxeState.Stuck))
                 return false;
+            PlayerRecalled = false;
             hits.BeginAttack(); // A target can be hit once outbound and once on return...
             // ...but not the one the axe is embedded in: Recall damage comes from routing the return through enemies.
             if (stuckTarget != null) hits.Exclude(stuckTarget.GetComponentInParent<IHitReceiver>());

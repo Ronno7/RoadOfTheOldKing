@@ -140,7 +140,13 @@ if(phase==8||phase==10){
             var seal=gate.GetComponent<RoadOfTheOldKing.World.RecallRelease>();
             move(new Vector2(84.5f,31f));tick(.1f);check(combat.Weapon.TryThrow(Vector2.up),"Throw into the seal starts");tick(.8f);
             check(combat.Weapon.State==RoadOfTheOldKing.Weapons.AxeState.Stuck&&seal.IsArmed,"Axe lodges in the seal");
-            check(combat.Weapon.TryPlayerRecall(),"Recall out of the seal starts");tick(.05f);seal.SendMessage("FixedUpdate");
+            // The automatic return (walking away from the lodged axe) isn't a Recall: the seal stays shut (review, 23 Nov).
+            check(combat.Weapon.TryRecall()&&!combat.Weapon.PlayerRecalled,"A free return out of the seal starts");tick(.05f);seal.SendMessage("FixedUpdate");
+            check(!seal.IsReleased&&!store.Load().Has("tutorial/seal/opened"),"A free return leaves the seal shut");
+            tick(2f);check(!combat.Weapon.IsAway,"Axe back in hand after the free return");
+            check(combat.Weapon.TryThrow(Vector2.up),"Throw into the seal again");tick(.8f);
+            check(combat.Weapon.State==RoadOfTheOldKing.Weapons.AxeState.Stuck&&seal.IsArmed,"Axe lodges in the seal again");
+            check(combat.Weapon.TryPlayerRecall()&&combat.Weapon.PlayerRecalled,"Recall out of the seal starts");tick(.05f);seal.SendMessage("FixedUpdate");
             check(seal.IsReleased&&store.Load().Has("tutorial/seal/opened"),"Recalling the axe out of the seal opens it and saves");
             tick(2f);check(!combat.Weapon.IsAway,"Axe back in hand after the seal");
             pack[0].GetComponent<RoadOfTheOldKing.Combat.Damageable>().ReceiveHit(hit);check(!reward.IsAvailable,"One pack defeat cannot release shard");

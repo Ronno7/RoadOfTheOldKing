@@ -159,6 +159,9 @@ if(SessionState.GetBool("Lowlands.Economy.Art",false)){
                 var cell=cells.First(c=>map.GetSprite(c)!=null&&map.GetSprite(c).name.EndsWith("_1_0")&&
                     Enumerable.Range(-1,3).All(dx=>!map.HasTile(c+new Vector3Int(dx,-1,0))&&!map.HasTile(c+new Vector3Int(dx,-2,0))));
                 var corner=map.CellToWorld(cell);ground=new Vector2(corner.x+.5f,corner.y+.5f);label=depth.name+" "+cell;
+                // Since 23 Nov (#103) the map draws tile by tile; its own renderer is off. Check that bush's tile.
+                var tiles=(SpriteRenderer[])depth.GetType().GetField("tileArt",flags).GetValue(depth);
+                if(tiles!=null){var at=ground;art=tiles.OrderBy(t=>((Vector2)t.transform.position-at).sqrMagnitude).First();}
             }
             pose(ground+Vector2.up*.6f);depth.GetType().GetMethod("LateUpdate",flags).Invoke(depth,null);
             check(art.sortingLayerID==hero.sortingLayerID&&art.sortingOrder>hero.sortingOrder,"north-side player behind "+label);

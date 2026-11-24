@@ -89,7 +89,7 @@ namespace RoadOfTheOldKing.Player
             UpdateAim(frame);
             if (Weapon == null)
                 return;
-            Weapon.SetAim(AimDirection);
+            Weapon.SetAim(ShownAim);
 
             // Bind the whole E press/release cycle to the intent at key-down. Catching an
             // away weapon while E is held must never reinterpret key-up as a new throw.
@@ -160,8 +160,12 @@ namespace RoadOfTheOldKing.Player
 
         // The committed direction: the aim, bent toward an enemy on a controller (AimAssist).
         private Vector2 Assisted(bool throwing) => !ActiveInput.UsingGamepad ? AimDirection :
-            AimAssist.Toward(transform.position, AimDirection, throwing ? throwAssistRange : meleeAssistRange,
+            AimAssist.Toward(transform, AimDirection, throwing ? throwAssistRange : meleeAssistRange,
                 throwing ? throwAssistAngle : meleeAssistAngle);
+
+        // While a throw is aimed the weapon (its guide line and the hero's facing) shows the direction the release will
+        // commit, so the line never promises a clear throw that assist then bends into an enemy (review, 23 Nov).
+        private Vector2 ShownAim => throwIntent == ThrowIntent.Throw ? Assisted(true) : AimDirection;
 
         private void UpdateAim(CombatInputFrame frame)
         {

@@ -37,7 +37,7 @@ namespace RoadOfTheOldKing.Progression
             progress.checkpointId = fire.Id;
             progress.scenePath = SceneLoader.ActivePath;
             session.CaptureAndSave("Bonfire lit.");
-            session.ClearResume();
+            session.ClearResumeIfSaved();
             fire.NotifyLit();
             return true;
         }
@@ -55,7 +55,7 @@ namespace RoadOfTheOldKing.Progression
             session.Capture();
             RestoreCombatArea();
             session.Save("Rested.");
-            session.ClearResume();
+            session.ClearResumeIfSaved();
             return true;
         }
 
@@ -75,7 +75,7 @@ namespace RoadOfTheOldKing.Progression
             progress.checkpointId = destination.id;
             progress.scenePath = local != null ? SceneLoader.ActivePath : destination.scenePath;
             session.Save("Travelled.");
-            session.ClearResume();
+            session.ClearResumeIfSaved();
             if (local == null)
             {
                 session.Visits.Clear();
@@ -94,8 +94,8 @@ namespace RoadOfTheOldKing.Progression
                 return false;
             session.CaptureAndSave("Progress saved.");
             session.Visits.Capture();
-            // The old scene's spot is stale; the first autosave in the new scene writes a fresh one.
-            session.ClearResume();
+            // The old scene's spot is stale once the exit is saved; the first autosave in the new scene writes a fresh one.
+            session.ClearResumeIfSaved();
             carriedHealth = player.Health.Health;
             var flask = player.GetComponent<PlayerFlask>();
             carriedFlasks = flask != null ? flask.Charges : -1;
