@@ -145,7 +145,10 @@ if(SessionState.GetBool("Lowlands.Economy.Art",false)){
         check(sprite.transform.localPosition==at&&sprite.transform.lossyScale==scale&&scale==Vector3.one,"lid animation keeps native registration and scale");
         view.PlayOpening();reward.RestoreProgress(game.Progress);
         check(!view.enabled&&sprite.sprite.name=="TimberChest_Open","restoring progress snaps to final open state");
-        // Sprites and prefab overhead halves sort on their anchor; a bush map (no anchor) on the base row the hero overlaps.
+        // Standing depth (23 Nov): sprites and anchored maps sort at their ground line, a bush map tile by tile at its bush's
+        // base row, a low wall tile by tile at its own row; the hero at his feet (HeroDepth), so update him after each pose.
+        var heroDepth=player.GetComponent<RoadOfTheOldKing.Player.HeroDepth>();
+        System.Action placeHero=()=>heroDepth.GetType().GetMethod("LateUpdate",flags).Invoke(heroDepth,null);
         foreach(var depth in UnityEngine.Object.FindObjectsByType<RoadOfTheOldKing.World.WorldPropDepth>(FindObjectsSortMode.None)){
             var anchor=(Transform)depth.GetType().GetField("groundAnchor",flags).GetValue(depth);
             var art=depth.GetComponent<Renderer>();var hero=player.GetComponentInChildren<SpriteRenderer>();
@@ -156,16 +159,17 @@ if(SessionState.GetBool("Lowlands.Economy.Art",false)){
             else{
                 // The lowest bush of a stack: nothing under it for two rows, so the south pose stands in front of it alone.
                 var cells=new System.Collections.Generic.List<Vector3Int>();foreach(var c in map.cellBounds.allPositionsWithin)cells.Add(c);
-                var cell=cells.First(c=>map.GetSprite(c)!=null&&map.GetSprite(c).name.EndsWith("_1_0")&&
+                bool standAlone=(bool)depth.GetType().GetField("tilesStandAlone",flags).GetValue(depth);
+                var cell=cells.First(c=>map.GetSprite(c)!=null&&(standAlone||map.GetSprite(c).name.EndsWith("_1_0"))&&
                     Enumerable.Range(-1,3).All(dx=>!map.HasTile(c+new Vector3Int(dx,-1,0))&&!map.HasTile(c+new Vector3Int(dx,-2,0))));
                 var corner=map.CellToWorld(cell);ground=new Vector2(corner.x+.5f,corner.y+.5f);label=depth.name+" "+cell;
                 // Since 23 Nov (#103) the map draws tile by tile; its own renderer is off. Check that bush's tile.
                 var tiles=(SpriteRenderer[])depth.GetType().GetField("tileArt",flags).GetValue(depth);
-                if(tiles!=null){var at=ground;art=tiles.OrderBy(t=>((Vector2)t.transform.position-at).sqrMagnitude).First();}
+                if(tiles!=null){var near=ground;art=tiles.OrderBy(t=>((Vector2)t.transform.position-near).sqrMagnitude).First();}
             }
-            pose(ground+Vector2.up*.6f);depth.GetType().GetMethod("LateUpdate",flags).Invoke(depth,null);
+            pose(ground+Vector2.up*.6f);depth.GetType().GetMethod("LateUpdate",flags).Invoke(depth,null);placeHero();
             check(art.sortingLayerID==hero.sortingLayerID&&art.sortingOrder>hero.sortingOrder,"north-side player behind "+label);
-            pose(ground-Vector2.up*.6f);depth.GetType().GetMethod("LateUpdate",flags).Invoke(depth,null);
+            pose(ground-Vector2.up*.6f);depth.GetType().GetMethod("LateUpdate",flags).Invoke(depth,null);placeHero();
             check(art.sortingOrder<hero.sortingOrder,"south-side player in front of "+label);
         }
         var practice=source("practice-pot");var pot=practice.GetComponentInChildren<RoadOfTheOldKing.Combat.Breakable>(true);

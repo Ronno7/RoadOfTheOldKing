@@ -89,7 +89,7 @@ Prompts follow whichever device was used last, with Xbox or PlayStation button n
 | R | X | Drink a flask |
 | F | A | Interact |
 | Tab | View | Inventory |
-| Alt (hold) | LB (hold) + right stick | Look around |
+| Alt (hold) | LB (hold) + right stick | Free look |
 | Wheel | D-pad up/down | Zoom |
 | Esc | Start | Pause |
 | F2 / F3 / F4 | | Hide HUD / debug panel / developer tools (playtest builds) |

@@ -31,11 +31,12 @@ namespace RoadOfTheOldKing.World
             sluice.Stage < (carriage ? SluiceStage.ServiceDiverted : SluiceStage.DistributorReleased));
 
         // Plain words (user, 23 Nov: "just call it a crank, say requires crank, insert crank, remove crank"). A locked
-        // socket shows its pin rather than saying so; with the crank in the other socket it still says insert crank.
+        // socket shows its pin rather than saying so. Only a carried crank can go in: with it seated in the other socket,
+        // this one needs it brought over.
         public override string Prompt =>
             !requiresOwnedCrank ? (sluice != null && sluice.IsMoving ? "Carriage moving" : "Turn crank") :
             HoldsCrank ? (sluice != null && sluice.IsMoving ? "Carriage moving" : Turnable ? "Turn crank" : "Remove crank") :
-            Owned ? "Insert crank" : "Requires crank";
+            Carried ? "Insert crank" : "Requires crank";
 
         public override bool CanCollect(PlayerHealth player)
         {

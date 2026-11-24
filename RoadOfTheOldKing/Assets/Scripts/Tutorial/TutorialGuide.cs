@@ -23,7 +23,7 @@ namespace RoadOfTheOldKing.Tutorial
         Milestone,      // progress contains `milestone` (lessons, rewards, exits...)
         ReachArea,      // came within `radius` of `area`
         DrankFlask,     // recovered safely after the fight named by `milestone` (empty: the first wolf)
-        Looked,         // held Alt to look around
+        Looked,         // held Alt to free look
         Zoomed,         // changed the camera zoom, or read the note for a few seconds
     }
 
@@ -318,7 +318,7 @@ namespace RoadOfTheOldKing.Tutorial
             new TutorialStep("throw", "Throw at a target {throw}, then pick it up", TutorialCondition.Milestone) { milestone = "tutorial/lesson/throw-retrieve" },
             new TutorialStep("melee", "Strike the dummy {attack}", TutorialCondition.Milestone) { milestone = "tutorial/lesson/melee" },
             new TutorialStep("sprint", "Sprint {sprint}", TutorialCondition.Sprinted) { amount = 4f },
-            new TutorialStep("look", "Hold {look} to look around", TutorialCondition.Looked) { cueAtPlayer = true },
+            new TutorialStep("look", "Hold {look} to free look", TutorialCondition.Looked) { cueAtPlayer = true },
             new TutorialStep("flask", "Drink a flask {heal}", TutorialCondition.DrankFlask) { milestone = "tutorial/enemy/field-rats" },
             new TutorialStep("road", "", TutorialCondition.ReachArea) { area = new Vector2(72f, 27.5f), radius = 5f },
             new TutorialStep("first-wolf", "A wolf guards the ruins. Dodge its lunge {dash}", TutorialCondition.Milestone) { milestone = "tutorial/enemy/first-wolf", appearDelay = .75f, minShowSeconds = 4f },

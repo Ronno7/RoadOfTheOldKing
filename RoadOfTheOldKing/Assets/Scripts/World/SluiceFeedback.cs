@@ -179,7 +179,12 @@ namespace RoadOfTheOldKing.World
                 Sound(response == SluiceResponse.Rejected ? blockedSound : latchSound,
                     receiver.position, response == SluiceResponse.Rejected ? .55f : .65f,
                     response == SluiceResponse.Rejected ? null : f.speaker);
-                if (response == SluiceResponse.Turned) motionTail = .65f;
+                if (response == SluiceResponse.Turned)
+                {
+                    motionTail = .65f;
+                    // Turned before its pin came out: the turn knocks it out now, so the late pop can't cut the turn short.
+                    if (f.crank && f.wasLatched && f.crankFitting != null && !f.crankFitting.Latched) KnockPin(f);
+                }
                 return;
             }
         }
@@ -350,12 +355,17 @@ namespace RoadOfTheOldKing.World
             if (f.unlatchIn < 0f) f.unlatchIn = unlatchDelay;
             f.unlatchIn -= seconds;
             if (f.unlatchIn > 0f) return;
-            f.wasLatched = false;
-            f.unlatchIn = -1f;
-            f.pinAge = 0f;
+            KnockPin(f);
             f.age = 0f;
             f.cooldown = .18f;
             f.response = SluiceResponse.Accepted;
+        }
+
+        private void KnockPin(Fitting f)
+        {
+            f.wasLatched = false;
+            f.unlatchIn = -1f;
+            f.pinAge = 0f;
             Sound(unlatchSound != null ? unlatchSound : latchSound, f.receiver.position, .8f);
         }
 

@@ -326,6 +326,7 @@ namespace RoadOfTheOldKing.UI
                     null, i => Color.HSVToRGB(hoodHue, i / (float)ShadeSteps, Mathf.Max(.4f, hoodBrightness))),
                 new OptionList.Slider("Brightness", "", () => hoodBrightness, v => SetHood(hoodHue, hoodSaturation, v), ShadeSteps,
                     null, i => Color.HSVToRGB(hoodHue, hoodSaturation, i / (float)ShadeSteps)),
+                new OptionList.Command("Random", "", RandomHood),
                 new OptionList.Command("Begin", "", StartRun)
             }, 0, true);
             RecolorHood();
@@ -339,6 +340,16 @@ namespace RoadOfTheOldKing.UI
             Color.RGBToHSV(HoodSwatches[index], out hoodHue, out hoodSaturation, out hoodBrightness);
             hoodChanged = index != 0;
             RecolorHood();
+        }
+
+        // A random cloak (user, 18 Nov: "random color button on color selection screen"), on the bars' own steps and out of
+        // their grey and near-black ends, so every roll looks like a pick.
+        private void RandomHood()
+        {
+            SetHood(UnityEngine.Random.Range(0, HueSteps) / (float)HueSteps,
+                UnityEngine.Random.Range(3, ShadeSteps + 1) / (float)ShadeSteps,
+                UnityEngine.Random.Range(4, ShadeSteps + 1) / (float)ShadeSteps);
+            options.RefreshAll();
         }
 
         private void SetHood(float hue, float saturation, float brightness)

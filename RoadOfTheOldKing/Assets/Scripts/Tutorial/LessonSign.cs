@@ -26,7 +26,8 @@ namespace RoadOfTheOldKing.Tutorial
         public static LessonSign Open => open;
         // Nothing to prompt while it is open: the same press closes it.
         public override string Prompt => IsOpen ? "" : "Read sign";
-        protected override float PickupDistance => reach;
+        // Open, it answers interact out to where walking off closes it, so the press that closes it never misses.
+        protected override float PickupDistance => IsOpen ? reach + closeMargin : reach;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void ResetOpen() => open = null;

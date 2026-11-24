@@ -116,17 +116,22 @@ try{
  check(!(bool)get(dFit,"wasLatched")&&(float)get(dFit,"pinAge")<.1f&&cue(dFit).StartsWith("Accepted")&&dPin.enabled&&cPin.enabled,"Then its pin is knocked out, with its own sound; the carriage crank stays pinned ("+cue(dFit)+")");
  advance(.5f);
  check(!dPin.enabled&&glinting()=="Distributor crank","With its pin out, only the distributor crank glints ("+glinting()+")");
- // Plain words (user, 23 Nov): insert, turn and remove crank; the other socket still says insert crank.
+ // Plain words (user, 23 Nov): insert, turn and remove crank; only a carried crank can be inserted.
  check(dCrank.Prompt=="Insert crank"&&cCrank.Prompt=="Insert crank"&&shows(dCrank)=="CrankSocket"&&shows(cCrank)=="CrankSocket","Carried, the crank is in neither socket and both say insert crank");
  var dShadow=(SpriteRenderer)get(dFit,"shadow");check(dShadow!=null&&!dShadow.enabled,"An empty socket shows no crank shadow");
- check(turn(false)&&game.Progress.crankSocket=="green-lowlands/crank/distributor"&&dCrank.HoldsCrank&&!cCrank.HoldsCrank&&cCrank.Prompt=="Insert crank"&&shows(dCrank)=="Machine_Crank"&&shows(cCrank)=="CrankSocket","Inserting puts the one crank in the distributor only; the other socket still says insert crank");
+ check(turn(false)&&game.Progress.crankSocket=="green-lowlands/crank/distributor"&&dCrank.HoldsCrank&&!cCrank.HoldsCrank&&cCrank.Prompt=="Requires crank"&&shows(dCrank)=="Machine_Crank"&&shows(cCrank)=="CrankSocket","Inserting puts the one crank in the distributor only; the other socket says requires crank");
  check(dShadow.enabled&&dCrank.Prompt=="Turn crank","The inserted crank brings its shadow and offers a turn");
  var dVis=dCrank.transform.Find("Native fitting visual");var dRenderer=dVis.GetComponent<SpriteRenderer>();var crankFrames=(Sprite[])get(dFit,"turnFrames");
  check(crankFrames.Length==8&&crankFrames[0].name=="CrankTurn_0","The crank has its eight turn frames");
+ // Turned while its pin is still due out (staged here): the turn knocks it out at once, and the late pop can't cut the turn short.
+ dFit.GetType().GetField("wasLatched").SetValue(dFit,true);dFit.GetType().GetField("unlatchIn").SetValue(dFit,.3f);
  check(turn(false),"Owned crank and contextual interaction divert service");
+ check(!(bool)get(dFit,"wasLatched")&&(float)get(dFit,"pinAge")<.05f&&cue(dFit).StartsWith("Turned"),"A turn during the pin's wait knocks the pin out with it ("+cue(dFit)+")");
  advance(.15f);
  check(dRenderer.sprite==crankFrames[2]&&dVis.localRotation==Quaternion.identity,"A turn plays the crank's frames about its hub; the sprite never rotates (user, 23 Nov: \"weirdly skewed\")");
- advance(.6f);
+ advance(.3f);
+ check(dRenderer.sprite==crankFrames[6]&&cue(dFit).StartsWith("Turned"),"Past the pin's old pop time the turn still plays ("+dRenderer.sprite.name+", "+cue(dFit)+")");
+ advance(.3f);
  check(dRenderer.sprite.name=="Machine_Crank","It comes to rest on its resting sprite");
  check(!(bool)get(cFit,"wasLatched")&&cue(cFit).StartsWith("Accepted"),"Diverting the service knocks out the carriage crank's pin ("+cue(cFit)+")");
  check(dCrank.Prompt=="Remove crank","With its work done, the distributor offers to remove the crank");

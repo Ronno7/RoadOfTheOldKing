@@ -16,7 +16,7 @@ namespace RoadOfTheOldKing.UI
             new[]
             {
                 ("WORLD", new[] { ("Interact", "interact"), ("Inventory", "status") }),
-                ("CAMERA", new[] { ("Look around", "look"), ("Zoom", "zoom") }),
+                ("CAMERA", new[] { ("Free look", "look"), ("Zoom", "zoom") }),
                 ("MENUS", new[] { ("Pause", "pause"), ("Select", "select"), ("Back", "back") }),
             },
         };

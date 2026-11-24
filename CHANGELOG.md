@@ -6,6 +6,7 @@
 - Two field rats on the Tutorial's forest road, where you now learn to drink a flask.
 - Signs teach the Tutorial's lessons and its bonfires; read one any time.
 - Bushes burst into leaves, cracked stone into chips, and dodges and leaping rats kick up dust.
+- A Random button on the cloak picker.
 
 **Changed**
 - The Recall stone wakes the moment your axe strikes it.

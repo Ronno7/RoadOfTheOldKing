@@ -23390,14 +23390,6 @@ PrefabInstance:
 
         Lighting or resting saves your game.'
       objectReference: {fileID: 0}
-    - target: {fileID: 7061433968705777180, guid: 5270e110114edbd4b970281410c6613e, type: 3}
-      propertyPath: radius
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 7061433968705777180, guid: 5270e110114edbd4b970281410c6613e, type: 3}
-      propertyPath: heading
-      value: BONFIRES
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -30937,10 +30929,6 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1312492780506765286, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 3403522340180570971, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
       propertyPath: m_LocalPosition.x
       value: 86
@@ -31006,46 +30994,6 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7167016761715090443, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: damage
-      value: 20
-      objectReference: {fileID: 0}
-    - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: target
-      value: 
-      objectReference: {fileID: 9001000002}
-    - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: moveSpeed
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: leashRadius
-      value: 20
-      objectReference: {fileID: 0}
-    - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: noticeRadius
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: windupDuration
-      value: 0.3
-      objectReference: {fileID: 0}
-    - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: recoveryDuration
-      value: 0.3
-      objectReference: {fileID: 0}
-    - target: {fileID: 8844307052046014739, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8844307052046014739, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8844307052046014739, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
       propertyPath: m_LocalRotation.z
       value: 0
       objectReference: {fileID: 0}
@@ -67052,10 +67000,6 @@ PrefabInstance:
       propertyPath: text
       value: Dodge {dash}
       objectReference: {fileID: 0}
-    - target: {fileID: 7061433968705777180, guid: 5270e110114edbd4b970281410c6613e, type: 3}
-      propertyPath: heading
-      value: DODGE
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -77452,11 +77396,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7061433968705777180, guid: 5270e110114edbd4b970281410c6613e, type: 3}
       propertyPath: text
-      value: Hold {look} to look around
-      objectReference: {fileID: 0}
-    - target: {fileID: 7061433968705777180, guid: 5270e110114edbd4b970281410c6613e, type: 3}
-      propertyPath: heading
-      value: LOOK AROUND
+      value: Hold {look} to free look
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -88657,10 +88597,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2803828411643543637, guid: 4b7a281c3eaec274fa9a3dfcea619116, type: 3}
-      propertyPath: m_SortingOrder
-      value: 180
-      objectReference: {fileID: 0}
     - target: {fileID: 6317934976666531229, guid: 4b7a281c3eaec274fa9a3dfcea619116, type: 3}
       propertyPath: m_Name
       value: Fallen_Log
@@ -98948,10 +98884,6 @@ PrefabInstance:
       value: 'Hold {cleave} and release
 
         to split cracked stone'
-      objectReference: {fileID: 0}
-    - target: {fileID: 7061433968705777180, guid: 5270e110114edbd4b970281410c6613e, type: 3}
-      propertyPath: heading
-      value: CLEAVE
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -185032,10 +184964,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2803828411643543637, guid: 4b7a281c3eaec274fa9a3dfcea619116, type: 3}
-      propertyPath: m_SortingOrder
-      value: 346
-      objectReference: {fileID: 0}
     - target: {fileID: 6317934976666531229, guid: 4b7a281c3eaec274fa9a3dfcea619116, type: 3}
       propertyPath: m_Name
       value: Fallen_Log
@@ -195919,10 +195847,6 @@ PrefabInstance:
       value: 'It''s dangerous to go alone!
 
         Take this.'
-      objectReference: {fileID: 0}
-    - target: {fileID: 7061433968705777180, guid: 5270e110114edbd4b970281410c6613e, type: 3}
-      propertyPath: heading
-      value: THE AXE
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -214630,10 +214554,6 @@ PrefabInstance:
     - target: {fileID: 7061433968705777180, guid: 5270e110114edbd4b970281410c6613e, type: 3}
       propertyPath: text
       value: Strike the dummy {attack}
-      objectReference: {fileID: 0}
-    - target: {fileID: 7061433968705777180, guid: 5270e110114edbd4b970281410c6613e, type: 3}
-      propertyPath: heading
-      value: STRIKE
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -261410,10 +261330,6 @@ PrefabInstance:
         then walk to your axe to take it
         back'
       objectReference: {fileID: 0}
-    - target: {fileID: 7061433968705777180, guid: 5270e110114edbd4b970281410c6613e, type: 3}
-      propertyPath: heading
-      value: THROW
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -282433,10 +282349,6 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1312492780506765286, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 3403522340180570971, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
       propertyPath: m_LocalPosition.x
       value: 82
@@ -282502,46 +282414,6 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7167016761715090443, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: damage
-      value: 20
-      objectReference: {fileID: 0}
-    - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: target
-      value: 
-      objectReference: {fileID: 9001000002}
-    - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: moveSpeed
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: leashRadius
-      value: 20
-      objectReference: {fileID: 0}
-    - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: noticeRadius
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: windupDuration
-      value: 0.3
-      objectReference: {fileID: 0}
-    - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: recoveryDuration
-      value: 0.3
-      objectReference: {fileID: 0}
-    - target: {fileID: 8844307052046014739, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8844307052046014739, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8844307052046014739, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
       propertyPath: m_LocalRotation.z
       value: 0
       objectReference: {fileID: 0}
@@ -331562,10 +331434,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2803828411643543637, guid: 4b7a281c3eaec274fa9a3dfcea619116, type: 3}
-      propertyPath: m_SortingOrder
-      value: 218
-      objectReference: {fileID: 0}
     - target: {fileID: 6317934976666531229, guid: 4b7a281c3eaec274fa9a3dfcea619116, type: 3}
       propertyPath: m_Name
       value: Fallen_Log
@@ -331749,10 +331617,6 @@ PrefabInstance:
     - target: {fileID: 7061433968705777180, guid: 5270e110114edbd4b970281410c6613e, type: 3}
       propertyPath: text
       value: '{sprint} to sprint'
-      objectReference: {fileID: 0}
-    - target: {fileID: 7061433968705777180, guid: 5270e110114edbd4b970281410c6613e, type: 3}
-      propertyPath: heading
-      value: SPRINT
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -382112,10 +381976,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2803828411643543637, guid: 4b7a281c3eaec274fa9a3dfcea619116, type: 3}
-      propertyPath: m_SortingOrder
-      value: 300
-      objectReference: {fileID: 0}
     - target: {fileID: 6317934976666531229, guid: 4b7a281c3eaec274fa9a3dfcea619116, type: 3}
       propertyPath: m_Name
       value: Fallen_Log
@@ -385043,10 +384903,6 @@ PrefabInstance:
     - target: {fileID: 1395121347706510829, guid: 4b7a281c3eaec274fa9a3dfcea619116, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2803828411643543637, guid: 4b7a281c3eaec274fa9a3dfcea619116, type: 3}
-      propertyPath: m_SortingOrder
-      value: 332
       objectReference: {fileID: 0}
     - target: {fileID: 6317934976666531229, guid: 4b7a281c3eaec274fa9a3dfcea619116, type: 3}
       propertyPath: m_Name
@@ -399180,17 +399036,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 646699f2df81e4844a5c581b020fb641, type: 3}
---- !u!114 &9001000002 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7425349288622817033, guid: e010a24f9d755d869541b88e5f988af7, type: 3}
-  m_PrefabInstance: {fileID: 1607463906426744502}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 77ed5e44f82138e47a2ffd319bf6a318, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Player.PlayerHealth
 --- !u!1001 &9001000005
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -399209,10 +399054,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 980551573255439911, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1312492780506765286, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3403522340180570971, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
@@ -399280,46 +399121,6 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7167016761715090443, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: damage
-      value: 20
-      objectReference: {fileID: 0}
-    - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: target
-      value: 
-      objectReference: {fileID: 9001000002}
-    - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: moveSpeed
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: leashRadius
-      value: 20
-      objectReference: {fileID: 0}
-    - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: noticeRadius
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: windupDuration
-      value: 0.3
-      objectReference: {fileID: 0}
-    - target: {fileID: 8178164584314931740, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: recoveryDuration
-      value: 0.3
-      objectReference: {fileID: 0}
-    - target: {fileID: 8844307052046014739, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8844307052046014739, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8844307052046014739, guid: a9e4774c1be0e7c4e8c8b70ec6395793, type: 3}
       propertyPath: m_LocalRotation.z
       value: 0
       objectReference: {fileID: 0}
@@ -399393,21 +399194,9 @@ PrefabInstance:
       value: tutorial/first-enemy
       objectReference: {fileID: 0}
     - target: {fileID: 9004386297107476432, guid: 82f144a445197664aa1a134666757137, type: 3}
-      propertyPath: defeatSource
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 9004386297107476432, guid: 82f144a445197664aa1a134666757137, type: 3}
       propertyPath: appearWhereLastFell
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 9004386297107476432, guid: 82f144a445197664aa1a134666757137, type: 3}
-      propertyPath: alsoDefeat.Array.size
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 9004386297107476432, guid: 82f144a445197664aa1a134666757137, type: 3}
-      propertyPath: 'alsoDefeat.Array.data[0]'
-      value: 
-      objectReference: {fileID: 1420275025}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -399429,10 +399218,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2144952346}
     m_Modifications:
-    - target: {fileID: 217401835310237027, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 552519079130167117, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
       propertyPath: id
       value: tutorial/roadside-fire
@@ -399469,25 +399254,9 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 2369363320632364989, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 2712772487470844132, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
       propertyPath: m_LocalPosition.y
       value: 0.31
-      objectReference: {fileID: 0}
-    - target: {fileID: 5044801811187824775, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
-      propertyPath: m_Sprite
-      value: 
-      objectReference: {fileID: 78360242, guid: 2dacabac9d92d6b46ab6fc5e45d8e614, type: 3}
-    - target: {fileID: 5274022206545519419, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7300992784925826037, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
-      propertyPath: m_IsActive
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8209990534844468561, guid: b11e2ca137451f849b02c86439c542d3, type: 3}
       propertyPath: m_Name
