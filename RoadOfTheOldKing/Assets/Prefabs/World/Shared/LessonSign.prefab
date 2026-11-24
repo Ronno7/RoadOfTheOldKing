@@ -93,8 +93,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: RoadOfTheOldKing::RoadOfTheOldKing.Tutorial.LessonSign
   text: 
-  radius: 4
-  textOffset: {x: 0, y: 2}
+  reach: 1.4
+  closeMargin: 0.75
 --- !u!1 &3589484325457794242
 GameObject:
   m_ObjectHideFlags: 0
@@ -105,6 +105,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9219993994952613495}
   - component: {fileID: 7406068030356730684}
+  - component: {fileID: 933474754937738656}
   m_Layer: 0
   m_Name: Art
   m_TagString: Untagged
@@ -186,3 +187,16 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &933474754937738656
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3589484325457794242}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f64907a8847f4eb429e2afb75cac63d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RoadOfTheOldKing::RoadOfTheOldKing.World.WorldPropDepth
+  groundAnchor: {fileID: 0}

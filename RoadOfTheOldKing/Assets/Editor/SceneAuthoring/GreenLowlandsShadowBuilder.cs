@@ -716,9 +716,7 @@ namespace RoadOfTheOldKing.EditorTools
                         Project(PathOf(r.transform), Shape(r.transform));
                 Project("Recall stone", Shape(Deep(world, "Recall Stone")));
                 var gate = Deep(world, "Recall Seal Gate");
-                var arch = Shape(gate.Find("Seal arch - Environment"));
-                arch.UnionWith(Shape(gate.Find("Seal arch - Above Player")));
-                Project("Seal arch", arch);
+                Project("Seal arch", Shape(gate.Find("Seal arch")));
                 Footprint(Shape(gate.Find("Masonry surrounds")));
                 Project("Opening gate", Shape(gate.Find("Sealed timber gate")), false, gate, true, "Gate-shadow");
                 var controller = new SerializedObject(gate.GetComponent<RoadOfTheOldKing.Tutorial.RecallSealGate>());

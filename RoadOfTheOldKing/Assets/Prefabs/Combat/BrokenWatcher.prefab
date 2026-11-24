@@ -217,6 +217,7 @@ GameObject:
   - component: {fileID: 1848394518750002021}
   - component: {fileID: 8075216643608637257}
   - component: {fileID: 5876216429773531711}
+  - component: {fileID: 7482175780941553189}
   m_Layer: 0
   m_Name: BrokenWatcher
   m_TagString: Untagged
@@ -465,6 +466,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoadOfTheOldKing.Enemies.BossHealthBar
   bossName: Broken Watcher
+  defeatAnnouncement: GUARDIAN FALLEN
 --- !u!114 &5876216429773531711
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -481,6 +483,19 @@ MonoBehaviour:
   ghostShader: {fileID: 0}
   afterglow: 1.1
   heavy: 1
+--- !u!114 &7482175780941553189
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1457853514096952128}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81c9fa5289f4fb642860cbba6be3ab65, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RoadOfTheOldKing::RoadOfTheOldKing.Enemies.ActorDepth
+  body: {fileID: 7540621806333141961}
 --- !u!1 &4943360059327782604
 GameObject:
   m_ObjectHideFlags: 0

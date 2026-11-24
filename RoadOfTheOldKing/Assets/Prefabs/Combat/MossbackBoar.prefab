@@ -375,6 +375,7 @@ GameObject:
   - component: {fileID: 1848394518750002021}
   - component: {fileID: 8122349257726216334}
   - component: {fileID: 7661948945362667228}
+  - component: {fileID: 3017550760876251790}
   m_Layer: 0
   m_Name: MossbackBoar
   m_TagString: Untagged
@@ -643,6 +644,19 @@ MonoBehaviour:
   ghostShader: {fileID: 4800000, guid: dccb8a4429804a8469ae41a42345a08a, type: 3}
   afterglow: 0.8
   heavy: 0
+--- !u!114 &3017550760876251790
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1457853514096952128}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81c9fa5289f4fb642860cbba6be3ab65, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RoadOfTheOldKing::RoadOfTheOldKing.Enemies.ActorDepth
+  body: {fileID: 7540621806333141961}
 --- !u!1 &4943360059327782604
 GameObject:
   m_ObjectHideFlags: 0

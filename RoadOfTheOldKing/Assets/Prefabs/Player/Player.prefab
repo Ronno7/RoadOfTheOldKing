@@ -39,6 +39,7 @@ GameObject:
   - component: {fileID: 301705873979853676}
   - component: {fileID: 5315980139413701495}
   - component: {fileID: 188380635630771110}
+  - component: {fileID: 8163186209694493225}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -649,6 +650,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: RoadOfTheOldKing::RoadOfTheOldKing.Player.DashDust
   dust: {fileID: 11400000, guid: b6679bccfa7e1aa42937e7b58e8def74, type: 2}
+--- !u!114 &8163186209694493225
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1de1ff3efa908114ab67d741ebe34bb5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RoadOfTheOldKing::RoadOfTheOldKing.Player.HeroDepth
+  body: {fileID: 1009}
 --- !u!1 &1007
 GameObject:
   m_ObjectHideFlags: 0
@@ -727,7 +741,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 300
-  m_SortingLayer: 3
+  m_SortingLayer: 4
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 50c0cc9685183704bae1ba50be6c4d90, type: 3}

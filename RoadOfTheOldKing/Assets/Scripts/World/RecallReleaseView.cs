@@ -14,8 +14,6 @@ namespace RoadOfTheOldKing.World
         [SerializeField] private Transform ropeWinch, ropeSupport, ropeRaisedTip;
         private RecallRelease mechanism;
         private PermanentPassage passage;
-        private PlayerMovement player;
-        private SpriteRenderer playerBody;
         private readonly Vector3[] ropePoints = new Vector3[4];
 
         private bool Released => mechanism != null ? mechanism.IsReleased : passage != null && passage.IsOpen;
@@ -27,8 +25,6 @@ namespace RoadOfTheOldKing.World
         {
             mechanism = GetComponent<RecallRelease>();
             passage = GetComponent<PermanentPassage>();
-            player = FindFirstObjectByType<PlayerMovement>();
-            if (player != null) playerBody = player.GetComponentInChildren<SpriteRenderer>();
             RefreshPresentation();
         }
 
@@ -70,10 +66,10 @@ namespace RoadOfTheOldKing.World
             }
             if (floor != null)
             {
-                floor.sortingLayerName = landed ? "World" : "Player";
+                // Raised, the floor stands in depth at its anchor line like any prop (Depth); landed, it is ground.
                 float feet = groundAnchor != null ? groundAnchor.position.y : transform.position.y;
-                floor.sortingOrder = landed ? 0 : playerBody == null ? 5 :
-                    playerBody.sortingOrder + (player.transform.position.y > feet ? 5 : -3);
+                if (landed) { floor.sortingLayerName = "World"; floor.sortingOrder = 0; }
+                else Depth.Apply(floor, feet, Depth.SlotAt(floor.transform.position.x));
             }
         }
 

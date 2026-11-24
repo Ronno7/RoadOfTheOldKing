@@ -261,7 +261,7 @@ Level construction is in [World and tilemaps](World.md).
 | End card | `EndCard`, `InscriptionReader` | A rereadable card where a build stops, offered after a milestone. |
 | Recall puzzles | `RecallAwakeningStone`, `RecallSealGate`, `RecallSluice`, `RecallRelease` | Bind a lodged axe and its return to one flight. Before Recall exists, the stone draws a throw in (`IAxeFlightPull`); the Tutorial gate opens when the axe is recalled out of it. |
 | Sluice crank | `SluiceCrank` | One carried part, saved with the socket it sits in: place, turn, take out. |
-| Prop depth | `WorldPropDepth` | Low props and edge bushes draw in front of or behind the hero by their ground line. |
+| Depth | `Depth`, `WorldPropDepth`, `ForestStamps`, `HeroDepth`, `ActorDepth` | Everything that stands (the hero, enemies, props, signs, walls, every tree, grass) sorts on one Standing layer by where it meets the ground, one art pixel at a time, with fixed tiebreaks; painted forests draw tree by tree. |
 | Gates and bridges | `PermanentPassage` | One-time. Collision holds until the animation ends and restores on load. |
 | Roofs | `BuildingCutaway` | Roofs fade while the player's feet are inside authored rectangles. |
 | Dark interiors | `DarkInterior` | Global light is zero. The lantern is a 2D light with wall shadows; a cover shader blacks out unlit pixels. |
@@ -294,15 +294,18 @@ One verb per space. Each lesson completes from a real outcome, not a key press.
 | --- | --- |
 | Vitals | Health and flasks on damage, healing or combat; a setting keeps them on |
 | Stamina arc | Pixel arc over the hero whenever stamina is below full |
-| Prompt | One `F verb` chip above the selected target, key in gold |
+| Prompt | One chip above the selected target: the control's icon and a verb |
 | Saving | A small flame blinking in the top-right corner |
 | Boss bar | Name and long health bar along the bottom during a boss fight |
 | Hints and receipts | One guide hint; up to three reward notices |
 | Inventory | Tab: resource counts, tools and discovered knowledge |
 
 - **UI kit:** every panel, menu and chip shares `UI/Kit.uss` and the RotOK pixel fonts, at 2 reference pixels per UI pixel on a 960x540 canvas.
+- **Control icons** (`ControlGlyphs`, drawn by `Tools/Art/UI/ui_kit.py`): every key, mouse button and pad control is a drawn icon with its name in compact pixel capitals, following the last-used device, Xbox or PlayStation.
+
+![Control icons: keyboard and mouse, Xbox, PlayStation](Art/UI/ControlGlyphs.png)
 - **World meters:** enemy bars and the charge bar are small world-space documents, so they scale with what they measure.
-- **Menus:** `MenuStack` routes input to the top menu. Title, pause, bonfire and defeat screens share one theme. Pause lists every control for both devices from `ControlLabels`, the source the prompts use. Settings (volume, window, flashes, shake, vibration) live outside the save. After the prologue, New Game picks a cloak colour that `EnemyFlash` applies to the hero's blues. The title shows the region paintings behind its logo.
+- **Menus:** `MenuStack` routes input to the top menu. Title, pause, bonfire and defeat screens share one theme. Pause lists every control for both devices as icons from `ControlLabels`, the source the prompts use. Settings (volume, window, flashes, shake, vibration) live outside the save. After the prologue, New Game picks a cloak colour that `EnemyFlash` applies to the hero's blues. The title shows the region paintings behind its logo.
 - **Atmosphere:** `RegionAtmosphere` lays a grade, cloud shadows and motes over each region, with Restrained (default) and Cinematic looks.
 - **Feedback:** `PlayerHitFeedback` flashes, kicks the camera, blinks the hero and rumbles a controller; `FeedbackSettings` and `Rumble` scale it down for players who prefer less.
 

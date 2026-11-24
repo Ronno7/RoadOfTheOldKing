@@ -52,7 +52,7 @@ MonoBehaviour:
   m_Intensity: 0.2
   m_LightVolumeIntensity: 1
   m_LightVolumeEnabled: 0
-  m_ApplyToSortingLayers: 0000000064000000c80000002c010000
+  m_ApplyToSortingLayers: 0000000064000000c80000002c010000f76f3e23
   m_LightCookieSprite: {fileID: 21300000, guid: b8bd699e47d92084594830d366994080, type: 3}
   m_DeprecatedPointLightCookieSprite: {fileID: 0}
   m_LightOrder: 0
@@ -171,6 +171,8 @@ MonoBehaviour:
   menuSkin: hearth
   spawnPoint: {fileID: 4829341851063174414}
   interactionRadius: 3.3
+  heatDamage: 2
+  heatInterval: 1.5
 --- !u!114 &4563134163250994979
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -205,6 +207,13 @@ MonoBehaviour:
   baseRenderer: {fileID: 6576237360567007531}
   stoneBase: {fileID: 2020160982, guid: 66fddfd853ceae244bc82e1cbd573570, type: 3}
   upgradeBase: {fileID: 2020160982, guid: 959eba0c2cca6544d8572659105e162c, type: 3}
+  igniteSeconds: 0.45
+  sparks: 12
+  flameOvershoot: 1.15
+  glowFlare: 1.8
+  upgradeSparks: 22
+  upgradeFlameOvershoot: 1.3
+  upgradeGlowFlare: 2.6
 --- !u!1 &8362247623293773798
 GameObject:
   m_ObjectHideFlags: 0

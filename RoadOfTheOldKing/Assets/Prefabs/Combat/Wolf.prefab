@@ -317,6 +317,7 @@ GameObject:
   - component: {fileID: 1047016559863015029}
   - component: {fileID: 2289962452642701656}
   - component: {fileID: 8957109625934908750}
+  - component: {fileID: 8158868160256956443}
   m_Layer: 0
   m_Name: Wolf
   m_TagString: Untagged
@@ -604,6 +605,19 @@ MonoBehaviour:
   ghostShader: {fileID: 4800000, guid: dccb8a4429804a8469ae41a42345a08a, type: 3}
   afterglow: 0.5
   heavy: 0
+--- !u!114 &8158868160256956443
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5631401983757112789}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81c9fa5289f4fb642860cbba6be3ab65, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RoadOfTheOldKing::RoadOfTheOldKing.Enemies.ActorDepth
+  body: {fileID: 7297936848709932806}
 --- !u!1 &7730274368486150538
 GameObject:
   m_ObjectHideFlags: 0

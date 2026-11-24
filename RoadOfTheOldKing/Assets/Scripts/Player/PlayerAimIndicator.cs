@@ -19,6 +19,7 @@ namespace RoadOfTheOldKing.Player
         // under the region atmosphere (1000) and darkness: the chevron is a reading aid, never hidden by scenery
         // (user, 18 Nov: "aim indicator is getting layered behind the world art").
         private const int OverlayOrder = 600;
+        private static int OverlayLayer => SortingLayer.NameToID("Player");
         private PlayerCombatController combat;
         private LineRenderer outline;
         private LineRenderer marker;
@@ -76,7 +77,8 @@ namespace RoadOfTheOldKing.Player
         private void Draw(LineRenderer line, Vector3 a, Vector3 b, Vector3 c, float width, int order)
         {
             line.startWidth = line.endWidth = width;
-            line.sortingLayerID = body.sortingLayerID;
+            // The Player layer, over all standing art (the hero's own body sorts in depth on Standing since 23 Nov).
+            line.sortingLayerID = OverlayLayer;
             line.sortingOrder = order;
             line.SetPosition(0, a);
             line.SetPosition(1, b);

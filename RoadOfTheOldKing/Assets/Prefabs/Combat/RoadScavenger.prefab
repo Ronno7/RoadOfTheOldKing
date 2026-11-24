@@ -113,6 +113,7 @@ GameObject:
   - component: {fileID: 6400531888760331847}
   - component: {fileID: 5069652519620453166}
   - component: {fileID: 3199130405693994130}
+  - component: {fileID: 4766187858116173633}
   m_Layer: 0
   m_Name: RoadScavenger
   m_TagString: Untagged
@@ -445,6 +446,19 @@ MonoBehaviour:
   ghostShader: {fileID: 4800000, guid: dccb8a4429804a8469ae41a42345a08a, type: 3}
   afterglow: 0.6
   heavy: 0
+--- !u!114 &4766187858116173633
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 423607603060298351}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81c9fa5289f4fb642860cbba6be3ab65, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RoadOfTheOldKing::RoadOfTheOldKing.Enemies.ActorDepth
+  body: {fileID: 5195685374505168920}
 --- !u!1 &1780693666760312645
 GameObject:
   m_ObjectHideFlags: 0

@@ -9,20 +9,21 @@ namespace RoadOfTheOldKing.World
 {
     // One field, no per-plant objects/colliders/Update. Shader wind is independent of field size.
     // Meshes are spatially culled; only touched chunks upload indices after an actual cut.
+    // Each chunk is a strip two art pixels deep and ChunkSize wide, drawn on the Standing layer at
+    // its row's order, so leaves sort against trees, props, enemies and the hero by their roots (user, 23 Nov: grass
+    // flickered against flowers and stones; the near-hero draw lifted a few leaves above things the rest stayed under).
     [ExecuteAlways, DisallowMultipleComponent, DefaultExecutionOrder(220)]
     public sealed class InteractiveVegetation : MonoBehaviour, IResetOnRest, ISceneVisitParticipant
     {
         public VegetationLayout layout;
         public Shader vegetationShader;
-        [Tooltip("Draw above this scene's ground surfaces; foreground depth still follows the player.")]
-        public int groundSortingOrder = 35;
         public Transform interactor;
         private const int ChunkSize = 8, TouchCount = 8;
+        // Strips are two art pixels deep: a leaf a pixel off in depth is invisible, and half as many strips draw.
+        public const int StripRowsPerUnit = 8;
         private readonly Dictionary<Vector2Int, List<Chunk>> cells = new Dictionary<Vector2Int, List<Chunk>>();
         private readonly List<Chunk> chunks = new List<Chunk>();
         private readonly Dictionary<Texture, Material> materials = new Dictionary<Texture, Material>();
-        private readonly Dictionary<Texture, Material> frontMaterials = new Dictionary<Texture, Material>();
-        private readonly HashSet<Chunk> foreground = new HashSet<Chunk>();
         private readonly Vector4[] touches = new Vector4[TouchCount];
         private readonly float[] ages = new float[TouchCount];
         private readonly HashSet<Chunk> dirty = new HashSet<Chunk>();
@@ -35,11 +36,6 @@ namespace RoadOfTheOldKing.World
         private VegetationDebris debris;
         private Transform depthInteractor;
         private SpriteRenderer depthBody;
-        private Vector4 depthWindow = new Vector4(1,1,0,0);
-        private Vector2Int depthMin, depthMax;
-        private bool hasDepthCells;
-        private float leafReach, rootOffset;
-        private int depthLayer, depthOrder;
         private static readonly int ClockId = Shader.PropertyToID("_PlantClock");
         private static readonly int TouchId = Shader.PropertyToID("_PlantTouch");
         private static readonly int DepthWindowId = Shader.PropertyToID("_PlantDepthWindow");
@@ -56,7 +52,7 @@ namespace RoadOfTheOldKing.World
         {
             public GameObject gameObject;
             public Mesh mesh;
-            public MeshRenderer renderer, front;
+            public MeshRenderer renderer;
             public bool hasGeometry;
             public Texture texture;
             public readonly List<int> plants = new List<int>();
@@ -118,29 +114,19 @@ namespace RoadOfTheOldKing.World
                 {
                     chunk=new Chunk { texture=texture };
                     list.Add(chunk); chunks.Add(chunk);
-                    if(!materials.ContainsKey(texture))
-                    {
-                        materials.Add(texture,MakeMaterial(texture,-1));
-                        frontMaterials.Add(texture,MakeMaterial(texture,1));
-                    }
-                    chunk.gameObject=new GameObject("Vegetation chunk "+key.x+","+key.y) { hideFlags=HideFlags.HideAndDontSave };
+                    if(!materials.ContainsKey(texture))materials.Add(texture,MakeMaterial(texture));
+                    chunk.gameObject=new GameObject("Vegetation strip "+key.x+","+key.y) { hideFlags=HideFlags.HideAndDontSave };
                     chunk.gameObject.transform.SetParent(transform,false);
                     chunk.renderer=chunk.gameObject.AddComponent<MeshRenderer>();
                     chunk.renderer.sharedMaterial=materials[texture];
-                    chunk.renderer.sortingLayerName="Ground"; chunk.renderer.sortingOrder=groundSortingOrder;
+                    chunk.renderer.sortingLayerID=Depth.Layer;
+                    chunk.renderer.sortingOrder=Depth.Order(key.y/(float)StripRowsPerUnit,Depth.GrassSlot);
+                    chunk.gameObject.transform.localPosition=new Vector3(0,0,Depth.TieDepth(key.x*ChunkSize,"grass"));
                     chunk.renderer.shadowCastingMode=ShadowCastingMode.Off; chunk.renderer.receiveShadows=false;
                     chunk.renderer.lightProbeUsage=LightProbeUsage.Off; chunk.renderer.reflectionProbeUsage=ReflectionProbeUsage.Off;
                     chunk.mesh=new Mesh { name="Vegetation chunk", hideFlags=HideFlags.HideAndDontSave };
                     chunk.mesh.MarkDynamic();
                     chunk.gameObject.AddComponent<MeshFilter>().sharedMesh=chunk.mesh;
-                    var frontObject=new GameObject("Vegetation foreground") { hideFlags=HideFlags.HideAndDontSave };
-                    frontObject.transform.SetParent(chunk.gameObject.transform,false);
-                    frontObject.AddComponent<MeshFilter>().sharedMesh=chunk.mesh;
-                    chunk.front=frontObject.AddComponent<MeshRenderer>();
-                    chunk.front.sharedMaterial=frontMaterials[texture];
-                    chunk.front.shadowCastingMode=ShadowCastingMode.Off; chunk.front.receiveShadows=false;
-                    chunk.front.lightProbeUsage=LightProbeUsage.Off; chunk.front.reflectionProbeUsage=ReflectionProbeUsage.Off;
-                    chunk.front.enabled=false;
                 }
                 chunk.plants.Add(i);
             }
@@ -150,17 +136,18 @@ namespace RoadOfTheOldKing.World
             UploadMotion();
         }
 
-        private Material MakeMaterial(Texture texture,float side)
+        // One draw for every leaf: the shader's old near-hero split stays off (an inverted window selects nothing).
+        private Material MakeMaterial(Texture texture)
         {
-            var material=new Material(vegetationShader) { name=side<0?"Vegetation (shared atlas)":"Vegetation (foreground)",
-                mainTexture=texture, hideFlags=HideFlags.HideAndDontSave };
-            material.SetFloat(DepthSideId,side);
+            var material=new Material(vegetationShader) { name="Vegetation (shared atlas)", mainTexture=texture, hideFlags=HideFlags.HideAndDontSave };
+            material.SetFloat(DepthSideId,-1);
+            material.SetVector(DepthWindowId,new Vector4(1,1,0,0));
             return material;
         }
 
         private void BuildMesh(Chunk c)
         {
-            // Sort north-to-south within each chunk. The two draws share this geometry and cut indices.
+            // Sort north-to-south within each strip.
             c.plants.Sort((a,b)=>layout.plants[b].position.y.CompareTo(layout.plants[a].position.y));
             var vertices=new List<Vector3>(c.plants.Count*8);
             var uv=new List<Vector2>(c.plants.Count*8);
@@ -201,8 +188,6 @@ namespace RoadOfTheOldKing.World
                     // Vertex rotation can leave the unrotated rectangle. A root-centred radius
                     // includes every possible rotation, keeping edge-of-camera leaves visible.
                     float radius=Mathf.Sqrt(Mathf.Max(left*left,right*right)+Mathf.Max(bottom*bottom,top*top));
-                    leafReach=Mathf.Max(leafReach,radius);
-                    rootOffset=Mathf.Max(rootOffset,leaf.offset.magnitude);
                     var leafBounds=new Bounds(root,new Vector3(radius*2,radius*2,.1f));
                     if(hasBounds)bounds.Encapsulate(leafBounds);
                     else {bounds=leafBounds;hasBounds=true;}
@@ -230,7 +215,6 @@ namespace RoadOfTheOldKing.World
             c.mesh.SetTriangles(c.indices,0,index,0,false);
             c.hasGeometry=index>0;
             c.renderer.enabled=c.hasGeometry;
-            c.front.enabled=c.hasGeometry&&foreground.Contains(c);
         }
 
         private void LateUpdate()
@@ -239,14 +223,14 @@ namespace RoadOfTheOldKing.World
             if(layout==null)return;
             using(UpdateMarker.Auto())
             {
-                bool depthChanged=SyncDepth();
+                SyncDepth();
                 float dt=Application.IsPlaying(gameObject)?Time.deltaTime:0f;
                 if(dt>0)
                 {
                     clock+=dt;
                     UpdateTouches(dt); debris?.Tick(dt);
                 }
-                if(dt>0||depthChanged)UploadMotion();
+                if(dt>0)UploadMotion();
                 foreach(var c in dirty)UploadIndices(c);
                 dirty.Clear();
             }
@@ -272,16 +256,15 @@ namespace RoadOfTheOldKing.World
         private void UploadMotion()
         {
             foreach(var m in materials.Values)UploadMaterialMotion(m);
-            foreach(var m in frontMaterials.Values)UploadMaterialMotion(m);
         }
 
         private void UploadMaterialMotion(Material material)
         {
             material.SetFloat(ClockId,clock); material.SetVectorArray(TouchId,touches);
-            material.SetVector(DepthWindowId,depthWindow);
         }
 
-        private bool SyncDepth()
+        // Cut debris sorts around the hero's body (VegetationDebris); the leaves themselves sit in depth already.
+        private void SyncDepth()
         {
             if(depthInteractor!=interactor)
             {
@@ -289,37 +272,9 @@ namespace RoadOfTheOldKing.World
                 depthBody=interactor!=null?interactor.GetComponentInChildren<SpriteRenderer>():null;
             }
             bool active=interactor!=null&&interactor.gameObject.activeInHierarchy;
-            var window=new Vector4(1,1,0,0); // inverted rectangle disables foreground selection
-            int layer=depthBody!=null?depthBody.sortingLayerID:SortingLayer.NameToID("Player");
-            int order=depthBody!=null?depthBody.sortingOrder+3:3; // over body, carried axe and grip fold
-            debris?.SetSorting(layer,order-3,active?interactor.position.y+.0625f:float.NegativeInfinity);
-            if(active)
-            {
-                float feet=interactor.position.y+.0625f;
-                var bounds=depthBody!=null?depthBody.bounds:new Bounds(interactor.position,new Vector3(2,2,0));
-                // Only roots that could overlap the player need the foreground draw. Distant grass
-                // retains its Ground ordering against existing props and overheads.
-                window=new Vector4(bounds.min.x-leafReach,bounds.min.y-leafReach,bounds.max.x+leafReach,feet);
-            }
-            bool changed=window!=depthWindow;
-            depthWindow=window;
-            var min=Cell(new Vector2(window.x-rootOffset,window.y-rootOffset));
-            var max=Cell(new Vector2(window.z+rootOffset,window.w+rootOffset));
-            if(active==hasDepthCells&&(!active||(min==depthMin&&max==depthMax&&layer==depthLayer&&order==depthOrder)))return changed;
-            foreach(var c in foreground)c.front.enabled=false;
-            foreground.Clear();
-            hasDepthCells=active; depthMin=min; depthMax=max; depthLayer=layer; depthOrder=order;
-            if(active)for(int y=min.y;y<=max.y;y++)for(int x=min.x;x<=max.x;x++)
-            {
-                if(!cells.TryGetValue(new Vector2Int(x,y),out var list))continue;
-                foreach(var c in list)
-                {
-                    foreground.Add(c);
-                    c.front.sortingLayerID=layer; c.front.sortingOrder=order;
-                    c.front.enabled=c.hasGeometry;
-                }
-            }
-            return true;
+            int layer=depthBody!=null?depthBody.sortingLayerID:Depth.Layer;
+            int order=depthBody!=null?depthBody.sortingOrder:0;
+            debris?.SetSorting(layer,order,active?interactor.position.y+.0625f:float.NegativeInfinity);
         }
 
         private void ClearTouches()
@@ -328,7 +283,8 @@ namespace RoadOfTheOldKing.World
             hasFeet=false; trailClock=0; nextTouch=1;
         }
 
-        private static Vector2Int Cell(Vector2 p) => new Vector2Int(Mathf.FloorToInt(p.x/ChunkSize),Mathf.FloorToInt(p.y/ChunkSize));
+        // A strip: ChunkSize wide, two art pixels (StripRowsPerUnit) deep.
+        private static Vector2Int Cell(Vector2 p) => new Vector2Int(Mathf.FloorToInt(p.x/ChunkSize),Mathf.RoundToInt(p.y*StripRowsPerUnit));
 
         private void OnSweep(WeaponSweep sweep)
         {
@@ -407,13 +363,11 @@ namespace RoadOfTheOldKing.World
 
         private void Release()
         {
-            foreach(var c in chunks){c.renderer.enabled=false;c.front.enabled=false;Dispose(c.gameObject);Dispose(c.mesh);}
+            foreach(var c in chunks){c.renderer.enabled=false;Dispose(c.gameObject);Dispose(c.mesh);}
             foreach(var m in materials.Values)Dispose(m);
-            foreach(var m in frontMaterials.Values)Dispose(m);
-            chunks.Clear();cells.Clear();materials.Clear();frontMaterials.Clear();foreground.Clear();dirty.Clear();
+            chunks.Clear();cells.Clear();materials.Clear();dirty.Clear();
             debris?.Dispose();debris=null;cut=null;CutCount=0;clock=0;ClearTouches();
-            hasDepthCells=false;depthInteractor=null;depthBody=null;leafReach=rootOffset=0;
-            depthWindow=new Vector4(1,1,0,0);
+            depthInteractor=null;depthBody=null;
         }
 
         internal static void Dispose(Object item)

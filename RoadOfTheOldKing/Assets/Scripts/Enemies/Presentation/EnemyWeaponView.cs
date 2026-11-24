@@ -114,6 +114,7 @@ namespace RoadOfTheOldKing.Enemies
         {
             weapon.enabled = body.enabled;
             weapon.color = body.color; // follows the corpse fade
+            // One slot in front of or behind the body, inside its depth row (ActorDepth, Depth).
             weapon.sortingLayerID = body.sortingLayerID;
             weapon.sortingOrder = body.sortingOrder + (inFront ? 1 : -1);
             // Level points east, diagonal north-east; mirrors and quarter turns reach the rest exactly.

@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2267733396704458040}
   - component: {fileID: 6782143480322084569}
+  - component: {fileID: 1130085099764499998}
   m_Layer: 0
   m_Name: Artwork
   m_TagString: Untagged
@@ -91,6 +92,19 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &1130085099764499998
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2496114937276437430}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f64907a8847f4eb429e2afb75cac63d6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RoadOfTheOldKing::RoadOfTheOldKing.World.WorldPropDepth
+  groundAnchor: {fileID: 7827584473503402727}
 --- !u!1 &5407195319457414978
 GameObject:
   m_ObjectHideFlags: 0

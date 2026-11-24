@@ -14,7 +14,8 @@
 - A locked sluice crank shows a pin, which pops out with its own sound when the puzzle frees it.
 - The maintenance crank is now simply the crank, with plain prompts.
 - The old stone bridges have new stonework.
-- Controls show as key and button icons, and menus no longer list their controls along the bottom.
+- The Tutorial's sealed gate stands in a new stone archway.
+- Controls show as key, mouse and button icons, on the Controls page too, and menus no longer list their controls along the bottom.
 - Prompts are lighter and slimmer, and no longer cover place names.
 
 **Fixed**
@@ -24,6 +25,10 @@
 - The hand on the carried axe stays on the cloak while walking, and now shows from behind too.
 - The sluice's cranks turn without skewing, and their shadows stay still.
 - The carried axe no longer pokes in and out of houses, wells, trees and rocks.
+- Trees, bushes, rocks, signs, enemies and grass keep their proper order as you walk among them, without flickering.
+- Low stone walls hide your feet when you stand behind them.
+- On a controller, the throw line shows where aim assist will send the axe, and assist ignores enemies behind walls.
+- A bonfire's flame no longer burns you while its menu is open.
 
 ## 0.5 — Full production
 

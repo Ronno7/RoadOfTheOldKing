@@ -46,7 +46,7 @@ Art and collision are independent: a water or cliff tile isn't an obstacle until
 
 Every scene shares one hierarchy. The region root (a Grid) holds `Collision`, the ground and path maps, `Terrain`, `Scenery`, `Gameplay`, `Encounters` and editor-only `Authoring` guides. `Player`, `Game Session`, `Cameras` and `Lighting` sit at the scene root.
 
-Props, buildings and single trees are prefabs with one sprite and a collision footprint: `WorldPropDepth` draws each in front of or behind the hero by its ground line, and does the same for bush tile maps along forest edges. Forest masses and the pieces the hero walks under (bridges, arches, door lintels) keep an overhead layer, so he passes under a canopy but not through a trunk.
+Props, buildings and single trees are prefabs with one sprite and a collision footprint. Everything that stands sorts on one **Standing** layer by where it meets the ground (`Depth`: one-pixel rows, a slot and a fixed tiebreak), so nothing swaps as the hero walks: `WorldPropDepth` places props, bush and wall tile maps tile by tile; forests painted as tile maps stay tile maps for painting, collision and shadows, but in play `ForestStamps` draws each tree as one sprite at its ground line; the hero and enemies sort by their feet (`HeroDepth`, `ActorDepth`). Only the pieces the hero walks under (bridge rails, the Lowlands' old arches, door lintels) keep an overhead layer.
 
 ## Elevation
 
@@ -79,10 +79,10 @@ Art is native 16×16 at 16 pixels per unit, point filtered. RuleTiles pick the r
 
 Grass, flowers and reeds sway, bend away from the player and get cut by real weapon sweeps.
 
-- `InteractiveVegetation` draws baked `VegetationLayout` data in small mesh chunks: no object or collider per plant.
+- `InteractiveVegetation` draws baked `VegetationLayout` data in mesh strips 8 units wide and two pixels deep: no object or collider per plant.
 - Leaves rotate on the GPU around their roots. This deliberately smooth motion is an exception to the pixel grid.
-- Depth follows each plant's root against the player's feet, using an extra draw only in nearby chunks.
-- The bake leaves out plants whose leaves would reach up into a prop standing behind them, since the field draws under props.
+- Each strip sorts on the Standing layer at its roots' depth, so leaves draw in front of or behind the hero, enemies and props exactly as they stand.
+- The bake leaves out plants whose leaves would reach up into a prop standing behind them.
 - Cut plants stay cleared through scene visits and regrow on rest. Debris uses a fixed particle pool.
 
 ## Light and shadow

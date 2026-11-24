@@ -394,7 +394,6 @@ namespace RoadOfTheOldKing.EditorTools
             Undo.RecordObject(field,"Configure Lowlands vegetation");
             field.layout=layout;field.vegetationShader=Shader.Find("RoadOfTheOldKing/InteractiveVegetation");
             if(field.vegetationShader==null)throw new InvalidOperationException("Vegetation shader missing.");
-            field.groundSortingOrder=55;
             field.interactor=UnityEngine.Object.FindFirstObjectByType<PlayerMovement>().transform;
             field.transform.SetPositionAndRotation(Vector3.zero,Quaternion.identity);field.transform.localScale=Vector3.one;
             field.Rebuild();EditorUtility.SetDirty(field);EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());

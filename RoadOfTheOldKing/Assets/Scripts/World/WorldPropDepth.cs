@@ -1,82 +1,54 @@
 using System.Collections.Generic;
-using RoadOfTheOldKing.Player;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
 namespace RoadOfTheOldKing.World
 {
-    // Props use their fixed ground contact for depth against the hero: with his feet behind its ground line a prop draws
-    // over him, in front of it under him. Animation height must not move the sorting boundary.
+    // A prop's place in depth (Depth): on the Standing layer at its ground line, so it draws in front of everything
+    // standing farther north and behind everything farther south, the hero included, wherever he is (user, 23 Nov: "go
+    // with codex's cleaner long term approach"; the hero-relative orders before it left every tie to the renderer). The
+    // ground line is its pivot or groundAnchor; the slot comes from its x. Set once, and again only if the prop moves.
     // A tilemap of low bushes is drawn tile by tile in play (the map keeps its tiles for painting, collision and the
-    // shadow bake): each tile sorts by its own bush's base row exactly like a prop, so bushes and trees keep one order
-    // however the hero moves (user, 23 Nov: "some groups of bushes are still swapping between layers of trees"; one map
-    // renderer can't sit in front of one tree and behind another). A groundAnchor instead fixes one line for a whole
-    // map, for a prefab's overhead half (the stone bridge's rails).
-    [DisallowMultipleComponent]
+    // shadow bake): each tile at its own bush's base row, so bushes and trees keep one order. A groundAnchor instead fixes
+    // one line for a whole map: a prefab's overhead half (the stone bridge's near rail).
+    [DisallowMultipleComponent, DefaultExecutionOrder(900)]
     public sealed class WorldPropDepth : MonoBehaviour
     {
         [SerializeField] private Transform groundAnchor;
+        [Tooltip("Each tile stands on its own row (a low wall, seen from above, is one tile deep everywhere); otherwise a " +
+            "tile takes its bush's base row.")]
+        [SerializeField] private bool tilesStandAlone;
         private Renderer body;
-        private SpriteRenderer playerBody;
-        private Transform player;
-        private int authoredLayer, authoredOrder;
         private SpriteRenderer[] tileArt;
         private float[] tileGround;
-
-        // The hero's art is about a tile wide and two tall from the feet.
-        private const float HalfWidth = .5f, Height = 2f;
-        // Orders against the hero's body: art he stands in front of goes just under him, art he is behind just over
-        // him (over his carried axe and grip fold too).
-        private const int UnderHero = -3, OverHero = 5;
-        // Art on the same side of the hero shares an order, and the 2D renderer's orthographic sort breaks a tie by
-        // distance to the camera: all at z 0, overlapping trees swapped as the hero walked (user, 23 Nov). A z from the
-        // ground line keeps the nearer one in front: farther north, farther away (a 200-unit map stays within 0.2).
-        private const float DepthPerUnit = .001f;
 
         private void Start()
         {
             body = GetComponent<Renderer>();
-            var movement = FindFirstObjectByType<PlayerMovement>();
-            if (body == null || movement == null) { enabled = false; return; }
-            authoredLayer = body.sortingLayerID; authoredOrder = body.sortingOrder;
-            player = movement.transform;
-            playerBody = movement.GetComponentInChildren<SpriteRenderer>();
+            if (body == null) { enabled = false; return; }
             var tiles = body is TilemapRenderer ? GetComponent<Tilemap>() : null;
-            if (tiles != null && groundAnchor == null) SplitTiles(tiles);
+            if (tiles != null && groundAnchor == null) { SplitTiles(tiles); enabled = false; return; }
+            Place();
         }
 
+        // Only a prop that moved (a recoil, a sinking gate leaf) is placed again.
         private void LateUpdate()
         {
-            if (body == null || player == null || playerBody == null) return;
-            float feet = player.position.y;
-            if (tileArt != null)
-            {
-                for (int i = 0; i < tileArt.Length; i++) Sort(tileArt[i], tileGround[i], feet);
-                return;
-            }
-            float ground = groundAnchor != null ? groundAnchor.position.y : transform.position.y;
-            if (body is TilemapRenderer)
-            {
-                // Only while the hero overlaps the overhead art; elsewhere it stays as authored.
-                var art = body.bounds;
-                float x = player.position.x;
-                bool near = x > art.min.x - HalfWidth && x < art.max.x + HalfWidth && feet < art.max.y && feet + Height > art.min.y;
-                bool behind = !near || feet > ground;
-                body.sortingLayerID = behind ? authoredLayer : playerBody.sortingLayerID;
-                body.sortingOrder = behind ? authoredOrder : playerBody.sortingOrder + UnderHero;
-                return;
-            }
-            Sort(body, ground, feet);
-            var position = transform.position;
-            float depth = ground * DepthPerUnit;
-            if (Mathf.Abs(position.z - depth) > 1e-5f) transform.position = new Vector3(position.x, position.y, depth);
+            if (!transform.hasChanged && (groundAnchor == null || !groundAnchor.hasChanged)) return;
+            Place();
         }
 
-        private void Sort(Renderer art, float ground, float feet)
+        private void Place()
         {
-            int order = playerBody.sortingOrder + (feet > ground ? OverHero : UnderHero);
-            if (art.sortingLayerID != playerBody.sortingLayerID) art.sortingLayerID = playerBody.sortingLayerID;
-            if (art.sortingOrder != order) art.sortingOrder = order;
+            transform.hasChanged = false;
+            if (groundAnchor != null) groundAnchor.hasChanged = false;
+            float ground = groundAnchor != null ? groundAnchor.position.y : transform.position.y;
+            float x = body is TilemapRenderer ? body.bounds.center.x : (groundAnchor != null ? groundAnchor : transform).position.x;
+            Depth.Apply(body, ground, Depth.SlotAt(x));
+            // Props' art objects are mostly named Art: tell them apart by the prop and its sprite.
+            string key = (transform.parent != null ? transform.parent.name : name) +
+                (body is SpriteRenderer art && art.sprite != null ? art.sprite.name : "");
+            Depth.Settle(transform, x, key);
         }
 
         // One sprite per tile, placed and drawn as the map draws it, at the depth of its ground line: the middle of its
@@ -94,25 +66,39 @@ namespace RoadOfTheOldKing.World
                 var sprite = tiles.GetSprite(cell);
                 if (sprite == null) continue;
                 var baseCell = cell;
-                while (!IsBase(tiles, baseCell)) baseCell += Vector3Int.down;
+                while (!tilesStandAlone && !IsBase(tiles, baseCell)) baseCell += Vector3Int.down;
                 float ground = tiles.CellToWorld(baseCell).y + tiles.cellSize.y * .5f;
                 var place = tiles.transform.localToWorldMatrix
                     * Matrix4x4.Translate(tiles.CellToLocal(cell) + tiles.tileAnchor) * tiles.GetTransformMatrix(cell);
                 var tile = new GameObject(sprite.name).transform;
                 tile.SetParent(root, false);
-                tile.SetPositionAndRotation(new Vector3(place.m03, place.m13, ground * DepthPerUnit), place.rotation);
+                tile.SetPositionAndRotation(new Vector3(place.m03, place.m13, 0f), place.rotation);
                 tile.localScale = place.lossyScale;
                 var renderer = tile.gameObject.AddComponent<SpriteRenderer>();
                 renderer.sprite = sprite;
                 renderer.color = tiles.color * tiles.GetColor(cell);
                 renderer.sharedMaterial = map.sharedMaterial;
                 renderer.maskInteraction = map.maskInteraction;
+                // The slot follows the bush's centre column (Name_col_row), not the tile, so one bush's tiles never split
+                // around something else on their row.
+                int centre = tilesStandAlone ? cell.x : cell.x + 1 - Column(sprite, 1);
+                float x = tiles.CellToWorld(new Vector3Int(centre, baseCell.y, 0)).x + tiles.cellSize.x * .5f;
+                Depth.Apply(renderer, ground, Depth.SlotAt(x));
+                Depth.Settle(tile, x, name);
                 art.Add(renderer);
                 grounds.Add(ground);
             }
             map.enabled = false;
             tileArt = art.ToArray();
             tileGround = grounds.ToArray();
+        }
+
+        // "Hedgerow_2_0" -> 2; a name without a column gives the fallback.
+        private static int Column(Sprite sprite, int fallback)
+        {
+            string n = sprite.name;
+            int last = n.LastIndexOf('_'), before = last > 0 ? n.LastIndexOf('_', last - 1) : -1;
+            return before >= 0 && int.TryParse(n.Substring(before + 1, last - before - 1), out int column) ? column : fallback;
         }
 
         private static bool IsBase(Tilemap tiles, Vector3Int cell)
