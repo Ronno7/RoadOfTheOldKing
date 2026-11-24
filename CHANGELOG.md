@@ -2,9 +2,15 @@
 
 ## Unreleased
 
+## 0.5 — Full production
+
+### 0.5.1 — 2026-11-23 · Signs, depth and settings
+
+*Windows*
+
 **Added**
 - Signs teach the Tutorial's lessons and its bonfires; read one any time.
-- Additional VFX for bush and rock breakables
+- Additional VFX for bush and rock breakables.
 - A Random button on the cloak picker.
 - V-Sync and frame rate limit settings.
 
@@ -28,8 +34,6 @@
 
 **Removed**
 - The Unity splash screen at launch.
-
-## 0.5 — Full production
 
 ### 0.5.1-dev.1 — 2026-11-22 · Bonfires and controllers
 
