@@ -15,7 +15,7 @@ namespace RoadOfTheOldKing.UI
         private VisualElement overlay, panel, controls, actions, options;
         private MenuList list;
         private OptionList optionList;
-        private bool showingOptions;
+        private bool showingOptions, controlsCanRecall;
         private Action<PauseMenuAction> invoke;
         public bool IsVisible => overlay != null && overlay.style.display.value != DisplayStyle.None;
 
@@ -73,13 +73,15 @@ namespace RoadOfTheOldKing.UI
         public bool ShowControls(IReadOnlyList<PauseMenuAction> commands, Action<PauseMenuAction> onAction, bool canRecall)
         {
             if (!Show(commands, onAction, 0, "CONTROLS")) return false;
+            controlsCanRecall = canRecall;
             ControlsPage.Fill(controls, canRecall);
             panel.AddToClassList("controls-open");
             HighlightDevice();
             return true;
         }
 
-        // The column for the device in use shows gold, and follows a switch while the page is open.
+        // The column for the device in use shows gold, and follows a switch while the page is open; a switch between
+        // Xbox and PlayStation pads redraws the pad column's buttons.
         private void HighlightDevice()
         {
             if (controls == null) return;
@@ -87,13 +89,19 @@ namespace RoadOfTheOldKing.UI
             controls.EnableInClassList("using-keyboard", !ActiveInput.UsingGamepad);
         }
 
-        private void OnEnable() => ActiveInput.Changed += HighlightDevice;
+        private void OnDeviceChanged()
+        {
+            if (IsVisible && panel.ClassListContains("controls-open")) ControlsPage.Fill(controls, controlsCanRecall);
+            HighlightDevice();
+        }
+
+        private void OnEnable() => ActiveInput.Changed += OnDeviceChanged;
 
         public void Navigate(int direction) { if (IsVisible) { if (showingOptions) optionList.Navigate(direction); else list.Navigate(direction); } }
         public void Submit() { if (IsVisible) { if (showingOptions) optionList.Submit(); else list.Submit(); } }
         public void Adjust(int direction) { if (IsVisible && showingOptions) optionList.Adjust(direction); }
         public void Hide() { if (overlay != null) overlay.style.display = DisplayStyle.None; }
-        private void OnDisable() { ActiveInput.Changed -= HighlightDevice; Hide(); }
+        private void OnDisable() { ActiveInput.Changed -= OnDeviceChanged; Hide(); }
         private void OnDestroy() { if (document != null) Destroy(document.gameObject); }
     }
 }

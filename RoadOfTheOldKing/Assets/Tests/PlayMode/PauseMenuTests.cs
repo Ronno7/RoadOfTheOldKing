@@ -261,10 +261,23 @@ public sealed class PauseMenuTests
             var page=pageRoot();
             check(find(page,"pause-panel").ClassListContains("controls-open")&&((UnityEngine.UIElements.Label)find(page,"heading")).text=="CONTROLS","The page shows the table under its own heading");
             Func<string,List<string>> cells=c=>UnityEngine.UIElements.UQueryExtensions.Query<UnityEngine.UIElements.Label>(find(page,"controls"),(string)null,c).ToList().Select(l=>l.text).Where(t=>t!="").ToList();
-            var names=cells("controls-action");var keys=cells("controls-keys");var pads=cells("controls-pad");
+            var names=cells("controls-action");
             foreach(var row in new[]{"Move","Sprint","Dodge","Light attack","Charged cleave","Throw","Aim","Drink flask","Interact","Inventory","Look around","Zoom","Pause","Select","Back"})check(names.Contains(row),"Lists "+row);
-            check(keys.Contains(RoadOfTheOldKing.UI.ControlLabels.KeyboardLabel("dash"))&&pads.Contains(RoadOfTheOldKing.UI.ControlLabels.GamepadLabel("dash"))&&keys.Contains("Space")&&pads.Contains("B"),"Dodge reads Space and B from ControlLabels");
-            check(keys.Count==pads.Count&&keys.Count==17,"All 15 rows have a key and a pad name, plus each block's column title");
+            // Each control cell shows glyphs: a keycap's name, or a drawn sprite's class.
+            var rows=UnityEngine.UIElements.UQueryExtensions.Query(find(page,"controls"),(string)null,"controls-row").ToList().Where(r=>!r.ClassListContains("controls-heading")).ToList();
+            Func<UnityEngine.UIElements.VisualElement,string> shown=cell=>string.Join(" ",UnityEngine.UIElements.UQueryExtensions.Query(cell,(string)null,"glyph").ToList().Select(g=>g.ClassListContains("glyph-key")?((UnityEngine.UIElements.Label)g.ElementAt(0)).text:g.GetClasses().First(k=>k.StartsWith("glyph-")&&k!="glyph-sprite")));
+            Func<string,UnityEngine.UIElements.VisualElement> rowOf=a=>rows.First(r=>((UnityEngine.UIElements.Label)r.ElementAt(0)).text==a);
+            check(RoadOfTheOldKing.UI.ControlLabels.KeyboardLabel("dash")=="Space"&&shown(rowOf("Dodge").ElementAt(1))=="glyph-key-space"&&shown(rowOf("Dodge").ElementAt(2))=="glyph-b","Dodge shows the Space key and the B button, from ControlLabels");
+            check(rows.All(r=>!UnityEngine.UIElements.UQueryExtensions.Query(r,(string)null,"glyph-key").ToList().Any()),"Every key on the page has its own drawn sprite, none falls back to the text keycap");
+            check(shown(rowOf("Light attack").ElementAt(1))=="glyph-mouse-left"&&shown(rowOf("Light attack").ElementAt(2))=="glyph-rb","Light attack shows the left mouse button and RB");
+            check(shown(rowOf("Look around").ElementAt(2))=="glyph-lb glyph-rs","Look around shows LB and the right stick");
+            check(rows.Count==15&&rows.All(r=>shown(r.ElementAt(1))!=""&&shown(r.ElementAt(2))!=""),"All 15 rows show a key and a pad control");
+            // A PlayStation pad picked up while the page is open redraws its column (review, 23 Nov: it kept the old names).
+            bool wasPad=RoadOfTheOldKing.Input.ActiveInput.UsingGamepad,wasPlayStation=RoadOfTheOldKing.Input.ActiveInput.PlayStationPad;
+            RoadOfTheOldKing.Input.ActiveInput.Set(true);RoadOfTheOldKing.Input.ActiveInput.SetPlayStation(true);
+            rows=UnityEngine.UIElements.UQueryExtensions.Query(find(page,"controls"),(string)null,"controls-row").ToList().Where(r=>!r.ClassListContains("controls-heading")).ToList();
+            check(shown(rowOf("Dodge").ElementAt(2))=="glyph-circle"&&shown(rowOf("Light attack").ElementAt(2))=="glyph-r1","A PlayStation pad picked up on the open page shows its own buttons");
+            RoadOfTheOldKing.Input.ActiveInput.SetPlayStation(wasPlayStation);RoadOfTheOldKing.Input.ActiveInput.Set(wasPad);
             check(!names.Contains("Throw, Recall"),"Recall stays unnamed until it's earned");
             menu.Back();check(menu.IsOpen&&!(bool)inControls.GetValue(menu)&&!find(pageRoot(),"pause-panel").ClassListContains("controls-open"),"Back returns to the main page and drops the table");
             menu.Submit();check((bool)inControls.GetValue(menu),"Back left the selection on the Controls row");

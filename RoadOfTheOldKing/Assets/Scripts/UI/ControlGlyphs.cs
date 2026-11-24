@@ -6,13 +6,29 @@ using UnityEngine.UIElements;
 namespace RoadOfTheOldKing.UI
 {
     // Controls drawn as icons instead of key names in brackets (user, 23 Nov: "find a better way to represent that";
-    // research: platform guidelines and shipped games show button glyphs that follow the device in use). Keyboard keys
-    // and faceless pad buttons (LB, D-pad, Start) are keycaps holding their name; pad face buttons are drawn (Xbox
-    // letters, PlayStation shapes). Text with {tokens} lays out as words and glyphs, line by line, centred.
+    // research: platform guidelines and shipped games show button glyphs that follow the device in use). Every key, mouse
+    // and pad control is a drawn sprite (Kit.uss, Tools/Art/UI/ui_kit.py); a key without one falls back to a keycap
+    // holding its name. Text with {tokens} lays out as words and glyphs, line by line, centred.
     public static class ControlGlyphs
     {
         private static readonly Regex Pieces = new Regex(@"\{[a-z]+\}|[^\s{]+");
-        private static readonly HashSet<string> Faces = new HashSet<string> { "A", "B", "X", "Y", "Cross", "Circle", "Square", "Triangle" };
+        // ControlLabels' names -> the sprite's class. Pad names cover Xbox and PlayStation; Options shares Start's lines.
+        private static readonly Dictionary<string, string> PadSprites = new Dictionary<string, string>
+        {
+            { "A", "glyph-a" }, { "B", "glyph-b" }, { "X", "glyph-x" }, { "Y", "glyph-y" },
+            { "Cross", "glyph-cross" }, { "Circle", "glyph-circle" }, { "Square", "glyph-square" }, { "Triangle", "glyph-triangle" },
+            { "LS", "glyph-ls" }, { "RS", "glyph-rs" }, { "D-pad", "glyph-dpad" },
+            { "LB", "glyph-lb" }, { "RB", "glyph-rb" }, { "LT", "glyph-lt" }, { "RT", "glyph-rt" },
+            { "L1", "glyph-l1" }, { "R1", "glyph-r1" }, { "L2", "glyph-l2" }, { "R2", "glyph-r2" },
+            { "Start", "glyph-start" }, { "Options", "glyph-start" }, { "View", "glyph-view" }, { "Create", "glyph-create" },
+        };
+        private static readonly Dictionary<string, string> KeyboardSprites = new Dictionary<string, string>
+        {
+            { "LMB", "glyph-mouse-left" }, { "RMB", "glyph-mouse-right" }, { "Wheel", "glyph-mouse-wheel" }, { "Mouse", "glyph-mouse" },
+            { "WASD", "glyph-key-wasd" }, { "Shift", "glyph-key-shift" }, { "Space", "glyph-key-space" }, { "Enter", "glyph-key-enter" },
+            { "Esc", "glyph-key-esc" }, { "Tab", "glyph-key-tab" }, { "Alt", "glyph-key-alt" },
+            { "F", "glyph-key-f" }, { "E", "glyph-key-e" }, { "R", "glyph-key-r" },
+        };
         private static readonly List<(VisualElement host, string text)> bound = new List<(VisualElement, string)>();
         private static bool subscribed;
 
@@ -67,8 +83,11 @@ namespace RoadOfTheOldKing.UI
         // The control a token names on the active device, e.g. {interact} -> F or A.
         public static VisualElement Token(string token) => Key(ControlLabels.Get(token));
 
-        // A key or button name as ControlLabels gives it: "F", "Hold B", "LB + RS", "Cross".
-        public static VisualElement Key(string name)
+        // A key or button name as ControlLabels gives it: "F", "Hold B", "LB + RS", "Cross", on the device in use.
+        public static VisualElement Key(string name) => Key(name, ActiveInput.UsingGamepad);
+
+        // The same for a named device, for the controls page's two columns.
+        public static VisualElement Key(string name, bool pad)
         {
             var group = new VisualElement { pickingMode = PickingMode.Ignore };
             group.AddToClassList("glyph-group");
@@ -77,19 +96,19 @@ namespace RoadOfTheOldKing.UI
             for (int i = 0; i < parts.Length; i++)
             {
                 if (i > 0) group.Add(Word("+"));
-                group.Add(Single(parts[i]));
+                group.Add(Single(parts[i], pad));
             }
             return group;
         }
 
-        private static VisualElement Single(string name)
+        private static VisualElement Single(string name, bool pad)
         {
             var glyph = new VisualElement { pickingMode = PickingMode.Ignore };
             glyph.AddToClassList("glyph");
-            if (ActiveInput.UsingGamepad && Faces.Contains(name))
+            if ((pad ? PadSprites : KeyboardSprites).TryGetValue(name, out string sprite))
             {
-                glyph.AddToClassList("glyph-face");
-                glyph.AddToClassList("glyph-" + name.ToLowerInvariant());
+                glyph.AddToClassList("glyph-sprite");
+                glyph.AddToClassList(sprite);
                 return glyph;
             }
             glyph.AddToClassList("glyph-key");

@@ -81,7 +81,8 @@
 .kit-row.selected > .kit-cursor { display: flex; }
 
 /* Control glyphs (ControlGlyphs; user, 23 Nov): controls drawn as icons on a 12 UI px line, never "[F]" in brackets.
-   Keys and faceless pad buttons are a keycap holding the name in gold; pad face buttons are drawn sprites. */
+   Every control is a drawn sprite, each its own width, its name in the icon capitals (ui_kit.py); a key without a
+   sprite falls back to the keycap holding its name in gold. */
 .glyph-line { flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; }
 .glyph-group { flex-direction: row; align-items: center; flex-shrink: 0; margin: 0 6px 0 0; }
 .glyph-word { margin: 0 6px 0 0; padding: 0; white-space: nowrap; }
@@ -93,7 +94,7 @@
     -unity-slice-left: 3; -unity-slice-right: 3; -unity-slice-top: 3; -unity-slice-bottom: 4;
 }
 .glyph-key Label { color: var(--kit-gold); margin: 0; padding: 0; -unity-text-align: middle-center; white-space: nowrap; }
-.glyph-face { width: 24px; }
+.glyph-sprite { width: 24px; }
 .glyph-a { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphA.png"); }
 .glyph-b { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphB.png"); }
 .glyph-x { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphX.png"); }
@@ -102,4 +103,40 @@
 .glyph-circle { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphCircle.png"); }
 .glyph-square { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphSquare.png"); }
 .glyph-triangle { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphTriangle.png"); }
+.glyph-start { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphStart.png"); }
+.glyph-view { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphView.png"); }
+.glyph-create { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphCreate.png"); }
+.glyph-ls { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphLS.png"); }
+.glyph-rs { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphRS.png"); }
+.glyph-dpad { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphDpad.png"); }
+.glyph-lb, .glyph-rb, .glyph-l1, .glyph-r1 { width: 30px; }
+.glyph-lt, .glyph-rt, .glyph-l2, .glyph-r2 { width: 26px; }
+.glyph-lb { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphLB.png"); }
+.glyph-rb { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphRB.png"); }
+.glyph-l1 { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphL1.png"); }
+.glyph-r1 { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphR1.png"); }
+.glyph-lt { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphLT.png"); }
+.glyph-rt { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphRT.png"); }
+.glyph-l2 { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphL2.png"); }
+.glyph-r2 { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphR2.png"); }
+.glyph-key-f, .glyph-key-e, .glyph-key-r { width: 22px; }
+.glyph-key-esc, .glyph-key-tab, .glyph-key-alt { width: 34px; }
+.glyph-key-wasd { width: 46px; }
+.glyph-key-shift, .glyph-key-space { width: 50px; }
+.glyph-key-enter { width: 52px; }
+.glyph-key-f { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/KeyF.png"); }
+.glyph-key-e { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/KeyE.png"); }
+.glyph-key-r { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/KeyR.png"); }
+.glyph-key-esc { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/KeyEsc.png"); }
+.glyph-key-tab { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/KeyTab.png"); }
+.glyph-key-alt { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/KeyAlt.png"); }
+.glyph-key-wasd { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/KeyWASD.png"); }
+.glyph-key-shift { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/KeyShift.png"); }
+.glyph-key-space { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/KeySpace.png"); }
+.glyph-key-enter { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/KeyEnter.png"); }
+.glyph-mouse, .glyph-mouse-left, .glyph-mouse-right, .glyph-mouse-wheel { width: 18px; }
+.glyph-mouse { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphMouse.png"); }
+.glyph-mouse-left { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphMouseLeft.png"); }
+.glyph-mouse-right { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphMouseRight.png"); }
+.glyph-mouse-wheel { background-image: url("project://database/Assets/Art/Sprites/UI/Kit/GlyphMouseWheel.png"); }
 .next-arrow { width: 14px; height: 10px; background-image: url("project://database/Assets/Art/Sprites/UI/Kit/NextArrow.png"); }

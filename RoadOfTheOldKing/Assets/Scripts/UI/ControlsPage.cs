@@ -2,8 +2,8 @@ using UnityEngine.UIElements;
 
 namespace RoadOfTheOldKing.UI
 {
-    // The pause menu's controls reference: each action with its keyboard and controller names, read from
-    // ControlLabels so the page can't drift from the prompts. Pure layout; PauseMenuView owns showing it.
+    // The pause menu's controls reference: each action with its keyboard and controller controls drawn as glyphs, read
+    // from ControlLabels so the page can't drift from the prompts. Pure layout; PauseMenuView owns showing it.
     public static class ControlsPage
     {
         private static readonly (string group, (string action, string token)[] rows)[][] Blocks =
@@ -33,24 +33,36 @@ namespace RoadOfTheOldKing.UI
                 for (int g = 0; g < block.Length; g++)
                 {
                     // The first heading also titles the two device columns.
-                    var heading = Row(column, block[g].group, g == 0 ? "Keys" : "", g == 0 ? "Pad" : "");
+                    var heading = Row(column, block[g].group);
+                    heading.Add(Cell(g == 0 ? "Keys" : "", "controls-keys"));
+                    heading.Add(Cell(g == 0 ? "Pad" : "", "controls-pad"));
                     heading.AddToClassList("controls-heading");
                     foreach (var (action, token) in block[g].rows)
-                        Row(column, token == "throw" && canRecall ? "Throw, Recall" : action,
-                            ControlLabels.KeyboardLabel(token), ControlLabels.GamepadLabel(token));
+                    {
+                        var row = Row(column, token == "throw" && canRecall ? "Throw, Recall" : action);
+                        row.Add(Glyphs(ControlLabels.KeyboardLabel(token), false, "controls-keys"));
+                        row.Add(Glyphs(ControlLabels.GamepadLabel(token), true, "controls-pad"));
+                    }
                 }
             }
         }
 
-        private static VisualElement Row(VisualElement parent, string action, string keys, string pad)
+        private static VisualElement Row(VisualElement parent, string action)
         {
             var row = new VisualElement();
             row.AddToClassList("controls-row");
             row.Add(Cell(action, "controls-action"));
-            row.Add(Cell(keys, "controls-keys"));
-            row.Add(Cell(pad, "controls-pad"));
             parent.Add(row);
             return row;
+        }
+
+        private static VisualElement Glyphs(string control, bool pad, string style)
+        {
+            var cell = new VisualElement { pickingMode = PickingMode.Ignore };
+            cell.AddToClassList(style);
+            cell.AddToClassList("controls-glyphs");
+            cell.Add(ControlGlyphs.Key(control, pad));
+            return cell;
         }
 
         private static Label Cell(string text, string style)

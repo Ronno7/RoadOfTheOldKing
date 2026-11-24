@@ -143,64 +143,187 @@ def build_kit():
 
 
 def glyphs():
-    """Control glyphs (user, 23 Nov: show controls as icons, not "Esc / Enter Leave" text). One UI pixel per sprite
-    pixel, 12 px tall to sit on a text line. Keyboard keys and pad buttons without a face (LB, D-pad, Start...) are a
-    keycap 9-slice with the key name in the UI's text; face buttons are drawn: Xbox letters on their colours, PlayStation
-    shapes on a dark button. Colours from the zone palette plus the sun gold."""
+    """Control glyphs (user, 23 Nov: show controls as icons, not "Esc / Enter Leave" text, then: "we could prob make the
+    icons look better" and "some of the button icons have the text bordering the edge"). One UI pixel per sprite pixel,
+    12 px tall to sit on a text line, lit from the upper left like the rest of the kit. Every control is a drawn sprite:
+    keyboard keys, the mouse with the named button lit, pad face buttons (Xbox letters on their colours, PlayStation
+    shapes on a dark button), sticks, the D-pad, bumpers and triggers, the menu buttons. Their names use the compact
+    capitals below, never the body font, so every label keeps a clear pixel inside its rim. KeyCap is the 9-slice
+    fallback for a key name without a sprite. Colours from the zone palette plus the sun gold and the reward accents."""
     out = {}
-    face = Image.new("RGBA", (10, 12), CLEAR)          # keycap: ink outline, slate top light, dark lip below
-    for y in range(12):
-        for x in range(10):
-            corner = (x in (0, 9)) and (y in (0, 11))
-            if corner:
-                continue
-            edge = x in (0, 9) or y in (0, 11)
-            if edge:
-                face.putpixel((x, y), C["ink"])
-            elif y >= 9:
-                face.putpixel((x, y), C["ink"] if y == 10 else hexrgb(palette["rockshadow"]))
-            elif y == 1 or x == 1:
-                face.putpixel((x, y), hexrgb(palette["slate"]))
-            else:
-                face.putpixel((x, y), C["inset"])
-    out["KeyCap"] = face                                                                       # slice 3, 3, 3, 4
-    font = ImageFont.truetype(FONT, 10)
+    P = {k: hexrgb(v) for k, v in palette.items()}
+    ink, gold = C["ink"], C["gold"]
+    # A dark control body: face, its lit top edge, lit left side, darker right side, front lip.
+    face_c, face_light, side_l, side_r, lip_c = P["slate"], P["slatelight"], P["rockshadow"], P["slatedark"], P["slatedark"]
+    sides = ((1, 0), (-1, 0), (0, 1), (0, -1))
+    # Icon capitals, 5 px tall: 3 wide (N 4, W 5), and 5x5 for the face buttons' letters.
+    small = {
+        "A": (".X.", "X.X", "XXX", "X.X", "X.X"), "B": ("XX.", "X.X", "XX.", "X.X", "XX."),
+        "C": (".XX", "X..", "X..", "X..", ".XX"), "D": ("XX.", "X.X", "X.X", "X.X", "XX."),
+        "E": ("XXX", "X..", "XX.", "X..", "XXX"), "F": ("XXX", "X..", "XX.", "X..", "X.."),
+        "H": ("X.X", "X.X", "XXX", "X.X", "X.X"), "I": ("XXX", ".X.", ".X.", ".X.", "XXX"),
+        "L": ("X..", "X..", "X..", "X..", "XXX"), "N": ("X..X", "XX.X", "X.XX", "X..X", "X..X"),
+        "P": ("XX.", "X.X", "XX.", "X..", "X.."), "R": ("XX.", "X.X", "XX.", "X.X", "X.X"),
+        "S": (".XX", "X..", ".X.", "..X", "XX."), "T": ("XXX", ".X.", ".X.", ".X.", ".X."),
+        "W": ("X...X", "X...X", "X.X.X", "X.X.X", ".X.X."),
+        "1": (".X.", "XX.", ".X.", ".X.", "XXX"), "2": ("XX.", "..X", ".X.", "X..", "XXX"),
+    }
+    big = {
+        "A": (".XXX.", "X...X", "XXXXX", "X...X", "X...X"), "B": ("XXXX.", "X...X", "XXXX.", "X...X", "XXXX."),
+        "X": ("X...X", ".X.X.", "..X..", ".X.X.", "X...X"), "Y": ("X...X", ".X.X.", "..X..", "..X..", "..X.."),
+    }
 
-    def disc(fill, rim):
-        img = Image.new("RGBA", (12, 12), CLEAR)
-        for y in range(12):
-            for x in range(12):
-                d = ((x - 5.5) ** 2 + (y - 5.5) ** 2) ** .5
-                if d <= 6.0:
-                    img.putpixel((x, y), C["ink"] if d > 4.9 else (rim if d > 4.0 and x + y < 11 else fill))
+    def text_width(label, face=small):
+        return sum(len(face[ch][0]) for ch in label) + len(label) - 1
+
+    def letters(img, label, color, x, y, face=small):
+        for ch in label:
+            for dy, row in enumerate(face[ch]):
+                for dx, cell in enumerate(row):
+                    if cell == "X":
+                        img.putpixel((x + dx, y + dy), color)
+            x += len(face[ch][0]) + 1
         return img
 
-    def lettered(fill, rim, letter):
-        img = disc(fill, rim)
-        layer = Image.new("RGBA", (12, 12), CLEAR)
-        draw = ImageDraw.Draw(layer)
-        draw.fontmode = "1"
-        w = draw.textlength(letter, font=font)
-        draw.text(((12 - w) / 2, 2), letter, font=font, fill=C["ink"])
-        img.alpha_composite(layer)
+    def disc(cx, cy, r):
+        return lambda x, y: ((x - cx) ** 2 + (y - cy) ** 2) ** .5 <= r
+
+    def paint(w, h, inside, color):
+        """Fill a shape: ink where a neighbour falls outside it, otherwise color(x, y)."""
+        img = Image.new("RGBA", (w, h), CLEAR)
+        for y in range(h):
+            for x in range(w):
+                if inside(x, y):
+                    edge = any(not (0 <= x + dx < w and 0 <= y + dy < h and inside(x + dx, y + dy)) for dx, dy in sides)
+                    img.putpixel((x, y), ink if edge else color(x, y))
         return img
 
-    out["GlyphA"] = lettered(hexrgb(palette["grass"]), hexrgb(palette["leaflight"]), "A")
-    out["GlyphB"] = lettered(C["red"], hexrgb("D99A67"), "B")
-    out["GlyphX"] = lettered(hexrgb(palette["water"]), hexrgb(palette["waterlight"]), "X")
-    out["GlyphY"] = lettered(C["gold"], hexrgb(palette["soilshine"]), "Y")
-    dark = (C["inset"], hexrgb(palette["slate"]))
-    cross, circle, square, triangle = (disc(*dark) for _ in range(4))
-    for i in range(5):                                   # PlayStation shapes, 5 px, on the dark button
-        cross.putpixel((3 + i, 3 + i), hexrgb(palette["waterlight"])); cross.putpixel((7 - i, 3 + i), hexrgb(palette["waterlight"]))
-    for x, y in ((4, 3), (5, 3), (6, 3), (3, 4), (7, 4), (3, 5), (7, 5), (3, 6), (7, 6), (4, 7), (5, 7), (6, 7)):
-        circle.putpixel((x, y), C["red"])
-    for i in range(5):
-        for x, y in ((3 + i, 3), (3 + i, 7), (3, 3 + i), (7, 3 + i)):
-            square.putpixel((x, y), hexrgb(palette["soilshine"]))
-    for x, y in ((5, 3), (4, 4), (6, 4), (4, 5), (6, 5), (3, 6), (7, 6), (3, 7), (4, 7), (5, 7), (6, 7), (7, 7)):
-        triangle.putpixel((x, y), hexrgb(palette["leaflight"]))
-    out["GlyphCross"], out["GlyphCircle"], out["GlyphSquare"], out["GlyphTriangle"] = cross, circle, square, triangle
+    def keycap_color(w):
+        def color(x, y):
+            if y >= 9:
+                return side_l if (x, y) == (1, 9) else lip_c        # the lit side runs down into the lip
+            return side_l if x == 1 else side_r if x == w - 2 else face_light if y == 1 else face_c
+        return color
+
+    def corners_cut(w):
+        return lambda x, y: not (x in (0, w - 1) and y in (0, 11))
+
+    out["KeyCap"] = paint(10, 12, corners_cut(10), keycap_color(10))     # slice 3, 3, 3, 4: the fallback
+
+    def key(label):
+        """A key with its name in gold: a face row above and below the 5 px capitals, two face columns either side."""
+        w = max(11, text_width(label) + 6)
+        img = paint(w, 12, corners_cut(w), keycap_color(w))
+        return letters(img, label, gold, (w - text_width(label)) // 2, 3)
+    for name, label in (("WASD", "WASD"), ("Shift", "SHIFT"), ("Space", "SPACE"), ("Enter", "ENTER"), ("Esc", "ESC"),
+                        ("Tab", "TAB"), ("Alt", "ALT"), ("F", "F"), ("E", "E"), ("R", "R")):
+        out["Key" + name] = key(label)
+
+    def button(fill, light, dark, lip):
+        """Round button seen from slightly above: the face sits high, its side shows as a crescent below."""
+        top = disc(5.5, 4.8, 4.3)
+
+        def color(x, y):
+            if not top(x, y):
+                return lip
+            rim = any(not top(x + dx, y + dy) for dx, dy in sides)
+            return light if rim and x + y < 10 else dark if rim and x - y > 2 else fill
+        return paint(12, 12, disc(5.5, 5.5, 5.9), color)
+
+    def lettered(fill, light, dark, lip, letter):
+        return letters(button(fill, light, dark, lip), letter, ink, 3, 3, big)
+
+    def marked(points, color):
+        img = button(P["slatedark"], P["slate"], P["slatedark"], ink)
+        for point in points:
+            img.putpixel(point, color)
+        return img
+
+    out["GlyphA"] = lettered(P["grass"], P["leaflight"], P["leafshade"], P["deepgreen"], "A")
+    out["GlyphB"] = lettered(C["red"], hexrgb("E6A275"), hexrgb("A34E46"), hexrgb("703C3C"), "B")
+    out["GlyphX"] = lettered(P["water"], P["waterlight"], P["watershade"], P["waterdeep"], "X")
+    out["GlyphY"] = lettered(gold, hexrgb("FFF0B3"), P["soillight"], P["soilmid"], "Y")
+    out["GlyphCross"] = marked([(3 + i, 3 + i) for i in range(5)] + [(7 - i, 3 + i) for i in range(5)], P["waterlight"])
+    out["GlyphCircle"] = marked([(4, 3), (5, 3), (6, 3), (3, 4), (7, 4), (3, 5), (7, 5), (3, 6), (7, 6), (4, 7), (5, 7), (6, 7)], C["red"])
+    out["GlyphSquare"] = marked([(x, y) for x in range(3, 8) for y in range(3, 8) if x in (3, 7) or y in (3, 7)], hexrgb("E6A275"))
+    out["GlyphTriangle"] = marked([(5, 2), (4, 3), (6, 3), (4, 4), (6, 4), (3, 5), (7, 5), (3, 6), (7, 6)]
+                                  + [(x, 7) for x in range(2, 9)], P["leaflight"])
+    # Menu buttons: Start/Options three lines, View two windows, Create the share mark (an arrow out of a tray).
+    out["GlyphStart"] = marked([(x, y) for y in (3, 5, 7) for x in range(4, 8)], P["stonelight"])
+    out["GlyphView"] = marked([(3, 3), (4, 3), (5, 3), (6, 3), (3, 4), (3, 5), (3, 6), (6, 4),
+                               (5, 5), (6, 5), (7, 5), (8, 5), (5, 6), (8, 6), (5, 7), (8, 7), (6, 7), (7, 7)], P["stonelight"])
+    out["GlyphCreate"] = marked([(5, 2), (4, 3), (6, 3), (5, 3), (5, 4), (5, 5), (3, 5), (7, 5), (3, 6), (7, 6)]
+                                + [(x, 7) for x in range(3, 8)], P["stonelight"])
+
+    def stick(letter):
+        """Thumbstick from above: a dark well round a domed cap with a lit rim, the letter in gold."""
+        cap = disc(5.5, 5.0, 4.2)
+
+        def color(x, y):
+            if not cap(x, y):
+                return P["slatedark"] if y < 8 else ink
+            rim = any(not cap(x + dx, y + dy) for dx, dy in sides)
+            return (face_light if x + y < 11 else side_l) if rim else face_c
+        return letters(paint(12, 12, disc(5.5, 5.5, 5.9), color), letter, gold, 4, 3)
+    out["GlyphLS"], out["GlyphRS"] = stick("L"), stick("R")
+
+    def dpad(x, y):
+        if (5 <= x <= 6) and (5 <= y <= 6):
+            return P["slatedark"]                                  # the dimple
+        if y == 1 or x == 1 or (x == 4 and y <= 4) or (y == 4 and x <= 4):
+            return face_light
+        if y == 10 or x == 10 or (x == 7 and y >= 7) or (y == 7 and x >= 7):
+            return P["slatedark"]
+        return face_c
+    out["GlyphDpad"] = paint(12, 12, lambda x, y: 4 <= x <= 7 or 4 <= y <= 7, dpad)
+
+    def shoulder(label, left, trigger):
+        """Bumper (15 wide, 11 tall) or trigger (13 wide, 12 tall): the outer top corner rounds off like the pad's, the
+        name in the 5 px capitals with a face row above and below."""
+        w, top, r = (13, 0, 6) if trigger else (15, 1, 4)
+
+        def inside(x, y):
+            if not (0 <= x < w and top <= y < 12):
+                return False
+            ox, oy = (x if left else w - 1 - x), y - top
+            if ox < r and oy < r:
+                return (r - ox - 0.5) ** 2 + (r - oy - 0.5) ** 2 <= r * r
+            return not ((w - 1 - x if left else x) == 0 and oy == 0)   # a one-pixel bevel on the inner corner
+
+        def color(x, y):
+            if y >= 9:
+                return lip_c
+            lit = not inside(x, y - 2) or not inside(x - 2, y) or not inside(x - 1, y - 1)   # just inside the top or left rim
+            return face_light if lit else face_c
+        img = paint(w, 12, inside, color)
+        return letters(img, label, gold, (w - text_width(label)) // 2, 3)
+    for name in ("LB", "RB", "L1", "R1"):
+        out["Glyph" + name] = shoulder(name, name[0] == "L", False)
+    for name in ("LT", "RT", "L2", "R2"):
+        out["Glyph" + name] = shoulder(name, name[0] == "L", True)
+
+    def mouse(lit):
+        """9x12 mouse: two buttons over the palm; the named button lit gold, or the wheel."""
+        def inside(x, y):
+            if y < 4:
+                return ((x - 4) / 4.5) ** 2 + ((y - 4) / 4.3) ** 2 <= 1
+            if y > 7:
+                return ((x - 4) / 4.5) ** 2 + ((y - 7) / 4.6) ** 2 <= 1
+            return True
+
+        def color(x, y):
+            if y == 5:
+                return ink                                          # buttons above, palm below
+            if y < 5 and x == 4:
+                return gold if lit == "wheel" and 1 <= y <= 3 else ink
+            if y < 5:
+                lit_here = (lit == "left" and x < 4) or (lit == "right" and x > 4)
+                return gold if lit_here else face_light if y == 1 or x == 1 else face_c
+            return P["slatedark"] if y >= 9 or x == 7 else face_c
+        return paint(9, 12, inside, color)
+    out["GlyphMouse"], out["GlyphMouseLeft"] = mouse(None), mouse("left")
+    out["GlyphMouseRight"], out["GlyphMouseWheel"] = mouse("right"), mouse("wheel")
+
     arrow = Image.new("RGBA", (7, 5), CLEAR)              # "more text": a gold down arrow, blinked by the HUD
     for y in range(5):
         for x in range(7):
