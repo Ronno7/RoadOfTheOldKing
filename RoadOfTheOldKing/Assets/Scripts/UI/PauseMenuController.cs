@@ -38,7 +38,7 @@ namespace RoadOfTheOldKing.UI
         private void OnEnable()
         {
             input.ToggleRequested += Toggle; input.NavigationRequested += RouteNavigate; input.SubmitRequested += RouteSubmit;
-            input.BackRequested += RouteBack; input.AdjustRequested += RouteAdjust;
+            input.BackRequested += RouteBack; input.AdjustRequested += RouteAdjust; input.AdjustRepeated += RouteAdjustRepeat;
         }
 
         // Composition seam for additional commands and save-free verification.
@@ -64,7 +64,8 @@ namespace RoadOfTheOldKing.UI
         private void RouteSubmit() => MenuStack.Top?.Submit();
         // Left/right: only pages with values to change (settings) take it.
         private void RouteAdjust(int direction) { if (MenuStack.Top is PauseMenuController menu) menu.Adjust(direction); }
-        public void Adjust(int direction) { if (IsOpen && inSettings) view.Adjust(direction); }
+        private void RouteAdjustRepeat(int direction) { if (MenuStack.Top is PauseMenuController menu) menu.Adjust(direction, true); }
+        public void Adjust(int direction, bool repeat = false) { if (IsOpen && inSettings) view.Adjust(direction, repeat); }
 
         public bool Open()
         {
@@ -142,7 +143,7 @@ namespace RoadOfTheOldKing.UI
         private void OnDisable()
         {
             input.ToggleRequested -= Toggle; input.NavigationRequested -= RouteNavigate; input.SubmitRequested -= RouteSubmit;
-            input.BackRequested -= RouteBack; input.AdjustRequested -= RouteAdjust;
+            input.BackRequested -= RouteBack; input.AdjustRequested -= RouteAdjust; input.AdjustRepeated -= RouteAdjustRepeat;
             if (restoring != null) { StopCoroutine(restoring); restoring = null; }
             MenuStack.Remove(this);
             view.Hide(); pause?.Dispose(); pause = null;

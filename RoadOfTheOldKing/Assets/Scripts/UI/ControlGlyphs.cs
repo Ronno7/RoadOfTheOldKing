@@ -80,8 +80,10 @@ namespace RoadOfTheOldKing.UI
             }
         }
 
-        // The control a token names on the active device, e.g. {interact} -> F or A.
-        public static VisualElement Token(string token) => Key(ControlLabels.Get(token));
+        // The control a token names on the active device, e.g. {interact} -> F or A. {anybutton} is words, not a control:
+        // "any key" on the keyboard, "any button" on a pad (the title's first prompt, which any of them answers).
+        public static VisualElement Token(string token) =>
+            token == "anybutton" ? Word(ActiveInput.UsingGamepad ? "any button" : "any key") : Key(ControlLabels.Get(token));
 
         // A key or button name as ControlLabels gives it: "F", "Hold B", "LB + RS", "Cross", on the device in use.
         public static VisualElement Key(string name) => Key(name, ActiveInput.UsingGamepad);

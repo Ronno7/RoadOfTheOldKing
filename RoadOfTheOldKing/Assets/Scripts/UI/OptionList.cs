@@ -16,6 +16,10 @@ namespace RoadOfTheOldKing.UI
             public readonly string Label;
             public readonly string Description;
             public virtual bool Selectable => true;
+            // Takes a held left/right's repeats (a bar or a number runs on); a choice turns once per press.
+            public virtual bool Repeats => false;
+            // Shown set aside (a frame rate limit while V-Sync paces the frames).
+            public bool Dimmed => Element != null && Element.ClassListContains("locked");
             internal VisualElement Element;
             internal OptionList Owner;
             protected Row(string label, string description) { Label = label; Description = description ?? ""; }
@@ -81,6 +85,7 @@ namespace RoadOfTheOldKing.UI
             { this.get = get; this.set = set; this.steps = Mathf.Max(1, steps); this.valueText = valueText; this.trackColor = trackColor; }
 
             private int Step => Mathf.Clamp(Mathf.RoundToInt(get() * steps), 0, steps);
+            public override bool Repeats => true;
 
             protected override void BuildControl(VisualElement control)
             {
@@ -166,6 +171,48 @@ namespace RoadOfTheOldKing.UI
 
             public override void Submit() => Adjust(1);
             public override void Refresh() { if (value != null) value.text = options[Mathf.Clamp(get(), 0, options.Length - 1)]; }
+        }
+
+        // A whole number between arrows (the frame rate limit): held left/right runs through it, and it stops at its
+        // ends. text names a value (the top one can read Unlimited); a row that's set aside (active false) shows dimmed.
+        public sealed class Number : Row
+        {
+            private readonly Func<int> get;
+            private readonly Action<int> set;
+            private readonly int min, max;
+            private readonly Func<int, string> text;
+            private readonly Func<bool> active;
+            private Label value;
+
+            public Number(string label, string description, Func<int> get, Action<int> set, int min, int max,
+                Func<int, string> text, Func<bool> active = null) : base(label, description)
+            { this.get = get; this.set = set; this.min = min; this.max = max; this.text = text; this.active = active; }
+
+            public override bool Repeats => true;
+
+            protected override void BuildControl(VisualElement control)
+            {
+                control.Add(Arrow("<", -1));
+                value = new Label();
+                value.AddToClassList("option-choice");
+                control.Add(value);
+                control.Add(Arrow(">", 1));
+                Refresh();
+            }
+
+            public override void Adjust(int direction)
+            {
+                int current = get(), next = Mathf.Clamp(current + direction, min, max);
+                if (next == current) return;
+                set(next);
+                Changed();
+            }
+
+            public override void Refresh()
+            {
+                if (value != null) value.text = text(get());
+                Element?.EnableInClassList("locked", active != null && !active());
+            }
         }
 
         // A row of colour squares; the chosen one is framed in gold.
@@ -269,6 +316,8 @@ namespace RoadOfTheOldKing.UI
                 if (rows[i].Selectable) { if (n == select) { index = i; break; } n++; }
             if (index < 0) index = Next(-1, 1);
             Highlight(index);
+            // Rows draw before their element is attached; once more so states on the row itself (dimmed) show.
+            RefreshAll();
         }
 
         // Selectable rows only, counted from the top: the same numbering Show's select uses.
@@ -284,7 +333,12 @@ namespace RoadOfTheOldKing.UI
             if (next >= 0) Highlight(next);
         }
 
-        public void Adjust(int direction) => SelectedRow?.Adjust(direction);
+        // repeat: a held left/right firing again, which only rows that run on (bars, numbers) take.
+        public void Adjust(int direction, bool repeat = false)
+        {
+            var row = SelectedRow;
+            if (row != null && (!repeat || row.Repeats)) row.Adjust(direction);
+        }
         public void Submit() => SelectedRow?.Submit();
         public void RefreshAll() { foreach (var row in rows) row.Refresh(); }
 

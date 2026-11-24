@@ -99,7 +99,7 @@ namespace RoadOfTheOldKing.UI
 
         public void Navigate(int direction) { if (IsVisible) { if (showingOptions) optionList.Navigate(direction); else list.Navigate(direction); } }
         public void Submit() { if (IsVisible) { if (showingOptions) optionList.Submit(); else list.Submit(); } }
-        public void Adjust(int direction) { if (IsVisible && showingOptions) optionList.Adjust(direction); }
+        public void Adjust(int direction, bool repeat = false) { if (IsVisible && showingOptions) optionList.Adjust(direction, repeat); }
         public void Hide() { if (overlay != null) overlay.style.display = DisplayStyle.None; }
         private void OnDisable() { ActiveInput.Changed -= OnDeviceChanged; Hide(); }
         private void OnDestroy() { if (document != null) Destroy(document.gameObject); }

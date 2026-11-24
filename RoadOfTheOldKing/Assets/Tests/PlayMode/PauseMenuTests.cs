@@ -222,10 +222,12 @@ public sealed class PauseMenuTests
             var settingKeys=new[]{"RoadOfTheOldKing.Settings.Volume","RoadOfTheOldKing.Settings.MusicVolume","RoadOfTheOldKing.Settings.AmbienceVolume","RoadOfTheOldKing.Settings.EffectsVolume","RoadOfTheOldKing.Settings.FlashScale","RoadOfTheOldKing.Settings.ShakeScale"};
             var settingsBefore=settingKeys.Select(k=>PlayerPrefs.HasKey(k)?(float?)PlayerPrefs.GetFloat(k):null).ToArray();
             float flashBefore=RoadOfTheOldKing.UI.FeedbackSettings.FlashScale,shakeBefore=RoadOfTheOldKing.UI.FeedbackSettings.ShakeScale,listenerBefore=AudioListener.volume;
+            var frameKeys=new[]{"RoadOfTheOldKing.Settings.VSync","RoadOfTheOldKing.Settings.FrameLimit"};
+            var framesBefore=frameKeys.Select(k=>PlayerPrefs.HasKey(k)?(int?)PlayerPrefs.GetInt(k):null).ToArray();
             try{
              var options=((RoadOfTheOldKing.UI.PauseMenuView)menu.GetType().GetField("view",flags).GetValue(menu)).Options;
              Func<List<string>> rowLabels=()=>options.Rows.Where(r=>r.Selectable).Select(r=>r.Label).ToList();
-             var expected=new[]{"Master","Effects","Window","Atmosphere","Screen flashes","Screen shake","Vibration","Vitals","Back"};
+             var expected=new[]{"Master","Effects","Window","V-Sync","Frame rate limit","Atmosphere","Screen flashes","Screen shake","Vibration","Vitals","Back"};
              check(rowLabels().SequenceEqual(expected)&&options.Rows.Count(r=>!r.Selectable)==3,"Settings: sound, display and comfort groups ("+string.Join(" | ",rowLabels().ToArray())+")");
              RoadOfTheOldKing.UI.SoundSettings.SetVolume(1f);RoadOfTheOldKing.UI.FeedbackSettings.SetFlash(1f);
              menu.Back();menu.Submit();
@@ -237,13 +239,27 @@ public sealed class PauseMenuTests
              float effectsDb;var mixer=Resources.Load<UnityEngine.Audio.AudioMixer>("Audio/Mixer");
              check(options.SelectedRow.Label=="Effects"&&Mathf.Approximately(RoadOfTheOldKing.UI.SoundSettings.ChannelVolume(RoadOfTheOldKing.Audio.AudioChannel.Effects),.9f)&&mixer!=null&&mixer.GetFloat("EffectsVolume",out effectsDb)&&Mathf.Abs(effectsDb-20f*Mathf.Log10(.9f))<.05f,"Effects steps down 10% and sets the mixer channel in dB");
              RoadOfTheOldKing.UI.SoundSettings.SetChannelVolume(RoadOfTheOldKing.Audio.AudioChannel.Effects,1f);
-             menu.Navigate(1);menu.Navigate(1);menu.Navigate(1);menu.Adjust(-1);
+             // V-Sync and the frame rate limit (23 Nov): a number that a held key runs through, Unlimited past its top,
+             // set aside (dimmed) while V-Sync is on; a choice ignores a held key's repeats.
+             RoadOfTheOldKing.UI.FrameSettings.VSync=true;RoadOfTheOldKing.UI.FrameSettings.Limit=0;options.RefreshAll();
+             var limitRow=options.Rows.First(r=>r.Label=="Frame rate limit");
+             menu.Navigate(1);menu.Navigate(1);
+             check(options.SelectedRow.Label=="V-Sync"&&limitRow.Dimmed,"V-Sync on sets the frame rate limit aside");
+             menu.Adjust(1,true);check(RoadOfTheOldKing.UI.FrameSettings.VSync,"A held key's repeat doesn't turn a choice");
+             menu.Adjust(1);check(!RoadOfTheOldKing.UI.FrameSettings.VSync&&!limitRow.Dimmed&&Application.targetFrameRate==-1,"V-Sync off brings the limit back, Unlimited by default");
+             menu.Navigate(1);menu.Adjust(1);
+             check(options.SelectedRow.Label=="Frame rate limit"&&RoadOfTheOldKing.UI.FrameSettings.Limit==0,"Unlimited is the top end");
+             menu.Adjust(-1);menu.Adjust(-1,true);menu.Adjust(-1,true);
+             check(RoadOfTheOldKing.UI.FrameSettings.Limit==358&&Application.targetFrameRate==358,"Left steps down one frame a second and a held key runs on ("+RoadOfTheOldKing.UI.FrameSettings.Limit+")");
+             menu.Navigate(1);menu.Navigate(1);menu.Adjust(-1);
              check(options.SelectedRow.Label=="Screen flashes"&&Mathf.Approximately(RoadOfTheOldKing.UI.FeedbackSettings.FlashScale,.9f)&&(bool)menu.GetType().GetField("inSettings",flags).GetValue(menu),"Down skips the group headings; left lowers flashes and stays on the page");
              menu.Navigate(1);menu.Navigate(1);menu.Navigate(1);menu.Navigate(1);check(options.SelectedRow.Label=="Back","The last row is Back");
              menu.Submit();check(menu.IsOpen&&!(bool)menu.GetType().GetField("inSettings",flags).GetValue(menu),"The Back row returns to the main page");
              menu.Submit();
             }finally{
              for(int i=0;i<settingKeys.Length;i++){if(settingsBefore[i].HasValue)PlayerPrefs.SetFloat(settingKeys[i],settingsBefore[i].Value);else PlayerPrefs.DeleteKey(settingKeys[i]);}
+             for(int i=0;i<frameKeys.Length;i++){if(framesBefore[i].HasValue)PlayerPrefs.SetInt(frameKeys[i],framesBefore[i].Value);else PlayerPrefs.DeleteKey(frameKeys[i]);}
+             RoadOfTheOldKing.UI.FrameSettings.Apply();
              PlayerPrefs.Save();RoadOfTheOldKing.UI.FeedbackSettings.FlashScale=flashBefore;RoadOfTheOldKing.UI.FeedbackSettings.ShakeScale=shakeBefore;AudioListener.volume=listenerBefore;
              // The live mixer too, not only the stored preference (18 Nov: a channel stayed at full for the rest of the session).
              foreach(RoadOfTheOldKing.Audio.AudioChannel channel in Enum.GetValues(typeof(RoadOfTheOldKing.Audio.AudioChannel)))RoadOfTheOldKing.Audio.AudioChannels.SetVolume(channel,RoadOfTheOldKing.UI.SoundSettings.ChannelVolume(channel));

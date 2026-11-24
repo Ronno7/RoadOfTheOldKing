@@ -16,6 +16,12 @@ namespace RoadOfTheOldKing.UI
         public event Action SubmitRequested;
         // Left/right: -1 or 1. Only pages with values to adjust listen.
         public event Action<int> AdjustRequested;
+        // A held left/right firing again, after a moment and faster the longer it's held, as most games' menus do;
+        // bars and numbers take it (OptionList.Row.Repeats), choices don't.
+        public event Action<int> AdjustRepeated;
+        private const float RepeatDelay = .4f, RepeatSlow = .1f, RepeatFast = .025f, RepeatRamp = 1.5f;
+        private int heldDirection;
+        private float heldFor, nextRepeat;
         private InputActionMap actions;
         private InputAction toggle, back, up, down, left, right, submit;
         private void Awake()
@@ -56,9 +62,26 @@ namespace RoadOfTheOldKing.UI
             if (back.WasPressedThisFrame()) { BackRequested?.Invoke(); return; }
             if (up.WasPressedThisFrame()) NavigationRequested?.Invoke(-1);
             if (down.WasPressedThisFrame()) NavigationRequested?.Invoke(1);
-            if (left.WasPressedThisFrame()) AdjustRequested?.Invoke(-1);
-            if (right.WasPressedThisFrame()) AdjustRequested?.Invoke(1);
+            if (left.WasPressedThisFrame()) { AdjustRequested?.Invoke(-1); Hold(-1); }
+            if (right.WasPressedThisFrame()) { AdjustRequested?.Invoke(1); Hold(1); }
+            RepeatHeld();
             if (submit.WasPressedThisFrame()) SubmitRequested?.Invoke();
+        }
+
+        private void Hold(int direction) { heldDirection = direction; heldFor = 0f; nextRepeat = RepeatDelay; }
+
+        private void RepeatHeld()
+        {
+            if (heldDirection == 0) return;
+            if (!(heldDirection < 0 ? left : right).IsPressed()) { heldDirection = 0; return; }
+            heldFor += Time.unscaledDeltaTime;
+            // At most a few a frame, so a hitch doesn't fire a burst.
+            for (int i = 0; i < 4 && heldFor >= nextRepeat; i++)
+            {
+                AdjustRepeated?.Invoke(heldDirection);
+                nextRepeat += Mathf.Lerp(RepeatSlow, RepeatFast, Mathf.Clamp01((heldFor - RepeatDelay) / RepeatRamp));
+            }
+            if (heldFor >= nextRepeat) nextRepeat = heldFor;
         }
     }
 }

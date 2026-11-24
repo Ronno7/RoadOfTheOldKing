@@ -3,20 +3,17 @@
 ## Unreleased
 
 **Added**
-- Two field rats on the Tutorial's forest road, where you now learn to drink a flask.
 - Signs teach the Tutorial's lessons and its bonfires; read one any time.
-- Bushes burst into leaves, cracked stone into chips, and dodges and leaping rats kick up dust.
+- Additional VFX for bush and rock breakables
 - A Random button on the cloak picker.
+- V-Sync and frame rate limit settings.
 
 **Changed**
-- The Recall stone wakes the moment your axe strikes it.
-- The Tutorial's sealed gate now opens with your first Recall.
+- The Recall stone no longer waits for previous tutorial steps.
 - Music and ambience sliders are hidden until the game has them.
-- A locked sluice crank shows a pin, which pops out with its own sound when the puzzle frees it.
-- The maintenance crank is now simply the crank, with plain prompts.
+- A locked sluice crank shows a pin which pops out when the puzzle frees it.
 - The old stone bridges have new stonework.
-- The Tutorial's sealed gate stands in a new stone archway.
-- Controls show as key, mouse and button icons, on the Controls page too, and menus no longer list their controls along the bottom.
+- Controls show as key and button icons, menus no longer list them along the bottom.
 - Prompts are lighter and slimmer, and no longer cover place names.
 
 **Fixed**
@@ -26,10 +23,11 @@
 - The hand on the carried axe stays on the cloak while walking, and now shows from behind too.
 - The sluice's cranks turn without skewing, and their shadows stay still.
 - The carried axe no longer pokes in and out of houses, wells, trees and rocks.
-- Trees, bushes, rocks, signs, enemies and grass keep their proper order as you walk among them, without flickering.
-- Low stone walls hide your feet when you stand behind them.
+- Trees, bushes, rocks, signs, enemies and grass keep their proper order as you walk among them.
 - On a controller, the throw line shows where aim assist will send the axe, and assist ignores enemies behind walls.
-- A bonfire's flame no longer burns you while its menu is open.
+
+**Removed**
+- The Unity splash screen at launch.
 
 ## 0.5 — Full production
 

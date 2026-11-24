@@ -305,7 +305,7 @@ One verb per space. Each lesson completes from a real outcome, not a key press.
 
 ![Control icons: keyboard and mouse, Xbox, PlayStation](Art/UI/ControlGlyphs.png)
 - **World meters:** enemy bars and the charge bar are small world-space documents, so they scale with what they measure.
-- **Menus:** `MenuStack` routes input to the top menu. Title, pause, bonfire and defeat screens share one theme. Pause lists every control for both devices as icons from `ControlLabels`, the source the prompts use. Settings (volume, window, flashes, shake, vibration) live outside the save. After the prologue, New Game picks a cloak colour that `EnemyFlash` applies to the hero's blues. The title shows the region paintings behind its logo.
+- **Menus:** `MenuStack` routes input to the top menu. Title, pause, bonfire and defeat screens share one theme. Pause lists every control for both devices as icons from `ControlLabels`, the source the prompts use. Settings (volume, window, V-Sync and frame rate limit, flashes, shake, vibration) live outside the save; a held left or right runs through bars and numbers. After the prologue, New Game picks a cloak colour, or a random one, that `EnemyFlash` applies to the hero's blues. The title shows the region paintings behind its logo.
 - **Atmosphere:** `RegionAtmosphere` lays a grade, cloud shadows and motes over each region, with Restrained (default) and Cinematic looks.
 - **Feedback:** `PlayerHitFeedback` flashes, kicks the camera, blinks the hero and rumbles a controller; `FeedbackSettings` and `Rumble` scale it down for players who prefer less.
 

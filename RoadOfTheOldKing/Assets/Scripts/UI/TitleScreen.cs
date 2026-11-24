@@ -123,7 +123,8 @@ namespace RoadOfTheOldKing.UI
             if (backdrop.Length > 0) backdropFront.Show(backdrop[0], backdropOpacity);
             // The prologue covers the menu and takes clicks too: a click turns the page like A/Enter.
             prologueRoot.RegisterCallback<PointerDownEvent>(_ => { if (page == Page.Prologue) AdvancePrologue(); });
-            ControlGlyphs.Bind(press, "Press {select}");
+            // Any key, button or click opens the menu (onAnyButtonPress), so the prompt says so (user, 22 Nov: "start screen says press enter but any button works").
+            ControlGlyphs.Bind(press, "Press {anybutton}");
             ControlGlyphs.Bind(root.Q<Label>("prologue-hint"), "{select} Next");
             ControlGlyphs.Bind(root.Q<Label>("prologue-skip"), "{skip} Skip");
             var version = root.Q<Label>("version");
@@ -133,6 +134,7 @@ namespace RoadOfTheOldKing.UI
             input.NavigationRequested += Navigate;
             input.SubmitRequested += Submit;
             input.AdjustRequested += Adjust;
+            input.AdjustRepeated += AdjustRepeat;
             MenuStack.Push(this);
             if (!pressed && bootScene == gameObject.scene.path) ShowPress();
             else ShowMain();
@@ -145,6 +147,7 @@ namespace RoadOfTheOldKing.UI
             input.NavigationRequested -= Navigate;
             input.SubmitRequested -= Submit;
             input.AdjustRequested -= Adjust;
+            input.AdjustRepeated -= AdjustRepeat;
             anyButton?.Dispose(); anyButton = null;
             if (hoodSource != null) Destroy(hoodSource);
             if (hoodShown != null) Destroy(hoodShown);
@@ -360,10 +363,13 @@ namespace RoadOfTheOldKing.UI
             RecolorHood();
         }
 
-        private void Adjust(int direction)
+        private void Adjust(int direction) => Adjust(direction, false);
+        private void AdjustRepeat(int direction) => Adjust(direction, true);
+
+        private void Adjust(int direction, bool repeat)
         {
             if (!OnOptionsPage || MenuStack.Top != (IModalMenu)this) return;
-            options.Adjust(direction);
+            options.Adjust(direction, repeat);
         }
 
         // The sprite isn't readable on the CPU, so it's copied once through a render texture.

@@ -75,6 +75,12 @@ namespace RoadOfTheOldKing.UI
                 new OptionList.Header("DISPLAY"),
                 new OptionList.Choice("Window", "", new[] { "Fullscreen", "Windowed" },
                     () => full ? 0 : 1, i => { full = i == 0; SetWindow(full); }),
+                new OptionList.Choice("V-Sync", "", new[] { "On", "Off" },
+                    () => FrameSettings.VSync ? 0 : 1, i => FrameSettings.VSync = i == 0),
+                // Past the highest number is Unlimited; set aside (dimmed) while V-Sync paces the frames.
+                new OptionList.Number("Frame rate limit", "", () => FrameSettings.Limit <= 0 ? FrameSettings.MaxLimit + 1 : FrameSettings.Limit,
+                    v => FrameSettings.Limit = v > FrameSettings.MaxLimit ? 0 : v, FrameSettings.MinLimit, FrameSettings.MaxLimit + 1,
+                    v => v > FrameSettings.MaxLimit ? "Unlimited" : v.ToString(), () => !FrameSettings.VSync),
                 new OptionList.Choice("Atmosphere", "Light, haze and weather.", new[] { "Restrained", "Cinematic" },
                     () => AtmosphereSettings.Cinematic ? 1 : 0, i => AtmosphereSettings.Cinematic = i == 1),
                 new OptionList.Header("COMFORT"),
