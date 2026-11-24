@@ -54,20 +54,7 @@ flowchart LR
 | Leases, not flags | `PlayerControlLocks`, `SimulationPause` and `MenuStack` let overlapping menus and freezes coexist without releasing each other. |
 | Tuning in data | Weapons, upgrades, enemy attacks and animations are ScriptableObjects. Scenes hold placement. |
 
-| `Assets/Scripts/` | Holds |
-| --- | --- |
-| `Input` | Keyboard, mouse and controller adapters; last-used-device tracking |
-| `Player` | Motor, stamina, dodge, health, flask, interaction, animation |
-| `Weapons` | Axe state machine, hit detection, throw clock, settings, upgrades |
-| `Combat` | Hit data, health, reactions, protection |
-| `Enemies` | `Brains`, `Abilities`, `Core`, `Presentation` |
-| `Progression` | Session, save format and store, rewards, upgrades |
-| `World` | Pickups, bonfires, puzzles, passages, water |
-| `Tutorial` | Lessons, Recall awakening, guide |
-| `UI` | HUD, menus, F3 and F4 panels |
-| `Camera`, `Development` | Follow, zoom, freelook; the combat preview driver |
-
-Code builds as three assemblies: `RoadOfTheOldKing` (`Assets/Scripts`), `RoadOfTheOldKing.Editor` (`Assets/Editor`) and `RoadOfTheOldKing.Tests` (`Assets/Tests`, PlayMode tests run from Unity's Test Runner, never shipped).
+`Assets/Scripts` is grouped by `Input`, `Player`, `Weapons`, `Combat`, `Enemies`, `Progression`, `World`, `Tutorial`, `UI` and `Camera`. Code builds as three assemblies: `RoadOfTheOldKing` (`Assets/Scripts`), `RoadOfTheOldKing.Editor` (`Assets/Editor`) and `RoadOfTheOldKing.Tests` (`Assets/Tests`, PlayMode tests run from Unity's Test Runner, never shipped).
 
 ## Player
 
@@ -112,7 +99,7 @@ Rope crossings are a separate motor mode between authored anchors.
 
 | System | Rule |
 | --- | --- |
-| Stamina | 100 points. Any action can start above zero and push into a deficit (to −40); attacks made in deficit deal 60% damage and swing 25% slower. Recovers 40/s after 0.6 s. Sprint drains 18/s. |
+| Stamina | 100 points; an action can start above zero and dip to −40, where attacks deal 60% and swing 25% slower. Recovers 40/s after 0.6 s; sprint drains 18/s. |
 | Dodge | 18 stamina, no cooldown. The first 0.24 s is invincible. |
 | Flask | Three charges, refilled at bonfires. The 0.9 s drink heals 40 late, and a stagger before then wastes it. |
 | Damage | 0.8 s of immunity after a hit. Defeat returns to the last bonfire. |
@@ -173,12 +160,7 @@ Values live in `Assets/Settings/Weapons/AxeSettings.asset`.
 
 ## Enemies
 
-| Folder | Role |
-| --- | --- |
-| `Brains` | `PredatorBrain` circles, commits and punishes. `PursuitBrain` approaches, attacks and returns. |
-| `Abilities` | `EnemyActionRunner` runs one `IEnemyAction` at a time on a shared phase clock. |
-| `Core` | `EnemyBody` owns sight, leash, home and reset. `EnemyRegistry` lets shared systems find enemies. |
-| `Presentation` | Sprite views, health bars, awareness marker, weapon view, drawn attack ground. They only sample. |
+`PredatorBrain` circles, commits and punishes; `PursuitBrain` approaches, attacks and returns. `EnemyActionRunner` runs one `IEnemyAction` at a time on a shared phase clock, `EnemyBody` owns sight, leash, home and reset, and the views only sample.
 
 | Enemy | Brain | Health | Attacks | What it asks of you |
 | --- | --- | --- | --- | --- |
@@ -195,12 +177,11 @@ flowchart LR
   W["Windup: tracks you"] --> L["Lock: direction fixed, telegraph changes"] --> A["Active: can hit"] --> R["Recovery: your opening"]
 ```
 
-- **Openings are promises.** Scavengers and wolves follow up at most once, boars never. Recovery is never cancelled, and breaking an enemy's poise never shortens what it owed.
-- **Reading the player.** `PlayerRead` tells both brains what they can see the player doing: drinking, axe away, recovering from a chop. After a 0.15 s beat, scavengers and rats press in and boars start their charge sooner. It never cuts a recovery short.
-- **No shared attack turn.** Each enemy attacks on its own rhythm. Groups are shaped by placement and notice radius, so a careful player can pull one at a time.
-- **Leash.** An enemy breaks off when it loses sight, or once past its leash with the player out of notice range, then walks home. A hit, or the player coming close, turns it back. All of this lives in `EnemyBody`. Wolves hunt: past the leash they give up only beyond a longer sight range (`huntReach`) or 2.5 leashes from home (`huntLeashes`).
-- **Mending.** Out of the fight an enemy heals 10% of its health per second. A boss back on its seat is whole at once.
-- **Boss arena.** While its boss is awake, `BossArena` stands fog walls on a rectangle. They hold the boss in, and the player too once fully inside. Only a seated or fallen boss drops them, so any reset reopens the way.
+- **Openings are promises.** Scavengers and wolves follow up at most once, boars never; a recovery is never cut short, even by a poise break.
+- **Reading the player.** `PlayerRead` lets brains see a drink, an axe away or a chop's recovery: scavengers and rats press in, boars charge sooner.
+- **No shared attack turn.** Each enemy keeps its own rhythm; placement and notice radius let a careful player pull one at a time.
+- **Leash and mending.** Past its leash or out of sight an enemy walks home, healing 10% a second; wolves hunt further (`huntReach`, `huntLeashes`).
+- **Boss arena.** `BossArena` stands fog walls while its boss is awake; only a seated or fallen boss drops them.
 
 ## Progression and saving
 
@@ -224,18 +205,15 @@ sequenceDiagram
 | --- | --- | --- | --- |
 | Light a bonfire | The lit fire | No | Permanent progress, including the newly discovered fire |
 | Rest or travel by bonfire | Resting or destination fire | Yes | Permanent progress |
-| Collect a reward, finish a combat lesson or solve a puzzle | Unchanged | No | Permanent progress |
-| Complete an ordinary tutorial guide step | Unchanged | No | Step recorded with the next permanent save |
-| Quit or close the window | Unchanged | No | Permanent progress, plus a resume point if alive |
-| Pause or lose focus | Unchanged | No | Resume point if alive |
+| Collect a reward, finish a lesson or solve a puzzle | Unchanged | No | Permanent progress (ordinary guide steps ride with the next save) |
+| Quit, close, pause or lose focus | Unchanged | No | A resume point if alive; quitting also saves progress |
 | Leave through a scene exit | Unchanged | No | Permanent progress. Health and flasks carry into the next scene in memory. |
 | Die, then retry | Unchanged | On respawn | Death clears the resume point. Retry saves permanent progress. |
 | Start a new game | Cleared | Fresh run | Fresh progress record with the chosen cloak colour |
 
-- **What's saved:** axe and Recall, checkpoint, discovered fires, shards and upgrades, coins and tools, and a list of permanent string IDs for lessons, rewards and puzzles. Shipped IDs never change.
-- **Resume point.** Continue restores the saved scene, position, health and flasks. If solid terrain blocks the position, the player stays at the checkpoint or scene arrival.
-- **Old saves:** `ProgressMigrations` upgrades them step by step.
-- **Visits.** `SceneVisitState` keeps defeated enemies and cut grass in memory across ordinary scene exits. Rest, bonfire travel, death and Continue clear these visits.
+- **What's saved:** axe and Recall, checkpoint, fires, shards and upgrades, coins and tools, and permanent string IDs for lessons, rewards and puzzles; shipped IDs never change, and `ProgressMigrations` upgrades old saves.
+- **Resume point.** Continue restores scene, position, health and flasks, or the checkpoint if terrain blocks the spot.
+- **Visits.** `SceneVisitState` keeps defeated enemies and cut grass across ordinary scene exits until a rest, travel, death or Continue.
 
 **Rewards are three pieces**, so a fight-gated chest is scene setup, not new code: `EncounterUnlock` (the condition), `RewardPickup` (the object in the world) and `RewardService.TryGrant` (the saved record).
 
@@ -248,24 +226,23 @@ Level construction is in [World and tilemaps](World.md).
 | System | Owner | Behaviour |
 | --- | --- | --- |
 | Interaction (F) | `PlayerBonfireInteraction` | Picks one nearby target. The HUD prompt reads the same selection. |
-| Bonfires | `Bonfire` | First use lights it (a burst of flame and sparks), sets the respawn point and unlocks travel. Next use rests: heals, refills, resets enemies, sets the respawn point. Travel lists fires by region. A lit flame burns a hero standing in it, 2 every 1.5 s, without knockback. |
+| Bonfires | `Bonfire` | First use lights it with a burst of flame, saves and sets the respawn point; later uses rest: heal, refill, reset enemies. Travel lists fires by region. A lit flame burns a hero standing in it. |
 | Upgrade fires | `Bonfire.allowsUpgrades` | A larger gold flame in a bronze brazier, with embers. Only their menu, in its own frame, lists Upgrades. |
-| Place names | `AreaName` | The smallest zone containing the player names the place, shown once per save. |
-| Announcements | `HudNotifications`, `GameHud` | Place names and events queue, one at a time in one spot; regions largest. |
+| Place names | `AreaName`, `HudNotifications` | The smallest zone around the player names the place, once per save; announcements queue in one spot. |
 | Pots and chests | `Breakable`, `CoinSource`, `RewardChest` | Each result saves once, including empty rolls. |
-| Hold-up | `RewardHoldUp` | A taken reward rises over the hero for about a second while the world stops. It is already saved. |
-| Sound channels | `AudioChannels`, `Resources/Audio/Mixer` | Every sound plays through a Music, Ambience or Effects group. Settings show Master and Effects; the Music and Ambience sliders return with music and ambience. |
-| Material feedback | `SurfaceTag`, `AxeSurfaceFeedback`, `ElevationLevels` | A tag names what an object is made of; the axe's first plain strike per attack plays that material's sound and flecks. Untagged objects stay silent; cliffs answer only when the rock rises above the striker. |
+| Hold-up | `RewardHoldUp` | A taken reward rises over the hero while the world stops; it is already saved. |
+| Sound channels | `AudioChannels`, `Resources/Audio/Mixer` | Music, Ambience and Effects groups; Settings show Master and Effects until there's music and ambience. |
+| Material feedback | `SurfaceTag`, `AxeSurfaceFeedback` | A tag names an object's material; the axe's first plain strike per attack plays its sound and flecks. |
 | Trader | `Trader`, `ShopOffer`, `CollectionMenu` | Talk, then trade. A purchase saves coins, item and stock together. |
 | Rope | `RopeAnchor`, `RopeRoute` | A bought kit secures a saved two-way route. |
 | Inscriptions | `ForgeInscription`, `InscriptionReader` | Reading saves the knowledge; the carving stays. |
 | End card | `EndCard`, `InscriptionReader` | A rereadable card where a build stops, offered after a milestone. |
-| Recall puzzles | `RecallAwakeningStone`, `RecallSealGate`, `RecallSluice`, `RecallRelease` | Bind a lodged axe and its return to one flight. Before Recall exists, the stone draws a throw in (`IAxeFlightPull`); the Tutorial gate opens when the axe is recalled out of it. |
+| Recall puzzles | `RecallAwakeningStone`, `RecallSealGate`, `RecallSluice`, `RecallRelease` | Bind a lodged axe and its return to one flight; before Recall, the stone draws a throw in (`IAxeFlightPull`). |
 | Sluice crank | `SluiceCrank` | One carried part, saved with the socket it sits in: place, turn, take out. |
-| Depth | `Depth`, `WorldPropDepth`, `ForestStamps`, `HeroDepth`, `ActorDepth` | Everything that stands (the hero, enemies, props, signs, walls, every tree, grass) sorts on one Standing layer by where it meets the ground, one art pixel at a time, with fixed tiebreaks; painted forests draw tree by tree. |
-| Gates and bridges | `PermanentPassage` | One-time. Collision holds until the animation ends and restores on load. |
+| Depth | `Depth`, `WorldPropDepth`, `HeroDepth`, `ActorDepth` | Everything that stands sorts on one Standing layer by where it meets the ground, one art pixel at a time; painted forests draw tree by tree. |
+| Gates and bridges | `PermanentPassage` | One-time; collision holds until the animation ends. |
 | Roofs | `BuildingCutaway` | Roofs fade while the player's feet are inside authored rectangles. |
-| Dark interiors | `DarkInterior` | Global light is zero. The lantern is a 2D light with wall shadows; a cover shader blacks out unlit pixels. |
+| Dark interiors | `DarkInterior` | Global light is zero; the lantern is a 2D light with wall shadows. |
 
 ## Tutorial
 
@@ -283,11 +260,11 @@ One verb per space. Each lesson completes from a real outcome, not a key press.
 | Meadow | Wolf pack, first Sun Shard | Both wolves; collecting the shard |
 | Roadside bonfire | Rest | First rest |
 
-`TutorialGuide` holds an ordered list of steps edited in the Inspector. It shows the first incomplete step past the furthest landmark reached, so skipped lessons stop following the player. A `LessonSign` is read on interact, like a Dark Souls message: its lesson shows in a small HUD box with controls as glyphs (`ControlGlyphs`) while play continues; interact again or walking away closes it. Lessons only record milestones, so a new lesson needs no guide code.
+`TutorialGuide` shows the first incomplete step past the furthest landmark reached, so skipped lessons stop following the player. A `LessonSign` reads on interact, like a Dark Souls message, into a small HUD box while play continues. Lessons only record milestones, so a new one needs no guide code.
 
 ## Camera and UI
 
-**Camera** (`FollowCamera.prefab`): `CameraFollow2D` is the only writer of position, `CameraZoom2D` keeps the player's zoom for the session and `CameraFreelook2D` looks up to five tiles away and holds there until the player moves, then eases back. The bonfire and dialogue close-ups request framing and zoom through owner-released overrides.
+**Camera** (`FollowCamera.prefab`): `CameraFollow2D` alone writes position, `CameraZoom2D` keeps the player's zoom, and `CameraFreelook2D` looks up to five tiles away until the player moves. Bonfire and dialogue close-ups use owner-released overrides.
 
 **HUD** (`GameHud`, UI Toolkit) is contextual, so quiet exploration shows almost nothing.
 
@@ -306,17 +283,17 @@ One verb per space. Each lesson completes from a real outcome, not a key press.
 
 ![Control icons: keyboard and mouse, Xbox, PlayStation](Art/UI/ControlGlyphs.png)
 - **World meters:** enemy bars and the charge bar are small world-space documents, so they scale with what they measure.
-- **Menus:** `MenuStack` routes input to the top menu. Title, pause, bonfire and defeat screens share one theme. Pause lists every control for both devices as icons from `ControlLabels`, the source the prompts use. Settings (volume, window, V-Sync and frame rate limit, flashes, shake, vibration) live outside the save; a held left or right runs through bars and numbers. After the prologue, New Game picks a cloak colour, or a random one, that `EnemyFlash` applies to the hero's blues. The title shows the region paintings behind its logo.
+- **Menus:** `MenuStack` routes input to the top menu; title, pause, bonfire and defeat share one theme. Settings (sound, window, V-Sync and frame rate limit, accessibility) live outside the save. New Game picks a cloak colour, or a random one, that `EnemyFlash` applies to the hero's blues.
 - **Atmosphere:** `RegionAtmosphere` lays a grade, cloud shadows and motes over each region, with Restrained (default) and Cinematic looks.
 - **Feedback:** `PlayerHitFeedback` flashes, kicks the camera, blinks the hero and rumbles a controller; `FeedbackSettings` and `Rumble` scale it down for players who prefer less.
 
 ## Tools
 
-- **Combat Effects Preview** (Unity menu): replays attacks against a target with slow motion and frame stepping.
-- **F3 Debug Panel:** read-only performance, player, world and save readouts.
-- **F4 Developer Tools:** restore, grants, god mode, no collision, show collision, game speed, reset enemies and fallen bosses, and travel to any fire or arrival point.
-- **F2 Hide HUD:** clean frames for screenshots and footage; menus and dialogue still show.
-- **Build profiles:** *Windows Playtest* keeps these tools; *Windows Steam* leaves them out and defines `ROTOK_STEAM_DEMO`, which gives the end card its demo text.
+- **F2 Hide HUD and F3 Debug Panel**, in every build: clean frames for screenshots and footage; read-only performance, player, world and save readouts.
+- **F4 Developer Tools**, in the editor and playtest builds: restore, grants, god mode, collision, game speed, enemy resets and travel.
+- **Playground** (`Scenes/Development/Playground`, editor only): every enemy, practice targets, both fire types and a rope ledge, with its own save.
+- **Combat Effects Preview** (Unity menu): replays attacks with slow motion and frame stepping.
+- **Build profiles:** *Windows Playtest* adds F4 (`ROTOK_DEV_TOOLS`); *Windows Itch* (`ROTOK_DEMO`) and *Windows Steam* (`ROTOK_STEAM_DEMO`) use the demo save and give the end card its demo text.
 - [Tools](../Tools/README.md): art exporters, pacing simulator, release packaging and regression checks.
 
 Limits today: Barrow Woods and later regions are unbuilt, and settings have no key rebinding.
